@@ -40,8 +40,10 @@ def main():
                 "--branch-name", config["branch"],
                 *options, "--output", "json", "--no-cli-pager",
             ],
-            capture_output=True, text=True, check=True,
+            capture_output=True, text=True,
         )
+        if result.returncode:
+            raise RuntimeError(f"AWS {command} failed: {result.stderr.strip()}")
         return json.loads(result.stdout)
 
     def verify_release():
