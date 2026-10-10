@@ -14,7 +14,6 @@ import { FLAGS, COUNTRIES } from "../study/engine";
 import info from "../geography/data/country-info.v1.json";
 import { languageName } from "../geography/languages";
 import { OFFICIAL_LANGUAGES, LANGUAGES } from "../game/quizData";
-import { REGIONAL_LAYERS } from "../geography/regions";
 import { PanelActive } from "./ModePanels";
 import { InfoTooltip } from "./InfoTooltip";
 import { normalizeAnswer, countryIdForName } from "../game/questions";
@@ -34,6 +33,7 @@ export function ExplorePanel({
   breakdown,
   onBreakdown,
   regionalStatus,
+  regionalLayers = [],
   onSaveView,
   onResetView,
   defaultViewStatus,
@@ -52,6 +52,7 @@ export function ExplorePanel({
   breakdown?: string;
   onBreakdown(id?: string): void;
   regionalStatus: string;
+  regionalLayers?: readonly { parentId: string; key: string; label: string }[];
   onSaveView(): void;
   onResetView(): void;
   defaultViewStatus: string;
@@ -122,8 +123,8 @@ export function ExplorePanel({
             ),
       )
     : [];
-  const layer = REGIONAL_LAYERS.find((l) => l.parentId === selected),
-    childLayer = REGIONAL_LAYERS.find((l) => l.parentId === selectedRegion?.id);
+  const layer = regionalLayers.find((l) => l.parentId === selected),
+    childLayer = regionalLayers.find((l) => l.parentId === selectedRegion?.id);
   const languageIds = selected ? OFFICIAL_LANGUAGES[selected] : undefined;
   const cities = useMemo(
     () =>

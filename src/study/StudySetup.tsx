@@ -437,6 +437,10 @@ export function StudySetup(props: {
       <h1 className="editorial-heading">
         Make the world <em>familiar.</em>
       </h1>
+      <p className="muted study-introduction">
+        Practice countries, capitals and flags. Choose a path or build your own
+        session.
+      </p>
       {props.onResume && (
         <button
           className="primary-button study-resume-button"
@@ -454,7 +458,18 @@ export function StudySetup(props: {
               aria-label={`Start ${path.title}`}
               onClick={() => props.onStart(structuredClone(path.settings))}
             >
-              <span aria-hidden="true">→</span>
+              <span aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 12h16m-7-7 7 7-7 7" />
+                </svg>
+              </span>
             </button>
             <h3>{path.title}</h3>
             <p>{path.description}</p>

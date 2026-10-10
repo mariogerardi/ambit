@@ -68,8 +68,9 @@ Friends are requested by exact handle and require the recipient's acceptance.
 Requests can be declined/cancelled; friendships can be removed and players can
 be blocked/unblocked. A block removes reciprocal inbox access and prevents new
 requests, comparisons and challenge access. Completed Journey totals are shared
-only with accepted friends when the profile's explicit sharing option is enabled
-(off by default). The API derives totals from private synced saves; answers, pins,
+only with accepted friends when the internal profile sharing flag is enabled
+(off by default). That flag is not shown or editable in the profile UI.
+The API derives totals from private synced saves; answers, pins,
 typed responses, drafts and email are never returned to friends. Comparison reads
 are bounded to 1,000 save registers and expose up to 30 recent totals.
 

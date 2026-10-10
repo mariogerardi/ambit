@@ -1081,11 +1081,16 @@
   display: none;
 }
 .app-menu-credits > summary::after {
-  content: "⌄";
+  content: "";
   margin-left: auto;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
 }
 .app-menu-credits[open] > summary::after {
-  content: "⌃";
+  transform: translateY(1px) rotate(225deg);
 }
 .experience .app-menu-content button:is(:hover, [aria-current]),
 .app-menu-credits > summary:hover {
@@ -1562,9 +1567,9 @@
 
 /* Study paths are quick choices; the builder has its own bounded scroll area. */
 .study-landing > h1 {
-  margin-bottom: 12px;
-  font-size: clamp(32px, 2.8vw, 44px);
-  line-height: 1.05;
+  margin: 10px 0 8px;
+  font-size: 40px;
+  line-height: 1.1;
 }
 .study-landing > .muted {
   margin: 0;
@@ -1633,9 +1638,16 @@
 .study-path-start > span {
   position: absolute;
   right: 14px;
-  bottom: 20px;
+  bottom: 14px;
+  width: 24px;
+  height: 36px;
+  display: grid;
+  place-items: center;
   color: var(--ui-accent, #ffe2a1);
-  font-size: 24px;
+}
+.study-path-start > span > svg {
+  width: 18px;
+  height: 18px;
 }
 .study-path:has(.study-path-start:focus-visible) {
   outline: 2px solid var(--ui-accent, #efd18f);
@@ -2102,6 +2114,9 @@
   :is(.home-story, .info-view, .question-card, .finish-story)
   > :first-child:not(.study-editor-scroll) {
   margin-top: 0;
+}
+.experience .info-view.study-landing > h1.editorial-heading {
+  margin-top: 10px;
 }
 /* Questions need a little more space inside the panel than the open page views. */
 .experience .question-card {

@@ -193,7 +193,10 @@
     font-size: 23px;
   }
   .experience .study-landing > h1 {
-    font-size: 25px;
+    font-size: clamp(24px, 7vw, 28px);
+  }
+  .experience .study-path-start > span {
+    height: 44px;
   }
   .experience .study-summary .info-heading h1 {
     font-size: 26px;
@@ -204,6 +207,9 @@
 
   .experience .study-setup > .muted {
     font-size: 12px;
+  }
+  .experience .study-landing > .study-introduction {
+    font-size: 13px;
   }
   .experience .explore-heading h1 {
     font-size: clamp(24px, 7vw, 28px);

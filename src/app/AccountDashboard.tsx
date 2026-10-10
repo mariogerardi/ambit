@@ -323,13 +323,27 @@ export function AccountDashboard({
               </div>
               <button
                 className="quiet-button profile-edit-button"
+                aria-label="Edit profile"
+                title="Edit profile"
                 onClick={() => {
                   dirty.current = false;
                   setDraft(profile);
                   setEditingProfile(true);
                 }}
               >
-                Edit profile <span aria-hidden="true">→</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m15 4 5 5M4 20l4-1L20 7a2 2 0 0 0-4-4L4 15Z" />
+                </svg>
               </button>
             </header>
             <p className="profile-bio">
@@ -343,14 +357,6 @@ export function AccountDashboard({
               <div>
                 <dt>Journeys finished</dt>
                 <dd>{metrics.journeys.length}</dd>
-              </div>
-              <div>
-                <dt>Journey scores</dt>
-                <dd>
-                  {profile.shareJourneyScores
-                    ? "Shared with friends"
-                    : "Only you"}
-                </dd>
               </div>
             </dl>
           </article>
@@ -508,22 +514,6 @@ export function AccountDashboard({
                 onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
                 placeholder="What sparks your curiosity?"
               />
-            </label>
-            <label className="profile-sharing">
-              <input
-                type="checkbox"
-                checked={draft.shareJourneyScores}
-                onChange={(e) =>
-                  setDraft({ ...draft, shareJourneyScores: e.target.checked })
-                }
-              />
-              <span>
-                Share completed Journey scores with friends
-                <small>
-                  Only accepted friends can see score totals. Your answers and
-                  email stay private.
-                </small>
-              </span>
             </label>
             <button className="primary-button" disabled={disabled}>
               Save profile

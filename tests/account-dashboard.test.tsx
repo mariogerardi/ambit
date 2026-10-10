@@ -113,7 +113,8 @@ async function mount(
 }
 async function click(text: string) {
   const button = [...host.querySelectorAll<HTMLButtonElement>("button")].find(
-    (b) => b.textContent?.trim() === text,
+    (b) =>
+      b.textContent?.trim() === text || b.getAttribute("aria-label") === text,
   )!;
   expect(button).toBeDefined();
   await act(async () => button.click());
@@ -142,7 +143,7 @@ it("loads private account data and accepts an incoming request for the displayed
 it("retains an edited profile and shows a handle collision instead of silently losing changes", async () => {
   await mount();
   await click("Profile");
-  await click("Edit profile →");
+  await click("Edit profile");
   await input('input[autocomplete="nickname"]', "Updated Alice");
   request.mockImplementationOnce(async () => {
     throw new Error("That handle is taken.");
@@ -165,8 +166,12 @@ it("opens a saved profile card before editing and cancels unsaved edits", async 
   await mount();
   await click("Profile");
   expect(host.querySelector(".profile-card")?.textContent).toContain("Alice");
+  expect(host.querySelector(".profile-card")?.textContent).not.toContain(
+    "Journey scores",
+  );
   expect(host.querySelector(".profile-form")).toBeNull();
-  await click("Edit profile →");
+  await click("Edit profile");
+  expect(host.textContent).not.toContain("Share completed Journey scores");
   await input('input[autocomplete="nickname"]', "Unsaved Alice");
   expect(
     host.querySelectorAll('.avatar-options input[type="radio"]'),
@@ -183,7 +188,7 @@ it("opens a saved profile card before editing and cancels unsaved edits", async 
 it("saves a country flag avatar and renders its local image", async () => {
   await mount();
   await click("Profile");
-  await click("Edit profile →");
+  await click("Edit profile");
   const flags = host.querySelector<HTMLSelectElement>(
     'select[aria-label="Country flag avatar"]',
   )!;
@@ -218,7 +223,7 @@ it("keeps profile editing available when only friends fail to load", async () =>
   );
   await mount();
   await click("Profile");
-  await click("Edit profile →");
+  await click("Edit profile");
   expect(
     host.querySelector<HTMLButtonElement>(".profile-form button.primary-button")
       ?.disabled,

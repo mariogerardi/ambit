@@ -76,9 +76,7 @@ import { useMobileLayout } from "./app/useMobileLayout";
 const AdminPanel = lazy(() =>
   import("./app/AdminPanel").then((m) => ({ default: m.AdminPanel })),
 );
-const ExplorePanel = lazy(() =>
-  import("./app/ExplorePanel").then((m) => ({ default: m.ExplorePanel })),
-);
+import { ExplorePanel } from "./app/ExplorePanel";
 import type { ExploreSettings } from "./app/ExplorePanel";
 import {
   DAILY_KEY,
@@ -117,9 +115,7 @@ import type {
   StudyRecord,
 } from "./study/engine";
 import { studyScopeFocus } from "./study/scopeFocus";
-const StudyPanel = lazy(() =>
-  import("./study/StudyPanel").then((m) => ({ default: m.StudyPanel })),
-);
+import { StudyPanel } from "./study/StudyPanel";
 const GlobeView = lazy(() =>
   import("./globe/GlobeView").then((m) => ({ default: m.GlobeView })),
 );
@@ -1445,6 +1441,7 @@ export function App() {
           if (!id || id === selected) setSelectedRegion(undefined);
         }}
         regionalStatus={regionalStatus || physicalError}
+        regionalLayers={regional?.REGIONAL_LAYERS}
         defaultViewStatus={defaultViewStatus}
         onSaveView={() => {
           const view = globe.current?.view();

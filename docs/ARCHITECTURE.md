@@ -121,6 +121,10 @@ have helper/DOM coverage; that is not proof of GPU appearance or frame rate.
 
 ## Themes and controls
 
+Explore and Study panels load with the app shell so their first navigation renders
+content directly instead of a module-loading placeholder. The globe and Journey
+runtime retain their separate loading paths.
+
 Account access lives beside the menu in the header, opening profile, stats, and
 friends. The menu groups Home, Journey, Explore, and Study above feedback, admin,
 credits, and theme settings.

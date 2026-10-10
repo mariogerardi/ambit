@@ -13,11 +13,12 @@
   gap: 22px;
   margin-bottom: 24px;
 }
-.account-heading h1.editorial-heading {
+.account-dashboard .account-heading h1.editorial-heading {
   margin: 8px 0 0;
+  line-height: 1.05;
 }
 .account-heading .account-handle {
-  margin: 6px 0 0;
+  margin: 0;
   font-size: 16px;
   line-height: 1.4;
   color: var(--ui-accent);
@@ -174,25 +175,36 @@
   flex: 1;
   min-width: 140px;
 }
-.profile-card h2 {
-  margin: 6px 0 4px;
+.account-dashboard .profile-card h2 {
+  margin: 4px 0 2px;
   font-size: 32px;
+  line-height: 1.1;
+}
+.profile-card .overline {
+  display: block;
+  line-height: 1.1;
 }
 .profile-card .account-handle {
   margin: 0;
   font-size: 15px;
   color: var(--ui-accent);
+  line-height: 1.3;
 }
 .experience .profile-edit-button {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
+  justify-content: center;
+  width: 44px;
+  padding: 10px;
   min-height: 44px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
   border-radius: 8px;
   color: var(--ui-accent);
   font-size: 13px;
+}
+.experience .profile-edit-button:hover {
+  background: rgb(var(--ui-line-rgb) / 0.08);
+  border-color: var(--ui-accent);
 }
 .profile-bio {
   max-width: 60ch;
