@@ -101,6 +101,9 @@ export function AppMenu({
               assets are served locally. Question sources appear after
               answering.
             </p>
+            <a href="/NOTICE.txt" target="_blank" rel="noreferrer">
+              Full source and license notices
+            </a>
           </details>
           <ThemePicker value={theme} onChange={onTheme} />
         </nav>

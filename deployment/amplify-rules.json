@@ -1,0 +1,12 @@
+[
+  {
+    "source": "https://www.playambit.com",
+    "target": "https://playambit.com",
+    "status": "301"
+  },
+  {
+    "source": "</^[^.]+$/>",
+    "target": "/index.html",
+    "status": "200"
+  }
+]

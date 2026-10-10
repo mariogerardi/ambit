@@ -27,6 +27,7 @@ npm run preview  # Inspect dist/ locally; this is not a production server
 
 See [Development](docs/DEVELOPMENT.md) for preparation commands and troubleshooting,
 and [Release readiness](docs/RELEASE_READINESS.md) before deploying.
+Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 
 ## What is included
 
@@ -91,6 +92,7 @@ Start with the [documentation index](docs/README.md).
 - [Geographic catalog policy](docs/CATALOG_POLICY.md) and [Explore data](docs/EXPLORE_DATA.md): identities, source conventions, and display limits.
 - [Save persistence](docs/SAVE_PERSISTENCE.md): migration, recovery, and conflicts.
 - [Release readiness](docs/RELEASE_READINESS.md): current gaps and deployment handoff.
+- [Hosting](docs/HOSTING.md): production deployment, domain, HTTP configuration, and rollback.
 - [Attribution](NOTICE.md): source notices, licenses, and transformations.
 
 ## Product language
@@ -111,4 +113,6 @@ fonts, and geographic assets retain their own notices in [NOTICE.md](NOTICE.md).
 [CI](.github/workflows/ci.yml) runs on main pushes, pull requests, and manual
 requests using the pinned Node version. It installs locked dependencies, checks
 documentation formatting, runs tests, builds the app, and checks dependency
-advisories. The workflow has read-only repository permissions and does not deploy.
+advisories. Validation has read-only repository permissions. Successful main-branch
+builds deploy their verified artifact to Amplify using short-lived AWS credentials
+scoped to Ambit's production app; pull requests do not deploy.

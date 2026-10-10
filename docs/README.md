@@ -14,6 +14,7 @@ The [root README](../README.md) provides setup and a product overview.
 | [Explore data](EXPLORE_DATA.md)                       | Country details, subdivisions, physical features, and asset provenance.             |
 | [Save persistence](SAVE_PERSISTENCE.md)               | Local save registers, migration, recovery, and concurrent tabs.                     |
 | [Release readiness](RELEASE_READINESS.md)             | Remaining launch work and static-hosting requirements.                              |
+| [Hosting](HOSTING.md)                                 | Production deployment, domain, HTTP configuration, and rollback.                    |
 | [Attribution](../NOTICE.md)                           | Source licenses, transformations, and redistribution notices.                       |
 
 Source code, generated catalogs, and source metadata are authoritative when a

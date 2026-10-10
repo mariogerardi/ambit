@@ -116,6 +116,10 @@ stages all outputs atomically, and Node locale differences can affect labels.
 
 ## Keep documentation current
 
+For production deployment, HTTP configuration, and rollback, see
+[Hosting](HOSTING.md). Main-branch CI publishes the exact artifact that passed its
+checks; deploying does not require regenerating committed geography.
+
 - Update the root overview and affected guide when public behavior changes.
 - After a Journey change, regenerate the index and update the catalog table/counts.
 - After a data change, review mappings, metadata, manifest, hashes, attribution,

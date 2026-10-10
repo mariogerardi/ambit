@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   validate:
@@ -38,3 +38,41 @@ jobs:
         run: npm run build
       - name: Check dependency advisories
         run: npm audit --audit-level=high
+      - name: Retain verified production artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-site
+          path: dist/
+          if-no-files-found: error
+          retention-days: 90
+
+  deploy:
+    name: Deploy production
+    needs: validate
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: ambit-production-deployment
+      cancel-in-progress: false
+    steps:
+      - name: Check out deployment tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download verified build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: production-site
+          path: dist/
+      - name: Obtain short-lived AWS credentials
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: ambit-${{ github.run_id }}
+      - name: Publish verified artifact
+        run: python3 scripts/deploy-production.py --expected-commit "$GITHUB_SHA"

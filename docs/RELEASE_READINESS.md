@@ -18,10 +18,12 @@ keyboard/no-WebGL map answers have regression coverage. These fixes do not suppl
 history retention/export or browser/device performance verification.
 
 The project is version-controlled as the private `mariogerardi/ambit` repository,
-with Node 24.21.0 pinned and a read-only [CI workflow](../.github/workflows/ci.yml)
+with Node 24.21.0 pinned and a [CI workflow](../.github/workflows/ci.yml)
 for locked installs, documentation formatting, tests, builds, and dependency
-advisories. No open-source code license was selected. Hosting/preview deployment,
-rollback integration, and production error reporting remain separate work.
+advisories. Successful main-branch builds deploy the verified artifact to Amplify
+using GitHub OIDC; artifacts are retained for rollback. See [Hosting](HOSTING.md)
+for configuration and operations. No open-source code license was selected.
+Production error reporting remains separate work.
 Large deferred globe/geometry bundles still produce Vite's chunk-size warning.
 
 ## Before a public launch
@@ -63,10 +65,9 @@ local inspection server, not the production hosting process.
 - Enable HTTPS and suitable compression/content types for JavaScript, JSON, SVG,
   and fonts. Review security headers on the real deployment; do not assume a
   generic CSP works without testing the Three.js/font/SVG paths.
-- Include the full root [NOTICE.md](../NOTICE.md) with the published distribution
-  and provide an accessible link. Vite does **not** copy it into `dist/` today.
-  The menu's abbreviated World credits and public font licenses are present,
-  but they do not replace shipping the full source/transformation notices.
+- The build ships the full root [NOTICE.md](../NOTICE.md) as `/NOTICE.txt`, linked
+  from World credits, alongside the public font licenses. Verify this distribution
+  when updating source/transformation notices.
 
 ## Candidate verification
 
