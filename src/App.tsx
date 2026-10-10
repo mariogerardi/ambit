@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ReactNode } from "react";
+import type { ErrorInfo, ReactNode } from "react";
 import { LayerLoader } from "./geography/loadLayer";
 import type {
   BoundaryLayerManifest,
@@ -35,6 +35,17 @@ import {
   saveDefaultView,
 } from "./app/worldPreferences";
 import { worldAltitude } from "./globe/camera";
+import { useAccount } from "./services/accounts";
+import { appRelease } from "./services/config";
+import {
+  trackView,
+  reportFailure,
+  reportReactFailure,
+} from "./services/monitoring";
+import type { FeedbackRequest } from "./services/feedback";
+import { AccountPanel, AdminAccess } from "./app/AccountPanel";
+import { FeedbackDialog } from "./app/FeedbackDialog";
+import { FeedbackReview } from "./app/FeedbackReview";
 import { AppMenu } from "./app/AppMenu";
 import { GlobeControls } from "./app/GlobeControls";
 import { journeyStops } from "./game/journeyStops";
@@ -124,7 +135,8 @@ class BoardBoundary extends Component<
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  componentDidCatch() {
+  componentDidCatch(error: unknown, info: ErrorInfo) {
+    reportReactFailure(error, info);
     this.props.onError();
   }
   render() {
@@ -139,6 +151,9 @@ class PanelBoundary extends Component<
   static getDerivedStateFromError() {
     return { failed: true };
   }
+  componentDidCatch(error: unknown, info: ErrorInfo) {
+    reportReactFailure(error, info);
+  }
   render() {
     return this.state.failed ? (
       <section className="info-view" role="alert">
@@ -151,6 +166,9 @@ class PanelBoundary extends Component<
   }
 }
 export function App() {
+  const account = useAccount();
+  const [feedback, setFeedback] = useState<FeedbackRequest>();
+  const closeFeedback = useCallback(() => setFeedback(undefined), []);
   const mobile = useMobileLayout();
   const [globeExpanded, setGlobeExpanded] = useState(false);
   const expanded = mobile.enabled && globeExpanded && !mobile.keyboard;
@@ -165,6 +183,9 @@ export function App() {
   const [dailyLoaded, setDailyLoaded] = useState(false);
   const [path, setPath] = useState(location.pathname);
   const mode = modeForPath(path);
+  useEffect(() => {
+    if (!account.loading) trackView(mode);
+  }, [mode, account.loading]);
   const [theme, setTheme] = useState(readTheme);
   useEffect(() => applyTheme(theme), [theme]);
   useEffect(() => {
@@ -208,6 +229,9 @@ export function App() {
   const [regions, setRegions] = useState<RegionFeature[]>([]),
     [error, setError] = useState(""),
     [retry, setRetry] = useState(0);
+  useEffect(() => {
+    if (error) reportFailure("geography loading");
+  }, [error]);
   const [dailyRead] = useState(() =>
     readSave(DAILY_KEY, emptyDaily, validDaily),
   );
@@ -218,6 +242,9 @@ export function App() {
     [studySaveOk, setStudySaveOk] = useState(studyStore.writable);
   const [saveRecovered, setSaveRecovered] = useState(studyStore.recovered);
   const canSave = dailySaveOk && studySaveOk;
+  useEffect(() => {
+    if (!canSave) reportFailure("local save");
+  }, [canSave]);
   const [today, setToday] = useState(localDateKey),
     [studySetup, setStudySetup] = useState(true);
   const [studyBuilder, setStudyBuilder] = useState(false);
@@ -770,7 +797,10 @@ export function App() {
     [mobile.enabled],
   );
   const stop = useCallback(() => setMotion(false), []),
-    fail = useCallback(() => setWebgl(false), []),
+    fail = useCallback(() => {
+      setWebgl(false);
+      reportFailure("globe loading");
+    }, []),
     onReady = useCallback(() => setReady(true), []);
   const selectExplore = useCallback(
     (id?: string) => {
@@ -1313,21 +1343,26 @@ export function App() {
         </div>
         <p className="globe-invitation">Or explore directly on the globe.</p>
       </section>
+    ) : mode === "account" ? (
+      <AccountPanel />
     ) : mode === "admin" ? (
-      <AdminPanel
-        date={today}
-        progress={daily}
-        catalog={allJourneys}
-        labels={Object.fromEntries(
-          published.items.map((p, i) => [
-            p.id,
-            `Local Journey ${i + 1} · revision ${p.revision}`,
-          ]),
-        )}
-        onSet={(id) =>
-          setDaily((p) => setDailyPuzzle(p, today, id, allJourneys))
-        }
-      />
+      <AdminAccess onAccount={() => navigate("/account")}>
+        <AdminPanel
+          date={today}
+          progress={daily}
+          catalog={allJourneys}
+          labels={Object.fromEntries(
+            published.items.map((p, i) => [
+              p.id,
+              `Local Journey ${i + 1} · revision ${p.revision}`,
+            ]),
+          )}
+          onSet={(id) =>
+            setDaily((p) => setDailyPuzzle(p, today, id, allJourneys))
+          }
+        />
+        <FeedbackReview />
+      </AdminAccess>
     ) : mode === "explore" ? (
       <ExplorePanel
         regions={namedRegions}
@@ -1373,6 +1408,20 @@ export function App() {
       />
     ) : mode === "study" ? (
       <StudyPanel
+        paused={!!feedback}
+        onReport={(prompt) =>
+          setFeedback({
+            kind: "question",
+            context: {
+              view: "study",
+              questionId: `${prompt.topic}:${prompt.targetId}:${prompt.style}`,
+              contentVersion: `study-v1:${appRelease}`,
+              topic: prompt.topic,
+              targetId: prompt.targetId,
+              method: prompt.style,
+            },
+          })
+        }
         onPreview={setStudyPreview}
         onHistoryChange={setStudyBrowsingHistory}
         compact={mobile.enabled}
@@ -1411,6 +1460,20 @@ export function App() {
       />
     ) : context ? (
       <GameShell
+        onReport={(questionId) =>
+          setFeedback({
+            kind: "question",
+            context: {
+              view: "journey",
+              journeyId: journey.id,
+              questionId,
+              contentVersion:
+                published.items
+                  .find((item) => item.id === journey.id)
+                  ?.revision.toString() ?? appRelease,
+            },
+          })
+        }
         compact={mobile.enabled}
         journey={journey}
         playground={mode === "playground"}
@@ -1460,6 +1523,7 @@ export function App() {
     <main
       className={`experience mode-${mode} phase-${phase} ${mode === "playground" ? "is-playground" : ""} ${expanded ? "globe-expanded" : ""}`}
       style={mobile.enabled ? mobile.style : undefined}
+      inert={!!feedback}
       data-keyboard-open={mobile.keyboard || undefined}
     >
       <div className="experience-glow" aria-hidden="true" />
@@ -1618,6 +1682,12 @@ export function App() {
           <AmbitLogo />
         </button>
         <AppMenu
+          admin={account.admin}
+          onJourney={() => playDaily(today)}
+          journeyReady={!!regions.length && dailyLoaded}
+          onFeedback={() =>
+            setFeedback({ kind: "experience", context: { view: mode } })
+          }
           path={path}
           theme={theme}
           onTheme={changeTheme}
@@ -1720,33 +1790,6 @@ export function App() {
           {expanded && studying && session!.phase === "playing" && (
             <p className="mobile-map-prompt">{studyPrompt(session!.prompt)}</p>
           )}
-          <nav className="mobile-navigation" aria-label="Main navigation">
-            <button
-              aria-current={mode === "home" ? "page" : undefined}
-              onClick={() => navigate("/")}
-            >
-              Home
-            </button>
-            <button
-              aria-current={isJourney ? "page" : undefined}
-              disabled={!regions.length || !dailyLoaded}
-              onClick={() => playDaily(today)}
-            >
-              Journey
-            </button>
-            <button
-              aria-current={mode === "explore" ? "page" : undefined}
-              onClick={() => navigate("/explore")}
-            >
-              Explore
-            </button>
-            <button
-              aria-current={mode === "study" ? "page" : undefined}
-              onClick={() => navigate("/study")}
-            >
-              Study
-            </button>
-          </nav>
         </>
       )}
       {!isJourney && (
@@ -1781,6 +1824,9 @@ export function App() {
           Some progress, preferences, or Study results won’t be saved after this
           visit.
         </div>
+      )}
+      {feedback && (
+        <FeedbackDialog request={feedback} onClose={closeFeedback} />
       )}
     </main>
   );

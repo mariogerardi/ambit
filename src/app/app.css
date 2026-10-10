@@ -2027,3 +2027,68 @@
     100dvh - var(--page-content-top) - 82px - var(--page-content-bottom)
   );
 }
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.experience .report-question {
+  display: block;
+  margin-block: 12px;
+  min-height: 44px;
+}
+.feedback-dialog {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.feedback-dialog .field {
+  display: grid;
+  gap: 8px;
+  margin-block: 16px;
+}
+.feedback-dialog textarea,
+.feedback-dialog select,
+.feedback-review select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 8px;
+  background: rgb(var(--ui-surface-rgb) / 1);
+  color: var(--ui-text);
+  font: inherit;
+}
+.feedback-dialog .muted {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.feedback-review {
+  margin-top: 32px;
+}
+.feedback-review ul {
+  padding: 0;
+  list-style: none;
+}
+.feedback-review li {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+  padding-block: 20px;
+}
+.feedback-review small {
+  display: block;
+  margin-top: 8px;
+}
+.feedback-review dl {
+  font-size: 12px;
+}
+.feedback-review dl div {
+  display: flex;
+  gap: 8px;
+}
+.feedback-review dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.feedback-message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

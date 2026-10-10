@@ -1,0 +1,8 @@
+{
+  "apiUrl": "https://kw82wzwu01.execute-api.us-east-1.amazonaws.com",
+  "auth": {
+    "authority": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_wLBLEbpgi",
+    "clientId": "63dsint614pgu2ed7vt2oaus78",
+    "loginUrl": "https://ambit-779846807044.auth.us-east-1.amazoncognito.com"
+  }
+}

@@ -14,6 +14,7 @@ import type {
   StudyReviewTarget,
   StudyAnswer,
   StudyRecord,
+  StudyPrompt,
 } from "./engine";
 import { PanelActive } from "../app/ModePanels";
 import { SettingsIcon } from "../app/SettingsIcon";
@@ -38,7 +39,11 @@ export function StudyPanel({
   onViewRecord,
   onHistoryChange,
   builder = false,
+  paused = false,
+  onReport,
 }: {
+  paused?: boolean;
+  onReport?(prompt: StudyPrompt): void;
   compact?: boolean;
   save: StudySave;
   setup: boolean;
@@ -78,6 +83,7 @@ export function StudyPanel({
       !active ||
       setup ||
       editing ||
+      paused ||
       session?.phase !== "feedback" ||
       !correct ||
       !session.settings.autoAdvance
@@ -89,6 +95,7 @@ export function StudyPanel({
     active,
     setup,
     editing,
+    paused,
     session?.phase,
     session?.prompt.ordinal,
     session?.settings.autoAdvance,
@@ -96,7 +103,14 @@ export function StudyPanel({
     onAction,
   ]);
   useEffect(() => {
-    if (!active || setup || editing || !session || session.phase !== "feedback")
+    if (
+      !active ||
+      setup ||
+      editing ||
+      paused ||
+      !session ||
+      session.phase !== "feedback"
+    )
       return;
     const key = (event: KeyboardEvent) => {
       if (
@@ -110,7 +124,7 @@ export function StudyPanel({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [active, setup, editing, session?.phase, onAction, session]);
+  }, [active, setup, editing, paused, session?.phase, onAction, session]);
   if (showHistory)
     return (
       <StudyHistory
@@ -328,6 +342,14 @@ export function StudyPanel({
                 ? `✓ ${prompt.style === "typing" ? "Nicely remembered." : "Well spotted."}`
                 : "Not quite."}
             </div>
+            {onReport && (
+              <button
+                className="quiet-button tertiary-action report-question"
+                onClick={() => onReport(prompt)}
+              >
+                Report this question
+              </button>
+            )}
             <p>Your answer: {session.history.at(-1)?.response}</p>
             {!correct && <p>Correct answer: {answerLabel(prompt)}</p>}
             <button

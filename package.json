@@ -19,7 +19,10 @@
     "check:docs": "prettier --check README.md NOTICE.md \"docs/**/*.md\""
   },
   "dependencies": {
+    "@datadog/browser-rum": "7.15.0",
+    "@datadog/browser-rum-react": "7.15.0",
     "d3-geo": "3.1.1",
+    "oidc-client-ts": "3.5.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-globe.gl": "2.37.0",

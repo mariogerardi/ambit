@@ -2,13 +2,9 @@
 @media (max-width: 700px), (max-width: 1000px) and (max-height: 500px) {
   .experience.experience {
     --header-height: calc(56px + env(safe-area-inset-top, 0px));
-    --nav-height: calc(52px + env(safe-area-inset-bottom, 0px));
+    --nav-height: env(safe-area-inset-bottom, 0px);
     /* Home's proportions are shared by every mobile mode. */
-    --map-height: clamp(
-      227.5px,
-      calc(var(--app-height, 100dvh) * 0.4025),
-      385px
-    );
+    --map-height: clamp(182px, calc(var(--app-height, 100dvh) * 0.322), 308px);
     --map-tools-height: 46px;
     --tools-offset: 0px;
     position: fixed;
@@ -178,7 +174,14 @@
     font-size: 28px;
   }
   .experience .question-card h1 {
-    font-size: 26px;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+  .experience .study-question h1 {
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
   }
   .experience .finish-story h1 {
     font-size: 30px;
@@ -386,32 +389,6 @@
     justify-self: end;
     text-align: right;
   }
-  .mobile-navigation {
-    position: absolute;
-    inset: auto 0 0;
-    height: var(--nav-height);
-    padding: 4px max(8px, env(safe-area-inset-right, 0px))
-      env(safe-area-inset-bottom, 0px) max(8px, env(safe-area-inset-left, 0px));
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
-    background: rgb(var(--ui-surface-rgb) / 1);
-    border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-    z-index: 6;
-  }
-  .mobile-navigation button {
-    min-width: 0;
-    color: var(--ui-muted, #a5bdb5);
-    font-size: 14px;
-    border-radius: 8px;
-  }
-  .mobile-navigation button[aria-current] {
-    color: var(--ui-accent, #f1d78f);
-    background: rgb(var(--ui-accent-rgb) / 0.071);
-  }
-  .mobile-navigation button:disabled {
-    opacity: 0.45;
-  }
   .mobile-gesture-hint {
     position: absolute;
     top: calc(
@@ -502,12 +479,7 @@
     height: 100%;
   }
   .experience[data-keyboard-open]
-    :is(
-      .mobile-navigation,
-      .mobile-map-tools,
-      .mobile-gesture-hint,
-      .globe-controls
-    ) {
+    :is(.mobile-map-tools, .mobile-gesture-hint, .globe-controls) {
     display: none;
   }
   .explore-search-popup {
@@ -526,7 +498,7 @@
       var(--app-height, 100dvh) - var(--header-height) - var(--nav-height) -
         var(--map-tools-height)
     );
-    --map-width: 45%;
+    --map-width: 36%;
   }
   .experience.experience .game-scene {
     right: auto;
@@ -595,7 +567,7 @@
 
 @media (orientation: portrait) and (max-width: 700px) and (max-height: 650px) {
   .experience.experience {
-    --map-height: 183.75px;
+    --map-height: 147px;
   }
   .experience.globe-expanded {
     --map-height: calc(

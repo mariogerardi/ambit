@@ -1,5 +1,6 @@
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 export type AppMode =
+  | "account"
   | "admin"
   | "home"
   | "daily"
@@ -8,17 +9,19 @@ export type AppMode =
   | "playground"
   | "practice";
 export function modeForPath(path: string): AppMode {
-  return path === "/admin"
-    ? "admin"
-    : path === "/daily"
-      ? "daily"
-      : path === "/explore"
-        ? "explore"
-        : path === "/study"
-          ? "study"
-          : path === "/playground"
-            ? "playground"
-            : JOURNEY_INDEX.some((j) => j.path === path)
-              ? "practice"
-              : "home";
+  return path === "/account" || path === "/auth/callback"
+    ? "account"
+    : path === "/admin"
+      ? "admin"
+      : path === "/daily"
+        ? "daily"
+        : path === "/explore"
+          ? "explore"
+          : path === "/study"
+            ? "study"
+            : path === "/playground"
+              ? "playground"
+              : JOURNEY_INDEX.some((j) => j.path === path)
+                ? "practice"
+                : "home";
 }

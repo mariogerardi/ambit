@@ -120,6 +120,20 @@ vi.mock("../src/globe/GlobeView", () => ({
     return <canvas data-testid="shared-earth" />;
   }),
 }));
+const authProbe = vi.hoisted(() => ({ admin: true }));
+vi.mock("../src/services/accounts", () => ({
+  useAccount: () => ({
+    user: null,
+    admin: authProbe.admin,
+    loading: false,
+    busy: false,
+    error: "",
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+    accessToken: async () => "test-access-token",
+  }),
+}));
+vi.mock("../src/app/FeedbackReview", () => ({ FeedbackReview: () => null }));
 let root: Root, host: HTMLDivElement;
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -135,7 +149,18 @@ async function click(text: string) {
       (b) =>
         b.textContent?.trim() === text || b.getAttribute("aria-label") === text,
     ) ?? buttons.find((b) => b.textContent?.trim().startsWith(text));
-  if (!button && ["Home", "Admin"].includes(text)) {
+  if (
+    !button &&
+    [
+      "Home",
+      "Admin",
+      "Journey",
+      "Explore",
+      "Study",
+      "Account",
+      "Send feedback",
+    ].includes(text)
+  ) {
     await click("Open menu");
     button = [
       ...host.querySelectorAll<HTMLButtonElement>(".app-menu-content > button"),
@@ -168,6 +193,7 @@ async function mount() {
   await settleLoads();
 }
 beforeEach(() => {
+  authProbe.admin = true;
   const store = new Map<string, string>();
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => store.get(key) ?? null,
@@ -218,6 +244,33 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
+  it("hides admin from guests and protects a direct admin route", async () => {
+    authProbe.admin = false;
+    history.replaceState(null, "", "/admin");
+    await mount();
+    expect(host.querySelector(".admin-panel")).toBeNull();
+    expect(host.textContent).toContain("Admin access required.");
+    await click("Open menu");
+    expect(
+      [...host.querySelectorAll(".app-menu-content > button")].some(
+        (button) => button.textContent === "Admin",
+      ),
+    ).toBe(false);
+    expect(host.querySelector(".mobile-navigation")).toBeNull();
+  });
+  it("opens general feedback from the menu, leaving the shared Earth mounted", async () => {
+    authProbe.admin = false;
+    await mount();
+    const earth = host.querySelector("canvas");
+    await click("Send feedback");
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
+      "Send feedback",
+    );
+    expect(host.querySelector("main")?.hasAttribute("inert")).toBe(true);
+    await click("Close feedback");
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(host.querySelector("canvas")).toBe(earth);
+  });
   it("switches and syncs themes without replacing Earth or changing its current selection and view", async () => {
     history.replaceState(null, "", "/explore");
     await mount();
@@ -462,11 +515,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts).toEqual(
       attempts,
     );
-    await act(async () =>
-      [...host.querySelectorAll<HTMLButtonElement>(".mobile-navigation button")]
-        .find((b) => b.textContent === "Journey")!
-        .click(),
-    );
+    await click("Journey");
     await settleLoads();
     expect(host.querySelector(".mode-incoming .question-card")).not.toBeNull();
     expect(host.querySelector("canvas")).toBe(earth);
@@ -528,18 +577,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector(".round-feedback")!.textContent).toContain(
       "Paris",
     );
-    await act(async () =>
-      [...host.querySelectorAll<HTMLButtonElement>(".mobile-navigation button")]
-        .find((b) => b.textContent === "Explore")!
-        .click(),
-    );
+    await click("Explore");
     await settleLoads();
     expect(host.querySelector(".explore-card")).not.toBeNull();
-    await act(async () =>
-      [...host.querySelectorAll<HTMLButtonElement>(".mobile-navigation button")]
-        .find((b) => b.textContent === "Study")!
-        .click(),
-    );
+    await click("Study");
     await settleLoads();
     expect(host.querySelector(".study-paths")).not.toBeNull();
     await click("Custom");

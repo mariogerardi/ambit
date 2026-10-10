@@ -58,6 +58,7 @@ import { PhysicalFeatures, isPhysicalLayer } from "./physicalFeatures";
 import { GlobeFidget } from "./fidget";
 import { RegionSurfaces } from "./regionSurfaces";
 import { SurfaceGesture } from "./gesture";
+import { SurfaceInspection } from "./inspection";
 import { normalWorldView } from "./defaultViews";
 export interface GlobeHandle {
   focus(focus: Focus, fitToViewport?: boolean): void;
@@ -137,6 +138,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     const [hoverPlaceId, setHoverPlaceId] = useState<string>();
     const tooltip = useRef<HTMLDivElement>(null);
     const gesture = useRef(new SurfaceGesture());
+    const inspection = useRef(new SurfaceInspection());
+    const clearInspection = useCallback(() => {
+      inspection.current.clear();
+      current.current.onHover(undefined);
+      setHoverPlaceId(undefined);
+    }, []);
     const previousViewport = useRef<
       { width: number; height: number } | undefined
     >(undefined);
@@ -460,6 +467,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       ref,
       () => ({
         focus(target, fitToViewport = true) {
+          clearInspection();
           resizing.current.cancel();
           if (!globe.current) return;
           flyover.current.cancel();
@@ -483,6 +491,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           );
         },
         flyover(stops) {
+          clearInspection();
           if (!globe.current) return;
           stop();
           resizing.current.cancel();
@@ -508,6 +517,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           resumeRotation();
         },
         fidget() {
+          clearInspection();
           resizing.current.cancel();
           const g = globe.current;
           if (!g || current.current.reduced) return;
@@ -617,7 +627,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         : "#ffe1a0";
     }, []);
     const onPointHover = useCallback((obj: object | null) => {
-      if (fidget.current.active) return;
+      if (fidget.current.active || !inspection.current.allowed) return;
       current.current.onHover(obj ? point(obj).region : undefined);
     }, []);
     const onPointClick = useCallback((obj: object) => {
@@ -894,7 +904,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       updateOutline,
     ]);
     const onPolygonHover = useCallback((obj: object | null) => {
-      if (fidget.current.active) return;
+      if (fidget.current.active || !inspection.current.allowed) return;
       current.current.onHover(
         obj &&
           !region(obj).displayBase &&
@@ -958,12 +968,15 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         className="globe-canvas"
         data-scene-instance={sceneId}
         ref={host}
-        onPointerDownCapture={(event) =>
-          gesture.current.down(event.pointerId, event.clientX, event.clientY)
-        }
-        onPointerMoveCapture={(event) =>
-          gesture.current.move(event.pointerId, event.clientX, event.clientY)
-        }
+        onPointerDownCapture={(event) => {
+          inspection.current.pointer(event.pointerType);
+          if (event.pointerType !== "mouse") clearInspection();
+          gesture.current.down(event.pointerId, event.clientX, event.clientY);
+        }}
+        onPointerMoveCapture={(event) => {
+          inspection.current.pointer(event.pointerType);
+          gesture.current.move(event.pointerId, event.clientX, event.clientY);
+        }}
         onPointerUpCapture={(event) => {
           gesture.current.up(event.pointerId, event.clientX, event.clientY);
           // Fingers can hit a visible city within a 44px target, even when the
@@ -985,8 +998,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             }
           }
         }}
-        onPointerCancelCapture={() => gesture.current.cancel()}
+        onPointerCancelCapture={() => {
+          gesture.current.cancel();
+          clearInspection();
+        }}
         onPointerMove={(event) => {
+          if (!inspection.current.allowed) return;
           if (!tooltip.current || !host.current) return;
           const box = host.current.getBoundingClientRect();
           if (current.current.placeInteraction)
@@ -1000,8 +1017,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           tooltip.current.style.top = `${Math.max(8, Math.min(event.clientY - box.top + 14, box.height - 38))}px`;
         }}
         onPointerLeave={() => {
-          current.current.onHover(undefined);
-          setHoverPlaceId(undefined);
+          clearInspection();
         }}
         aria-label={
           props.interactionLabel ??

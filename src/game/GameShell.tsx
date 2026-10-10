@@ -22,7 +22,9 @@ export function GameShell({
   frame,
   onHome,
   onStudy,
+  onReport,
 }: {
+  onReport?(questionId: string): void;
   journey: Journey;
   playground?: boolean;
   compact?: boolean;
@@ -157,6 +159,14 @@ export function GameShell({
                   : "Next"}
                 <span>→</span>
               </button>
+              {onReport && (
+                <button
+                  className="quiet-button tertiary-action report-question"
+                  onClick={() => onReport(round.id)}
+                >
+                  Report this question
+                </button>
+              )}
               <InfoTooltip key={round.id} label="Sources">
                 {round.qualification && <p>{round.qualification}</p>}
                 {[
@@ -247,6 +257,14 @@ export function GameShell({
                 ? "Use the type selector to revisit an example or try a fresh attempt."
                 : feedbackText}
             </p>
+          )}
+          {game.phase === "failed" && onReport && (
+            <button
+              className="quiet-button tertiary-action report-question"
+              onClick={() => onReport(round.id)}
+            >
+              Report this question
+            </button>
           )}
           <ol className="journey-receipt">
             {journey.rounds.map((question, i) => {

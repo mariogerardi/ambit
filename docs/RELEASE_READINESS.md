@@ -9,7 +9,8 @@ audit has already passed. Current save behavior is documented in
 
 The static app has pinned npm dependencies, strict TypeScript checks, extensive
 unit/asset/DOM coverage, local assets, and source attribution. The October 10
-implementation pass passed 395 tests across 40 files and the production build.
+implementation pass passed 413 frontend tests across 43 files, 12 offline backend
+tests, and the production build.
 The October 9 dependency audit reported no known advisories; rerun it for release.
 
 Record-based save persistence addresses stale-tab data loss, preserves recoverable
@@ -23,7 +24,10 @@ for locked installs, documentation formatting, tests, builds, and dependency
 advisories. Successful main-branch builds deploy the verified artifact to Amplify
 using GitHub OIDC; artifacts are retained for rollback. See [Hosting](HOSTING.md)
 for configuration and operations. No open-source code license was selected.
-Production error reporting remains separate work.
+Datadog browser RUM, React error reporting, and optional backend logs/traces are
+implemented. A production build needs the public RUM configuration; backend
+monitoring needs deployment with a server-side secret. See [Services](SERVICES.md).
+Actual event ingestion and physical-device behavior still need verification.
 Large deferred globe/geometry bundles still produce Vite's chunk-size warning.
 
 ## Before a public launch
@@ -36,7 +40,7 @@ Large deferred globe/geometry bundles still produce Vite's chunk-size warning.
 | Static hosting              | Direct-route loading, compression, cache policy, headers, and rollback verified on the chosen host.                                                                       |
 | Browser/device verification | Cold/warm Journey entry, heavy subdivisions, repeated Fidget, close-zoom borders, keyboard, touch, mobile layouts, and WebGL failure inspected on representative devices. |
 | Accessibility               | Focus/dialog navigation, keyboard alternatives, screen-reader feedback, transparency/imagery contrast, and reduced motion verified.                                       |
-| Content policy              | Fifteen-Journey repeat cadence, device-local “today,” public Admin visibility, and source conventions accepted.                                                           |
+| Content policy              | Fifteen-Journey repeat cadence, device-local “today,” verified-owner Admin access, and source conventions accepted.                                                       |
 | Distribution and discovery  | Full attribution shipped, font notices retained, and intentional favicon/social-preview metadata.                                                                         |
 | Error visibility            | A deliberate production reporting/debugging path for failed loads, context loss, and storage failures.                                                                    |
 

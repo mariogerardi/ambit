@@ -3,12 +3,20 @@ import { ThemePicker } from "../theme/ThemePicker";
 import type { ThemeId } from "../theme/themes";
 
 export function AppMenu({
+  admin = false,
+  onJourney,
+  journeyReady = true,
+  onFeedback,
   path,
   caption,
   onNavigate,
   theme,
   onTheme,
 }: {
+  admin?: boolean;
+  onJourney?(): void;
+  journeyReady?: boolean;
+  onFeedback?(): void;
   path: string;
   caption?: string;
   onNavigate(path: string): void;
@@ -86,11 +94,52 @@ export function AppMenu({
             Home
           </button>
           <button
-            aria-current={path === "/admin" ? "page" : undefined}
-            onClick={() => navigate("/admin")}
+            aria-current={path === "/daily" ? "page" : undefined}
+            disabled={!journeyReady}
+            onClick={() => {
+              setOpen(false);
+              onJourney ? onJourney() : navigate("/daily");
+            }}
           >
-            Admin
+            Journey
           </button>
+          <button
+            aria-current={path === "/explore" ? "page" : undefined}
+            onClick={() => navigate("/explore")}
+          >
+            Explore
+          </button>
+          <button
+            aria-current={path === "/study" ? "page" : undefined}
+            onClick={() => navigate("/study")}
+          >
+            Study
+          </button>
+          <button
+            aria-current={path === "/account" ? "page" : undefined}
+            onClick={() => navigate("/account")}
+          >
+            Account
+          </button>
+          {onFeedback && (
+            <button
+              onClick={() => {
+                setOpen(false);
+                trigger.current?.focus();
+                onFeedback();
+              }}
+            >
+              Send feedback
+            </button>
+          )}
+          {admin && (
+            <button
+              aria-current={path === "/admin" ? "page" : undefined}
+              onClick={() => navigate("/admin")}
+            >
+              Admin
+            </button>
+          )}
           <details className="app-menu-credits">
             <summary>World credits</summary>
             <p>

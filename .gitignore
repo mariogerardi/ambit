@@ -10,3 +10,7 @@ sources/*.geojson
 
 # Local screenshots and exported showcases
 artifacts/
+
+# Python backend/tooling caches
+__pycache__/
+*.pyc

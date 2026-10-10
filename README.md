@@ -3,7 +3,9 @@
 A geography game built around one shared, interactive globe. Play a five-question
 Journey, explore places, or build a Study session. React, TypeScript, Vite, and
 Three.js power a static web app; geography, flags, and fonts are bundled locally.
-There is no backend, account system, or required runtime API/CDN.
+Guest play uses local assets and saves. Optional Cognito accounts and a feedback
+API run on AWS; Datadog monitors configured releases. Cross-device saves are not
+yet implemented.
 
 ## Quick start
 
@@ -38,7 +40,8 @@ Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 | **Explore** (`/explore`)                | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.     |
 | **Study** (`/study`)                    | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions. |
 | **Question playground** (`/playground`) | Read-only practice of all 75 bundled questions, with direct selection and retry.                                |
-| **Admin** (`/admin`)                    | Choose today's Journey on this device. This is a local preference, not shared publication.                      |
+| **Account** (`/account`)                | Optional verified-email signup, sign-in, recovery, and sign-out.                                                |
+| **Admin** (`/admin`)                    | Verified owner only: review player feedback and choose today's Journey locally. This is not shared publication. |
 
 The daily schedule cycles through the bundled Journeys from October 5, 2026, using
 device-local dates. Attempts stay attached to their starting date; an unfinished
@@ -70,12 +73,17 @@ playback state. Speeds range from 0.25× to 8×. Reduced motion disables idle
 rotation, Fidget, and animated travel.
 
 On narrow screens, the globe and scrolling content occupy separate areas, with
-bottom navigation and an **Enlarge globe** action. Desktop layouts put content
+navigation in the hamburger menu and an **Enlarge globe** action. Desktop layouts put content
 beside the globe. Keyboard answer controls remain available for written answers;
 Study map prompts include **Answer by name**, automatically expanded without
 WebGL. Capital map prompts expect the country name in this alternative.
 Actual browser/GPU, screen-reader, and physical mobile behavior still require
 separate verification; unit/DOM coverage does not certify those experiences.
+
+Question feedback screens offer **Report this question**; the menu includes
+**Send feedback** for general comments. Neither requires an account. See
+[Accounts, feedback, and monitoring](docs/SERVICES.md) for configuration and
+backend deployment.
 
 The hamburger menu offers **Atlas**, **Ocean**, **Dusk**, and **Paper** themes.
 Each theme applies to UI and globe, preserving the camera and session. Editorial

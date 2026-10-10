@@ -5,12 +5,14 @@
 Use Node.js **24.21.0**, pinned in [`.nvmrc`](../.nvmrc), with bundled npm 11.19.0.
 `package.json` records the supported Node 24/npm 11 ranges and npm package-manager
 version. If you use nvm, run `nvm install` and `nvm use` before installing.
-Python 3 is needed only for the optional Python preparation scripts.
+Python 3 runs offline backend tests and the optional preparation/deployment
+scripts.
 
 ```sh
 npm ci
 npm run dev
 npm test
+python3 -m unittest discover -s backend -p 'test_*.py'
 npm run build
 npm run preview
 ```
@@ -18,11 +20,12 @@ npm run preview
 Run commands from the repository root. `dev` and `preview` bind to `127.0.0.1`
 with strict ports; use the URL they print. `build` runs strict TypeScript checks
 before writing `dist/`. Public assets are copied into the output; root docs are
-not automatically copied. No `.env` file or API key is required. Old local
-credentials for the removed authoring service are not part of current startup.
+not automatically copied. No `.env` file or API key is required. Optional accounts/feedback use `deployment/services.json`; optional Datadog
+configuration is described in [Services](SERVICES.md). Old local credentials for
+the removed authoring service are not part of current startup.
 
-The last implementation verification on October 10, 2026 passed **395 tests in
-40 files** and the production build. That is a dated result, not a promise about
+The last implementation verification on October 10, 2026 passed **413 frontend tests in
+43 files**, 12 offline backend tests, and the production build. That is a dated result, not a promise about
 later changes. Vitest covers logic, local assets, and DOM integration with a
 mocked globe. It does not exercise browser/WebGL rendering or actual mobile input.
 Browser testing is a separate, explicitly scoped activity; it was not run for
