@@ -1,4 +1,5 @@
 import type { Focus } from "../geography/types";
+import { normalWorldView } from "./defaultViews";
 export interface CameraPort {
   pointOfView(): Required<Focus>;
   pointOfView(focus: Focus, duration: number): unknown;
@@ -108,6 +109,9 @@ export class CameraTravel {
 export class CameraFlyover {
   private frame = 0;
   private generation = 0;
+  get active() {
+    return this.frame !== 0;
+  }
   cancel() {
     this.generation++;
     cancelAnimationFrame(this.frame);
@@ -270,6 +274,33 @@ export function worldAltitude(width: number, height: number, compact = false) {
 const projectedRadius = (altitude: number, height: number) =>
   height * Math.tan(Math.asin(1 / (1 + altitude)));
 
+/** Blend projection magnification without taking control of the camera orbit. */
+export class CameraScale {
+  private frame = 0;
+  constructor(public value = 1) {}
+  cancel() {
+    cancelAnimationFrame(this.frame);
+    this.frame = 0;
+  }
+  move(target: number, reduced: boolean, update: () => void) {
+    this.cancel();
+    if (reduced || target === this.value) {
+      this.value = target;
+      update();
+      return;
+    }
+    const from = this.value,
+      start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, Math.max(0, (now - start) / 720));
+      this.value = from + (target - from) * t * t * (3 - 2 * t);
+      update();
+      this.frame = t < 1 ? requestAnimationFrame(tick) : 0;
+    };
+    this.frame = requestAnimationFrame(tick);
+  }
+}
+
 /** Preserve the on-screen scale while the tray moves, then grow gently. */
 export class ViewportResize {
   private frame = 0;
@@ -283,6 +314,28 @@ export class ViewportResize {
   }
   resize(width: number, height: number) {
     if (this.viewport) this.viewport = { width, height };
+  }
+  adapt(
+    port: CameraPort,
+    previous: { width: number; height: number },
+    next: { width: number; height: number },
+    moving: boolean,
+  ) {
+    // A changing tray must never cancel or overwrite a destination flight.
+    if (moving) return;
+    if (this.active) {
+      this.resize(next.width, next.height);
+      return;
+    }
+    const view = port.pointOfView();
+    const altitude = normalWorldView(
+      view,
+      worldAltitude(previous.width, previous.height, true),
+    )
+      ? worldAltitude(next.width, next.height, true)
+      : (view.altitude * Math.min(1, previous.width / previous.height)) /
+        Math.min(1, next.width / next.height);
+    port.pointOfView({ ...view, altitude }, 0);
   }
   start(
     port: CameraPort,

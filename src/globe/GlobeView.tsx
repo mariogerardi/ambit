@@ -34,6 +34,7 @@ import {
   CameraTravel,
   CameraFlyover,
   ViewportResize,
+  CameraScale,
   viewportProjection,
   worldAltitude,
 } from "./camera";
@@ -135,6 +136,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       [],
     );
     const resizing = useRef(new ViewportResize());
+    const projectionScale = useRef(new CameraScale(props.visualScale ?? 1));
     const previousExpanded = useRef(props.expanded);
     const [hoverPlaceId, setHoverPlaceId] = useState<string>();
     const tooltip = useRef<HTMLDivElement>(null);
@@ -331,7 +333,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         viewport.height,
         viewport.frameHeight,
         viewport.frameTop,
-        current.current.visualScale ?? 1,
+        projectionScale.current.value,
       ).fov;
       camera.updateProjectionMatrix();
       const keyLight = new DirectionalLight(0xe3f0ff, 1.0);
@@ -386,12 +388,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         props.reduced ||
         !ready ||
         !globe.current ||
-        !previous
+        !previous ||
+        travel.current.active ||
+        flyover.current.active ||
+        fidget.current.active
       )
         return;
-      flyover.current.cancel();
-      travel.current.cancel();
-      fidget.current.cancel();
       resizing.current.start(
         globe.current,
         previous,
@@ -410,6 +412,29 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       [],
     );
     useEffect(() => {
+      if (!ready || !globe.current) return;
+      const scale = projectionScale.current;
+      scale.move(props.visualScale ?? 1, props.reduced, () => {
+        const viewport = readViewport();
+        if (
+          !globe.current ||
+          !viewport ||
+          host.current?.closest('[data-keyboard-open="true"]')
+        )
+          return;
+        const camera = globe.current.camera() as PerspectiveCamera;
+        camera.fov = viewportProjection(
+          viewport.height,
+          viewport.frameHeight,
+          viewport.frameTop,
+          scale.value,
+        ).fov;
+        camera.updateProjectionMatrix();
+        refreshLabels();
+      });
+      return () => scale.cancel();
+    }, [ready, props.visualScale, props.reduced, readViewport, refreshLabels]);
+    useEffect(() => {
       const previous = previousViewport.current;
       if (!ready || !globe.current || !previous || !size.width || !size.height)
         return;
@@ -420,35 +445,28 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         size.height,
         size.frameHeight,
         size.frameTop,
-        props.visualScale ?? 1,
+        projectionScale.current.value,
       ).fov;
       camera.updateProjectionMatrix();
       if (
         props.compact &&
         (previous.width !== size.width || previous.height !== size.frameHeight)
       ) {
-        if (resizing.current.active) {
-          resizing.current.resize(size.width, size.frameHeight);
-        } else {
-          flyover.current.cancel();
-          travel.current.cancel();
-          const view = globe.current.pointOfView();
-          const altitude = normalWorldView(
-            view,
-            worldAltitude(previous.width, previous.height, props.compact),
-          )
-            ? worldAltitude(size.width, size.frameHeight, props.compact)
-            : (view.altitude * Math.min(1, previous.width / previous.height)) /
-              Math.min(1, size.width / size.frameHeight);
-          globe.current.pointOfView({ ...view, altitude }, 0);
-        }
+        resizing.current.adapt(
+          globe.current,
+          previous,
+          { width: size.width, height: size.frameHeight },
+          travel.current.active ||
+            flyover.current.active ||
+            fidget.current.active,
+        );
       }
       previousViewport.current = {
         width: size.width,
         height: size.frameHeight,
       };
       refreshLabels();
-    }, [size, ready, props.compact, props.visualScale, refreshLabels]);
+    }, [size, ready, props.compact, refreshLabels]);
     useEffect(() => {
       if (ready && globe.current) {
         globe.current.controls().autoRotate =

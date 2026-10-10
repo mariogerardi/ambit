@@ -1643,7 +1643,7 @@ export function App() {
                 layout="game"
                 compact={mobile.enabled}
                 expanded={expanded}
-                visualScale={mobile.enabled && mode === "home" ? 1.15 : 1}
+                visualScale={mobile.enabled && mode === "home" ? 1.2 : 1}
                 regions={
                   world?.regions ??
                   (mode === "explore" ? exploreRegions : namedRegions)
@@ -1851,6 +1851,7 @@ export function App() {
       <ModePanels
         mode={path}
         reduced={reduced || mobile.enabled}
+        persistent={mobile.enabled}
         hidden={expanded}
         scrollKey={mobile.enabled ? mobileStep : undefined}
       >

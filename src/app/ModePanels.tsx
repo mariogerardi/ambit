@@ -7,12 +7,14 @@ export function ModePanels({
   children,
   hidden = false,
   scrollKey,
+  persistent = false,
 }: {
   mode: string;
   reduced: boolean;
   children: ReactNode;
   hidden?: boolean;
   scrollKey?: string;
+  persistent?: boolean;
 }) {
   const panel = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -38,7 +40,8 @@ export function ModePanels({
         </div>
       )}
       <div
-        key={mode}
+        // Retain the mobile tray so CSS can interpolate its previous position.
+        key={persistent ? "mobile-panel" : mode}
         ref={panel}
         className="mode-layer mode-incoming"
         inert={hidden}

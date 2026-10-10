@@ -78,10 +78,13 @@ are excluded from a session using country-city capital multiple choice.
 
 On phones, the Study cog groups report/edit/finish actions and correct answers
 stay visible longer before automatic advance. Explore selections use tighter
-camera framing. Home magnifies the mobile globe projection by 15% behind its
+camera framing. Home magnifies the mobile globe projection by 20% behind its
 transparent bars. Explore measures its content to fit the open tray, capping long
 details at 45% of the visible height; the map, controls, and tray boundary animate
-with the existing enlargement timing. Keyboard detection retains the viewport height before focus,
+with the existing enlargement timing. The mobile tray remains mounted between
+modes so its position can interpolate. Projection magnification blends over
+720 ms; tray resizing updates the viewport without cancelling active camera
+travel or tours. Keyboard detection retains the viewport height before focus,
 including Safari layouts where both viewports shrink. The keyboard layout hides
 the mounted globe and keeps the prompt and submit control available in the
 scrolling question pane. Quiz fields disable text correction and use response

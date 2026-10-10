@@ -44,6 +44,19 @@ aws amplify update-app --region us-east-1 --app-id d2s965d1nr8fn6 \
   --custom-headers "$(cat customHttp.yml)"
 ```
 
+## Link previews and icons
+
+`index.html` includes static Open Graph and large-image card metadata, so link
+preview clients can read it without running the app. Every application route uses
+the same evergreen [`ambit-preview-v1.png`](../public/social/ambit-preview-v1.png),
+with no daily schedule or private player state. The vector artwork and export
+notes live in [`sources/brand/`](../sources/brand/README.md).
+
+Browser favicons and the Apple home-screen icon reuse the existing logo globe.
+These public assets ship with the regular production build. Actual Messages
+preview behavior can be checked after publishing; messaging clients may cache
+previews of previously shared URLs.
+
 ## Rollback
 
 Verified artifacts are retained by GitHub for 90 days. To restore one, identify

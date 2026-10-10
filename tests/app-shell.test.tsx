@@ -542,8 +542,12 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       removeEventListener() {},
     }));
     await mount();
-    expect(probe.props!.visualScale).toBe(1.15);
+    expect(probe.props!.visualScale).toBe(1.2);
+    const tray = host.querySelector(".mode-incoming");
+    const mapTools = host.querySelector(".mobile-map-tools");
     await click("Explore");
+    expect(host.querySelector(".mode-incoming")).toBe(tray);
+    expect(host.querySelector(".mobile-map-tools")).toBe(mapTools);
     const experience = host.querySelector<HTMLElement>(".experience")!;
     expect(experience.style.getPropertyValue("--explore-content-height")).toBe(
       "196px",
@@ -572,7 +576,15 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.mounts).toBe(1);
     await click("Home");
     expect(observer.disconnected).toBe(true);
-    expect(probe.props!.visualScale).toBe(1.15);
+    expect(probe.props!.visualScale).toBe(1.2);
+    expect(host.querySelector(".mode-incoming")).toBe(tray);
+    await click("Study");
+    expect(host.querySelector(".mode-incoming")).toBe(tray);
+    await click("Explore");
+    expect(host.querySelector(".mode-incoming")).toBe(tray);
+    await click("Study");
+    expect(host.querySelector(".mode-incoming")).toBe(tray);
+    expect(probe.mounts).toBe(1);
   });
 
   it("restores a saved theme at startup", async () => {

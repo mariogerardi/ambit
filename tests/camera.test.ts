@@ -7,12 +7,109 @@ import {
   worldAltitude,
   viewportProjection,
   ViewportResize,
+  CameraScale,
 } from "../src/globe/camera";
 import { PerspectiveCamera, Vector3 } from "three";
 import type { Focus } from "../src/geography/types";
 import { regionStyle, stateStyles } from "../src/globe/visualStates";
 afterEach(() => vi.unstubAllGlobals());
 describe("camera travel", () => {
+  it.each(["travel", "flyover"])(
+    "keeps an active %s moving while an Explore tray changes size",
+    (kind) => {
+      let now = 0,
+        nextId = 0;
+      const callbacks = new Map<number, FrameRequestCallback>();
+      vi.stubGlobal("performance", { now: () => now });
+      vi.stubGlobal(
+        "requestAnimationFrame",
+        (callback: FrameRequestCallback) => {
+          callbacks.set(++nextId, callback);
+          return nextId;
+        },
+      );
+      vi.stubGlobal("cancelAnimationFrame", (id: number) =>
+        callbacks.delete(id),
+      );
+      let position: Required<Focus> = { lat: 60, lng: -110, altitude: 0.7 };
+      const port = {
+        pointOfView(target?: Focus) {
+          if (target) position = { ...position, ...target };
+          return position;
+        },
+      };
+      const travel = new CameraTravel(),
+        flyover = new CameraFlyover();
+      const destination = { lat: 72, lng: -40, altitude: 0.4 };
+      if (kind === "travel") travel.move(port, destination, false);
+      else flyover.start(port, [destination], false);
+      const resize = new ViewportResize();
+      let viewport = { width: 390, height: 500 };
+      for (let i = 0; i < 80; i++) {
+        now += 10;
+        const frame = [...callbacks.values()];
+        callbacks.clear();
+        for (const callback of frame) callback(now);
+        const beforeResize = { ...position };
+        const next = { width: 390, height: 500 - i * 2 };
+        resize.adapt(port, viewport, next, travel.active || flyover.active);
+        viewport = next;
+        expect(position).toEqual(beforeResize);
+      }
+      expect(position.lng).toBeGreaterThan(-110);
+      expect(travel.active || flyover.active).toBe(true);
+      for (let i = 0; i < 220; i++) {
+        now += 10;
+        const frame = [...callbacks.values()];
+        callbacks.clear();
+        for (const callback of frame) callback(now);
+      }
+      expect(position).toEqual(destination);
+      travel.cancel();
+      flyover.cancel();
+      expect(callbacks.size).toBe(0);
+    },
+  );
+  it("blends mode magnification, reverses from its current size, and respects reduced motion", () => {
+    let now = 0,
+      nextId = 0;
+    const callbacks = new Map<number, FrameRequestCallback>();
+    vi.stubGlobal("performance", { now: () => now });
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callbacks.set(++nextId, callback);
+      return nextId;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => callbacks.delete(id));
+    const advance = (duration: number) => {
+      for (let i = 0; i < duration; i += 10) {
+        now += 10;
+        const frame = [...callbacks.values()];
+        callbacks.clear();
+        for (const callback of frame) callback(now);
+      }
+    };
+    const scale = new CameraScale(1.2),
+      update = vi.fn();
+    scale.move(1, false, update);
+    expect(scale.value).toBe(1.2);
+    advance(360);
+    expect(scale.value).toBeCloseTo(1.1);
+    scale.move(1.2, false, update);
+    expect(scale.value).toBeCloseTo(1.1);
+    advance(10);
+    expect(scale.value).toBeGreaterThan(1.1);
+    expect(scale.value).toBeLessThan(1.101);
+    advance(710);
+    expect(scale.value).toBe(1.2);
+    expect(callbacks.size).toBe(0);
+    scale.move(1, true, update);
+    expect(scale.value).toBe(1);
+    expect(callbacks.size).toBe(0);
+    scale.move(1.2, false, update);
+    scale.cancel();
+    advance(720);
+    expect(scale.value).toBe(1);
+  });
   it("flies slowly across each stop once, returns to the first, loops, and cancels completely", () => {
     let now = 0,
       nextId = 0;
@@ -247,7 +344,7 @@ describe("camera travel", () => {
       worldAltitude(440, 490, true),
     );
   });
-  it.each([1, 1.15])(
+  it.each([1, 1.15, 1.2])(
     "extends the mobile frustum behind both bars with centered visual scale %s",
     (scale) => {
       const width = 440,
