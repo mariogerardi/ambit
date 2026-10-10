@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--datadog-secret-arn", default=None)
     parser.add_argument("--with-datadog", action="store_true", help="Store DATADOG_API_KEY from the environment or .env.local in AWS Secrets Manager and enable monitoring")
     parser.add_argument("--datadog-site", default="datadoghq.com")
+    parser.add_argument("--no-wait", action="store_true", help="Start an existing stack update and return immediately")
     args = parser.parse_args()
     def aws(*arguments, raw=False):
         result = subprocess.run(["aws", *arguments, "--profile", args.profile, "--region", "us-east-1"], capture_output=True, text=True)
@@ -41,7 +42,7 @@ def main():
     aws("s3api", "put-bucket-encryption", "--bucket", bucket, "--server-side-encryption-configuration", json.dumps({"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}))
     archive = io.BytesIO()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
-        for name in ("handler.py", "confirmation.py"):
+        for name in ("handler.py", "confirmation.py", "saves.py"):
             info = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             package.writestr(info, (ROOT / "backend" / name).read_bytes())
@@ -56,6 +57,8 @@ def main():
     except RuntimeError as error:
         if "does not exist" not in str(error):
             raise
+    if args.no_wait and not exists:
+        raise RuntimeError("The first deployment must wait to obtain public endpoints")
     datadog_secret = args.datadog_secret_arn
     if args.with_datadog:
         api_key = os.environ.get("DATADOG_API_KEY", "")
@@ -93,6 +96,9 @@ def main():
         aws("cloudformation", "validate-template", "--template-body", f"file://{directory / 'template.json'}")
         try:
             aws("cloudformation", "update-stack" if exists else "create-stack", "--stack-name", stack, "--template-body", f"file://{directory / 'template.json'}", "--parameters", f"file://{directory / 'parameters.json'}", "--capabilities", "CAPABILITY_IAM", "--tags", "Key=project,Value=ambit", "Key=environment,Value=production")
+            if args.no_wait:
+                print(f"Started backend update {revision[:12]}; not waiting for completion.", flush=True)
+                return
             print("Waiting for CloudFormation…", flush=True)
             aws("cloudformation", "wait", "stack-update-complete" if exists else "stack-create-complete", "--stack-name", stack, raw=True)
         except RuntimeError as error:

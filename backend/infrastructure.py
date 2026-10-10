@@ -43,6 +43,13 @@ def template():
         "PointInTimeRecoverySpecification": {"PointInTimeRecoveryEnabled": True},
         "SSESpecification": {"SSEEnabled": True},
     }, retain=True)
+    r["Saves"] = resource("AWS::DynamoDB::Table", {
+        "TableName": "ambit-production-saves", "BillingMode": "PAY_PER_REQUEST",
+        "AttributeDefinitions": [{"AttributeName": key, "AttributeType": "S"} for key in ("pk", "sk")],
+        "KeySchema": [{"AttributeName": "pk", "KeyType": "HASH"}, {"AttributeName": "sk", "KeyType": "RANGE"}],
+        "PointInTimeRecoverySpecification": {"PointInTimeRecoveryEnabled": True},
+        "SSESpecification": {"SSEEnabled": True},
+    }, retain=True)
     r["ConfirmationRole"] = resource("AWS::IAM::Role", {"AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy]})
     code = {"S3Bucket": ref("ArtifactBucket"), "S3Key": ref("ArtifactKey")}
     r["Confirmation"] = resource("AWS::Lambda::Function", {
@@ -85,10 +92,11 @@ def template():
         "AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy],
         "Policies": [{"PolicyName": "FeedbackData", "PolicyDocument": {"Version": "2012-10-17", "Statement": [
             {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:Query"], "Resource": [arn("Feedback"), sub("${Feedback.Arn}/index/feedback-by-date")]},
+            {"Effect": "Allow", "Action": ["dynamodb:PutItem", "dynamodb:Query"], "Resource": arn("Saves")},
             {"Fn::If": ["UseDatadog", {"Effect": "Allow", "Action": "secretsmanager:GetSecretValue", "Resource": ref("DatadogSecretArn")}, ref("AWS::NoValue")]},
         ]}}],
     })
-    env = {"FEEDBACK_TABLE": ref("Feedback"), "RATE_SALT": ref("RateSalt"), "ALLOWED_ORIGINS": ",".join(origins), "RELEASE": ref("Release"),
+    env = {"SAVES_TABLE": ref("Saves"), "FEEDBACK_TABLE": ref("Feedback"), "RATE_SALT": ref("RateSalt"), "ALLOWED_ORIGINS": ",".join(origins), "RELEASE": ref("Release"),
            "DD_ENV": "production", "DD_SERVICE": "ambit-api", "DD_VERSION": ref("Release"), "DD_SITE": ref("DatadogSite"),
            "DD_API_KEY_SECRET_ARN": ref("DatadogSecretArn"), "DD_LAMBDA_HANDLER": "handler.handler", "DD_TRACE_ENABLED": "true", "DD_LOGS_INJECTION": "true", "DD_SERVERLESS_LOGS_ENABLED": "true", "DD_CAPTURE_LAMBDA_PAYLOAD": "false"}
     r["ApiFunction"] = resource("AWS::Lambda::Function", {
@@ -99,10 +107,10 @@ def template():
         "Layers": {"Fn::If": ["UseDatadog", [sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python313:127"), sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension:99")], ref("AWS::NoValue")]},
         "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": "production"}, {"Key": "service", "Value": "ambit-api"}],
     })
-    r["Api"] = resource("AWS::ApiGatewayV2::Api", {"Name": "ambit-production", "ProtocolType": "HTTP", "CorsConfiguration": {"AllowOrigins": origins, "AllowMethods": ["POST", "GET", "PATCH", "OPTIONS"], "AllowHeaders": ["content-type", "authorization", "x-datadog-origin", "x-datadog-parent-id", "x-datadog-trace-id", "x-datadog-sampling-priority", "traceparent", "tracestate"], "MaxAge": 3600}})
+    r["Api"] = resource("AWS::ApiGatewayV2::Api", {"Name": "ambit-production", "ProtocolType": "HTTP", "CorsConfiguration": {"AllowOrigins": origins, "AllowMethods": ["POST", "GET", "PATCH", "OPTIONS"], "AllowHeaders": ["content-type", "authorization", "x-datadog-origin", "x-datadog-parent-id", "x-datadog-trace-id", "x-datadog-sampling-priority", "traceparent", "tracestate", "baggage", "x-datadog-tags"], "MaxAge": 3600}})
     r["Integration"] = resource("AWS::ApiGatewayV2::Integration", {"ApiId": ref("Api"), "IntegrationType": "AWS_PROXY", "IntegrationUri": arn("ApiFunction"), "PayloadFormatVersion": "2.0", "TimeoutInMillis": 15000})
     r["Authorizer"] = resource("AWS::ApiGatewayV2::Authorizer", {"ApiId": ref("Api"), "Name": "accounts", "AuthorizerType": "JWT", "IdentitySource": ["$request.header.Authorization"], "JwtConfiguration": {"Audience": [ref("Client")], "Issuer": sub("https://cognito-idp.${AWS::Region}.amazonaws.com/${Users}")}})
-    for name, route, authenticated in [("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
+    for name, route, authenticated in [("ReadSaves", "GET /account/saves", True), ("WriteSaves", "POST /account/saves", True), ("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
         properties = {"ApiId": ref("Api"), "RouteKey": route, "Target": sub("integrations/${Integration}"), "AuthorizationType": "JWT" if authenticated else "NONE"}
         if authenticated:
             properties.update(AuthorizerId=ref("Authorizer"), AuthorizationScopes=["openid"])

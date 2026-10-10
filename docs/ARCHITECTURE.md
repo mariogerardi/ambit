@@ -5,6 +5,8 @@ routes share one Three.js/react-globe.gl renderer and local geography dataset.
 Guest gameplay remains local. `src/services/accounts.tsx` manages Cognito
 authorization-code/PKCE sessions in session storage. `src/services/feedback.ts`
 connects reports and admin review to API Gateway/Lambda/DynamoDB.
+`src/services/progressSync.ts` synchronizes account-scoped Journey and Study
+registers, using local storage as an offline upload queue.
 `src/services/monitoring.ts` initializes Datadog RUM with the React plugin.
 Backend infrastructure and handlers live in `backend/`; deployment and secret
 provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).

@@ -379,9 +379,7 @@ export function StudySetup(props: {
   initialEditor?: boolean;
   onHistory?(): void;
 }) {
-  const [editing, setEditing] = useState(
-    !!props.initialEditor || !!props.onResume,
-  );
+  const [editing, setEditing] = useState(!!props.initialEditor);
   useEffect(() => {
     props.onPreview?.(editing ? props.settings : undefined);
     return () => props.onPreview?.(undefined);

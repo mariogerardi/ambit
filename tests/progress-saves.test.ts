@@ -318,3 +318,104 @@ describe("durable player saves", () => {
     ).toBe(true);
   });
 });
+
+it("restores active Study answers and draft input after refresh without rewriting history per key", () => {
+  const store = createStudySave();
+  let session = {
+    ...startStudy(
+      {
+        ...defaultSettings,
+        styles: { ...defaultSettings.styles, countries: "typing" },
+      },
+      42,
+    ),
+    id: "active",
+  };
+  store.save({ ...emptyStudy, session });
+  const before = store
+    .entries()
+    .find((entry) => entry.field === "session.active");
+  session = { ...session, text: "Arg" };
+  store.save({ ...emptyStudy, session });
+  expect(createStudySave().load().session).toMatchObject({
+    id: "active",
+    text: "Arg",
+  });
+  expect(
+    store.entries().find((entry) => entry.field === "session.active"),
+  ).toEqual(before);
+});
+it("keeps guest import idempotent and isolates accounts, including after sign-out", () => {
+  const guest = createStudySave();
+  guest.save(result("guest-result"));
+  const a = createStudySave("account-a");
+  expect(a.load().history?.map((entry) => entry.id)).toEqual(["guest-result"]);
+  expect(createStudySave("account-a").load().history).toHaveLength(1);
+  a.save(result("account-result"));
+  expect(createStudySave("account-b").load().history).toBeUndefined();
+  expect(
+    createStudySave()
+      .load()
+      .history?.map((entry) => entry.id),
+  ).toEqual(["guest-result"]);
+});
+it("merges two devices' history and preserves queued edits against a cloud update", () => {
+  const a = createStudySave("a");
+  const initial = a.load();
+  const b = createStudySave("b");
+  b.save(result("cloud-result"));
+  a.mergeEntries(b.entries());
+  const merge = a.incoming();
+  const merged = merge({
+    ...initial,
+    settings: { ...initial.settings, length: 50 },
+  });
+  expect(merged.history?.[0].id).toBe("cloud-result");
+  expect(merged.settings.length).toBe(50);
+  a.save(merged);
+  expect(createStudySave("a").load()).toEqual(merged);
+});
+it("does not regress Study progress or let an old run replace a replay", () => {
+  const store = createStudySave("a");
+  const start = { ...startStudy(defaultSettings, 42), id: "old" };
+  const advanced = studyReducer(start, {
+    type: "pick",
+    id: start.prompt.targetId,
+  });
+  store.save({ ...emptyStudy, session: advanced });
+  const oldEntries = store.entries();
+  const replay = { ...startStudy(defaultSettings, 43), id: "new" };
+  store.save({ ...emptyStudy, session: replay });
+  store.mergeEntries(
+    oldEntries.map((entry) =>
+      entry.field === "session.old"
+        ? { ...entry, writer: "late-device", clock: 100, value: start }
+        : entry,
+    ),
+  );
+  expect(store.load().session?.id).toBe("new");
+  store.mergeEntries([
+    {
+      version: 2,
+      writer: "remote",
+      clock: 101,
+      field: "activeSession",
+      value: "old",
+    },
+  ]);
+  expect(store.load().session?.history).toHaveLength(1);
+});
+it("imports a legacy guest's active Study session and non-default preferences", () => {
+  const session = startStudy(defaultSettings, 42);
+  localStorage.setItem(
+    STUDY_KEY,
+    JSON.stringify({
+      ...emptyStudy,
+      settings: { ...defaultSettings, length: 50 },
+      session,
+    }),
+  );
+  const save = createStudySave("first-account").load();
+  expect(save.session?.seed).toBe(session.seed);
+  expect(save.settings.length).toBe(50);
+});

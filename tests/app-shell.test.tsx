@@ -21,8 +21,8 @@ import type {
   PlaceFeature,
 } from "../src/geography/types";
 import { createGlobeRegionPreparer } from "../src/globe/geometry";
-import { App } from "../src/App";
-import { createStudySave } from "../src/app/progressSaves";
+import { App, PlayerWorkspace } from "../src/App";
+import { createStudySave, createDailySave } from "../src/app/progressSaves";
 const savedStudy = () => createStudySave().load();
 import * as journeyRegistry from "../src/game/journeyRegistry";
 import {
@@ -42,7 +42,7 @@ import { SIXTH_JOURNEY } from "../src/game/sixthJourney";
 import { EIGHTH_JOURNEY } from "../src/game/eighthJourney";
 import { SEVENTH_JOURNEY } from "../src/game/seventhJourney";
 import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
-import { DAILY_KEY } from "../src/app/daily";
+import { DAILY_KEY, openDaily } from "../src/app/dailyProgress";
 import { DEFAULT_VIEW_KEY, DEFAULT_LAYERS } from "../src/app/worldPreferences";
 import { MOBILE_LAYOUT_QUERY } from "../src/app/useMobileLayout";
 import { STUDY_PATHS } from "../src/study/paths";
@@ -120,12 +120,23 @@ vi.mock("../src/globe/GlobeView", () => ({
     return <canvas data-testid="shared-earth" />;
   }),
 }));
-const authProbe = vi.hoisted(() => ({ admin: true }));
+const authProbe = vi.hoisted(() => ({
+  admin: true,
+  subject: undefined as string | undefined,
+  loading: false,
+}));
 vi.mock("../src/services/accounts", () => ({
   useAccount: () => ({
-    user: null,
+    user: authProbe.subject
+      ? {
+          profile: {
+            sub: authProbe.subject,
+            email: `${authProbe.subject}@example.com`,
+          },
+        }
+      : null,
     admin: authProbe.admin,
-    loading: false,
+    loading: authProbe.loading,
     busy: false,
     error: "",
     signIn: vi.fn(),
@@ -194,6 +205,8 @@ async function mount() {
 }
 beforeEach(() => {
   authProbe.admin = true;
+  authProbe.subject = undefined;
+  authProbe.loading = false;
   const store = new Map<string, string>();
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => store.get(key) ?? null,
@@ -244,6 +257,96 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
+  it("remounts progress when accounts change and waits for account discovery", async () => {
+    authProbe.loading = true;
+    await act(async () => root.render(<PlayerWorkspace />));
+    expect(host.textContent).toContain("Checking your account");
+    expect(localStorage.length).toBe(0);
+    const record = (id: string) => {
+      const session = { ...startStudy(defaultSettings, 42), id };
+      return archiveStudy({
+        ...emptyStudy,
+        session: studyReducer(session, {
+          type: "pick",
+          id: session.prompt.targetId,
+        }),
+      });
+    };
+    createStudySave("a").save(record("account-a-result"));
+    createStudySave("b").save(record("account-b-result"));
+    authProbe.loading = false;
+    authProbe.subject = "a";
+    await act(async () => root.render(<PlayerWorkspace />));
+    await settleLoads();
+    await click("Study");
+    await click("Past study sessions");
+    expect(host.querySelectorAll(".study-history-list li")).toHaveLength(1);
+    authProbe.subject = "b";
+    await act(async () => root.render(<PlayerWorkspace />));
+    await settleLoads();
+    await click("Past study sessions");
+    expect(host.querySelectorAll(".study-history-list li")).toHaveLength(1);
+    expect(
+      createStudySave("b")
+        .load()
+        .history?.map((entry) => entry.id),
+    ).toEqual(["account-b-result"]);
+    authProbe.subject = undefined;
+    await act(async () => root.render(<PlayerWorkspace />));
+    await settleLoads();
+    await click("Past study sessions");
+    expect(host.querySelectorAll(".study-history-list li")).toHaveLength(0);
+  });
+  it("restores cloud progress before creating a Journey on a new device", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const source = createDailySave(
+      journeyRegistry.JOURNEY_INDEX,
+      "source-device",
+    );
+    const original = openDaily(
+      source.load(),
+      "2026-10-10",
+      false,
+      journeyRegistry.JOURNEY_INDEX,
+    );
+    source.save(original);
+    const entries = source
+      .entries()
+      .map((entry) => ({ ...entry, namespace: "daily" }));
+    let release!: (value: Response) => void;
+    const assets = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, options?: RequestInit) => {
+        if (!url.includes("/account/saves")) return assets(url, options);
+        if (options?.method === "POST")
+          return Promise.resolve(new Response(JSON.stringify({ saved: true })));
+        return new Promise<Response>((resolve) => {
+          release = resolve;
+        });
+      }),
+    );
+    authProbe.subject = "new-device";
+    history.replaceState(null, "", "/daily");
+    await act(async () => root.render(<PlayerWorkspace />));
+    await settleLoads();
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    expect(
+      createDailySave(journeyRegistry.JOURNEY_INDEX, "new-device").load()
+        .attempts,
+    ).toEqual({});
+    expect(host.textContent).toContain("Syncing your progress");
+    await act(async () => release(new Response(JSON.stringify({ entries }))));
+    await settleLoads();
+    const restored = createDailySave(
+      journeyRegistry.JOURNEY_INDEX,
+      "new-device",
+    ).load();
+    expect(restored.activeDate).toBe(original.activeDate);
+    expect(restored.attempts["2026-10-10"].runId).toBe(
+      original.attempts["2026-10-10"].runId,
+    );
+  });
   it("hides admin from guests and protects a direct admin route", async () => {
     authProbe.admin = false;
     history.replaceState(null, "", "/admin");
@@ -1447,7 +1550,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       await mount();
       await click("Study");
       await click("Custom");
-      await click("Start studying");
+      await click("Start new session");
       expect(probe.focus.at(-1)).toEqual(member(session.prompt.targetId).focus);
       if (style === "choices") {
         const answer = host.querySelector<HTMLInputElement>(
@@ -1489,7 +1592,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Study");
     await click("Custom");
     const count = probe.focus.length;
-    await click("Start studying");
+    await click("Start new session");
     expect(probe.focus).toHaveLength(count);
   });
   it("sets the daily through Admin, preserves the globe, and resumes each selected puzzle", async () => {
@@ -1648,7 +1751,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.fidgets).toBe(1);
     expect(probe.props!.motion).toBe(true);
   });
-  it("frames a path, clears its active session on leaving, and saves results for viewing and replay", async () => {
+  it("frames a path and saves completed results for viewing and replay", async () => {
     vi.spyOn(Date, "now").mockReturnValue(24);
     await mount();
     await click("Study");
@@ -1664,7 +1767,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Finish session");
     const saved = savedStudy();
     expect(saved.history).toHaveLength(1);
-    expect(saved.session).toBeUndefined();
+    expect(saved.session?.phase).toBe("summary");
     expect(saved.history![0].session.history[0].correct).toBe(true);
     expect(host.querySelector(".study-summary .settings-button")).toBeNull();
     await click("Past study sessions");
@@ -1832,7 +1935,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(
       host.querySelector(".mode-incoming .study-question")!.textContent,
     ).not.toContain("Not quite");
-    expect(savedStudy().session).toBeUndefined();
+    expect(savedStudy().session?.prompt.ordinal).toBe(2);
   });
   it("supports map clicks and keyboard alternatives while preserving the Study orbit", async () => {
     vi.spyOn(Date, "now").mockReturnValue(24);
@@ -1896,7 +1999,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(daily.querySelector("time")).toBeNull();
     expect(daily.querySelectorAll(".daily-levels span")).toHaveLength(5);
   });
-  it("archives an abandoned attempt and opens a fresh custom builder", async () => {
+  it("resumes an attempt after navigation and archives it when a new session starts", async () => {
     const settings = {
       ...defaultSettings,
       topics: ["flags"] as typeof defaultSettings.topics,
@@ -1915,15 +2018,23 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Home");
     const saved = savedStudy();
     expect(saved.settings).toEqual(settings);
-    expect(saved.session).toBeUndefined();
-    expect(saved.history).toHaveLength(1);
+    expect(saved.session?.history).toHaveLength(1);
+    expect(saved.history).toBeUndefined();
     await click("Study");
     expect(host.querySelector(".study-paths")).not.toBeNull();
-    await click("Past study sessions");
-    await act(async () =>
-      host.querySelector<HTMLButtonElement>(".study-history-view")!.click(),
-    );
-    await click("Build a custom session");
+    await click("Resume session");
+    expect(host.querySelector(".round-feedback")).not.toBeNull();
+    await click("Home");
+    await act(async () => {
+      root.unmount();
+      root = createRoot(host);
+    });
+    await mount();
+    await click("Study");
+    await click("Resume session");
+    expect(savedStudy().session?.id).toBe(saved.session?.id);
+    await click("Session settings");
+    await click("Build a new session");
     expect(host.querySelector(".study-editor")).not.toBeNull();
     expect(host.textContent).not.toContain("Return to results");
     await click("Start studying");

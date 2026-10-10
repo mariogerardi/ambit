@@ -17,9 +17,8 @@ import {
   validStudy,
   validSettings,
   recoverStudy,
-  leaveStudy,
 } from "../study/engine";
-import type { StudySave, StudyRecord } from "../study/engine";
+import type { StudySave, StudyRecord, StudySession } from "../study/engine";
 const optionalSettings = new Set([
   "choiceCount",
   "revisitMissed",
@@ -31,18 +30,24 @@ export const studySaveCodec: SaveCodec<StudySave> = {
   valid: validStudy,
   recover: recoverStudy,
   encode(save) {
-    const persistent = save.session
-      ? leaveStudy({
-          ...save,
-          session: {
-            ...save.session,
-            id:
-              save.session.id ??
-              `legacy-study-${save.session.seed}-${save.session.prompt.ordinal}`,
-          },
-        })
-      : save;
+    const persistent = save;
+    const session = save.session && {
+      ...save.session,
+      id: save.session.id ?? `legacy-study-${save.session.seed}`,
+      text: "",
+      choiceId: "",
+    };
     return {
+      activeSession: session?.id ?? null,
+      ...(session
+        ? {
+            [`session.${session.id}`]: session,
+            [`draft.${session.id}/${session.prompt.ordinal}`]: {
+              text: save.session!.text,
+              choiceId: save.session!.choiceId,
+            },
+          }
+        : {}),
       ...Object.fromEntries(
         Object.entries(persistent.settings)
           .filter(([key]) => key !== "styles")
@@ -78,9 +83,39 @@ export const studySaveCodec: SaveCodec<StudySave> = {
     history.sort(
       (a, b) => b.finishedAt - a.finishedAt || a.id.localeCompare(b.id),
     );
-    return { version: 1, settings, ...(history.length ? { history } : {}) };
+    let session = fields[`session.${fields.activeSession}`] as
+      | StudySession
+      | undefined;
+    if (session) {
+      const draft = fields[`draft.${session.id}/${session.prompt.ordinal}`] as
+        | { text: string; choiceId: string }
+        | undefined;
+      session = { ...session, ...(session.phase === "playing" ? draft : {}) };
+    }
+    return {
+      version: 1,
+      settings,
+      ...(session ? { session } : {}),
+      ...(history.length ? { history } : {}),
+    };
   },
   accepts(field, value) {
+    if (field === "activeSession")
+      return value === null || typeof value === "string";
+    if (field.startsWith("session."))
+      return (
+        isRecord(value) &&
+        field === `session.${value.id}` &&
+        validStudy({ version: 1, settings: defaultSettings, session: value })
+      );
+    if (field.startsWith("draft."))
+      return (
+        isRecord(value) &&
+        typeof value.text === "string" &&
+        value.text.length <= 10000 &&
+        typeof value.choiceId === "string" &&
+        value.choiceId.length <= 200
+      );
     if (field.startsWith("history."))
       return (
         isRecord(value) &&
@@ -108,7 +143,20 @@ export const studySaveCodec: SaveCodec<StudySave> = {
       })
     );
   },
+  retain: (field) =>
+    field.startsWith("session.") ||
+    field.startsWith("draft.") ||
+    field.startsWith("history."),
   resolve(field, previous, next) {
+    if (field.startsWith("session.")) {
+      const rank = (session: StudySession) =>
+        session.history.length * 100 +
+        session.prompt.ordinal * 10 +
+        { playing: 0, feedback: 1, summary: 2 }[session.phase];
+      return rank(previous as StudySession) > rank(next as StudySession)
+        ? previous
+        : next;
+    }
     if (field.startsWith("history.")) {
       const a = previous as StudyRecord,
         b = next as StudyRecord;
@@ -296,6 +344,47 @@ export function dailySaveCodec(
     },
   };
 }
-export const createStudySave = () => new RecordSave(STUDY_KEY, studySaveCodec);
-export const createDailySave = (catalog: JourneySummary[]) =>
-  new RecordSave(DAILY_KEY, dailySaveCodec(catalog));
+export const progressKey = (key: string, subject?: string) =>
+  subject ? `${key}.account.${encodeURIComponent(subject)}` : key;
+
+function accountStore<T>(key: string, codec: SaveCodec<T>, subject?: string) {
+  const store = new RecordSave(progressKey(key, subject), codec);
+  if (!subject || !store.writable) return store;
+  try {
+    const marker = `${store.prefix}guest-imported`;
+    if (localStorage.getItem(marker)) return store;
+    const owner = localStorage.getItem("ambit.guest-progress-owner");
+    if (owner && owner !== subject) return store;
+    const guest = new RecordSave(key, codec);
+    if (!guest.writable) return store;
+    const entries = guest.entries();
+    // An empty guest profile must not override preferences already in the cloud.
+    if (
+      !entries.some((entry) =>
+        /^(run|attempt|history|session)\./.test(entry.field),
+      )
+    )
+      return store;
+    const device =
+      localStorage.getItem("ambit.guest-import-device") ?? crypto.randomUUID();
+    localStorage.setItem("ambit.guest-import-device", device);
+    // Claim before copying so a partial import cannot leak into another account.
+    localStorage.setItem("ambit.guest-progress-owner", subject);
+    store.mergeEntries(
+      entries
+        .filter((entry) => !entry.field.startsWith("override."))
+        .map((entry) => ({
+          ...entry,
+          writer: `zguest.${device}.${entry.writer}`,
+        })),
+    );
+    localStorage.setItem(marker, "1");
+  } catch {
+    /* Keep the original guest save and retry the import next time. */
+  }
+  return store;
+}
+export const createStudySave = (subject?: string) =>
+  accountStore(STUDY_KEY, studySaveCodec, subject);
+export const createDailySave = (catalog: JourneySummary[], subject?: string) =>
+  accountStore(DAILY_KEY, dailySaveCodec(catalog), subject);

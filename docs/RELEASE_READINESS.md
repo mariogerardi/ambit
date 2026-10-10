@@ -9,7 +9,7 @@ audit has already passed. Current save behavior is documented in
 
 The static app has pinned npm dependencies, strict TypeScript checks, extensive
 unit/asset/DOM coverage, local assets, and source attribution. The October 10
-implementation pass passed 413 frontend tests across 43 files, 12 offline backend
+implementation pass passed 428 frontend tests across 44 files, 16 offline backend
 tests, and the production build.
 The October 9 dependency audit reported no known advisories; rerun it for release.
 
@@ -36,7 +36,7 @@ Large deferred globe/geometry bundles still produce Vite's chunk-size warning.
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Version control and runtime | Tracked source/lockfile/assets; supported Node LTS pinned and verified with a clean install.                                                                              |
 | CI and preview              | Automated install, tests, and build; a preview of the exact candidate release.                                                                                            |
-| Player-data policy          | Retention/export or storage-growth handling, and an explicit decision on refresh/close losing active Study attempts.                                                      |
+| Player-data policy          | Retention/export or storage-growth handling; account sync and durable active Study sessions are implemented.                                                              |
 | Static hosting              | Direct-route loading, compression, cache policy, headers, and rollback verified on the chosen host.                                                                       |
 | Browser/device verification | Cold/warm Journey entry, heavy subdivisions, repeated Fidget, close-zoom borders, keyboard, touch, mobile layouts, and WebGL failure inspected on representative devices. |
 | Accessibility               | Focus/dialog navigation, keyboard alternatives, screen-reader feedback, transparency/imagery contrast, and reduced motion verified.                                       |

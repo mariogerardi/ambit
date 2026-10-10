@@ -133,7 +133,7 @@ it("sends account creation to Cognito signup with authorization code and session
   expect(settings.automaticSilentRenew).toBe(false);
   expect(auth.signin).toHaveBeenCalledWith({ state: "/account" });
 });
-it("refreshes expired access credentials before an authenticated request and clears a failed renewal", async () => {
+it("refreshes expired access credentials and retains the account cache after an offline renewal", async () => {
   auth.getUser.mockResolvedValue({ ...owner, expired: true });
   auth.renew.mockResolvedValue(owner);
   await mount();
@@ -145,8 +145,10 @@ it("refreshes expired access credentials before an authenticated request and cle
   expect(auth.renew).toHaveBeenCalledOnce();
   auth.renew.mockRejectedValue(new Error("private token"));
   await act(async () => {
-    await expect(account.accessToken()).rejects.toThrow("Please sign in again");
+    await expect(account.accessToken()).rejects.toThrow(
+      "Retry syncing or sign in again",
+    );
   });
-  expect(account.user).toBeNull();
-  expect(auth.remove).toHaveBeenCalledOnce();
+  expect(account.user?.profile.email).toBe(owner.profile.email);
+  expect(auth.remove).not.toHaveBeenCalled();
 });

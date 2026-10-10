@@ -155,5 +155,69 @@ class ServicesTests(unittest.TestCase):
         self.assertEqual(variables["DD_CAPTURE_LAMBDA_PAYLOAD"], "false")
 
 
+class SaveTests(unittest.TestCase):
+    def setUp(self):
+        import saves
+        self.saves = saves
+        self.db = MagicMock()
+        self.db.query.return_value = {"Items": []}
+        self.boundary = patch.object(saves, "table", return_value=self.db)
+        self.boundary.start()
+        self.env = patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://playambit.com"})
+        self.env.start()
+
+    def tearDown(self):
+        self.boundary.stop()
+        self.env.stop()
+
+    def event(self, route="POST /account/saves", subject="player-a"):
+        return {"routeKey": route, "headers": {"origin": "https://playambit.com", "content-type": "application/json"}, "requestContext": {"authorizer": {"jwt": {"claims": {"sub": subject}}}}, "body": json.dumps({"userId": "player-b", "entries": [{"namespace": "study", "version": 2, "clock": 1, "writer": "device-a", "field": "settings.length", "value": 50}]})}
+
+    def test_jwt_identity_is_the_only_owner_and_revisions_are_conditional(self):
+        self.assertEqual(self.saves.handle(self.event())["statusCode"], 200)
+        options = self.db.put_item.call_args.kwargs
+        self.assertEqual(options["Item"]["pk"], "user#player-a")
+        self.assertIn("#clock < :clock", options["ConditionExpression"])
+        self.db.put_item.side_effect = ClientError({"Error": {"Code": "ConditionalCheckFailedException"}})
+        self.assertEqual(self.saves.handle(self.event())["statusCode"], 200)
+
+    def test_authentication_and_validation_precede_any_write(self):
+        self.assertEqual(self.saves.handle(self.event(subject=None))["statusCode"], 401)
+        for change in ({"clock": True}, {"clock": -1}, {"clock": 9007199254740992}, {"namespace": "other"}, {"value": float("nan")}, {"value": "x" * 300001}):
+            event = self.event()
+            body = json.loads(event["body"])
+            body["entries"].append({**body["entries"][0], **change})
+            event["body"] = json.dumps(body)
+            self.assertEqual(self.saves.handle(event)["statusCode"], 400)
+        event = self.event()
+        body = json.loads(event["body"])
+        body["entries"] *= 26
+        event["body"] = json.dumps(body)
+        self.assertEqual(self.saves.handle(event)["statusCode"], 400)
+        self.db.put_item.assert_not_called()
+
+    def test_paginated_reads_are_private_and_restore_json_types(self):
+        item = {"pk": "user#player-a", **self.saves.validate({"namespace": "daily", "version": 2, "clock": 2, "writer": "a", "field": "draft", "value": {"n": 1.25, "b": True}})}
+        self.db.query.return_value = {"Items": [item], "LastEvaluatedKey": {"pk": item["pk"], "sk": item["sk"]}}
+        page = json.loads(self.saves.handle(self.event("GET /account/saves"))["body"])
+        self.assertEqual(page["entries"][0]["value"], {"n": 1.25, "b": True})
+        self.assertNotIn("pk", page["entries"][0])
+        event = self.event("GET /account/saves", "player-b")
+        event["queryStringParameters"] = {"cursor": page["cursor"]}
+        self.assertEqual(self.saves.handle(event)["statusCode"], 400)
+        self.assertEqual(self.db.query.call_count, 1)
+        event = self.event("GET /account/saves")
+        event["queryStringParameters"] = {"cursor": page["cursor"]}
+        self.assertEqual(self.saves.handle(event)["statusCode"], 200)
+        self.assertEqual(self.db.query.call_args.kwargs["ExclusiveStartKey"]["pk"], "user#player-a")
+
+    def test_save_routes_require_jwt_and_trace_headers_are_allowed(self):
+        resources = template()["Resources"]
+        for name in ("ReadSavesRoute", "WriteSavesRoute"):
+            self.assertEqual(resources[name]["Properties"]["AuthorizationType"], "JWT")
+        self.assertIn("baggage", resources["Api"]["Properties"]["CorsConfiguration"]["AllowHeaders"])
+        self.assertEqual(resources["Saves"]["DeletionPolicy"], "Retain")
+
+
 if __name__ == "__main__":
     unittest.main()

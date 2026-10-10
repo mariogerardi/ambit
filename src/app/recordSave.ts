@@ -1,7 +1,7 @@
 import { isRecord, readSave } from "./storage";
 
 type Fields = Record<string, unknown>;
-interface Entry {
+export interface SaveEntry {
   version: 2;
   clock: number;
   writer: string;
@@ -18,6 +18,7 @@ export interface SaveCodec<T> {
   /** Entries arrive in revision order; preserve forward progress if required. */
   resolve?(field: string, previous: unknown, next: unknown): unknown;
   projection?(value: T): unknown;
+  retain?(field: string): boolean;
 }
 const equal = (a: unknown, b: unknown) =>
   JSON.stringify(a) === JSON.stringify(b);
@@ -71,7 +72,7 @@ export class RecordSave<T> {
                 writer: "legacy",
                 field,
                 value,
-              } satisfies Entry),
+              } satisfies SaveEntry),
             );
         }
         this.baseline = this.snapshot();
@@ -97,8 +98,8 @@ export class RecordSave<T> {
   private address(field: string, writer: string = this.writer) {
     return `${this.prefix}${encodeURIComponent(field)}/${writer}`;
   }
-  private snapshot(): T {
-    const entries: Entry[] = [];
+  entries(): SaveEntry[] {
+    const entries: SaveEntry[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key?.startsWith(this.prefix)) continue;
@@ -115,12 +116,53 @@ export class RecordSave<T> {
           !this.codec.accepts(entry.field, entry.value)
         )
           continue;
-        entries.push(entry as unknown as Entry);
+        entries.push(entry as unknown as SaveEntry);
         this.clock = Math.max(this.clock, Number(entry.clock));
       } catch {
         /* Leave a damaged register intact; other records still load. */
       }
     }
+    return entries;
+  }
+  /** Keep the React baseline intact until incoming() captures queued edits. */
+  mergeEntries(entries: SaveEntry[]) {
+    if (!this.writable) throw new Error("Local saving is unavailable.");
+    for (const entry of entries) {
+      if (
+        entry.version !== 2 ||
+        !Number.isSafeInteger(entry.clock) ||
+        entry.clock < 0 ||
+        typeof entry.writer !== "string" ||
+        !entry.writer ||
+        entry.writer.includes("/") ||
+        typeof entry.field !== "string" ||
+        !this.codec.accepts(entry.field, entry.value)
+      )
+        continue;
+      const address = this.address(entry.field, entry.writer);
+      const raw = localStorage.getItem(address);
+      if (raw) {
+        try {
+          const previous = JSON.parse(raw);
+          if (
+            previous.version === 2 &&
+            previous.field === entry.field &&
+            previous.writer === entry.writer &&
+            Number.isSafeInteger(previous.clock) &&
+            previous.clock >= entry.clock &&
+            this.codec.accepts(previous.field, previous.value)
+          )
+            continue;
+        } catch {
+          /* Repair a damaged register. */
+        }
+      }
+      localStorage.setItem(address, JSON.stringify(entry));
+      this.clock = Math.max(this.clock, entry.clock);
+    }
+  }
+  private snapshot(): T {
+    const entries = this.entries();
     entries.sort(
       (a, b) => a.clock - b.clock || a.writer.localeCompare(b.writer),
     );
@@ -149,7 +191,11 @@ export class RecordSave<T> {
         ...Object.keys(before),
         ...Object.keys(after),
       ])) {
-        if (equal(before[field], after[field])) continue;
+        if (
+          equal(before[field], after[field]) ||
+          (after[field] === undefined && this.codec.retain?.(field))
+        )
+          continue;
         const value = after[field] ?? null;
         fields[field] =
           field in fields && this.codec.resolve
@@ -165,12 +211,16 @@ export class RecordSave<T> {
       after = this.codec.encode(value);
     const changed = [
       ...new Set([...Object.keys(before), ...Object.keys(after)]),
-    ].filter((field) => !equal(before[field], after[field]));
+    ].filter(
+      (field) =>
+        !equal(before[field], after[field]) &&
+        !(after[field] === undefined && this.codec.retain?.(field)),
+    );
     if (!changed.length) return { value: this.baseline, ok: true };
     try {
       this.snapshot(); // Observe other writers before choosing a logical clock.
       for (const field of changed) {
-        const entry: Entry = {
+        const entry: SaveEntry = {
           version: 2,
           clock: ++this.clock,
           writer: this.writer,
@@ -192,6 +242,7 @@ export class RecordSave<T> {
         } catch {
           /* Durable records remain saved. */
         }
+      dispatchEvent(new CustomEvent("ambit-save", { detail: this.prefix }));
       return { value: merged, ok: true };
     } catch {
       return { value, ok: false };

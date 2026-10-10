@@ -1,3 +1,4 @@
+import { useProgressSync } from "./app/useProgressSync";
 import {
   Component,
   Suspense,
@@ -90,10 +91,13 @@ import {
 } from "./app/dailyProgress";
 import { usePublishedPuzzles } from "./app/publishedPuzzles";
 import { readSave } from "./app/storage";
-import { createDailySave, createStudySave } from "./app/progressSaves";
+import {
+  createDailySave,
+  createStudySave,
+  progressKey,
+} from "./app/progressSaves";
 import {
   COUNTRIES,
-  studyPreferences,
   archiveStudy,
   leaveStudy,
   startStudy,
@@ -165,8 +169,14 @@ class PanelBoundary extends Component<
     );
   }
 }
+export function PlayerWorkspace() {
+  const account = useAccount();
+  if (account.loading) return <p role="status">Checking your account…</p>;
+  return <App key={account.user?.profile.sub ?? "guest"} />;
+}
 export function App() {
   const account = useAccount();
+  const subject = account.user?.profile.sub;
   const [feedback, setFeedback] = useState<FeedbackRequest>();
   const closeFeedback = useCallback(() => setFeedback(undefined), []);
   const mobile = useMobileLayout();
@@ -233,14 +243,23 @@ export function App() {
     if (error) reportFailure("geography loading");
   }, [error]);
   const [dailyRead] = useState(() =>
-    readSave(DAILY_KEY, emptyDaily, validDaily),
+    readSave(progressKey(DAILY_KEY, subject), emptyDaily, validDaily),
   );
-  const [studyStore] = useState(createStudySave);
+  const [studyStore] = useState(() => createStudySave(subject));
   const [daily, setDaily] = useState(dailyRead.value),
     [study, setStudy] = useState(() => studyStore.load());
   const [dailySaveOk, setDailySaveOk] = useState(dailyRead.available),
     [studySaveOk, setStudySaveOk] = useState(studyStore.writable);
   const [saveRecovered, setSaveRecovered] = useState(studyStore.recovered);
+  const cloudSave = useProgressSync(
+    subject,
+    dailyLoaded ? dailyStore.current : undefined,
+    studyStore,
+    account.accessToken,
+  );
+  const dailyReady =
+    dailyLoaded &&
+    (cloudSave.hydrated || Object.keys(daily.attempts).length > 0);
   const canSave = dailySaveOk && studySaveOk;
   useEffect(() => {
     if (!canSave) reportFailure("local save");
@@ -830,7 +849,6 @@ export function App() {
   }, [mode]);
   useEffect(() => {
     if (mode === "study") return;
-    setStudy((save) => (save.session ? leaveStudy(save) : save));
     setStudySetup(true);
     setStudyBuilder(false);
     setStudyBrowsingHistory(false);
@@ -888,13 +906,13 @@ export function App() {
   }, []);
   useEffect(() => {
     if (!published.ready || dailyLoaded) return;
-    const store = createDailySave(allJourneys);
+    const store = createDailySave(allJourneys, subject);
     dailyStore.current = store;
     setDaily(store.load());
     setDailySaveOk(store.writable);
     if (store.recovered) setSaveRecovered(true);
     setDailyLoaded(true);
-  }, [published.ready, dailyLoaded, allJourneys]);
+  }, [published.ready, dailyLoaded, allJourneys, subject]);
   useEffect(() => {
     if (!dailyLoaded || !dailyStore.current) return;
     const saved = dailyStore.current.save(daily);
@@ -903,15 +921,18 @@ export function App() {
       setDaily(saved.value);
   }, [daily, dailyLoaded]);
   useEffect(() => {
-    const persistent = studyPreferences(study);
-    const saved = studyStore.save(persistent);
+    const saved = studyStore.save(study);
     setStudySaveOk(saved.ok);
-    if (JSON.stringify(saved.value) !== JSON.stringify(persistent))
-      setStudy((current) => ({ ...saved.value, session: current.session }));
-  }, [study.settings, study.history, studyStore]);
+    if (JSON.stringify(saved.value) !== JSON.stringify(study))
+      setStudy(saved.value);
+  }, [study, studyStore]);
   useEffect(() => {
-    const change = (event: StorageEvent) => {
-      if (dailyStore.current?.matches(event.key)) {
+    const change = (event: Event) => {
+      const key =
+        event instanceof StorageEvent
+          ? event.key
+          : (event as CustomEvent<string>).detail;
+      if (dailyStore.current?.matches(key)) {
         try {
           const merge = dailyStore.current.incoming();
           setDaily((current) => {
@@ -924,15 +945,14 @@ export function App() {
           setDailySaveOk(false);
         }
       }
-      if (studyStore.matches(event.key)) {
+      if (studyStore.matches(key)) {
         try {
           const merge = studyStore.incoming();
           setStudy((current) => {
-            const value = merge(studyPreferences(current));
-            return JSON.stringify(studyPreferences(current)) ===
-              JSON.stringify(value)
+            const value = merge(current);
+            return JSON.stringify(current) === JSON.stringify(value)
               ? current
-              : { ...value, session: current.session };
+              : value;
           });
         } catch {
           setStudySaveOk(false);
@@ -940,13 +960,17 @@ export function App() {
       }
     };
     addEventListener("storage", change);
-    return () => removeEventListener("storage", change);
+    addEventListener("ambit-progress-received", change);
+    return () => {
+      removeEventListener("storage", change);
+      removeEventListener("ambit-progress-received", change);
+    };
   }, [studyStore]);
   useEffect(() => {
-    if (mode === "daily" && dailyLoaded && !activeAttempt)
+    if (mode === "daily" && dailyReady && !activeAttempt)
       setDaily((p) => openDaily(p, today, false, allJourneys));
     document.title = `ambit — ${mode === "playground" ? "Question Playground" : mode === "home" ? "A world of wonders" : mode === "daily" || mode === "practice" ? "Journey" : mode[0].toUpperCase() + mode.slice(1)}`;
-  }, [mode, activeAttempt, today, dailyLoaded, allJourneys]);
+  }, [mode, activeAttempt, today, dailyReady, allJourneys]);
   useEffect(() => {
     const controller = new AbortController();
     let loader: LayerLoader | undefined;
@@ -1084,6 +1108,7 @@ export function App() {
       !ready ||
       !isJourney ||
       !context ||
+      (mode === "daily" && !dailyReady) ||
       mode === "playground" ||
       (game.phase !== "finished" && game.phase !== "failed")
     )
@@ -1102,6 +1127,7 @@ export function App() {
     mode,
     game.phase,
     game.answers,
+    dailyReady,
     reduced,
     frame,
     stop,
@@ -1311,7 +1337,7 @@ export function App() {
           </div>
           <button
             className="primary-button"
-            disabled={!regions.length || !dailyLoaded}
+            disabled={!regions.length || !dailyLoaded || !cloudSave.ready}
             onClick={() => playDaily(today)}
           >
             {dailyLabel}
@@ -1344,7 +1370,25 @@ export function App() {
         <p className="globe-invitation">Or explore directly on the globe.</p>
       </section>
     ) : mode === "account" ? (
-      <AccountPanel />
+      <AccountPanel
+        sync={
+          canSave
+            ? cloudSave
+            : {
+                ...cloudSave,
+                status: "error",
+                message:
+                  "Saving on this device failed. New progress has not synced. Free storage space and try again.",
+                retry: () => {
+                  const savedStudy = studyStore.save(study);
+                  setStudySaveOk(savedStudy.ok);
+                  if (dailyStore.current)
+                    setDailySaveOk(dailyStore.current.save(daily).ok);
+                  cloudSave.retry();
+                },
+              }
+        }
+      />
     ) : mode === "admin" ? (
       <AdminAccess onAccount={() => navigate("/account")}>
         <AdminPanel
@@ -1458,6 +1502,23 @@ export function App() {
           setStudySetup(true);
         }}
       />
+    ) : mode === "daily" && !dailyReady ? (
+      <section className="info-view" role="status">
+        <p>{cloudSave.message}</p>
+        {cloudSave.ready && (
+          <>
+            <button
+              className="quiet-button tertiary-action"
+              onClick={cloudSave.retry}
+            >
+              Retry sync
+            </button>
+            <button className="primary-button" onClick={() => playDaily(today)}>
+              Play on this device
+            </button>
+          </>
+        )}
+      </section>
     ) : context ? (
       <GameShell
         onReport={(questionId) =>
@@ -1684,7 +1745,7 @@ export function App() {
         <AppMenu
           admin={account.admin}
           onJourney={() => playDaily(today)}
-          journeyReady={!!regions.length && dailyLoaded}
+          journeyReady={!!regions.length && dailyLoaded && cloudSave.ready}
           onFeedback={() =>
             setFeedback({ kind: "experience", context: { view: mode } })
           }

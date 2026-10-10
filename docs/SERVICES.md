@@ -1,8 +1,8 @@
 # Accounts, feedback, and monitoring
 
 Guest gameplay and local saves remain available without accounts, monitoring,
-or a working backend connection. Accounts currently identify players and protect
-admin tools; they do not synchronize progress across devices.
+or a working backend connection. Signed-in players synchronize Journey and Study progress across devices;
+accounts also protect admin tools. See [Save persistence](SAVE_PERSISTENCE.md).
 
 ## Accounts and admin access
 
@@ -37,7 +37,8 @@ optional. Reports pause Study auto-advance while the dialog is open.
 
 Reports use stable UUIDs across retries. Failed/slow requests keep the draft
 available for retry; closing the dialog discards it. The request timeout is 15
-seconds. There is no persistent offline submission queue. The API limits
+seconds. CORS allows all browser tracing headers, including Datadog's default
+`baggage` header. There is no persistent offline submission queue. The API limits
 submissions to ten per source IP per hour using a salted hash, restricts browser
 origins, and validates context/body limits. DynamoDB records expire after 180
 days, with eventual TTL deletion; rate-limit records expire after two hours.
@@ -83,6 +84,15 @@ in AWS Secrets Manager, not GitHub's browser-build configuration.
 `ambit-production-services` in `us-east-1`: Cognito, HTTP API, Lambdas, DynamoDB,
 IAM policies, throttling, and logs. `deployment/services.json` contains only
 public API/auth configuration. Static frontend deployment remains separate.
+
+Existing stacks can be updated without waiting for deployment completion:
+
+```sh
+python3 scripts/deploy-backend.py --profile personal --no-wait
+```
+
+This starts the update and preserves the existing public endpoints. It does not
+confirm successful deployment. The first deployment must wait for its endpoints.
 
 Run offline checks before deploying:
 

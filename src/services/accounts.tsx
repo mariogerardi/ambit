@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 import type { User } from "oidc-client-ts";
@@ -76,21 +76,29 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const renewal = useRef<Promise<User | null> | undefined>(undefined);
+  const signingOut = useRef(false);
   useEffect(() => {
     let active = true;
     let client: UserManager;
     const loaded = (value: User) => {
-      if (active) setUser(value);
+      if (active && !signingOut.current) setUser(value);
     };
     const removed = () => {
       if (active) setUser(null);
+    };
+    const expired = () => {
+      if (active)
+        setError(
+          "Your session needs renewal. Progress remains on this device.",
+        );
     };
     void (async () => {
       try {
         client = accountManager();
         client.events.addUserLoaded(loaded);
         client.events.addUserUnloaded(removed);
-        client.events.addAccessTokenExpired(removed);
+        client.events.addAccessTokenExpired(expired);
         if (location.pathname === "/auth/callback") {
           const value = await client.signinRedirectCallback();
           if (!active) return;
@@ -99,7 +107,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
           dispatchEvent(new PopStateEvent("popstate"));
         } else {
           const value = await client.getUser();
-          if (active) setUser(value?.expired ? null : value);
+          if (active) setUser(value);
         }
         await client.clearStaleState();
       } catch {
@@ -119,7 +127,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       active = false;
       client?.events.removeUserLoaded(loaded);
       client?.events.removeUserUnloaded(removed);
-      client?.events.removeAccessTokenExpired(removed);
+      client?.events.removeAccessTokenExpired(expired);
     };
   }, []);
   async function signIn(signup = false) {
@@ -138,10 +146,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   }
   async function signOut() {
+    signingOut.current = true;
     setBusy(true);
     setError("");
     try {
       const client = accountManager();
+      await renewal.current?.catch(() => {});
       await client.revokeTokens(["refresh_token"]);
       await client.removeUser();
       setUser(null);
@@ -163,16 +173,23 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   async function accessToken() {
     const client = accountManager();
     let current = await client.getUser();
-    if (!current) return;
+    if (!current || signingOut.current) return;
     if (current.expired) {
       try {
-        current = await client.signinSilent();
+        renewal.current ??= client.signinSilent().finally(() => {
+          renewal.current = undefined;
+        });
+        current = await renewal.current;
       } catch {
-        await client.removeUser();
-        setUser(null);
-        throw new Error("Your session expired. Please sign in again.");
+        // Keep the account's cache selected during network/renewal failures.
+        // Signing out explicitly is the boundary back to guest storage.
+        throw new Error(
+          "Couldn’t renew your session. Retry syncing or sign in again.",
+        );
       }
     }
+    if (signingOut.current) return;
+    setError("");
     setUser(current);
     return current?.access_token;
   }

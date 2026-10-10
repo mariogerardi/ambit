@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import { useAccount } from "../services/accounts";
-export function AccountPanel() {
+export function AccountPanel({
+  sync,
+}: {
+  sync?: { status: string; message: string; retry(): void };
+}) {
   const account = useAccount();
   return (
     <section className="info-view account-panel" aria-label="Account">
@@ -11,10 +15,26 @@ export function AccountPanel() {
       ) : account.user ? (
         <>
           <p>{account.user.profile.email}</p>
-          <p>
-            Progress is currently saved on this device. Cross-device saves are
-            coming later.
+          <p role="status">
+            {sync?.message ?? "Preparing to sync your progress…"}
           </p>
+          {sync && (sync.status === "error" || sync.status === "offline") && (
+            <button
+              className="quiet-button tertiary-action"
+              onClick={sync.retry}
+            >
+              Retry sync
+            </button>
+          )}
+          {account.user.expired && (
+            <button
+              className="quiet-button tertiary-action"
+              disabled={account.busy}
+              onClick={() => void account.signIn()}
+            >
+              Sign in again
+            </button>
+          )}
           <button
             className="primary-button"
             disabled={account.busy}
@@ -29,8 +49,8 @@ export function AccountPanel() {
             Create an account or sign in. You can also keep playing as a guest.
           </p>
           <p>
-            Progress is currently saved on this device. Cross-device saves are
-            coming later.
+            Guest progress is saved on this device. Sign in to save Journey and
+            Study progress across devices.
           </p>
           <div className="account-actions">
             <button

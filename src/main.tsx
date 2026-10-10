@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { modeForPath } from "./app/modes";
 import { reportReactFailure, trackView } from "./services/monitoring";
 import { AccountProvider } from "./services/accounts";
-import { App } from "./App";
+import { PlayerWorkspace } from "./App";
 import { applyTheme, readTheme } from "./theme/themes";
 import "./fonts.css";
 import "./style.css";
@@ -16,6 +16,6 @@ createRoot(document.getElementById("root")!, {
   onUncaughtError: reportReactFailure,
 }).render(
   <AccountProvider>
-    <App />
+    <PlayerWorkspace />
   </AccountProvider>,
 );

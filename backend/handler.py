@@ -8,6 +8,7 @@ import re
 import time
 import uuid
 
+import saves
 import boto3
 from botocore.exceptions import ClientError
 
@@ -157,12 +158,14 @@ def handler(event, context):
             result = submit(event, route == "POST /account/feedback")
         elif route in ("GET /admin/feedback", "PATCH /admin/feedback/{id}"):
             result = review(event)
+        elif route in ("GET /account/saves", "POST /account/saves"):
+            result = saves.handle(event)
         else:
             result = response(404, {"error": "Not found."})
         status = result["statusCode"]
         return result
     except Exception as error:
         print(json.dumps({"event": "request_failed", "error_type": type(error).__name__, "request_id": context.aws_request_id}))
-        return response(500, {"error": "Couldn't save your feedback. Please try again."})
+        return response(500, {"error": "Couldn't complete the request. Please try again."})
     finally:
         print(json.dumps({"event": "api_request", "service": "ambit-api", "env": "production", "version": os.environ.get("RELEASE", "unknown"), "route": route, "status": status, "duration_ms": round((time.monotonic() - started) * 1000, 1), "request_id": context.aws_request_id}))
