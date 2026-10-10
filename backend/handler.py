@@ -9,6 +9,7 @@ import time
 import uuid
 
 import saves
+import community
 import boto3
 from botocore.exceptions import ClientError
 
@@ -160,6 +161,8 @@ def handler(event, context):
             result = review(event)
         elif route in ("GET /account/saves", "POST /account/saves"):
             result = saves.handle(event)
+        elif route.startswith(("GET /account/", "POST /account/", "PATCH /account/")):
+            result = community.handle(event)
         else:
             result = response(404, {"error": "Not found."})
         status = result["statusCode"]

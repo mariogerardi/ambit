@@ -1,3 +1,4 @@
+import { StudyBack } from "./StudyBack";
 import { studyComplete, studyReplayTargets } from "./engine";
 import type { StudyRecord, StudySettings, StudyReviewTarget } from "./engine";
 import { ActionIcon } from "../app/ActionIcon";
@@ -22,13 +23,7 @@ export function StudyHistory({
   });
   return (
     <section className="info-view study-history">
-      <button
-        className="quiet-button tertiary-action study-back"
-        aria-label="Back to Study"
-        onClick={onBack}
-      >
-        <span aria-hidden="true">←</span> Back to Study
-      </button>
+      <StudyBack label="Back to Study" onClick={onBack} />
       <h1 className="editorial-heading">
         Past <em>sessions.</em>
       </h1>

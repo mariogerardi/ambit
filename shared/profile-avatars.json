@@ -1,0 +1,10 @@
+{
+  "globe": { "label": "Globe", "symbol": "🌍" },
+  "compass": { "label": "Compass", "symbol": "🧭" },
+  "mountain": { "label": "Mountain", "symbol": "⛰️" },
+  "star": { "label": "Star", "symbol": "✦" },
+  "wave": { "label": "Wave", "symbol": "🌊" },
+  "sun": { "label": "Sun", "symbol": "☀️" },
+  "planet": { "label": "Planet", "symbol": "🪐" },
+  "balloon": { "label": "Balloon", "symbol": "🎈" }
+}

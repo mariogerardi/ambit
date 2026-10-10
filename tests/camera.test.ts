@@ -5,6 +5,7 @@ import {
   shortestLongitude,
   routeFocus,
   worldAltitude,
+  focusAltitude,
   viewportProjection,
   ViewportResize,
   CameraScale,
@@ -14,6 +15,62 @@ import type { Focus } from "../src/geography/types";
 import { regionStyle, stateStyles } from "../src/globe/visualStates";
 afterEach(() => vi.unstubAllGlobals());
 describe("camera travel", () => {
+  it("fits an overview to the restored map height without retaining a hidden page's zoom distance", () => {
+    const hidden = { width: 390, frameHeight: 844 };
+    const home = { width: 390, frameHeight: 272 };
+    const oldDistance = worldAltitude(hidden.width, hidden.frameHeight, true);
+    expect(oldDistance).toBeGreaterThan(3);
+    expect(focusAltitude(oldDistance, home, true, "world")).toBe(
+      worldAltitude(home.width, home.frameHeight, true),
+    );
+    expect(focusAltitude(oldDistance, home, true, "world")).toBeLessThan(
+      oldDistance,
+    );
+    // Fixed clue framing remains independent of overview fitting.
+    expect(focusAltitude(0.4, home, true, false)).toBe(0.4);
+  });
+  it("fits the destination to a changing viewport without restarting or jumping the flight", () => {
+    let now = 0,
+      nextId = 0;
+    const callbacks = new Map<number, FrameRequestCallback>();
+    vi.stubGlobal("performance", { now: () => now });
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callbacks.set(++nextId, callback);
+      return nextId;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => callbacks.delete(id));
+    let position: Required<Focus> = { lat: 0, lng: 0, altitude: 1.4 },
+      height = 200;
+    const port = {
+      pointOfView(target?: Focus) {
+        if (target) position = { ...position, ...target };
+        return position;
+      },
+    };
+    const travel = new CameraTravel(),
+      done = vi.fn();
+    travel.move(
+      port,
+      { lat: 20, lng: 60, altitude: 0.4 },
+      false,
+      done,
+      () => 0.4 / Math.min(1, 390 / height),
+    );
+    let previousLongitude = 0;
+    for (let i = 0; i < 110; i++) {
+      now += 10;
+      height = 200 + Math.min(1, i / 72) * 350;
+      const frame = [...callbacks.values()];
+      callbacks.clear();
+      for (const callback of frame) callback(now);
+      expect(position.lng).toBeGreaterThanOrEqual(previousLongitude);
+      expect(position.lng - previousLongitude).toBeLessThan(2);
+      previousLongitude = position.lng;
+    }
+    expect(position).toEqual({ lat: 20, lng: 60, altitude: 0.4 / (390 / 550) });
+    expect(done).toHaveBeenCalledOnce();
+    expect(travel.active).toBe(false);
+  });
   it.each(["travel", "flyover"])(
     "keeps an active %s moving while an Explore tray changes size",
     (kind) => {

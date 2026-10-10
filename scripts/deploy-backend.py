@@ -42,10 +42,13 @@ def main():
     aws("s3api", "put-bucket-encryption", "--bucket", bucket, "--server-side-encryption-configuration", json.dumps({"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}))
     archive = io.BytesIO()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
-        for name in ("handler.py", "confirmation.py", "saves.py"):
+        for name in ("handler.py", "confirmation.py", "saves.py", "community.py", "study-countries.json"):
             info = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             package.writestr(info, (ROOT / "backend" / name).read_bytes())
+        info = zipfile.ZipInfo("profile-avatars.json", (2026, 1, 1, 0, 0, 0))
+        info.compress_type = zipfile.ZIP_DEFLATED
+        package.writestr(info, (ROOT / "shared" / "profile-avatars.json").read_bytes())
     content = archive.getvalue()
     revision = hashlib.sha256(content).hexdigest()
     key = f"releases/{revision}.zip"

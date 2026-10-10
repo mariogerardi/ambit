@@ -31,9 +31,11 @@ function createManager(signup = false) {
     redirect_uri: `${location.origin}/auth/callback`,
     response_type: "code",
     scope: "openid email",
+    // Renewal is coordinated below so expiry, focus and API calls share one request.
     automaticSilentRenew: false,
+    accessTokenExpiringNotificationTimeInSeconds: 90,
     revokeTokenTypes: ["refresh_token"],
-    userStore: new WebStorageStateStore({ store: sessionStorage }),
+    userStore: new WebStorageStateStore({ store: localStorage }),
     stateStore: new WebStorageStateStore({ store: sessionStorage }),
     metadataSeed: {
       end_session_endpoint: `${serviceConfig.auth.loginUrl}/logout`,
@@ -43,7 +45,13 @@ function createManager(signup = false) {
     },
   });
 }
+const userStorageKey = `oidc.user:${serviceConfig.auth.authority}:${serviceConfig.auth.clientId}`;
 function accountManager() {
+  // Preserve existing signed-in tabs when upgrading from tab-only sessions.
+  const legacy = sessionStorage.getItem(userStorageKey);
+  if (legacy && !localStorage.getItem(userStorageKey))
+    localStorage.setItem(userStorageKey, legacy);
+  sessionStorage.removeItem(userStorageKey);
   return (manager ??= createManager());
 }
 export interface AccountAccess {
@@ -78,6 +86,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
   const renewal = useRef<Promise<User | null> | undefined>(undefined);
   const signingOut = useRef(false);
+  const renewalRetryAt = useRef(0);
+  const storageEpoch = useRef(0);
+  const externalUser = useRef<string | null>(null);
   useEffect(() => {
     let active = true;
     let client: UserManager;
@@ -87,18 +98,48 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const removed = () => {
       if (active) setUser(null);
     };
-    const expired = () => {
-      if (active)
-        setError(
-          "Your session needs renewal. Progress remains on this device.",
-        );
+    const wake = (event?: unknown) => {
+      if (
+        event instanceof Event &&
+        (event.type === "online" || event.type === "focus")
+      )
+        renewalRetryAt.current = 0;
+      if (
+        active &&
+        !signingOut.current &&
+        Date.now() >= renewalRetryAt.current &&
+        document.visibilityState !== "hidden"
+      )
+        void accessToken().catch(() => {
+          if (active)
+            setError(
+              "Couldn’t renew your session yet. We’ll retry when you reconnect.",
+            );
+        });
     };
+    const storage = (event: StorageEvent) => {
+      if (event.key !== userStorageKey && event.key !== null) return;
+      storageEpoch.current++;
+      externalUser.current = event.newValue;
+      void client
+        .getUser()
+        .then((value) => {
+          if (active && !signingOut.current) setUser(value);
+        })
+        .catch(() => {});
+    };
+    const expired = wake;
     void (async () => {
       try {
         client = accountManager();
         client.events.addUserLoaded(loaded);
         client.events.addUserUnloaded(removed);
         client.events.addAccessTokenExpired(expired);
+        client.events.addAccessTokenExpiring(wake);
+        addEventListener("focus", wake);
+        addEventListener("online", wake);
+        addEventListener("storage", storage);
+        document.addEventListener("visibilitychange", wake);
         if (location.pathname === "/auth/callback") {
           const value = await client.signinRedirectCallback();
           if (!active) return;
@@ -108,6 +149,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         } else {
           const value = await client.getUser();
           if (active) setUser(value);
+          if (value)
+            await accessToken().catch(() => {
+              if (active)
+                setError(
+                  "Couldn’t renew your session yet. We’ll retry when you reconnect.",
+                );
+            });
         }
         await client.clearStaleState();
       } catch {
@@ -128,6 +176,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       client?.events.removeUserLoaded(loaded);
       client?.events.removeUserUnloaded(removed);
       client?.events.removeAccessTokenExpired(expired);
+      client?.events.removeAccessTokenExpiring(wake);
+      removeEventListener("focus", wake);
+      removeEventListener("online", wake);
+      removeEventListener("storage", storage);
+      document.removeEventListener("visibilitychange", wake);
     };
   }, []);
   async function signIn(signup = false) {
@@ -174,13 +227,33 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const client = accountManager();
     let current = await client.getUser();
     if (!current || signingOut.current) return;
-    if (current.expired) {
+    if (
+      current.expired ||
+      (current.expires_at !== undefined &&
+        current.expires_at <= Date.now() / 1000 + 90)
+    ) {
+      if (Date.now() < renewalRetryAt.current)
+        throw new Error(
+          "Couldn’t renew your session. Retry syncing or sign in again.",
+        );
       try {
+        const epoch = storageEpoch.current;
         renewal.current ??= client.signinSilent().finally(() => {
           renewal.current = undefined;
         });
         current = await renewal.current;
+        if (epoch !== storageEpoch.current) {
+          // A late refresh must not resurrect a session signed out in another tab,
+          // or replace another account's credentials with the old account's token.
+          if (externalUser.current === null)
+            localStorage.removeItem(userStorageKey);
+          else localStorage.setItem(userStorageKey, externalUser.current);
+          setUser(await client.getUser());
+          throw new Error("The account changed in another tab.");
+        }
+        renewalRetryAt.current = 0;
       } catch {
+        renewalRetryAt.current = Date.now() + 30000;
         // Keep the account's cache selected during network/renewal failures.
         // Signing out explicitly is the boundary back to guest storage.
         throw new Error(
@@ -189,6 +262,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       }
     }
     if (signingOut.current) return;
+    if (!current || current.expired)
+      throw new Error("Your session has expired. Please sign in again.");
     setError("");
     setUser(current);
     return current?.access_token;

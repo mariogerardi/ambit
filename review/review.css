@@ -1,0 +1,60 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #071321;
+  color: #edf4f7;
+}
+.review-banner {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 16px 24px;
+  background: #16222d;
+  font-size: 13px;
+  border-bottom: 1px solid #354d5d;
+}
+.review-banner a {
+  color: #9cd8de;
+}
+.review-main {
+  position: relative;
+  isolation: isolate;
+  padding: 36px 0;
+}
+.review-main .account-dashboard {
+  z-index: 1;
+  position: static;
+  inset: auto;
+  max-height: none;
+  background: none;
+}
+.review-session {
+  max-width: 620px;
+  padding: 20px;
+  margin: auto;
+}
+.review-session .info-view {
+  position: static;
+  inset: auto;
+  width: 100%;
+  max-height: none;
+}
+.review-session > button {
+  padding: 12px;
+  color: #9cd8de;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+@media (max-width: 700px) {
+  .review-main {
+    padding: 22px 0;
+  }
+  .review-main .account-dashboard {
+    width: calc(100% - 32px);
+  }
+  .review-banner {
+    gap: 10px;
+  }
+}

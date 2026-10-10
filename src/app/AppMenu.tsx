@@ -1,3 +1,4 @@
+import { ActionIcon } from "./ActionIcon";
 import { useEffect, useRef, useState } from "react";
 import { ThemePicker } from "../theme/ThemePicker";
 import type { ThemeId } from "../theme/themes";
@@ -86,74 +87,77 @@ export function AppMenu({
           className="app-menu-content"
           aria-label="App navigation"
         >
+          <span className="app-menu-heading">Explore Ambit</span>
           {caption && <p className="app-menu-caption">{caption}</p>}
-          <button
-            aria-current={path === "/" ? "page" : undefined}
-            onClick={() => navigate("/")}
-          >
-            Home
-          </button>
-          <button
-            aria-current={path === "/daily" ? "page" : undefined}
-            disabled={!journeyReady}
-            onClick={() => {
-              setOpen(false);
-              onJourney ? onJourney() : navigate("/daily");
-            }}
-          >
-            Journey
-          </button>
-          <button
-            aria-current={path === "/explore" ? "page" : undefined}
-            onClick={() => navigate("/explore")}
-          >
-            Explore
-          </button>
-          <button
-            aria-current={path === "/study" ? "page" : undefined}
-            onClick={() => navigate("/study")}
-          >
-            Study
-          </button>
-          <button
-            aria-current={path === "/account" ? "page" : undefined}
-            onClick={() => navigate("/account")}
-          >
-            Account
-          </button>
-          {onFeedback && (
+          <div className="app-menu-primary">
             <button
+              aria-current={path === "/" ? "page" : undefined}
+              onClick={() => navigate("/")}
+            >
+              <ActionIcon name="home" />
+              <span>Home</span>
+            </button>
+            <button
+              aria-current={path === "/daily" ? "page" : undefined}
+              disabled={!journeyReady}
               onClick={() => {
                 setOpen(false);
-                trigger.current?.focus();
-                onFeedback();
+                onJourney ? onJourney() : navigate("/daily");
               }}
             >
-              Send feedback
+              <ActionIcon name="journey" />
+              <span>Journey</span>
             </button>
-          )}
-          {admin && (
             <button
-              aria-current={path === "/admin" ? "page" : undefined}
-              onClick={() => navigate("/admin")}
+              aria-current={path === "/explore" ? "page" : undefined}
+              onClick={() => navigate("/explore")}
             >
-              Admin
+              <ActionIcon name="explore" />
+              <span>Explore</span>
             </button>
-          )}
-          <details className="app-menu-credits">
-            <summary>World credits</summary>
-            <p>
-              Decorative geography: Natural Earth (public domain). Capitals,
-              cities &amp; continent membership: GeoNames (CC BY 4.0). Flags:
-              public-domain SVGs from Wikimedia Commons. Regional boundaries:
-              geoBoundaries / U.S. Census Bureau (CC BY 4.0). Map and clue
-              assets are served locally. Question sources appear after
-              answering.
-            </p>
-            <a href="/NOTICE.txt" target="_blank" rel="noreferrer">
-              Full source and license notices
-            </a>
-          </details>
+            <button
+              aria-current={path === "/study" ? "page" : undefined}
+              onClick={() => navigate("/study")}
+            >
+              <ActionIcon name="study" />
+              <span>Study</span>
+            </button>
+          </div>
+          <div className="app-menu-secondary">
+            {onFeedback && (
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  trigger.current?.focus();
+                  onFeedback();
+                }}
+              >
+                Send feedback
+              </button>
+            )}
+            {admin && (
+              <button
+                aria-current={path === "/admin" ? "page" : undefined}
+                onClick={() => navigate("/admin")}
+              >
+                Admin
+              </button>
+            )}
+            <details className="app-menu-credits">
+              <summary>World credits</summary>
+              <p>
+                Decorative geography: Natural Earth (public domain). Capitals,
+                cities &amp; continent membership: GeoNames (CC BY 4.0). Flags:
+                public-domain SVGs from Wikimedia Commons. Regional boundaries:
+                geoBoundaries / U.S. Census Bureau (CC BY 4.0). Map and clue
+                assets are served locally. Question sources appear after
+                answering.
+              </p>
+              <a href="/NOTICE.txt" target="_blank" rel="noreferrer">
+                Full source and license notices
+              </a>
+            </details>
+          </div>
           <ThemePicker value={theme} onChange={onTheme} />
         </nav>
       )}

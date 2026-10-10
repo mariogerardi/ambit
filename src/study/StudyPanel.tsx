@@ -40,6 +40,8 @@ export function StudyPanel({
   onHome,
   onViewRecord,
   onHistoryChange,
+  onBuilderChange,
+  onCustomizeChange,
   builder = false,
   paused = false,
   onReport,
@@ -64,6 +66,8 @@ export function StudyPanel({
   onViewRecord?(record: StudyRecord): void;
   onHistoryChange?(visible: boolean): void;
   builder?: boolean;
+  onBuilderChange?(editing: boolean): void;
+  onCustomizeChange?(editing: boolean): void;
 }) {
   const panelActive = useContext(PanelActive);
   active = active && panelActive;
@@ -155,6 +159,7 @@ export function StudyPanel({
         onSettings={onSettings}
         onStart={onStart}
         initialEditor={builder}
+        onEditorChange={active ? onBuilderChange : undefined}
         onHistory={() => setShowHistory(true)}
         onResume={session && session.phase !== "summary" ? onResume : undefined}
         resumeLabel="Resume session"
@@ -178,7 +183,16 @@ export function StudyPanel({
       {editing && active && (
         <StudySessionOptions
           settings={session.settings}
-          compact={compact}
+          locked={!!session.challengeId}
+          onPreferencesChange={onCustomizeChange}
+          onPause={
+            onHome
+              ? () => {
+                  closeSettings();
+                  onHome();
+                }
+              : undefined
+          }
           onReport={
             onReport
               ? () => {
@@ -391,16 +405,6 @@ export function StudyPanel({
               onClick={() => onAction({ type: "next" })}
             >
               {studyComplete(session) ? "See results" : "Next"} <span>→</span>
-            </button>
-          </div>
-        )}
-        {!compact && (
-          <div className="inline-actions study-bottom">
-            <button
-              className="quiet-button tertiary-action"
-              onClick={() => onAction({ type: "finish" })}
-            >
-              Finish session
             </button>
           </div>
         )}

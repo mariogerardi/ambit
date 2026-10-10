@@ -1,0 +1,387 @@
+"""Profiles and opt-in social play. Caller identity always comes from the JWT.
+
+Handle reservations and reciprocal inboxes use conditional transactions. Private
+save bodies never leave this module: friends receive only completed score totals.
+"""
+import base64
+import json
+import os
+import re
+import secrets
+import time
+import uuid
+from pathlib import Path
+
+COUNTRIES = set(json.loads(Path(__file__).with_name("study-countries.json").read_text()))
+AVATAR_CATALOG = Path(__file__).with_name("profile-avatars.json")
+if not AVATAR_CATALOG.exists():
+    AVATAR_CATALOG = Path(__file__).resolve().parents[1] / "shared" / "profile-avatars.json"
+AVATARS = set(json.loads(AVATAR_CATALOG.read_text()))
+
+import boto3
+from botocore.exceptions import ClientError
+
+
+class Problem(Exception):
+    def __init__(self, status, message):
+        self.status, self.message = status, message
+
+
+def table():
+    return boto3.resource("dynamodb").Table(os.environ["COMMUNITY_TABLE"])
+
+
+def response(status, body):
+    return {"statusCode": status, "headers": {"Content-Type": "application/json", "Cache-Control": "no-store"}, "body": json.dumps(body)}
+
+
+def key(owner, kind):
+    return {"pk": owner, "sk": kind}
+
+
+def get(owner, kind):
+    item = table().get_item(Key=key(owner, kind), ConsistentRead=True).get("Item")
+    return json.loads(item["dataJson"]) if item else None
+
+
+def packed(owner, kind, value):
+    return {**key(owner, kind), "dataJson": json.dumps(value, sort_keys=True, separators=(",", ":"))}
+
+
+def encoded(values):
+    # Community records consist only of string keys and serialized JSON payloads.
+    return {k: {"S": v} for k, v in values.items()}
+
+
+def put(owner, kind, value, previous=None):
+    operation = {"TableName": os.environ["COMMUNITY_TABLE"], "Item": encoded(packed(owner, kind, value)), "ConditionExpression": "attribute_not_exists(pk)"}
+    if previous is not None:
+        operation.update(ConditionExpression="dataJson = :old", ExpressionAttributeValues={":old": {"S": packed(owner, kind, previous)["dataJson"]}})
+    return {"Put": operation}
+
+
+def delete(owner, kind):
+    return {"Delete": {"TableName": os.environ["COMMUNITY_TABLE"], "Key": encoded(key(owner, kind))}}
+
+
+def transact(operations):
+    try:
+        boto3.client("dynamodb").transact_write_items(TransactItems=operations)
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "TransactionCanceledException":
+            raise Problem(409, "This changed in another session, or that handle is taken. Refresh and try again.") from None
+        raise
+
+
+def rows(owner, prefix, maximum=200):
+    result, cursor = [], None
+    while len(result) < maximum:
+        options = {"KeyConditionExpression": "pk = :owner AND begins_with(sk, :prefix)", "ExpressionAttributeValues": {":owner": owner, ":prefix": prefix}, "ConsistentRead": True, "Limit": min(100, maximum - len(result)), "ScanIndexForward": False}
+        if cursor:
+            options["ExclusiveStartKey"] = cursor
+        page = table().query(**options)
+        result.extend(json.loads(item["dataJson"]) for item in page.get("Items", []))
+        cursor = page.get("LastEvaluatedKey")
+        if not cursor:
+            break
+    return result
+
+
+def string(value, maximum, required=False):
+    if not isinstance(value, str) or len(value) > maximum or any(ord(c) < 32 for c in value) or (required and not value.strip()):
+        raise Problem(400, "Please check the profile fields.")
+    return value.strip()
+
+
+def settings(value, challenge=False):
+    if not isinstance(value, dict):
+        raise Problem(400, "Choose valid Study settings.")
+    topics = value.get("topics")
+    styles = value.get("styles")
+    countries = value.get("countryIds")
+    if not isinstance(topics, list) or not 1 <= len(topics) <= 3 or len(set(topics)) != len(topics) or any(t not in ("countries", "capitals", "flags") for t in topics):
+        raise Problem(400, "Choose valid Study topics.")
+    if not isinstance(styles, dict) or set(styles) != {"countries", "capitals", "flags"} or any(v not in ("map", "typing", "choices", "mixed") for v in styles.values()):
+        raise Problem(400, "Choose valid answer methods.")
+    if not isinstance(countries, list) or len(countries) > 193 or any(not isinstance(c, str) or c not in COUNTRIES for c in countries):
+        raise Problem(400, "Choose valid countries.")
+    if value.get("scope") not in ("all", "continent", "custom") or value.get("continent") not in ("AF", "AS", "EU", "NA", "SA", "OC") or (value.get("scope") == "custom" and not countries):
+        raise Problem(400, "Choose a Study area.")
+    length = value.get("length")
+    if (type(length) is not int or length not in (10, 20, 50)) and length not in ("all", "continuous"):
+        raise Problem(400, "Choose a valid session length.")
+    if challenge and (type(length) is not int or length not in (10, 20, 50)):
+        raise Problem(400, "Challenges need 10, 20, or 50 questions.")
+    clean = {k: value[k] for k in ("topics", "styles", "countryIds", "scope", "continent", "length")}
+    for k in ("borders", "countryNames", "capitalMarkers", "capitalNames", "autoAdvance"):
+        if type(value.get(k)) is not bool:
+            raise Problem(400, "Choose valid Study preferences.")
+        clean[k] = value[k]
+    for k, default in (("perTopicMethods", False), ("revisitMissed", False)):
+        if type(value.get(k, default)) is not bool:
+            raise Problem(400, "Choose valid Study preferences.")
+        clean[k] = value.get(k, default)
+    choices = value.get("choiceCount", 6)
+    distractors = value.get("capitalDistractors", "study")
+    if type(choices) is not int or choices not in range(2, 7) or distractors not in ("study", "region", "countryCities", "globalCities", "globalCapitals"):
+        raise Problem(400, "Choose valid multiple-choice options.")
+    clean.update(choiceCount=choices, capitalDistractors=distractors)
+    if challenge:
+        clean["revisitMissed"] = False
+    return clean
+
+
+def public_profile(subject):
+    profile = get("user#" + subject, "profile")
+    return {"id": subject, **{k: profile[k] for k in ("displayName", "handle", "avatar", "favoriteRegion", "bio")}} if profile else None
+
+
+def save_profile(subject, body):
+    owner = "user#" + subject
+    old = get(owner, "profile")
+    handle = string(body.get("handle"), 24, True).lower()
+    if not re.fullmatch(r"[a-z][a-z0-9_]{2,23}", handle):
+        raise Problem(400, "Handles need 3–24 letters, numbers, or underscores and must start with a letter.")
+    avatar = body.get("avatar", "globe")
+    if not isinstance(avatar, str) or not (avatar in AVATARS or (avatar.startswith("flag:") and avatar[5:] in COUNTRIES)):
+        raise Problem(400, "Choose an avatar.")
+    if type(body.get("shareJourneyScores", False)) is not bool:
+        raise Problem(400, "Choose whether to share Journey scores.")
+    if type(body.get("revision", 0)) is not int or body.get("revision", 0) != (old or {}).get("revision", 0):
+        raise Problem(409, "Your profile changed on another device. Refresh before saving.")
+    presets = body.get("presets", [])
+    if not isinstance(presets, list) or len(presets) > 20:
+        raise Problem(400, "You can save up to 20 Study presets.")
+    clean_presets = []
+    for preset in presets:
+        if not isinstance(preset, dict):
+            raise Problem(400, "Choose valid presets.")
+        identifier = str(uuid.UUID(preset.get("id", "")))
+        clean_presets.append({"id": identifier, "name": string(preset.get("name"), 60, True), "settings": settings(preset.get("settings"))})
+    if len({p["id"] for p in clean_presets}) != len(clean_presets):
+        raise Problem(400, "Each preset needs its own identifier.")
+    value = {"id": subject, "displayName": string(body.get("displayName"), 40, True), "handle": handle, "avatar": avatar, "favoriteRegion": string(body.get("favoriteRegion", ""), 60), "bio": string(body.get("bio", ""), 160), "shareJourneyScores": body.get("shareJourneyScores", False), "presets": clean_presets, "revision": (old or {}).get("revision", 0) + 1}
+    operations = [put(owner, "profile", value, old)]
+    if not old or old["handle"] != handle:
+        operations.append(put("handle#" + handle, "owner", {"id": subject}))
+        if old:
+            operations.append(delete("handle#" + old["handle"], "owner"))
+    transact(operations)
+    return value
+
+
+def pair(a, b):
+    return "pair#" + "#".join(sorted([a, b]))
+
+
+def relationship(a, b):
+    return get(pair(a, b), "relation")
+
+
+def require_friend(a, b):
+    relation = relationship(a, b)
+    if not relation or relation["status"] != "accepted":
+        raise Problem(403, "This feature is available to accepted friends.")
+    return relation
+
+
+def friend_action(subject, other, action):
+    if not isinstance(other, str) or not other or len(other) > 200 or subject == other:
+        raise Problem(400, "Choose another player.")
+    previous = relationship(subject, other)
+    owner, left, right = pair(subject, other), "user#" + subject, "user#" + other
+    if action == "request":
+        if not public_profile(subject):
+            raise Problem(400, "Save your profile before adding friends.")
+        if previous:
+            if previous["status"] == "blocked":
+                raise Problem(404, "That player is unavailable.")
+            return {"saved": True}
+        existing = rows(left, "friend#")
+        if len(existing) >= 200 or sum(r["status"] == "outgoing" for r in existing) >= 20:
+            raise Problem(429, "Please resolve your existing friend requests first.")
+        value = {"status": "requested", "requester": subject}
+        transact([put(owner, "relation", value), put(left, "friend#" + other, {"id": other, "status": "outgoing"}), put(right, "friend#" + subject, {"id": subject, "status": "incoming"})])
+    elif action == "accept":
+        if not previous or previous["status"] != "requested" or previous["requester"] == subject:
+            raise Problem(403, "Only the recipient can accept this request.")
+        value = {**previous, "status": "accepted"}
+        transact([put(owner, "relation", value, previous), put(left, "friend#" + other, {"id": other, "status": "accepted"}, {"id": other, "status": "incoming"}), put(right, "friend#" + subject, {"id": subject, "status": "accepted"}, {"id": subject, "status": "outgoing"})])
+    elif action == "block":
+        if previous and previous["status"] == "blocked" and previous["blockedBy"] != subject:
+            raise Problem(404, "That player is unavailable.")
+        link = get(left, "friend#" + other)
+        transact([put(owner, "relation", {"status": "blocked", "blockedBy": subject}, previous), put(left, "friend#" + other, {"id": other, "status": "blocked"}, link), delete(right, "friend#" + subject)])
+    elif action in ("remove", "decline", "cancel", "unblock"):
+        valid = previous and ((action == "remove" and previous["status"] == "accepted") or (action == "decline" and previous["status"] == "requested" and previous["requester"] != subject) or (action == "cancel" and previous["status"] == "requested" and previous["requester"] == subject) or (action == "unblock" and previous["status"] == "blocked" and previous["blockedBy"] == subject))
+        if not valid:
+            raise Problem(403, "You cannot change this request.")
+        # Conditional deletion prevents a stale inbox from deleting a newer block.
+        deletion = delete(owner, "relation")
+        deletion["Delete"].update(ConditionExpression="dataJson = :old", ExpressionAttributeValues={":old": {"S": packed(owner, "relation", previous)["dataJson"]}})
+        transact([deletion, delete(left, "friend#" + other), delete(right, "friend#" + subject)])
+    else:
+        raise Problem(400, "Choose a valid friend action.")
+    return {"saved": True}
+
+
+def saved_values(subject, namespace, field=None):
+    db = boto3.resource("dynamodb").Table(os.environ["SAVES_TABLE"])
+    values, cursor = {}, None
+    # Bounded reads; the regular sync protocol continues to own full save recovery.
+    for _ in range(10):
+        options = {"KeyConditionExpression": "pk = :owner", "ExpressionAttributeValues": {":owner": "user#" + subject}, "ProjectionExpression": "#ns, #field, writer, #clock, valueJson", "ExpressionAttributeNames": {"#ns": "namespace", "#field": "field", "#clock": "clock"}, "ConsistentRead": True, "Limit": 100}
+        if cursor:
+            options["ExclusiveStartKey"] = cursor
+        page = db.query(**options)
+        for item in page.get("Items", []):
+            if item["namespace"] != namespace or (field and item["field"] != field):
+                continue
+            address = (item["field"], item["writer"])
+            if address not in values or int(item["clock"]) > int(values[address]["clock"]):
+                values[address] = item
+        cursor = page.get("LastEvaluatedKey")
+        if not cursor:
+            break
+    return [json.loads(item["valueJson"]) for item in values.values()]
+
+
+def journey_scores(subject):
+    latest = {}
+    for attempt in saved_values(subject, "daily"):
+        if not isinstance(attempt, dict) or not isinstance(attempt.get("game"), dict):
+            continue
+        identity = (attempt.get("date"), attempt.get("journeyId"))
+        if not all(isinstance(v, str) for v in identity):
+            continue
+        prior = latest.get(identity)
+        rank = lambda a: (a.get("startedAt", 0), len(a["game"].get("answers", [])), a["game"].get("phase") in ("finished", "failed"))
+        if not prior or rank(attempt) > rank(prior):
+            latest[identity] = attempt
+    scores = []
+    for (date, journey), attempt in sorted(latest.items(), reverse=True):
+        answers = attempt["game"].get("answers", [])
+        if attempt["game"].get("phase") not in ("finished", "failed") or not isinstance(answers, list) or len(answers) > 5:
+            continue
+        scores.append({"date": date, "journeyId": journey, "correct": sum(a.get("correct") is True for a in answers if isinstance(a, dict)), "total": 5})
+    return scores[:30]
+
+
+def challenge_view(subject, value):
+    if subject not in (value["owner"], value["opponent"]):
+        raise Problem(403, "This challenge is private.")
+    require_friend(value["owner"], value["opponent"])
+    return {**value, "player": public_profile(value["opponent"] if subject == value["owner"] else value["owner"])}
+
+
+def challenge_action(subject, identifier, body):
+    owner = "challenge#" + str(uuid.UUID(identifier))
+    old = get(owner, "details")
+    if not old:
+        raise Problem(404, "Challenge not found.")
+    challenge_view(subject, old)
+    action = body.get("action")
+    value = {**old}
+    if action == "accept" and old["status"] == "pending" and old["opponent"] == subject:
+        value["status"] = "active"
+    elif action == "decline" and old["status"] == "pending" and old["opponent"] == subject:
+        value["status"] = "declined"
+    elif action == "cancel" and old["status"] == "pending" and old["owner"] == subject:
+        value["status"] = "cancelled"
+    elif action == "result" and old["status"] in ("active", "completed"):
+        if subject in old["results"]:
+            return challenge_view(subject, old)
+        run_id = str(uuid.UUID(body.get("runId", identifier)))
+        records = saved_values(subject, "study", "history." + run_id)
+        candidates = [r for r in records if isinstance(r, dict) and isinstance(r.get("session"), dict)]
+        record = max(candidates, key=lambda r: len(r["session"].get("history", [])), default=None)
+        session = (record or {}).get("session", {})
+        answers = session.get("history", [])
+        if session.get("phase") != "summary" or session.get("challengeId") != identifier or settings(session.get("settings")) != old["settings"] or not isinstance(answers, list) or len(answers) != old["settings"]["length"] or any(not isinstance(a, dict) or type(a.get("correct")) is not bool or a.get("prompt", {}).get("ordinal") != i for i, a in enumerate(answers)):
+            raise Problem(409, "Finish this challenge and sync your progress before sharing its result.")
+        value["results"] = {**old["results"], subject: {"correct": sum(a["correct"] for a in answers), "total": len(answers)}}
+        if len(value["results"]) == 2:
+            value["status"] = "completed"
+    else:
+        raise Problem(403, "You cannot change this challenge.")
+    transact([put(owner, "details", value, old)])
+    return challenge_view(subject, value)
+
+
+def handle(event):
+    subject = event.get("requestContext", {}).get("authorizer", {}).get("jwt", {}).get("claims", {}).get("sub")
+    if not isinstance(subject, str) or not subject:
+        return response(401, {"error": "Sign in to use your account."})
+    try:
+        route = event["routeKey"]
+        body = {}
+        if not route.startswith("GET "):
+            headers = {k.lower(): v for k, v in event.get("headers", {}).items()}
+            if headers.get("origin") not in os.environ["ALLOWED_ORIGINS"].split(","):
+                raise Problem(403, "This origin is not allowed.")
+            if not headers.get("content-type", "").startswith("application/json"):
+                raise Problem(415, "Use JSON.")
+            raw = event.get("body") or ""
+            if event.get("isBase64Encoded"):
+                raw = base64.b64decode(raw, validate=True).decode()
+            if len(raw.encode()) > 60000:
+                raise Problem(413, "This account update is too large.")
+            body = json.loads(raw)
+            if not isinstance(body, dict):
+                raise Problem(400, "Use a valid account update.")
+        params = event.get("pathParameters") or {}
+        if route == "GET /account/profile":
+            value = get("user#" + subject, "profile")
+        elif route == "PATCH /account/profile":
+            value = save_profile(subject, body)
+        elif route == "GET /account/players/{handle}":
+            handle = string(params.get("handle"), 24, True).lower()
+            reservation = get("handle#" + handle, "owner")
+            if not reservation or (relationship(subject, reservation["id"]) or {}).get("status") == "blocked":
+                raise Problem(404, "No available player has that handle.")
+            value = public_profile(reservation["id"])
+        elif route == "GET /account/friends":
+            value = [{**entry, "player": public_profile(entry["id"])} for entry in rows("user#" + subject, "friend#")]
+        elif route == "POST /account/friends":
+            handle = string(body.get("handle"), 24, True).lower()
+            reservation = get("handle#" + handle, "owner")
+            if not reservation:
+                raise Problem(404, "No player has that handle.")
+            value = friend_action(subject, reservation["id"], "request")
+        elif route == "PATCH /account/friends/{id}":
+            value = friend_action(subject, params.get("id"), body.get("action"))
+        elif route == "GET /account/friends/{id}/journeys":
+            other = params.get("id")
+            require_friend(subject, other)
+            if not (get("user#" + other, "profile") or {}).get("shareJourneyScores"):
+                raise Problem(403, "Your friend hasn’t enabled Journey score sharing.")
+            value = journey_scores(other)
+        elif route == "GET /account/challenges":
+            value = []
+            for entry in rows("user#" + subject, "challenge#", 50):
+                record = get("challenge#" + entry["id"], "details")
+                if record and (relationship(record["owner"], record["opponent"]) or {}).get("status") == "accepted":
+                    value.append(challenge_view(subject, record))
+        elif route == "POST /account/challenges":
+            other = string(body.get("opponent"), 200, True)
+            relation = require_friend(subject, other)
+            if subject == other:
+                raise Problem(400, "Choose a friend to challenge.")
+            recent = rows("user#" + subject, "challenge#", 50)
+            if sum(e.get("createdAt", 0) > int(time.time()) - 86400 for e in recent) >= 20:
+                raise Problem(429, "You can send up to 20 challenges a day.")
+            identifier, created = str(uuid.uuid4()), int(time.time())
+            value = {"id": identifier, "title": string(body.get("title"), 60, True), "owner": subject, "opponent": other, "settings": settings(body.get("settings"), True), "seed": secrets.randbits(32), "createdAt": created, "status": "pending", "results": {}}
+            condition = {"ConditionCheck": {"TableName": os.environ["COMMUNITY_TABLE"], "Key": encoded(key(pair(subject, other), "relation")), "ConditionExpression": "dataJson = :old", "ExpressionAttributeValues": {":old": {"S": packed(pair(subject, other), "relation", relation)["dataJson"]}}}}
+            inbox = {"id": identifier, "createdAt": created}
+            transact([condition, put("challenge#" + identifier, "details", value), put("user#" + subject, f"challenge#{created:010d}#{identifier}", inbox), put("user#" + other, f"challenge#{created:010d}#{identifier}", inbox)])
+            value = challenge_view(subject, value)
+        elif route == "PATCH /account/challenges/{id}":
+            value = challenge_action(subject, params.get("id", ""), body)
+        else:
+            raise Problem(404, "Not found.")
+        return response(200, value)
+    except Problem as error:
+        return response(error.status, {"error": error.message})
+    except (ValueError, TypeError, KeyError, UnicodeError):
+        return response(400, {"error": "Please check the account details and try again."})

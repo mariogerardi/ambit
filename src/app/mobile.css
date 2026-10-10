@@ -657,6 +657,15 @@
   .experience .app-menu-toggle {
     transform: translateY(10px);
   }
+  .experience .profile-toggle {
+    transform: translateY(10px);
+    width: 44px;
+    padding: 10px;
+    justify-content: center;
+  }
+  .experience .profile-toggle > span:last-child:not(.profile-avatar) {
+    display: none;
+  }
   .experience .app-menu-content {
     top: calc(100% + 18px);
     max-height: calc(var(--app-height, 100dvh) - var(--header-height) - 28px);
@@ -794,5 +803,22 @@
           )
       )
     );
+  }
+}
+@media (max-width: 700px), (max-width: 1000px) and (max-height: 500px) {
+  .experience.experience.panel-only .game-scene {
+    /* Hidden pages keep the normal map frame, never a full-screen fitting area. */
+    inset: var(--header-height) env(safe-area-inset-right, 0px) auto
+      env(safe-area-inset-left, 0px);
+    height: var(--map-height);
+  }
+  .experience.experience.panel-only .mode-layer {
+    top: var(--header-height);
+    left: 0;
+  }
+  .experience.experience.page-layout .mode-layer {
+    top: auto;
+    left: auto;
+    padding: 20px 16px 32px;
   }
 }

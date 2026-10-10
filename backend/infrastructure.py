@@ -50,6 +50,13 @@ def template():
         "PointInTimeRecoverySpecification": {"PointInTimeRecoveryEnabled": True},
         "SSESpecification": {"SSEEnabled": True},
     }, retain=True)
+    r["Community"] = resource("AWS::DynamoDB::Table", {
+        "TableName": "ambit-production-community", "BillingMode": "PAY_PER_REQUEST",
+        "AttributeDefinitions": [{"AttributeName": k, "AttributeType": "S"} for k in ("pk", "sk")],
+        "KeySchema": [{"AttributeName": "pk", "KeyType": "HASH"}, {"AttributeName": "sk", "KeyType": "RANGE"}],
+        "PointInTimeRecoverySpecification": {"PointInTimeRecoveryEnabled": True},
+        "SSESpecification": {"SSEEnabled": True},
+    }, retain=True)
     r["ConfirmationRole"] = resource("AWS::IAM::Role", {"AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy]})
     code = {"S3Bucket": ref("ArtifactBucket"), "S3Key": ref("ArtifactKey")}
     r["Confirmation"] = resource("AWS::Lambda::Function", {
@@ -93,10 +100,11 @@ def template():
         "Policies": [{"PolicyName": "FeedbackData", "PolicyDocument": {"Version": "2012-10-17", "Statement": [
             {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:Query"], "Resource": [arn("Feedback"), sub("${Feedback.Arn}/index/feedback-by-date")]},
             {"Effect": "Allow", "Action": ["dynamodb:PutItem", "dynamodb:Query"], "Resource": arn("Saves")},
+            {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:Query", "dynamodb:ConditionCheckItem"], "Resource": arn("Community")},
             {"Fn::If": ["UseDatadog", {"Effect": "Allow", "Action": "secretsmanager:GetSecretValue", "Resource": ref("DatadogSecretArn")}, ref("AWS::NoValue")]},
         ]}}],
     })
-    env = {"SAVES_TABLE": ref("Saves"), "FEEDBACK_TABLE": ref("Feedback"), "RATE_SALT": ref("RateSalt"), "ALLOWED_ORIGINS": ",".join(origins), "RELEASE": ref("Release"),
+    env = {"COMMUNITY_TABLE": ref("Community"), "SAVES_TABLE": ref("Saves"), "FEEDBACK_TABLE": ref("Feedback"), "RATE_SALT": ref("RateSalt"), "ALLOWED_ORIGINS": ",".join(origins), "RELEASE": ref("Release"),
            "DD_ENV": "production", "DD_SERVICE": "ambit-api", "DD_VERSION": ref("Release"), "DD_SITE": ref("DatadogSite"),
            "DD_API_KEY_SECRET_ARN": ref("DatadogSecretArn"), "DD_LAMBDA_HANDLER": "handler.handler", "DD_TRACE_ENABLED": "true", "DD_LOGS_INJECTION": "true", "DD_SERVERLESS_LOGS_ENABLED": "true", "DD_CAPTURE_LAMBDA_PAYLOAD": "false"}
     r["ApiFunction"] = resource("AWS::Lambda::Function", {
@@ -110,7 +118,15 @@ def template():
     r["Api"] = resource("AWS::ApiGatewayV2::Api", {"Name": "ambit-production", "ProtocolType": "HTTP", "CorsConfiguration": {"AllowOrigins": origins, "AllowMethods": ["POST", "GET", "PATCH", "OPTIONS"], "AllowHeaders": ["content-type", "authorization", "x-datadog-origin", "x-datadog-parent-id", "x-datadog-trace-id", "x-datadog-sampling-priority", "traceparent", "tracestate", "baggage", "x-datadog-tags"], "MaxAge": 3600}})
     r["Integration"] = resource("AWS::ApiGatewayV2::Integration", {"ApiId": ref("Api"), "IntegrationType": "AWS_PROXY", "IntegrationUri": arn("ApiFunction"), "PayloadFormatVersion": "2.0", "TimeoutInMillis": 15000})
     r["Authorizer"] = resource("AWS::ApiGatewayV2::Authorizer", {"ApiId": ref("Api"), "Name": "accounts", "AuthorizerType": "JWT", "IdentitySource": ["$request.header.Authorization"], "JwtConfiguration": {"Audience": [ref("Client")], "Issuer": sub("https://cognito-idp.${AWS::Region}.amazonaws.com/${Users}")}})
-    for name, route, authenticated in [("ReadSaves", "GET /account/saves", True), ("WriteSaves", "POST /account/saves", True), ("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
+    community_routes = [(name, route, True) for name, route in [
+        ("ReadProfile", "GET /account/profile"), ("WriteProfile", "PATCH /account/profile"),
+        ("FindPlayer", "GET /account/players/{handle}"), ("ReadFriends", "GET /account/friends"),
+        ("RequestFriend", "POST /account/friends"), ("UpdateFriend", "PATCH /account/friends/{id}"),
+        ("FriendJourneys", "GET /account/friends/{id}/journeys"),
+        ("ReadChallenges", "GET /account/challenges"), ("CreateChallenge", "POST /account/challenges"),
+        ("UpdateChallenge", "PATCH /account/challenges/{id}"),
+    ]]
+    for name, route, authenticated in community_routes + [("ReadSaves", "GET /account/saves", True), ("WriteSaves", "POST /account/saves", True), ("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
         properties = {"ApiId": ref("Api"), "RouteKey": route, "Target": sub("integrations/${Integration}"), "AuthorizationType": "JWT" if authenticated else "NONE"}
         if authenticated:
             properties.update(AuthorizerId=ref("Authorizer"), AuthorizationScopes=["openid"])

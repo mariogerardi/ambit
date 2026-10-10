@@ -37,6 +37,7 @@ import {
   CameraScale,
   viewportProjection,
   worldAltitude,
+  focusAltitude,
 } from "./camera";
 import { themedRegionStyle } from "./themes";
 import type { GlobeTheme } from "./themes";
@@ -62,7 +63,7 @@ import { SurfaceGesture } from "./gesture";
 import { SurfaceInspection } from "./inspection";
 import { normalWorldView } from "./defaultViews";
 export interface GlobeHandle {
-  focus(focus: Focus, fitToViewport?: boolean): void;
+  focus(focus: Focus, fitToViewport?: boolean | "world"): void;
   cancelFocus(): void;
   flyover(stops: Focus[]): void;
   cancelFlyover(): void;
@@ -77,6 +78,7 @@ export interface GlobeHandle {
   }>;
 }
 interface Props {
+  active?: boolean;
   initialFocus?: Focus;
   physicalFeatures?: PhysicalFeature[];
   overlays?: MapOverlay[];
@@ -439,34 +441,53 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       if (!ready || !globe.current || !previous || !size.width || !size.height)
         return;
       // Keyboard resizing must not change the player's orbit.
-      if (host.current?.closest('[data-keyboard-open="true"]')) return;
+      if (
+        host.current?.closest(
+          '[data-keyboard-open="true"], [data-panel-only="true"]',
+        )
+      )
+        return;
+      const viewport = readViewport() ?? size;
       const camera = globe.current.camera() as PerspectiveCamera;
       camera.fov = viewportProjection(
-        size.height,
-        size.frameHeight,
-        size.frameTop,
+        viewport.height,
+        viewport.frameHeight,
+        viewport.frameTop,
         projectionScale.current.value,
       ).fov;
       camera.updateProjectionMatrix();
       if (
         props.compact &&
-        (previous.width !== size.width || previous.height !== size.frameHeight)
+        (previous.width !== viewport.width ||
+          previous.height !== viewport.frameHeight)
       ) {
         resizing.current.adapt(
           globe.current,
           previous,
-          { width: size.width, height: size.frameHeight },
+          { width: viewport.width, height: viewport.frameHeight },
           travel.current.active ||
             flyover.current.active ||
             fidget.current.active,
         );
       }
       previousViewport.current = {
-        width: size.width,
-        height: size.frameHeight,
+        width: viewport.width,
+        height: viewport.frameHeight,
       };
       refreshLabels();
-    }, [size, ready, props.compact, refreshLabels]);
+    }, [size, ready, props.compact, props.active, readViewport, refreshLabels]);
+    useEffect(() => {
+      if (!ready || !globe.current) return;
+      const syncRendering = () => {
+        if (props.active === false || document.visibilityState === "hidden")
+          globe.current?.pauseAnimation();
+        else globe.current?.resumeAnimation();
+      };
+      syncRendering();
+      document.addEventListener("visibilitychange", syncRendering);
+      return () =>
+        document.removeEventListener("visibilitychange", syncRendering);
+    }, [ready, props.active]);
     useEffect(() => {
       if (ready && globe.current) {
         globe.current.controls().autoRotate =
@@ -496,19 +517,19 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           globe.current.controls().autoRotate = false;
           fidget.current.cancel();
           const altitude = target.altitude ?? 0.8;
-          const fitted =
-            fitToViewport && altitude < 1.65
-              ? {
-                  ...target,
-                  altitude:
-                    altitude / Math.min(1, size.width / size.frameHeight),
-                }
-              : target;
+          const fitAltitude = () =>
+            focusAltitude(
+              altitude,
+              readViewport() ?? size,
+              !!current.current.compact,
+              fitToViewport,
+            );
           travel.current.move(
             globe.current,
-            fitted,
+            target,
             current.current.reduced,
             resumeRotation,
+            fitAltitude,
           );
         },
         flyover(stops) {

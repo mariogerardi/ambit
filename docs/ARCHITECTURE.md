@@ -3,7 +3,8 @@
 Ambit is a client-side React/TypeScript application compiled by Vite. Product
 routes share one Three.js/react-globe.gl renderer and local geography dataset.
 Guest gameplay remains local. `src/services/accounts.tsx` manages Cognito
-authorization-code/PKCE sessions in session storage. `src/services/feedback.ts`
+authorization-code/PKCE sessions with persistent user storage and tab-scoped
+redirect state. `src/services/feedback.ts`
 connects reports and admin review to API Gateway/Lambda/DynamoDB.
 `src/services/progressSync.ts` synchronizes account-scoped Journey and Study
 registers, using local storage as an offline upload queue.
@@ -13,24 +14,25 @@ provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
 
 ## Module map
 
-| Owner                                                                                                      | Responsibility                                                             |
-| ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [`src/App.tsx`](../src/App.tsx)                                                                            | Navigation, shared data, camera memory, view orchestration, and sessions.  |
-| [`src/app/modes.ts`](../src/app/modes.ts), [`ModePanels.tsx`](../src/app/ModePanels.tsx)                   | Route-to-mode mapping and overlapping panel transitions.                   |
-| [`src/app/dailyProgress.ts`](../src/app/dailyProgress.ts)                                                  | Device-local scheduling and date-pinned Journey progress.                  |
-| [`src/app/recordSave.ts`](../src/app/recordSave.ts), [`progressSaves.ts`](../src/app/progressSaves.ts)     | Independent save registers and domain-specific merges.                     |
-| [`src/game/journeyRegistry.ts`](../src/game/journeyRegistry.ts)                                            | Lightweight Journey metadata and lazy module loading.                      |
-| [`src/game/questions.ts`](../src/game/questions.ts), [`state.ts`](../src/game/state.ts)                    | Question contract, prepared answers, scoring, and round transitions.       |
-| [`src/game/presentation.ts`](../src/game/presentation.ts)                                                  | Clue, selection, feedback, and disclosure states.                          |
-| [`src/game/reasoning.ts`](../src/game/reasoning.ts), [`spatial.ts`](../src/game/spatial.ts)                | Shared-edge adjacency, shortest paths, routes, and spatial predicates.     |
-| [`src/study/engine.ts`](../src/study/engine.ts)                                                            | Study pools, decks, methods, review pairs, completion, and history models. |
-| [`src/study/StudySetup.tsx`](../src/study/StudySetup.tsx), [`scopeFocus.ts`](../src/study/scopeFocus.ts)   | Builder configuration and geographic scope framing.                        |
-| [`src/app/ExplorePanel.tsx`](../src/app/ExplorePanel.tsx)                                                  | Search, country/subdivision details, and display settings.                 |
-| [`src/geography/types.ts`](../src/geography/types.ts), [`loadLayer.ts`](../src/geography/loadLayer.ts)     | Canonical geometry contracts and cancellable, cached layer loading.        |
-| [`src/globe/GlobeView.tsx`](../src/globe/GlobeView.tsx)                                                    | Sole product renderer adapter: regions, places, routes, and overlays.      |
-| [`src/globe/camera.ts`](../src/globe/camera.ts)                                                            | Interruptible camera travel, fitting, and looping flyovers.                |
-| [`src/globe/regionSurfaces.ts`](../src/globe/regionSurfaces.ts), [`outlines.ts`](../src/globe/outlines.ts) | Cached regional surfaces and border draw order.                            |
-| [`src/theme/themes.ts`](../src/theme/themes.ts), [`themes.css`](../src/theme/themes.css)                   | Palette registry and semantic UI properties.                               |
+| Owner                                                                                                                          | Responsibility                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [`src/App.tsx`](../src/App.tsx)                                                                                                | Navigation, shared data, continuous camera state, view orchestration, and sessions. |
+| [`src/app/modes.ts`](../src/app/modes.ts), [`ModePanels.tsx`](../src/app/ModePanels.tsx)                                       | Route-to-mode mapping and overlapping panel transitions.                            |
+| [`src/app/dailyProgress.ts`](../src/app/dailyProgress.ts)                                                                      | Device-local scheduling and date-pinned Journey progress.                           |
+| [`src/app/recordSave.ts`](../src/app/recordSave.ts), [`progressSaves.ts`](../src/app/progressSaves.ts)                         | Independent save registers and domain-specific merges.                              |
+| [`src/game/journeyRegistry.ts`](../src/game/journeyRegistry.ts)                                                                | Lightweight Journey metadata and lazy module loading.                               |
+| [`src/game/questions.ts`](../src/game/questions.ts), [`state.ts`](../src/game/state.ts)                                        | Question contract, prepared answers, scoring, and round transitions.                |
+| [`src/game/presentation.ts`](../src/game/presentation.ts)                                                                      | Clue, selection, feedback, and disclosure states.                                   |
+| [`src/game/reasoning.ts`](../src/game/reasoning.ts), [`spatial.ts`](../src/game/spatial.ts)                                    | Shared-edge adjacency, shortest paths, routes, and spatial predicates.              |
+| [`src/study/engine.ts`](../src/study/engine.ts)                                                                                | Study pools, decks, methods, review pairs, completion, and history models.          |
+| [`src/study/StudySetup.tsx`](../src/study/StudySetup.tsx), [`scopeFocus.ts`](../src/study/scopeFocus.ts)                       | Builder configuration and geographic scope framing.                                 |
+| [`src/app/ExplorePanel.tsx`](../src/app/ExplorePanel.tsx)                                                                      | Search, country/subdivision details, and display settings.                          |
+| [`src/app/AccountDashboard.tsx`](../src/app/AccountDashboard.tsx), [`src/services/community.ts`](../src/services/community.ts) | Profiles, compact progress dashboard and friends.                                   |
+| [`src/geography/types.ts`](../src/geography/types.ts), [`loadLayer.ts`](../src/geography/loadLayer.ts)                         | Canonical geometry contracts and cancellable, cached layer loading.                 |
+| [`src/globe/GlobeView.tsx`](../src/globe/GlobeView.tsx)                                                                        | Sole product renderer adapter: regions, places, routes, and overlays.               |
+| [`src/globe/camera.ts`](../src/globe/camera.ts)                                                                                | Interruptible camera travel, fitting, and looping flyovers.                         |
+| [`src/globe/regionSurfaces.ts`](../src/globe/regionSurfaces.ts), [`outlines.ts`](../src/globe/outlines.ts)                     | Cached regional surfaces and border draw order.                                     |
+| [`src/theme/themes.ts`](../src/theme/themes.ts), [`themes.css`](../src/theme/themes.css)                                       | Palette registry and semantic UI properties.                                        |
 
 `src/app/daily.ts` and `src/game/journeys.ts` provide synchronous full-catalog APIs
 for tooling/tests. Runtime scheduling uses the small generated
@@ -64,8 +66,11 @@ Keep these responsibilities separate:
 - **Response:** pending selections and pins, then graded feedback.
 - **Camera:** frames the clue or selected scope without silently revealing an answer.
 
-The Study builder previews the actual `studyPool` and hint settings. Scoped
-sessions frame their eligible area; country-identification and typed/choice
+The Study builder configures the actual `studyPool` and hint settings. Building
+or customizing a session on mobile raises the content panel and hides the mounted globe;
+desktop keeps its sidebar and previews the selected Study area on the live globe.
+Configuration changes do not reposition the hidden mobile camera. Scoped sessions
+frame their eligible area; country-identification and typed/choice
 capital questions can frame their visible clue. Capital map questions keep the
 answer country undisclosed. Capital feedback reveals the target capital's marker
 and name even when those hints were disabled. Named-country map prompts require
@@ -76,8 +81,8 @@ target country, worldwide cities, or worldwide capitals. City options use their
 own place IDs and the bundled major-city catalog; countries without another city
 are excluded from a session using country-city capital multiple choice.
 
-On phones, the Study cog groups report/edit/finish actions and correct answers
-stay visible longer before automatic advance. Explore selections use tighter
+The Study cog groups report/edit/finish actions on desktop and mobile. On phones,
+correct answers stay visible longer before automatic advance. Explore selections use tighter
 camera framing. Home magnifies the mobile globe projection by 20% behind its
 transparent bars. Explore measures its content to fit the open tray, capping long
 details at 45% of the visible height; the map, controls, and tray boundary animate
@@ -102,12 +107,23 @@ copies normalize winding without mutating the source catalog. Renderer caches
 and mesh bindings belong to the mounted globe, not the shared source objects.
 Highlights use near-surface geometry and draw order rather than large elevation.
 
-Idle motion and Fidget share playback state. Home enables rotation after focus;
-Explore preserves it until interaction. Fidget restores prior playback and
+Idle motion and Fidget share playback state. Home, Explore and the Study overview
+continue from the globe's live orientation with rotation enabled; returning from
+a close view zooms out smoothly. Explore clears its prior selection on mode entry,
+and neither Explore nor Study stores/restores a mode-specific camera position.
+Explicit default views still apply at Home startup, not Explore startup. Camera
+flights fit their destination against the live viewport while panels move.
+Overview flights recalculate their world framing as the viewport settles; hidden
+mobile pages retain the normal map frame instead of a full-screen fitting area.
+Fidget restores prior playback and
 retains polygon metadata needed for subsequent renderer refreshes. These contracts
 have helper/DOM coverage; that is not proof of GPU appearance or frame rate.
 
 ## Themes and controls
+
+Account access lives beside the menu in the header, opening profile, stats, and
+friends. The menu groups Home, Journey, Explore, and Study above feedback, admin,
+credits, and theme settings.
 
 Atlas, Ocean, Dusk, and Paper share semantic roles for text, editorial emphasis,
 actions, land, selection, and feedback. UI consumes `--ui-*` custom properties;

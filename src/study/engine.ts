@@ -77,6 +77,7 @@ export function missedStudyAnswers(session: StudySession): StudyAnswer[] {
 }
 export interface StudySession {
   id?: string;
+  challengeId?: string;
   settings: StudySettings;
   pool: string[];
   deck: string[];
@@ -548,6 +549,9 @@ export function validStudy(value: unknown): value is StudySave {
   return (
     isRecord(s) &&
     (s.id === undefined || typeof s.id === "string") &&
+    (s.challengeId === undefined ||
+      (typeof s.challengeId === "string" &&
+        /^[a-f0-9-]{36}$/.test(s.challengeId))) &&
     validSettings(s.settings) &&
     !settingsError(s.settings) &&
     strings(s.pool) &&

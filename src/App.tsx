@@ -37,6 +37,8 @@ import {
 } from "./app/worldPreferences";
 import { worldAltitude } from "./globe/camera";
 import { useAccount } from "./services/accounts";
+import { usePlayerProfile } from "./services/playerProfile";
+import { ProfileAvatar } from "./app/ProfileAvatar";
 import { appRelease } from "./services/config";
 import {
   trackView,
@@ -177,6 +179,7 @@ export function PlayerWorkspace() {
 export function App() {
   const account = useAccount();
   const subject = account.user?.profile.sub;
+  const playerProfile = usePlayerProfile(subject, account.accessToken);
   const [feedback, setFeedback] = useState<FeedbackRequest>();
   const closeFeedback = useCallback(() => setFeedback(undefined), []);
   const mobile = useMobileLayout();
@@ -293,8 +296,7 @@ export function App() {
   const [globeInteracted, setGlobeInteracted] = useState(false);
   const globe = useRef<GlobeHandle>(null),
     scene = useRef<HTMLDivElement>(null);
-  const views = useRef(new Map<string, Focus>()),
-    previous = useRef<string | undefined>(undefined);
+  const previous = useRef<string | undefined>(undefined);
   const namedRegions = useMemo(
     () =>
       regions.map((r) => ({
@@ -571,6 +573,18 @@ export function App() {
   const session = study.session;
   const [studyReview, setStudyReview] = useState<StudyAnswer>();
   const [studyEditing, setStudyEditing] = useState(false);
+  const [studyEditorOpen, setStudyEditorOpen] = useState(false);
+  const [studyCustomizing, setStudyCustomizing] = useState(false);
+  const panelOnly =
+    mode === "account" ||
+    mode === "admin" ||
+    (mobile.enabled &&
+      mode === "study" &&
+      (studyEditorOpen || studyCustomizing));
+  const pageLayout =
+    mode === "account" ||
+    mode === "admin" ||
+    (mobile.enabled && mode === "study" && studyEditorOpen);
   const [studyPreview, setStudyPreview] = useState<StudySettings>();
   const studying =
     mode === "study" && !studyBrowsingHistory && !studySetup && !!session;
@@ -795,33 +809,67 @@ export function App() {
       : displayLayers?.names
         ? "all"
         : "none");
-  const frame = useCallback(
-    (focus: Focus) => {
-      const box = scene.current?.getBoundingClientRect();
-      globe.current?.focus(
-        (focus.altitude ?? 0) >= 1.65
-          ? {
-              ...focus,
-              altitude: Math.max(
-                focus.altitude ?? 0,
-                worldAltitude(
-                  box?.width || innerWidth,
-                  box?.height || innerHeight,
-                  mobile.enabled,
-                ),
-              ),
-            }
-          : focus,
-      );
-    },
-    [mobile.enabled],
-  );
+  const frame = useCallback((focus: Focus) => globe.current?.focus(focus), []);
   const stop = useCallback(() => setMotion(false), []),
     fail = useCallback(() => {
       setWebgl(false);
       reportFailure("globe loading");
     }, []),
     onReady = useCallback(() => setReady(true), []);
+  const builderFocus = useMemo(
+    () =>
+      studyPreview
+        ? studyScopeFocus(
+            studyPreview,
+            namedRegions,
+            worldAltitude(
+              scene.current?.clientWidth || innerWidth,
+              scene.current?.clientHeight || innerHeight,
+              false,
+            ),
+          )
+        : undefined,
+    // Hint and answer-method edits update layers without restarting the flight.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      studyPreview?.scope,
+      studyPreview?.continent,
+      studyPreview?.countryIds,
+      namedRegions,
+    ],
+  );
+  useEffect(() => {
+    if (
+      !ready ||
+      mobile.enabled ||
+      mode !== "study" ||
+      !studyEditorOpen ||
+      !studyPreview?.scope
+    )
+      return;
+    if (builderFocus) {
+      stop();
+      frame(builderFocus);
+    } else if (studyPreview.scope === "all") {
+      const view = globe.current?.view();
+      const altitude = worldAltitude(
+        scene.current?.clientWidth || innerWidth,
+        scene.current?.clientHeight || innerHeight,
+      );
+      if (view && !normalWorldView(view, altitude))
+        globe.current?.focus({ ...view, altitude }, "world");
+      setMotion(true);
+    }
+  }, [
+    ready,
+    mobile.enabled,
+    mode,
+    studyEditorOpen,
+    builderFocus,
+    studyPreview?.scope,
+    stop,
+    frame,
+  ]);
   const focusExplore = useCallback(
     (region: RegionFeature) => {
       if (mobile.enabled)
@@ -860,6 +908,13 @@ export function App() {
     globe.current?.cancelFidget();
   }, [mode]);
   useEffect(() => {
+    if (mode !== "explore" || pendingExploreFocus.current) return;
+    setSelected(undefined);
+    setSelectedRegion(undefined);
+    setBreakdown(undefined);
+    setBranches([]);
+  }, [mode]);
+  useEffect(() => {
     if (mode === "study") return;
     setStudySetup(true);
     setStudyBuilder(false);
@@ -886,8 +941,7 @@ export function App() {
       defaultView.current = saved?.focus;
       setDefaultLayers(saved?.layers);
       if (saved?.layers) setExplore(saved.layers);
-      for (const key of ["/", "/admin", "/study:setup", "/playground:editor"])
-        views.current.delete(key);
+
       if (unrestricted)
         globe.current?.focus(saved?.focus ?? initialFocus, false);
     };
@@ -1020,7 +1074,7 @@ export function App() {
       loader?.cancel();
     };
   }, [retry]);
-  // Save or restore camera positions only on mode/question transitions, never input updates.
+  // Frame questions on transitions; overview screens share the current orbit.
   useEffect(() => {
     if (!ready) return;
     const old = previous.current;
@@ -1029,10 +1083,6 @@ export function App() {
       mode !== "playground" &&
       (game.phase === "finished" || game.phase === "failed")
     ) {
-      if (old && old !== cameraKey) {
-        const view = globe.current?.view();
-        if (view) views.current.set(old, view);
-      }
       previous.current = cameraKey;
       return;
     }
@@ -1042,46 +1092,30 @@ export function App() {
         previous.current = cameraKey;
         return;
       }
-      const view = globe.current?.view();
-      if (old && view) views.current.set(old, view);
       globe.current?.cancelFocus();
       setHover(undefined);
-      if (mode !== "home" && mode !== "explore") setMotion(false);
-      if (!(old === "/" && mode === "explore")) {
-        const saved = views.current.get(cameraKey);
-        const questionDestination =
-          world?.focus ?? (studying ? studyDestination(true) : undefined);
-        const destination =
-          questionDestination ??
-          (studying
-            ? saved
-            : mode === "home" && defaultView.current
-              ? defaultView.current
-              : (saved ?? defaultView.current ?? initialFocus));
-        if (destination) {
-          if (questionDestination) frame(destination);
-          else
-            globe.current?.focus(
-              mobile.enabled &&
-                normalWorldView(
-                  destination,
-                  worldAltitude(innerWidth, innerHeight),
-                )
-                ? {
-                    ...destination,
-                    altitude: worldAltitude(
-                      scene.current?.clientWidth || innerWidth,
-                      scene.current?.clientHeight || innerHeight,
-                      mobile.enabled,
-                    ),
-                  }
-                : destination,
-              false,
-            );
-        }
+      if (mode === "explore" && pendingExploreFocus.current) {
+        stop();
+        previous.current = cameraKey;
+        return;
       }
-      // Request rotation now; the globe waits until its focus travel finishes.
-      if (mode === "home") setMotion(true);
+      const questionDestination =
+        world?.focus ?? (studying ? studyDestination(true) : undefined);
+      if (questionDestination) {
+        stop();
+        frame(questionDestination);
+      } else if (mode === "home" || mode === "explore" || mode === "study") {
+        // Overview screens share one continuously moving globe, never a saved orbit.
+        const view = globe.current?.view();
+        const altitude = worldAltitude(
+          scene.current?.clientWidth || innerWidth,
+          scene.current?.clientHeight || innerHeight,
+          mobile.enabled,
+        );
+        if (view && !normalWorldView(view, altitude))
+          globe.current?.focus({ ...view, altitude }, "world");
+        setMotion(true);
+      } else setMotion(false);
       previous.current = cameraKey;
       return;
     }
@@ -1144,37 +1178,6 @@ export function App() {
     frame,
     stop,
   ]);
-  // Scope changes frame all eligible land; hint edits preserve the orbit.
-  useEffect(() => {
-    if (
-      !ready ||
-      mode !== "study" ||
-      studying ||
-      (!studyPreview && !studyBrowsingHistory)
-    )
-      return;
-    const altitude = worldAltitude(
-      scene.current?.clientWidth || innerWidth,
-      scene.current?.clientHeight || innerHeight,
-      mobile.enabled,
-    );
-    const focus = studyPreview
-      ? studyScopeFocus(studyPreview, namedRegions, altitude)
-      : undefined;
-    // Worldwide, an empty custom set and history have no regional focus.
-    frame(focus ?? { ...(defaultView.current ?? initialFocus), altitude });
-  }, [
-    ready,
-    mode,
-    studying,
-    studyBrowsingHistory,
-    studyPreview?.scope,
-    studyPreview?.continent,
-    studyPreview?.countryIds.join(","),
-    namedRegions,
-    mobile.enabled,
-    frame,
-  ]);
   // A home-country tap enters Explore first, then frames its new selection.
   useEffect(() => {
     if (!ready || mode !== "explore" || !pendingExploreFocus.current) return;
@@ -1183,8 +1186,9 @@ export function App() {
     );
     if (!region) return;
     pendingExploreFocus.current = undefined;
+    stop();
     focusExplore(region);
-  }, [ready, mode, namedRegions, focusExplore]);
+  }, [ready, mode, namedRegions, focusExplore, stop]);
   const dispatch = useCallback(
     (action: Action) => {
       if (!context) return;
@@ -1383,6 +1387,8 @@ export function App() {
       </section>
     ) : mode === "account" ? (
       <AccountPanel
+        daily={daily}
+        study={study}
         sync={
           canSave
             ? cloudSave
@@ -1403,21 +1409,23 @@ export function App() {
       />
     ) : mode === "admin" ? (
       <AdminAccess onAccount={() => navigate("/account")}>
-        <AdminPanel
-          date={today}
-          progress={daily}
-          catalog={allJourneys}
-          labels={Object.fromEntries(
-            published.items.map((p, i) => [
-              p.id,
-              `Local Journey ${i + 1} · revision ${p.revision}`,
-            ]),
-          )}
-          onSet={(id) =>
-            setDaily((p) => setDailyPuzzle(p, today, id, allJourneys))
-          }
-        />
-        <FeedbackReview />
+        <div className="admin-content">
+          <AdminPanel
+            date={today}
+            progress={daily}
+            catalog={allJourneys}
+            labels={Object.fromEntries(
+              published.items.map((p, i) => [
+                p.id,
+                `Local Journey ${i + 1} · revision ${p.revision}`,
+              ]),
+            )}
+            onSet={(id) =>
+              setDaily((p) => setDailyPuzzle(p, today, id, allJourneys))
+            }
+          />
+          <FeedbackReview />
+        </div>
       </AdminAccess>
     ) : mode === "explore" ? (
       <ExplorePanel
@@ -1444,10 +1452,9 @@ export function App() {
           if (saveDefaultView(view, explore)) {
             defaultView.current = { ...view };
             setDefaultLayers({ ...explore });
-            for (const key of ["/", "/admin", "/study:setup"])
-              views.current.delete(key);
+
             setDefaultViewStatus(
-              "Your starting view and visible layers are saved for Home and other screens.",
+              "Your Home starting view and visible layers are saved.",
             );
           } else setDefaultViewStatus("Could not save your default view.");
         }}
@@ -1458,8 +1465,7 @@ export function App() {
           }
           defaultView.current = undefined;
           setDefaultLayers(undefined);
-          for (const key of ["/", "/admin", "/study:setup"])
-            views.current.delete(key);
+
           setDefaultViewStatus("Default view reset.");
         }}
       />
@@ -1480,6 +1486,8 @@ export function App() {
           })
         }
         onPreview={setStudyPreview}
+        onBuilderChange={setStudyEditorOpen}
+        onCustomizeChange={setStudyCustomizing}
         onHistoryChange={setStudyBrowsingHistory}
         compact={mobile.enabled}
         save={study}
@@ -1607,7 +1615,7 @@ export function App() {
   );
   return (
     <main
-      className={`experience mode-${mode} phase-${phase} ${mode === "playground" ? "is-playground" : ""} ${expanded ? "globe-expanded" : ""}`}
+      className={`experience mode-${mode} phase-${phase} ${mode === "playground" ? "is-playground" : ""} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
       style={
         mobile.enabled
           ? ({
@@ -1618,11 +1626,17 @@ export function App() {
       }
       inert={!!feedback}
       data-keyboard-open={mobile.keyboard || undefined}
+      data-panel-only={panelOnly || undefined}
     >
       <div className="experience-glow" aria-hidden="true" />
+      {(mode === "account" || mode === "admin") && (
+        <div className="account-earth" aria-hidden="true" />
+      )}
       <div
         className="game-scene"
         id="mobile-map"
+        inert={panelOnly}
+        aria-hidden={panelOnly || undefined}
         ref={scene}
         onPointerDownCapture={() => setGlobeInteracted(true)}
         onWheelCapture={() => setGlobeInteracted(true)}
@@ -1636,8 +1650,13 @@ export function App() {
               }
             >
               <GlobeView
+                active={!panelOnly}
                 ref={globe}
-                initialFocus={defaultView.current ?? initialFocus}
+                initialFocus={
+                  mode === "home"
+                    ? (defaultView.current ?? initialFocus)
+                    : initialFocus
+                }
                 theme="play"
                 palette={theme}
                 layout="game"
@@ -1775,25 +1794,68 @@ export function App() {
         >
           <AmbitLogo />
         </button>
-        <AppMenu
-          admin={account.admin}
-          onJourney={() => playDaily(today)}
-          journeyReady={!!regions.length && dailyLoaded && cloudSave.ready}
-          onFeedback={() =>
-            setFeedback({ kind: "experience", context: { view: mode } })
-          }
-          path={path}
-          theme={theme}
-          onTheme={changeTheme}
-          caption={
-            mode === "daily"
-              ? `Journey · ${activeAttempt?.date ?? today}`
-              : mode === "practice"
-                ? "Practice"
-                : undefined
-          }
-          onNavigate={navigate}
-        />
+        <div className="experience-header-right">
+          <button
+            className="profile-toggle"
+            aria-label="Account"
+            aria-current={mode === "account" ? "page" : undefined}
+            title={
+              account.user
+                ? "Your profile, stats and friends"
+                : "Sign in or create an account"
+            }
+            onClick={() => navigate("/account")}
+            data-dd-privacy="mask"
+          >
+            {playerProfile ? (
+              <ProfileAvatar
+                avatar={playerProfile.avatar}
+                label="Your profile picture"
+              />
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            )}
+            <span>
+              {playerProfile
+                ? `@${playerProfile.handle}`
+                : account.user
+                  ? "Profile"
+                  : "Sign in"}
+            </span>
+          </button>
+          <AppMenu
+            admin={account.admin}
+            onJourney={() => playDaily(today)}
+            journeyReady={!!regions.length && dailyLoaded && cloudSave.ready}
+            onFeedback={() =>
+              setFeedback({ kind: "experience", context: { view: mode } })
+            }
+            path={path}
+            theme={theme}
+            onTheme={changeTheme}
+            caption={
+              mode === "daily"
+                ? `Journey · ${activeAttempt?.date ?? today}`
+                : mode === "practice"
+                  ? "Practice"
+                  : undefined
+            }
+            onNavigate={navigate}
+          />
+        </div>
       </header>
       {mobile.enabled && (
         <div className="mobile-map-tools" aria-label="Globe controls">
@@ -1850,6 +1912,7 @@ export function App() {
       )}
       <ModePanels
         mode={path}
+        page={pageLayout}
         reduced={reduced || mobile.enabled}
         persistent={mobile.enabled}
         hidden={expanded}

@@ -18,3 +18,11 @@ replacement, to give cached link previews a new image URL.
 The favicon SVG reuses `public/ambit-orb.svg` with a tightly cropped viewBox.
 Transparent 16/32-pixel PNGs and a multi-size ICO cover browser tabs. The
 180-pixel Apple touch icon places the same globe on a navy square for home screens.
+
+`ambit-login-logo.svg` reuses the outlined wordmark and globe for the 350 × 120
+transparent PNG in `deployment/cognito/`. The hosted-login CSS and offline-safe
+publication tool are documented in [Services](../../docs/SERVICES.md).
+
+`public/brand/account-globe.svg` reuses the globe paths and shading from
+`ambit-preview.svg` for the decorative Account and Admin backgrounds. It contains no card
+text and uses no interactive renderer.

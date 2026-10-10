@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ambit login branding review</title>
+    <link rel="stylesheet" href="/deployment/cognito/ambit.css" />
+    <style>
+      body {
+        margin: 0;
+        font:
+          14px/1.5 Arial,
+          sans-serif;
+      }
+      .review-note {
+        background: #071321;
+        color: #a5c6d2;
+        padding: 16px 24px;
+        text-align: center;
+      }
+      .review-note a {
+        color: #9cd8de;
+      }
+      .login-preview {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 0 24px 28px;
+        color: #edf4f7;
+      }
+      .banner-customizable {
+        text-align: center;
+        margin: 0 -24px 28px;
+      }
+      .login-preview label {
+        display: block;
+        margin: 16px 0 8px;
+      }
+      .inputField-customizable {
+        box-sizing: border-box;
+        padding: 12px;
+        border-radius: 4px;
+      }
+      button {
+        cursor: pointer;
+        border: 0;
+        border-radius: 4px;
+      }
+      .login-links {
+        display: grid;
+        gap: 14px;
+        text-align: center;
+      }
+      .login-links a {
+        color: #9cd8de;
+      }
+      .preview-status {
+        text-align: center;
+        color: #a5c6d2;
+      }
+    </style>
+  </head>
+  <body class="background-customizable">
+    <aside class="review-note">
+      Local branding preview · Cognito’s exact layout stays provider-managed.<br />No
+      credentials are submitted.
+      <a href="/review/accounts.html">Account preview</a> · <a href="/">App</a>
+    </aside>
+    <main class="login-preview">
+      <div class="banner-customizable">
+        <img
+          class="logo-customizable"
+          src="/deployment/cognito/ambit-logo.png"
+          alt="ambit"
+        />
+      </div>
+      <p class="textDescription-customizable">
+        Sign in with your email and password.
+      </p>
+      <form
+        onsubmit="event.preventDefault(); document.getElementById('preview-status').textContent='Preview only. Nothing was submitted.';"
+      >
+        <label class="label-customizable" for="email">Email</label
+        ><input
+          class="inputField-customizable"
+          id="email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+        /><label class="label-customizable" for="password">Password</label
+        ><input
+          class="inputField-customizable"
+          id="password"
+          type="password"
+          autocomplete="current-password"
+        /><button class="submitButton-customizable" type="submit">
+          Sign in
+        </button>
+      </form>
+      <div class="login-links">
+        <a href="#" onclick="event.preventDefault()">Forgot your password?</a
+        ><span
+          >Need an account?
+          <a href="#" onclick="event.preventDefault()">Sign up</a></span
+        >
+      </div>
+      <p class="preview-status" id="preview-status" role="status"></p>
+    </main>
+  </body>
+</html>

@@ -4,6 +4,9 @@ const paths = {
   repeat: "M20 8a8 8 0 1 0 0 8M20 3v5h-5",
   custom: "M4 7h16M4 17h16M8 4v6M16 14v6",
   review: "M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm5 11 5 5",
+  explore: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm5 5-3 7-7 3 3-7 7-3Z",
+  journey:
+    "M5 5h8a4 4 0 0 1 0 8H9a4 4 0 0 0 0 8h10M3 5a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm14 16a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z",
 };
 
 export function ActionIcon({ name }: { name: keyof typeof paths }) {

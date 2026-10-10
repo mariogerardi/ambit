@@ -8,6 +8,7 @@ export function ModePanels({
   hidden = false,
   scrollKey,
   persistent = false,
+  page = false,
 }: {
   mode: string;
   reduced: boolean;
@@ -15,18 +16,24 @@ export function ModePanels({
   hidden?: boolean;
   scrollKey?: string;
   persistent?: boolean;
+  page?: boolean;
 }) {
   const panel = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     if (panel.current) panel.current.scrollTop = 0;
   }, [mode, scrollKey]);
-  const previous = useRef({ mode, children });
+  const previous = useRef({ mode, children, page });
   const [outgoing, setOutgoing] = useState<ReactNode>();
   useLayoutEffect(() => {
-    if (previous.current.mode !== mode && !reduced)
+    if (
+      previous.current.mode !== mode &&
+      !reduced &&
+      !page &&
+      !previous.current.page
+    )
       setOutgoing(previous.current.children);
-    previous.current = { mode, children };
-  }, [mode, children, reduced]);
+    previous.current = { mode, children, page };
+  }, [mode, children, reduced, page]);
   useLayoutEffect(() => {
     if (!outgoing) return;
     const timer = setTimeout(() => setOutgoing(undefined), 220);

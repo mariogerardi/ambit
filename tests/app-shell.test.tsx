@@ -11,6 +11,7 @@ import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
+import { publishProfile } from "../src/services/playerProfile";
 import { THEME_KEY, readTheme } from "../src/theme/themes";
 import { regionBorderVisible } from "../src/globe/outlines";
 import type { GlobeHandle } from "../src/globe/GlobeView";
@@ -72,6 +73,7 @@ interface GlobeProps {
   placeLabels?: boolean;
   placeInteraction?: boolean;
   onSurfaceTap?(region?: RegionFeature): void;
+  active?: boolean;
 }
 const probe = vi.hoisted(() => ({
   mounts: 0,
@@ -79,6 +81,7 @@ const probe = vi.hoisted(() => ({
   props: undefined as GlobeProps | undefined,
   renders: [] as RegionFeature[][],
   focus: [] as Focus[],
+  fitModes: [] as (boolean | "world" | undefined)[],
   tours: [] as Focus[][],
   tourCancellations: 0,
   currentView: { lat: 14, lng: 24, altitude: 1.65 } as Focus,
@@ -93,7 +96,8 @@ vi.mock("../src/globe/GlobeView", () => ({
     useImperativeHandle(
       ref,
       () => ({
-        focus(target) {
+        focus(target, fit) {
+          probe.fitModes.push(fit);
           probe.focus.push(target);
           probe.currentView = target;
           view.current = target;
@@ -175,7 +179,7 @@ async function click(text: string) {
   ) {
     await click("Open menu");
     button = [
-      ...host.querySelectorAll<HTMLButtonElement>(".app-menu-content > button"),
+      ...host.querySelectorAll<HTMLButtonElement>(".app-menu-content button"),
     ].find((b) => b.textContent === text);
   }
   expect(button, `Button: ${text}`).toBeDefined();
@@ -247,6 +251,7 @@ beforeEach(() => {
   probe.props = undefined;
   probe.renders = [];
   probe.focus = [];
+  probe.fitModes = [];
   probe.tours = [];
   probe.tourCancellations = 0;
   probe.currentView = { lat: 14, lng: 24, altitude: 1.65 };
@@ -378,7 +383,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.textContent).toContain("Admin access required.");
     await click("Open menu");
     expect(
-      [...host.querySelectorAll(".app-menu-content > button")].some(
+      [...host.querySelectorAll(".app-menu-content button")].some(
         (button) => button.textContent === "Admin",
       ),
     ).toBe(false);
@@ -677,6 +682,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     history.replaceState(null, "", "/study");
     await mount();
     await click("Custom");
+    expect(host.querySelector(".page-layout .study-editor")).toBeNull();
+    expect(probe.props!.active).toBe(true);
     await act(async () => probe.props!.onSelect(member("wurl:BRA")));
     expect(probe.props!.states["wurl:BRA"]).toBe("selected");
     expect(probe.props!.selectDisabled).toBe(true);
@@ -684,6 +691,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.states["wurl:CAN"]).toBe("selected");
     await act(async () => probe.props!.onSelect(member("wurl:BRA")));
     expect(probe.props!.states["wurl:BRA"]).toBe("disabled");
+    expect(probe.focus.at(-1)).toMatchObject({
+      lat: member("wurl:CAN").focus.lat,
+      lng: member("wurl:CAN").focus.lng,
+    });
     const saved = savedStudy().settings;
     expect(saved.scope).toBe("custom");
     expect(saved.countryIds).toEqual(["wurl:CAN"]);
@@ -723,7 +734,12 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.places.some((p) => p.markerHidden)).toBe(false);
     expect(probe.props!.regionNames).toBe("none");
   });
-  it("previews the Study builder's eligible countries and frames its continent without resetting hints", async () => {
+  it("hides the globe only in the mobile Study builder and leaves its orbit alone while settings change", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === MOBILE_LAYOUT_QUERY,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
     history.replaceState(null, "", "/study");
     await mount();
     await click("Custom");
@@ -741,7 +757,11 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     });
     for (const id of pool) expect(probe.props!.states[id]).toBe("selectable");
     expect(probe.props!.states["wurl:CAN"]).toBe("disabled");
-    expect(probe.focus.at(-1)).toMatchObject({ lat: 3, lng: 20 });
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(true);
+    expect(host.querySelector("#mobile-map")?.hasAttribute("inert")).toBe(true);
+    expect(probe.focus).toHaveLength(0);
     const flights = probe.focus.length;
     await act(async () =>
       host.querySelector<HTMLElement>(".study-advanced > summary")!.click(),
@@ -757,11 +777,15 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       where.value = "all";
       where.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    expect(probe.focus.at(-1)!.altitude).toBeGreaterThanOrEqual(1.65);
+    expect(probe.focus).toHaveLength(flights);
     for (const id of studyPool(defaultSettings))
       expect(probe.props!.states[id]).toBe("selectable");
     await click("Back to paths");
+    expect(host.querySelector(".experience.page-layout")).toBeNull();
     expect(probe.props!.states["wurl:EGY"]).toBe("disabled");
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(false);
   });
   it("opens Admin on mobile without replacing Earth or losing the current attempt", async () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
@@ -776,12 +800,17 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Admin");
     expect(host.querySelector(".mode-incoming .admin-panel")).not.toBeNull();
     expect(location.pathname).toBe("/admin");
+    expect(
+      host.querySelector(".page-layout .admin-content .admin-panel"),
+    ).not.toBeNull();
+    expect(probe.props!.active).toBe(false);
     expect(host.querySelector("canvas")).toBe(earth);
     expect(JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts).toEqual(
       attempts,
     );
     await click("Journey");
     await settleLoads();
+    expect(probe.props!.active).toBe(true);
     expect(host.querySelector(".mode-incoming .question-card")).not.toBeNull();
     expect(host.querySelector("canvas")).toBe(earth);
     expect(probe.mounts).toBe(1);
@@ -1191,6 +1220,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.regionInteraction).toBe(false);
     await act(async () => probe.props!.onSelect(member("wurl:BRA")));
     expect(question.querySelector(".round-feedback")).toBeNull();
+    await click("Edit this session");
     const borders = [...dialog.querySelectorAll("label")]
       .find((label) => label.textContent === "Country borders")!
       .querySelector<HTMLInputElement>("input")!;
@@ -1418,6 +1448,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.textContent).toContain("Ottawa");
     expect(probe.focus).toHaveLength(before + 1);
     expect(probe.focus.at(-1)).toEqual(member("wurl:CAN").focus);
+    expect(probe.props!.motion).toBe(false);
     await act(async () => probe.props!.onSelect(member("wurl:JPN")));
     expect(host.textContent).toContain("Tokyo");
     expect(probe.focus).toHaveLength(before + 2);
@@ -1429,6 +1460,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await act(async () => probe.props!.onSurfaceTap!());
     expect(location.pathname).toBe("/explore");
     expect(probe.focus).toHaveLength(onHome);
+    expect(probe.props!.motion).toBe(true);
   });
   it("does not overwrite an existing custom daily attempt when its local library cannot be loaded", async () => {
     const saved = {
@@ -1474,7 +1506,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         ),
     ).toHaveLength(1);
   });
-  it("applies an updated default to Home and all unrestricted screens, ahead of old cached views", async () => {
+  it("uses a saved default only at startup while overview navigation keeps the live orientation", async () => {
     await mount();
     await click("Admin");
     await click("Home");
@@ -1486,12 +1518,15 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Globe settings");
     await click("Make this my default view");
     await click("Home");
-    expect(probe.focus.at(-1)).toEqual(saved);
+    expect(probe.currentView).toMatchObject({ lat: saved.lat, lng: saved.lng });
+    expect(probe.currentView.altitude).toBeGreaterThan(0.45);
     await click("Admin");
-    expect(probe.focus.at(-1)).toEqual(saved);
+    expect(probe.currentView).toMatchObject({ lat: saved.lat, lng: saved.lng });
+    expect(probe.currentView.altitude).toBeGreaterThan(0.45);
     await click("Home");
     await click("Study");
-    expect(probe.focus.at(-1)).toEqual(saved);
+    expect(probe.currentView).toMatchObject({ lat: saved.lat, lng: saved.lng });
+    expect(probe.currentView.altitude).toBeGreaterThan(0.45);
     await click("Home");
 
     await click("Play");
@@ -1892,17 +1927,74 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     expect(probe.props!.showBorders).toBe(false);
   });
-  it("keeps Explore paused after interaction but resumes rotation on returning Home", async () => {
+  it("resumes natural rotation on entering Explore and Home after interaction", async () => {
     await mount();
     expect(probe.props!.motion).toBe(true);
     await act(async () => probe.props!.onInteraction());
     expect(probe.props!.motion).toBe(false);
     await click("Explore");
-    expect(probe.props!.motion).toBe(false);
+    expect(probe.props!.motion).toBe(true);
     await click("Home");
     expect(probe.props!.motion).toBe(true);
     await click("Pause Earth");
     expect(probe.props!.motion).toBe(false);
+  });
+  it("clears Explore's prior selection and keeps the live orientation on return", async () => {
+    await mount();
+    await click("Explore");
+    await act(async () => probe.props!.onSelect(member("wurl:CAN")));
+    expect(host.textContent).toContain("Canada");
+    await click("Study");
+    probe.currentView = { lat: 12, lng: 112, altitude: 1.65 };
+    const flights = probe.focus.length;
+    await click("Explore");
+    expect(probe.currentView).toEqual({ lat: 12, lng: 112, altitude: 1.65 });
+    expect(probe.focus).toHaveLength(flights);
+    expect(probe.props!.states["wurl:CAN"]).not.toBe("selected");
+    expect(probe.props!.motion).toBe(true);
+    expect(probe.mounts).toBe(1);
+  });
+  it("raises the panel only for mobile Study customization and restores the mounted globe on close", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === MOBILE_LAYOUT_QUERY,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    await mount();
+    await click("Study");
+    await click("Custom");
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(true);
+    await click("Start studying");
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(false);
+    const cog = host.querySelector<HTMLButtonElement>(
+      '[aria-label="Session settings"]',
+    )!;
+    await act(async () => cog.click());
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(false);
+    const edit = [
+      ...document.querySelectorAll<HTMLButtonElement>("button"),
+    ].find((b) => b.textContent === "Edit this session")!;
+    await act(async () => edit.click());
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(true);
+    await act(async () =>
+      document
+        .querySelector<HTMLButtonElement>(
+          '[aria-label="Close Session settings"]',
+        )!
+        .click(),
+    );
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(false);
+    expect(probe.mounts).toBe(1);
   });
   it("preserves enabled rotation through Explore navigation and fidget", async () => {
     await mount();
@@ -1926,7 +2018,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     const focused = probe.focus.length;
     await click("Next");
     expect(probe.focus).toHaveLength(focused);
-    await click("Finish session");
+    await click("Session settings");
+    await click("Finish this session");
     const saved = savedStudy();
     expect(saved.history).toHaveLength(1);
     expect(saved.session?.phase).toBe("summary");
@@ -1997,10 +2090,13 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       ...other.load(),
       session: { ...session, id: "other-tab" },
     });
+    await click("Session settings");
     await act(async () => {
       const finish = [
-        ...host.querySelectorAll<HTMLButtonElement>(".study-question button"),
-      ].find((b) => b.textContent?.trim() === "Finish session")!;
+        ...document.querySelectorAll<HTMLButtonElement>(
+          ".study-options-dialog button",
+        ),
+      ].find((b) => b.textContent?.trim() === "Finish this session")!;
       finish.click();
       other.save(remote);
       dispatchEvent(
@@ -2016,7 +2112,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     expect(host.querySelector(".study-summary")).not.toBeNull();
     await click("Past study sessions");
-    expect(host.querySelectorAll(".study-history-list li")).toHaveLength(2);
+    expect(document.querySelectorAll(".study-history-list li")).toHaveLength(2);
   });
   it.each(["pointerdown", "wheel", "keydown"])(
     "keeps mobile playback between the map actions and dismisses the hint on %s",
@@ -2033,7 +2129,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         "globe-controls",
         "",
       ]);
-      expect(host.querySelectorAll(".globe-controls")).toHaveLength(1);
+      expect(document.querySelectorAll(".globe-controls")).toHaveLength(1);
       expect(host.querySelector(".mobile-gesture-hint")).not.toBeNull();
       // Programmatic camera changes must not dismiss the player's instruction.
       await click("Enlarge globe");
@@ -2195,6 +2291,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Resume session");
     expect(savedStudy().session?.id).toBe(saved.session?.id);
     await click("Session settings");
+    await click("Edit this session");
     await click("Build a new session");
     expect(host.querySelector(".study-editor")).not.toBeNull();
     expect(host.textContent).not.toContain("Return to results");
@@ -2228,6 +2325,80 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Data notes");
     await click("Home");
     expect(document.querySelector(".info-note-tooltip")).toBeNull();
+  });
+  it.each(["account", "builder"])(
+    "fits Home to its live viewport after leaving the hidden %s globe",
+    async (page) => {
+      vi.stubGlobal("matchMedia", (query: string) => ({
+        matches: query === MOBILE_LAYOUT_QUERY,
+        addEventListener() {},
+        removeEventListener() {},
+      }));
+      await mount();
+      if (page === "account") await click("Account");
+      else {
+        await click("Study");
+        await click("Custom");
+      }
+      expect(probe.props!.active).toBe(false);
+      const scene = host.querySelector(".game-scene")!;
+      Object.defineProperty(scene, "clientWidth", {
+        configurable: true,
+        value: 390,
+      });
+      Object.defineProperty(scene, "clientHeight", {
+        configurable: true,
+        value: 844,
+      });
+      probe.currentView = { lat: 17, lng: 80, altitude: 1.4 };
+      await click("ambit home");
+      expect(probe.props!.active).toBe(true);
+      expect(probe.fitModes.at(-1)).toBe("world");
+      expect(probe.focus.at(-1)).toMatchObject({ lat: 17, lng: 80 });
+      expect(probe.mounts).toBe(1);
+    },
+  );
+  it("puts Account access in the header and keeps it out of general navigation", async () => {
+    await mount();
+    const profile = host.querySelector<HTMLButtonElement>(".profile-toggle")!;
+    expect(profile.textContent).toContain("Sign in");
+    await click("Open menu");
+    expect(
+      [...host.querySelectorAll(".app-menu-content button")].some(
+        (b) => b.textContent?.trim() === "Account",
+      ),
+    ).toBe(false);
+    await act(async () => profile.click());
+    expect(location.pathname).toBe("/account");
+    expect(host.textContent).toContain("Welcome to Ambit.");
+    expect(host.querySelector(".app-menu-content")).toBeNull();
+  });
+  it("shows a saved handle and flag in the header and ignores another player's profile", async () => {
+    authProbe.subject = "a";
+    await mount();
+    const profile = {
+      id: "a",
+      displayName: "Alice",
+      handle: "alice",
+      avatar: "flag:wurl:CAN" as const,
+      favoriteRegion: "",
+      bio: "",
+      shareJourneyScores: false,
+      presets: [],
+      revision: 1,
+    };
+    await act(async () => publishProfile("a", profile));
+    expect(host.querySelector(".profile-toggle")?.textContent).toBe("@alice");
+    expect(
+      host.querySelector(".profile-toggle img")?.getAttribute("src"),
+    ).toMatch(/^\/flags\/study\//);
+    await act(async () =>
+      publishProfile("b", { ...profile, id: "b", handle: "bob" }),
+    );
+    expect(host.querySelector(".profile-toggle")?.textContent).toBe("@alice");
+    expect(
+      host.querySelector(".profile-toggle")?.classList.contains("is-signed-in"),
+    ).toBe(false);
   });
   it("keeps app navigation in a dismissible menu without blocking or replacing Earth", async () => {
     await mount();

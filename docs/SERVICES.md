@@ -6,10 +6,18 @@ accounts also protect admin tools. See [Save persistence](SAVE_PERSISTENCE.md).
 
 ## Accounts and admin access
 
-The hamburger menu opens **Account**. Sign-in, signup, email verification, and
+The header's profile button opens **Account**, separate from the navigation menu.
+After a profile is saved it shows the player's handle and chosen avatar; on mobile
+it keeps the avatar visible. Sign-in, signup, email verification, and
 password recovery use Cognito's hosted pages. The browser uses authorization code
-with PKCE, without an embedded client secret. Tokens and sign-in state stay in
-session storage, and expired access tokens can be renewed with a refresh token.
+with PKCE, without an embedded client secret. The signed-in user stays in local
+storage across tabs and browser sessions; temporary authorization state stays in
+tab session storage. Existing tab sessions migrate on first use. A coordinated
+refresh runs at startup, 90 seconds before expiry, and on focus/reconnect. Network
+failures retain the selected account and back off for 30 seconds; they do not
+erase progress or silently select guest storage. Other-tab sign-out/account
+changes cannot be overwritten by a late refresh. Access/ID tokens last 60 minutes
+and the refresh token lasts 30 days in the infrastructure configuration.
 Sign-out revokes the refresh token, removes the local session, and closes the
 hosted session. Sign-in failures remove callback query parameters and show a
 retry path without exposing provider responses.
@@ -23,6 +31,85 @@ is created on the owner's behalf: use **Create account** and verify that address
 
 The admin view offers feedback review and the existing device-local daily
 Journey override. It is not a central Journey publishing service.
+
+## Profiles, dashboard, and friends
+
+The Account screen shows daily Journey totals, a calendar-day Journey streak,
+Study completion totals and answer accuracy. It keeps Dashboard, Profile and
+Friends tabs; Journey/session history, Study setup presets, resume actions and
+Challenges are not shown on Account. Account and Admin scroll with the page.
+Account and Admin use a static globe illustration behind the content, while the hidden
+WebGL renderer is paused and kept mounted for returning to play.
+Display names, case-insensitive unique handles, preset avatars or country flags, an optional
+favorite region and a 160-character bio live in the retained, encrypted
+`ambit-production-community` table. Profile revisions prevent stale-device
+updates from overwriting newer edits. Handle claims and changes are transactional.
+No email address appears in another player's profile.
+
+[`shared/profile-avatars.json`](../shared/profile-avatars.json) defines the default
+avatar catalog for both frontend and backend. Add a label and either a symbol or
+a local `image` path when supplying more artwork; include the image under `public/`.
+Flag choices reuse the 193 locally bundled Study flags. The server accepts only
+catalog IDs and known country IDs, never player-supplied image URLs. Saving a
+profile updates the header immediately. A friends-service failure does not block
+profile editing, and connection errors show a player-facing retry message.
+
+Friends are requested by exact handle and require the recipient's acceptance.
+Requests can be declined/cancelled; friendships can be removed and players can
+be blocked/unblocked. A block removes reciprocal inbox access and prevents new
+requests, comparisons and challenge access. Completed Journey totals are shared
+only with accepted friends when the profile's explicit sharing option is enabled
+(off by default). The API derives totals from private synced saves; answers, pins,
+typed responses, drafts and email are never returned to friends. Comparison reads
+are bounded to 1,000 save registers and expose up to 30 recent totals.
+
+The backend includes challenge routes for a future feature,
+but Account no longer requests or exposes them. These routes use a fixed 10/20/50-question Study configuration and a server-generated
+seed. Both players receive the same order; missed-answer repeats and mid-session
+settings changes are disabled. Invitations can be accepted/declined/cancelled.
+An accepted challenge starts/resumes an account-scoped Study run and retains its
+challenge ID through sync. **Share result** requires a finished, synced session;
+the API calculates totals from the matching archived run rather than accepting
+caller-supplied totals. This is friendly practice using the existing client-side
+grading model, not a verified competitive ranking. Results are idempotent and
+private to the participants while their friendship remains accepted. Friend
+inboxes are bounded to 200 entries, outstanding outgoing requests to 20, and
+challenge sending to 20 per day. The challenge inbox shows its latest 50 entries.
+
+All profile and social routes require the existing JWT authorizer and `openid`
+scope. Writes additionally validate the browser origin, JSON type, payload size,
+field bounds and Study settings. Identity comes from the validated `sub`, never
+a submitted owner ID. Conditional DynamoDB transactions protect reciprocal
+inboxes and concurrent profile/challenge updates.
+
+## Login branding and local review
+
+The classic Cognito pages retain signup, verification and password recovery.
+[`deployment/cognito/ambit.css`](../deployment/cognito/ambit.css) uses the supported
+classic classes with Ambit's navy, peach, turquoise and light text. The outlined
+wordmark PNG stays below Cognito's 100 KB logo recommendation; no additional
+font service, provider upgrade or authentication flow is required. See
+[AWS's classic branding rules](https://docs.aws.amazon.com/cognito/latest/developerguide/hosted-ui-classic-branding.html).
+
+With `npm run dev`, review `/review/accounts.html` for an interactive sample-data
+dashboard/profile/friends flow and `/review/login.html` for the branding
+approximation. These entry points are not included in the production build;
+the account preview sends no API calls. The real hosted layout still needs a
+post-publication check. Validate branding offline with:
+
+```sh
+python3 scripts/apply-login-branding.py
+```
+
+After release approval, deploy the backend routes/table before the frontend and
+apply the reviewed hosted-page assets separately:
+
+```sh
+python3 scripts/deploy-backend.py --profile personal --no-wait
+python3 scripts/apply-login-branding.py --profile personal --apply
+```
+
+The default branding command never contacts AWS; only `--apply` publishes it.
 
 ## Feedback
 

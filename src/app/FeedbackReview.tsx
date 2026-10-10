@@ -103,14 +103,16 @@ export function FeedbackReview() {
       aria-label="Player feedback"
       data-dd-privacy="mask"
     >
-      <h2>Player feedback</h2>
-      <button
-        className="quiet-button tertiary-action"
-        disabled={busy}
-        onClick={() => void load()}
-      >
-        Refresh feedback
-      </button>
+      <header className="feedback-review-heading">
+        <h2>Player feedback</h2>
+        <button
+          className="quiet-button tertiary-action"
+          disabled={busy}
+          onClick={() => void load()}
+        >
+          Refresh feedback
+        </button>
+      </header>
       {busy && <p role="status">Loading…</p>}
       {error && <p role="alert">{error}</p>}
       {loaded && !items.length && <p>No feedback yet.</p>}

@@ -1,3 +1,4 @@
+import { StudyBack } from "./StudyBack";
 import { useEffect, useId, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { createPortal } from "react-dom";
@@ -10,12 +11,16 @@ export function StudySessionOptions({
   onApply,
   onClose,
   onBuild,
-  compact = false,
   onReport,
   onFinish,
+  locked = false,
+  onPause,
+  onPreferencesChange,
 }: {
+  locked?: boolean;
+  onPause?(): void;
+  onPreferencesChange?(visible: boolean): void;
   settings: StudySettings;
-  compact?: boolean;
   onReport?(): void;
   onFinish?(): void;
   returnFocus: RefObject<HTMLButtonElement | null>;
@@ -24,7 +29,11 @@ export function StudySessionOptions({
   onBuild(): void;
 }) {
   const [draft, setDraft] = useState(settings);
-  const [preferences, setPreferences] = useState(!compact);
+  const [preferences, setPreferences] = useState(false);
+  useEffect(() => {
+    onPreferencesChange?.(preferences);
+    return () => onPreferencesChange?.(false);
+  }, [preferences, onPreferencesChange]);
   const id = useId();
   const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -112,13 +121,26 @@ export function StudySessionOptions({
                 Report this question
               </button>
             )}
-            <button
-              className="quiet-button"
-              onClick={() => setPreferences(true)}
-            >
-              Edit this session
-            </button>
-            {onFinish && (
+            {!locked && (
+              <button
+                className="quiet-button"
+                onClick={() => setPreferences(true)}
+              >
+                Edit this session
+              </button>
+            )}
+            {locked && (
+              <p className="muted">
+                Challenge settings stay fixed so you and your friend get the
+                same questions.
+              </p>
+            )}
+            {locked && onPause && (
+              <button className="quiet-button" onClick={onPause}>
+                Pause challenge
+              </button>
+            )}
+            {!locked && onFinish && (
               <button className="quiet-button" onClick={onFinish}>
                 Finish this session
               </button>
@@ -126,14 +148,10 @@ export function StudySessionOptions({
           </div>
         ) : (
           <>
-            {compact && (
-              <button
-                className="quiet-button tertiary-action"
-                onClick={() => setPreferences(false)}
-              >
-                Back to session actions
-              </button>
-            )}
+            <StudyBack
+              label="Back to session actions"
+              onClick={() => setPreferences(false)}
+            />
             <StudyPreferences settings={draft} onSettings={setDraft} />
             <div className="study-options-actions">
               <button className="primary-button" onClick={() => onApply(draft)}>

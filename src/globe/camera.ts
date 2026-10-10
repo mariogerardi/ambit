@@ -43,7 +43,13 @@ export class CameraTravel {
     this.cancel();
     finalPosition?.();
   }
-  move(port: CameraPort, target: Focus, reduced: boolean, done?: () => void) {
+  move(
+    port: CameraPort,
+    target: Focus,
+    reduced: boolean,
+    done?: () => void,
+    targetAltitude?: () => number,
+  ) {
     this.cancel();
     const from = port.pointOfView(),
       to = {
@@ -52,7 +58,11 @@ export class CameraTravel {
       };
     const lng = shortestLongitude(from.lng, to.lng);
     this.finish = done;
-    this.finalPosition = () => port.pointOfView(to, 0);
+    const fitAltitude = () =>
+      Math.max(0.012, Math.min(5.5, targetAltitude?.() ?? to.altitude));
+    to.altitude = fitAltitude();
+    this.finalPosition = () =>
+      port.pointOfView({ ...to, altitude: fitAltitude() }, 0);
     if (reduced) {
       port.pointOfView(to, 0);
       this.cancel();
@@ -70,6 +80,7 @@ export class CameraTravel {
         Math.max(0, now - previousTime),
       );
       previousTime = now;
+      to.altitude = fitAltitude();
       const t = Math.min(1, elapsed / duration),
         // Soften just the first 90ms, with a nonzero starting speed so the
         // globe responds immediately. Rejoin the original ease-out afterward.
@@ -256,6 +267,23 @@ export function viewportProjection(
       Math.PI,
     offsetY: frameTop + (frameHeight - canvasHeight) / 2,
   };
+}
+
+export function focusAltitude(
+  altitude: number,
+  viewport: { width: number; frameHeight: number },
+  compact: boolean,
+  fit: boolean | "world" = true,
+) {
+  if (!fit) return altitude;
+  if (fit === "world")
+    return worldAltitude(viewport.width, viewport.frameHeight, compact);
+  return altitude < 1.65
+    ? altitude / Math.min(1, viewport.width / Math.max(1, viewport.frameHeight))
+    : Math.max(
+        altitude,
+        worldAltitude(viewport.width, viewport.frameHeight, compact),
+      );
 }
 
 export function worldAltitude(width: number, height: number, compact = false) {

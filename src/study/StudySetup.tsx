@@ -1,3 +1,4 @@
+import { StudyBack } from "./StudyBack";
 import { CAPITAL_DISTRACTORS } from "./distractors";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { normalizeAnswer, countryIdForName } from "../game/questions";
@@ -96,15 +97,7 @@ export function StudyEditor({
       aria-label="Study setup"
     >
       <div className="study-editor-scroll">
-        {onBack && (
-          <button
-            className="quiet-button tertiary-action study-back"
-            aria-label="Back to paths"
-            onClick={onBack}
-          >
-            <span aria-hidden="true">←</span> Back to paths
-          </button>
-        )}
+        {onBack && <StudyBack label="Back to paths" onClick={onBack} />}
         <h1 className="editorial-heading">
           Build a <em>session.</em>
         </h1>
@@ -396,7 +389,8 @@ export function StudyEditor({
           <aside className="study-replacement-note">
             <p>Starting a new session replaces your current session.</p>
             <button className="quiet-button tertiary-action" onClick={onResume}>
-              {resumeLabel ?? "Resume session"}
+              {resumeLabel ?? "Resume session"}{" "}
+              <span aria-hidden="true">→</span>
             </button>
           </aside>
         )}
@@ -414,8 +408,13 @@ export function StudySetup(props: {
   resumeLabel?: string;
   initialEditor?: boolean;
   onHistory?(): void;
+  onEditorChange?(editing: boolean): void;
 }) {
   const [editing, setEditing] = useState(!!props.initialEditor);
+  useEffect(() => {
+    props.onEditorChange?.(editing);
+    return () => props.onEditorChange?.(false);
+  }, [editing, props.onEditorChange]);
   useEffect(() => {
     props.onPreview?.(editing ? props.settings : undefined);
     return () => props.onPreview?.(undefined);
@@ -443,7 +442,8 @@ export function StudySetup(props: {
           className="primary-button study-resume-button"
           onClick={props.onResume}
         >
-          {props.resumeLabel ?? "Resume session"}
+          {props.resumeLabel ?? "Resume session"}{" "}
+          <span aria-hidden="true">→</span>
         </button>
       )}
       <div className="study-paths">

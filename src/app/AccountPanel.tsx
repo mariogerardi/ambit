@@ -1,48 +1,52 @@
 import type { ReactNode } from "react";
 import { useAccount } from "../services/accounts";
+import { AccountDashboard } from "./AccountDashboard";
+import type { DailyProgress } from "./dailyProgress";
+import type { StudySave } from "../study/engine";
 export function AccountPanel({
   sync,
+  daily,
+  study,
 }: {
+  daily?: DailyProgress;
+  study?: StudySave;
   sync?: { status: string; message: string; retry(): void };
 }) {
   const account = useAccount();
+  if (!account.loading && account.user)
+    return (
+      <>
+        <AccountDashboard
+          subject={account.user.profile.sub}
+          email={account.user.profile.email}
+          daily={daily}
+          study={study}
+          sync={sync}
+          onSignOut={() => void account.signOut()}
+          busy={account.busy}
+        />
+        {account.error && (
+          <p className="account-auth-error" role="alert">
+            {account.error}
+          </p>
+        )}
+        {account.user.expired && (
+          <button
+            className="quiet-button tertiary-action"
+            disabled={account.busy}
+            onClick={() => void account.signIn()}
+          >
+            Sign in again
+          </button>
+        )}
+      </>
+    );
   return (
     <section className="info-view account-panel" aria-label="Account">
       <span className="overline">YOUR ACCOUNT</span>
       <h1>{account.user ? "You’re signed in." : "Welcome to Ambit."}</h1>
       {account.loading ? (
         <p role="status">Checking your account…</p>
-      ) : account.user ? (
-        <>
-          <p>{account.user.profile.email}</p>
-          <p role="status">
-            {sync?.message ?? "Preparing to sync your progress…"}
-          </p>
-          {sync && (sync.status === "error" || sync.status === "offline") && (
-            <button
-              className="quiet-button tertiary-action"
-              onClick={sync.retry}
-            >
-              Retry sync
-            </button>
-          )}
-          {account.user.expired && (
-            <button
-              className="quiet-button tertiary-action"
-              disabled={account.busy}
-              onClick={() => void account.signIn()}
-            >
-              Sign in again
-            </button>
-          )}
-          <button
-            className="primary-button"
-            disabled={account.busy}
-            onClick={() => void account.signOut()}
-          >
-            Sign out
-          </button>
-        </>
       ) : (
         <>
           <p>

@@ -196,64 +196,67 @@ describe("Study completion, replay, and alternate answers", () => {
   );
 });
 
-it("puts mobile session actions in the cog and lets the player edit, report, or finish", async () => {
-  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-  const host = document.createElement("div"),
-    root = createRoot(host);
-  document.body.append(host);
-  const session = startStudy(settings, 42),
-    onReport = vi.fn(),
-    onAction = vi.fn();
-  const click = async (text: string) =>
-    act(async () => {
-      const button = [
-        ...document.querySelectorAll<HTMLButtonElement>("button"),
-      ].find(
-        (b) =>
-          b.textContent?.trim() === text ||
-          b.getAttribute("aria-label") === text,
+it.each([false, true])(
+  "puts session actions in the cog and supports edit, report and finish (compact=%s)",
+  async (compact) => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div"),
+      root = createRoot(host);
+    document.body.append(host);
+    const session = startStudy(settings, 42),
+      onReport = vi.fn(),
+      onAction = vi.fn();
+    const click = async (text: string) =>
+      act(async () => {
+        const button = [
+          ...document.querySelectorAll<HTMLButtonElement>("button"),
+        ].find(
+          (b) =>
+            b.textContent?.trim() === text ||
+            b.getAttribute("aria-label") === text,
+        );
+        expect(button).toBeDefined();
+        button!.click();
+      });
+    try {
+      await act(async () =>
+        root.render(
+          <StudyPanel
+            compact={compact}
+            active
+            webgl
+            setup={false}
+            save={{ ...emptyStudy, session }}
+            onSettings={vi.fn()}
+            onStart={vi.fn()}
+            onSetup={vi.fn()}
+            onAction={onAction}
+            onReport={onReport}
+          />,
+        ),
       );
-      expect(button).toBeDefined();
-      button!.click();
-    });
-  try {
-    await act(async () =>
-      root.render(
-        <StudyPanel
-          compact
-          active
-          webgl
-          setup={false}
-          save={{ ...emptyStudy, session }}
-          onSettings={vi.fn()}
-          onStart={vi.fn()}
-          onSetup={vi.fn()}
-          onAction={onAction}
-          onReport={onReport}
-        />,
-      ),
-    );
-    expect(host.textContent).not.toContain("Finish session");
-    expect(host.querySelector("input")).toBeNull();
-    await click("Session settings");
-    await click("Edit this session");
-    expect(
-      document.querySelector(".study-options-dialog")?.textContent,
-    ).toContain("Apply & resume");
-    await click("Back to session actions");
-    await click("Report this question");
-    expect(onReport).toHaveBeenCalledWith(session.prompt);
-    expect(document.querySelector("[role=dialog]")).toBeNull();
-    await click("Session settings");
-    await click("Finish this session");
-    expect(onAction).toHaveBeenCalledWith({ type: "finish" });
-    expect(document.querySelector("[role=dialog]")).toBeNull();
-  } finally {
-    await act(async () => root.unmount());
-    host.remove();
-    vi.unstubAllGlobals();
-  }
-});
+      expect(host.textContent).not.toContain("Finish session");
+      expect(host.querySelector("input")).toBeNull();
+      await click("Session settings");
+      await click("Edit this session");
+      expect(
+        document.querySelector(".study-options-dialog")?.textContent,
+      ).toContain("Apply & resume");
+      await click("Back to session actions");
+      await click("Report this question");
+      expect(onReport).toHaveBeenCalledWith(session.prompt);
+      expect(document.querySelector("[role=dialog]")).toBeNull();
+      await click("Session settings");
+      await click("Finish this session");
+      expect(onAction).toHaveBeenCalledWith({ type: "finish" });
+      expect(document.querySelector("[role=dialog]")).toBeNull();
+    } finally {
+      await act(async () => root.unmount());
+      host.remove();
+      vi.unstubAllGlobals();
+    }
+  },
+);
 
 it.each([true, false])(
   "does not offer the supplied country name as a map answer (WebGL: %s)",

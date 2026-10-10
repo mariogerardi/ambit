@@ -24,12 +24,19 @@ not automatically copied. No `.env` file or API key is required. Optional accoun
 configuration is described in [Services](SERVICES.md). Old local credentials for
 the removed authoring service are not part of current startup.
 
-The last implementation verification on October 10, 2026 passed **413 frontend tests in
-43 files**, 12 offline backend tests, and the production build. That is a dated result, not a promise about
+For review without deploying account services, open
+`http://127.0.0.1:5173/review/accounts.html` on the dev server. It renders the actual
+dashboard with an in-memory client and sample accounts; requests never reach AWS.
+The preview supports profile edits, friend acceptance and Journey comparisons. `/review/login.html` previews the supported
+Cognito branding assets; it submits no credentials. Both review entry points stay
+outside the production bundle. See [Services](SERVICES.md) for release steps.
+
+Full implementation verification on October 10, 2026 passed **473 frontend tests in
+45 files**, 25 offline backend tests, and the production build. That is a dated result, not a promise about
 later changes. Vitest covers logic, local assets, and DOM integration with a
 mocked globe. It does not exercise browser/WebGL rendering or actual mobile input.
 Browser testing is a separate, explicitly scoped activity; it was not run for
-this documentation pass.
+this implementation pass.
 
 For a focused check, name the relevant test files:
 
