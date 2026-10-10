@@ -3,7 +3,7 @@
   .experience.experience {
     --header-height: calc(56px + env(safe-area-inset-top, 0px));
     --nav-height: env(safe-area-inset-bottom, 0px);
-    /* Home's proportions are shared by every mobile mode. */
+    /* Study and Journey retain Home's standard map area. */
     --map-height: clamp(182px, calc(var(--app-height, 100dvh) * 0.322), 308px);
     --map-tools-height: 46px;
     --tools-offset: 0px;
@@ -147,6 +147,9 @@
   }
   .experience .daily-menu h2 {
     font-size: 23px;
+  }
+  .experience .daily-menu-description {
+    margin-top: 4px;
   }
   .experience .daily-levels {
     margin: 8px 0 10px;
@@ -458,7 +461,7 @@
   .mobile-gesture-hint {
     position: absolute;
     top: calc(
-      var(--header-height) + var(--map-height) - var(--tools-offset) - 22px
+      var(--header-height) + var(--map-height) - var(--tools-offset) - 14px
     );
     left: 50%;
     transform: translateX(-50%);
@@ -468,7 +471,7 @@
     color: var(--ui-text, #c0d0cb);
     pointer-events: none;
     z-index: 3;
-    text-shadow: var(--ui-text-shadow, 0 1px 3px #000);
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
   }
   .experience .study-presets {
     margin-bottom: 12px;
@@ -772,5 +775,24 @@
   .experience.experience.is-playground :is(.question-card, .finish-story) {
     top: auto;
     max-height: none;
+  }
+}
+
+/* Explore keeps its tray open, fitting short content and scrolling long details. */
+@media (orientation: portrait) and (max-width: 700px) {
+  .experience.experience.mode-explore:not(.globe-expanded):not(
+      [data-keyboard-open]
+    ) {
+    --map-height: max(
+      182px,
+      calc(
+        var(--app-height, 100dvh) - var(--header-height) - var(--nav-height) -
+          var(--map-tools-height) -
+          min(
+            calc(var(--explore-content-height, 220px) + 37px),
+            calc(var(--app-height, 100dvh) * 0.45)
+          )
+      )
+    );
   }
 }

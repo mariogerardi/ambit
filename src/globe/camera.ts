@@ -236,14 +236,17 @@ export function viewportProjection(
   canvasHeight: number,
   frameHeight = canvasHeight,
   frameTop = 0,
+  scale = 1,
 ) {
   // Extend the visible frustum through overlay bars, preserving the scale and
-  // center of the original map frame at every zoom level.
+  // center of the original map frame at every zoom level. Scale magnifies the
+  // projection without changing the orbit or distorting the sphere.
   return {
     fov:
       (Math.atan(
-        Math.tan((25 * Math.PI) / 180) *
-          (Math.max(1, canvasHeight) / Math.max(1, frameHeight)),
+        (Math.tan((25 * Math.PI) / 180) *
+          (Math.max(1, canvasHeight) / Math.max(1, frameHeight))) /
+          scale,
       ) *
         360) /
       Math.PI,

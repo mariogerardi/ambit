@@ -247,66 +247,78 @@ describe("camera travel", () => {
       worldAltitude(440, 490, true),
     );
   });
-  it("extends the mobile frustum behind both bars without shifting or enlarging the globe", () => {
-    const width = 440,
-      frameHeight = 385,
-      top = 56,
-      bottom = 46;
-    const height = top + frameHeight + bottom;
-    const projection = viewportProjection(height, frameHeight, top);
-    const original = new PerspectiveCamera(50, width / frameHeight, 1, 2000);
-    const extended = new PerspectiveCamera(
-      projection.fov,
-      width / height,
-      1,
-      2000,
-    );
-    extended.setViewOffset(
-      width,
-      height,
-      0,
-      -projection.offsetY,
-      width,
-      height,
-    );
-    const pixels = (
-      point: Vector3,
-      camera: PerspectiveCamera,
-      canvasHeight: number,
-    ) => {
-      const p = point.clone().project(camera);
-      return { x: ((p.x + 1) * width) / 2, y: ((1 - p.y) * canvasHeight) / 2 };
-    };
-    // Preserve framing at the default distance and after a close zoom.
-    for (const distance of [
-      100 * (worldAltitude(width, frameHeight, true) + 1),
-      125,
-    ]) {
-      for (const camera of [original, extended]) {
-        camera.position.z = distance;
-        camera.updateMatrixWorld();
-      }
-      for (const point of [
-        new Vector3(),
-        new Vector3(70, 70, 20),
-        new Vector3(-70, -70, 20),
+  it.each([1, 1.15])(
+    "extends the mobile frustum behind both bars with centered visual scale %s",
+    (scale) => {
+      const width = 440,
+        frameHeight = 385,
+        top = 56,
+        bottom = 46;
+      const height = top + frameHeight + bottom;
+      const projection = viewportProjection(height, frameHeight, top, scale);
+      const original = new PerspectiveCamera(50, width / frameHeight, 1, 2000);
+      const extended = new PerspectiveCamera(
+        projection.fov,
+        width / height,
+        1,
+        2000,
+      );
+      extended.setViewOffset(
+        width,
+        height,
+        0,
+        -projection.offsetY,
+        width,
+        height,
+      );
+      const pixels = (
+        point: Vector3,
+        camera: PerspectiveCamera,
+        canvasHeight: number,
+      ) => {
+        const p = point.clone().project(camera);
+        return {
+          x: ((p.x + 1) * width) / 2,
+          y: ((1 - p.y) * canvasHeight) / 2,
+        };
+      };
+      // Preserve framing at the default distance and after a close zoom.
+      for (const distance of [
+        100 * (worldAltitude(width, frameHeight, true) + 1),
+        125,
       ]) {
-        const before = pixels(point, original, frameHeight);
-        const after = pixels(point, extended, height);
-        expect(after.x).toBeCloseTo(before.x, 8);
-        expect(after.y).toBeCloseTo(top + before.y, 8);
+        for (const camera of [original, extended]) {
+          camera.position.z = distance;
+          camera.updateMatrixWorld();
+        }
+        for (const point of [
+          new Vector3(),
+          new Vector3(70, 70, 20),
+          new Vector3(-70, -70, 20),
+        ]) {
+          const before = pixels(point, original, frameHeight);
+          const after = pixels(point, extended, height);
+          expect(after.x).toBeCloseTo(
+            width / 2 + (before.x - width / 2) * scale,
+            8,
+          );
+          expect(after.y).toBeCloseTo(
+            top + frameHeight / 2 + (before.y - frameHeight / 2) * scale,
+            8,
+          );
+        }
       }
-    }
-    // These zoomed surface points used to be clipped at the map's edges.
-    for (const y of [65, -65]) {
-      const p = pixels(new Vector3(0, y, 0), extended, height);
-      expect(p.y).toBeGreaterThan(0);
-      expect(p.y).toBeLessThan(height);
-      expect(p.y < top || p.y > top + frameHeight).toBe(true);
-    }
-    expect(viewportProjection(900).fov).toBeCloseTo(50);
-    expect(viewportProjection(900).offsetY).toBe(0);
-  });
+      // These zoomed surface points used to be clipped at the map's edges.
+      for (const y of [65 / scale, -65 / scale]) {
+        const p = pixels(new Vector3(0, y, 0), extended, height);
+        expect(p.y).toBeGreaterThan(0);
+        expect(p.y).toBeLessThan(height);
+        expect(p.y < top || p.y > top + frameHeight).toBe(true);
+      }
+      expect(viewportProjection(900).fov).toBeCloseTo(50);
+      expect(viewportProjection(900).offsetY).toBe(0);
+    },
+  );
   it("interrupts camera movement at its current position and starts new travel there", () => {
     let callback: FrameRequestCallback = () => {},
       position: Required<Focus> = { lat: 0, lng: 179, altitude: 1 };

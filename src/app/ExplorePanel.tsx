@@ -2,6 +2,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -36,7 +37,9 @@ export function ExplorePanel({
   onSaveView,
   onResetView,
   defaultViewStatus,
+  onContentHeight,
 }: {
+  onContentHeight?(height: number): void;
   search: string;
   onSearch(value: string): void;
   regions: RegionFeature[];
@@ -53,6 +56,17 @@ export function ExplorePanel({
   onResetView(): void;
   defaultViewStatus: string;
 }) {
+  const card = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    if (!onContentHeight || !card.current) return;
+    const element = card.current;
+    const measure = () =>
+      onContentHeight(Math.ceil(element.getBoundingClientRect().height));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [onContentHeight]);
   const active = useContext(PanelActive),
     input = useRef<HTMLInputElement>(null),
     searchButton = useRef<HTMLButtonElement>(null),
@@ -302,6 +316,7 @@ export function ExplorePanel({
   );
   return (
     <section
+      ref={card}
       className="info-view explore-card"
       aria-label="Countries and capitals explorer"
       onKeyDown={(event) => {

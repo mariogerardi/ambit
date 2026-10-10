@@ -92,6 +92,7 @@ interface Props {
   layout?: "lab" | "game";
   compact?: boolean;
   expanded?: boolean;
+  visualScale?: number;
   onInteraction?(): void;
   onSurfaceTap?(region?: RegionFeature): void;
   onCoordinateTap?(point: Focus): void;
@@ -330,6 +331,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         viewport.height,
         viewport.frameHeight,
         viewport.frameTop,
+        current.current.visualScale ?? 1,
       ).fov;
       camera.updateProjectionMatrix();
       const keyLight = new DirectionalLight(0xe3f0ff, 1.0);
@@ -418,6 +420,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         size.height,
         size.frameHeight,
         size.frameTop,
+        props.visualScale ?? 1,
       ).fov;
       camera.updateProjectionMatrix();
       if (
@@ -445,7 +448,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         height: size.frameHeight,
       };
       refreshLabels();
-    }, [size, ready, props.compact, refreshLabels]);
+    }, [size, ready, props.compact, props.visualScale, refreshLabels]);
     useEffect(() => {
       if (ready && globe.current) {
         globe.current.controls().autoRotate =

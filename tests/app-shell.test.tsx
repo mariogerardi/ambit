@@ -48,6 +48,7 @@ import { MOBILE_LAYOUT_QUERY } from "../src/app/useMobileLayout";
 import { STUDY_PATHS } from "../src/study/paths";
 interface GlobeProps {
   palette?: string;
+  visualScale?: number;
   initialFocus?: Focus;
   regions: RegionFeature[];
   places: PlaceFeature[];
@@ -203,6 +204,11 @@ async function mount() {
   });
   await settleLoads();
 }
+let panelObservers: {
+  resize(): void;
+  element?: Element;
+  disconnected: boolean;
+}[] = [];
 beforeEach(() => {
   authProbe.admin = true;
   authProbe.subject = undefined;
@@ -218,6 +224,23 @@ beforeEach(() => {
       return store.size;
     },
   });
+  panelObservers = [];
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      item: (typeof panelObservers)[number];
+      constructor(resize: () => void) {
+        this.item = { resize, disconnected: false };
+        panelObservers.push(this.item);
+      }
+      observe(element: Element) {
+        this.item.element = element;
+      }
+      disconnect() {
+        this.item.disconnected = true;
+      }
+    },
+  );
   localStorage.clear();
   history.replaceState(null, "", "/");
   probe.mounts = 0;
@@ -502,6 +525,54 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       ...country.focus,
       altitude: country.focus.altitude! * 0.72,
     });
+  });
+
+  it("fits the mobile Explore tray to changing content while keeping the globe and enlargement control", async () => {
+    let contentHeight = 196;
+    const bounds = HTMLElement.prototype.getBoundingClientRect;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        if (!this.matches(".explore-card")) return bounds.call(this);
+        return { ...bounds.call(this), height: contentHeight } as DOMRect;
+      },
+    );
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === MOBILE_LAYOUT_QUERY,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    await mount();
+    expect(probe.props!.visualScale).toBe(1.15);
+    await click("Explore");
+    const experience = host.querySelector<HTMLElement>(".experience")!;
+    expect(experience.style.getPropertyValue("--explore-content-height")).toBe(
+      "196px",
+    );
+    expect(probe.props!.visualScale).toBe(1);
+    const enlargement = [
+      ...host.querySelectorAll<HTMLButtonElement>("button"),
+    ].find((button) => button.textContent?.trim() === "Enlarge globe")!;
+    expect(enlargement.getAttribute("aria-expanded")).toBe("false");
+    expect(host.querySelector(".mode-incoming")!.hasAttribute("inert")).toBe(
+      false,
+    );
+    const observer = panelObservers.find((item) =>
+      item.element?.matches(".explore-card"),
+    )!;
+    contentHeight = 480;
+    await act(async () => observer.resize());
+    expect(experience.style.getPropertyValue("--explore-content-height")).toBe(
+      "480px",
+    );
+    await act(async () => enlargement.click());
+    expect(enlargement.getAttribute("aria-expanded")).toBe("true");
+    await act(async () => enlargement.click());
+    expect(enlargement.textContent?.trim()).toBe("Enlarge globe");
+    expect(host.querySelector(".explore-card")).not.toBeNull();
+    expect(probe.mounts).toBe(1);
+    await click("Home");
+    expect(observer.disconnected).toBe(true);
+    expect(probe.props!.visualScale).toBe(1.15);
   });
 
   it("restores a saved theme at startup", async () => {

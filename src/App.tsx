@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ErrorInfo, ReactNode } from "react";
+import type { CSSProperties, ErrorInfo, ReactNode } from "react";
 import { LayerLoader } from "./geography/loadLayer";
 import type {
   BoundaryLayerManifest,
@@ -181,6 +181,7 @@ export function App() {
   const closeFeedback = useCallback(() => setFeedback(undefined), []);
   const mobile = useMobileLayout();
   const [globeExpanded, setGlobeExpanded] = useState(false);
+  const [exploreContentHeight, setExploreContentHeight] = useState(220);
   const expanded = mobile.enabled && globeExpanded && !mobile.keyboard;
   const published = usePublishedPuzzles();
   const allJourneys = useMemo(
@@ -1420,6 +1421,7 @@ export function App() {
       </AdminAccess>
     ) : mode === "explore" ? (
       <ExplorePanel
+        onContentHeight={mobile.enabled ? setExploreContentHeight : undefined}
         regions={namedRegions}
         selected={selected}
         settings={explore}
@@ -1606,7 +1608,14 @@ export function App() {
   return (
     <main
       className={`experience mode-${mode} phase-${phase} ${mode === "playground" ? "is-playground" : ""} ${expanded ? "globe-expanded" : ""}`}
-      style={mobile.enabled ? mobile.style : undefined}
+      style={
+        mobile.enabled
+          ? ({
+              ...mobile.style,
+              "--explore-content-height": `${exploreContentHeight}px`,
+            } as CSSProperties)
+          : undefined
+      }
       inert={!!feedback}
       data-keyboard-open={mobile.keyboard || undefined}
     >
@@ -1634,6 +1643,7 @@ export function App() {
                 layout="game"
                 compact={mobile.enabled}
                 expanded={expanded}
+                visualScale={mobile.enabled && mode === "home" ? 1.15 : 1}
                 regions={
                   world?.regions ??
                   (mode === "explore" ? exploreRegions : namedRegions)
