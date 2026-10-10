@@ -1,0 +1,15 @@
+{
+  "source": "Natural Earth",
+  "version": "5.1.2 / 1:10m",
+  "license": "Public Domain",
+  "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_lakes.geojson",
+  "subset": "scripts/great-lakes.geojson",
+  "sha256": "8e237f03d483daf9d1604ed6e2dc3ed3417c4fe3106d4b7b2e75097403e32fc2",
+  "features": [
+    "Lake Erie",
+    "Lake Ontario",
+    "Lake Superior",
+    "Lake Michigan",
+    "Lake Huron"
+  ]
+}

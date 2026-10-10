@@ -1,0 +1,779 @@
+{
+  "version": "un-members-common-en-2026-10-04",
+  "source": "https://www.un.org/en/about-us/member-states",
+  "namingPolicy": "Reviewed common English names of the 193 UN member states; canonical IDs mapped to the pinned Natural Earth catalog. Territories and observer/non-member states are excluded.",
+  "members": [
+    {
+      "id": "wurl:AFG",
+      "name": "Afghanistan"
+    },
+    {
+      "id": "wurl:ALB",
+      "name": "Albania"
+    },
+    {
+      "id": "wurl:DZA",
+      "name": "Algeria"
+    },
+    {
+      "id": "wurl:AND",
+      "name": "Andorra"
+    },
+    {
+      "id": "wurl:AGO",
+      "name": "Angola"
+    },
+    {
+      "id": "wurl:ATG",
+      "name": "Antigua and Barbuda"
+    },
+    {
+      "id": "wurl:ARG",
+      "name": "Argentina"
+    },
+    {
+      "id": "wurl:ARM",
+      "name": "Armenia"
+    },
+    {
+      "id": "wurl:AUS",
+      "name": "Australia"
+    },
+    {
+      "id": "wurl:AUT",
+      "name": "Austria"
+    },
+    {
+      "id": "wurl:AZE",
+      "name": "Azerbaijan"
+    },
+    {
+      "id": "wurl:BHR",
+      "name": "Bahrain"
+    },
+    {
+      "id": "wurl:BGD",
+      "name": "Bangladesh"
+    },
+    {
+      "id": "wurl:BRB",
+      "name": "Barbados"
+    },
+    {
+      "id": "wurl:BLR",
+      "name": "Belarus"
+    },
+    {
+      "id": "wurl:BEL",
+      "name": "Belgium"
+    },
+    {
+      "id": "wurl:BLZ",
+      "name": "Belize"
+    },
+    {
+      "id": "wurl:BEN",
+      "name": "Benin"
+    },
+    {
+      "id": "wurl:BTN",
+      "name": "Bhutan"
+    },
+    {
+      "id": "wurl:BOL",
+      "name": "Bolivia"
+    },
+    {
+      "id": "wurl:BIH",
+      "name": "Bosnia and Herzegovina"
+    },
+    {
+      "id": "wurl:BWA",
+      "name": "Botswana"
+    },
+    {
+      "id": "wurl:BRA",
+      "name": "Brazil"
+    },
+    {
+      "id": "wurl:BRN",
+      "name": "Brunei"
+    },
+    {
+      "id": "wurl:BGR",
+      "name": "Bulgaria"
+    },
+    {
+      "id": "wurl:BFA",
+      "name": "Burkina Faso"
+    },
+    {
+      "id": "wurl:BDI",
+      "name": "Burundi"
+    },
+    {
+      "id": "wurl:CPV",
+      "name": "Cabo Verde"
+    },
+    {
+      "id": "wurl:KHM",
+      "name": "Cambodia"
+    },
+    {
+      "id": "wurl:CMR",
+      "name": "Cameroon"
+    },
+    {
+      "id": "wurl:CAN",
+      "name": "Canada"
+    },
+    {
+      "id": "wurl:CAF",
+      "name": "Central African Republic"
+    },
+    {
+      "id": "wurl:TCD",
+      "name": "Chad"
+    },
+    {
+      "id": "wurl:CHL",
+      "name": "Chile"
+    },
+    {
+      "id": "wurl:CHN",
+      "name": "China"
+    },
+    {
+      "id": "wurl:COL",
+      "name": "Colombia"
+    },
+    {
+      "id": "wurl:COM",
+      "name": "Comoros"
+    },
+    {
+      "id": "wurl:CRI",
+      "name": "Costa Rica"
+    },
+    {
+      "id": "wurl:HRV",
+      "name": "Croatia"
+    },
+    {
+      "id": "wurl:CUB",
+      "name": "Cuba"
+    },
+    {
+      "id": "wurl:CYP",
+      "name": "Cyprus"
+    },
+    {
+      "id": "wurl:CZE",
+      "name": "Czechia"
+    },
+    {
+      "id": "wurl:COD",
+      "name": "Democratic Republic of the Congo"
+    },
+    {
+      "id": "wurl:DNK",
+      "name": "Denmark"
+    },
+    {
+      "id": "wurl:DJI",
+      "name": "Djibouti"
+    },
+    {
+      "id": "wurl:DMA",
+      "name": "Dominica"
+    },
+    {
+      "id": "wurl:DOM",
+      "name": "Dominican Republic"
+    },
+    {
+      "id": "wurl:TLS",
+      "name": "East Timor"
+    },
+    {
+      "id": "wurl:ECU",
+      "name": "Ecuador"
+    },
+    {
+      "id": "wurl:EGY",
+      "name": "Egypt"
+    },
+    {
+      "id": "wurl:SLV",
+      "name": "El Salvador"
+    },
+    {
+      "id": "wurl:GNQ",
+      "name": "Equatorial Guinea"
+    },
+    {
+      "id": "wurl:ERI",
+      "name": "Eritrea"
+    },
+    {
+      "id": "wurl:EST",
+      "name": "Estonia"
+    },
+    {
+      "id": "wurl:SWZ",
+      "name": "Eswatini"
+    },
+    {
+      "id": "wurl:ETH",
+      "name": "Ethiopia"
+    },
+    {
+      "id": "wurl:FSM",
+      "name": "Federated States of Micronesia"
+    },
+    {
+      "id": "wurl:FJI",
+      "name": "Fiji"
+    },
+    {
+      "id": "wurl:FIN",
+      "name": "Finland"
+    },
+    {
+      "id": "wurl:FRA",
+      "name": "France"
+    },
+    {
+      "id": "wurl:GAB",
+      "name": "Gabon"
+    },
+    {
+      "id": "wurl:GMB",
+      "name": "Gambia"
+    },
+    {
+      "id": "wurl:GEO",
+      "name": "Georgia"
+    },
+    {
+      "id": "wurl:DEU",
+      "name": "Germany"
+    },
+    {
+      "id": "wurl:GHA",
+      "name": "Ghana"
+    },
+    {
+      "id": "wurl:GRC",
+      "name": "Greece"
+    },
+    {
+      "id": "wurl:GRD",
+      "name": "Grenada"
+    },
+    {
+      "id": "wurl:GTM",
+      "name": "Guatemala"
+    },
+    {
+      "id": "wurl:GIN",
+      "name": "Guinea"
+    },
+    {
+      "id": "wurl:GNB",
+      "name": "Guinea-Bissau"
+    },
+    {
+      "id": "wurl:GUY",
+      "name": "Guyana"
+    },
+    {
+      "id": "wurl:HTI",
+      "name": "Haiti"
+    },
+    {
+      "id": "wurl:HND",
+      "name": "Honduras"
+    },
+    {
+      "id": "wurl:HUN",
+      "name": "Hungary"
+    },
+    {
+      "id": "wurl:ISL",
+      "name": "Iceland"
+    },
+    {
+      "id": "wurl:IND",
+      "name": "India"
+    },
+    {
+      "id": "wurl:IDN",
+      "name": "Indonesia"
+    },
+    {
+      "id": "wurl:IRN",
+      "name": "Iran"
+    },
+    {
+      "id": "wurl:IRQ",
+      "name": "Iraq"
+    },
+    {
+      "id": "wurl:IRL",
+      "name": "Ireland"
+    },
+    {
+      "id": "wurl:ISR",
+      "name": "Israel"
+    },
+    {
+      "id": "wurl:ITA",
+      "name": "Italy"
+    },
+    {
+      "id": "wurl:CIV",
+      "name": "Ivory Coast"
+    },
+    {
+      "id": "wurl:JAM",
+      "name": "Jamaica"
+    },
+    {
+      "id": "wurl:JPN",
+      "name": "Japan"
+    },
+    {
+      "id": "wurl:JOR",
+      "name": "Jordan"
+    },
+    {
+      "id": "wurl:KAZ",
+      "name": "Kazakhstan"
+    },
+    {
+      "id": "wurl:KEN",
+      "name": "Kenya"
+    },
+    {
+      "id": "wurl:KIR",
+      "name": "Kiribati"
+    },
+    {
+      "id": "wurl:KWT",
+      "name": "Kuwait"
+    },
+    {
+      "id": "wurl:KGZ",
+      "name": "Kyrgyzstan"
+    },
+    {
+      "id": "wurl:LAO",
+      "name": "Laos"
+    },
+    {
+      "id": "wurl:LVA",
+      "name": "Latvia"
+    },
+    {
+      "id": "wurl:LBN",
+      "name": "Lebanon"
+    },
+    {
+      "id": "wurl:LSO",
+      "name": "Lesotho"
+    },
+    {
+      "id": "wurl:LBR",
+      "name": "Liberia"
+    },
+    {
+      "id": "wurl:LBY",
+      "name": "Libya"
+    },
+    {
+      "id": "wurl:LIE",
+      "name": "Liechtenstein"
+    },
+    {
+      "id": "wurl:LTU",
+      "name": "Lithuania"
+    },
+    {
+      "id": "wurl:LUX",
+      "name": "Luxembourg"
+    },
+    {
+      "id": "wurl:MDG",
+      "name": "Madagascar"
+    },
+    {
+      "id": "wurl:MWI",
+      "name": "Malawi"
+    },
+    {
+      "id": "wurl:MYS",
+      "name": "Malaysia"
+    },
+    {
+      "id": "wurl:MDV",
+      "name": "Maldives"
+    },
+    {
+      "id": "wurl:MLI",
+      "name": "Mali"
+    },
+    {
+      "id": "wurl:MLT",
+      "name": "Malta"
+    },
+    {
+      "id": "wurl:MHL",
+      "name": "Marshall Islands"
+    },
+    {
+      "id": "wurl:MRT",
+      "name": "Mauritania"
+    },
+    {
+      "id": "wurl:MUS",
+      "name": "Mauritius"
+    },
+    {
+      "id": "wurl:MEX",
+      "name": "Mexico"
+    },
+    {
+      "id": "wurl:MDA",
+      "name": "Moldova"
+    },
+    {
+      "id": "wurl:MCO",
+      "name": "Monaco"
+    },
+    {
+      "id": "wurl:MNG",
+      "name": "Mongolia"
+    },
+    {
+      "id": "wurl:MNE",
+      "name": "Montenegro"
+    },
+    {
+      "id": "wurl:MAR",
+      "name": "Morocco"
+    },
+    {
+      "id": "wurl:MOZ",
+      "name": "Mozambique"
+    },
+    {
+      "id": "wurl:MMR",
+      "name": "Myanmar"
+    },
+    {
+      "id": "wurl:NAM",
+      "name": "Namibia"
+    },
+    {
+      "id": "wurl:NRU",
+      "name": "Nauru"
+    },
+    {
+      "id": "wurl:NPL",
+      "name": "Nepal"
+    },
+    {
+      "id": "wurl:NLD",
+      "name": "Netherlands"
+    },
+    {
+      "id": "wurl:NZL",
+      "name": "New Zealand"
+    },
+    {
+      "id": "wurl:NIC",
+      "name": "Nicaragua"
+    },
+    {
+      "id": "wurl:NER",
+      "name": "Niger"
+    },
+    {
+      "id": "wurl:NGA",
+      "name": "Nigeria"
+    },
+    {
+      "id": "wurl:PRK",
+      "name": "North Korea"
+    },
+    {
+      "id": "wurl:MKD",
+      "name": "North Macedonia"
+    },
+    {
+      "id": "wurl:NOR",
+      "name": "Norway"
+    },
+    {
+      "id": "wurl:OMN",
+      "name": "Oman"
+    },
+    {
+      "id": "wurl:PAK",
+      "name": "Pakistan"
+    },
+    {
+      "id": "wurl:PLW",
+      "name": "Palau"
+    },
+    {
+      "id": "wurl:PAN",
+      "name": "Panama"
+    },
+    {
+      "id": "wurl:PNG",
+      "name": "Papua New Guinea"
+    },
+    {
+      "id": "wurl:PRY",
+      "name": "Paraguay"
+    },
+    {
+      "id": "wurl:PER",
+      "name": "Peru"
+    },
+    {
+      "id": "wurl:PHL",
+      "name": "Philippines"
+    },
+    {
+      "id": "wurl:POL",
+      "name": "Poland"
+    },
+    {
+      "id": "wurl:PRT",
+      "name": "Portugal"
+    },
+    {
+      "id": "wurl:QAT",
+      "name": "Qatar"
+    },
+    {
+      "id": "wurl:SRB",
+      "name": "Republic of Serbia"
+    },
+    {
+      "id": "wurl:COG",
+      "name": "Republic of the Congo"
+    },
+    {
+      "id": "wurl:ROU",
+      "name": "Romania"
+    },
+    {
+      "id": "wurl:RUS",
+      "name": "Russia"
+    },
+    {
+      "id": "wurl:RWA",
+      "name": "Rwanda"
+    },
+    {
+      "id": "wurl:KNA",
+      "name": "Saint Kitts and Nevis"
+    },
+    {
+      "id": "wurl:LCA",
+      "name": "Saint Lucia"
+    },
+    {
+      "id": "wurl:VCT",
+      "name": "Saint Vincent and the Grenadines"
+    },
+    {
+      "id": "wurl:WSM",
+      "name": "Samoa"
+    },
+    {
+      "id": "wurl:SMR",
+      "name": "San Marino"
+    },
+    {
+      "id": "wurl:STP",
+      "name": "São Tomé and Principe"
+    },
+    {
+      "id": "wurl:SAU",
+      "name": "Saudi Arabia"
+    },
+    {
+      "id": "wurl:SEN",
+      "name": "Senegal"
+    },
+    {
+      "id": "wurl:SYC",
+      "name": "Seychelles"
+    },
+    {
+      "id": "wurl:SLE",
+      "name": "Sierra Leone"
+    },
+    {
+      "id": "wurl:SGP",
+      "name": "Singapore"
+    },
+    {
+      "id": "wurl:SVK",
+      "name": "Slovakia"
+    },
+    {
+      "id": "wurl:SVN",
+      "name": "Slovenia"
+    },
+    {
+      "id": "wurl:SLB",
+      "name": "Solomon Islands"
+    },
+    {
+      "id": "wurl:SOM",
+      "name": "Somalia"
+    },
+    {
+      "id": "wurl:ZAF",
+      "name": "South Africa"
+    },
+    {
+      "id": "wurl:KOR",
+      "name": "South Korea"
+    },
+    {
+      "id": "wurl:SSD",
+      "name": "South Sudan"
+    },
+    {
+      "id": "wurl:ESP",
+      "name": "Spain"
+    },
+    {
+      "id": "wurl:LKA",
+      "name": "Sri Lanka"
+    },
+    {
+      "id": "wurl:SDN",
+      "name": "Sudan"
+    },
+    {
+      "id": "wurl:SUR",
+      "name": "Suriname"
+    },
+    {
+      "id": "wurl:SWE",
+      "name": "Sweden"
+    },
+    {
+      "id": "wurl:CHE",
+      "name": "Switzerland"
+    },
+    {
+      "id": "wurl:SYR",
+      "name": "Syria"
+    },
+    {
+      "id": "wurl:TJK",
+      "name": "Tajikistan"
+    },
+    {
+      "id": "wurl:THA",
+      "name": "Thailand"
+    },
+    {
+      "id": "wurl:BHS",
+      "name": "The Bahamas"
+    },
+    {
+      "id": "wurl:TGO",
+      "name": "Togo"
+    },
+    {
+      "id": "wurl:TON",
+      "name": "Tonga"
+    },
+    {
+      "id": "wurl:TTO",
+      "name": "Trinidad and Tobago"
+    },
+    {
+      "id": "wurl:TUN",
+      "name": "Tunisia"
+    },
+    {
+      "id": "wurl:TUR",
+      "name": "Türkiye"
+    },
+    {
+      "id": "wurl:TKM",
+      "name": "Turkmenistan"
+    },
+    {
+      "id": "wurl:TUV",
+      "name": "Tuvalu"
+    },
+    {
+      "id": "wurl:UGA",
+      "name": "Uganda"
+    },
+    {
+      "id": "wurl:UKR",
+      "name": "Ukraine"
+    },
+    {
+      "id": "wurl:ARE",
+      "name": "United Arab Emirates"
+    },
+    {
+      "id": "wurl:GBR",
+      "name": "United Kingdom"
+    },
+    {
+      "id": "wurl:TZA",
+      "name": "United Republic of Tanzania"
+    },
+    {
+      "id": "wurl:USA",
+      "name": "United States"
+    },
+    {
+      "id": "wurl:URY",
+      "name": "Uruguay"
+    },
+    {
+      "id": "wurl:UZB",
+      "name": "Uzbekistan"
+    },
+    {
+      "id": "wurl:VUT",
+      "name": "Vanuatu"
+    },
+    {
+      "id": "wurl:VEN",
+      "name": "Venezuela"
+    },
+    {
+      "id": "wurl:VNM",
+      "name": "Vietnam"
+    },
+    {
+      "id": "wurl:YEM",
+      "name": "Yemen"
+    },
+    {
+      "id": "wurl:ZMB",
+      "name": "Zambia"
+    },
+    {
+      "id": "wurl:ZWE",
+      "name": "Zimbabwe"
+    }
+  ]
+}

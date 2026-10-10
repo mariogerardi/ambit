@@ -1,0 +1,24 @@
+{
+  "version": "quiz-data-2026-10-05",
+  "runtime": "Bundled local assets; no third-party runtime data requests.",
+  "assets": [
+    {
+      "path": "src/game/data/capitals.v1.json",
+      "name": "GeoNames primary capital snapshot",
+      "sourceUrl": "https://www.geonames.org/",
+      "license": "CC BY 4.0",
+      "sha256": "fe1bc8eb3dd831a6c869adf6373e8e7c403466d6748b2647b896e52c1fe29261",
+      "bytes": 174277
+    },
+    {
+      "path": "public/flags/clue-01.svg",
+      "name": "Flag of Canada",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Flag_of_Canada.svg",
+      "license": "Public domain",
+      "sha256": "ba5f569988ccbada9e1690abdc982d5b382c50d0be3ab702e68eecb34ea97932",
+      "bytes": 670
+    }
+  ],
+  "flagModification": "Removed the SVG title to keep the country name out of the pre-answer asset; artwork unchanged.",
+  "flagDownloadUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Flag_of_Canada.svg"
+}

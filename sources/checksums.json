@@ -1,0 +1,17 @@
+{
+  "ne-countries.geojson": {
+    "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_50m_admin_0_countries.geojson",
+    "bytes": 3083490
+  },
+  "usa-adm1.geojson": {
+    "sha256": "d4f7426c7ba3c49b958b7219fc1503409bab2948efe5917998101d921d77bcf1",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09/releaseData/gbOpen/USA/ADM1/geoBoundaries-USA-ADM1.geojson",
+    "bytes": 13282737
+  },
+  "usa-adm2.geojson": {
+    "sha256": "81fdd384df8012e5007ed2994a8ab306352f3c48e32cd8ea99182195e8647f43",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09/releaseData/gbOpen/USA/ADM2/geoBoundaries-USA-ADM2.geojson",
+    "bytes": 10500644
+  }
+}

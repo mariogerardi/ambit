@@ -1,0 +1,24 @@
+const paths = {
+  home: "m3 10 9-7 9 7M5 9v11h5v-7h4v7h5V9",
+  study: "M12 5v15M12 5C9 3 5 3 3 4v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-2-1-6-1-9 1Z",
+  repeat: "M20 8a8 8 0 1 0 0 8M20 3v5h-5",
+  custom: "M4 7h16M4 17h16M8 4v6M16 14v6",
+  review: "M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm5 11 5 5",
+};
+
+export function ActionIcon({ name }: { name: keyof typeof paths }) {
+  return (
+    <svg
+      className="action-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={paths[name]} />
+    </svg>
+  );
+}

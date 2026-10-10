@@ -1,0 +1,873 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { PerspectiveCamera, SRGBColorSpace } from "three";
+import {
+  PlaceLabels,
+  placeStyle,
+  placeMarkerSize,
+  placeDetailVisible,
+  countryCityLimit,
+  placeHorizonVisible,
+  physicalNameLimit,
+  placeLabelStyle,
+} from "../src/globe/placeLabels";
+import { ANSWER_PLACES } from "../src/game/answerTargets";
+import type { PlaceFeature } from "../src/geography/types";
+import {
+  PhysicalFeatures,
+  physicalLinePositions,
+  physicalSurfaceAltitude,
+} from "../src/globe/physicalFeatures";
+const places: PlaceFeature[] = [
+  {
+    id: "a",
+    name: "First capital",
+    kind: "capital",
+    lat: 0,
+    lng: 0,
+    sourceId: "test",
+  },
+  {
+    id: "b",
+    name: "Second capital",
+    kind: "capital",
+    lat: 0,
+    lng: 180,
+    sourceId: "test",
+  },
+];
+function canvasFactory() {
+  const createElement = vi.fn(() => ({
+    width: 0,
+    height: 0,
+    getContext: () => ({
+      measureText: (text: string) => ({ width: text.length * 14 }),
+      strokeText() {},
+      fillText() {},
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      bezierCurveTo() {},
+      closePath() {},
+      arc() {},
+      stroke() {},
+      fill() {},
+    }),
+  }));
+  vi.stubGlobal("document", { createElement });
+  return createElement;
+}
+const camera = () => {
+  const c = new PerspectiveCamera(50, 1, 1, 1000);
+  c.position.set(0, 0, 300);
+  c.lookAt(0, 0, 0);
+  c.updateMatrixWorld();
+  return c;
+};
+afterEach(() => vi.unstubAllGlobals());
+describe("cached readable place labels", () => {
+  it("shows country and capital names together without giving label-only countries a marker", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    const country: PlaceFeature = {
+      id: "country",
+      name: "Land",
+      kind: "landform",
+      lat: 0,
+      lng: -15,
+      sourceId: "test",
+      markerHidden: true,
+    };
+    const capital: PlaceFeature = {
+      ...places[0],
+      name: "Place",
+      lng: 15,
+    };
+    const layer = {
+      id: "test",
+      kind: "place-labels" as const,
+      visible: true,
+      markers: true,
+      contextual: true,
+      density: "study" as const,
+      places: [country, capital],
+    };
+    labels.update(layer, 100);
+    labels.view(camera(), 800, 800);
+    const visible = () =>
+      labels.group.children.filter((child) => child.visible);
+    expect(
+      visible()
+        .filter((child) => child.userData.role === "marker")
+        .map((child) => child.userData.placeId),
+    ).toEqual([capital.id]);
+    expect(
+      visible().filter((child) => child.userData.role !== "marker"),
+    ).toHaveLength(2);
+    labels.update(
+      { ...layer, places: [country, { ...capital, labelHidden: true }] },
+      100,
+    );
+    labels.view(camera(), 800, 800);
+    expect(
+      visible().filter((child) => child.userData.role !== "marker"),
+    ).toHaveLength(1);
+    labels.dispose();
+  });
+  it("uses identical typography for capital and non-capital answer targets", () => {
+    const capital = {
+      ...ANSWER_PLACES.get("place:964137")!,
+      answerTarget: true,
+    };
+    const city = { ...ANSWER_PLACES.get("place:993800")!, answerTarget: true };
+    expect(placeLabelStyle(capital)).toEqual(placeLabelStyle(city));
+    expect(placeLabelStyle(capital)).toEqual(placeStyle("city"));
+  });
+  it.each([
+    {
+      title: "Brazil reveal",
+      lat: -15,
+      lng: -51,
+      altitude: 0.82,
+      ids: ["3469058", "3451190", "3448439", "3450554", "3470127", "3663517"],
+    },
+    {
+      title: "South Africa question",
+      lat: -28.5,
+      lng: 25,
+      altitude: 0.42,
+      ids: ["964137", "3369157", "1018725", "993800", "1007311", "964420"],
+    },
+  ])(
+    "places all six authored names without overlap in $title",
+    ({ lat, lng, altitude, ids }) => {
+      canvasFactory();
+      const labels = new PlaceLabels();
+      const targets = ids.map((id, i) => ({
+        ...ANSWER_PLACES.get(`place:${id}`)!,
+        answerTarget: true,
+        priority: i === 0 ? 100 : i === 1 ? 90 : 0,
+      }));
+      labels.update(
+        {
+          id: "answers",
+          kind: "place-labels",
+          places: targets,
+          visible: true,
+          markers: true,
+        },
+        100,
+      );
+      const c = camera();
+      c.aspect = 1.5;
+      c.updateProjectionMatrix();
+      const phi = (lat * Math.PI) / 180,
+        theta = (lng * Math.PI) / 180,
+        distance = 100 * (1 + altitude);
+      c.position.set(
+        Math.cos(phi) * Math.sin(theta) * distance,
+        Math.sin(phi) * distance,
+        Math.cos(phi) * Math.cos(theta) * distance,
+      );
+      c.lookAt(0, 0, 0);
+      c.updateMatrixWorld();
+      labels.view(c, 1200, 800);
+      const shown = labels.group.children.filter(
+        (p) => p.visible && p.userData.role === "label",
+      );
+      expect(shown.map((p) => p.userData.labelName).sort()).toEqual(
+        targets.map((p) => p.name).sort(),
+      );
+      const boxes = labels.labelBoxes();
+      for (const [i, a] of boxes.entries())
+        for (const b of boxes.slice(i + 1))
+          expect(
+            a.left < b.right &&
+              a.right > b.left &&
+              a.top < b.bottom &&
+              a.bottom > b.top,
+          ).toBe(false);
+      const textures = labels.group.children.filter(
+        (p) => p.userData.role === "label",
+      );
+      labels.view(c, 1200, 800);
+      expect(
+        labels.group.children.filter((p) => p.userData.role === "label"),
+      ).toEqual(textures);
+      labels.dispose();
+    },
+  );
+  it("renders anonymous city targets and pin symbols with cached semantic colors", () => {
+    const factory = canvasFactory();
+    const labels = new PlaceLabels();
+    const anonymous: PlaceFeature = {
+      ...places[0],
+      name: "",
+      labelHidden: true,
+      hoverName: undefined,
+      answerTarget: true,
+      visualState: "selectable",
+    };
+    const pin: PlaceFeature = {
+      ...places[0],
+      id: "pin",
+      kind: "pin",
+      name: "Your pin",
+      visualState: "selected",
+      lng: 5,
+    };
+    labels.update(
+      {
+        id: "answer",
+        kind: "place-labels",
+        places: [anonymous, pin],
+        visible: true,
+        markers: true,
+      },
+      100,
+    );
+    labels.view(camera(), 1200, 1200);
+    expect(
+      labels.group.children
+        .filter((p) => p.userData.role === "label")
+        .map((p) => p.userData.labelName),
+    ).toEqual(["Your pin"]);
+    const marker = labels.group.children.find(
+      (p) => p.userData.placeId === "a",
+    )!;
+    expect(marker.userData.markerStyle).toContain("#e7c673");
+    expect(
+      labels.group.children.find(
+        (p) => p.userData.placeId === "pin" && p.userData.role === "marker",
+      )!.userData.markerStyle,
+    ).toContain("pin:");
+    const before = factory.mock.calls.length;
+    labels.update(
+      {
+        id: "answer",
+        kind: "place-labels",
+        places: [{ ...anonymous, visualState: "correct" }, pin],
+        visible: true,
+        markers: true,
+      },
+      100,
+    );
+    labels.view(camera(), 1200, 1200);
+    expect(labels.group.children.find((p) => p.userData.placeId === "a")).toBe(
+      marker,
+    );
+    expect(marker.userData.markerStyle).toContain("#66c590");
+    expect(factory.mock.calls.length).toBe(before + 1); // one shared color texture, no blank-name textures
+    labels.dispose();
+  });
+  it("keeps terrain names ahead of overlapping rivers and cities and uses a visible regional anchor", () => {
+    canvasFactory();
+    const physical = new PhysicalFeatures();
+    physical.update(
+      {
+        id: "physical",
+        kind: "physical-features",
+        features: [
+          {
+            id: "range",
+            kind: "mountain",
+            name: "A mountain range",
+            lat: 0,
+            lng: 180,
+            rank: 2,
+            labelAnchors: [
+              [180, 0],
+              [0, 0],
+            ],
+          },
+          {
+            id: "river",
+            kind: "river",
+            name: "Local river",
+            lat: 0,
+            lng: 0,
+            rank: 0,
+          },
+        ],
+      },
+      100,
+    );
+    physical.view(camera(), 1200, 1200);
+    const labels = physical.group.children[0].children.filter((s) => s.visible);
+    expect(labels.map((s) => s.userData.labelName)).toContain(
+      "A mountain range",
+    );
+    expect(labels.map((s) => s.userData.labelName)).not.toContain(
+      "Local river",
+    );
+    const cities = new PlaceLabels();
+    cities.update(
+      {
+        id: "cities",
+        kind: "place-labels",
+        places: [places[0]],
+        visible: true,
+        markers: true,
+      },
+      100,
+    );
+    cities.view(camera(), 1200, 1200, physical.labelBoxes());
+    expect(cities.labelBoxes()).toHaveLength(0);
+    expect(
+      cities.group.children.find((s) => s.userData.role === "marker")?.visible,
+    ).toBe(true);
+    physical.dispose();
+    cities.dispose();
+  });
+  it("drapes finely sampled rivers just above the land surface", () => {
+    expect(physicalSurfaceAltitude).toBeGreaterThan(0.0015);
+    expect(physicalSurfaceAltitude).toBeLessThan(0.002);
+    const radius = 100 * (1 + physicalSurfaceAltitude);
+    const positions = physicalLinePositions(
+      [
+        [
+          [0, 0],
+          [2, 0],
+        ],
+      ],
+      radius,
+    );
+    expect(positions.length).toBeGreaterThanOrEqual(8 * 6);
+    for (let i = 0; i < positions.length; i += 3)
+      expect(
+        Math.hypot(positions[i], positions[i + 1], positions[i + 2]),
+      ).toBeCloseTo(radius, 4);
+  });
+  it("spreads new context-label textures across frames and eventually settles", () => {
+    const create = canvasFactory(),
+      labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "cities",
+        kind: "place-labels",
+        visible: true,
+        contextual: true,
+        places: Array.from({ length: 12 }, (_, i) => ({
+          ...places[0],
+          id: `city:${i}`,
+          name: `City ${i}`,
+          kind: "city",
+          population: 3_000_000,
+          lat: (Math.floor(i / 4) - 1) * 18,
+          lng: ((i % 4) - 1.5) * 22,
+        })),
+      },
+      100,
+    );
+    labels.view(camera(), 1600, 1600);
+    expect(create.mock.calls.length).toBeLessThanOrEqual(4);
+    expect(labels.needsRefresh()).toBe(true);
+    for (let frame = 0; frame < 8; frame++) labels.view(camera(), 1600, 1600);
+    expect(labels.needsRefresh()).toBe(false);
+    expect(labels.labelBoxes().length).toBeGreaterThan(4);
+    labels.dispose();
+  });
+  it("caps river names at broad/regional/local zoom and labels duplicate segments only once", () => {
+    expect([2, 0.8, 0.2].map((alt) => physicalNameLimit("river", alt))).toEqual(
+      [2, 4, 6],
+    );
+    canvasFactory();
+    const labels = new PlaceLabels();
+    const rivers = Array.from({ length: 8 }, (_, i) => ({
+      ...places[0],
+      id: `river:${i}`,
+      kind: "river" as const,
+      name: i < 2 ? "One River" : `River ${i}`,
+      lat: ((i % 3) - 1) * 18,
+      lng: (i - 4) * 11,
+    }));
+    labels.update(
+      {
+        id: "rivers",
+        kind: "place-labels",
+        places: rivers,
+        visible: true,
+        markers: false,
+        contextual: true,
+        density: "physical",
+      },
+      100,
+    );
+    labels.view(camera(), 1200, 1200);
+    const shown = labels.group.children.filter(
+      (s) => s.visible && s.userData.role === "label",
+    );
+    expect(shown.length).toBeGreaterThan(0);
+    expect(shown.length).toBeLessThanOrEqual(2);
+    expect(new Set(shown.map((s) => s.userData.labelName)).size).toBe(
+      shown.length,
+    );
+    labels.dispose();
+  });
+  it("replaces a cached name when authored label content changes but keeps unchanged sprites", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    const layer = {
+      id: "test",
+      kind: "place-labels" as const,
+      places: [places[0]],
+      visible: true,
+      markers: true,
+    };
+    labels.update(layer, 100);
+    const first = labels.group.children.find(
+      (s) => s.userData.role === "label",
+    )!;
+    labels.update(
+      { ...layer, places: [{ ...places[0], name: "Changed capital" }] },
+      100,
+    );
+    const next = labels.group.children.find(
+      (s) => s.userData.role === "label",
+    )!;
+    expect(next).not.toBe(first);
+    expect(next.userData.labelName).toBe("Changed capital");
+    labels.update(
+      { ...layer, places: [{ ...places[0], name: "Changed capital" }] },
+      100,
+    );
+    expect(labels.group.children.find((s) => s.userData.role === "label")).toBe(
+      next,
+    );
+    labels.dispose();
+  });
+  it("keeps secondary annotations clear of already drawn city/capital names", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "test",
+        kind: "place-labels",
+        places: [places[0]],
+        visible: true,
+        markers: true,
+      },
+      100,
+    );
+    labels.view(camera(), 600, 600);
+    expect(labels.labelBoxes()).toHaveLength(1);
+    labels.view(camera(), 600, 600, [
+      { left: 0, right: 600, top: 0, bottom: 600 },
+    ]);
+    expect(labels.labelBoxes()).toHaveLength(0);
+    expect(
+      labels.group.children.find((s) => s.userData.role === "marker")!.visible,
+    ).toBe(true);
+    labels.dispose();
+  });
+  it("insets context cities from the horizon at both world and close zoom without hiding authored clues", () => {
+    for (const horizon of [0.333, 0.95]) {
+      const edge = horizon + (1 - horizon) * 0.05;
+      expect(placeHorizonVisible(edge, horizon, "city", true)).toBe(false);
+      expect(placeHorizonVisible(edge, horizon, "capital", true)).toBe(false);
+      expect(placeHorizonVisible(edge, horizon, "city", false)).toBe(true);
+      expect(
+        placeHorizonVisible(
+          horizon + (1 - horizon) * 0.5,
+          horizon,
+          "city",
+          true,
+        ),
+      ).toBe(true);
+      expect(
+        placeHorizonVisible(horizon - 0.01, horizon, "capital", false),
+      ).toBe(false);
+    }
+  });
+  it("creates each sprite/texture once and preserves it across hover-equivalent updates, movement, and visibility toggles", () => {
+    const create = canvasFactory(),
+      labels = new PlaceLabels();
+    const data = {
+      id: "label-layer",
+      kind: "place-labels" as const,
+      places,
+      visible: true,
+    };
+    labels.update(data, 100);
+    const [first, second] = labels.group.children;
+    expect(create).toHaveBeenCalledTimes(2);
+    for (let i = 0; i < 30; i++) {
+      labels.update(data, 100);
+      labels.view(camera(), 700, 700);
+    }
+    labels.update({ ...data, visible: false }, 100);
+    expect(labels.group.visible).toBe(false);
+    labels.update({ ...data, visible: true }, 100);
+    expect(labels.group.children).toEqual([first, second]);
+    expect(create).toHaveBeenCalledTimes(2);
+    labels.dispose();
+  });
+  it("maintains readable screen size while zooming and culls the far side", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    labels.update(
+      { id: "label-layer", kind: "place-labels", places, visible: true },
+      100,
+    );
+    const c = camera();
+    labels.view(c, 700, 700);
+    const first = labels.group.children[0];
+    expect(first.visible).toBe(true);
+    expect(labels.group.children[1].visible).toBe(false);
+    const scale = first.scale.y;
+    c.position.z = 150;
+    c.updateMatrixWorld();
+    labels.view(c, 700, 700);
+    expect(first.scale.y).toBeLessThan(scale);
+    expect(
+      ((first.scale.y / first.position.distanceTo(c.position)) * 700) /
+        (2 * Math.tan((c.fov * Math.PI) / 360)),
+    ).toBeCloseTo(26);
+    c.position.z = -300;
+    c.lookAt(0, 0, 0);
+    c.updateMatrixWorld();
+    labels.view(c, 700, 700);
+    expect(first.visible).toBe(false);
+    expect(labels.group.children[1].visible).toBe(true);
+    labels.dispose();
+  });
+  it("declutters overlapping text and frees its cached textures on disposal", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "label-layer",
+        kind: "place-labels",
+        places: [places[0], { ...places[0], id: "overlap" }],
+        visible: true,
+      },
+      100,
+    );
+    labels.view(camera(), 700, 700);
+    expect(labels.group.children.filter((child) => child.visible)).toHaveLength(
+      1,
+    );
+    const sprite = labels.group.children[0] as import("three").Sprite;
+    const dispose = vi.spyOn(sprite.material.map!, "dispose");
+    labels.dispose();
+    expect(dispose).toHaveBeenCalledOnce();
+    expect(labels.group.children).toHaveLength(0);
+  });
+  it("uses fixed-size contrasting stars and city dots with neutral readable text", () => {
+    const create = canvasFactory(),
+      labels = new PlaceLabels();
+    const data = {
+      id: "places",
+      kind: "place-labels" as const,
+      places: [
+        places[0],
+        { ...places[0], id: "city", kind: "city" as const, lng: 20 },
+      ],
+      visible: true,
+      markers: true,
+    };
+    labels.update(data, 100);
+    const capitalLabel = labels.group.children[0] as import("three").Sprite;
+    const capitalMarker = labels.group.children[1] as import("three").Sprite;
+    const cityLabel = labels.group.children[2] as import("three").Sprite;
+    const c = camera();
+    labels.view(c, 700, 700);
+    const pixelHeight = () =>
+      ((capitalMarker.scale.y / (c.position.z - capitalMarker.position.z)) *
+        700) /
+      (2 * Math.tan((c.fov * Math.PI) / 360));
+    expect(pixelHeight()).toBeCloseTo(18);
+    c.position.z = 105;
+    c.updateMatrixWorld();
+    labels.view(c, 700, 700);
+    expect(pixelHeight()).toBeCloseTo(18);
+    expect(capitalMarker.material.depthTest).toBe(false);
+    expect(capitalMarker.material.map?.colorSpace).toBe(SRGBColorSpace);
+    expect(capitalLabel.material.depthTest).toBe(false);
+    expect(capitalLabel.renderOrder).toBeGreaterThan(4);
+    expect(placeStyle("capital").shape).toBe("star");
+    expect(placeStyle("city").shape).toBe("circle");
+    expect(placeStyle("capital").marker).not.toBe(placeStyle("city").marker);
+    expect(placeStyle("capital").text).toBe(placeStyle("city").text);
+    expect(placeStyle("capital").textHeight).toBeGreaterThan(
+      placeStyle("city").textHeight,
+    );
+    expect(capitalLabel.material.map).not.toBe(cityLabel.material.map);
+    const allocations = create.mock.calls.length;
+    labels.update(data, 100);
+    labels.view(c, 700, 700);
+    expect(create).toHaveBeenCalledTimes(allocations);
+    labels.dispose();
+  });
+  it("keeps markers independent of names and prevents far-side or disabled marker picks", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    const data = {
+      id: "places",
+      kind: "place-labels" as const,
+      places,
+      visible: false,
+      markers: true,
+    };
+    labels.update(data, 100);
+    labels.view(camera(), 700, 700);
+    expect(labels.group.children).toHaveLength(2);
+    expect(labels.pick(350, 350)?.id).toBe("a");
+    expect(labels.pick(370, 350)).toBeUndefined();
+    expect(labels.pick(370, 350, 22)?.id).toBe("a");
+    expect(labels.pick(373, 350, 22)).toBeUndefined();
+    expect(labels.group.children[1].visible).toBe(false);
+    labels.update({ ...data, markers: false }, 100);
+    expect(labels.pick(350, 350)).toBeUndefined();
+    labels.update({ ...data, visible: true, markers: false }, 100);
+    labels.view(camera(), 700, 700);
+    expect(labels.group.children).toHaveLength(2);
+    expect(labels.pick(350, 350)).toBeUndefined();
+    labels.dispose();
+  });
+  it("hides whole labels at viewport edges instead of cutting off their text", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "places",
+        kind: "place-labels",
+        places: [
+          {
+            ...places[0],
+            lng: 55,
+            name: "A very long city name right beside the screen edge",
+          },
+        ],
+        visible: true,
+        markers: true,
+      },
+      100,
+    );
+    labels.view(camera(), 700, 700);
+    expect(labels.group.children[0].visible).toBe(false);
+    expect(labels.group.children[1].visible).toBe(true);
+    labels.dispose();
+  });
+});
+
+describe("zoom-aware context places", () => {
+  it("shows prominent places at world scale, reveals smaller ones up close, and creates only visible textures", () => {
+    const create = canvasFactory(),
+      labels = new PlaceLabels();
+    const data = {
+      id: "context",
+      kind: "place-labels" as const,
+      contextual: true,
+      visible: true,
+      markers: true,
+      places: [
+        { ...places[0], population: 2_000_000 },
+        {
+          ...places[0],
+          id: "small",
+          kind: "city" as const,
+          lat: 0.5,
+          population: 20_000,
+        },
+        { ...places[1], population: 10_000_000 },
+      ],
+    };
+    labels.update(data, 100);
+    expect(create).not.toHaveBeenCalled();
+    const c = camera();
+    labels.view(c, 700, 700);
+    expect(create).toHaveBeenCalledTimes(2); // one star texture and one name, no far-side/small textures
+    const capital = labels.group.children.find(
+      (o) => o.userData.role === "marker",
+    )!;
+    expect(
+      labels.group.children.some((o) => o.userData.placeId === "small"),
+    ).toBe(false);
+    expect(labels.pick(350, 350)?.id).toBe("a");
+    c.position.z = 130;
+    c.updateMatrixWorld();
+    labels.view(c, 700, 700);
+    const small = labels.group.children.find(
+      (o) => o.userData.placeId === "small" && o.userData.role === "marker",
+    )!;
+    expect(small.visible).toBe(true);
+    expect(capital.visible).toBe(true);
+    const allocations = create.mock.calls.length;
+    labels.view(c, 700, 700);
+    expect(create).toHaveBeenCalledTimes(allocations);
+    c.position.z = 300;
+    c.updateMatrixWorld();
+    labels.view(c, 700, 700);
+    expect(small.visible).toBe(false);
+    expect(
+      labels.group.children.find(
+        (o) => o.userData.placeId === "a" && o.userData.role === "marker",
+      ),
+    ).toBe(capital);
+    labels.dispose();
+  });
+  it("bounds world clutter and leaves explicitly authored clue markers visible", () => {
+    canvasFactory();
+    const labels = new PlaceLabels(),
+      c = camera();
+    const dense = Array.from({ length: 100 }, (_, i) => ({
+      ...places[0],
+      id: `city-${i}`,
+      kind: "city" as const,
+      lat: -36 + Math.floor(i / 10) * 8,
+      lng: -36 + (i % 10) * 8,
+      population: 5_000_000,
+    }));
+    labels.update(
+      {
+        id: "context",
+        kind: "place-labels",
+        contextual: true,
+        places: dense,
+        visible: true,
+        markers: true,
+      },
+      100,
+    );
+    labels.view(c, 700, 700);
+    const visible = labels.group.children.filter((o) => o.visible);
+    expect(
+      visible.filter((o) => o.userData.role === "marker").length,
+    ).toBeLessThanOrEqual(28);
+    expect(
+      visible.filter((o) => o.userData.role === "label").length,
+    ).toBeLessThanOrEqual(14);
+    expect(visible.length).toBeGreaterThan(0);
+    labels.update(
+      {
+        id: "clue",
+        kind: "place-labels",
+        places: [{ ...places[0], population: 500 }],
+        visible: true,
+        markers: true,
+      },
+      100,
+    );
+    labels.view(c, 700, 700);
+    expect(labels.pick(350, 350)?.id).toBe("a");
+    labels.dispose();
+  });
+  it("uses black dots and slightly larger sizes for the largest cities", () => {
+    const city = { ...places[0], kind: "city" as const, population: 300_000 };
+    expect(placeStyle("city").marker).toBe("#101010");
+    expect(placeStyle("city").textHeight).toBeGreaterThanOrEqual(24);
+    expect(placeStyle("city").font).toContain("500 26px");
+    expect(placeMarkerSize({ ...city, population: 3_820_914 })).toBeGreaterThan(
+      placeMarkerSize(city),
+    );
+    expect(placeDetailVisible(city, 1.65)).toBe(false);
+    expect(placeDetailVisible({ ...city, population: 3_820_914 }, 1.65)).toBe(
+      true,
+    );
+    expect(placeDetailVisible(city, 0.3)).toBe(true);
+    expect(
+      placeDetailVisible(
+        { ...city, kind: "capital", population: 150_000 },
+        0.8,
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("city quotas and accented label textures", () => {
+  it.each([
+    [300, 3],
+    [180, 6],
+    [130, 10],
+  ])(
+    "caps each visible country's cities at camera distance %s, while keeping capitals",
+    (distance, quota) => {
+      canvasFactory();
+      const labels = new PlaceLabels(),
+        c = camera();
+      c.position.z = distance;
+      c.updateMatrixWorld();
+      const cities = Array.from({ length: 30 }, (_, i) => ({
+        ...places[0],
+        id: `city-${i}`,
+        kind: "city" as const,
+        parentId: "wurl:CHN",
+        lat: (Math.floor(i / 6) - 2) * 2,
+        lng: ((i % 6) - 2.5) * 2,
+        population: 20_000_000 - i,
+      }));
+      labels.update(
+        {
+          id: "cities",
+          kind: "place-labels",
+          contextual: true,
+          places: [
+            ...cities,
+            {
+              ...places[0],
+              id: "capital",
+              parentId: "wurl:CHN",
+              population: 2_000_000,
+            },
+          ],
+          visible: false,
+          markers: true,
+        },
+        100,
+      );
+      labels.view(c, 700, 700);
+      const visible = labels.group.children.filter(
+        (p) => p.visible && p.userData.role === "marker",
+      );
+      expect(
+        visible.filter((p) => p.userData.placeId.startsWith("city-")).length,
+      ).toBe(quota);
+      expect(visible.some((p) => p.userData.placeId === "capital")).toBe(true);
+      expect(countryCityLimit(distance / 100 - 1)).toBe(quota);
+      labels.dispose();
+    },
+  );
+  it("pads accented glyph bounds, draws Unicode unchanged, and uses sRGB canvas colors", () => {
+    const fillText = vi.fn();
+    const metrics = {
+      width: 80,
+      actualBoundingBoxAscent: 40,
+      actualBoundingBoxDescent: 12,
+      actualBoundingBoxLeft: 4,
+      actualBoundingBoxRight: 86,
+    };
+    const canvas = {
+      width: 0,
+      height: 0,
+      getContext: () => ({
+        measureText: () => metrics,
+        fillText,
+        strokeText() {},
+      }),
+    };
+    vi.stubGlobal("document", { createElement: () => canvas });
+    const labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "name",
+        kind: "place-labels",
+        places: [{ ...places[0], name: "Ürümqi" }],
+        visible: true,
+      },
+      100,
+    );
+    const [name, x, y] = fillText.mock.calls[0];
+    expect(name).toBe("Ürümqi");
+    expect(x - metrics.actualBoundingBoxLeft).toBeGreaterThanOrEqual(4);
+    expect(x + metrics.actualBoundingBoxRight).toBeLessThanOrEqual(
+      canvas.width - 4,
+    );
+    expect(y - metrics.actualBoundingBoxAscent).toBeGreaterThanOrEqual(4);
+    expect(y + metrics.actualBoundingBoxDescent).toBeLessThanOrEqual(
+      canvas.height - 4,
+    );
+    const label = labels.group.children[0] as import("three").Sprite;
+    expect(label.material.map?.colorSpace).toBe(SRGBColorSpace);
+    labels.dispose();
+  });
+});

@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-10-04T00:00:00Z",
+  "counts": {
+    "ADM0": 242,
+    "ADM1": 56,
+    "NY_ADM2": 62
+  },
+  "antimeridianCrossings": 1,
+  "assets": [
+    {
+      "filename": "world.v1.json",
+      "features": 242,
+      "bytes": 414457,
+      "sha256": "17a9d01ed22af8392eb02465f04fcf528a40b6b72520e5861e73e32c3aca7662"
+    },
+    {
+      "filename": "usa-adm1.v1.json",
+      "features": 56,
+      "bytes": 360015,
+      "sha256": "1e767137b7d03ea9f17a2a7426533c917668a96748ef820da28caa5cdf1bf8f0"
+    },
+    {
+      "filename": "ny-adm2.v1.json",
+      "features": 62,
+      "bytes": 69938,
+      "sha256": "19accaeec07e02131811a572349cba28e39ffc4132950e68bd4343c68db6e18b"
+    }
+  ]
+}

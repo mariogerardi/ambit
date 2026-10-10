@@ -1,0 +1,114 @@
+# Ambit
+
+A geography game built around one shared, interactive globe. Play a five-question
+Journey, explore places, or build a Study session. React, TypeScript, Vite, and
+Three.js power a static web app; geography, flags, and fonts are bundled locally.
+There is no backend, account system, or required runtime API/CDN.
+
+## Quick start
+
+Use **Node.js 24.21.0** (pinned in [.nvmrc](.nvmrc)) and its bundled npm 11.19.0.
+With nvm installed, run `nvm install` and `nvm use` in this directory first.
+
+```sh
+npm ci
+npm run dev
+```
+
+Open the URL printed by Vite, normally `http://127.0.0.1:5173`. The dev server binds
+to loopback and requires its configured port to be available. Generated assets
+are included; no data preparation or API keys are needed to run the app.
+
+```sh
+npm test         # Unit, asset, and DOM integration tests; no browser/WebGL
+npm run build    # Strict TypeScript checks, then the production build in dist/
+npm run preview  # Inspect dist/ locally; this is not a production server
+```
+
+See [Development](docs/DEVELOPMENT.md) for preparation commands and troubleshooting,
+and [Release readiness](docs/RELEASE_READINESS.md) before deploying.
+
+## What is included
+
+| View                                    | Behavior                                                                                                        |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Home** (`/`)                          | Today's Journey, saved progress, and entry points to Explore and Study.                                         |
+| **Journey**                             | 15 authored, five-question puzzles covering pins, map picks, recall, choices, and geographic reasoning.         |
+| **Explore** (`/explore`)                | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.     |
+| **Study** (`/study`)                    | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions. |
+| **Question playground** (`/playground`) | Read-only practice of all 75 bundled questions, with direct selection and retry.                                |
+| **Admin** (`/admin`)                    | Choose today's Journey on this device. This is a local preference, not shared publication.                      |
+
+The daily schedule cycles through the bundled Journeys from October 5, 2026, using
+device-local dates. Attempts stay attached to their starting date; an unfinished
+attempt can continue after midnight. Each Journey also has a direct practice
+route. See the [Journey catalog](docs/QUESTION_CATALOG.md) for titles and routes.
+The removed editor/AI generator is not part of the current app; legacy locally
+published packs remain readable.
+
+Study supports countries, capitals, and flags for 193 UN members. Choose worldwide,
+a continent, or a custom country pool; answer by globe, typing, multiple choice,
+or Mixed. **Cover everything once** exhausts the selected country/topic pairs.
+**Bring back missed answers** explicitly enables additional mistake reviews.
+Ordinary fixed-length/continuous decks reshuffle after exhausting their pool;
+that can revisit a country even with mistake reviews disabled.
+
+Study settings and results persist; the active attempt does not survive refresh
+or tab closure. Leaving Study through app navigation clears it and archives any
+submitted answers. Past sessions can be viewed or replayed, including the exact
+coverage of targeted reviews. [Save persistence](docs/SAVE_PERSISTENCE.md) explains
+recovery, tab synchronization, and remaining durability limits.
+
+## Globe and presentation
+
+All product views share the same mounted decorative globe. Selected regions,
+question clues, and feedback use semantic states; display geometry and grading
+geometry remain separate. Home starts idle rotation after focusing. Entering
+Explore preserves enabled rotation until interaction; Fidget restores the prior
+playback state. Speeds range from 0.25× to 8×. Reduced motion disables idle
+rotation, Fidget, and animated travel.
+
+On narrow screens, the globe and scrolling content occupy separate areas, with
+bottom navigation and an **Enlarge globe** action. Desktop layouts put content
+beside the globe. Keyboard answer controls remain available for written answers;
+Study map prompts include **Answer by name**, automatically expanded without
+WebGL. Capital map prompts expect the country name in this alternative.
+Actual browser/GPU, screen-reader, and physical mobile behavior still require
+separate verification; unit/DOM coverage does not certify those experiences.
+
+The hamburger menu offers **Atlas**, **Ocean**, **Dusk**, and **Paper** themes.
+Each theme applies to UI and globe, preserving the camera and session. Editorial
+emphasis, interaction accents, and primary actions use separate color roles.
+Themes and default-view preferences persist locally and synchronize between tabs.
+
+## Documentation
+
+Start with the [documentation index](docs/README.md).
+
+- [Architecture](docs/ARCHITECTURE.md): module responsibilities and globe state.
+- [Development](docs/DEVELOPMENT.md): commands, data preparation, and maintenance.
+- [Question catalog and authoring](docs/QUESTION_CATALOG.md): Journeys, rules, and content review.
+- [Geographic catalog policy](docs/CATALOG_POLICY.md) and [Explore data](docs/EXPLORE_DATA.md): identities, source conventions, and display limits.
+- [Save persistence](docs/SAVE_PERSISTENCE.md): migration, recovery, and conflicts.
+- [Release readiness](docs/RELEASE_READINESS.md): current gaps and deployment handoff.
+- [Attribution](NOTICE.md): source notices, licenses, and transformations.
+
+## Product language
+
+**Ambit** is the product. A **Journey** is the daily five-question experience;
+a **round** is one question within it. **Explore** is freeform exploration.
+**Study** is practice; a **session** is one Study run. Keep the question prominent,
+explain exceptional rules only, and avoid copy that merely describes visible UI.
+Stable internal `wurl:` IDs remain for save/data compatibility; they are not an
+additional product mode. The npm package is named `ambit`.
+
+## Repository and licensing
+
+This is a private project; no open-source license is granted for the application
+code. The package is marked `private` and `UNLICENSED`. Third-party dependencies,
+fonts, and geographic assets retain their own notices in [NOTICE.md](NOTICE.md).
+
+[CI](.github/workflows/ci.yml) runs on main pushes, pull requests, and manual
+requests using the pinned Node version. It installs locked dependencies, checks
+documentation formatting, runs tests, builds the app, and checks dependency
+advisories. The workflow has read-only repository permissions and does not deploy.

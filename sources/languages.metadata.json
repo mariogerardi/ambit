@@ -1,0 +1,11 @@
+{
+  "source": {
+    "url": "https://download.geonames.org/export/dump/iso-languagecodes.txt",
+    "license": "CC BY 4.0",
+    "attribution": "GeoNames",
+    "snapshotDate": "2026-10-07",
+    "sha256": "cb0d34f492775deec8ec5713da6efa4463dad99b5e7ba2172bd094cfdcb76571",
+    "bytes": 137908
+  },
+  "output": "src/geography/data/language-names.v1.json"
+}

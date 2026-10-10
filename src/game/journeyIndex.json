@@ -1,0 +1,462 @@
+[
+  {
+    "id": "long-way-home-v2",
+    "title": "The long way home",
+    "description": "A few letters can lead you across continents. Even the shortest way home has a story.",
+    "path": "/journey/long-way-home",
+    "module": "./journey.ts",
+    "rounds": [
+      {
+        "id": "windhoek-neighbor",
+        "label": "Neighbors"
+      },
+      {
+        "id": "fewest-crossings",
+        "label": "Crossings"
+      },
+      {
+        "id": "four-letter-world",
+        "label": "Four letters"
+      },
+      {
+        "id": "peru-capital",
+        "label": "Capital"
+      },
+      {
+        "id": "great-circle-home",
+        "label": "Homeward"
+      }
+    ]
+  },
+  {
+    "id": "beyond-borders-v1",
+    "title": "Beyond borders",
+    "description": "Flags, languages, mountains, and latitude: familiar places look different from each angle.",
+    "path": "/journey/beyond-borders",
+    "module": "./secondJourney.ts",
+    "rounds": [
+      {
+        "id": "flag-maple",
+        "label": "Flag"
+      },
+      {
+        "id": "canada-languages",
+        "label": "Languages"
+      },
+      {
+        "id": "andes-three",
+        "label": "Mountains"
+      },
+      {
+        "id": "africa-north-amman",
+        "label": "Latitude"
+      },
+      {
+        "id": "mediterranean-capitals",
+        "label": "Circle"
+      }
+    ]
+  },
+  {
+    "id": "silk-roads-v1",
+    "title": "Across the Silk Roads",
+    "description": "Across Central Asia, languages and borders trace different paths through the same landscape.",
+    "path": "/journey/silk-roads",
+    "module": "./thirdJourney.ts",
+    "rounds": [
+      {
+        "id": "central-asia-families",
+        "label": "Families"
+      },
+      {
+        "id": "tajikistan-armenia-crossings",
+        "label": "Crossings"
+      },
+      {
+        "id": "caspian-shores",
+        "label": "Caspian"
+      },
+      {
+        "id": "nakhchivan-owner",
+        "label": "Exclave"
+      },
+      {
+        "id": "silk-road-capitals",
+        "label": "Capitals"
+      }
+    ]
+  },
+  {
+    "id": "mediterranean-v1",
+    "title": "Around the Mediterranean",
+    "description": "Around one sea, islands, languages, and shared histories bring many countries together.",
+    "path": "/journey/mediterranean",
+    "module": "./fourthJourney.ts",
+    "rounds": [
+      {
+        "id": "spain-regional-languages",
+        "label": "Languages"
+      },
+      {
+        "id": "italy-sicily",
+        "label": "Island"
+      },
+      {
+        "id": "libya-capital",
+        "label": "Capital"
+      },
+      {
+        "id": "yugoslavia-six",
+        "label": "Republics"
+      },
+      {
+        "id": "mediterranean-shores",
+        "label": "Sea"
+      }
+    ]
+  },
+  {
+    "id": "north-america-v1",
+    "title": "North America by name",
+    "description": "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
+    "path": "/journey/north-america",
+    "module": "./fifthJourney.ts",
+    "rounds": [
+      {
+        "id": "canada-three-territories",
+        "label": "Territories"
+      },
+      {
+        "id": "canada-south-of-boston",
+        "label": "Latitude"
+      },
+      {
+        "id": "five-states-bordering-canada",
+        "label": "Pick five"
+      },
+      {
+        "id": "california-missouri-crossings",
+        "label": "Crossings"
+      },
+      {
+        "id": "five-cardinal-states",
+        "label": "Directions"
+      }
+    ]
+  },
+  {
+    "id": "enclosed-territories-v1",
+    "title": "Worlds within worlds",
+    "description": "A place can be surrounded, separated, or connected in ways a first glance misses.",
+    "path": "/journey/enclosed-territories",
+    "module": "./sixthJourney.ts",
+    "rounds": [
+      {
+        "id": "enclosed-lesotho",
+        "label": "Kingdom"
+      },
+      {
+        "id": "leningrad-surrounded-city",
+        "label": "City"
+      },
+      {
+        "id": "temburong-owner",
+        "label": "Exclave"
+      },
+      {
+        "id": "act-surrounding-state",
+        "label": "Territory"
+      },
+      {
+        "id": "kaliningrad-land-neighbors",
+        "label": "Ownership"
+      }
+    ]
+  },
+  {
+    "id": "borrowed-names-v1",
+    "title": "Borrowed names",
+    "description": "Names travel too. A familiar word can connect places on opposite sides of the world.",
+    "path": "/journey/borrowed-names",
+    "module": "./seventhJourney.ts",
+    "rounds": [
+      {
+        "id": "new-zealand-namesake",
+        "label": "Namesake"
+      },
+      {
+        "id": "papua-new-guinea-namesake",
+        "label": "Coast"
+      },
+      {
+        "id": "new-england-six-states",
+        "label": "Six states"
+      },
+      {
+        "id": "new-jersey-namesake",
+        "label": "Island"
+      },
+      {
+        "id": "nuevo-leon-namesake",
+        "label": "Country"
+      }
+    ]
+  },
+  {
+    "id": "pins-and-cities-v1",
+    "title": "Pins and cities",
+    "description": "A city becomes more than a name once you can place it on the globe.",
+    "path": "/journey/pins-and-cities",
+    "module": "./eighthJourney.ts",
+    "rounds": [
+      {
+        "id": "pin-lima",
+        "label": "Drop a pin",
+        "progressLabel": "Lima"
+      },
+      {
+        "id": "city-paris",
+        "label": "City",
+        "progressLabel": "Paris"
+      },
+      {
+        "id": "pin-new-mexico",
+        "label": "Drop a pin",
+        "progressLabel": "New Mexico"
+      },
+      {
+        "id": "cities-north-of-rome",
+        "label": "Cities",
+        "progressLabel": "North of Rome"
+      },
+      {
+        "id": "city-sydney",
+        "label": "City",
+        "progressLabel": "Sydney"
+      }
+    ]
+  },
+  {
+    "id": "shared-neighbors-v1",
+    "title": "Shared neighbors",
+    "description": "Two neighbors can narrow down a whole world. Borders make unexpected connections.",
+    "path": "/journey/shared-neighbors",
+    "module": "./ninthJourney.ts",
+    "rounds": [
+      {
+        "id": "pin-ivory-coast-benin",
+        "label": "Drop a pin",
+        "progressLabel": "Ivory Coast + Benin"
+      },
+      {
+        "id": "pin-bulgaria-georgia",
+        "label": "Drop a pin",
+        "progressLabel": "Bulgaria + Georgia"
+      },
+      {
+        "id": "pin-norway-belarus",
+        "label": "Drop a pin",
+        "progressLabel": "Norway + Belarus"
+      },
+      {
+        "id": "pin-eswatini-zambia",
+        "label": "Drop a pin",
+        "progressLabel": "Eswatini + Zambia"
+      },
+      {
+        "id": "pin-chile-colombia",
+        "label": "Drop a pin",
+        "progressLabel": "Chile + Colombia"
+      }
+    ]
+  },
+  {
+    "id": "ring-of-fire-v1",
+    "title": "Around the Ring of Fire",
+    "description": "Across the Pacific, islands, mountains, and capitals connect one Journey.",
+    "path": "/journey/ring-of-fire",
+    "module": "./tenthJourney.ts",
+    "rounds": [
+      {
+        "id": "pacific-rising-sun",
+        "label": "Flag"
+      },
+      {
+        "id": "pacific-hokkaido",
+        "label": "Island"
+      },
+      {
+        "id": "pacific-indonesia-pin",
+        "label": "Drop a pin"
+      },
+      {
+        "id": "pacific-andes-coast",
+        "label": "Mountains"
+      },
+      {
+        "id": "pacific-wellington",
+        "label": "Capital"
+      }
+    ]
+  },
+  {
+    "id": "not-the-obvious-city-v1",
+    "title": "Not the obvious city",
+    "description": "The best-known city isn’t always the capital. Find the places behind the familiar names.",
+    "path": "/journey/not-the-obvious-city",
+    "module": "./eleventhJourney.ts",
+    "rounds": [
+      {
+        "id": "unexpected-turkey-capital",
+        "label": "Capital",
+        "progressLabel": "Türkiye"
+      },
+      {
+        "id": "unexpected-canberra-pin",
+        "label": "Drop a pin",
+        "progressLabel": "Australia"
+      },
+      {
+        "id": "unexpected-abuja",
+        "label": "Capital",
+        "progressLabel": "Nigeria"
+      },
+      {
+        "id": "unexpected-brasilia-marker",
+        "label": "City",
+        "progressLabel": "Brazil"
+      },
+      {
+        "id": "unexpected-south-africa-capitals",
+        "label": "Cities",
+        "progressLabel": "South Africa"
+      }
+    ]
+  },
+  {
+    "id": "exceptions-to-the-rule-v1",
+    "title": "Exceptions to the rule",
+    "description": "Geography rewards a second look. The exceptions can be the most memorable places on the map.",
+    "path": "/journey/exceptions-to-the-rule",
+    "module": "./twelfthJourney.ts",
+    "rounds": [
+      {
+        "id": "exceptions-france-border",
+        "label": "Border"
+      },
+      {
+        "id": "exceptions-double-landlocked",
+        "label": "Country"
+      },
+      {
+        "id": "exceptions-four-hemispheres",
+        "label": "Hemispheres"
+      },
+      {
+        "id": "exceptions-bolivia-coast",
+        "label": "History"
+      },
+      {
+        "id": "exceptions-baku",
+        "label": "Capital"
+      }
+    ]
+  },
+  {
+    "id": "the-z-trail-v1",
+    "title": "The Z trail",
+    "description": "Follow one letter through cities, rivers, and changing country names across continents.",
+    "path": "/journey/the-z-trail",
+    "module": "./thirteenthJourney.ts",
+    "rounds": [
+      {
+        "id": "z-zurich-pin",
+        "label": "Drop a pin"
+      },
+      {
+        "id": "z-zagreb-capital",
+        "label": "Capital"
+      },
+      {
+        "id": "z-zambia-zimbabwe-river",
+        "label": "River"
+      },
+      {
+        "id": "z-zanzibar-union",
+        "label": "Union"
+      },
+      {
+        "id": "z-zaire-country",
+        "label": "Former name"
+      }
+    ]
+  },
+  {
+    "id": "island-instincts-v1",
+    "title": "Island instincts",
+    "description": "The nearest coast doesn’t always tell the whole story. Islands have connections of their own.",
+    "path": "/journey/island-instincts",
+    "module": "./fourteenthJourney.ts",
+    "rounds": [
+      {
+        "id": "island-owner-andaman-nicobar",
+        "label": "Island",
+        "progressLabel": "Andaman & Nicobar"
+      },
+      {
+        "id": "island-owner-bioko",
+        "label": "Island",
+        "progressLabel": "Bioko"
+      },
+      {
+        "id": "island-owner-svalbard",
+        "label": "Island",
+        "progressLabel": "Svalbard"
+      },
+      {
+        "id": "island-owner-galapagos",
+        "label": "Island",
+        "progressLabel": "Galápagos"
+      },
+      {
+        "id": "island-owner-reunion",
+        "label": "Island",
+        "progressLabel": "Réunion"
+      }
+    ]
+  },
+  {
+    "id": "try-not-to-click-russia-v1",
+    "title": "On Russia’s doorstep",
+    "description": "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",
+    "path": "/journey/try-not-to-click-russia",
+    "module": "./fifteenthJourney.ts",
+    "rounds": [
+      {
+        "id": "russia-neighbor-fin",
+        "label": "Drop a pin",
+        "progressLabel": "Finland"
+      },
+      {
+        "id": "russia-neighbor-prk",
+        "label": "Drop a pin",
+        "progressLabel": "North Korea"
+      },
+      {
+        "id": "russia-neighbor-mng",
+        "label": "Drop a pin",
+        "progressLabel": "Mongolia"
+      },
+      {
+        "id": "russia-neighbor-geo",
+        "label": "Drop a pin",
+        "progressLabel": "Georgia"
+      },
+      {
+        "id": "russia-neighbor-est",
+        "label": "Drop a pin",
+        "progressLabel": "Estonia"
+      }
+    ]
+  }
+]

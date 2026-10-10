@@ -1,0 +1,55 @@
+{
+  "name": "ambit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "prepare:geography": "node scripts/prepare-geography.mjs",
+    "prepare:quiz": "python3 scripts/prepare-quiz-data.py",
+    "test": "vitest run",
+    "prepare:flags": "python3 scripts/prepare-flags.py",
+    "prepare:cities": "python3 scripts/prepare-cities.py",
+    "prepare:explore": "node scripts/prepare-explore.mjs",
+    "prepare:regional-display": "node scripts/prepare-regional-display.mjs",
+    "prepare:journeys": "node scripts/prepare-journey-index.mjs",
+    "prepare:languages": "node scripts/prepare-language-names.mjs",
+    "check:docs": "prettier --check README.md NOTICE.md \"docs/**/*.md\""
+  },
+  "dependencies": {
+    "d3-geo": "3.1.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-globe.gl": "2.37.0",
+    "three": "0.180.0",
+    "three-conic-polygon-geometry": "2.1.3"
+  },
+  "devDependencies": {
+    "@types/d3-geo": "3.1.0",
+    "@types/geojson": "7946.0.16",
+    "@types/jsdom": "30.0.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "@types/three": "0.180.0",
+    "@vitejs/plugin-react": "5.0.4",
+    "d3-delaunay": "6.0.4",
+    "jsdom": "29.1.1",
+    "mapshaper": "0.6.113",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
+  },
+  "overrides": {
+    "adm-zip": "0.6.1",
+    "fflate": "0.8.3"
+  },
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=24.21.0 <25",
+    "npm": ">=11 <12"
+  },
+  "packageManager": "npm@11.19.0"
+}

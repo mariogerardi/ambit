@@ -1,0 +1,738 @@
+/* Keep the same Earth mounted; only its available space changes. */
+@media (max-width: 700px), (max-width: 1000px) and (max-height: 500px) {
+  .experience.experience {
+    --header-height: calc(56px + env(safe-area-inset-top, 0px));
+    --nav-height: calc(52px + env(safe-area-inset-bottom, 0px));
+    /* Home's proportions are shared by every mobile mode. */
+    --map-height: clamp(
+      227.5px,
+      calc(var(--app-height, 100dvh) * 0.4025),
+      385px
+    );
+    --map-tools-height: 46px;
+    --tools-offset: 0px;
+    position: fixed;
+    top: var(--visual-top, 0px);
+    left: 0;
+    width: 100%;
+    height: var(--app-height, 100dvh);
+    min-height: 0;
+    padding: 0;
+    display: block;
+    overflow: hidden;
+  }
+  .experience.experience::before {
+    display: none;
+  }
+  .experience .experience-header {
+    height: var(--header-height);
+    padding: env(safe-area-inset-top, 0px)
+      max(16px, env(safe-area-inset-right, 0px)) 0
+      max(16px, env(safe-area-inset-left, 0px));
+    align-items: center;
+    background: transparent;
+    z-index: 6;
+  }
+  .experience .experience-logo {
+    transform: translateY(10px);
+    font-size: 28px;
+  }
+  .experience .experience-header-right {
+    gap: 12px;
+  }
+  .experience .header-mode-label {
+    display: none;
+  }
+  .experience .experience-header .home-link {
+    font-size: 13px;
+    padding: 0 6px;
+  }
+  .experience .experience-header .home-link:not(:last-child) {
+    display: none;
+  }
+  .experience .experience-header button.header-action {
+    min-height: 44px;
+    padding-inline: 10px;
+    transform: translateY(10px);
+  }
+  .experience
+    :is(
+      .experience-header .home-link,
+      .shell-credits > summary,
+      .mobile-map-tools button,
+      .world-tools > summary
+    ) {
+    text-shadow: var(--ui-text-shadow, 0 2px 4px #000e, 0 0 12px #000c);
+  }
+  .experience .experience-logo {
+    text-shadow: var(--ui-text-shadow, 0 2px 3px #000b);
+  }
+  .experience.experience .game-scene {
+    position: absolute;
+    inset: var(--header-height) env(safe-area-inset-right, 0px) auto
+      env(safe-area-inset-left, 0px);
+    height: var(--map-height);
+    max-height: none;
+  }
+  .experience .globe-canvas {
+    /* Render through the bars without changing the map's framing area. */
+    top: calc(-1 * var(--header-height));
+    bottom: auto;
+    height: calc(
+      var(--header-height) + var(--map-height) + var(--map-tools-height)
+    );
+    touch-action: none;
+  }
+  .experience.experience .mode-layer {
+    position: absolute;
+    inset: calc(
+        var(--header-height) + var(--map-height) + var(--map-tools-height)
+      )
+      0 var(--nav-height);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px max(12px, env(safe-area-inset-right, 0px)) 24px
+      max(12px, env(safe-area-inset-left, 0px));
+    pointer-events: auto;
+    animation: none;
+    background: rgb(var(--ui-surface-rgb) / 1);
+    border-top: 1px solid rgb(var(--ui-line-rgb) / 0.149);
+    scroll-padding-block: 16px;
+    transition:
+      top 720ms cubic-bezier(0.4, 0, 0.2, 1),
+      left 720ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 280ms ease 120ms,
+      visibility 0s;
+  }
+  .experience .mode-layer[aria-hidden="true"] {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      top 720ms cubic-bezier(0.4, 0, 0.2, 1),
+      left 720ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 300ms ease 240ms,
+      visibility 0s 720ms;
+  }
+  .experience.experience
+    :is(.info-view, .home-menu, .question-card, .finish-story) {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    max-height: none;
+    overflow: visible;
+    margin: 0;
+    padding: 18px;
+    border-radius: 16px;
+  }
+  .experience .round-feedback > .info-note-button {
+    min-height: 44px;
+  }
+  .experience .home-menu {
+    padding: 6px;
+  }
+  .experience.experience .info-view {
+    padding: 6px;
+    border-radius: 0;
+  }
+  .experience .home-menu h1 {
+    font-size: 30px;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin: 0 0 18px;
+  }
+  .experience .daily-menu {
+    padding: 12px 16px;
+  }
+  .experience .daily-menu h2 {
+    font-size: 23px;
+  }
+  .experience .daily-levels {
+    margin: 8px 0 10px;
+  }
+  .experience .daily-levels span {
+    font-size: 12px;
+    padding: 4px 0;
+  }
+  .experience .home-menu .menu-secondary {
+    margin-top: 20px;
+    gap: 14px;
+  }
+  .experience .menu-secondary small,
+  .experience .globe-invitation {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .experience .home-menu .globe-invitation {
+    margin-top: 18px;
+  }
+  .experience :is(.info-view h1, .question-card h2) {
+    overflow-wrap: anywhere;
+  }
+  .experience :is(.info-view h1, .question-card h1) {
+    font-size: 28px;
+  }
+  .experience .question-card h1 {
+    font-size: 26px;
+  }
+  .experience .finish-story h1 {
+    font-size: 30px;
+  }
+  .experience .info-view h2 {
+    font-size: 23px;
+  }
+  .experience .study-landing > h1 {
+    font-size: 25px;
+  }
+  .experience .study-summary .info-heading h1 {
+    font-size: 26px;
+  }
+  .experience .menu-secondary strong {
+    font-size: 21px;
+  }
+
+  .experience .study-setup > .muted {
+    font-size: 12px;
+  }
+  .experience .explore-heading h1 {
+    font-size: clamp(24px, 7vw, 28px);
+    overflow-wrap: break-word;
+  }
+  .experience .detail-flag {
+    max-width: 60px;
+    max-height: 40px;
+    margin: 0;
+  }
+  .experience :is(button, summary) {
+    min-height: 44px;
+  }
+  .experience button {
+    touch-action: manipulation;
+  }
+  .experience
+    :is(
+      .primary-button,
+      .quiet-button,
+      .candidate-grid button,
+      .study-presets button,
+      .country-search button
+    ) {
+    font-size: 14px;
+  }
+  .experience .candidate-grid button {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding: 12px;
+  }
+  .experience
+    :is(.info-view, .question-card, .playground-toolbar)
+    :is(
+      input:not([type="checkbox"], [type="radio"], [type="range"]),
+      select,
+      textarea
+    ),
+  .experience .ordered-answer input {
+    font-size: 16px;
+    min-height: 46px;
+    scroll-margin-block: 16px;
+  }
+  .experience .answer-form .answer-counter input {
+    font-size: 24px;
+    min-height: 48px;
+  }
+  .experience
+    :is(
+      .field,
+      .answer-form label,
+      .ordered-answer label,
+      .typed-country-guess label
+    ) {
+    font-size: 13px;
+  }
+  .experience
+    :is(
+      .display-settings label,
+      .checkbox-line,
+      .custom-pool label,
+      .regional-toggle,
+      .study-choices label
+    ) {
+    min-height: 44px;
+    font-size: 14px;
+    margin-block: 4px;
+  }
+  .experience
+    :is(.info-view input[type="checkbox"], .info-view input[type="radio"]) {
+    width: 20px;
+    height: 20px;
+  }
+  .experience
+    :is(
+      .muted,
+      .commit-note,
+      .source-note,
+      .info-view small,
+      .round-feedback p,
+      .question-instruction
+    ) {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .experience :is(.typed-country-guess summary, .explore-controls summary) {
+    font-size: 14px;
+    padding-block: 12px;
+  }
+  .experience .country-facts {
+    grid-template-columns: 100px minmax(0, 1fr);
+    font-size: 14px;
+    gap: 10px;
+  }
+  .experience .country-facts dd {
+    overflow-wrap: anywhere;
+  }
+  .experience .inline-actions,
+  .experience .study-presets {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .experience .setup-row {
+    flex-wrap: wrap;
+  }
+  .experience .setup-row > * {
+    flex-basis: 120px;
+  }
+  .experience .flag-clue img {
+    max-height: 130px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .experience .custom-pool {
+    max-height: 220px;
+  }
+  .experience.experience .finish-story {
+    padding-top: 18px;
+  }
+  .experience .journey-score {
+    margin: 16px 0 18px;
+  }
+  .experience.experience .experience-footer {
+    position: relative;
+    inset: auto;
+    margin: 20px 0 0;
+    padding: 0 6px;
+  }
+  .experience > .experience-footer {
+    display: none;
+  }
+  .experience .journey-progress {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .experience .journey-progress li {
+    font-size: 11px;
+  }
+  .experience .mode-layer .board-tools {
+    display: none;
+  }
+  .experience .playground-toolbar {
+    position: relative;
+    inset: auto;
+    margin: 0 0 12px;
+    padding: 12px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .experience .playground-controls {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-height: none;
+    margin-top: 12px;
+  }
+  .experience .mobile-map-tools {
+    position: absolute;
+    top: calc(var(--header-height) + var(--map-height) - var(--tools-offset));
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
+    height: var(--map-tools-height);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    justify-content: space-between;
+    gap: 2px;
+    z-index: 4;
+    background: transparent;
+    pointer-events: none;
+  }
+  .mobile-map-tools > button {
+    pointer-events: auto;
+    padding: 0 4px;
+    min-width: 0;
+    color: var(--ui-accent, #e5cf94);
+    font-size: 13px;
+  }
+  .mobile-map-tools > button:first-child {
+    justify-self: start;
+    text-align: left;
+  }
+  .mobile-map-tools > button:last-child {
+    grid-column: 3;
+    justify-self: end;
+    text-align: right;
+  }
+  .mobile-navigation {
+    position: absolute;
+    inset: auto 0 0;
+    height: var(--nav-height);
+    padding: 4px max(8px, env(safe-area-inset-right, 0px))
+      env(safe-area-inset-bottom, 0px) max(8px, env(safe-area-inset-left, 0px));
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    background: rgb(var(--ui-surface-rgb) / 1);
+    border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+    z-index: 6;
+  }
+  .mobile-navigation button {
+    min-width: 0;
+    color: var(--ui-muted, #a5bdb5);
+    font-size: 14px;
+    border-radius: 8px;
+  }
+  .mobile-navigation button[aria-current] {
+    color: var(--ui-accent, #f1d78f);
+    background: rgb(var(--ui-accent-rgb) / 0.071);
+  }
+  .mobile-navigation button:disabled {
+    opacity: 0.45;
+  }
+  .mobile-gesture-hint {
+    position: absolute;
+    top: calc(
+      var(--header-height) + var(--map-height) - var(--tools-offset) - 22px
+    );
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    margin: 0;
+    font-size: 11px;
+    color: var(--ui-text, #c0d0cb);
+    pointer-events: none;
+    z-index: 3;
+    text-shadow: var(--ui-text-shadow, 0 1px 3px #000);
+  }
+  .experience .study-presets {
+    margin-bottom: 12px;
+  }
+  .study-session-description {
+    margin-block: 8px;
+  }
+  .experience .experience-status,
+  .experience .save-notice {
+    position: absolute;
+    inset: auto 12px calc(var(--nav-height) + 12px);
+    max-width: none;
+    font-size: 13px;
+    z-index: 8;
+  }
+  .experience.globe-expanded {
+    --map-height: calc(
+      var(--app-height, 100dvh) - var(--header-height) - var(--nav-height) -
+        var(--map-tools-height)
+    );
+  }
+  /* Resize the existing canvas and slide the tray; keep the player's orbit. */
+  .experience:not([data-keyboard-open]) :is(.game-scene, .globe-canvas) {
+    transition:
+      height 720ms cubic-bezier(0.4, 0, 0.2, 1),
+      width 720ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .experience:not([data-keyboard-open])
+    :is(.mobile-map-tools, .globe-controls, .mobile-gesture-hint) {
+    transition:
+      top 720ms cubic-bezier(0.4, 0, 0.2, 1),
+      left 720ms cubic-bezier(0.4, 0, 0.2, 1),
+      right 720ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .experience[data-keyboard-open] .mode-layer {
+    transition: none;
+  }
+  .mobile-map-prompt {
+    position: absolute;
+    top: var(--header-height);
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
+    margin: 8px 0;
+    padding: 0 12px;
+    background: rgb(var(--ui-surface-rgb) / 0.902);
+    color: var(--ui-text, #e6eadb);
+    font-size: 14px;
+    line-height: 1.45;
+    border-radius: 8px;
+    z-index: 3;
+    max-height: 35%;
+    overflow-y: auto;
+  }
+  .mobile-map-prompt summary {
+    padding-block: 12px;
+    cursor: pointer;
+  }
+  p.mobile-map-prompt {
+    padding-block: 12px;
+    pointer-events: none;
+  }
+  .experience[data-keyboard-open] {
+    --map-height: 0px;
+    --map-tools-height: 0px;
+    --nav-height: 0px;
+  }
+  .experience[data-keyboard-open] .game-scene {
+    height: 180px;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .experience[data-keyboard-open] .globe-canvas {
+    top: 0;
+    height: 100%;
+  }
+  .experience[data-keyboard-open]
+    :is(
+      .mobile-navigation,
+      .mobile-map-tools,
+      .mobile-gesture-hint,
+      .globe-controls
+    ) {
+    display: none;
+  }
+  .explore-search-popup {
+    overscroll-behavior: contain;
+  }
+  .explore-search-popup button {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
+/* On a sideways phone, put the question beside the Earth. */
+@media (orientation: landscape) and (max-width: 1000px) and (max-height: 500px) {
+  .experience.experience {
+    --map-height: calc(
+      var(--app-height, 100dvh) - var(--header-height) - var(--nav-height) -
+        var(--map-tools-height)
+    );
+    --map-width: 45%;
+  }
+  .experience.experience .game-scene {
+    right: auto;
+    width: calc(var(--map-width) - env(safe-area-inset-left, 0px));
+  }
+  .experience.experience .mode-layer {
+    inset: var(--header-height) 0 var(--nav-height) var(--map-width);
+    border-left: 1px solid rgb(var(--ui-line-rgb) / 0.149);
+    border-top: 0;
+  }
+  .experience .mobile-map-tools {
+    right: calc(100% - var(--map-width) + 8px);
+  }
+  .mobile-map-tools > button {
+    font-size: 12px;
+    padding-inline: 4px;
+  }
+  .mobile-gesture-hint {
+    display: none;
+  }
+  .experience .home-menu h1 {
+    font-size: 26px;
+  }
+  .experience.globe-expanded {
+    --map-width: 100%;
+  }
+  .experience.globe-expanded .mobile-map-prompt {
+    right: max(12px, env(safe-area-inset-right, 0px));
+  }
+  .experience[data-keyboard-open] {
+    --map-width: 0%;
+  }
+  .experience[data-keyboard-open] .game-scene {
+    width: 45%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience
+    :is(
+      .mode-layer,
+      .game-scene,
+      .globe-canvas,
+      .mobile-map-tools,
+      .globe-controls,
+      .mobile-gesture-hint
+    ) {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .study-config-row {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 8px;
+  }
+  .experience .experience-logo {
+    transform: translateY(10px);
+    font-size: 28px;
+  }
+  .mobile-map-tools > button {
+    font-size: 12px;
+    padding-inline: 0;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 700px) and (max-height: 650px) {
+  .experience.experience {
+    --map-height: 183.75px;
+  }
+  .experience.globe-expanded {
+    --map-height: calc(
+      var(--app-height, 100dvh) - var(--header-height) - var(--nav-height) -
+        var(--map-tools-height)
+    );
+  }
+  .experience[data-keyboard-open] {
+    --map-height: 0px;
+  }
+  .experience .home-menu h1 {
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 700px), (max-width: 1000px) and (max-height: 500px) {
+  .experience .app-menu-toggle {
+    transform: translateY(10px);
+  }
+  .experience .app-menu-content {
+    top: calc(100% + 18px);
+    max-height: calc(var(--app-height, 100dvh) - var(--header-height) - 28px);
+  }
+  .experience .explore-heading .detail-flag {
+    width: 100px;
+    max-width: 100px;
+    max-height: 68px;
+  }
+  .experience .globe-controls {
+    position: static;
+    transform: none;
+    grid-column: 2;
+    pointer-events: auto;
+    z-index: 5;
+  }
+  .experience .globe-controls svg {
+    width: 16px;
+    height: 16px;
+  }
+  .experience .globe-controls button,
+  .experience .globe-controls select {
+    height: 44px;
+    min-height: 44px;
+  }
+  .experience .globe-controls button,
+  .experience .globe-speed {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 700px), (max-width: 1000px) and (max-height: 500px) {
+  .experience .mode-layer:has(.study-editor) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 12px;
+  }
+  .experience.experience .study-editor {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+  .experience .study-editor h1.editorial-heading {
+    margin: 0 0 14px;
+    font-size: 24px;
+  }
+  .experience .study-history h1.editorial-heading {
+    font-size: 26px;
+    margin: 0 0 16px;
+  }
+  .experience .tertiary-action,
+  .study-options-dialog .tertiary-action {
+    min-height: 44px;
+    font-size: 13px;
+    padding-block: 8px;
+  }
+  .experience .study-history-score small {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .experience .study-back {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .experience .result-actions > button {
+    min-height: 50px;
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+  .experience .study-path h3,
+  .experience .study-path-build strong {
+    font-size: 23px;
+  }
+  .experience .study-path .quiet-button {
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .experience .study-preferences .display-settings legend {
+    font-size: 16px;
+  }
+  .experience .study-preferences .display-settings label {
+    min-height: 40px;
+    margin: 0;
+  }
+  .experience .study-hint-note {
+    font-size: 13px;
+  }
+}
+
+/* The mobile tray has one content inset, regardless of mode or heading type. */
+@media (max-width: 700px), (max-width: 1000px) and (max-height: 500px) {
+  .experience.experience .mode-layer {
+    padding-top: 18px;
+  }
+  .experience.experience
+    :is(.home-story, .info-view, .question-card, .finish-story) {
+    inset: auto;
+    max-height: none;
+    margin-top: 0;
+    padding-top: 6px;
+  }
+  .experience.experience .question-card {
+    padding-top: 20px;
+  }
+  .experience.experience .study-editor {
+    height: 100%;
+    overflow: hidden;
+  }
+  .experience.experience.is-playground .playground-toolbar {
+    top: auto;
+  }
+  .experience.experience.is-playground :is(.question-card, .finish-story) {
+    top: auto;
+    max-height: none;
+  }
+}

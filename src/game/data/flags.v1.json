@@ -1,0 +1,778 @@
+{
+  "version": 1,
+  "commit": "c09927e63705529bbf59ca6684cd9b23225dddad",
+  "flags": [
+    {
+      "countryId": "wurl:AFG",
+      "src": "/flags/study/flag-001.svg"
+    },
+    {
+      "countryId": "wurl:ALB",
+      "src": "/flags/study/flag-002.svg"
+    },
+    {
+      "countryId": "wurl:DZA",
+      "src": "/flags/study/flag-003.svg"
+    },
+    {
+      "countryId": "wurl:AND",
+      "src": "/flags/study/flag-004.svg"
+    },
+    {
+      "countryId": "wurl:AGO",
+      "src": "/flags/study/flag-005.svg"
+    },
+    {
+      "countryId": "wurl:ATG",
+      "src": "/flags/study/flag-006.svg"
+    },
+    {
+      "countryId": "wurl:ARG",
+      "src": "/flags/study/flag-007.svg"
+    },
+    {
+      "countryId": "wurl:ARM",
+      "src": "/flags/study/flag-008.svg"
+    },
+    {
+      "countryId": "wurl:AUS",
+      "src": "/flags/study/flag-009.svg"
+    },
+    {
+      "countryId": "wurl:AUT",
+      "src": "/flags/study/flag-010.svg"
+    },
+    {
+      "countryId": "wurl:AZE",
+      "src": "/flags/study/flag-011.svg"
+    },
+    {
+      "countryId": "wurl:BHR",
+      "src": "/flags/study/flag-012.svg"
+    },
+    {
+      "countryId": "wurl:BGD",
+      "src": "/flags/study/flag-013.svg"
+    },
+    {
+      "countryId": "wurl:BRB",
+      "src": "/flags/study/flag-014.svg"
+    },
+    {
+      "countryId": "wurl:BLR",
+      "src": "/flags/study/flag-015.svg"
+    },
+    {
+      "countryId": "wurl:BEL",
+      "src": "/flags/study/flag-016.svg"
+    },
+    {
+      "countryId": "wurl:BLZ",
+      "src": "/flags/study/flag-017.svg"
+    },
+    {
+      "countryId": "wurl:BEN",
+      "src": "/flags/study/flag-018.svg"
+    },
+    {
+      "countryId": "wurl:BTN",
+      "src": "/flags/study/flag-019.svg"
+    },
+    {
+      "countryId": "wurl:BOL",
+      "src": "/flags/study/flag-020.svg"
+    },
+    {
+      "countryId": "wurl:BIH",
+      "src": "/flags/study/flag-021.svg"
+    },
+    {
+      "countryId": "wurl:BWA",
+      "src": "/flags/study/flag-022.svg"
+    },
+    {
+      "countryId": "wurl:BRA",
+      "src": "/flags/study/flag-023.svg"
+    },
+    {
+      "countryId": "wurl:BRN",
+      "src": "/flags/study/flag-024.svg"
+    },
+    {
+      "countryId": "wurl:BGR",
+      "src": "/flags/study/flag-025.svg"
+    },
+    {
+      "countryId": "wurl:BFA",
+      "src": "/flags/study/flag-026.svg"
+    },
+    {
+      "countryId": "wurl:BDI",
+      "src": "/flags/study/flag-027.svg"
+    },
+    {
+      "countryId": "wurl:CPV",
+      "src": "/flags/study/flag-028.svg"
+    },
+    {
+      "countryId": "wurl:KHM",
+      "src": "/flags/study/flag-029.svg"
+    },
+    {
+      "countryId": "wurl:CMR",
+      "src": "/flags/study/flag-030.svg"
+    },
+    {
+      "countryId": "wurl:CAN",
+      "src": "/flags/study/flag-031.svg"
+    },
+    {
+      "countryId": "wurl:CAF",
+      "src": "/flags/study/flag-032.svg"
+    },
+    {
+      "countryId": "wurl:TCD",
+      "src": "/flags/study/flag-033.svg"
+    },
+    {
+      "countryId": "wurl:CHL",
+      "src": "/flags/study/flag-034.svg"
+    },
+    {
+      "countryId": "wurl:CHN",
+      "src": "/flags/study/flag-035.svg"
+    },
+    {
+      "countryId": "wurl:COL",
+      "src": "/flags/study/flag-036.svg"
+    },
+    {
+      "countryId": "wurl:COM",
+      "src": "/flags/study/flag-037.svg"
+    },
+    {
+      "countryId": "wurl:CRI",
+      "src": "/flags/study/flag-038.svg"
+    },
+    {
+      "countryId": "wurl:HRV",
+      "src": "/flags/study/flag-039.svg"
+    },
+    {
+      "countryId": "wurl:CUB",
+      "src": "/flags/study/flag-040.svg"
+    },
+    {
+      "countryId": "wurl:CYP",
+      "src": "/flags/study/flag-041.svg"
+    },
+    {
+      "countryId": "wurl:CZE",
+      "src": "/flags/study/flag-042.svg"
+    },
+    {
+      "countryId": "wurl:COD",
+      "src": "/flags/study/flag-043.svg"
+    },
+    {
+      "countryId": "wurl:DNK",
+      "src": "/flags/study/flag-044.svg"
+    },
+    {
+      "countryId": "wurl:DJI",
+      "src": "/flags/study/flag-045.svg"
+    },
+    {
+      "countryId": "wurl:DMA",
+      "src": "/flags/study/flag-046.svg"
+    },
+    {
+      "countryId": "wurl:DOM",
+      "src": "/flags/study/flag-047.svg"
+    },
+    {
+      "countryId": "wurl:TLS",
+      "src": "/flags/study/flag-048.svg"
+    },
+    {
+      "countryId": "wurl:ECU",
+      "src": "/flags/study/flag-049.svg"
+    },
+    {
+      "countryId": "wurl:EGY",
+      "src": "/flags/study/flag-050.svg"
+    },
+    {
+      "countryId": "wurl:SLV",
+      "src": "/flags/study/flag-051.svg"
+    },
+    {
+      "countryId": "wurl:GNQ",
+      "src": "/flags/study/flag-052.svg"
+    },
+    {
+      "countryId": "wurl:ERI",
+      "src": "/flags/study/flag-053.svg"
+    },
+    {
+      "countryId": "wurl:EST",
+      "src": "/flags/study/flag-054.svg"
+    },
+    {
+      "countryId": "wurl:SWZ",
+      "src": "/flags/study/flag-055.svg"
+    },
+    {
+      "countryId": "wurl:ETH",
+      "src": "/flags/study/flag-056.svg"
+    },
+    {
+      "countryId": "wurl:FSM",
+      "src": "/flags/study/flag-057.svg"
+    },
+    {
+      "countryId": "wurl:FJI",
+      "src": "/flags/study/flag-058.svg"
+    },
+    {
+      "countryId": "wurl:FIN",
+      "src": "/flags/study/flag-059.svg"
+    },
+    {
+      "countryId": "wurl:FRA",
+      "src": "/flags/study/flag-060.svg"
+    },
+    {
+      "countryId": "wurl:GAB",
+      "src": "/flags/study/flag-061.svg"
+    },
+    {
+      "countryId": "wurl:GMB",
+      "src": "/flags/study/flag-062.svg"
+    },
+    {
+      "countryId": "wurl:GEO",
+      "src": "/flags/study/flag-063.svg"
+    },
+    {
+      "countryId": "wurl:DEU",
+      "src": "/flags/study/flag-064.svg"
+    },
+    {
+      "countryId": "wurl:GHA",
+      "src": "/flags/study/flag-065.svg"
+    },
+    {
+      "countryId": "wurl:GRC",
+      "src": "/flags/study/flag-066.svg"
+    },
+    {
+      "countryId": "wurl:GRD",
+      "src": "/flags/study/flag-067.svg"
+    },
+    {
+      "countryId": "wurl:GTM",
+      "src": "/flags/study/flag-068.svg"
+    },
+    {
+      "countryId": "wurl:GIN",
+      "src": "/flags/study/flag-069.svg"
+    },
+    {
+      "countryId": "wurl:GNB",
+      "src": "/flags/study/flag-070.svg"
+    },
+    {
+      "countryId": "wurl:GUY",
+      "src": "/flags/study/flag-071.svg"
+    },
+    {
+      "countryId": "wurl:HTI",
+      "src": "/flags/study/flag-072.svg"
+    },
+    {
+      "countryId": "wurl:HND",
+      "src": "/flags/study/flag-073.svg"
+    },
+    {
+      "countryId": "wurl:HUN",
+      "src": "/flags/study/flag-074.svg"
+    },
+    {
+      "countryId": "wurl:ISL",
+      "src": "/flags/study/flag-075.svg"
+    },
+    {
+      "countryId": "wurl:IND",
+      "src": "/flags/study/flag-076.svg"
+    },
+    {
+      "countryId": "wurl:IDN",
+      "src": "/flags/study/flag-077.svg"
+    },
+    {
+      "countryId": "wurl:IRN",
+      "src": "/flags/study/flag-078.svg"
+    },
+    {
+      "countryId": "wurl:IRQ",
+      "src": "/flags/study/flag-079.svg"
+    },
+    {
+      "countryId": "wurl:IRL",
+      "src": "/flags/study/flag-080.svg"
+    },
+    {
+      "countryId": "wurl:ISR",
+      "src": "/flags/study/flag-081.svg"
+    },
+    {
+      "countryId": "wurl:ITA",
+      "src": "/flags/study/flag-082.svg"
+    },
+    {
+      "countryId": "wurl:CIV",
+      "src": "/flags/study/flag-083.svg"
+    },
+    {
+      "countryId": "wurl:JAM",
+      "src": "/flags/study/flag-084.svg"
+    },
+    {
+      "countryId": "wurl:JPN",
+      "src": "/flags/study/flag-085.svg"
+    },
+    {
+      "countryId": "wurl:JOR",
+      "src": "/flags/study/flag-086.svg"
+    },
+    {
+      "countryId": "wurl:KAZ",
+      "src": "/flags/study/flag-087.svg"
+    },
+    {
+      "countryId": "wurl:KEN",
+      "src": "/flags/study/flag-088.svg"
+    },
+    {
+      "countryId": "wurl:KIR",
+      "src": "/flags/study/flag-089.svg"
+    },
+    {
+      "countryId": "wurl:KWT",
+      "src": "/flags/study/flag-090.svg"
+    },
+    {
+      "countryId": "wurl:KGZ",
+      "src": "/flags/study/flag-091.svg"
+    },
+    {
+      "countryId": "wurl:LAO",
+      "src": "/flags/study/flag-092.svg"
+    },
+    {
+      "countryId": "wurl:LVA",
+      "src": "/flags/study/flag-093.svg"
+    },
+    {
+      "countryId": "wurl:LBN",
+      "src": "/flags/study/flag-094.svg"
+    },
+    {
+      "countryId": "wurl:LSO",
+      "src": "/flags/study/flag-095.svg"
+    },
+    {
+      "countryId": "wurl:LBR",
+      "src": "/flags/study/flag-096.svg"
+    },
+    {
+      "countryId": "wurl:LBY",
+      "src": "/flags/study/flag-097.svg"
+    },
+    {
+      "countryId": "wurl:LIE",
+      "src": "/flags/study/flag-098.svg"
+    },
+    {
+      "countryId": "wurl:LTU",
+      "src": "/flags/study/flag-099.svg"
+    },
+    {
+      "countryId": "wurl:LUX",
+      "src": "/flags/study/flag-100.svg"
+    },
+    {
+      "countryId": "wurl:MDG",
+      "src": "/flags/study/flag-101.svg"
+    },
+    {
+      "countryId": "wurl:MWI",
+      "src": "/flags/study/flag-102.svg"
+    },
+    {
+      "countryId": "wurl:MYS",
+      "src": "/flags/study/flag-103.svg"
+    },
+    {
+      "countryId": "wurl:MDV",
+      "src": "/flags/study/flag-104.svg"
+    },
+    {
+      "countryId": "wurl:MLI",
+      "src": "/flags/study/flag-105.svg"
+    },
+    {
+      "countryId": "wurl:MLT",
+      "src": "/flags/study/flag-106.svg"
+    },
+    {
+      "countryId": "wurl:MHL",
+      "src": "/flags/study/flag-107.svg"
+    },
+    {
+      "countryId": "wurl:MRT",
+      "src": "/flags/study/flag-108.svg"
+    },
+    {
+      "countryId": "wurl:MUS",
+      "src": "/flags/study/flag-109.svg"
+    },
+    {
+      "countryId": "wurl:MEX",
+      "src": "/flags/study/flag-110.svg"
+    },
+    {
+      "countryId": "wurl:MDA",
+      "src": "/flags/study/flag-111.svg"
+    },
+    {
+      "countryId": "wurl:MCO",
+      "src": "/flags/study/flag-112.svg"
+    },
+    {
+      "countryId": "wurl:MNG",
+      "src": "/flags/study/flag-113.svg"
+    },
+    {
+      "countryId": "wurl:MNE",
+      "src": "/flags/study/flag-114.svg"
+    },
+    {
+      "countryId": "wurl:MAR",
+      "src": "/flags/study/flag-115.svg"
+    },
+    {
+      "countryId": "wurl:MOZ",
+      "src": "/flags/study/flag-116.svg"
+    },
+    {
+      "countryId": "wurl:MMR",
+      "src": "/flags/study/flag-117.svg"
+    },
+    {
+      "countryId": "wurl:NAM",
+      "src": "/flags/study/flag-118.svg"
+    },
+    {
+      "countryId": "wurl:NRU",
+      "src": "/flags/study/flag-119.svg"
+    },
+    {
+      "countryId": "wurl:NPL",
+      "src": "/flags/study/flag-120.svg"
+    },
+    {
+      "countryId": "wurl:NLD",
+      "src": "/flags/study/flag-121.svg"
+    },
+    {
+      "countryId": "wurl:NZL",
+      "src": "/flags/study/flag-122.svg"
+    },
+    {
+      "countryId": "wurl:NIC",
+      "src": "/flags/study/flag-123.svg"
+    },
+    {
+      "countryId": "wurl:NER",
+      "src": "/flags/study/flag-124.svg"
+    },
+    {
+      "countryId": "wurl:NGA",
+      "src": "/flags/study/flag-125.svg"
+    },
+    {
+      "countryId": "wurl:PRK",
+      "src": "/flags/study/flag-126.svg"
+    },
+    {
+      "countryId": "wurl:MKD",
+      "src": "/flags/study/flag-127.svg"
+    },
+    {
+      "countryId": "wurl:NOR",
+      "src": "/flags/study/flag-128.svg"
+    },
+    {
+      "countryId": "wurl:OMN",
+      "src": "/flags/study/flag-129.svg"
+    },
+    {
+      "countryId": "wurl:PAK",
+      "src": "/flags/study/flag-130.svg"
+    },
+    {
+      "countryId": "wurl:PLW",
+      "src": "/flags/study/flag-131.svg"
+    },
+    {
+      "countryId": "wurl:PAN",
+      "src": "/flags/study/flag-132.svg"
+    },
+    {
+      "countryId": "wurl:PNG",
+      "src": "/flags/study/flag-133.svg"
+    },
+    {
+      "countryId": "wurl:PRY",
+      "src": "/flags/study/flag-134.svg"
+    },
+    {
+      "countryId": "wurl:PER",
+      "src": "/flags/study/flag-135.svg"
+    },
+    {
+      "countryId": "wurl:PHL",
+      "src": "/flags/study/flag-136.svg"
+    },
+    {
+      "countryId": "wurl:POL",
+      "src": "/flags/study/flag-137.svg"
+    },
+    {
+      "countryId": "wurl:PRT",
+      "src": "/flags/study/flag-138.svg"
+    },
+    {
+      "countryId": "wurl:QAT",
+      "src": "/flags/study/flag-139.svg"
+    },
+    {
+      "countryId": "wurl:SRB",
+      "src": "/flags/study/flag-140.svg"
+    },
+    {
+      "countryId": "wurl:COG",
+      "src": "/flags/study/flag-141.svg"
+    },
+    {
+      "countryId": "wurl:ROU",
+      "src": "/flags/study/flag-142.svg"
+    },
+    {
+      "countryId": "wurl:RUS",
+      "src": "/flags/study/flag-143.svg"
+    },
+    {
+      "countryId": "wurl:RWA",
+      "src": "/flags/study/flag-144.svg"
+    },
+    {
+      "countryId": "wurl:KNA",
+      "src": "/flags/study/flag-145.svg"
+    },
+    {
+      "countryId": "wurl:LCA",
+      "src": "/flags/study/flag-146.svg"
+    },
+    {
+      "countryId": "wurl:VCT",
+      "src": "/flags/study/flag-147.svg"
+    },
+    {
+      "countryId": "wurl:WSM",
+      "src": "/flags/study/flag-148.svg"
+    },
+    {
+      "countryId": "wurl:SMR",
+      "src": "/flags/study/flag-149.svg"
+    },
+    {
+      "countryId": "wurl:STP",
+      "src": "/flags/study/flag-150.svg"
+    },
+    {
+      "countryId": "wurl:SAU",
+      "src": "/flags/study/flag-151.svg"
+    },
+    {
+      "countryId": "wurl:SEN",
+      "src": "/flags/study/flag-152.svg"
+    },
+    {
+      "countryId": "wurl:SYC",
+      "src": "/flags/study/flag-153.svg"
+    },
+    {
+      "countryId": "wurl:SLE",
+      "src": "/flags/study/flag-154.svg"
+    },
+    {
+      "countryId": "wurl:SGP",
+      "src": "/flags/study/flag-155.svg"
+    },
+    {
+      "countryId": "wurl:SVK",
+      "src": "/flags/study/flag-156.svg"
+    },
+    {
+      "countryId": "wurl:SVN",
+      "src": "/flags/study/flag-157.svg"
+    },
+    {
+      "countryId": "wurl:SLB",
+      "src": "/flags/study/flag-158.svg"
+    },
+    {
+      "countryId": "wurl:SOM",
+      "src": "/flags/study/flag-159.svg"
+    },
+    {
+      "countryId": "wurl:ZAF",
+      "src": "/flags/study/flag-160.svg"
+    },
+    {
+      "countryId": "wurl:KOR",
+      "src": "/flags/study/flag-161.svg"
+    },
+    {
+      "countryId": "wurl:SSD",
+      "src": "/flags/study/flag-162.svg"
+    },
+    {
+      "countryId": "wurl:ESP",
+      "src": "/flags/study/flag-163.svg"
+    },
+    {
+      "countryId": "wurl:LKA",
+      "src": "/flags/study/flag-164.svg"
+    },
+    {
+      "countryId": "wurl:SDN",
+      "src": "/flags/study/flag-165.svg"
+    },
+    {
+      "countryId": "wurl:SUR",
+      "src": "/flags/study/flag-166.svg"
+    },
+    {
+      "countryId": "wurl:SWE",
+      "src": "/flags/study/flag-167.svg"
+    },
+    {
+      "countryId": "wurl:CHE",
+      "src": "/flags/study/flag-168.svg"
+    },
+    {
+      "countryId": "wurl:SYR",
+      "src": "/flags/study/flag-169.svg"
+    },
+    {
+      "countryId": "wurl:TJK",
+      "src": "/flags/study/flag-170.svg"
+    },
+    {
+      "countryId": "wurl:THA",
+      "src": "/flags/study/flag-171.svg"
+    },
+    {
+      "countryId": "wurl:BHS",
+      "src": "/flags/study/flag-172.svg"
+    },
+    {
+      "countryId": "wurl:TGO",
+      "src": "/flags/study/flag-173.svg"
+    },
+    {
+      "countryId": "wurl:TON",
+      "src": "/flags/study/flag-174.svg"
+    },
+    {
+      "countryId": "wurl:TTO",
+      "src": "/flags/study/flag-175.svg"
+    },
+    {
+      "countryId": "wurl:TUN",
+      "src": "/flags/study/flag-176.svg"
+    },
+    {
+      "countryId": "wurl:TUR",
+      "src": "/flags/study/flag-177.svg"
+    },
+    {
+      "countryId": "wurl:TKM",
+      "src": "/flags/study/flag-178.svg"
+    },
+    {
+      "countryId": "wurl:TUV",
+      "src": "/flags/study/flag-179.svg"
+    },
+    {
+      "countryId": "wurl:UGA",
+      "src": "/flags/study/flag-180.svg"
+    },
+    {
+      "countryId": "wurl:UKR",
+      "src": "/flags/study/flag-181.svg"
+    },
+    {
+      "countryId": "wurl:ARE",
+      "src": "/flags/study/flag-182.svg"
+    },
+    {
+      "countryId": "wurl:GBR",
+      "src": "/flags/study/flag-183.svg"
+    },
+    {
+      "countryId": "wurl:TZA",
+      "src": "/flags/study/flag-184.svg"
+    },
+    {
+      "countryId": "wurl:USA",
+      "src": "/flags/study/flag-185.svg"
+    },
+    {
+      "countryId": "wurl:URY",
+      "src": "/flags/study/flag-186.svg"
+    },
+    {
+      "countryId": "wurl:UZB",
+      "src": "/flags/study/flag-187.svg"
+    },
+    {
+      "countryId": "wurl:VUT",
+      "src": "/flags/study/flag-188.svg"
+    },
+    {
+      "countryId": "wurl:VEN",
+      "src": "/flags/study/flag-189.svg"
+    },
+    {
+      "countryId": "wurl:VNM",
+      "src": "/flags/study/flag-190.svg"
+    },
+    {
+      "countryId": "wurl:YEM",
+      "src": "/flags/study/flag-191.svg"
+    },
+    {
+      "countryId": "wurl:ZMB",
+      "src": "/flags/study/flag-192.svg"
+    },
+    {
+      "countryId": "wurl:ZWE",
+      "src": "/flags/study/flag-193.svg"
+    }
+  ]
+}

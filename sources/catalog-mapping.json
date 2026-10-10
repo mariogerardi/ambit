@@ -1,0 +1,2894 @@
+{
+  "world": {
+    "1159320319": {
+      "id": "wurl:AFG",
+      "name": "Afghanistan",
+      "iso": "AFG",
+      "sourceCode": "AFG",
+      "sourceType": "Sovereign country",
+      "sovereign": "Afghanistan",
+      "boundaryNote": null
+    },
+    "1159320323": {
+      "id": "wurl:AGO",
+      "name": "Angola",
+      "iso": "AGO",
+      "sourceCode": "AGO",
+      "sourceType": "Sovereign country",
+      "sovereign": "Angola",
+      "boundaryNote": null
+    },
+    "1159320325": {
+      "id": "wurl:ALB",
+      "name": "Albania",
+      "iso": "ALB",
+      "sourceCode": "ALB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Albania",
+      "boundaryNote": null
+    },
+    "1159320327": {
+      "id": "wurl:AND",
+      "name": "Andorra",
+      "iso": "AND",
+      "sourceCode": "AND",
+      "sourceType": "Sovereign country",
+      "sovereign": "Andorra",
+      "boundaryNote": null
+    },
+    "1159320329": {
+      "id": "wurl:ARE",
+      "name": "United Arab Emirates",
+      "iso": "ARE",
+      "sourceCode": "ARE",
+      "sourceType": "Sovereign country",
+      "sovereign": "United Arab Emirates",
+      "boundaryNote": null
+    },
+    "1159320331": {
+      "id": "wurl:ARG",
+      "name": "Argentina",
+      "iso": "ARG",
+      "sourceCode": "ARG",
+      "sourceType": "Sovereign country",
+      "sovereign": "Argentina",
+      "boundaryNote": null
+    },
+    "1159320333": {
+      "id": "wurl:ARM",
+      "name": "Armenia",
+      "iso": "ARM",
+      "sourceCode": "ARM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Armenia",
+      "boundaryNote": null
+    },
+    "1159320335": {
+      "id": "wurl:ATA",
+      "name": "Antarctica",
+      "iso": "ATA",
+      "sourceCode": "ATA",
+      "sourceType": "Indeterminate",
+      "sovereign": "Antarctica",
+      "boundaryNote": "Multiple claims held in abeyance by treaty"
+    },
+    "1159320345": {
+      "id": "wurl:ATG",
+      "name": "Antigua and Barbuda",
+      "iso": "ATG",
+      "sourceCode": "ATG",
+      "sourceType": "Sovereign country",
+      "sovereign": "Antigua and Barbuda",
+      "boundaryNote": null
+    },
+    "1159320353": {
+      "id": "wurl:NE-ATC",
+      "name": "Ashmore and Cartier Islands",
+      "iso": "AUS",
+      "sourceCode": "ATC",
+      "sourceType": "Dependency",
+      "sovereign": "Australia",
+      "boundaryNote": "Auz."
+    },
+    "1159320355": {
+      "id": "wurl:AUS",
+      "name": "Australia",
+      "iso": "AUS",
+      "sourceCode": "AUS",
+      "sourceType": "Country",
+      "sovereign": "Australia",
+      "boundaryNote": null
+    },
+    "1159320361": {
+      "id": "wurl:HMD",
+      "name": "Heard Island and McDonald Islands",
+      "iso": "HMD",
+      "sourceCode": "HMD",
+      "sourceType": "Dependency",
+      "sovereign": "Australia",
+      "boundaryNote": "Auz."
+    },
+    "1159320363": {
+      "id": "wurl:NE-IOA",
+      "name": "Indian Ocean Territories",
+      "iso": "AUS",
+      "sourceCode": "IOA",
+      "sourceType": "Dependency",
+      "sovereign": "Australia",
+      "boundaryNote": "Auz."
+    },
+    "1159320365": {
+      "id": "wurl:NFK",
+      "name": "Norfolk Island",
+      "iso": "NFK",
+      "sourceCode": "NFK",
+      "sourceType": "Dependency",
+      "sovereign": "Australia",
+      "boundaryNote": "Auz."
+    },
+    "1159320379": {
+      "id": "wurl:AUT",
+      "name": "Austria",
+      "iso": "AUT",
+      "sourceCode": "AUT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Austria",
+      "boundaryNote": null
+    },
+    "1159320381": {
+      "id": "wurl:AZE",
+      "name": "Azerbaijan",
+      "iso": "AZE",
+      "sourceCode": "AZE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Azerbaijan",
+      "boundaryNote": null
+    },
+    "1159320387": {
+      "id": "wurl:BDI",
+      "name": "Burundi",
+      "iso": "BDI",
+      "sourceCode": "BDI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Burundi",
+      "boundaryNote": null
+    },
+    "1159320389": {
+      "id": "wurl:BEL",
+      "name": "Belgium",
+      "iso": "BEL",
+      "sourceCode": "BEL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Belgium",
+      "boundaryNote": null
+    },
+    "1159320399": {
+      "id": "wurl:BEN",
+      "name": "Benin",
+      "iso": "BEN",
+      "sourceCode": "BEN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Benin",
+      "boundaryNote": null
+    },
+    "1159320405": {
+      "id": "wurl:BFA",
+      "name": "Burkina Faso",
+      "iso": "BFA",
+      "sourceCode": "BFA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Burkina Faso",
+      "boundaryNote": null
+    },
+    "1159320407": {
+      "id": "wurl:BGD",
+      "name": "Bangladesh",
+      "iso": "BGD",
+      "sourceCode": "BGD",
+      "sourceType": "Sovereign country",
+      "sovereign": "Bangladesh",
+      "boundaryNote": null
+    },
+    "1159320409": {
+      "id": "wurl:BGR",
+      "name": "Bulgaria",
+      "iso": "BGR",
+      "sourceCode": "BGR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Bulgaria",
+      "boundaryNote": null
+    },
+    "1159320413": {
+      "id": "wurl:BHR",
+      "name": "Bahrain",
+      "iso": "BHR",
+      "sourceCode": "BHR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Bahrain",
+      "boundaryNote": null
+    },
+    "1159320415": {
+      "id": "wurl:BHS",
+      "name": "The Bahamas",
+      "iso": "BHS",
+      "sourceCode": "BHS",
+      "sourceType": "Sovereign country",
+      "sovereign": "The Bahamas",
+      "boundaryNote": null
+    },
+    "1159320417": {
+      "id": "wurl:BIH",
+      "name": "Bosnia and Herzegovina",
+      "iso": "BIH",
+      "sourceCode": "BIH",
+      "sourceType": "Sovereign country",
+      "sovereign": "Bosnia and Herzegovina",
+      "boundaryNote": null
+    },
+    "1159320427": {
+      "id": "wurl:BLR",
+      "name": "Belarus",
+      "iso": "BLR",
+      "sourceCode": "BLR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Belarus",
+      "boundaryNote": null
+    },
+    "1159320431": {
+      "id": "wurl:BLZ",
+      "name": "Belize",
+      "iso": "BLZ",
+      "sourceCode": "BLZ",
+      "sourceType": "Sovereign country",
+      "sovereign": "Belize",
+      "boundaryNote": null
+    },
+    "1159320439": {
+      "id": "wurl:BOL",
+      "name": "Bolivia",
+      "iso": "BOL",
+      "sourceCode": "BOL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Bolivia",
+      "boundaryNote": null
+    },
+    "1159320441": {
+      "id": "wurl:BRA",
+      "name": "Brazil",
+      "iso": "BRA",
+      "sourceCode": "BRA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Brazil",
+      "boundaryNote": null
+    },
+    "1159320449": {
+      "id": "wurl:BRB",
+      "name": "Barbados",
+      "iso": "BRB",
+      "sourceCode": "BRB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Barbados",
+      "boundaryNote": null
+    },
+    "1159320451": {
+      "id": "wurl:BRN",
+      "name": "Brunei",
+      "iso": "BRN",
+      "sourceCode": "BRN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Brunei",
+      "boundaryNote": null
+    },
+    "1159320453": {
+      "id": "wurl:BTN",
+      "name": "Bhutan",
+      "iso": "BTN",
+      "sourceCode": "BTN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Bhutan",
+      "boundaryNote": null
+    },
+    "1159320461": {
+      "id": "wurl:BWA",
+      "name": "Botswana",
+      "iso": "BWA",
+      "sourceCode": "BWA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Botswana",
+      "boundaryNote": null
+    },
+    "1159320463": {
+      "id": "wurl:CAF",
+      "name": "Central African Republic",
+      "iso": "CAF",
+      "sourceCode": "CAF",
+      "sourceType": "Sovereign country",
+      "sovereign": "Central African Republic",
+      "boundaryNote": null
+    },
+    "1159320467": {
+      "id": "wurl:CAN",
+      "name": "Canada",
+      "iso": "CAN",
+      "sourceCode": "CAN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Canada",
+      "boundaryNote": null
+    },
+    "1159320471": {
+      "id": "wurl:CHN",
+      "name": "China",
+      "iso": "CHN",
+      "sourceCode": "CHN",
+      "sourceType": "Country",
+      "sovereign": "China",
+      "boundaryNote": null
+    },
+    "1159320473": {
+      "id": "wurl:HKG",
+      "name": "Hong Kong S.A.R.",
+      "iso": "HKG",
+      "sourceCode": "HKG",
+      "sourceType": "Country",
+      "sovereign": "China",
+      "boundaryNote": "China"
+    },
+    "1159320475": {
+      "id": "wurl:MAC",
+      "name": "Macao S.A.R",
+      "iso": "MAC",
+      "sourceCode": "MAC",
+      "sourceType": "Country",
+      "sovereign": "China",
+      "boundaryNote": "China"
+    },
+    "1159320491": {
+      "id": "wurl:CHE",
+      "name": "Switzerland",
+      "iso": "CHE",
+      "sourceCode": "CHE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Switzerland",
+      "boundaryNote": null
+    },
+    "1159320493": {
+      "id": "wurl:CHL",
+      "name": "Chile",
+      "iso": "CHL",
+      "sourceCode": "CHL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Chile",
+      "boundaryNote": null
+    },
+    "1159320507": {
+      "id": "wurl:CIV",
+      "name": "Ivory Coast",
+      "iso": "CIV",
+      "sourceCode": "CIV",
+      "sourceType": "Sovereign country",
+      "sovereign": "Ivory Coast",
+      "boundaryNote": null
+    },
+    "1159320509": {
+      "id": "wurl:CMR",
+      "name": "Cameroon",
+      "iso": "CMR",
+      "sourceCode": "CMR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Cameroon",
+      "boundaryNote": null
+    },
+    "1159320513": {
+      "id": "wurl:COD",
+      "name": "Democratic Republic of the Congo",
+      "iso": "COD",
+      "sourceCode": "COD",
+      "sourceType": "Sovereign country",
+      "sovereign": "Democratic Republic of the Congo",
+      "boundaryNote": null
+    },
+    "1159320515": {
+      "id": "wurl:COG",
+      "name": "Republic of the Congo",
+      "iso": "COG",
+      "sourceCode": "COG",
+      "sourceType": "Sovereign country",
+      "sovereign": "Republic of the Congo",
+      "boundaryNote": null
+    },
+    "1159320517": {
+      "id": "wurl:COL",
+      "name": "Colombia",
+      "iso": "COL",
+      "sourceCode": "COL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Colombia",
+      "boundaryNote": null
+    },
+    "1159320521": {
+      "id": "wurl:COM",
+      "name": "Comoros",
+      "iso": "COM",
+      "sourceCode": "COM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Comoros",
+      "boundaryNote": null
+    },
+    "1159320523": {
+      "id": "wurl:CPV",
+      "name": "Cabo Verde",
+      "iso": "CPV",
+      "sourceCode": "CPV",
+      "sourceType": "Sovereign country",
+      "sovereign": "Cabo Verde",
+      "boundaryNote": null
+    },
+    "1159320525": {
+      "id": "wurl:CRI",
+      "name": "Costa Rica",
+      "iso": "CRI",
+      "sourceCode": "CRI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Costa Rica",
+      "boundaryNote": null
+    },
+    "1159320527": {
+      "id": "wurl:CUB",
+      "name": "Cuba",
+      "iso": "CUB",
+      "sourceCode": "CUB",
+      "sourceType": "Sovereignty",
+      "sovereign": "Cuba",
+      "boundaryNote": null
+    },
+    "1159320531": {
+      "id": "wurl:NE-CYN",
+      "name": "Northern Cyprus",
+      "iso": null,
+      "sourceCode": "CYN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Northern Cyprus",
+      "boundaryNote": "Self admin.; Claimed by Cyprus"
+    },
+    "1159320533": {
+      "id": "wurl:CYP",
+      "name": "Cyprus",
+      "iso": "CYP",
+      "sourceCode": "CYP",
+      "sourceType": "Sovereign country",
+      "sovereign": "Cyprus",
+      "boundaryNote": null
+    },
+    "1159320535": {
+      "id": "wurl:CZE",
+      "name": "Czechia",
+      "iso": "CZE",
+      "sourceCode": "CZE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Czechia",
+      "boundaryNote": null
+    },
+    "1159320539": {
+      "id": "wurl:DEU",
+      "name": "Germany",
+      "iso": "DEU",
+      "sourceCode": "DEU",
+      "sourceType": "Sovereign country",
+      "sovereign": "Germany",
+      "boundaryNote": null
+    },
+    "1159320541": {
+      "id": "wurl:DJI",
+      "name": "Djibouti",
+      "iso": "DJI",
+      "sourceCode": "DJI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Djibouti",
+      "boundaryNote": null
+    },
+    "1159320543": {
+      "id": "wurl:DMA",
+      "name": "Dominica",
+      "iso": "DMA",
+      "sourceCode": "DMA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Dominica",
+      "boundaryNote": null
+    },
+    "1159320547": {
+      "id": "wurl:DNK",
+      "name": "Denmark",
+      "iso": "DNK",
+      "sourceCode": "DNK",
+      "sourceType": "Country",
+      "sovereign": "Denmark",
+      "boundaryNote": null
+    },
+    "1159320549": {
+      "id": "wurl:FRO",
+      "name": "Faroe Islands",
+      "iso": "FRO",
+      "sourceCode": "FRO",
+      "sourceType": "Dependency",
+      "sovereign": "Denmark",
+      "boundaryNote": "Den."
+    },
+    "1159320551": {
+      "id": "wurl:GRL",
+      "name": "Greenland",
+      "iso": "GRL",
+      "sourceCode": "GRL",
+      "sourceType": "Country",
+      "sovereign": "Denmark",
+      "boundaryNote": "Den."
+    },
+    "1159320563": {
+      "id": "wurl:DOM",
+      "name": "Dominican Republic",
+      "iso": "DOM",
+      "sourceCode": "DOM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Dominican Republic",
+      "boundaryNote": null
+    },
+    "1159320565": {
+      "id": "wurl:DZA",
+      "name": "Algeria",
+      "iso": "DZA",
+      "sourceCode": "DZA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Algeria",
+      "boundaryNote": null
+    },
+    "1159320567": {
+      "id": "wurl:ECU",
+      "name": "Ecuador",
+      "iso": "ECU",
+      "sourceCode": "ECU",
+      "sourceType": "Sovereign country",
+      "sovereign": "Ecuador",
+      "boundaryNote": null
+    },
+    "1159320575": {
+      "id": "wurl:EGY",
+      "name": "Egypt",
+      "iso": "EGY",
+      "sourceCode": "EGY",
+      "sourceType": "Sovereign country",
+      "sovereign": "Egypt",
+      "boundaryNote": null
+    },
+    "1159320581": {
+      "id": "wurl:ERI",
+      "name": "Eritrea",
+      "iso": "ERI",
+      "sourceCode": "ERI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Eritrea",
+      "boundaryNote": null
+    },
+    "1159320587": {
+      "id": "wurl:ESP",
+      "name": "Spain",
+      "iso": "ESP",
+      "sourceCode": "ESP",
+      "sourceType": "Sovereign country",
+      "sovereign": "Spain",
+      "boundaryNote": null
+    },
+    "1159320615": {
+      "id": "wurl:EST",
+      "name": "Estonia",
+      "iso": "EST",
+      "sourceCode": "EST",
+      "sourceType": "Sovereign country",
+      "sovereign": "Estonia",
+      "boundaryNote": null
+    },
+    "1159320617": {
+      "id": "wurl:ETH",
+      "name": "Ethiopia",
+      "iso": "ETH",
+      "sourceCode": "ETH",
+      "sourceType": "Sovereign country",
+      "sovereign": "Ethiopia",
+      "boundaryNote": null
+    },
+    "1159320621": {
+      "id": "wurl:ALA",
+      "name": "Aland",
+      "iso": "ALA",
+      "sourceCode": "ALD",
+      "sourceType": "Country",
+      "sovereign": "Finland",
+      "boundaryNote": "Fin."
+    },
+    "1159320623": {
+      "id": "wurl:FIN",
+      "name": "Finland",
+      "iso": "FIN",
+      "sourceCode": "FIN",
+      "sourceType": "Country",
+      "sovereign": "Finland",
+      "boundaryNote": null
+    },
+    "1159320625": {
+      "id": "wurl:FJI",
+      "name": "Fiji",
+      "iso": "FJI",
+      "sourceCode": "FJI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Fiji",
+      "boundaryNote": null
+    },
+    "1159320631": {
+      "id": "wurl:ATF",
+      "name": "French Southern and Antarctic Lands",
+      "iso": "ATF",
+      "sourceCode": "ATF",
+      "sourceType": "Dependency",
+      "sovereign": "France",
+      "boundaryNote": "Fr."
+    },
+    "1159320633": {
+      "id": "wurl:BLM",
+      "name": "Saint Barthelemy",
+      "iso": "BLM",
+      "sourceCode": "BLM",
+      "sourceType": "Dependency",
+      "sovereign": "France",
+      "boundaryNote": "Fr."
+    },
+    "1159320637": {
+      "id": "wurl:FRA",
+      "name": "France",
+      "iso": "FRA",
+      "sourceCode": "FRA",
+      "sourceType": "Country",
+      "sovereign": "France",
+      "boundaryNote": null
+    },
+    "1159320639": {
+      "id": "wurl:MAF",
+      "name": "Saint Martin",
+      "iso": "MAF",
+      "sourceCode": "MAF",
+      "sourceType": "Dependency",
+      "sovereign": "France",
+      "boundaryNote": "Fr."
+    },
+    "1159320641": {
+      "id": "wurl:NCL",
+      "name": "New Caledonia",
+      "iso": "NCL",
+      "sourceCode": "NCL",
+      "sourceType": "Dependency",
+      "sovereign": "France",
+      "boundaryNote": "Fr."
+    },
+    "1159320643": {
+      "id": "wurl:PYF",
+      "name": "French Polynesia",
+      "iso": "PYF",
+      "sourceCode": "PYF",
+      "sourceType": "Dependency",
+      "sovereign": "France",
+      "boundaryNote": "Fr."
+    },
+    "1159320647": {
+      "id": "wurl:SPM",
+      "name": "Saint Pierre and Miquelon",
+      "iso": "SPM",
+      "sourceCode": "SPM",
+      "sourceType": "Dependency",
+      "sovereign": "France",
+      "boundaryNote": "Fr."
+    },
+    "1159320649": {
+      "id": "wurl:WLF",
+      "name": "Wallis and Futuna",
+      "iso": "WLF",
+      "sourceCode": "WLF",
+      "sourceType": "Dependency",
+      "sovereign": "France",
+      "boundaryNote": "Fr."
+    },
+    "1159320691": {
+      "id": "wurl:FSM",
+      "name": "Federated States of Micronesia",
+      "iso": "FSM",
+      "sourceCode": "FSM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Federated States of Micronesia",
+      "boundaryNote": null
+    },
+    "1159320693": {
+      "id": "wurl:GAB",
+      "name": "Gabon",
+      "iso": "GAB",
+      "sourceCode": "GAB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Gabon",
+      "boundaryNote": null
+    },
+    "1159320703": {
+      "id": "wurl:AIA",
+      "name": "Anguilla",
+      "iso": "AIA",
+      "sourceCode": "AIA",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320705": {
+      "id": "wurl:BMU",
+      "name": "Bermuda",
+      "iso": "BMU",
+      "sourceCode": "BMU",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320707": {
+      "id": "wurl:CYM",
+      "name": "Cayman Islands",
+      "iso": "CYM",
+      "sourceCode": "CYM",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320711": {
+      "id": "wurl:FLK",
+      "name": "Falkland Islands",
+      "iso": "FLK",
+      "sourceCode": "FLK",
+      "sourceType": "Disputed",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "Admin. by U.K.; Claimed by Argentina"
+    },
+    "1159320713": {
+      "id": "wurl:GBR",
+      "name": "United Kingdom",
+      "iso": "GBR",
+      "sourceCode": "GBR",
+      "sourceType": "Country",
+      "sovereign": "United Kingdom",
+      "boundaryNote": null
+    },
+    "1159320715": {
+      "id": "wurl:GGY",
+      "name": "Guernsey",
+      "iso": "GGY",
+      "sourceCode": "GGY",
+      "sourceType": "Country",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K. crown dependency"
+    },
+    "1159320721": {
+      "id": "wurl:IMN",
+      "name": "Isle of Man",
+      "iso": "IMN",
+      "sourceCode": "IMN",
+      "sourceType": "Country",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K. crown dependency"
+    },
+    "1159320723": {
+      "id": "wurl:IOT",
+      "name": "British Indian Ocean Territory",
+      "iso": "IOT",
+      "sourceCode": "IOT",
+      "sourceType": "Disputed",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "Admin. by U.K.; Claimed by Mauritius and Seychelles"
+    },
+    "1159320725": {
+      "id": "wurl:JEY",
+      "name": "Jersey",
+      "iso": "JEY",
+      "sourceCode": "JEY",
+      "sourceType": "Country",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K. crown dependency"
+    },
+    "1159320727": {
+      "id": "wurl:MSR",
+      "name": "Montserrat",
+      "iso": "MSR",
+      "sourceCode": "MSR",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320729": {
+      "id": "wurl:PCN",
+      "name": "Pitcairn Islands",
+      "iso": "PCN",
+      "sourceCode": "PCN",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320731": {
+      "id": "wurl:SGS",
+      "name": "South Georgia and the Islands",
+      "iso": "SGS",
+      "sourceCode": "SGS",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320733": {
+      "id": "wurl:SHN",
+      "name": "Saint Helena",
+      "iso": "SHN",
+      "sourceCode": "SHN",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320737": {
+      "id": "wurl:TCA",
+      "name": "Turks and Caicos Islands",
+      "iso": "TCA",
+      "sourceCode": "TCA",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320739": {
+      "id": "wurl:VGB",
+      "name": "British Virgin Islands",
+      "iso": "VGB",
+      "sourceCode": "VGB",
+      "sourceType": "Dependency",
+      "sovereign": "United Kingdom",
+      "boundaryNote": "U.K."
+    },
+    "1159320779": {
+      "id": "wurl:GEO",
+      "name": "Georgia",
+      "iso": "GEO",
+      "sourceCode": "GEO",
+      "sourceType": "Sovereign country",
+      "sovereign": "Georgia",
+      "boundaryNote": null
+    },
+    "1159320793": {
+      "id": "wurl:GHA",
+      "name": "Ghana",
+      "iso": "GHA",
+      "sourceCode": "GHA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Ghana",
+      "boundaryNote": null
+    },
+    "1159320795": {
+      "id": "wurl:GIN",
+      "name": "Guinea",
+      "iso": "GIN",
+      "sourceCode": "GIN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Guinea",
+      "boundaryNote": null
+    },
+    "1159320797": {
+      "id": "wurl:GMB",
+      "name": "Gambia",
+      "iso": "GMB",
+      "sourceCode": "GMB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Gambia",
+      "boundaryNote": null
+    },
+    "1159320799": {
+      "id": "wurl:GNB",
+      "name": "Guinea-Bissau",
+      "iso": "GNB",
+      "sourceCode": "GNB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Guinea-Bissau",
+      "boundaryNote": null
+    },
+    "1159320801": {
+      "id": "wurl:GNQ",
+      "name": "Equatorial Guinea",
+      "iso": "GNQ",
+      "sourceCode": "GNQ",
+      "sourceType": "Sovereign country",
+      "sovereign": "Equatorial Guinea",
+      "boundaryNote": null
+    },
+    "1159320811": {
+      "id": "wurl:GRC",
+      "name": "Greece",
+      "iso": "GRC",
+      "sourceCode": "GRC",
+      "sourceType": "Sovereign country",
+      "sovereign": "Greece",
+      "boundaryNote": null
+    },
+    "1159320813": {
+      "id": "wurl:GRD",
+      "name": "Grenada",
+      "iso": "GRD",
+      "sourceCode": "GRD",
+      "sourceType": "Sovereign country",
+      "sovereign": "Grenada",
+      "boundaryNote": null
+    },
+    "1159320815": {
+      "id": "wurl:GTM",
+      "name": "Guatemala",
+      "iso": "GTM",
+      "sourceCode": "GTM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Guatemala",
+      "boundaryNote": null
+    },
+    "1159320817": {
+      "id": "wurl:GUY",
+      "name": "Guyana",
+      "iso": "GUY",
+      "sourceCode": "GUY",
+      "sourceType": "Sovereign country",
+      "sovereign": "Guyana",
+      "boundaryNote": null
+    },
+    "1159320827": {
+      "id": "wurl:HND",
+      "name": "Honduras",
+      "iso": "HND",
+      "sourceCode": "HND",
+      "sourceType": "Sovereign country",
+      "sovereign": "Honduras",
+      "boundaryNote": null
+    },
+    "1159320833": {
+      "id": "wurl:HRV",
+      "name": "Croatia",
+      "iso": "HRV",
+      "sourceCode": "HRV",
+      "sourceType": "Sovereign country",
+      "sovereign": "Croatia",
+      "boundaryNote": null
+    },
+    "1159320839": {
+      "id": "wurl:HTI",
+      "name": "Haiti",
+      "iso": "HTI",
+      "sourceCode": "HTI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Haiti",
+      "boundaryNote": null
+    },
+    "1159320841": {
+      "id": "wurl:HUN",
+      "name": "Hungary",
+      "iso": "HUN",
+      "sourceCode": "HUN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Hungary",
+      "boundaryNote": null
+    },
+    "1159320845": {
+      "id": "wurl:IDN",
+      "name": "Indonesia",
+      "iso": "IDN",
+      "sourceCode": "IDN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Indonesia",
+      "boundaryNote": null
+    },
+    "1159320847": {
+      "id": "wurl:IND",
+      "name": "India",
+      "iso": "IND",
+      "sourceCode": "IND",
+      "sourceType": "Sovereign country",
+      "sovereign": "India",
+      "boundaryNote": null
+    },
+    "1159320877": {
+      "id": "wurl:IRL",
+      "name": "Ireland",
+      "iso": "IRL",
+      "sourceCode": "IRL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Ireland",
+      "boundaryNote": null
+    },
+    "1159320881": {
+      "id": "wurl:IRN",
+      "name": "Iran",
+      "iso": "IRN",
+      "sourceCode": "IRN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Iran",
+      "boundaryNote": null
+    },
+    "1159320887": {
+      "id": "wurl:IRQ",
+      "name": "Iraq",
+      "iso": "IRQ",
+      "sourceCode": "IRQ",
+      "sourceType": "Sovereign country",
+      "sovereign": "Iraq",
+      "boundaryNote": null
+    },
+    "1159320895": {
+      "id": "wurl:ISR",
+      "name": "Israel",
+      "iso": "ISR",
+      "sourceCode": "ISR",
+      "sourceType": "Disputed",
+      "sovereign": "Israel",
+      "boundaryNote": null
+    },
+    "1159320899": {
+      "id": "wurl:PSE",
+      "name": "Palestine",
+      "iso": "PSE",
+      "sourceCode": "PSX",
+      "sourceType": "Indeterminate",
+      "sovereign": "Israel",
+      "boundaryNote": "Partial self-admin."
+    },
+    "1159320917": {
+      "id": "wurl:ISL",
+      "name": "Iceland",
+      "iso": "ISL",
+      "sourceCode": "ISL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Iceland",
+      "boundaryNote": null
+    },
+    "1159320919": {
+      "id": "wurl:ITA",
+      "name": "Italy",
+      "iso": "ITA",
+      "sourceCode": "ITA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Italy",
+      "boundaryNote": null
+    },
+    "1159320931": {
+      "id": "wurl:JAM",
+      "name": "Jamaica",
+      "iso": "JAM",
+      "sourceCode": "JAM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Jamaica",
+      "boundaryNote": null
+    },
+    "1159320935": {
+      "id": "wurl:JOR",
+      "name": "Jordan",
+      "iso": "JOR",
+      "sourceCode": "JOR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Jordan",
+      "boundaryNote": null
+    },
+    "1159320937": {
+      "id": "wurl:JPN",
+      "name": "Japan",
+      "iso": "JPN",
+      "sourceCode": "JPN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Japan",
+      "boundaryNote": null
+    },
+    "1159320963": {
+      "id": "wurl:NE-KAS",
+      "name": "Siachen Glacier",
+      "iso": null,
+      "sourceCode": "KAS",
+      "sourceType": "Indeterminate",
+      "sovereign": "Kashmir",
+      "boundaryNote": "Claimed by Pakistan and India"
+    },
+    "1159320967": {
+      "id": "wurl:KAZ",
+      "name": "Kazakhstan",
+      "iso": "KAZ",
+      "sourceCode": "KAZ",
+      "sourceType": "Sovereignty",
+      "sovereign": "Kazakhstan",
+      "boundaryNote": null
+    },
+    "1159320971": {
+      "id": "wurl:KEN",
+      "name": "Kenya",
+      "iso": "KEN",
+      "sourceCode": "KEN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Kenya",
+      "boundaryNote": null
+    },
+    "1159320977": {
+      "id": "wurl:KGZ",
+      "name": "Kyrgyzstan",
+      "iso": "KGZ",
+      "sourceCode": "KGZ",
+      "sourceType": "Sovereign country",
+      "sovereign": "Kyrgyzstan",
+      "boundaryNote": null
+    },
+    "1159320979": {
+      "id": "wurl:KHM",
+      "name": "Cambodia",
+      "iso": "KHM",
+      "sourceCode": "KHM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Cambodia",
+      "boundaryNote": null
+    },
+    "1159320981": {
+      "id": "wurl:KIR",
+      "name": "Kiribati",
+      "iso": "KIR",
+      "sourceCode": "KIR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Kiribati",
+      "boundaryNote": null
+    },
+    "1159320983": {
+      "id": "wurl:KNA",
+      "name": "Saint Kitts and Nevis",
+      "iso": "KNA",
+      "sourceCode": "KNA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Saint Kitts and Nevis",
+      "boundaryNote": null
+    },
+    "1159320985": {
+      "id": "wurl:KOR",
+      "name": "South Korea",
+      "iso": "KOR",
+      "sourceCode": "KOR",
+      "sourceType": "Sovereign country",
+      "sovereign": "South Korea",
+      "boundaryNote": null
+    },
+    "1159321007": {
+      "id": "wurl:NE-KOS",
+      "name": "Kosovo",
+      "iso": null,
+      "sourceCode": "KOS",
+      "sourceType": "Disputed",
+      "sovereign": "Kosovo",
+      "boundaryNote": null
+    },
+    "1159321009": {
+      "id": "wurl:KWT",
+      "name": "Kuwait",
+      "iso": "KWT",
+      "sourceCode": "KWT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Kuwait",
+      "boundaryNote": null
+    },
+    "1159321011": {
+      "id": "wurl:LAO",
+      "name": "Laos",
+      "iso": "LAO",
+      "sourceCode": "LAO",
+      "sourceType": "Sovereign country",
+      "sovereign": "Laos",
+      "boundaryNote": null
+    },
+    "1159321013": {
+      "id": "wurl:LBN",
+      "name": "Lebanon",
+      "iso": "LBN",
+      "sourceCode": "LBN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Lebanon",
+      "boundaryNote": null
+    },
+    "1159321015": {
+      "id": "wurl:LBR",
+      "name": "Liberia",
+      "iso": "LBR",
+      "sourceCode": "LBR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Liberia",
+      "boundaryNote": null
+    },
+    "1159321017": {
+      "id": "wurl:LBY",
+      "name": "Libya",
+      "iso": "LBY",
+      "sourceCode": "LBY",
+      "sourceType": "Sovereign country",
+      "sovereign": "Libya",
+      "boundaryNote": null
+    },
+    "1159321019": {
+      "id": "wurl:LCA",
+      "name": "Saint Lucia",
+      "iso": "LCA",
+      "sourceCode": "LCA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Saint Lucia",
+      "boundaryNote": null
+    },
+    "1159321021": {
+      "id": "wurl:LIE",
+      "name": "Liechtenstein",
+      "iso": "LIE",
+      "sourceCode": "LIE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Liechtenstein",
+      "boundaryNote": null
+    },
+    "1159321025": {
+      "id": "wurl:LKA",
+      "name": "Sri Lanka",
+      "iso": "LKA",
+      "sourceCode": "LKA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Sri Lanka",
+      "boundaryNote": null
+    },
+    "1159321027": {
+      "id": "wurl:LSO",
+      "name": "Lesotho",
+      "iso": "LSO",
+      "sourceCode": "LSO",
+      "sourceType": "Sovereign country",
+      "sovereign": "Lesotho",
+      "boundaryNote": null
+    },
+    "1159321029": {
+      "id": "wurl:LTU",
+      "name": "Lithuania",
+      "iso": "LTU",
+      "sourceCode": "LTU",
+      "sourceType": "Sovereign country",
+      "sovereign": "Lithuania",
+      "boundaryNote": null
+    },
+    "1159321031": {
+      "id": "wurl:LUX",
+      "name": "Luxembourg",
+      "iso": "LUX",
+      "sourceCode": "LUX",
+      "sourceType": "Sovereign country",
+      "sovereign": "Luxembourg",
+      "boundaryNote": null
+    },
+    "1159321033": {
+      "id": "wurl:LVA",
+      "name": "Latvia",
+      "iso": "LVA",
+      "sourceCode": "LVA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Latvia",
+      "boundaryNote": null
+    },
+    "1159321035": {
+      "id": "wurl:MAR",
+      "name": "Morocco",
+      "iso": "MAR",
+      "sourceCode": "MAR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Morocco",
+      "boundaryNote": null
+    },
+    "1159321043": {
+      "id": "wurl:MCO",
+      "name": "Monaco",
+      "iso": "MCO",
+      "sourceCode": "MCO",
+      "sourceType": "Sovereign country",
+      "sovereign": "Monaco",
+      "boundaryNote": null
+    },
+    "1159321045": {
+      "id": "wurl:MDA",
+      "name": "Moldova",
+      "iso": "MDA",
+      "sourceCode": "MDA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Moldova",
+      "boundaryNote": null
+    },
+    "1159321051": {
+      "id": "wurl:MDG",
+      "name": "Madagascar",
+      "iso": "MDG",
+      "sourceCode": "MDG",
+      "sourceType": "Sovereign country",
+      "sovereign": "Madagascar",
+      "boundaryNote": null
+    },
+    "1159321053": {
+      "id": "wurl:MDV",
+      "name": "Maldives",
+      "iso": "MDV",
+      "sourceCode": "MDV",
+      "sourceType": "Sovereign country",
+      "sovereign": "Maldives",
+      "boundaryNote": null
+    },
+    "1159321055": {
+      "id": "wurl:MEX",
+      "name": "Mexico",
+      "iso": "MEX",
+      "sourceCode": "MEX",
+      "sourceType": "Sovereign country",
+      "sovereign": "Mexico",
+      "boundaryNote": null
+    },
+    "1159321057": {
+      "id": "wurl:MHL",
+      "name": "Marshall Islands",
+      "iso": "MHL",
+      "sourceCode": "MHL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Marshall Islands",
+      "boundaryNote": null
+    },
+    "1159321061": {
+      "id": "wurl:MKD",
+      "name": "North Macedonia",
+      "iso": "MKD",
+      "sourceCode": "MKD",
+      "sourceType": "Sovereign country",
+      "sovereign": "North Macedonia",
+      "boundaryNote": null
+    },
+    "1159321063": {
+      "id": "wurl:MLI",
+      "name": "Mali",
+      "iso": "MLI",
+      "sourceCode": "MLI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Mali",
+      "boundaryNote": null
+    },
+    "1159321065": {
+      "id": "wurl:MLT",
+      "name": "Malta",
+      "iso": "MLT",
+      "sourceCode": "MLT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Malta",
+      "boundaryNote": null
+    },
+    "1159321067": {
+      "id": "wurl:MMR",
+      "name": "Myanmar",
+      "iso": "MMR",
+      "sourceCode": "MMR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Myanmar",
+      "boundaryNote": null
+    },
+    "1159321069": {
+      "id": "wurl:MNE",
+      "name": "Montenegro",
+      "iso": "MNE",
+      "sourceCode": "MNE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Montenegro",
+      "boundaryNote": null
+    },
+    "1159321071": {
+      "id": "wurl:MNG",
+      "name": "Mongolia",
+      "iso": "MNG",
+      "sourceCode": "MNG",
+      "sourceType": "Sovereign country",
+      "sovereign": "Mongolia",
+      "boundaryNote": null
+    },
+    "1159321073": {
+      "id": "wurl:MOZ",
+      "name": "Mozambique",
+      "iso": "MOZ",
+      "sourceCode": "MOZ",
+      "sourceType": "Sovereign country",
+      "sovereign": "Mozambique",
+      "boundaryNote": null
+    },
+    "1159321075": {
+      "id": "wurl:MRT",
+      "name": "Mauritania",
+      "iso": "MRT",
+      "sourceCode": "MRT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Mauritania",
+      "boundaryNote": null
+    },
+    "1159321079": {
+      "id": "wurl:MUS",
+      "name": "Mauritius",
+      "iso": "MUS",
+      "sourceCode": "MUS",
+      "sourceType": "Sovereign country",
+      "sovereign": "Mauritius",
+      "boundaryNote": null
+    },
+    "1159321081": {
+      "id": "wurl:MWI",
+      "name": "Malawi",
+      "iso": "MWI",
+      "sourceCode": "MWI",
+      "sourceType": "Sovereign country",
+      "sovereign": "Malawi",
+      "boundaryNote": null
+    },
+    "1159321083": {
+      "id": "wurl:MYS",
+      "name": "Malaysia",
+      "iso": "MYS",
+      "sourceCode": "MYS",
+      "sourceType": "Sovereign country",
+      "sovereign": "Malaysia",
+      "boundaryNote": null
+    },
+    "1159321085": {
+      "id": "wurl:NAM",
+      "name": "Namibia",
+      "iso": "NAM",
+      "sourceCode": "NAM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Namibia",
+      "boundaryNote": null
+    },
+    "1159321087": {
+      "id": "wurl:NER",
+      "name": "Niger",
+      "iso": "NER",
+      "sourceCode": "NER",
+      "sourceType": "Sovereign country",
+      "sovereign": "Niger",
+      "boundaryNote": null
+    },
+    "1159321089": {
+      "id": "wurl:NGA",
+      "name": "Nigeria",
+      "iso": "NGA",
+      "sourceCode": "NGA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Nigeria",
+      "boundaryNote": null
+    },
+    "1159321091": {
+      "id": "wurl:NIC",
+      "name": "Nicaragua",
+      "iso": "NIC",
+      "sourceCode": "NIC",
+      "sourceType": "Sovereign country",
+      "sovereign": "Nicaragua",
+      "boundaryNote": null
+    },
+    "1159321097": {
+      "id": "wurl:ABW",
+      "name": "Aruba",
+      "iso": "ABW",
+      "sourceCode": "ABW",
+      "sourceType": "Country",
+      "sovereign": "Netherlands",
+      "boundaryNote": "Neth."
+    },
+    "1159321099": {
+      "id": "wurl:CUW",
+      "name": "Curaçao",
+      "iso": "CUW",
+      "sourceCode": "CUW",
+      "sourceType": "Country",
+      "sovereign": "Netherlands",
+      "boundaryNote": "Neth."
+    },
+    "1159321101": {
+      "id": "wurl:NLD",
+      "name": "Netherlands",
+      "iso": "NLD",
+      "sourceCode": "NLD",
+      "sourceType": "Country",
+      "sovereign": "Netherlands",
+      "boundaryNote": null
+    },
+    "1159321103": {
+      "id": "wurl:SXM",
+      "name": "Sint Maarten",
+      "iso": "SXM",
+      "sourceCode": "SXM",
+      "sourceType": "Country",
+      "sovereign": "Netherlands",
+      "boundaryNote": "Neth."
+    },
+    "1159321109": {
+      "id": "wurl:NOR",
+      "name": "Norway",
+      "iso": "NOR",
+      "sourceCode": "NOR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Norway",
+      "boundaryNote": null
+    },
+    "1159321121": {
+      "id": "wurl:NPL",
+      "name": "Nepal",
+      "iso": "NPL",
+      "sourceCode": "NPL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Nepal",
+      "boundaryNote": null
+    },
+    "1159321123": {
+      "id": "wurl:NRU",
+      "name": "Nauru",
+      "iso": "NRU",
+      "sourceCode": "NRU",
+      "sourceType": "Sovereign country",
+      "sovereign": "Nauru",
+      "boundaryNote": null
+    },
+    "1159321129": {
+      "id": "wurl:COK",
+      "name": "Cook Islands",
+      "iso": "COK",
+      "sourceCode": "COK",
+      "sourceType": "Dependency",
+      "sovereign": "New Zealand",
+      "boundaryNote": "Assoc. with N.Z."
+    },
+    "1159321133": {
+      "id": "wurl:NIU",
+      "name": "Niue",
+      "iso": "NIU",
+      "sourceCode": "NIU",
+      "sourceType": "Dependency",
+      "sovereign": "New Zealand",
+      "boundaryNote": "Assoc. with N.Z."
+    },
+    "1159321135": {
+      "id": "wurl:NZL",
+      "name": "New Zealand",
+      "iso": "NZL",
+      "sourceCode": "NZL",
+      "sourceType": "Country",
+      "sovereign": "New Zealand",
+      "boundaryNote": null
+    },
+    "1159321151": {
+      "id": "wurl:OMN",
+      "name": "Oman",
+      "iso": "OMN",
+      "sourceCode": "OMN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Oman",
+      "boundaryNote": null
+    },
+    "1159321153": {
+      "id": "wurl:PAK",
+      "name": "Pakistan",
+      "iso": "PAK",
+      "sourceCode": "PAK",
+      "sourceType": "Sovereign country",
+      "sovereign": "Pakistan",
+      "boundaryNote": null
+    },
+    "1159321161": {
+      "id": "wurl:PAN",
+      "name": "Panama",
+      "iso": "PAN",
+      "sourceCode": "PAN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Panama",
+      "boundaryNote": null
+    },
+    "1159321163": {
+      "id": "wurl:PER",
+      "name": "Peru",
+      "iso": "PER",
+      "sourceCode": "PER",
+      "sourceType": "Sovereign country",
+      "sovereign": "Peru",
+      "boundaryNote": null
+    },
+    "1159321169": {
+      "id": "wurl:PHL",
+      "name": "Philippines",
+      "iso": "PHL",
+      "sourceCode": "PHL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Philippines",
+      "boundaryNote": null
+    },
+    "1159321171": {
+      "id": "wurl:PLW",
+      "name": "Palau",
+      "iso": "PLW",
+      "sourceCode": "PLW",
+      "sourceType": "Sovereign country",
+      "sovereign": "Palau",
+      "boundaryNote": null
+    },
+    "1159321173": {
+      "id": "wurl:PNG",
+      "name": "Papua New Guinea",
+      "iso": "PNG",
+      "sourceCode": "PNG",
+      "sourceType": "Sovereign country",
+      "sovereign": "Papua New Guinea",
+      "boundaryNote": null
+    },
+    "1159321179": {
+      "id": "wurl:POL",
+      "name": "Poland",
+      "iso": "POL",
+      "sourceCode": "POL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Poland",
+      "boundaryNote": null
+    },
+    "1159321181": {
+      "id": "wurl:PRK",
+      "name": "North Korea",
+      "iso": "PRK",
+      "sourceCode": "PRK",
+      "sourceType": "Sovereign country",
+      "sovereign": "North Korea",
+      "boundaryNote": null
+    },
+    "1159321187": {
+      "id": "wurl:PRT",
+      "name": "Portugal",
+      "iso": "PRT",
+      "sourceCode": "PRT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Portugal",
+      "boundaryNote": null
+    },
+    "1159321195": {
+      "id": "wurl:PRY",
+      "name": "Paraguay",
+      "iso": "PRY",
+      "sourceCode": "PRY",
+      "sourceType": "Sovereign country",
+      "sovereign": "Paraguay",
+      "boundaryNote": null
+    },
+    "1159321197": {
+      "id": "wurl:QAT",
+      "name": "Qatar",
+      "iso": "QAT",
+      "sourceCode": "QAT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Qatar",
+      "boundaryNote": null
+    },
+    "1159321199": {
+      "id": "wurl:ROU",
+      "name": "Romania",
+      "iso": "ROU",
+      "sourceCode": "ROU",
+      "sourceType": "Sovereign country",
+      "sovereign": "Romania",
+      "boundaryNote": null
+    },
+    "1159321201": {
+      "id": "wurl:RUS",
+      "name": "Russia",
+      "iso": "RUS",
+      "sourceCode": "RUS",
+      "sourceType": "Sovereign country",
+      "sovereign": "Russia",
+      "boundaryNote": null
+    },
+    "1159321219": {
+      "id": "wurl:RWA",
+      "name": "Rwanda",
+      "iso": "RWA",
+      "sourceCode": "RWA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Rwanda",
+      "boundaryNote": null
+    },
+    "1159321223": {
+      "id": "wurl:ESH",
+      "name": "Western Sahara",
+      "iso": "ESH",
+      "sourceCode": "SAH",
+      "sourceType": "Indeterminate",
+      "sovereign": "Western Sahara",
+      "boundaryNote": "Self admin.; Claimed by Morocco"
+    },
+    "1159321225": {
+      "id": "wurl:SAU",
+      "name": "Saudi Arabia",
+      "iso": "SAU",
+      "sourceCode": "SAU",
+      "sourceType": "Sovereign country",
+      "sovereign": "Saudi Arabia",
+      "boundaryNote": null
+    },
+    "1159321229": {
+      "id": "wurl:SDN",
+      "name": "Sudan",
+      "iso": "SDN",
+      "sourceCode": "SDN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Sudan",
+      "boundaryNote": null
+    },
+    "1159321235": {
+      "id": "wurl:SSD",
+      "name": "South Sudan",
+      "iso": "SSD",
+      "sourceCode": "SDS",
+      "sourceType": "Sovereign country",
+      "sovereign": "South Sudan",
+      "boundaryNote": null
+    },
+    "1159321243": {
+      "id": "wurl:SEN",
+      "name": "Senegal",
+      "iso": "SEN",
+      "sourceCode": "SEN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Senegal",
+      "boundaryNote": null
+    },
+    "1159321247": {
+      "id": "wurl:SGP",
+      "name": "Singapore",
+      "iso": "SGP",
+      "sourceCode": "SGP",
+      "sourceType": "Sovereign country",
+      "sovereign": "Singapore",
+      "boundaryNote": null
+    },
+    "1159321249": {
+      "id": "wurl:SLB",
+      "name": "Solomon Islands",
+      "iso": "SLB",
+      "sourceCode": "SLB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Solomon Islands",
+      "boundaryNote": null
+    },
+    "1159321251": {
+      "id": "wurl:SLE",
+      "name": "Sierra Leone",
+      "iso": "SLE",
+      "sourceCode": "SLE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Sierra Leone",
+      "boundaryNote": null
+    },
+    "1159321253": {
+      "id": "wurl:SLV",
+      "name": "El Salvador",
+      "iso": "SLV",
+      "sourceCode": "SLV",
+      "sourceType": "Sovereign country",
+      "sovereign": "El Salvador",
+      "boundaryNote": null
+    },
+    "1159321255": {
+      "id": "wurl:SMR",
+      "name": "San Marino",
+      "iso": "SMR",
+      "sourceCode": "SMR",
+      "sourceType": "Sovereign country",
+      "sovereign": "San Marino",
+      "boundaryNote": null
+    },
+    "1159321259": {
+      "id": "wurl:NE-SOL",
+      "name": "Somaliland",
+      "iso": null,
+      "sourceCode": "SOL",
+      "sourceType": "Sovereign country",
+      "sovereign": "Somaliland",
+      "boundaryNote": "Self admin.; Claimed by Somalia"
+    },
+    "1159321261": {
+      "id": "wurl:SOM",
+      "name": "Somalia",
+      "iso": "SOM",
+      "sourceCode": "SOM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Somalia",
+      "boundaryNote": null
+    },
+    "1159321267": {
+      "id": "wurl:SRB",
+      "name": "Republic of Serbia",
+      "iso": "SRB",
+      "sourceCode": "SRB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Republic of Serbia",
+      "boundaryNote": null
+    },
+    "1159321273": {
+      "id": "wurl:STP",
+      "name": "São Tomé and Principe",
+      "iso": "STP",
+      "sourceCode": "STP",
+      "sourceType": "Sovereign country",
+      "sovereign": "São Tomé and Principe",
+      "boundaryNote": null
+    },
+    "1159321281": {
+      "id": "wurl:SUR",
+      "name": "Suriname",
+      "iso": "SUR",
+      "sourceCode": "SUR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Suriname",
+      "boundaryNote": null
+    },
+    "1159321283": {
+      "id": "wurl:SVK",
+      "name": "Slovakia",
+      "iso": "SVK",
+      "sourceCode": "SVK",
+      "sourceType": "Sovereign country",
+      "sovereign": "Slovakia",
+      "boundaryNote": null
+    },
+    "1159321285": {
+      "id": "wurl:SVN",
+      "name": "Slovenia",
+      "iso": "SVN",
+      "sourceCode": "SVN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Slovenia",
+      "boundaryNote": null
+    },
+    "1159321287": {
+      "id": "wurl:SWE",
+      "name": "Sweden",
+      "iso": "SWE",
+      "sourceCode": "SWE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Sweden",
+      "boundaryNote": null
+    },
+    "1159321289": {
+      "id": "wurl:SWZ",
+      "name": "eSwatini",
+      "iso": "SWZ",
+      "sourceCode": "SWZ",
+      "sourceType": "Sovereign country",
+      "sovereign": "eSwatini",
+      "boundaryNote": null
+    },
+    "1159321291": {
+      "id": "wurl:SYC",
+      "name": "Seychelles",
+      "iso": "SYC",
+      "sourceCode": "SYC",
+      "sourceType": "Sovereign country",
+      "sovereign": "Seychelles",
+      "boundaryNote": null
+    },
+    "1159321295": {
+      "id": "wurl:SYR",
+      "name": "Syria",
+      "iso": "SYR",
+      "sourceCode": "SYR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Syria",
+      "boundaryNote": null
+    },
+    "1159321301": {
+      "id": "wurl:TCD",
+      "name": "Chad",
+      "iso": "TCD",
+      "sourceCode": "TCD",
+      "sourceType": "Sovereign country",
+      "sovereign": "Chad",
+      "boundaryNote": null
+    },
+    "1159321303": {
+      "id": "wurl:TGO",
+      "name": "Togo",
+      "iso": "TGO",
+      "sourceCode": "TGO",
+      "sourceType": "Sovereign country",
+      "sovereign": "Togo",
+      "boundaryNote": null
+    },
+    "1159321305": {
+      "id": "wurl:THA",
+      "name": "Thailand",
+      "iso": "THA",
+      "sourceCode": "THA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Thailand",
+      "boundaryNote": null
+    },
+    "1159321307": {
+      "id": "wurl:TJK",
+      "name": "Tajikistan",
+      "iso": "TJK",
+      "sourceCode": "TJK",
+      "sourceType": "Sovereign country",
+      "sovereign": "Tajikistan",
+      "boundaryNote": null
+    },
+    "1159321309": {
+      "id": "wurl:TKM",
+      "name": "Turkmenistan",
+      "iso": "TKM",
+      "sourceCode": "TKM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Turkmenistan",
+      "boundaryNote": null
+    },
+    "1159321313": {
+      "id": "wurl:TLS",
+      "name": "East Timor",
+      "iso": "TLS",
+      "sourceCode": "TLS",
+      "sourceType": "Sovereign country",
+      "sovereign": "East Timor",
+      "boundaryNote": null
+    },
+    "1159321319": {
+      "id": "wurl:TON",
+      "name": "Tonga",
+      "iso": "TON",
+      "sourceCode": "TON",
+      "sourceType": "Sovereign country",
+      "sovereign": "Tonga",
+      "boundaryNote": null
+    },
+    "1159321321": {
+      "id": "wurl:TTO",
+      "name": "Trinidad and Tobago",
+      "iso": "TTO",
+      "sourceCode": "TTO",
+      "sourceType": "Sovereign country",
+      "sovereign": "Trinidad and Tobago",
+      "boundaryNote": null
+    },
+    "1159321327": {
+      "id": "wurl:TUN",
+      "name": "Tunisia",
+      "iso": "TUN",
+      "sourceCode": "TUN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Tunisia",
+      "boundaryNote": null
+    },
+    "1159321331": {
+      "id": "wurl:TUR",
+      "name": "Turkey",
+      "iso": "TUR",
+      "sourceCode": "TUR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Turkey",
+      "boundaryNote": null
+    },
+    "1159321333": {
+      "id": "wurl:TUV",
+      "name": "Tuvalu",
+      "iso": "TUV",
+      "sourceCode": "TUV",
+      "sourceType": "Sovereign country",
+      "sovereign": "Tuvalu",
+      "boundaryNote": null
+    },
+    "1159321335": {
+      "id": "wurl:TWN",
+      "name": "Taiwan",
+      "iso": "TWN",
+      "sourceCode": "TWN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Taiwan",
+      "boundaryNote": "Self admin.; Claimed by China"
+    },
+    "1159321337": {
+      "id": "wurl:TZA",
+      "name": "United Republic of Tanzania",
+      "iso": "TZA",
+      "sourceCode": "TZA",
+      "sourceType": "Sovereign country",
+      "sovereign": "United Republic of Tanzania",
+      "boundaryNote": null
+    },
+    "1159321343": {
+      "id": "wurl:UGA",
+      "name": "Uganda",
+      "iso": "UGA",
+      "sourceCode": "UGA",
+      "sourceType": "Sovereign country",
+      "sovereign": "Uganda",
+      "boundaryNote": null
+    },
+    "1159321345": {
+      "id": "wurl:UKR",
+      "name": "Ukraine",
+      "iso": "UKR",
+      "sourceCode": "UKR",
+      "sourceType": "Sovereign country",
+      "sovereign": "Ukraine",
+      "boundaryNote": null
+    },
+    "1159321353": {
+      "id": "wurl:URY",
+      "name": "Uruguay",
+      "iso": "URY",
+      "sourceCode": "URY",
+      "sourceType": "Sovereign country",
+      "sovereign": "Uruguay",
+      "boundaryNote": null
+    },
+    "1159321357": {
+      "id": "wurl:ASM",
+      "name": "American Samoa",
+      "iso": "ASM",
+      "sourceCode": "ASM",
+      "sourceType": "Dependency",
+      "sovereign": "United States of America",
+      "boundaryNote": "U.S.A."
+    },
+    "1159321359": {
+      "id": "wurl:GUM",
+      "name": "Guam",
+      "iso": "GUM",
+      "sourceCode": "GUM",
+      "sourceType": "Dependency",
+      "sovereign": "United States of America",
+      "boundaryNote": "U.S.A."
+    },
+    "1159321361": {
+      "id": "wurl:MNP",
+      "name": "Northern Mariana Islands",
+      "iso": "MNP",
+      "sourceCode": "MNP",
+      "sourceType": "Dependency",
+      "sovereign": "United States of America",
+      "boundaryNote": "U.S.A."
+    },
+    "1159321363": {
+      "id": "wurl:PRI",
+      "name": "Puerto Rico",
+      "iso": "PRI",
+      "sourceCode": "PRI",
+      "sourceType": "Dependency",
+      "sovereign": "United States of America",
+      "boundaryNote": "U.S.A."
+    },
+    "1159321369": {
+      "id": "wurl:USA",
+      "name": "United States",
+      "iso": "USA",
+      "sourceCode": "USA",
+      "sourceType": "Country",
+      "sovereign": "United States of America",
+      "boundaryNote": null
+    },
+    "1159321371": {
+      "id": "wurl:VIR",
+      "name": "United States Virgin Islands",
+      "iso": "VIR",
+      "sourceCode": "VIR",
+      "sourceType": "Dependency",
+      "sovereign": "United States of America",
+      "boundaryNote": "U.S.A."
+    },
+    "1159321405": {
+      "id": "wurl:UZB",
+      "name": "Uzbekistan",
+      "iso": "UZB",
+      "sourceCode": "UZB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Uzbekistan",
+      "boundaryNote": null
+    },
+    "1159321407": {
+      "id": "wurl:VAT",
+      "name": "Vatican",
+      "iso": "VAT",
+      "sourceCode": "VAT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Vatican",
+      "boundaryNote": null
+    },
+    "1159321409": {
+      "id": "wurl:VCT",
+      "name": "Saint Vincent and the Grenadines",
+      "iso": "VCT",
+      "sourceCode": "VCT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Saint Vincent and the Grenadines",
+      "boundaryNote": null
+    },
+    "1159321411": {
+      "id": "wurl:VEN",
+      "name": "Venezuela",
+      "iso": "VEN",
+      "sourceCode": "VEN",
+      "sourceType": "Sovereign country",
+      "sovereign": "Venezuela",
+      "boundaryNote": null
+    },
+    "1159321417": {
+      "id": "wurl:VNM",
+      "name": "Vietnam",
+      "iso": "VNM",
+      "sourceCode": "VNM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Vietnam",
+      "boundaryNote": null
+    },
+    "1159321421": {
+      "id": "wurl:VUT",
+      "name": "Vanuatu",
+      "iso": "VUT",
+      "sourceCode": "VUT",
+      "sourceType": "Sovereign country",
+      "sovereign": "Vanuatu",
+      "boundaryNote": null
+    },
+    "1159321423": {
+      "id": "wurl:WSM",
+      "name": "Samoa",
+      "iso": "WSM",
+      "sourceCode": "WSM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Samoa",
+      "boundaryNote": null
+    },
+    "1159321425": {
+      "id": "wurl:YEM",
+      "name": "Yemen",
+      "iso": "YEM",
+      "sourceCode": "YEM",
+      "sourceType": "Sovereign country",
+      "sovereign": "Yemen",
+      "boundaryNote": null
+    },
+    "1159321431": {
+      "id": "wurl:ZAF",
+      "name": "South Africa",
+      "iso": "ZAF",
+      "sourceCode": "ZAF",
+      "sourceType": "Sovereign country",
+      "sovereign": "South Africa",
+      "boundaryNote": null
+    },
+    "1159321439": {
+      "id": "wurl:ZMB",
+      "name": "Zambia",
+      "iso": "ZMB",
+      "sourceCode": "ZMB",
+      "sourceType": "Sovereign country",
+      "sovereign": "Zambia",
+      "boundaryNote": null
+    },
+    "1159321441": {
+      "id": "wurl:ZWE",
+      "name": "Zimbabwe",
+      "iso": "ZWE",
+      "sourceCode": "ZWE",
+      "sourceType": "Sovereign country",
+      "sovereign": "Zimbabwe",
+      "boundaryNote": null
+    }
+  },
+  "states": {
+    "66186276B69138566591314": {
+      "id": "wurl:USA-MS",
+      "name": "Mississippi",
+      "parentId": "wurl:USA",
+      "iso": "US-MS"
+    },
+    "66186276B6801956407400": {
+      "id": "wurl:USA-NC",
+      "name": "North Carolina",
+      "parentId": "wurl:USA",
+      "iso": "US-NC"
+    },
+    "66186276B83300161667341": {
+      "id": "wurl:USA-OK",
+      "name": "Oklahoma",
+      "parentId": "wurl:USA",
+      "iso": "US-OK"
+    },
+    "66186276B53580985925186": {
+      "id": "wurl:USA-VA",
+      "name": "Virginia",
+      "parentId": "wurl:USA",
+      "iso": "US-VA"
+    },
+    "66186276B64762166704956": {
+      "id": "wurl:USA-WV",
+      "name": "West Virginia",
+      "parentId": "wurl:USA",
+      "iso": "US-WV"
+    },
+    "66186276B41335105066757": {
+      "id": "wurl:USA-LA",
+      "name": "Louisiana",
+      "parentId": "wurl:USA",
+      "iso": "US-LA"
+    },
+    "66186276B37442548568489": {
+      "id": "wurl:USA-MI",
+      "name": "Michigan",
+      "parentId": "wurl:USA",
+      "iso": "US-MI"
+    },
+    "66186276B15934532614691": {
+      "id": "wurl:USA-MA",
+      "name": "Massachusetts",
+      "parentId": "wurl:USA",
+      "iso": "US-MA"
+    },
+    "66186276B48953429733047": {
+      "id": "wurl:USA-ID",
+      "name": "Idaho",
+      "parentId": "wurl:USA",
+      "iso": "US-ID"
+    },
+    "66186276B65591139260314": {
+      "id": "wurl:USA-FL",
+      "name": "Florida",
+      "parentId": "wurl:USA",
+      "iso": "US-FL"
+    },
+    "66186276B73402293045483": {
+      "id": "wurl:USA-NE",
+      "name": "Nebraska",
+      "parentId": "wurl:USA",
+      "iso": "US-NE"
+    },
+    "66186276B98555229882405": {
+      "id": "wurl:USA-WA",
+      "name": "Washington",
+      "parentId": "wurl:USA",
+      "iso": "US-WA"
+    },
+    "66186276B2592965416524": {
+      "id": "wurl:USA-NM",
+      "name": "New Mexico",
+      "parentId": "wurl:USA",
+      "iso": "US-NM"
+    },
+    "66186276B86072070009793": {
+      "id": "wurl:USA-PR",
+      "name": "Puerto Rico",
+      "parentId": "wurl:USA",
+      "iso": "US-PR"
+    },
+    "66186276B38006515706420": {
+      "id": "wurl:USA-SD",
+      "name": "South Dakota",
+      "parentId": "wurl:USA",
+      "iso": "SU-SD"
+    },
+    "66186276B29106115751815": {
+      "id": "wurl:USA-TX",
+      "name": "Texas",
+      "parentId": "wurl:USA",
+      "iso": "US-TX"
+    },
+    "66186276B43071933723331": {
+      "id": "wurl:USA-CA",
+      "name": "California",
+      "parentId": "wurl:USA",
+      "iso": "US-CA"
+    },
+    "66186276B98021244841737": {
+      "id": "wurl:USA-AL",
+      "name": "Alabama",
+      "parentId": "wurl:USA",
+      "iso": "US-AL"
+    },
+    "66186276B75419826371250": {
+      "id": "wurl:USA-GA",
+      "name": "Georgia",
+      "parentId": "wurl:USA",
+      "iso": "US-GA"
+    },
+    "66186276B6628180846672": {
+      "id": "wurl:USA-PA",
+      "name": "Pennsylvania",
+      "parentId": "wurl:USA",
+      "iso": "US-PA"
+    },
+    "66186276B13694661525286": {
+      "id": "wurl:USA-MO",
+      "name": "Missouri",
+      "parentId": "wurl:USA",
+      "iso": "US-MO"
+    },
+    "66186276B35012827062242": {
+      "id": "wurl:USA-CO",
+      "name": "Colorado",
+      "parentId": "wurl:USA",
+      "iso": "US-CO"
+    },
+    "66186276B31593004124297": {
+      "id": "wurl:USA-UT",
+      "name": "Utah",
+      "parentId": "wurl:USA",
+      "iso": "US-UT"
+    },
+    "66186276B52324970173776": {
+      "id": "wurl:USA-TN",
+      "name": "Tennessee",
+      "parentId": "wurl:USA",
+      "iso": "US-TN"
+    },
+    "66186276B10933057601622": {
+      "id": "wurl:USA-WY",
+      "name": "Wyoming",
+      "parentId": "wurl:USA",
+      "iso": "US-WY"
+    },
+    "66186276B43575054209436": {
+      "id": "wurl:USA-NY",
+      "name": "New York",
+      "parentId": "wurl:USA",
+      "iso": "US-NY"
+    },
+    "66186276B64014601259366": {
+      "id": "wurl:USA-KS",
+      "name": "Kansas",
+      "parentId": "wurl:USA",
+      "iso": "US-KS"
+    },
+    "66186276B62688952876525": {
+      "id": "wurl:USA-AK",
+      "name": "Alaska",
+      "parentId": "wurl:USA",
+      "iso": "US-AK"
+    },
+    "66186276B98615608994420": {
+      "id": "wurl:USA-NV",
+      "name": "Nevada",
+      "parentId": "wurl:USA",
+      "iso": "US-NV"
+    },
+    "66186276B11383391196245": {
+      "id": "wurl:USA-IL",
+      "name": "Illinois",
+      "parentId": "wurl:USA",
+      "iso": "US-IL"
+    },
+    "66186276B17406925856308": {
+      "id": "wurl:USA-VT",
+      "name": "Vermont",
+      "parentId": "wurl:USA",
+      "iso": "US-VT"
+    },
+    "66186276B80192890672447": {
+      "id": "wurl:USA-MT",
+      "name": "Montana",
+      "parentId": "wurl:USA",
+      "iso": "US-MT"
+    },
+    "66186276B63937528568220": {
+      "id": "wurl:USA-IA",
+      "name": "Iowa",
+      "parentId": "wurl:USA",
+      "iso": "US-IA"
+    },
+    "66186276B79689460185872": {
+      "id": "wurl:USA-SC",
+      "name": "South Carolina",
+      "parentId": "wurl:USA",
+      "iso": "US-SC"
+    },
+    "66186276B86627915353587": {
+      "id": "wurl:USA-NH",
+      "name": "New Hampshire",
+      "parentId": "wurl:USA",
+      "iso": "US-NH"
+    },
+    "66186276B89395128410123": {
+      "id": "wurl:USA-AZ",
+      "name": "Arizona",
+      "parentId": "wurl:USA",
+      "iso": "US-AZ"
+    },
+    "66186276B94082813086253": {
+      "id": "wurl:USA-DC",
+      "name": "District of Columbia",
+      "parentId": "wurl:USA",
+      "iso": "US-DC"
+    },
+    "66186276B68035916752114": {
+      "id": "wurl:USA-AS",
+      "name": "American Samoa",
+      "parentId": "wurl:USA",
+      "iso": "US-AS"
+    },
+    "66186276B43103824256708": {
+      "id": "wurl:USA-VI",
+      "name": "United States Virgin Islands",
+      "parentId": "wurl:USA",
+      "iso": "US-VI"
+    },
+    "66186276B73434888205604": {
+      "id": "wurl:USA-NJ",
+      "name": "New Jersey",
+      "parentId": "wurl:USA",
+      "iso": "US-NJ"
+    },
+    "66186276B21291522594454": {
+      "id": "wurl:USA-MD",
+      "name": "Maryland",
+      "parentId": "wurl:USA",
+      "iso": "US-MD"
+    },
+    "66186276B78821008370123": {
+      "id": "wurl:USA-ME",
+      "name": "Maine",
+      "parentId": "wurl:USA",
+      "iso": "US-ME"
+    },
+    "66186276B99594608635082": {
+      "id": "wurl:USA-HI",
+      "name": "Hawaii",
+      "parentId": "wurl:USA",
+      "iso": "US-HI"
+    },
+    "66186276B31549545599635": {
+      "id": "wurl:USA-DE",
+      "name": "Delaware",
+      "parentId": "wurl:USA",
+      "iso": "US-DE"
+    },
+    "66186276B63361112364184": {
+      "id": "wurl:USA-GU",
+      "name": "Guam",
+      "parentId": "wurl:USA",
+      "iso": "US-GU"
+    },
+    "66186276B16791499040259": {
+      "id": "wurl:USA-MP",
+      "name": "Commonwealth of the Northern Mariana Islands",
+      "parentId": "wurl:USA",
+      "iso": "US-MP"
+    },
+    "66186276B98073251815399": {
+      "id": "wurl:USA-RI",
+      "name": "Rhode Island",
+      "parentId": "wurl:USA",
+      "iso": "US-RI"
+    },
+    "66186276B22971435435932": {
+      "id": "wurl:USA-KY",
+      "name": "Kentucky",
+      "parentId": "wurl:USA",
+      "iso": "US-KY"
+    },
+    "66186276B76680759932915": {
+      "id": "wurl:USA-OH",
+      "name": "Ohio",
+      "parentId": "wurl:USA",
+      "iso": "US-OH"
+    },
+    "66186276B91272823970344": {
+      "id": "wurl:USA-WI",
+      "name": "Wisconsin",
+      "parentId": "wurl:USA",
+      "iso": "US-WI"
+    },
+    "66186276B97229519707655": {
+      "id": "wurl:USA-OR",
+      "name": "Oregon",
+      "parentId": "wurl:USA",
+      "iso": "US-OR"
+    },
+    "66186276B22881275445497": {
+      "id": "wurl:USA-ND",
+      "name": "North Dakota",
+      "parentId": "wurl:USA",
+      "iso": "US-ND"
+    },
+    "66186276B86295910312663": {
+      "id": "wurl:USA-AR",
+      "name": "Arkansas",
+      "parentId": "wurl:USA",
+      "iso": "US-AR"
+    },
+    "66186276B82803899326534": {
+      "id": "wurl:USA-IN",
+      "name": "Indiana",
+      "parentId": "wurl:USA",
+      "iso": "US-IN"
+    },
+    "66186276B10610315112087": {
+      "id": "wurl:USA-MN",
+      "name": "Minnesota",
+      "parentId": "wurl:USA",
+      "iso": "US-MN"
+    },
+    "66186276B83663796884405": {
+      "id": "wurl:USA-CT",
+      "name": "Connecticut",
+      "parentId": "wurl:USA",
+      "iso": "US-CT"
+    }
+  },
+  "counties": {
+    "52423323B67077901806593": {
+      "id": "wurl:USA-NY-36001",
+      "name": "Albany County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36001"
+    },
+    "52423323B86796072613442": {
+      "id": "wurl:USA-NY-36049",
+      "name": "Lewis County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36049"
+    },
+    "52423323B61802346265036": {
+      "id": "wurl:USA-NY-36099",
+      "name": "Seneca County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36099"
+    },
+    "52423323B65441354087785": {
+      "id": "wurl:USA-NY-36097",
+      "name": "Schuyler County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36097"
+    },
+    "52423323B99116494629117": {
+      "id": "wurl:USA-NY-36003",
+      "name": "Allegany County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36003"
+    },
+    "52423323B61064757463824": {
+      "id": "wurl:USA-NY-36073",
+      "name": "Orleans County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36073"
+    },
+    "52423323B52661947985134": {
+      "id": "wurl:USA-NY-36033",
+      "name": "Franklin County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36033"
+    },
+    "52423323B8631496960035": {
+      "id": "wurl:USA-NY-36093",
+      "name": "Schenectady County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36093"
+    },
+    "52423323B72706838172398": {
+      "id": "wurl:USA-NY-36035",
+      "name": "Fulton County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36035"
+    },
+    "52423323B25656019308328": {
+      "id": "wurl:USA-NY-36113",
+      "name": "Warren County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36113"
+    },
+    "52423323B74073307510671": {
+      "id": "wurl:USA-NY-36079",
+      "name": "Putnam County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36079"
+    },
+    "52423323B74278338404385": {
+      "id": "wurl:USA-NY-36039",
+      "name": "Greene County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36039"
+    },
+    "52423323B21854369364698": {
+      "id": "wurl:USA-NY-36023",
+      "name": "Cortland County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36023"
+    },
+    "52423323B12520146334260": {
+      "id": "wurl:USA-NY-36031",
+      "name": "Essex County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36031"
+    },
+    "52423323B94169185911577": {
+      "id": "wurl:USA-NY-36121",
+      "name": "Wyoming County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36121"
+    },
+    "52423323B86897144494159": {
+      "id": "wurl:USA-NY-36081",
+      "name": "Queens County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36081"
+    },
+    "52423323B19157599393340": {
+      "id": "wurl:USA-NY-36123",
+      "name": "Yates County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36123"
+    },
+    "52423323B38635571773884": {
+      "id": "wurl:USA-NY-36085",
+      "name": "Richmond County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36085"
+    },
+    "52423323B52767364873789": {
+      "id": "wurl:USA-NY-36055",
+      "name": "Monroe County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36055"
+    },
+    "52423323B56598235469590": {
+      "id": "wurl:USA-NY-36075",
+      "name": "Oswego County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36075"
+    },
+    "52423323B68121870797656": {
+      "id": "wurl:USA-NY-36015",
+      "name": "Chemung County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36015"
+    },
+    "52423323B2741615206535": {
+      "id": "wurl:USA-NY-36037",
+      "name": "Genesee County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36037"
+    },
+    "52423323B41588458909272": {
+      "id": "wurl:USA-NY-36027",
+      "name": "Dutchess County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36027"
+    },
+    "52423323B8840369760606": {
+      "id": "wurl:USA-NY-36013",
+      "name": "Chautauqua County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36013"
+    },
+    "52423323B87116435053012": {
+      "id": "wurl:USA-NY-36117",
+      "name": "Wayne County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36117"
+    },
+    "52423323B32160257293354": {
+      "id": "wurl:USA-NY-36043",
+      "name": "Herkimer County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36043"
+    },
+    "52423323B65561543584618": {
+      "id": "wurl:USA-NY-36041",
+      "name": "Hamilton County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36041"
+    },
+    "52423323B89765058067018": {
+      "id": "wurl:USA-NY-36051",
+      "name": "Livingston County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36051"
+    },
+    "52423323B33397436463796": {
+      "id": "wurl:USA-NY-36083",
+      "name": "Rensselaer County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36083"
+    },
+    "52423323B88569310946047": {
+      "id": "wurl:USA-NY-36019",
+      "name": "Clinton County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36019"
+    },
+    "52423323B54966547945963": {
+      "id": "wurl:USA-NY-36111",
+      "name": "Ulster County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36111"
+    },
+    "52423323B42354579566723": {
+      "id": "wurl:USA-NY-36059",
+      "name": "Nassau County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36059"
+    },
+    "52423323B61185146991898": {
+      "id": "wurl:USA-NY-36103",
+      "name": "Suffolk County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36103"
+    },
+    "52423323B83261755629665": {
+      "id": "wurl:USA-NY-36045",
+      "name": "Jefferson County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36045"
+    },
+    "52423323B60491080416719": {
+      "id": "wurl:USA-NY-36011",
+      "name": "Cayuga County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36011"
+    },
+    "52423323B92557929546558": {
+      "id": "wurl:USA-NY-36115",
+      "name": "Washington County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36115"
+    },
+    "52423323B14203500513931": {
+      "id": "wurl:USA-NY-36017",
+      "name": "Chenango County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36017"
+    },
+    "52423323B83071826775288": {
+      "id": "wurl:USA-NY-36119",
+      "name": "Westchester County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36119"
+    },
+    "52423323B93912655119641": {
+      "id": "wurl:USA-NY-36089",
+      "name": "St. Lawrence County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36089"
+    },
+    "52423323B70020317049433": {
+      "id": "wurl:USA-NY-36053",
+      "name": "Madison County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36053"
+    },
+    "52423323B85442507940743": {
+      "id": "wurl:USA-NY-36065",
+      "name": "Oneida County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36065"
+    },
+    "52423323B57402250817644": {
+      "id": "wurl:USA-NY-36063",
+      "name": "Niagara County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36063"
+    },
+    "52423323B79140225975519": {
+      "id": "wurl:USA-NY-36107",
+      "name": "Tioga County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36107"
+    },
+    "52423323B77336622441555": {
+      "id": "wurl:USA-NY-36057",
+      "name": "Montgomery County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36057"
+    },
+    "52423323B9880923188438": {
+      "id": "wurl:USA-NY-36007",
+      "name": "Broome County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36007"
+    },
+    "52423323B60397494558599": {
+      "id": "wurl:USA-NY-36101",
+      "name": "Steuben County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36101"
+    },
+    "52423323B44038614744637": {
+      "id": "wurl:USA-NY-36005",
+      "name": "Bronx County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36005"
+    },
+    "52423323B27260501944339": {
+      "id": "wurl:USA-NY-36069",
+      "name": "Ontario County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36069"
+    },
+    "52423323B40222754422720": {
+      "id": "wurl:USA-NY-36095",
+      "name": "Schoharie County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36095"
+    },
+    "52423323B92741938255653": {
+      "id": "wurl:USA-NY-36029",
+      "name": "Erie County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36029"
+    },
+    "52423323B42930074476451": {
+      "id": "wurl:USA-NY-36047",
+      "name": "Kings County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36047"
+    },
+    "52423323B75499738856279": {
+      "id": "wurl:USA-NY-36077",
+      "name": "Otsego County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36077"
+    },
+    "52423323B97730067298662": {
+      "id": "wurl:USA-NY-36091",
+      "name": "Saratoga County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36091"
+    },
+    "52423323B72877265814635": {
+      "id": "wurl:USA-NY-36071",
+      "name": "Orange County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36071"
+    },
+    "52423323B79096114646112": {
+      "id": "wurl:USA-NY-36021",
+      "name": "Columbia County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36021"
+    },
+    "52423323B63267759277093": {
+      "id": "wurl:USA-NY-36109",
+      "name": "Tompkins County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36109"
+    },
+    "52423323B4442832355941": {
+      "id": "wurl:USA-NY-36105",
+      "name": "Sullivan County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36105"
+    },
+    "52423323B68557587713523": {
+      "id": "wurl:USA-NY-36061",
+      "name": "New York County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36061"
+    },
+    "52423323B64631698212491": {
+      "id": "wurl:USA-NY-36087",
+      "name": "Rockland County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36087"
+    },
+    "52423323B71236434888676": {
+      "id": "wurl:USA-NY-36025",
+      "name": "Delaware County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36025"
+    },
+    "52423323B60762350977788": {
+      "id": "wurl:USA-NY-36067",
+      "name": "Onondaga County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36067"
+    },
+    "52423323B48082592169210": {
+      "id": "wurl:USA-NY-36009",
+      "name": "Cattaraugus County",
+      "parentId": "wurl:USA-NY",
+      "fips": "36009"
+    }
+  }
+}

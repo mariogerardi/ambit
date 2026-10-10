@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.cache/
+*.tsbuildinfo
+.DS_Store
+sources/*.geojson
+
+.env*
+!.env.example
+
+# Local screenshots and exported showcases
+artifacts/

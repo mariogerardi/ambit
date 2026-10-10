@@ -1,0 +1,21 @@
+{
+  "version": "cities-geonames-2026-10-05",
+  "license": "CC BY 4.0",
+  "source": "https://www.geonames.org/",
+  "policy": "GeoNames populated places PPL/PPLA/PPLA2/PPLA3/PPLA4 in the 193 eligible countries; population at least 250,000, plus the largest non-primary-capital place per country when at least 15,000. Primary capital IDs excluded to avoid duplicate symbols. Population values are source place estimates, not comparable metropolitan-area rankings; used only for display importance. Unicode source display names preserved in NFC form.",
+  "inputs": [
+    {
+      "url": "https://download.geonames.org/export/dump/cities15000.zip",
+      "sha256": "2d82a15a729ab0031895405e4e7436ddc7486d330c266a85f1d4b50967102ea6"
+    },
+    {
+      "url": "https://download.geonames.org/export/dump/countryInfo.txt",
+      "sha256": "93bafc525813f22e4711ff9ed6d626343094ce48c26388dc7c49189b3d7d5512"
+    }
+  ],
+  "asset": "src/geography/data/cities.v1.json",
+  "sha256": "2554bf60757df6cfc4ac43e34e8c31c99ab8386901e228484c3f41d0fb1e47f2",
+  "bytes": 143117,
+  "cities": 2234,
+  "capitalPopulations": 193
+}
