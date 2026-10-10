@@ -1038,7 +1038,7 @@
 }
 .experience-header .app-menu-toggle:is(:hover, [aria-expanded="true"]) {
   color: var(--ui-accent);
-  background: rgb(var(--ui-line-rgb) / 0.1);
+  background: var(--ui-surface);
   border-color: rgb(var(--ui-accent-rgb) / 0.3);
 }
 .app-menu-toggle svg {
@@ -1150,7 +1150,7 @@
   font-size: 12px;
 }
 .experience-header .profile-toggle:is(:hover, [aria-current]) {
-  background: rgb(var(--ui-accent-rgb) / 0.12);
+  background: var(--ui-surface);
   border-color: rgb(var(--ui-accent-rgb) / 0.3);
 }
 .experience-header .profile-toggle .profile-avatar {
@@ -1415,6 +1415,9 @@
   display: grid;
   gap: 18px;
 }
+.study-options-dialog:focus {
+  outline: none;
+}
 .study-options-heading {
   display: flex;
   align-items: center;
@@ -1483,6 +1486,7 @@
   background: transparent;
   color: var(--ui-accent, #e5cf94);
   cursor: pointer;
+  font-size: 24px;
 }
 .study-options-dialog .primary-button {
   width: 100%;
@@ -1494,13 +1498,37 @@
   border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
 }
 .study-options-actions > .quiet-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   min-height: 44px;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--ui-text);
+  border-radius: 8px;
+  background: rgb(var(--ui-line-rgb) / 0.035);
 }
-.study-options-dialog .study-new-session {
-  width: 100%;
-  min-height: 44px;
-  margin: 0;
+.study-options-actions > .quiet-button:hover {
+  background: rgb(var(--ui-line-rgb) / 0.09);
+}
+.study-options-actions > .quiet-button::after {
+  content: "›";
+  color: var(--ui-muted);
+  font-size: 20px;
+}
+.study-options-dialog button.study-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  justify-self: start;
+  width: auto;
   font-size: 13px;
+  padding: 6px 8px;
+}
+.study-options-dialog .primary-button {
+  min-height: 44px;
+  padding: 11px 16px;
+  font-size: 14px;
 }
 @media (max-width: 700px) {
   .study-options-backdrop {
@@ -2118,6 +2146,7 @@
   display: grid;
   gap: 8px;
   margin-block: 16px;
+  font-size: 13px;
 }
 .feedback-dialog textarea,
 .feedback-dialog select,
@@ -2365,4 +2394,64 @@
 .study-options-dialog button.study-back:focus-visible {
   outline: 2px solid var(--ui-focus);
   outline-offset: 2px;
+}
+
+/* Native selects keep their keyboard/mobile picker; only the closed caret changes. */
+body
+  :is(.experience, .study-options-dialog, .review-main)
+  select:not([multiple]):not([size]) {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23a6bfba' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 16px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+[data-theme="paper"]
+  body
+  :is(.experience, .study-options-dialog, .review-main)
+  select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2347635b' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+}
+
+.experience .round-feedback[role="status"] .feedback-label {
+  font-size: clamp(22px, 2vw, 26px);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.experience .round-feedback[role="status"] p {
+  font-size: 15px;
+  line-height: 1.65;
+}
+.experience .round-feedback .study-response {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--ui-muted);
+  border-radius: 0 8px 8px 0;
+  background: rgb(var(--ui-line-rgb) / 0.045);
+  margin-block: 12px;
+}
+.experience .study-response > span {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.experience .round-feedback .study-response strong {
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ui-text);
+}
+.experience
+  .round-feedback.answer-discovered
+  .study-response:not(.study-correction) {
+  border-left-color: var(--ui-incorrect);
+}
+.experience .round-feedback .study-correction,
+.experience .round-feedback.answer-correct .study-response {
+  border-left-color: var(--ui-correct);
+}
+.experience .round-feedback .study-correction strong {
+  color: var(--ui-correct);
 }

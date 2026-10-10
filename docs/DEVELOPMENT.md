@@ -31,8 +31,8 @@ The preview supports profile edits, friend acceptance and Journey comparisons. `
 Cognito branding assets; it submits no credentials. Both review entry points stay
 outside the production bundle. See [Services](SERVICES.md) for release steps.
 
-Full implementation verification on October 10, 2026 passed **473 frontend tests in
-45 files**, 25 offline backend tests, and the production build. That is a dated result, not a promise about
+Full implementation verification on October 10, 2026 passed **478 frontend tests in
+46 files**, 25 offline backend tests, and the production build. That is a dated result, not a promise about
 later changes. Vitest covers logic, local assets, and DOM integration with a
 mocked globe. It does not exercise browser/WebGL rendering or actual mobile input.
 Browser testing is a separate, explicitly scoped activity; it was not run for

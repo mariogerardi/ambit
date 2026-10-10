@@ -207,10 +207,6 @@ export function StudyPanel({
           }}
           returnFocus={settingsButton}
           onClose={closeSettings}
-          onBuild={() => {
-            setEditing(false);
-            onSetup();
-          }}
           onApply={(draft) => {
             const value = {
               borders: draft.borders,
@@ -382,14 +378,6 @@ export function StudyPanel({
                 ? `✓ ${prompt.style === "typing" ? "Nicely remembered." : "Well spotted."}`
                 : "Not quite."}
             </div>
-            {onReport && !compact && (
-              <button
-                className="quiet-button tertiary-action report-question"
-                onClick={() => onReport(prompt)}
-              >
-                Report this question
-              </button>
-            )}
             <p className="study-response">
               <span>Your answer: </span>
               <strong>{session.history.at(-1)?.response}</strong>

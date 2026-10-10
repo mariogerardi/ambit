@@ -13,11 +13,14 @@
   gap: 22px;
   margin-bottom: 24px;
 }
-.account-heading h1 {
+.account-heading h1.editorial-heading {
   margin: 8px 0 0;
 }
-.account-heading p {
+.account-heading .account-handle {
   margin: 6px 0 0;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ui-accent);
 }
 .profile-avatar {
   display: grid;
@@ -141,20 +144,86 @@
   width: auto;
   margin-bottom: 18px;
 }
-.profile-form,
 .challenge-form {
   max-width: 760px;
+}
+.profile-form,
+.profile-card {
+  width: 100%;
+  max-width: none;
 }
 .profile-fields .field {
   min-width: 0;
   align-content: start;
   margin: 0;
 }
-.experience .profile-form {
+.experience .profile-form,
+.profile-card {
   padding: 24px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.18);
   border-radius: 16px;
   background: rgb(var(--ui-surface-rgb) / 0.92);
+}
+.profile-card > header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.profile-card > header > div {
+  flex: 1;
+  min-width: 140px;
+}
+.profile-card h2 {
+  margin: 6px 0 4px;
+  font-size: 32px;
+}
+.profile-card .account-handle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ui-accent);
+}
+.experience .profile-edit-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  min-height: 44px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+  border-radius: 8px;
+  color: var(--ui-accent);
+  font-size: 13px;
+}
+.profile-bio {
+  max-width: 60ch;
+  margin: 24px 0;
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.profile-card-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  margin-bottom: 0;
+}
+.profile-card-details dt {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.profile-card-details dd {
+  margin: 6px 0 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.experience .profile-edit-cancel {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--ui-accent);
 }
 .profile-form-heading h2 {
   margin: 0 0 6px;
@@ -213,8 +282,25 @@
 }
 .avatar-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
+}
+.avatar-options .avatar-pending {
+  cursor: default;
+  border-style: dashed;
+  color: var(--ui-muted);
+}
+.avatar-slot {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(var(--ui-line-rgb) / 0.06);
+  font-size: 12px;
+}
+.avatar-coming-soon {
+  margin: 12px 0 0;
 }
 .avatar-options label {
   position: relative;
@@ -314,6 +400,9 @@
   opacity: 0.5;
 }
 @media (max-width: 700px) {
+  .avatar-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
   .experience.experience .account-dashboard {
     width: 100%;
     padding: 10px 4px 30px;

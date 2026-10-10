@@ -12,6 +12,7 @@ import type { Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { publishProfile } from "../src/services/playerProfile";
+import { clearProfileCache } from "../src/services/playerProfileCache";
 import { THEME_KEY, readTheme } from "../src/theme/themes";
 import { regionBorderVisible } from "../src/globe/outlines";
 import type { GlobeHandle } from "../src/globe/GlobeView";
@@ -214,6 +215,7 @@ let panelObservers: {
   disconnected: boolean;
 }[] = [];
 beforeEach(() => {
+  clearProfileCache();
   authProbe.admin = true;
   authProbe.subject = undefined;
   authProbe.loading = false;
@@ -2292,10 +2294,16 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(savedStudy().session?.id).toBe(saved.session?.id);
     await click("Session settings");
     await click("Edit this session");
-    await click("Build a new session");
+    expect(
+      document.querySelector(".study-options-dialog")?.textContent,
+    ).not.toContain("Build a new session");
+    await click("Close Session settings");
+    await click("Home");
+    await click("Study");
+    await click("Custom");
     expect(host.querySelector(".study-editor")).not.toBeNull();
     expect(host.textContent).not.toContain("Return to results");
-    await click("Start studying");
+    await click("Start new session");
     expect(
       host.querySelector(".study-question .round-number")?.textContent,
     ).toBe("1");

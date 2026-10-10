@@ -47,11 +47,21 @@ updates from overwriting newer edits. Handle claims and changes are transactiona
 No email address appears in another player's profile.
 
 [`shared/profile-avatars.json`](../shared/profile-avatars.json) defines the default
-avatar catalog for both frontend and backend. Add a label and either a symbol or
-a local `image` path when supplying more artwork; include the image under `public/`.
+avatar catalog for both frontend and backend. It reserves 24 PNG choices named
+`avatar-01.png` through `avatar-24.png` under [`public/avatars/`](../public/avatars/README.md).
+Add PNGs and update their catalog labels, then restart the dev server or build.
+Build configuration enables only files that exist; missing slots stay disabled
+and do not request missing images. Earlier emoji avatars remain valid for existing
+profiles but are no longer offered in the picker.
 Flag choices reuse the 193 locally bundled Study flags. The server accepts only
 catalog IDs and known country IDs, never player-supplied image URLs. Saving a
-profile updates the header immediately. A friends-service failure does not block
+profile updates the header immediately. The Profile tab presents a saved card;
+**Edit profile** opens the full-width editor, with cancel returning to the card.
+Saved profiles are cached per account in memory and tab session storage. Reads
+are shared between the header and Account, reused for five minutes, and refreshed
+in the background when stale. The last known profile stays visible during refresh.
+Explicit sign-out clears cached identity; late responses cannot revive it or
+overwrite a newer save. A friends-service failure does not block
 profile editing, and connection errors show a player-facing retry message.
 
 Friends are requested by exact handle and require the recipient's acceptance.

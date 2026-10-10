@@ -106,6 +106,8 @@ class CommunityTests(unittest.TestCase):
         for avatar in ("flag:wurl:FAKE", "https://example.com/tracker.png", "../../secret", {}, None):
             self.assertEqual(self.call("PATCH /account/profile", "a", {**value, "avatar": avatar})[0], 400)
         self.assertEqual(self.call("PATCH /account/profile", "a", {**value, "avatar": "planet"})[0], 200)
+        latest = self.call("GET /account/profile", "a")[1]
+        self.assertEqual(self.call("PATCH /account/profile", "a", {**latest, "avatar": "avatar-24"})[0], 200)
 
     def test_friendship_requires_recipient_acceptance_and_block_prevents_recontact(self):
         self.profile("a", "alice")

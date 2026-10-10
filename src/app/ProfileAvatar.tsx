@@ -4,7 +4,7 @@ import countries from "../game/data/un-members.v1.json";
 
 export const AVATARS: Record<
   string,
-  { label: string; symbol?: string; image?: string }
+  { label: string; symbol?: string; image?: string; hidden?: boolean }
 > = avatars;
 export type AvatarId = keyof typeof avatars | `flag:${string}`;
 const flagSources = new Map(
@@ -25,14 +25,22 @@ export function ProfileAvatar({
 }) {
   const countryId = avatar.startsWith("flag:") ? avatar.slice(5) : undefined;
   const preset = AVATARS[avatar] ?? AVATARS.globe;
-  const image = countryId ? flagSources.get(countryId) : preset.image;
+  const image = countryId
+    ? flagSources.get(countryId)
+    : preset.image && __AVATAR_IMAGES__.includes(preset.image)
+      ? preset.image
+      : undefined;
   return (
     <span
       className={`profile-avatar ${className}`}
       role="img"
       aria-label={label}
     >
-      {image ? <img src={image} alt="" /> : preset.symbol}
+      {image ? (
+        <img src={image} alt="" />
+      ) : (
+        (preset.symbol ?? <img src="/ambit-orb.svg" alt="" />)
+      )}
     </span>
   );
 }

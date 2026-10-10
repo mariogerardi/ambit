@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { createCommunityClient } from "../services/community";
 import { AVATARS, FLAG_AVATARS, ProfileAvatar } from "./ProfileAvatar";
-import { publishProfile } from "../services/playerProfile";
+import {
+  cachedProfile,
+  loadPlayerProfile,
+  publishProfile,
+} from "../services/playerProfileCache";
 import type {
   AccountProfile,
   CommunityClient,
@@ -70,34 +74,42 @@ export function AccountDashboard({
     () => suppliedClient ?? createCommunityClient(() => token.current()),
     [suppliedClient],
   );
-  const [profile, setProfile] = useState<AccountProfile | null>(null);
-  const [draft, setDraft] = useState(() => newProfile(subject));
+  const initialProfile = !suppliedClient ? cachedProfile(subject) : undefined;
+  const [profile, setProfile] = useState<AccountProfile | null>(
+    () => initialProfile?.profile ?? null,
+  );
+  const [draft, setDraft] = useState(
+    () => initialProfile?.profile ?? newProfile(subject),
+  );
+  const [editingProfile, setEditingProfile] = useState(false);
+  const dirty = useRef(false);
   const [friends, setFriends] = useState<Friendship[]>([]);
   const [friendsError, setFriendsError] = useState("");
   const [tab, setTab] = useState("dashboard"),
-    [loading, setLoading] = useState(true),
+    [loading, setLoading] = useState(!initialProfile),
     [working, setWorking] = useState(false);
   const [error, setError] = useState(""),
     [notice, setNotice] = useState("");
   const [handle, setHandle] = useState("");
-  const [available, setAvailable] = useState(false);
+  const [available, setAvailable] = useState(!!initialProfile);
   const [comparison, setComparison] = useState<{
     friend: Friendship;
     scores: JourneyScore[];
   }>();
   const controller = useRef<AbortController | undefined>(undefined);
   const metrics = accountProgress(daily, study);
-  async function load(signal?: AbortSignal) {
-    const value = await api.request<AccountProfile | null>(
-      "profile",
-      "GET",
-      undefined,
-      signal,
-    );
+  async function load(signal?: AbortSignal, force = true) {
+    const value = suppliedClient
+      ? await api.request<AccountProfile | null>(
+          "profile",
+          "GET",
+          undefined,
+          signal,
+        )
+      : await loadPlayerProfile(subject, api, force);
     if (signal?.aborted) return;
     setProfile(value);
-    setDraft(value ?? newProfile(subject));
-    publishProfile(subject, value);
+    if (!dirty.current) setDraft(value ?? newProfile(subject));
     setAvailable(true);
     setFriendsError("");
     // A social-service failure must not prevent editing a profile.
@@ -119,10 +131,11 @@ export function AccountDashboard({
   useEffect(() => {
     const abort = new AbortController();
     controller.current = abort;
-    setLoading(true);
-    setAvailable(false);
+    const cached = !suppliedClient ? cachedProfile(subject) : undefined;
+    setLoading(!cached);
+    setAvailable(!!cached);
     setError("");
-    void load(abort.signal)
+    void load(abort.signal, false)
       .catch((e: unknown) => {
         if (!abort.signal.aborted)
           setError(
@@ -169,7 +182,19 @@ export function AccountDashboard({
     api.request<AccountProfile>("profile", "PATCH", value);
   const submitProfile = (e: FormEvent) => {
     e.preventDefault();
-    void perform(() => saveProfile(draft), "Your profile is saved.");
+    void perform(
+      async () => {
+        const saved = await saveProfile(draft);
+        if (controller.current?.signal.aborted) return;
+        setProfile(saved);
+        setDraft(saved);
+        dirty.current = false;
+        if (!suppliedClient) publishProfile(subject, saved);
+        setEditingProfile(false);
+      },
+      "Your profile is saved.",
+      false,
+    );
   };
   const disabled = working || loading || busy || !available;
   return (
@@ -186,13 +211,17 @@ export function AccountDashboard({
               <>
                 Hello, <em>{profile.displayName}.</em>
               </>
+            ) : loading ? (
+              <>
+                Opening your <em>account.</em>
+              </>
             ) : (
               <>
                 Make yourself <em>at home.</em>
               </>
             )}
           </h1>
-          {profile && <p className="muted">@{profile.handle}</p>}
+          {profile && <p className="account-handle">@{profile.handle}</p>}
         </div>
       </div>
       <nav className="account-tabs" aria-label="Account sections">
@@ -280,144 +309,227 @@ export function AccountDashboard({
           </dl>
         </>
       )}
-      {tab === "profile" && (
-        <form className="profile-form" onSubmit={submitProfile}>
-          <header className="profile-form-heading">
-            <h2>Make it yours.</h2>
-            <p className="muted">Choose how you appear around Ambit.</p>
-          </header>
-          <div className="profile-fields">
-            <label className="field">
-              <span>Display name</span>
-              <input
-                autoComplete="nickname"
-                maxLength={40}
-                required
-                value={draft.displayName}
-                onChange={(e) =>
-                  setDraft({ ...draft, displayName: e.target.value })
-                }
-              />
-            </label>
-            <label className="field">
-              <span>Handle</span>
-              <input
-                autoComplete="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                pattern="[a-zA-Z][a-zA-Z0-9_]{2,23}"
-                maxLength={24}
-                required
-                value={draft.handle}
-                onChange={(e) =>
-                  setDraft({ ...draft, handle: e.target.value.toLowerCase() })
-                }
-              />
-              <small>
-                3–24 letters, numbers or underscores. Friends can find you by
-                this handle.
-              </small>
-            </label>
-          </div>
-          <fieldset className="avatar-picker">
-            <legend>Choose your avatar</legend>
-            <div className="avatar-options">
-              {Object.entries(AVATARS).map(([value, preset]) => (
-                <label
-                  key={value}
-                  className={draft.avatar === value ? "chosen" : ""}
-                >
-                  <input
-                    type="radio"
-                    name="avatar"
-                    value={value}
-                    checked={draft.avatar === value}
-                    onChange={() =>
-                      setDraft({
-                        ...draft,
-                        avatar: value as AccountProfile["avatar"],
-                      })
-                    }
-                  />
-                  <ProfileAvatar
-                    avatar={value as AccountProfile["avatar"]}
-                    label={preset.label}
-                  />
-                  <small>{preset.label}</small>
-                </label>
-              ))}
-            </div>
-            <label className="field flag-avatar-choice">
-              <span>Or use a country flag</span>
-              <div className="flag-avatar-select">
-                <ProfileAvatar avatar={draft.avatar} />
-                <select
-                  aria-label="Country flag avatar"
-                  value={draft.avatar.startsWith("flag:") ? draft.avatar : ""}
-                  onChange={(event) => {
-                    if (event.target.value)
-                      setDraft({
-                        ...draft,
-                        avatar: event.target.value as AccountProfile["avatar"],
-                      });
+      {tab === "profile" &&
+        (!profile && loading ? (
+          <p className="muted">Opening your profile…</p>
+        ) : profile && !editingProfile ? (
+          <article className="profile-card" aria-label="Your profile">
+            <header>
+              <Avatar player={profile} />
+              <div>
+                <span className="overline">EXPLORER</span>
+                <h2>{profile.displayName}</h2>
+                <p className="account-handle">@{profile.handle}</p>
+              </div>
+              <button
+                className="quiet-button profile-edit-button"
+                onClick={() => {
+                  dirty.current = false;
+                  setDraft(profile);
+                  setEditingProfile(true);
+                }}
+              >
+                Edit profile <span aria-hidden="true">→</span>
+              </button>
+            </header>
+            <p className="profile-bio">
+              {profile.bio || "A curious mind. A world to explore."}
+            </p>
+            <dl className="profile-card-details">
+              <div>
+                <dt>Favorite place</dt>
+                <dd>{profile.favoriteRegion || "Still exploring"}</dd>
+              </div>
+              <div>
+                <dt>Journeys finished</dt>
+                <dd>{metrics.journeys.length}</dd>
+              </div>
+              <div>
+                <dt>Journey scores</dt>
+                <dd>
+                  {profile.shareJourneyScores
+                    ? "Shared with friends"
+                    : "Only you"}
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ) : (
+          <form
+            className="profile-form"
+            onSubmit={submitProfile}
+            onChange={() => {
+              dirty.current = true;
+            }}
+          >
+            <header className="profile-form-heading">
+              <h2>Make it yours.</h2>
+              <p className="muted">Choose how you appear around Ambit.</p>
+              {profile && (
+                <button
+                  type="button"
+                  className="quiet-button profile-edit-cancel"
+                  onClick={() => {
+                    setDraft(profile);
+                    dirty.current = false;
+                    setEditingProfile(false);
                   }}
                 >
-                  <option value="">Choose a country</option>
-                  {FLAG_AVATARS.map((country) => (
-                    <option key={country.id} value={`flag:${country.id}`}>
-                      {country.name}
-                    </option>
+                  ← Back to profile
+                </button>
+              )}
+            </header>
+            <div className="profile-fields">
+              <label className="field">
+                <span>Display name</span>
+                <input
+                  autoComplete="nickname"
+                  maxLength={40}
+                  required
+                  value={draft.displayName}
+                  onChange={(e) =>
+                    setDraft({ ...draft, displayName: e.target.value })
+                  }
+                />
+              </label>
+              <label className="field">
+                <span>Handle</span>
+                <input
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  pattern="[a-zA-Z][a-zA-Z0-9_]{2,23}"
+                  maxLength={24}
+                  required
+                  value={draft.handle}
+                  onChange={(e) =>
+                    setDraft({ ...draft, handle: e.target.value.toLowerCase() })
+                  }
+                />
+                <small>
+                  3–24 letters, numbers or underscores. Friends can find you by
+                  this handle.
+                </small>
+              </label>
+            </div>
+            <fieldset className="avatar-picker">
+              <legend>Choose your avatar</legend>
+              <div className="avatar-options">
+                {Object.entries(AVATARS)
+                  .filter(([, preset]) => !preset.hidden)
+                  .map(([value, preset]) => (
+                    <label
+                      key={value}
+                      className={`${draft.avatar === value ? "chosen" : ""} ${preset.image && !__AVATAR_IMAGES__.includes(preset.image) ? "avatar-pending" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="avatar"
+                        value={value}
+                        checked={draft.avatar === value}
+                        disabled={
+                          !!preset.image &&
+                          !__AVATAR_IMAGES__.includes(preset.image)
+                        }
+                        onChange={() =>
+                          setDraft({
+                            ...draft,
+                            avatar: value as AccountProfile["avatar"],
+                          })
+                        }
+                      />
+                      {preset.image &&
+                      !__AVATAR_IMAGES__.includes(preset.image) ? (
+                        <span className="avatar-slot" aria-hidden="true">
+                          {value.slice(-2)}
+                        </span>
+                      ) : (
+                        <ProfileAvatar
+                          avatar={value as AccountProfile["avatar"]}
+                          label={preset.label}
+                        />
+                      )}
+                      <small>{preset.label}</small>
+                    </label>
                   ))}
-                </select>
               </div>
+              {!__AVATAR_IMAGES__.length && (
+                <p className="muted avatar-coming-soon">
+                  More avatars are coming soon. Choose a flag below.
+                </p>
+              )}
+              <label className="field flag-avatar-choice">
+                <span>Or use a country flag</span>
+                <div className="flag-avatar-select">
+                  <ProfileAvatar avatar={draft.avatar} />
+                  <select
+                    aria-label="Country flag avatar"
+                    value={draft.avatar.startsWith("flag:") ? draft.avatar : ""}
+                    onChange={(event) => {
+                      if (event.target.value)
+                        setDraft({
+                          ...draft,
+                          avatar: event.target
+                            .value as AccountProfile["avatar"],
+                        });
+                    }}
+                  >
+                    <option value="">Choose a country</option>
+                    {FLAG_AVATARS.map((country) => (
+                      <option key={country.id} value={`flag:${country.id}`}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </label>
+            </fieldset>
+            <label className="field">
+              <span>
+                Favorite place or region <small>Optional</small>
+              </span>
+              <input
+                maxLength={60}
+                value={draft.favoriteRegion}
+                onChange={(e) =>
+                  setDraft({ ...draft, favoriteRegion: e.target.value })
+                }
+                placeholder="The Mediterranean"
+              />
             </label>
-          </fieldset>
-          <label className="field">
-            <span>
-              Favorite place or region <small>Optional</small>
-            </span>
-            <input
-              maxLength={60}
-              value={draft.favoriteRegion}
-              onChange={(e) =>
-                setDraft({ ...draft, favoriteRegion: e.target.value })
-              }
-              placeholder="The Mediterranean"
-            />
-          </label>
-          <label className="field">
-            <span>
-              A little about you <small>Optional · 160 characters</small>
-            </span>
-            <textarea
-              maxLength={160}
-              rows={3}
-              value={draft.bio}
-              onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
-              placeholder="What sparks your curiosity?"
-            />
-          </label>
-          <label className="profile-sharing">
-            <input
-              type="checkbox"
-              checked={draft.shareJourneyScores}
-              onChange={(e) =>
-                setDraft({ ...draft, shareJourneyScores: e.target.checked })
-              }
-            />
-            <span>
-              Share completed Journey scores with friends
-              <small>
-                Only accepted friends can see score totals. Your answers and
-                email stay private.
-              </small>
-            </span>
-          </label>
-          <button className="primary-button" disabled={disabled}>
-            Save profile
-          </button>
-        </form>
-      )}
+            <label className="field">
+              <span>
+                A little about you <small>Optional · 160 characters</small>
+              </span>
+              <textarea
+                maxLength={160}
+                rows={3}
+                value={draft.bio}
+                onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
+                placeholder="What sparks your curiosity?"
+              />
+            </label>
+            <label className="profile-sharing">
+              <input
+                type="checkbox"
+                checked={draft.shareJourneyScores}
+                onChange={(e) =>
+                  setDraft({ ...draft, shareJourneyScores: e.target.checked })
+                }
+              />
+              <span>
+                Share completed Journey scores with friends
+                <small>
+                  Only accepted friends can see score totals. Your answers and
+                  email stay private.
+                </small>
+              </span>
+            </label>
+            <button className="primary-button" disabled={disabled}>
+              Save profile
+            </button>
+          </form>
+        ))}
       {tab === "friends" && (
         <>
           {friendsError && <p role="alert">{friendsError}</p>}

@@ -142,6 +142,7 @@ it("loads private account data and accepts an incoming request for the displayed
 it("retains an edited profile and shows a handle collision instead of silently losing changes", async () => {
   await mount();
   await click("Profile");
+  await click("Edit profile →");
   await input('input[autocomplete="nickname"]', "Updated Alice");
   request.mockImplementationOnce(async () => {
     throw new Error("That handle is taken.");
@@ -160,9 +161,29 @@ it("retains an edited profile and shows a handle collision instead of silently l
   ).toBe("Updated Alice");
   expect(profile.displayName).toBe("Alice");
 });
+it("opens a saved profile card before editing and cancels unsaved edits", async () => {
+  await mount();
+  await click("Profile");
+  expect(host.querySelector(".profile-card")?.textContent).toContain("Alice");
+  expect(host.querySelector(".profile-form")).toBeNull();
+  await click("Edit profile →");
+  await input('input[autocomplete="nickname"]', "Unsaved Alice");
+  expect(
+    host.querySelectorAll('.avatar-options input[type="radio"]'),
+  ).toHaveLength(24);
+  expect(host.querySelectorAll(".avatar-options input:disabled")).toHaveLength(
+    24,
+  );
+  expect(host.querySelectorAll(".avatar-options img")).toHaveLength(0);
+  await click("← Back to profile");
+  expect(host.querySelector(".profile-card")?.textContent).toContain("Alice");
+  expect(host.textContent).not.toContain("Unsaved Alice");
+  expect(profile.displayName).toBe("Alice");
+});
 it("saves a country flag avatar and renders its local image", async () => {
   await mount();
   await click("Profile");
+  await click("Edit profile →");
   const flags = host.querySelector<HTMLSelectElement>(
     'select[aria-label="Country flag avatar"]',
   )!;
@@ -197,6 +218,7 @@ it("keeps profile editing available when only friends fail to load", async () =>
   );
   await mount();
   await click("Profile");
+  await click("Edit profile →");
   expect(
     host.querySelector<HTMLButtonElement>(".profile-form button.primary-button")
       ?.disabled,

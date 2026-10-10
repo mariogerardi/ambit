@@ -10,7 +10,6 @@ export function StudySessionOptions({
   returnFocus,
   onApply,
   onClose,
-  onBuild,
   onReport,
   onFinish,
   locked = false,
@@ -26,7 +25,6 @@ export function StudySessionOptions({
   returnFocus: RefObject<HTMLButtonElement | null>;
   onApply(settings: StudySettings): void;
   onClose(): void;
-  onBuild(): void;
 }) {
   const [draft, setDraft] = useState(settings);
   const [preferences, setPreferences] = useState(false);
@@ -156,12 +154,6 @@ export function StudySessionOptions({
             <div className="study-options-actions">
               <button className="primary-button" onClick={() => onApply(draft)}>
                 Apply &amp; resume
-              </button>
-              <button
-                className="quiet-button tertiary-action study-new-session"
-                onClick={onBuild}
-              >
-                Build a new session
               </button>
             </div>
           </>

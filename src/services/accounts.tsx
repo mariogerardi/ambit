@@ -4,6 +4,7 @@ import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 import type { User } from "oidc-client-ts";
 import { serviceConfig } from "./config";
 import { reportFailure } from "./monitoring";
+import { clearProfileCache } from "./playerProfileCache";
 
 export function isAdmin(user: User | null) {
   const groups = user?.profile["cognito:groups"];
@@ -96,6 +97,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       if (active && !signingOut.current) setUser(value);
     };
     const removed = () => {
+      clearProfileCache();
       if (active) setUser(null);
     };
     const wake = (event?: unknown) => {
@@ -121,6 +123,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       if (event.key !== userStorageKey && event.key !== null) return;
       storageEpoch.current++;
       externalUser.current = event.newValue;
+      if (event.newValue === null) clearProfileCache();
       void client
         .getUser()
         .then((value) => {
@@ -200,6 +203,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }
   async function signOut() {
     signingOut.current = true;
+    clearProfileCache();
     setBusy(true);
     setError("");
     try {
