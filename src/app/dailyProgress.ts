@@ -213,7 +213,8 @@ export function openDaily(
           runId: crypto.randomUUID(),
           startedAt: Math.max(Date.now(), (existing?.startedAt ?? 0) + 1),
           date,
-          journeyId: dailyJourney(date, progress, catalog).id,
+          journeyId:
+            existing?.journeyId ?? dailyJourney(date, progress, catalog).id,
           scheduleVersion: DAILY_VERSION,
           game: { ...initialGame, phase: "playing" as const },
         };

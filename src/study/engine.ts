@@ -1,3 +1,11 @@
+import {
+  CAPITAL_DISTRACTORS,
+  capitalChoicePool,
+  capitalChoiceName,
+  validCapitalChoice,
+  hasCountryCityDistractors,
+} from "./distractors";
+import type { CapitalDistractors } from "./distractors";
 import roster from "../game/data/un-members.v1.json";
 import flagCatalog from "../game/data/flags.v1.json";
 import { CAPITALS } from "../game/quizData";
@@ -26,6 +34,7 @@ export interface StudySettings {
   length: 10 | 20 | 50 | "continuous" | "all";
   autoAdvance: boolean;
   choiceCount?: 2 | 3 | 4 | 5 | 6;
+  capitalDistractors?: CapitalDistractors;
   revisitMissed?: boolean;
 }
 export const defaultSettings: StudySettings = {
@@ -41,6 +50,7 @@ export const defaultSettings: StudySettings = {
   length: 20,
   autoAdvance: true,
   choiceCount: 6,
+  capitalDistractors: "study",
   revisitMissed: false,
 };
 export interface StudyPrompt {
@@ -104,10 +114,16 @@ export const capitalOf = (id: string) =>
 export function studyPool(settings: StudySettings): string[] {
   return COUNTRIES.filter(
     (c) =>
-      settings.scope === "all" ||
-      (settings.scope === "custom"
-        ? settings.countryIds.includes(c.id)
-        : capitalOf(c.id).continent === settings.continent),
+      (settings.scope === "all" ||
+        (settings.scope === "custom"
+          ? settings.countryIds.includes(c.id)
+          : capitalOf(c.id).continent === settings.continent)) &&
+      !(
+        settings.topics.includes("capitals") &&
+        settings.styles.capitals === "choices" &&
+        settings.capitalDistractors === "countryCities" &&
+        !hasCountryCityDistractors(c.id)
+      ),
   ).map((c) => c.id);
 }
 export function usesPerTopicMethods(settings: StudySettings) {
@@ -119,10 +135,20 @@ export function usesPerTopicMethods(settings: StudySettings) {
 export function settingsError(settings: StudySettings): string | undefined {
   if (!settings.topics.length) return "Choose at least one topic.";
   const pool = studyPool(settings);
-  if (!pool.length) return "Choose at least one country.";
+  if (!pool.length)
+    return settings.capitalDistractors === "countryCities" &&
+      settings.topics.includes("capitals") &&
+      settings.styles.capitals === "choices"
+      ? "Choose a country with another bundled city, or a different distractor pool."
+      : "Choose at least one country.";
   if (
-    settings.topics.some((t) => settings.styles[t] === "choices") &&
-    pool.length < 2
+    settings.topics.some(
+      (topic) =>
+        settings.styles[topic] === "choices" &&
+        (topic === "capitals"
+          ? pool.some((id) => capitalChoicePool(settings, pool, id).length < 2)
+          : pool.length < 2),
+    )
   )
     return "Include at least two countries for multiple choice.";
 }
@@ -167,10 +193,13 @@ function draw(
   let style = session.settings.styles[topic];
   if (style === "mixed") {
     seed = random(seed);
-    const available: PromptStyle[] =
-      session.pool.length < 2
-        ? ["map", "typing"]
-        : ["map", "typing", "choices"];
+    const available: PromptStyle[] = (
+      topic === "capitals"
+        ? capitalChoicePool(session.settings, session.pool, targetId).length < 2
+        : session.pool.length < 2
+    )
+      ? ["map", "typing"]
+      : ["map", "typing", "choices"];
     style = available[seed % available.length];
   }
   let choices: string[] = [];
@@ -178,11 +207,14 @@ function draw(
     // Distinct display answers, including countries whose primary capitals share a name.
     const label = (id: string) =>
       normalizeAnswer(
-        topic === "capitals" ? capitalOf(id).name : countryName(id),
+        topic === "capitals" ? capitalChoiceName(id)! : countryName(id),
       );
     const seen = new Set([label(targetId)]);
     const shuffled = shuffle(
-      session.pool.filter((id) => id !== targetId),
+      (topic === "capitals"
+        ? capitalChoicePool(session.settings, session.pool, targetId)
+        : session.pool
+      ).filter((id) => id !== targetId),
       seed,
     );
     seed = shuffled.seed;
@@ -310,7 +342,16 @@ export function studyReducer(
     return draw(session, session.prompt.ordinal + 1);
   }
   if (session.phase !== "playing") return session;
-  if (action.type === "text") return { ...session, text: action.value };
+  if (action.type === "text")
+    return canTypeStudyAnswer(session.prompt)
+      ? { ...session, text: action.value }
+      : session;
+  if (
+    action.type === "submit" &&
+    !canTypeStudyAnswer(session.prompt) &&
+    session.prompt.style === "map"
+  )
+    return session;
   if (action.type === "choice")
     return session.prompt.choices.includes(action.id)
       ? { ...session, choiceId: action.id }
@@ -376,9 +417,11 @@ export function studyReducer(
 }
 export function answerLabel(prompt: StudyPrompt, id = prompt.targetId): string {
   return prompt.topic === "capitals" && prompt.style !== "map"
-    ? capitalOf(id).name
+    ? (capitalChoiceName(id) ?? id)
     : countryName(id);
 }
+export const canTypeStudyAnswer = (prompt: StudyPrompt) =>
+  !(prompt.topic === "countries" && prompt.style === "map");
 export function studyPrompt(prompt: StudyPrompt): string {
   const name = countryName(prompt.targetId),
     capital = capitalOf(prompt.targetId).name;
@@ -405,7 +448,11 @@ export function studyStates(
   } else if (session.phase === "feedback") {
     const answer = session.history.at(-1)!;
     states[session.prompt.targetId] = answer.correct ? "correct" : "answer";
-    if (!answer.correct && answer.selectedId)
+    if (
+      !answer.correct &&
+      answer.selectedId &&
+      memberIds.has(answer.selectedId)
+    )
       states[answer.selectedId] = "incorrect";
   } else {
     session.history.forEach((a) => (states[a.prompt.targetId] = "correct"));
@@ -441,6 +488,9 @@ export function validSettings(value: unknown): value is StudySettings {
     [10, 20, 50, "continuous", "all"].includes(
       value.length as number | string,
     ) &&
+    (value.capitalDistractors === undefined ||
+      (typeof value.capitalDistractors === "string" &&
+        Object.hasOwn(CAPITAL_DISTRACTORS, value.capitalDistractors))) &&
     (value.choiceCount === undefined ||
       ([2, 3, 4, 5, 6].includes(Number(value.choiceCount)) &&
         typeof value.choiceCount === "number")) &&
@@ -460,7 +510,11 @@ function validPrompt(value: unknown, pool: string[]): value is StudyPrompt {
     strings(value.choices) &&
     value.choices.length <= 6 &&
     new Set(value.choices).size === value.choices.length &&
-    value.choices.every((id) => pool.includes(id)) &&
+    value.choices.every((id) =>
+      value.topic === "capitals" && value.style === "choices"
+        ? validCapitalChoice(id)
+        : pool.includes(id),
+    ) &&
     (value.style !== "choices" ||
       (value.choices.length >= 2 && value.choices.includes(value.targetId))) &&
     Number.isInteger(value.ordinal) &&
@@ -540,7 +594,10 @@ export function validStudy(value: unknown): value is StudySave {
         typeof a.correct === "boolean" &&
         typeof a.response === "string" &&
         (a.selectedId === undefined ||
-          (s.pool as string[]).includes(String(a.selectedId))),
+          (a.prompt.style === "choices"
+            ? a.prompt.choices
+            : (s.pool as string[])
+          ).includes(String(a.selectedId))),
     ) &&
     (s.phase !== "feedback" || s.history.length > 0)
   );
@@ -599,7 +656,7 @@ export function studyReplayTargets(
   );
 }
 
-/** Preferences and past results persist; an active attempt never survives leaving. */
+/** Drop an active attempt only when explicitly replacing/ending its setup. */
 export function studyPreferences(save: StudySave): StudySave {
   return {
     version: 1,

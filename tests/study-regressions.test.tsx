@@ -195,3 +195,121 @@ describe("Study completion, replay, and alternate answers", () => {
     },
   );
 });
+
+it("puts mobile session actions in the cog and lets the player edit, report, or finish", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  const host = document.createElement("div"),
+    root = createRoot(host);
+  document.body.append(host);
+  const session = startStudy(settings, 42),
+    onReport = vi.fn(),
+    onAction = vi.fn();
+  const click = async (text: string) =>
+    act(async () => {
+      const button = [
+        ...document.querySelectorAll<HTMLButtonElement>("button"),
+      ].find(
+        (b) =>
+          b.textContent?.trim() === text ||
+          b.getAttribute("aria-label") === text,
+      );
+      expect(button).toBeDefined();
+      button!.click();
+    });
+  try {
+    await act(async () =>
+      root.render(
+        <StudyPanel
+          compact
+          active
+          webgl
+          setup={false}
+          save={{ ...emptyStudy, session }}
+          onSettings={vi.fn()}
+          onStart={vi.fn()}
+          onSetup={vi.fn()}
+          onAction={onAction}
+          onReport={onReport}
+        />,
+      ),
+    );
+    expect(host.textContent).not.toContain("Finish session");
+    expect(host.querySelector("input")).toBeNull();
+    await click("Session settings");
+    await click("Edit this session");
+    expect(
+      document.querySelector(".study-options-dialog")?.textContent,
+    ).toContain("Apply & resume");
+    await click("Back to session actions");
+    await click("Report this question");
+    expect(onReport).toHaveBeenCalledWith(session.prompt);
+    expect(document.querySelector("[role=dialog]")).toBeNull();
+    await click("Session settings");
+    await click("Finish this session");
+    expect(onAction).toHaveBeenCalledWith({ type: "finish" });
+    expect(document.querySelector("[role=dialog]")).toBeNull();
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    vi.unstubAllGlobals();
+  }
+});
+
+it.each([true, false])(
+  "does not offer the supplied country name as a map answer (WebGL: %s)",
+  (webgl) => {
+    const session = startStudy(settings, 42);
+    const html = renderToStaticMarkup(
+      <StudyPanel
+        save={{ ...emptyStudy, session }}
+        setup={false}
+        active
+        webgl={webgl}
+        onSettings={vi.fn()}
+        onStart={vi.fn()}
+        onSetup={vi.fn()}
+        onAction={vi.fn()}
+      />,
+    );
+    expect(html).not.toContain("Answer by name");
+    expect(html).not.toContain("<input");
+    if (!webgl) expect(html).toContain("another answer method");
+  },
+);
+it("gives mobile correct-answer feedback time to read before automatic advance", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.useFakeTimers();
+  const host = document.createElement("div"),
+    root = createRoot(host);
+  let session = startStudy({ ...settings, autoAdvance: true }, 42);
+  session = studyReducer(session, {
+    type: "pick",
+    id: session.prompt.targetId,
+  });
+  const onAction = vi.fn();
+  try {
+    await act(async () =>
+      root.render(
+        <StudyPanel
+          compact
+          save={{ ...emptyStudy, session }}
+          setup={false}
+          active
+          webgl
+          onSettings={vi.fn()}
+          onStart={vi.fn()}
+          onSetup={vi.fn()}
+          onAction={onAction}
+        />,
+      ),
+    );
+    await act(async () => vi.advanceTimersByTime(1000));
+    expect(onAction).not.toHaveBeenCalled();
+    await act(async () => vi.advanceTimersByTime(800));
+    expect(onAction).toHaveBeenCalledWith({ type: "next" });
+  } finally {
+    await act(async () => root.unmount());
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  }
+});

@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   FLAGS,
   answerLabel,
+  canTypeStudyAnswer,
   countryName,
   defaultSettings,
   studyPrompt,
@@ -21,6 +22,7 @@ import { SettingsIcon } from "../app/SettingsIcon";
 import { StudyResults } from "./StudyResults";
 import { StudySetup } from "./StudySetup";
 import { StudySessionOptions } from "./StudySessionOptions";
+import { AnswerInput } from "../game/AnswerInput";
 import { StudyHistory } from "./StudyHistory";
 export function StudyPanel({
   save,
@@ -41,6 +43,7 @@ export function StudyPanel({
   builder = false,
   paused = false,
   onReport,
+  compact = false,
 }: {
   paused?: boolean;
   onReport?(prompt: StudyPrompt): void;
@@ -89,7 +92,10 @@ export function StudyPanel({
       !session.settings.autoAdvance
     )
       return;
-    const timer = setTimeout(() => onAction({ type: "next" }), 650);
+    const timer = setTimeout(
+      () => onAction({ type: "next" }),
+      compact ? 1800 : 650,
+    );
     return () => clearTimeout(timer);
   }, [
     active,
@@ -100,6 +106,7 @@ export function StudyPanel({
     session?.prompt.ordinal,
     session?.settings.autoAdvance,
     correct,
+    compact,
     onAction,
   ]);
   useEffect(() => {
@@ -171,6 +178,19 @@ export function StudyPanel({
       {editing && active && (
         <StudySessionOptions
           settings={session.settings}
+          compact={compact}
+          onReport={
+            onReport
+              ? () => {
+                  closeSettings();
+                  onReport(prompt);
+                }
+              : undefined
+          }
+          onFinish={() => {
+            closeSettings();
+            onAction({ type: "finish" });
+          }}
           returnFocus={settingsButton}
           onClose={closeSettings}
           onBuild={() => {
@@ -241,43 +261,49 @@ export function StudyPanel({
               <p className="study-map-instruction muted">
                 {webgl
                   ? "Tap your answer on the globe."
-                  : "The globe is unavailable. Answer by country name below."}
+                  : canTypeStudyAnswer(prompt)
+                    ? "The globe is unavailable. Answer by country name below."
+                    : "The globe is unavailable. Open session settings to build a session with another answer method."}
               </p>
-              <details
-                className="typed-country-guess"
-                open={!webgl || undefined}
-              >
-                <summary>Answer by name</summary>
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    onAction({ type: "submit" });
-                  }}
+              {canTypeStudyAnswer(prompt) && (
+                <details
+                  className="typed-country-guess"
+                  open={!webgl || undefined}
                 >
-                  <label className="field">
-                    Country name
-                    <input
-                      autoComplete="off"
-                      spellCheck={false}
-                      enterKeyHint="done"
-                      value={session.text}
-                      placeholder="Your answer…"
-                      onChange={(event) =>
-                        onAction({ type: "text", value: event.target.value })
-                      }
-                    />
-                  </label>
-                  <button
-                    className="primary-button"
-                    disabled={!session.text.trim()}
+                  <summary>Answer by name</summary>
+                  <form
+                    autoComplete="off"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      onAction({ type: "submit" });
+                    }}
                   >
-                    Submit answer <span>→</span>
-                  </button>
-                </form>
-              </details>
+                    <label className="field">
+                      Country name
+                      <AnswerInput
+                        autoComplete="off"
+                        spellCheck={false}
+                        enterKeyHint="done"
+                        value={session.text}
+                        placeholder="Your answer…"
+                        onChange={(event) =>
+                          onAction({ type: "text", value: event.target.value })
+                        }
+                      />
+                    </label>
+                    <button
+                      className="primary-button"
+                      disabled={!session.text.trim()}
+                    >
+                      Submit answer <span>→</span>
+                    </button>
+                  </form>
+                </details>
+              )}
             </div>
           ) : (
             <form
+              autoComplete="off"
               onSubmit={(e) => {
                 e.preventDefault();
                 onAction({ type: "submit" });
@@ -307,7 +333,7 @@ export function StudyPanel({
                     {prompt.topic === "capitals"
                       ? "Capital name"
                       : "Country name"}
-                    <input
+                    <AnswerInput
                       autoComplete="off"
                       spellCheck={false}
                       enterKeyHint="done"
@@ -342,7 +368,7 @@ export function StudyPanel({
                 ? `✓ ${prompt.style === "typing" ? "Nicely remembered." : "Well spotted."}`
                 : "Not quite."}
             </div>
-            {onReport && (
+            {onReport && !compact && (
               <button
                 className="quiet-button tertiary-action report-question"
                 onClick={() => onReport(prompt)}
@@ -350,8 +376,16 @@ export function StudyPanel({
                 Report this question
               </button>
             )}
-            <p>Your answer: {session.history.at(-1)?.response}</p>
-            {!correct && <p>Correct answer: {answerLabel(prompt)}</p>}
+            <p className="study-response">
+              <span>Your answer: </span>
+              <strong>{session.history.at(-1)?.response}</strong>
+            </p>
+            {!correct && (
+              <p className="study-response study-correction">
+                <span>Correct answer: </span>
+                <strong>{answerLabel(prompt)}</strong>
+              </p>
+            )}
             <button
               className="primary-button"
               onClick={() => onAction({ type: "next" })}
@@ -360,14 +394,16 @@ export function StudyPanel({
             </button>
           </div>
         )}
-        <div className="inline-actions study-bottom">
-          <button
-            className="quiet-button tertiary-action"
-            onClick={() => onAction({ type: "finish" })}
-          >
-            Finish session
-          </button>
-        </div>
+        {!compact && (
+          <div className="inline-actions study-bottom">
+            <button
+              className="quiet-button tertiary-action"
+              onClick={() => onAction({ type: "finish" })}
+            >
+              Finish session
+            </button>
+          </div>
+        )}
       </section>
     </>
   );

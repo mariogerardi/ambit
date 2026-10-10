@@ -9,7 +9,12 @@ import {
   countryName,
   studyComplete,
   validStudy,
+  settingsError,
+  answerLabel,
+  capitalOf,
+  studyStates,
 } from "../src/study/engine";
+import { MAJOR_CITIES } from "../src/geography/places";
 import type { StudySession, StudySettings } from "../src/study/engine";
 function answer(s: StudySession, right = true) {
   if (s.prompt.style === "map")
@@ -176,5 +181,95 @@ describe("Study flexibility and ephemeral sessions", () => {
     expect(s.remaining).toBe(remaining);
     s = studyReducer(answer(s), { type: "next" });
     expect(s.remaining).toEqual(remaining!.slice(1));
+  });
+});
+
+describe("capital distractors", () => {
+  const base: StudySettings = {
+    ...defaultSettings,
+    scope: "custom",
+    countryIds: ["wurl:CAN"],
+    topics: ["capitals"],
+    styles: { ...defaultSettings.styles, capitals: "choices" },
+  };
+  it.each([
+    "region",
+    "countryCities",
+    "globalCities",
+    "globalCapitals",
+  ] as const)(
+    "supports %s alternatives outside the studied country and restores the answered session",
+    (capitalDistractors) => {
+      const settings = { ...base, capitalDistractors };
+      expect(settingsError(settings)).toBeUndefined();
+      const session = startStudy(settings, 42);
+      expect(startStudy(settings, 42)).toEqual(session);
+      expect(session.pool).toEqual(["wurl:CAN"]);
+      expect(session.prompt.choices.length).toBeGreaterThan(1);
+      expect(session.prompt.choices).toContain("wurl:CAN");
+      const labels = session.prompt.choices.map((id) =>
+        answerLabel(session.prompt, id),
+      );
+      expect(new Set(labels).size).toBe(labels.length);
+      const wrong = session.prompt.choices.find((id) => id !== "wurl:CAN")!;
+      const answered = studyReducer(
+        studyReducer(session, { type: "choice", id: wrong }),
+        { type: "submit" },
+      );
+      expect(answered.history[0]).toMatchObject({
+        correct: false,
+        response: answerLabel(session.prompt, wrong),
+        selectedId: wrong,
+      });
+      expect(
+        validStudy(
+          JSON.parse(
+            JSON.stringify({ ...emptyStudy, settings, session: answered }),
+          ),
+        ),
+      ).toBe(true);
+      if (capitalDistractors === "countryCities") {
+        expect(wrong.startsWith("place:")).toBe(true);
+        expect(studyStates(answered)[wrong]).toBeUndefined();
+      }
+    },
+  );
+  it("keeps alternatives in the requested geographic pool", () => {
+    const continentSession = startStudy(
+      { ...base, capitalDistractors: "region" },
+      42,
+    );
+    for (const id of continentSession.prompt.choices)
+      expect(capitalOf(id).continent).toBe(capitalOf("wurl:CAN").continent);
+    const countrySession = startStudy(
+      { ...base, capitalDistractors: "countryCities" },
+      42,
+    );
+    for (const id of countrySession.prompt.choices.filter(
+      (id) => id !== "wurl:CAN",
+    )) {
+      expect(MAJOR_CITIES.find((city) => city.id === id)?.parentId).toBe(
+        "wurl:CAN",
+      );
+    }
+    expect(
+      settingsError({ ...base, capitalDistractors: "study" }),
+    ).toBeTruthy();
+    expect(validSettings({ ...base, capitalDistractors: "unknown" })).toBe(
+      false,
+    );
+  });
+  it("does not fabricate city alternatives for countries without another bundled city", () => {
+    const settings: StudySettings = {
+      ...base,
+      countryIds: ["wurl:LIE"],
+      capitalDistractors: "countryCities",
+    };
+    expect(settingsError(settings)).toContain("another bundled city");
+    const mixed = startStudy(
+      { ...settings, styles: { ...settings.styles, capitals: "mixed" } },
+      42,
+    );
+    expect(mixed.prompt.style).not.toBe("choices");
   });
 });

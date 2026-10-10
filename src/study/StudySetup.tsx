@@ -1,3 +1,4 @@
+import { CAPITAL_DISTRACTORS } from "./distractors";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { normalizeAnswer, countryIdForName } from "../game/questions";
 import {
@@ -274,6 +275,41 @@ export function StudyEditor({
               ))}
             </div>
           )}
+          {settings.topics.includes("capitals") &&
+            ["choices", "mixed"].includes(settings.styles.capitals) && (
+              <>
+                <label className="study-config-row">
+                  <span>Capital distractors</span>
+                  <select
+                    aria-label="Capital distractors"
+                    value={settings.capitalDistractors ?? "study"}
+                    onChange={(event) =>
+                      update({
+                        capitalDistractors: event.target
+                          .value as StudySettings["capitalDistractors"],
+                      })
+                    }
+                  >
+                    {Object.entries(CAPITAL_DISTRACTORS).map(
+                      ([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </label>
+                {settings.capitalDistractors === "countryCities" && (
+                  <p className="muted study-distractor-note">
+                    Uses the bundled major-city catalog. Countries without
+                    another city are excluded from this session when capitals
+                    use multiple choice; mixed practice uses map or typing
+                    there. Fewer options appear when fewer distinct cities are
+                    available.
+                  </p>
+                )}
+              </>
+            )}
           {choices && (
             <label className="study-config-row">
               <span>Number of options</span>

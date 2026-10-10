@@ -142,7 +142,7 @@ describe("product copy follows the answer and visible reveal", () => {
     expect(territories).toMatch(
       /<\/h1><form[^>]*><ul class="ordered-answer unordered-answer"/,
     );
-    expect(territories.match(/placeholder="Territory name"/g)).toHaveLength(3);
+    expect(territories.match(/placeholder="Your answer"/g)).toHaveLength(3);
     expect(territories).not.toContain("Any order");
     expect(territories).not.toContain("question-instruction");
     const capitals = render(THIRD_JOURNEY, 4);

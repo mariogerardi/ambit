@@ -334,3 +334,27 @@ describe("Study Session configuration", () => {
     expect(host.textContent).toContain("Choose at least one topic.");
   });
 });
+
+it("lets the player choose and start with a capital distractor pool", async () => {
+  await mount({
+    ...defaultSettings,
+    topics: ["capitals"],
+    styles: { ...defaultSettings.styles, capitals: "choices" },
+  });
+  const field = select("Capital distractors");
+  expect([...field.options].map((option) => option.value)).toEqual([
+    "study",
+    "region",
+    "countryCities",
+    "globalCities",
+    "globalCapitals",
+  ]);
+  await change("Capital distractors", "countryCities");
+  expect(host.textContent).toContain("bundled major-city catalog");
+  await click("Start studying");
+  expect(start).toHaveBeenCalledWith(
+    expect.objectContaining({ capitalDistractors: "countryCities" }),
+  );
+  await change("Answer method", "typing");
+  expect(select("Capital distractors")).toBeNull();
+});

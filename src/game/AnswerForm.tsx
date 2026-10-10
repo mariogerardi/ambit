@@ -3,6 +3,7 @@ import type { Dispatch } from "react";
 import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questions";
 import { canSubmit, responseCount, selectableIds } from "./questions";
+import { AnswerInput } from "./AnswerInput";
 import { AnswerCounter } from "./AnswerCounter";
 
 export function AnswerForm({
@@ -59,6 +60,7 @@ export function AnswerForm({
         <details className="typed-country-guess" open={!webgl || undefined}>
           <summary>Enter coordinates</summary>
           <form
+            autoComplete="off"
             key={question.id}
             onSubmit={(event) => {
               event.preventDefault();
@@ -222,6 +224,7 @@ export function AnswerForm({
             <details className="typed-country-guess" open={!webgl || undefined}>
               <summary>Answer by typing</summary>
               <form
+                autoComplete="off"
                 onSubmit={(event) => {
                   event.preventDefault();
                   dispatch({ type: "guess-country" });
@@ -234,7 +237,7 @@ export function AnswerForm({
                       ? "Region name"
                       : "Country name"}
                 </label>
-                <input
+                <AnswerInput
                   id="country-guess"
                   autoComplete="off"
                   spellCheck={false}
@@ -277,6 +280,7 @@ export function AnswerForm({
     );
   return (
     <form
+      autoComplete="off"
       className="answer-form"
       onSubmit={(event) => {
         event.preventDefault();
@@ -318,7 +322,7 @@ export function AnswerForm({
                             : "Ending country"
                           : `${question.mode === "ordered-capitals" ? "Capital" : "Country"} ${i + 1}`}
                 </label>
-                <input
+                <AnswerInput
                   id={`route-country-${i}`}
                   autoComplete="off"
                   spellCheck={false}
@@ -335,13 +339,7 @@ export function AnswerForm({
                         ?.focus();
                     }
                   }}
-                  placeholder={
-                    question.mode === "typed-regions"
-                      ? `${question.inputLabel ?? "Region"} name`
-                      : question.mode === "ordered-capitals"
-                        ? "Capital city"
-                        : "Country name"
-                  }
+                  placeholder="Your answer"
                   value={game.ordered[i] ?? ""}
                   onChange={(event) =>
                     dispatch({
@@ -366,9 +364,8 @@ export function AnswerForm({
               onChange={(value) => dispatch({ type: "text", value })}
             />
           ) : (
-            <input
+            <AnswerInput
               id="written-answer"
-              type="text"
               inputMode="text"
               autoComplete="off"
               spellCheck={false}

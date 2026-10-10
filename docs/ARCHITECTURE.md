@@ -68,7 +68,21 @@ The Study builder previews the actual `studyPool` and hint settings. Scoped
 sessions frame their eligible area; country-identification and typed/choice
 capital questions can frame their visible clue. Capital map questions keep the
 answer country undisclosed. Capital feedback reveals the target capital's marker
-and name even when those hints were disabled.
+and name even when those hints were disabled. Named-country map prompts require
+an actual globe selection; typing remains available when the answer name is not
+in the prompt. Capital multiple choice separates the studied countries from its
+distractor pool: selected-country capitals, same-continent capitals, cities in the
+target country, worldwide cities, or worldwide capitals. City options use their
+own place IDs and the bundled major-city catalog; countries without another city
+are excluded from a session using country-city capital multiple choice.
+
+On phones, the Study cog groups report/edit/finish actions and correct answers
+stay visible longer before automatic advance. Explore selections use tighter
+camera framing. Keyboard detection retains the viewport height before focus,
+including Safari layouts where both viewports shrink. The keyboard layout hides
+the mounted globe and keeps the prompt and submit control available in the
+scrolling question pane. Quiz fields disable text correction and use response
+metadata rather than address-like placeholders.
 
 Journey questions configure disclosure independently of answer mode. Future stage
 labels remain `???` until active or completed. A pin's playable camera need not be
@@ -106,7 +120,7 @@ accessible labels, focus behavior, mobile targets, and reduced motion intact.
 ## Persistence and legacy code
 
 See [Save persistence](SAVE_PERSISTENCE.md) for migration and recovery. Active Study
-attempts are tab-private; settings and archived results synchronize independently.
+attempts, settings, and archived results synchronize independently for signed-in players.
 Themes/default views have their own small preference stores.
 
 [`src/app/publishedPuzzles.ts`](../src/app/publishedPuzzles.ts) reads previously

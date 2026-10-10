@@ -53,7 +53,10 @@ values before Study history can render them.
 Preference conflicts resolve per field using the latest logical revision. For the
 same Journey run, answered rounds/advanced phases take precedence over stale draft
 edits. Replays receive a new run ID and monotonically increasing start time, so a
-late edit from an old run cannot replace a fresh replay. Selection pointers are
+late edit from an old run cannot replace a fresh replay. The Journey's **Play again**
+action creates that new run rather than resetting the old run's forward-only state;
+it keeps the played Journey even when the admin's local override is absent on a
+second device. Selection pointers are
 independent of run progress, so restoring an earlier Journey also works without
 allowing a stale tab to change the chosen Journey. Conflicting answers at
 the same progress level resolve deterministically by revision; this is not a
@@ -109,5 +112,6 @@ Regression tests cover interleaved writers, stale preferences/drafts, queued loc
 completion, migration interruption, damaged/unknown saves, account isolation,
 paginated cloud reads, offline retries, writes during upload, and result preservation.
 Study tests also cover final-unanswered completion, exact review replay coverage,
-and typed answers with and without WebGL. These are unit/DOM tests, not browser or
+and eligible typed answers with and without WebGL, rejecting typed names already
+given by map prompts, city distractor round trips, and Journey replay across devices. These are unit/DOM tests, not browser or
 GPU verification.

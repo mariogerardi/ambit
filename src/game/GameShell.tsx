@@ -23,8 +23,10 @@ export function GameShell({
   onHome,
   onStudy,
   onReport,
+  onReplay,
 }: {
   onReport?(questionId: string): void;
+  onReplay?(): void;
   journey: Journey;
   playground?: boolean;
   compact?: boolean;
@@ -74,7 +76,7 @@ export function GameShell({
   const submitted = feedback?.ordered.length
     ? feedback.ordered.join(round.mode === "typed-regions" ? ", " : " → ")
     : feedback?.text || feedback?.selectedIds.map(name).join(" → ");
-  const start = () => dispatch({ type: "start" });
+  const start = () => (onReplay ? onReplay() : dispatch({ type: "start" }));
   const legend =
     game.phase === "feedback" ? feedbackLegend(round, context, game) : [];
   return (

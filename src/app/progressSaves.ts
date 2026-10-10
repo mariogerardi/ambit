@@ -21,6 +21,7 @@ import {
 import type { StudySave, StudyRecord, StudySession } from "../study/engine";
 const optionalSettings = new Set([
   "choiceCount",
+  "capitalDistractors",
   "revisitMissed",
   "perTopicMethods",
 ]);

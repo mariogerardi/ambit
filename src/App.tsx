@@ -821,6 +821,17 @@ export function App() {
       reportFailure("globe loading");
     }, []),
     onReady = useCallback(() => setReady(true), []);
+  const focusExplore = useCallback(
+    (region: RegionFeature) => {
+      if (mobile.enabled)
+        globe.current?.focus({
+          ...region.focus,
+          altitude: Math.max(0.012, (region.focus.altitude ?? 0.8) * 0.72),
+        });
+      else frame(region.focus);
+    },
+    [mobile.enabled, frame],
+  );
   const selectExplore = useCallback(
     (id?: string) => {
       stop();
@@ -830,7 +841,7 @@ export function App() {
       );
       if (regional) {
         setSelectedRegion(regional);
-        frame(regional.focus);
+        focusExplore(regional);
         return;
       }
       setSelectedRegion(undefined);
@@ -840,9 +851,9 @@ export function App() {
         setBranches([]);
       }
       const region = namedRegions.find((r) => r.id === id);
-      if (region) frame(region.focus);
+      if (region) focusExplore(region);
     },
-    [stop, namedRegions, exploreRegions, selected, frame],
+    [stop, namedRegions, exploreRegions, selected, focusExplore],
   );
   useEffect(() => {
     globe.current?.cancelFidget();
@@ -1171,8 +1182,8 @@ export function App() {
     );
     if (!region) return;
     pendingExploreFocus.current = undefined;
-    frame(region.focus);
-  }, [ready, mode, namedRegions, frame]);
+    focusExplore(region);
+  }, [ready, mode, namedRegions, focusExplore]);
   const dispatch = useCallback(
     (action: Action) => {
       if (!context) return;
@@ -1416,7 +1427,7 @@ export function App() {
         onSearch={setExploreSearch}
         onSettings={setExplore}
         onSelect={selectExplore}
-        onFocus={(r) => frame(r.focus)}
+        onFocus={focusExplore}
         selectedRegion={selectedRegion}
         breakdown={breakdown}
         onBreakdown={(id) => {
@@ -1521,6 +1532,18 @@ export function App() {
       </section>
     ) : context ? (
       <GameShell
+        onReplay={() => {
+          if (mode === "daily")
+            setDaily((progress) =>
+              openDaily(
+                progress,
+                progress.activeDate ?? today,
+                true,
+                allJourneys,
+              ),
+            );
+          else dispatch({ type: "start" });
+        }}
         onReport={(questionId) =>
           setFeedback({
             kind: "question",
@@ -1768,6 +1791,14 @@ export function App() {
             disabled={!ready || !webgl}
             onClick={() => {
               stop();
+              if (mode === "explore") {
+                const region =
+                  selectedRegion ?? namedRegions.find((r) => r.id === selected);
+                if (region) {
+                  focusExplore(region);
+                  return;
+                }
+              }
               const destination =
                 world?.focus ??
                 (mode === "explore"

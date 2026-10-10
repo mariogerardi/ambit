@@ -214,7 +214,7 @@ describe("Study recall engine", () => {
       }
     },
   );
-  it("accepts typed country answers for map prompts without changing their method", () => {
+  it("rejects typed names already given by named-country map prompts", () => {
     const session = startStudy(defaultSettings, 4);
     expect(studyReducer(session, { type: "submit" })).toBe(session);
     const typed = studyReducer(session, {
@@ -222,9 +222,8 @@ describe("Study recall engine", () => {
       value: answerLabel(session.prompt),
     });
     const answered = studyReducer(typed, { type: "submit" });
-    expect(answered.phase).toBe("feedback");
-    expect(answered.history[0].correct).toBe(true);
-    expect(answered.prompt.style).toBe("map");
+    expect(typed).toBe(session);
+    expect(answered).toBe(session);
     expect(
       studyReducer(session, { type: "pick", id: session.prompt.targetId })
         .phase,

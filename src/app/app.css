@@ -1424,6 +1424,9 @@
   padding-top: 16px;
   border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
 }
+.study-options-actions > .quiet-button {
+  min-height: 44px;
+}
 .study-options-dialog .study-new-session {
   width: 100%;
   min-height: 44px;

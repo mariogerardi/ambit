@@ -250,3 +250,61 @@ it("retries a throttled page without restarting a large cloud download", async (
   expect(fetcher).toHaveBeenCalledTimes(2);
   expect(fetcher.mock.calls[0][0]).toBe(fetcher.mock.calls[1][0]);
 });
+
+it("syncs a Journey replay as a new run without restoring the previous completed run", async () => {
+  const remote = cloud(),
+    a = device("replay-a", remote);
+  const date = "2026-10-10";
+  const original = openDaily(a.daily.load(), date, false, JOURNEY_INDEX);
+  const attempt = original.attempts[date];
+  a.daily.save({
+    ...original,
+    attempts: {
+      [date]: { ...attempt, game: { ...attempt.game, phase: "failed" } },
+    },
+  });
+  await a.sync.flush();
+  const b = device("replay-b", remote);
+  await b.sync.flush();
+  const replay = openDaily(b.daily.load(), date, true, JOURNEY_INDEX);
+  b.daily.save(replay);
+  await b.sync.flush();
+  await a.sync.flush();
+  await b.sync.flush();
+  for (const player of [a, b]) {
+    expect(player.daily.load().attempts[date].runId).toBe(
+      replay.attempts[date].runId,
+    );
+    expect(player.daily.load().attempts[date].game.phase).toBe("playing");
+  }
+});
+
+it("syncs the distractor preference and a city-answer Study session", async () => {
+  const remote = cloud(),
+    a = device("cities-a", remote);
+  const settings = {
+    ...defaultSettings,
+    topics: ["capitals" as const],
+    scope: "custom" as const,
+    countryIds: ["wurl:CAN"],
+    capitalDistractors: "countryCities" as const,
+    styles: { ...defaultSettings.styles, capitals: "choices" as const },
+  };
+  let session = { ...startStudy(settings, 42), id: "cities" };
+  const city = session.prompt.choices.find((id) => id.startsWith("place:"))!;
+  session = studyReducer(studyReducer(session, { type: "choice", id: city }), {
+    type: "submit",
+  }) as typeof session;
+  a.study.save({ ...emptyStudy, settings, session });
+  await a.sync.flush();
+  const b = device("cities-b", remote);
+  await b.sync.flush();
+  expect(b.study.load().settings.capitalDistractors).toBe("countryCities");
+  expect(b.study.load().session).toMatchObject({
+    id: session.id,
+    phase: "feedback",
+    prompt: session.prompt,
+    history: session.history,
+    settings,
+  });
+});

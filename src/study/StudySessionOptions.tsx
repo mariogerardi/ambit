@@ -10,14 +10,21 @@ export function StudySessionOptions({
   onApply,
   onClose,
   onBuild,
+  compact = false,
+  onReport,
+  onFinish,
 }: {
   settings: StudySettings;
+  compact?: boolean;
+  onReport?(): void;
+  onFinish?(): void;
   returnFocus: RefObject<HTMLButtonElement | null>;
   onApply(settings: StudySettings): void;
   onClose(): void;
   onBuild(): void;
 }) {
   const [draft, setDraft] = useState(settings);
+  const [preferences, setPreferences] = useState(!compact);
   const id = useId();
   const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -98,18 +105,49 @@ export function StudySessionOptions({
             </svg>
           </button>
         </div>
-        <StudyPreferences settings={draft} onSettings={setDraft} />
-        <div className="study-options-actions">
-          <button className="primary-button" onClick={() => onApply(draft)}>
-            Apply &amp; resume
-          </button>
-          <button
-            className="quiet-button tertiary-action study-new-session"
-            onClick={onBuild}
-          >
-            Build a new session
-          </button>
-        </div>
+        {!preferences ? (
+          <div className="study-options-actions">
+            {onReport && (
+              <button className="quiet-button" onClick={onReport}>
+                Report this question
+              </button>
+            )}
+            <button
+              className="quiet-button"
+              onClick={() => setPreferences(true)}
+            >
+              Edit this session
+            </button>
+            {onFinish && (
+              <button className="quiet-button" onClick={onFinish}>
+                Finish this session
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {compact && (
+              <button
+                className="quiet-button tertiary-action"
+                onClick={() => setPreferences(false)}
+              >
+                Back to session actions
+              </button>
+            )}
+            <StudyPreferences settings={draft} onSettings={setDraft} />
+            <div className="study-options-actions">
+              <button className="primary-button" onClick={() => onApply(draft)}>
+                Apply &amp; resume
+              </button>
+              <button
+                className="quiet-button tertiary-action study-new-session"
+                onClick={onBuild}
+              >
+                Build a new session
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>,
     document.body,

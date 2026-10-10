@@ -425,6 +425,85 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.mounts).toBe(1);
   });
 
+  it.each(["finished", "failed"] as const)(
+    "replays a %s Journey as a fresh durable run",
+    async (phase) => {
+      const date = "2026-10-06";
+      const save = createDailySave(journeyRegistry.JOURNEY_INDEX);
+      const progress = openDaily(
+        save.load(),
+        date,
+        false,
+        journeyRegistry.JOURNEY_INDEX,
+      );
+      const attempt = progress.attempts[date];
+      save.save({
+        ...progress,
+        attempts: {
+          [date]: {
+            ...attempt,
+            game: {
+              ...attempt.game,
+              phase,
+              roundIndex: 4,
+              answers: journeyRegistry.JOURNEY_INDEX.find(
+                (journey) => journey.id === attempt.journeyId,
+              )!.rounds.map((round) => ({
+                roundId: round.id,
+                correct: true,
+                selectedIds: [],
+                text: "",
+                ordered: [],
+              })),
+            },
+          },
+        },
+      });
+      history.replaceState(null, "", "/daily");
+      await mount();
+      await click("Play again");
+      const replay = createDailySave(journeyRegistry.JOURNEY_INDEX).load()
+        .attempts[date];
+      expect(replay.runId).not.toBe(attempt.runId);
+      expect(replay.journeyId).toBe(attempt.journeyId);
+      expect(replay.game).toMatchObject({
+        phase: "playing",
+        roundIndex: 0,
+        answers: [],
+      });
+      await act(async () => root.unmount());
+      root = createRoot(host);
+      await mount();
+      expect(
+        host.querySelector(".mode-incoming .question-card"),
+      ).not.toBeNull();
+      expect(
+        createDailySave(journeyRegistry.JOURNEY_INDEX).load().attempts[date]
+          .runId,
+      ).toBe(replay.runId);
+    },
+  );
+  it("frames selected countries more closely on a phone and retains the framing on recenter", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === MOBILE_LAYOUT_QUERY,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    await mount();
+    await click("Explore");
+    const country = member("wurl:CAN");
+    await act(async () => probe.props!.onSelect(country));
+    expect(probe.focus.at(-1)).toEqual({
+      ...country.focus,
+      altitude: country.focus.altitude! * 0.72,
+    });
+    await click("◎ Recenter");
+    expect(probe.focus.at(-1)).toEqual({
+      ...country.focus,
+      altitude: country.focus.altitude! * 0.72,
+    });
+  });
+
   it("restores a saved theme at startup", async () => {
     localStorage.setItem(
       THEME_KEY,
@@ -1937,7 +2016,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     ).not.toContain("Not quite");
     expect(savedStudy().session?.prompt.ordinal).toBe(2);
   });
-  it("supports map clicks and keyboard alternatives while preserving the Study orbit", async () => {
+  it("requires map clicks for named-country prompts while preserving the Study orbit", async () => {
     vi.spyOn(Date, "now").mockReturnValue(24);
     let session = startStudy({ ...defaultSettings, autoAdvance: false }, 24);
     localStorage.setItem(
@@ -1949,9 +2028,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Custom");
     await click("Start studying");
     const question = host.querySelector(".mode-incoming .study-question")!;
-    expect(question.querySelector("input")).not.toBeNull();
-    expect(question.querySelector("details")?.open).toBe(false);
-    expect(question.textContent).toContain("Answer by name");
+    expect(question.querySelector("input")).toBeNull();
+    expect(question.textContent).not.toContain("Answer by name");
     probe.currentView = { lat: -15, lng: 133, altitude: 1.7 };
     const count = probe.focus.length;
     await act(async () =>
