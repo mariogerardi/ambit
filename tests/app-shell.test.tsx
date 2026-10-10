@@ -1073,6 +1073,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.mounts).toBe(1);
   });
   it("preserves the canvas, world load, and render feature identities through rapid mode changes", async () => {
+    // Keep the outgoing panel alive while lazy imports settle on slower CI hosts.
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     await mount();
     const canvas = host.querySelector("canvas");
     const first = probe.renders.find((r) => r.length === 242)!;
@@ -1098,6 +1100,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector(".mode-outgoing")?.hasAttribute("inert")).toBe(
       true,
     );
+    await act(async () => vi.advanceTimersByTime(1000));
+    expect(host.querySelector(".mode-outgoing")).toBeNull();
+    expect(host.querySelector("canvas")).toBe(canvas);
   });
   it("automatically frames Explore country taps while water entry preserves the orbit", async () => {
     await mount();
