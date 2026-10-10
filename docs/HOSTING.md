@@ -13,7 +13,7 @@ it to Amplify. Pull requests validate and retain their artifact without deployin
 A manual workflow run on `main` can redeploy the current source.
 
 AWS credentials are issued through GitHub OIDC. The IAM role trusts only this
-repository's `main` branch and permits deployment operations on Ambit's production
+repository's immutable GitHub identity and `main` branch, and permits deployment operations on Ambit's production
 app/branch. `AWS_DEPLOY_ROLE_ARN` is a repository variable; no persistent AWS keys
 are stored in GitHub. Amplify is an artifact deployment target and does not build
 the repository independently. This avoids publishing before CI finishes.

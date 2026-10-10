@@ -37,7 +37,9 @@ npm test -- tests/progress-saves.test.ts tests/study-regressions.test.tsx
 [CI](../.github/workflows/ci.yml) installs locked dependencies, checks docs,
 runs the complete test suite, builds, and fails on high/critical dependency
 advisories. It runs for main pushes, pull requests, and manual dispatches, with
-read-only permissions and commit-pinned official actions. It does not deploy.
+read-only validation permissions and commit-pinned official actions. Successful
+main-branch runs publish their verified artifact through a scoped GitHub OIDC
+deployment role. Pull requests do not deploy. See [Hosting](HOSTING.md).
 
 Run `npm run check:docs` to check documentation formatting. There is no source lint
 gate yet. Format files you change with the local executable:
