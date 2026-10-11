@@ -53,7 +53,9 @@ values before Study history can render them.
 Preference conflicts resolve per field using the latest logical revision. For the
 same Journey run, answered rounds/advanced phases take precedence over stale draft
 edits. Replays receive a new run ID and monotonically increasing start time, so a
-late edit from an old run cannot replace a fresh replay. The Journey's **Play again**
+late edit from an old run cannot replace a fresh replay. Daily Journey replay is
+available only to admins; ordinary players can still view their completed result.
+The Journey's **Play again**
 action creates that new run rather than resetting the old run's forward-only state;
 it keeps the played Journey even when the admin's local override is absent on a
 second device. Selection pointers are

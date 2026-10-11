@@ -1110,11 +1110,6 @@
   line-height: 1.5;
   color: var(--ui-accent);
 }
-.app-menu-caption {
-  margin: 8px 12px;
-  color: var(--ui-text, #b9ccc5);
-  font-size: 11px;
-}
 .app-menu-heading {
   display: block;
   margin: 10px 12px 12px;
@@ -2118,6 +2113,19 @@
 .experience .info-view.study-landing > h1.editorial-heading {
   margin-top: 10px;
 }
+.experience .home-story.home-menu > h1:first-child,
+.experience .finish-story > h1.journey-result-heading:first-child {
+  margin-top: 10px;
+}
+.experience .finish-story > h1.journey-result-heading {
+  margin-bottom: 8px;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -1.6px;
+}
+.experience .finish-story > h1.journey-result-heading em {
+  margin-left: 0;
+}
 /* Questions need a little more space inside the panel than the open page views. */
 .experience .question-card {
   --page-content-padding: 20px;
@@ -2156,12 +2164,19 @@
 .feedback-dialog {
   max-height: calc(100dvh - 32px);
   overflow-y: auto;
+  gap: 14px;
+}
+.feedback-dialog form {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
 }
 .feedback-dialog .field {
   display: grid;
   gap: 8px;
-  margin-block: 16px;
-  font-size: 13px;
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
 }
 .feedback-dialog textarea,
 .feedback-dialog select,
@@ -2174,7 +2189,31 @@
   color: var(--ui-text);
   font: inherit;
 }
+.feedback-dialog textarea {
+  height: 160px;
+  resize: none;
+  line-height: 1.5;
+}
+.feedback-character-count {
+  color: var(--ui-muted);
+  font-size: 12px;
+  text-align: right;
+}
+.feedback-dialog .study-options-close {
+  flex-shrink: 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgb(var(--ui-line-rgb) / 0.06);
+}
+.feedback-dialog .study-options-close:hover {
+  background: rgb(var(--ui-line-rgb) / 0.14);
+  color: var(--ui-text);
+}
+.feedback-dialog .primary-button {
+  font-size: 14px;
+}
 .feedback-dialog .muted {
+  margin: 0;
   font-size: 13px;
   line-height: 1.5;
 }

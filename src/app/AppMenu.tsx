@@ -9,7 +9,6 @@ export function AppMenu({
   journeyReady = true,
   onFeedback,
   path,
-  caption,
   onNavigate,
   theme,
   onTheme,
@@ -19,7 +18,6 @@ export function AppMenu({
   journeyReady?: boolean;
   onFeedback?(): void;
   path: string;
-  caption?: string;
   onNavigate(path: string): void;
   theme: ThemeId;
   onTheme(theme: ThemeId): void;
@@ -88,7 +86,6 @@ export function AppMenu({
           aria-label="App navigation"
         >
           <span className="app-menu-heading">Explore Ambit</span>
-          {caption && <p className="app-menu-caption">{caption}</p>}
           <div className="app-menu-primary">
             <button
               aria-current={path === "/" ? "page" : undefined}

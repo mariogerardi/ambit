@@ -29,7 +29,7 @@ Previously published local packs are read-only compatibility data.
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
 cycles the catalog from October 5, 2026. Results use Home/Study as primary exits,
-with replay secondary. A results flyover follows answer stops in round order and
+with daily replay secondary and available only to admins. A results flyover follows answer stops in round order and
 loops; player interaction or reduced motion interrupts it.
 
 The Russia-neighbor Journey asks for pins in Finland, North Korea, Mongolia,

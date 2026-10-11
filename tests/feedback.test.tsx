@@ -53,6 +53,18 @@ it("sends guest question context and preserves the report identity through a net
         ),
     );
   }
+  const message = document.querySelector("textarea")!;
+  expect(message.maxLength).toBe(500);
+  expect(message.rows).toBe(6);
+  expect(
+    document.getElementById(message.getAttribute("aria-describedby")!)
+      ?.textContent,
+  ).toContain("0 / 500 characters");
+  expect(
+    document.querySelector(
+      '.feedback-dialog button.primary-button span[aria-hidden="true"]',
+    )?.textContent,
+  ).toBe("→");
   await send();
   expect(document.querySelector('[role="alert"]')?.textContent).toContain(
     "Check your connection",

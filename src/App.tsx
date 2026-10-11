@@ -285,6 +285,16 @@ export function App() {
   const [motion, setMotion] = useState(mode === "home"),
     [ready, setReady] = useState(false),
     [webgl, setWebgl] = useState(true);
+  const [globePresented, setGlobePresented] = useState(false);
+  useEffect(() => {
+    if (!ready || !regions.length || globePresented) return;
+    // Allow the populated scene to paint before revealing it. Keep the canvas
+    // mounted and measurable throughout; mode changes never repeat the entrance.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setGlobePresented(true));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [ready, regions.length, globePresented]);
   const [reduced, setReduced] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -1539,8 +1549,10 @@ export function App() {
       </section>
     ) : context ? (
       <GameShell
+        canReplay={mode !== "daily" || account.admin}
         onReplay={() => {
-          if (mode === "daily")
+          if (mode === "daily") {
+            if (!account.admin) return;
             setDaily((progress) =>
               openDaily(
                 progress,
@@ -1549,7 +1561,7 @@ export function App() {
                 allJourneys,
               ),
             );
-          else dispatch({ type: "start" });
+          } else dispatch({ type: "start" });
         }}
         onReport={(questionId) =>
           setFeedback({
@@ -1630,7 +1642,8 @@ export function App() {
         <div className="account-earth" aria-hidden="true" />
       )}
       <div
-        className="game-scene"
+        className={`game-scene${globePresented ? " globe-presented" : ""}`}
+        aria-busy={!globePresented && webgl && !error}
         id="mobile-map"
         inert={panelOnly}
         aria-hidden={panelOnly || undefined}
@@ -1641,11 +1654,7 @@ export function App() {
       >
         {webgl && (
           <BoardBoundary onError={fail}>
-            <Suspense
-              fallback={
-                <div className="world-loading">Unfolding your world…</div>
-              }
-            >
+            <Suspense fallback={null}>
               <GlobeView
                 active={!panelOnly}
                 ref={globe}
@@ -1843,13 +1852,6 @@ export function App() {
             path={path}
             theme={theme}
             onTheme={changeTheme}
-            caption={
-              mode === "daily"
-                ? `Journey · ${activeAttempt?.date ?? today}`
-                : mode === "practice"
-                  ? "Practice"
-                  : undefined
-            }
             onNavigate={navigate}
           />
         </div>
@@ -1962,14 +1964,12 @@ export function App() {
           </span>
         </footer>
       )}
-      {(!regions.length || error || contextResult.error || !webgl) && (
+      {(error || contextResult.error || !webgl) && (
         <div className="experience-status" role="status">
           <p>
             {error ||
               contextResult.error ||
-              (!webgl
-                ? "The globe is unavailable. You can still use the written answer controls."
-                : "Gathering the world…")}
+              "The globe is unavailable. You can still use the written answer controls."}
           </p>
           {error && (
             <button onClick={() => setRetry((v) => v + 1)}>Try again ↻</button>

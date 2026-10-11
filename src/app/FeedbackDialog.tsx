@@ -126,7 +126,18 @@ export function FeedbackDialog({
             aria-label="Close feedback"
             onClick={onClose}
           >
-            ×
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
           </button>
         </div>
         {saved ? (
@@ -164,13 +175,19 @@ export function FeedbackDialog({
                 ? "Comment (optional)"
                 : "Your feedback"}
               <textarea
-                rows={4}
-                maxLength={2000}
+                rows={6}
+                maxLength={500}
+                aria-describedby={`${id}-count`}
                 required={request.kind === "experience"}
                 value={message}
                 disabled={busy}
-                onChange={(event) => setMessage(event.target.value)}
+                onChange={(event) =>
+                  setMessage(event.target.value.slice(0, 500))
+                }
               />
+              <small id={`${id}-count`} className="feedback-character-count">
+                {message.length} / 500 characters
+              </small>
             </label>
             <p className="muted">
               Includes the current screen, app version, and question details
@@ -183,7 +200,8 @@ export function FeedbackDialog({
                 busy || (request.kind === "experience" && !message.trim())
               }
             >
-              {busy ? "Sending…" : "Send feedback"}
+              <span>{busy ? "Sending…" : "Send feedback"}</span>
+              <span aria-hidden="true">→</span>
             </button>
           </form>
         )}

@@ -287,6 +287,39 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
+  it("reveals the globe after painting geography and keeps it presented across modes", async () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frames.set(++nextFrame, callback);
+      return nextFrame;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => frames.delete(id));
+    const paint = async () => {
+      await act(async () => {
+        const pending = [...frames.values()];
+        frames.clear();
+        pending.forEach((callback) => callback(performance.now()));
+      });
+    };
+    await mount();
+    expect(probe.props!.regions.length).toBeGreaterThan(0);
+    expect(host.querySelector(".game-scene")!.getAttribute("aria-busy")).toBe(
+      "true",
+    );
+    expect(host.textContent).not.toMatch(
+      /Unfolding your world|Gathering the world/,
+    );
+    await paint();
+    expect(host.querySelector(".game-scene.globe-presented")).toBeNull();
+    await paint();
+    expect(host.querySelector(".game-scene.globe-presented")).not.toBeNull();
+    await click("Explore");
+    await click("Study");
+    await click("Home");
+    expect(host.querySelector(".game-scene.globe-presented")).not.toBeNull();
+    expect(probe.mounts).toBe(1);
+  });
   it("remounts progress when accounts change and waits for account discovery", async () => {
     authProbe.loading = true;
     await act(async () => root.render(<PlayerWorkspace />));
@@ -455,9 +488,14 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.mounts).toBe(1);
   });
 
-  it.each(["finished", "failed"] as const)(
-    "replays a %s Journey as a fresh durable run",
-    async (phase) => {
+  it.each(
+    (["finished", "failed"] as const).flatMap((phase) =>
+      [true, false].map((admin) => ({ phase, admin })),
+    ),
+  )(
+    "restricts $phase daily Journey replay to admins (admin: $admin)",
+    async ({ phase, admin }) => {
+      authProbe.admin = admin;
       const date = "2026-10-06";
       const save = createDailySave(journeyRegistry.JOURNEY_INDEX);
       const progress = openDaily(
@@ -491,6 +529,17 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       });
       history.replaceState(null, "", "/daily");
       await mount();
+      if (phase === "finished")
+        expect(host.textContent).not.toContain("JOURNEY COMPLETE");
+      await click("Open menu");
+      expect(host.querySelector(".app-menu-caption")).toBeNull();
+      await click("Close menu");
+      if (!admin) {
+        expect(host.querySelector(".journey-replay")).toBeNull();
+        expect(host.querySelector(".journey-receipt")).not.toBeNull();
+        expect(save.load().attempts[date].runId).toBe(attempt.runId);
+        return;
+      }
       await click("Play again");
       const replay = createDailySave(journeyRegistry.JOURNEY_INDEX).load()
         .attempts[date];

@@ -125,6 +125,13 @@ Explore and Study panels load with the app shell so their first navigation rende
 content directly instead of a module-loading placeholder. The globe and Journey
 runtime retain their separate loading paths.
 
+The globe stays mounted and measurable while hidden during initial loading. Once
+its renderer and geography are ready, two animation frames allow the populated
+scene to paint before a single fade and gentle scale-up reveal. This affects only
+the canvas presentation; navigation never repeats it or changes the camera to
+produce it. Reduced motion reveals the globe immediately. Loading copy is omitted,
+but geography and WebGL errors remain visible.
+
 Account access lives beside the menu in the header, opening profile, stats, and
 friends. The menu groups Home, Journey, Explore, and Study above feedback, admin,
 credits, and theme settings.

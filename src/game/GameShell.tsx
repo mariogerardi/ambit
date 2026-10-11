@@ -24,9 +24,11 @@ export function GameShell({
   onStudy,
   onReport,
   onReplay,
+  canReplay = false,
 }: {
   onReport?(questionId: string): void;
   onReplay?(): void;
+  canReplay?: boolean;
   journey: Journey;
   playground?: boolean;
   compact?: boolean;
@@ -224,25 +226,19 @@ export function GameShell({
       )}
       {ended && (
         <section className="finish-story">
-          <div className="overline">
-            {playground
-              ? "QUESTION PLAYGROUND"
-              : game.phase === "failed"
-                ? "ONE WRONG TURN"
-                : "JOURNEY COMPLETE"}
-          </div>
-          <h1 ref={heading} tabIndex={-1}>
+          {(playground || game.phase === "failed") && (
+            <div className="overline">
+              {playground ? "QUESTION PLAYGROUND" : "ONE WRONG TURN"}
+            </div>
+          )}
+          <h1 className="journey-result-heading" ref={heading} tabIndex={-1}>
             {game.phase === "failed" ? (
               <>
-                This is where
-                <br />
-                <em>we pause.</em>
+                This is where <em>we pause.</em>
               </>
             ) : (
               <>
-                Look how far
-                <br />
-                <em>you wandered.</em>
+                Look how far <em>you wandered.</em>
               </>
             )}
           </h1>
@@ -300,12 +296,14 @@ export function GameShell({
               <span>Study</span>
             </button>
           </div>
-          <button
-            className="quiet-button tertiary-action journey-replay"
-            onClick={start}
-          >
-            <ActionIcon name="repeat" /> Play again
-          </button>
+          {canReplay && (
+            <button
+              className="quiet-button tertiary-action journey-replay"
+              onClick={start}
+            >
+              <ActionIcon name="repeat" /> Play again
+            </button>
+          )}
         </section>
       )}
       <div className="board-tools">
