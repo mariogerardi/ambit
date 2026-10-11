@@ -70,8 +70,8 @@ export function ExplorePanel({
   }, [onContentHeight]);
   const active = useContext(PanelActive),
     input = useRef<HTMLInputElement>(null),
-    searchButton = useRef<HTMLButtonElement>(null),
     settingsButton = useRef<HTMLButtonElement>(null),
+    settingsPanel = useRef<HTMLDivElement>(null),
     restoreSearchFocus = useRef(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   useEffect(() => setSettingsOpen(false), [selected, active]);
@@ -95,7 +95,7 @@ export function ExplorePanel({
   useEffect(() => {
     if (!open && active && restoreSearchFocus.current) {
       restoreSearchFocus.current = false;
-      searchButton.current?.focus();
+      input.current?.focus();
     }
   }, [open, active, selected]);
   useEffect(() => {
@@ -182,33 +182,52 @@ export function ExplorePanel({
     addEventListener("pointerdown", dismiss);
     return () => removeEventListener("pointerdown", dismiss);
   }, [open, closeSearch]);
-  const tools = (
-    <div className="explore-heading-tools">
+  const searchField = (
+    <div id="explore-search" className="explore-search-field">
+      <label className="field">
+        <span className="sr-only">Find a country</span>
+        <input
+          ref={input}
+          type="search"
+          autoComplete="off"
+          spellCheck={false}
+          enterKeyHint="search"
+          value={search}
+          placeholder="Search countries"
+          aria-expanded={!!search.trim() && active}
+          aria-controls="explore-search-results"
+          onFocus={() => {
+            setOpen(true);
+            setSettingsOpen(false);
+          }}
+          onChange={(event) => {
+            setOpen(true);
+            onSearch(event.target.value);
+          }}
+        />
+      </label>
       <button
-        ref={searchButton}
-        className="quiet-button explore-search-toggle"
-        aria-label="Search"
-        title="Search countries"
-        aria-expanded={open && active}
-        aria-controls="explore-search"
-        onClick={() => {
-          setSettingsOpen(false);
-          if (open) closeSearch(true);
-          else setOpen(true);
-        }}
+        className="explore-search-close"
+        aria-label="Clear search"
+        title="Clear search"
+        onClick={() => closeSearch(true)}
       >
         <svg
           viewBox="0 0 24 24"
-          aria-hidden="true"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
+          aria-hidden="true"
         >
-          <circle cx="10.5" cy="10.5" r="6.5" />
-          <path d="m16 16 5 5" />
+          <path d="m6 6 12 12M18 6 6 18" />
         </svg>
       </button>
+    </div>
+  );
+  const tools = (
+    <div className="explore-toolbar">
+      {searchField}
       <button
         ref={settingsButton}
         className="settings-button"
@@ -225,96 +244,171 @@ export function ExplorePanel({
       </button>
     </div>
   );
-  const searchField = open && (
-    <div id="explore-search" className="explore-search-field">
-      <label className="field">
-        <span className="sr-only">Find a country</span>
-        <input
-          ref={input}
-          type="search"
-          autoComplete="off"
-          spellCheck={false}
-          enterKeyHint="search"
-          value={search}
-          placeholder="Country name…"
-          aria-expanded={!!search.trim() && active}
-          aria-controls="explore-search-results"
-          onChange={(event) => onSearch(event.target.value)}
-        />
-      </label>
-      <button
-        className="explore-search-close"
-        aria-label="Close search"
-        title="Close search"
-        onClick={() => closeSearch(true)}
+  const [settingsAnchor, setSettingsAnchor] = useState({
+    left: 12,
+    top: 12,
+    width: 320,
+    maxHeight: 540,
+    transform: "none",
+  });
+  useLayoutEffect(() => {
+    if (!settingsOpen || !active) return;
+    const position = () => {
+      const bounds = settingsButton.current?.getBoundingClientRect();
+      if (!bounds) return;
+      const visual = window.visualViewport;
+      const viewportTop = visual?.offsetTop ?? 0;
+      const viewportLeft = visual?.offsetLeft ?? 0;
+      const width = Math.min(360, (visual?.width ?? innerWidth) - 24);
+      const bottom = viewportTop + (visual?.height ?? innerHeight);
+      const upperAnchor = Math.min(bounds.top - 8, bottom - 12);
+      const lowerAnchor = Math.max(bounds.bottom + 8, viewportTop + 12);
+      const below = bottom - lowerAnchor - 12;
+      const above = upperAnchor - viewportTop - 12;
+      const flip = below < 300 && above > below;
+      const maxHeight = Math.max(100, Math.min(540, flip ? above : below));
+      setSettingsAnchor({
+        left: Math.max(
+          viewportLeft + 12,
+          Math.min(
+            bounds.right - width,
+            viewportLeft + (visual?.width ?? innerWidth) - width - 12,
+          ),
+        ),
+        top: flip ? upperAnchor : lowerAnchor,
+        width,
+        maxHeight,
+        transform: flip ? "translateY(-100%)" : "none",
+      });
+    };
+    position();
+    addEventListener("resize", position);
+    addEventListener("scroll", position, true);
+    window.visualViewport?.addEventListener("resize", position);
+    window.visualViewport?.addEventListener("scroll", position);
+    const timer = setTimeout(position, 230);
+    return () => {
+      clearTimeout(timer);
+      removeEventListener("resize", position);
+      removeEventListener("scroll", position, true);
+      window.visualViewport?.removeEventListener("resize", position);
+      window.visualViewport?.removeEventListener("scroll", position);
+    };
+  }, [settingsOpen, active]);
+  useEffect(() => {
+    if (!settingsOpen || !active) return;
+    settingsPanel.current?.querySelector<HTMLInputElement>("input")?.focus();
+    const dismiss = (event: Event) => {
+      if (
+        !settingsPanel.current?.contains(event.target as Node) &&
+        !settingsButton.current?.contains(event.target as Node)
+      )
+        setSettingsOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setSettingsOpen(false);
+      settingsButton.current?.focus();
+    };
+    addEventListener("pointerdown", dismiss);
+    addEventListener("focusin", dismiss);
+    addEventListener("keydown", escape);
+    return () => {
+      removeEventListener("pointerdown", dismiss);
+      removeEventListener("focusin", dismiss);
+      removeEventListener("keydown", escape);
+    };
+  }, [settingsOpen, active]);
+  const settingsControls =
+    settingsOpen &&
+    active &&
+    createPortal(
+      <div
+        id="explore-settings"
+        ref={settingsPanel}
+        className="explore-controls explore-settings-popover"
+        role="dialog"
+        style={settingsAnchor}
+        aria-label="Globe settings"
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          aria-hidden="true"
-        >
-          <path d="m6 6 12 12M18 6 6 18" />
-        </svg>
-      </button>
-    </div>
-  );
-  const settingsControls = settingsOpen && active && (
-    <div
-      id="explore-settings"
-      className="explore-controls"
-      aria-label="Globe settings"
-    >
-      <fieldset className="display-settings">
-        <legend>On your globe</legend>
-        {(
-          [
-            "borders",
-            "names",
-            "capitals",
-            "cities",
-            "rivers",
-            "mountains",
-            "landforms",
-            "oceans",
-          ] as const
-        ).map((key) => (
-          <label key={key}>
-            <input
-              type="checkbox"
-              checked={settings[key]}
-              onChange={(e) =>
-                onSettings({ ...settings, [key]: e.target.checked })
-              }
-            />
-            {
+        <div className="explore-settings-heading">
+          <h2>Globe settings</h2>
+          <button
+            aria-label="Close globe settings"
+            onClick={() => {
+              setSettingsOpen(false);
+              settingsButton.current?.focus();
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </div>
+        <fieldset className="display-settings">
+          <legend>On your globe</legend>
+          {(
+            [
+              "borders",
+              "names",
+              "capitals",
+              "cities",
+              "rivers",
+              "mountains",
+              "landforms",
+              "oceans",
+            ] as const
+          ).map((key) => (
+            <label key={key}>
+              <input
+                type="checkbox"
+                checked={settings[key]}
+                onChange={(e) =>
+                  onSettings({ ...settings, [key]: e.target.checked })
+                }
+              />
               {
-                borders: "Country borders",
-                names: "Country names",
-                capitals: "Capital markers & names",
-                cities: "Major cities",
-                rivers: "Rivers",
-                mountains: "Mountain ranges",
-                landforms: "Deserts & other landforms",
-                oceans: "Ocean & sea names",
-              }[key]
-            }
-          </label>
-        ))}
-      </fieldset>
-      <div className="explore-default-view">
-        <button className="quiet-button tertiary-action" onClick={onSaveView}>
-          Make this my default view
-        </button>
-        <button className="quiet-button tertiary-action" onClick={onResetView}>
-          Reset default view
-        </button>
-        {defaultViewStatus && <small role="status">{defaultViewStatus}</small>}
-      </div>
-    </div>
-  );
+                {
+                  borders: "Country borders",
+                  names: "Country names",
+                  capitals: "Capital markers & names",
+                  cities: "Major cities",
+                  rivers: "Rivers",
+                  mountains: "Mountain ranges",
+                  landforms: "Deserts & other landforms",
+                  oceans: "Ocean & sea names",
+                }[key]
+              }
+            </label>
+          ))}
+        </fieldset>
+        <div className="explore-default-view">
+          <button className="quiet-button tertiary-action" onClick={onSaveView}>
+            Make this my default view
+          </button>
+          <button
+            className="quiet-button tertiary-action"
+            onClick={onResetView}
+          >
+            Reset default view
+          </button>
+          {defaultViewStatus && (
+            <small role="status">{defaultViewStatus}</small>
+          )}
+        </div>
+      </div>,
+      document.body,
+    );
   return (
     <section
       ref={card}
@@ -361,11 +455,10 @@ export function ExplorePanel({
           <p className="muted explore-introduction">
             Tap a country to see its flag, capital, and more. Or search by name.
           </p>
-          {tools}
-          {searchField}
-          {settingsControls}
         </>
       )}
+      {tools}
+      {settingsControls}
       {!!search.trim() &&
         open &&
         active &&
@@ -462,7 +555,6 @@ export function ExplorePanel({
             )}
           </dl>
           <div className="inline-actions explore-country-actions">
-            {tools}
             <button
               className="quiet-button tertiary-action"
               disabled={!region}
@@ -477,8 +569,6 @@ export function ExplorePanel({
               Clear selection
             </button>
           </div>
-          {searchField}
-          {settingsControls}
           {layer && (
             <label className="regional-toggle">
               <input

@@ -1911,6 +1911,9 @@ export function App() {
       )}
       <ModePanels
         mode={path}
+        animateExit={
+          !(mode === "study" && (studyEditorOpen || studyCustomizing))
+        }
         page={pageLayout}
         reduced={reduced || mobile.enabled}
         persistent={mobile.enabled}

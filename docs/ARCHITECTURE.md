@@ -134,7 +134,11 @@ but geography and WebGL errors remain visible.
 
 Account access lives beside the menu in the header, opening profile, stats, and
 friends. The menu groups Home, Journey, Explore, and Study above feedback, admin,
-credits, and theme settings.
+credits, and theme settings. Its heading is simply “Ambit”. Explore keeps a persistent
+search field and settings cog together; globe settings open in a viewport-bounded
+popover outside the panel, so opening them does not change the globe frame.
+Leaving a Study builder skips the outgoing panel copy, which would otherwise
+remount the editor as the Study overview during the exit animation.
 
 Atlas, Ocean, Dusk, and Paper share semantic roles for text, editorial emphasis,
 actions, land, selection, and feedback. UI consumes `--ui-*` custom properties;

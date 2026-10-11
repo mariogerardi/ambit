@@ -85,7 +85,7 @@ export function AppMenu({
           className="app-menu-content"
           aria-label="App navigation"
         >
-          <span className="app-menu-heading">Explore Ambit</span>
+          <span className="app-menu-heading">Ambit</span>
           <div className="app-menu-primary">
             <button
               aria-current={path === "/" ? "page" : undefined}

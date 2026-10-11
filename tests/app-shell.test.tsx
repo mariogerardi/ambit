@@ -838,6 +838,25 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       host.querySelector(".experience")?.hasAttribute("data-panel-only"),
     ).toBe(false);
   });
+  it.each([false, true])(
+    "leaves the Study builder without flashing the overview (mobile: %s)",
+    async (mobile) => {
+      vi.stubGlobal("matchMedia", (query: string) => ({
+        matches: mobile && query === MOBILE_LAYOUT_QUERY,
+        addEventListener() {},
+        removeEventListener() {},
+      }));
+      history.replaceState(null, "", "/study");
+      await mount();
+      await click("Custom");
+      expect(host.querySelector(".study-editor")).not.toBeNull();
+      await click("Home");
+      expect(host.querySelector(".home-menu")).not.toBeNull();
+      expect(host.querySelector(".study-landing")).toBeNull();
+      expect(host.querySelector(".mode-outgoing")).toBeNull();
+      expect(probe.mounts).toBe(1);
+    },
+  );
   it("opens Admin on mobile without replacing Earth or losing the current attempt", async () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: query === MOBILE_LAYOUT_QUERY,
@@ -1202,10 +1221,22 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Explore");
     expect(host.querySelector(".mode-incoming .explore-controls")).toBeNull();
     await click("Globe settings");
+    const popover = document.querySelector(
+      '.explore-settings-popover[role="dialog"]',
+    )!;
+    expect(popover).not.toBeNull();
+    expect(host.querySelector(".explore-card")!.contains(popover)).toBe(false);
+    expect(popover.contains(document.activeElement)).toBe(true);
+    await act(async () =>
+      dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })),
+    );
+    expect(document.querySelector(".explore-settings-popover")).toBeNull();
+    expect(document.activeElement).toBe(
+      host.querySelector('.settings-button[aria-label="Globe settings"]'),
+    );
+    await click("Globe settings");
     const borderToggle = [
-      ...host.querySelectorAll<HTMLLabelElement>(
-        ".mode-incoming .explore-controls label",
-      ),
+      ...document.querySelectorAll<HTMLLabelElement>(".explore-controls label"),
     ]
       .find((label) => label.textContent?.trim() === "Country borders")!
       .querySelector<HTMLInputElement>("input")!;
@@ -1215,7 +1246,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     const panel = host.querySelector(".mode-incoming .explore-card")!;
     expect(panel.querySelector("h1")?.textContent).toBe("Brazil");
     expect(panel.querySelector(".explore-controls")).toBeNull();
-    expect(panel.querySelector(".explore-search-field")).toBeNull();
+    expect(panel.querySelector(".explore-search-field")).not.toBeNull();
     expect(panel.querySelector(".explore-heading .detail-flag")).not.toBeNull();
     expect(panel.textContent).not.toContain("YOUR CURRENT PLACE");
     const toggle = panel.querySelector<HTMLInputElement>(
@@ -1536,7 +1567,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Explore");
     await click("Globe settings");
-    const toggle = [...host.querySelectorAll("label")]
+    const toggle = [...document.querySelectorAll("label")]
       .find((l) => l.textContent === "Rivers")!
       .querySelector("input")!;
     await act(async () => toggle.click());
@@ -1616,7 +1647,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "Mountain ranges",
       "Ocean & sea names",
     ]) {
-      const input = [...host.querySelectorAll("label")]
+      const input = [...document.querySelectorAll("label")]
         .find((l) => l.textContent === name)!
         .querySelector("input")!;
       await act(async () => input.click());
@@ -1694,7 +1725,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Explore");
     expect(probe.props!.places.some((p) => p.kind === "capital")).toBe(true);
     await act(async () => probe.props!.onSelect(member("wurl:CAN")));
-    const toggle = [...host.querySelectorAll("label")]
+    const toggle = [...document.querySelectorAll("label")]
       .find((l) => l.textContent === "Provinces & territories")!
       .querySelector("input")!;
     await act(async () => toggle.click());
@@ -1724,8 +1755,14 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Explore");
     expect(document.querySelector(".explore-search-popup")).toBeNull();
-    expect(host.querySelector(".explore-search-field")).toBeNull();
-    await click("Search");
+    expect(host.querySelector(".explore-search-field")).not.toBeNull();
+    await act(async () =>
+      host
+        .querySelector<HTMLInputElement>(
+          ".mode-incoming .explore-search-field input",
+        )!
+        .focus(),
+    );
     const input = host.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -1739,9 +1776,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     });
     await click("Andorra");
     expect(document.querySelector(".explore-search-popup")).toBeNull();
-    expect(host.querySelector(".explore-search-field")).toBeNull();
+    expect(host.querySelector(".explore-search-field")).not.toBeNull();
     expect(document.activeElement).toBe(
-      host.querySelector(".mode-incoming .explore-search-toggle"),
+      host.querySelector(".mode-incoming .explore-search-field input"),
     );
     expect(probe.focus.at(-1)).toEqual(member("wurl:AND").focus);
     expect(probe.focus.at(-1)!.altitude).toBeLessThan(0.1);
@@ -1750,11 +1787,17 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus).toHaveLength(count + 1);
     expect(probe.focus.at(-1)).toEqual(member("wurl:AND").focus);
   });
-  it("dismisses Explore search with Escape or Close and restores focus without replacing Earth", async () => {
+  it("clears Explore search with Escape or Clear and restores focus without replacing Earth", async () => {
     await mount();
     await click("Explore");
     const earth = host.querySelector("canvas");
-    await click("Search");
+    await act(async () =>
+      host
+        .querySelector<HTMLInputElement>(
+          ".mode-incoming .explore-search-field input",
+        )!
+        .focus(),
+    );
     const input = host.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -1763,15 +1806,21 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
       );
     });
-    expect(host.querySelector(".explore-search-field")).toBeNull();
+    expect(host.querySelector(".explore-search-field")).not.toBeNull();
     expect(document.activeElement).toBe(
-      host.querySelector(".mode-incoming .explore-search-toggle"),
+      host.querySelector(".mode-incoming .explore-search-field input"),
     );
-    await click("Search");
-    await click("Close search");
-    expect(host.querySelector(".explore-search-field")).toBeNull();
+    await act(async () =>
+      host
+        .querySelector<HTMLInputElement>(
+          ".mode-incoming .explore-search-field input",
+        )!
+        .focus(),
+    );
+    await click("Clear search");
+    expect(host.querySelector(".explore-search-field")).not.toBeNull();
     expect(document.activeElement).toBe(
-      host.querySelector(".mode-incoming .explore-search-toggle"),
+      host.querySelector(".mode-incoming .explore-search-field input"),
     );
     expect(host.querySelector("canvas")).toBe(earth);
     expect(probe.mounts).toBe(1);
@@ -1929,7 +1978,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     ).toBeDefined();
     await click("Globe settings");
     const checkbox = [
-      ...host.querySelectorAll<HTMLInputElement>("input[type=checkbox]"),
+      ...document.querySelectorAll<HTMLInputElement>("input[type=checkbox]"),
     ].find((input) =>
       input.closest("label")?.textContent?.includes("Major cities"),
     )!;

@@ -140,6 +140,10 @@ describe("Study Session configuration", () => {
   it("offers three paths and one builder tile, and previews only builder selections", async () => {
     await mount(defaultSettings, false);
     expect(host.querySelectorAll("article.study-path")).toHaveLength(3);
+    expect(host.querySelector("article.study-path small")).toBeNull();
+    expect(
+      host.querySelector("article.study-path p")?.textContent,
+    ).toBeTruthy();
     expect(host.querySelectorAll(".study-path-build")).toHaveLength(1);
     expect(host.textContent).not.toContain("Your own session");
     expect(preview).toHaveBeenLastCalledWith(undefined);

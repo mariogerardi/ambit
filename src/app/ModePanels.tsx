@@ -9,6 +9,7 @@ export function ModePanels({
   scrollKey,
   persistent = false,
   page = false,
+  animateExit = true,
 }: {
   mode: string;
   reduced: boolean;
@@ -17,23 +18,26 @@ export function ModePanels({
   scrollKey?: string;
   persistent?: boolean;
   page?: boolean;
+  animateExit?: boolean;
 }) {
   const panel = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     if (panel.current) panel.current.scrollTop = 0;
   }, [mode, scrollKey]);
-  const previous = useRef({ mode, children, page });
+  const previous = useRef({ mode, children, page, animateExit });
   const [outgoing, setOutgoing] = useState<ReactNode>();
   useLayoutEffect(() => {
-    if (
-      previous.current.mode !== mode &&
-      !reduced &&
-      !page &&
-      !previous.current.page
-    )
-      setOutgoing(previous.current.children);
-    previous.current = { mode, children, page };
-  }, [mode, children, reduced, page]);
+    if (previous.current.mode !== mode)
+      setOutgoing(
+        !reduced &&
+          !page &&
+          !previous.current.page &&
+          previous.current.animateExit
+          ? previous.current.children
+          : undefined,
+      );
+    previous.current = { mode, children, page, animateExit };
+  }, [mode, children, reduced, page, animateExit]);
   useLayoutEffect(() => {
     if (!outgoing) return;
     const timer = setTimeout(() => setOutgoing(undefined), 220);

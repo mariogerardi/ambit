@@ -473,7 +473,6 @@ export function StudySetup(props: {
             </button>
             <h3>{path.title}</h3>
             <p>{path.description}</p>
-            <small>{path.detail}</small>
             <div className="inline-actions">
               <button
                 className="quiet-button study-path-customize"
