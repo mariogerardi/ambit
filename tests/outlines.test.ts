@@ -10,7 +10,7 @@ import {
   outlineResolution,
   surfaceRoutePositions,
 } from "../src/globe/outlines";
-import { LIMA, WINDHOEK } from "../src/game/journey";
+import { LIMA, WINDHOEK } from "./fixtures/engine/journey";
 
 const regions = prepareGlobeRegions(
   ["world", "usa-adm1", "ny-adm2"].flatMap(

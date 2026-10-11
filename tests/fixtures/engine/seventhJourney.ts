@@ -1,8 +1,8 @@
 import originData from "./data/name-origins.v1.json";
-import type { RegionFeature } from "../geography/types";
-import type { FactSource, Journey, Question } from "./questions";
-import { US_STATES } from "../geography/usStates";
-import { CAPITALS } from "./quizData";
+import type { RegionFeature } from "../../../src/geography/types";
+import type { FactSource, Journey, Question } from "../../../src/game/questions";
+import { US_STATES } from "../../../src/geography/usStates";
+import { CAPITALS } from "../../../src/game/quizData";
 
 const originRegions = originData as RegionFeature[];
 const regions = (...ids: string[]) =>

@@ -6,14 +6,20 @@ import {
   NORTH_AMERICA_JOURNEY,
   MEXICO_BORDER_STATES,
 } from "../src/game/northAmericaJourney";
-import { CANADIAN_TERRITORIES, FIFTH_JOURNEY } from "../src/game/fifthJourney";
+import {
+  CANADIAN_TERRITORIES,
+  FIFTH_JOURNEY,
+} from "./fixtures/engine/fifthJourney";
 import {
   dailyJourney,
   emptyDaily,
   openDaily,
   setDailyPuzzle,
   validDaily,
+  recoverDaily,
 } from "../src/app/dailyProgress";
+import { RETIRED_JOURNEY_IDS } from "../src/game/retiredJourneys";
+import { modeForPath } from "../src/app/modes";
 import { createQuestionContext, isCorrect } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
 import type { RegionFeature } from "../src/geography/types";
@@ -22,7 +28,51 @@ const world = JSON.parse(
 ) as RegionFeature[];
 
 describe("retained daily rotation", () => {
-  it("cycles only the eleven approved editions, while keeping scrapped saves loadable", async () => {
+  it("drops retired saves and overrides while preserving retained progress and unavailable custom saves", async () => {
+    const keep = openDaily(emptyDaily, "2026-10-11");
+    const removed = {
+      date: "2026-10-10",
+      journeyId: "enclosed-territories-v1",
+      scheduleVersion: 1,
+      game: { ...initialGame, phase: "playing" },
+    };
+    const recovered = recoverDaily({
+      ...keep,
+      attempts: { ...keep.attempts, [removed.date]: removed },
+      activeDate: removed.date,
+      archivedAttempts: { [`${removed.date}/${removed.journeyId}`]: removed },
+      overrides: { [removed.date]: removed.journeyId },
+    })!;
+    expect(recovered.attempts).toEqual(keep.attempts);
+    expect(recovered.activeDate).toBeUndefined();
+    expect(recovered.archivedAttempts).toEqual({});
+    expect(recovered.overrides).toEqual({});
+    expect(validDaily(recovered)).toBe(true);
+    for (const id of RETIRED_JOURNEY_IDS) {
+      expect(JOURNEY_INDEX.some((journey) => journey.id === id)).toBe(false);
+      await expect(loadJourney(id)).rejects.toThrow("Unknown Journey");
+    }
+    for (const path of [
+      "long-way-home",
+      "beyond-borders",
+      "silk-roads",
+      "north-america-v1",
+      "enclosed-territories",
+      "borrowed-names",
+      "pins-and-cities",
+      "the-z-trail",
+    ])
+      expect(modeForPath(`/journey/${path}`)).toBe("home");
+    expect(
+      recoverDaily({
+        ...keep,
+        attempts: {
+          [removed.date]: { ...removed, journeyId: "studio:unavailable" },
+        },
+      }),
+    ).toBeUndefined();
+  });
+  it("cycles only the eleven approved editions, and permanently rejects removed editions", async () => {
     expect(ACTIVE_JOURNEY_IDS).toHaveLength(11);
     expect(new Set(ACTIVE_JOURNEY_IDS).size).toBe(11);
     for (let index = 0; index < 22; index++) {
@@ -31,17 +81,13 @@ describe("retained daily rotation", () => {
         ACTIVE_JOURNEY_IDS[index % ACTIVE_JOURNEY_IDS.length],
       );
     }
-    const old = openDaily(
+    await expect(loadJourney("enclosed-territories-v1")).rejects.toThrow(
+      "Unknown Journey",
+    );
+    expect(() =>
       setDailyPuzzle(emptyDaily, "2026-10-10", "enclosed-territories-v1"),
-      "2026-10-10",
-    );
-    expect(validDaily(JSON.parse(JSON.stringify(old)))).toBe(true);
-    expect(openDaily(old, "2026-10-10").attempts["2026-10-10"]).toBe(
-      old.attempts["2026-10-10"],
-    );
-    expect((await loadJourney("enclosed-territories-v1")).rounds).toHaveLength(
-      5,
-    );
+    ).toThrow("Unknown Journey");
+    expect(JOURNEY_INDEX.map((entry) => entry.id)).toEqual(ACTIVE_JOURNEY_IDS);
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === NORTH_AMERICA_JOURNEY.id)
         ?.path,

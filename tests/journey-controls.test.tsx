@@ -5,7 +5,7 @@ import type { Root } from "react-dom/client";
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnswerForm } from "../src/game/AnswerForm";
-import { JOURNEY, COUNTRY_FACTS } from "../src/game/journey";
+import { JOURNEY, COUNTRY_FACTS } from "./fixtures/engine/journey";
 import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
 import { createQuestionContext } from "../src/game/questions";
 import type { Journey } from "../src/game/questions";

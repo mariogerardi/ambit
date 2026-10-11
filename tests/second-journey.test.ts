@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { RegionFeature } from "../src/geography/types";
-import { SECOND_JOURNEY } from "../src/game/secondJourney";
+import { SECOND_JOURNEY } from "./fixtures/engine/secondJourney";
 import { SECOND_VARIANTS } from "./fixtures/ruleVariants";
-import { COUNTRY_FACTS } from "../src/game/journey";
+import { COUNTRY_FACTS } from "./fixtures/engine/journey";
 import { CAPITALS } from "../src/game/quizData";
 import {
   createQuestionContext,

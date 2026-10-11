@@ -7,13 +7,13 @@ import {
   roundIdentity,
 } from "../src/game/copy";
 import { GameShell } from "../src/game/GameShell";
-import { JOURNEY, COUNTRY_FACTS } from "../src/game/journey";
-import { SEVENTH_JOURNEY } from "../src/game/seventhJourney";
-import { EIGHTH_JOURNEY } from "../src/game/eighthJourney";
+import { JOURNEY, COUNTRY_FACTS } from "./fixtures/engine/journey";
+import { SEVENTH_JOURNEY } from "./fixtures/engine/seventhJourney";
+import { EIGHTH_JOURNEY } from "./fixtures/engine/eighthJourney";
 import { NINTH_JOURNEY } from "../src/game/ninthJourney";
 import { ELEVENTH_JOURNEY } from "../src/game/eleventhJourney";
-import { FIFTH_JOURNEY } from "../src/game/fifthJourney";
-import { THIRD_JOURNEY } from "../src/game/thirdJourney";
+import { FIFTH_JOURNEY } from "./fixtures/engine/fifthJourney";
+import { THIRD_JOURNEY } from "./fixtures/engine/thirdJourney";
 import { JOURNEYS } from "../src/game/journeys";
 import {
   createQuestionContext,

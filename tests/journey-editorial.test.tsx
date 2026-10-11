@@ -6,7 +6,7 @@ import { ANDES_JOURNEY } from "../src/game/andesJourney";
 import { LATITUDE_JOURNEY } from "../src/game/latitudeJourney";
 import { TWELFTH_JOURNEY } from "../src/game/twelfthJourney";
 import { ELEVENTH_JOURNEY } from "../src/game/eleventhJourney";
-import { SECOND_JOURNEY } from "../src/game/secondJourney";
+import { SECOND_JOURNEY } from "./fixtures/engine/secondJourney";
 import { JOURNEYS } from "../src/game/journeys";
 import { COUNTRY_FACTS } from "../src/game/countryFacts";
 import { correctAnswerSummary } from "../src/game/copy";
@@ -182,7 +182,7 @@ describe("connected Journey drafts and answer feedback", () => {
     ).toBe("Canberra");
   });
 
-  it("produces a readable nonempty answer for every archived and active question", () => {
+  it("produces a readable nonempty answer for every current question", () => {
     for (const journey of JOURNEYS) {
       const context = createQuestionContext(world, COUNTRY_FACTS, journey);
       for (const question of journey.rounds) {

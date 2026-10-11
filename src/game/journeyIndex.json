@@ -1,88 +1,30 @@
 [
   {
-    "id": "long-way-home-v2",
-    "title": "The long way home",
-    "description": "A few letters can lead you across continents. Even the shortest way home has a story.",
-    "path": "/journey/long-way-home",
-    "module": "./journey.ts",
+    "id": "beyond-the-maple-leaf-v1",
+    "title": "Beyond the maple leaf",
+    "description": "Start with a familiar flag, follow Canada’s two official languages to the east coast, then travel through its capital to the northern shore.",
+    "path": "/journey/beyond-the-maple-leaf",
+    "module": "./canadaJourney.ts",
     "rounds": [
       {
-        "id": "windhoek-neighbor",
-        "label": "Neighbors"
-      },
-      {
-        "id": "fewest-crossings",
-        "label": "Crossings"
-      },
-      {
-        "id": "four-letter-world",
-        "label": "Four letters"
-      },
-      {
-        "id": "peru-capital",
-        "label": "Capital"
-      },
-      {
-        "id": "great-circle-home",
-        "label": "Homeward"
-      }
-    ]
-  },
-  {
-    "id": "beyond-borders-v1",
-    "title": "Beyond borders",
-    "description": "Flags, languages, mountains, and latitude: familiar places look different from each angle.",
-    "path": "/journey/beyond-borders",
-    "module": "./secondJourney.ts",
-    "rounds": [
-      {
-        "id": "flag-maple",
+        "id": "canada-maple-flag-v1",
         "label": "Flag"
       },
       {
-        "id": "canada-languages",
+        "id": "canada-federal-languages-v1",
         "label": "Languages"
       },
       {
-        "id": "andes-three",
-        "label": "Mountains"
+        "id": "canada-bilingual-province-v1",
+        "label": "Province"
       },
       {
-        "id": "africa-north-amman",
-        "label": "Latitude"
+        "id": "canada-ottawa-v1",
+        "label": "Capital"
       },
       {
-        "id": "mediterranean-capitals",
-        "label": "Circle"
-      }
-    ]
-  },
-  {
-    "id": "silk-roads-v1",
-    "title": "Across the Silk Roads",
-    "description": "Across Central Asia, languages and borders trace different paths through the same landscape.",
-    "path": "/journey/silk-roads",
-    "module": "./thirdJourney.ts",
-    "rounds": [
-      {
-        "id": "central-asia-families",
-        "label": "Families"
-      },
-      {
-        "id": "tajikistan-armenia-crossings",
-        "label": "Crossings"
-      },
-      {
-        "id": "caspian-shores",
-        "label": "Caspian"
-      },
-      {
-        "id": "nakhchivan-owner",
-        "label": "Exclave"
-      },
-      {
-        "id": "silk-road-capitals",
-        "label": "Capitals"
+        "id": "canada-arctic-shore-v1",
+        "label": "Ocean"
       }
     ]
   },
@@ -112,127 +54,6 @@
       {
         "id": "mediterranean-shores",
         "label": "Sea"
-      }
-    ]
-  },
-  {
-    "id": "north-america-v1",
-    "title": "North America by name",
-    "description": "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
-    "path": "/journey/north-america-v1",
-    "module": "./fifthJourney.ts",
-    "rounds": [
-      {
-        "id": "canada-three-territories",
-        "label": "Territories"
-      },
-      {
-        "id": "canada-south-of-boston",
-        "label": "Latitude"
-      },
-      {
-        "id": "five-states-bordering-canada",
-        "label": "Pick five"
-      },
-      {
-        "id": "california-missouri-crossings",
-        "label": "Crossings"
-      },
-      {
-        "id": "five-cardinal-states",
-        "label": "Directions"
-      }
-    ]
-  },
-  {
-    "id": "enclosed-territories-v1",
-    "title": "Worlds within worlds",
-    "description": "A place can be surrounded, separated, or connected in ways a first glance misses.",
-    "path": "/journey/enclosed-territories",
-    "module": "./sixthJourney.ts",
-    "rounds": [
-      {
-        "id": "enclosed-lesotho",
-        "label": "Kingdom"
-      },
-      {
-        "id": "leningrad-surrounded-city",
-        "label": "City"
-      },
-      {
-        "id": "temburong-owner",
-        "label": "Exclave"
-      },
-      {
-        "id": "act-surrounding-state",
-        "label": "Territory"
-      },
-      {
-        "id": "kaliningrad-land-neighbors",
-        "label": "Ownership"
-      }
-    ]
-  },
-  {
-    "id": "borrowed-names-v1",
-    "title": "Borrowed names",
-    "description": "Names travel too. A familiar word can connect places on opposite sides of the world.",
-    "path": "/journey/borrowed-names",
-    "module": "./seventhJourney.ts",
-    "rounds": [
-      {
-        "id": "new-zealand-namesake",
-        "label": "Namesake"
-      },
-      {
-        "id": "papua-new-guinea-namesake",
-        "label": "Coast"
-      },
-      {
-        "id": "new-england-six-states",
-        "label": "Six states"
-      },
-      {
-        "id": "new-jersey-namesake",
-        "label": "Island"
-      },
-      {
-        "id": "nuevo-leon-namesake",
-        "label": "Country"
-      }
-    ]
-  },
-  {
-    "id": "pins-and-cities-v1",
-    "title": "Pins and cities",
-    "description": "A city becomes more than a name once you can place it on the globe.",
-    "path": "/journey/pins-and-cities",
-    "module": "./eighthJourney.ts",
-    "rounds": [
-      {
-        "id": "pin-lima",
-        "label": "Drop a pin",
-        "progressLabel": "Lima"
-      },
-      {
-        "id": "city-paris",
-        "label": "City",
-        "progressLabel": "Paris"
-      },
-      {
-        "id": "pin-new-mexico",
-        "label": "Drop a pin",
-        "progressLabel": "New Mexico"
-      },
-      {
-        "id": "cities-north-of-rome",
-        "label": "Cities",
-        "progressLabel": "North of Rome"
-      },
-      {
-        "id": "city-sydney",
-        "label": "City",
-        "progressLabel": "Sydney"
       }
     ]
   },
@@ -271,31 +92,31 @@
     ]
   },
   {
-    "id": "ring-of-fire-v1",
-    "title": "Around the Ring of Fire",
-    "description": "Trace the Pacific rim from Japan through Indonesia to the Andes and New Zealand. One ocean connects every stop.",
-    "path": "/journey/ring-of-fire",
-    "module": "./tenthJourney.ts",
+    "id": "along-the-andes-v1",
+    "title": "Along the Andes",
+    "description": "Follow South America’s mountain spine: a highland capital, a lake shared by two countries, a towering peak, and a narrow Pacific finish.",
+    "path": "/journey/along-the-andes",
+    "module": "./andesJourney.ts",
     "rounds": [
       {
-        "id": "pacific-rising-sun",
-        "label": "Flag"
-      },
-      {
-        "id": "pacific-hokkaido",
-        "label": "Island"
-      },
-      {
-        "id": "pacific-indonesia-pin",
-        "label": "Drop a pin"
-      },
-      {
-        "id": "pacific-andes-coast",
+        "id": "andes-country-trio-v1",
         "label": "Mountains"
       },
       {
-        "id": "pacific-wellington",
+        "id": "andes-quito-v1",
         "label": "Capital"
+      },
+      {
+        "id": "andes-titicaca-v1",
+        "label": "Lake"
+      },
+      {
+        "id": "andes-aconcagua-v1",
+        "label": "Peak"
+      },
+      {
+        "id": "andes-chile-pin-v1",
+        "label": "Drop a pin"
       }
     ]
   },
@@ -334,64 +155,6 @@
     ]
   },
   {
-    "id": "exceptions-to-the-rule-v1",
-    "title": "Exceptions to the rule",
-    "description": "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
-    "path": "/journey/exceptions-to-the-rule",
-    "module": "./twelfthJourney.ts",
-    "rounds": [
-      {
-        "id": "exceptions-france-border",
-        "label": "Border"
-      },
-      {
-        "id": "exceptions-double-landlocked",
-        "label": "Country"
-      },
-      {
-        "id": "exceptions-four-hemispheres",
-        "label": "Hemispheres"
-      },
-      {
-        "id": "exceptions-bolivia-coast",
-        "label": "History"
-      },
-      {
-        "id": "exceptions-baku",
-        "label": "Capital"
-      }
-    ]
-  },
-  {
-    "id": "the-z-trail-v1",
-    "title": "The Z trail",
-    "description": "Follow one letter through cities, rivers, and changing country names across continents.",
-    "path": "/journey/the-z-trail",
-    "module": "./thirteenthJourney.ts",
-    "rounds": [
-      {
-        "id": "z-zurich-pin",
-        "label": "Drop a pin"
-      },
-      {
-        "id": "z-zagreb-capital",
-        "label": "Capital"
-      },
-      {
-        "id": "z-zambia-zimbabwe-river",
-        "label": "River"
-      },
-      {
-        "id": "z-zanzibar-union",
-        "label": "Union"
-      },
-      {
-        "id": "z-zaire-country",
-        "label": "Former name"
-      }
-    ]
-  },
-  {
     "id": "island-instincts-v1",
     "title": "Island instincts",
     "description": "Island-hop around the world and resist the nearest-coast guess. Five islands reveal how distance and belonging can disagree.",
@@ -426,43 +189,9 @@
     ]
   },
   {
-    "id": "try-not-to-click-russia-v1",
-    "title": "On Russia’s doorstep",
-    "description": "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",
-    "path": "/journey/try-not-to-click-russia",
-    "module": "./fifteenthJourney.ts",
-    "rounds": [
-      {
-        "id": "russia-neighbor-fin",
-        "label": "Drop a pin",
-        "progressLabel": "Finland"
-      },
-      {
-        "id": "russia-neighbor-prk",
-        "label": "Drop a pin",
-        "progressLabel": "North Korea"
-      },
-      {
-        "id": "russia-neighbor-mng",
-        "label": "Drop a pin",
-        "progressLabel": "Mongolia"
-      },
-      {
-        "id": "russia-neighbor-geo",
-        "label": "Drop a pin",
-        "progressLabel": "Georgia"
-      },
-      {
-        "id": "russia-neighbor-est",
-        "label": "Drop a pin",
-        "progressLabel": "Estonia"
-      }
-    ]
-  },
-  {
     "id": "north-america-v2",
     "title": "North America by name",
-    "description": "Travel from Canada’s northern territories to the Mexican border, then find your way across the United States. Names, latitude, and borders are your guides.",
+    "description": "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
     "path": "/journey/north-america",
     "module": "./northAmericaJourney.ts",
     "rounds": [
@@ -485,64 +214,6 @@
       {
         "id": "five-cardinal-states-v2",
         "label": "Directions"
-      }
-    ]
-  },
-  {
-    "id": "beyond-the-maple-leaf-v1",
-    "title": "Beyond the maple leaf",
-    "description": "Start with a familiar flag, follow Canada’s two official languages to the east coast, then travel through its capital to the Arctic shore.",
-    "path": "/journey/beyond-the-maple-leaf",
-    "module": "./canadaJourney.ts",
-    "rounds": [
-      {
-        "id": "canada-maple-flag-v1",
-        "label": "Flag"
-      },
-      {
-        "id": "canada-federal-languages-v1",
-        "label": "Languages"
-      },
-      {
-        "id": "canada-bilingual-province-v1",
-        "label": "Province"
-      },
-      {
-        "id": "canada-ottawa-v1",
-        "label": "Capital"
-      },
-      {
-        "id": "canada-arctic-shore-v1",
-        "label": "Ocean"
-      }
-    ]
-  },
-  {
-    "id": "along-the-andes-v1",
-    "title": "Along the Andes",
-    "description": "Follow South America’s mountain spine: a highland capital, a lake shared by two countries, a towering peak, and a narrow Pacific finish.",
-    "path": "/journey/along-the-andes",
-    "module": "./andesJourney.ts",
-    "rounds": [
-      {
-        "id": "andes-country-trio-v1",
-        "label": "Mountains"
-      },
-      {
-        "id": "andes-quito-v1",
-        "label": "Capital"
-      },
-      {
-        "id": "andes-titicaca-v1",
-        "label": "Lake"
-      },
-      {
-        "id": "andes-aconcagua-v1",
-        "label": "Peak"
-      },
-      {
-        "id": "andes-chile-pin-v1",
-        "label": "Drop a pin"
       }
     ]
   },
@@ -577,6 +248,98 @@
         "id": "latitude-oceania-buenos-aires-v1",
         "label": "Latitude",
         "progressLabel": "Oceania"
+      }
+    ]
+  },
+  {
+    "id": "ring-of-fire-v1",
+    "title": "Around the Ring of Fire",
+    "description": "Trace the Pacific rim from Japan through Indonesia to the Andes and New Zealand. One ocean connects every stop.",
+    "path": "/journey/ring-of-fire",
+    "module": "./tenthJourney.ts",
+    "rounds": [
+      {
+        "id": "pacific-rising-sun",
+        "label": "Flag"
+      },
+      {
+        "id": "pacific-hokkaido",
+        "label": "Island"
+      },
+      {
+        "id": "pacific-indonesia-pin",
+        "label": "Drop a pin"
+      },
+      {
+        "id": "pacific-andes-coast",
+        "label": "Mountains"
+      },
+      {
+        "id": "pacific-wellington",
+        "label": "Capital"
+      }
+    ]
+  },
+  {
+    "id": "exceptions-to-the-rule-v1",
+    "title": "Exceptions to the rule",
+    "description": "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
+    "path": "/journey/exceptions-to-the-rule",
+    "module": "./twelfthJourney.ts",
+    "rounds": [
+      {
+        "id": "exceptions-france-border",
+        "label": "Border"
+      },
+      {
+        "id": "exceptions-double-landlocked",
+        "label": "Country"
+      },
+      {
+        "id": "exceptions-four-hemispheres",
+        "label": "Hemispheres"
+      },
+      {
+        "id": "exceptions-bolivia-coast",
+        "label": "History"
+      },
+      {
+        "id": "exceptions-baku",
+        "label": "Capital"
+      }
+    ]
+  },
+  {
+    "id": "try-not-to-click-russia-v1",
+    "title": "On Russia’s doorstep",
+    "description": "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",
+    "path": "/journey/try-not-to-click-russia",
+    "module": "./fifteenthJourney.ts",
+    "rounds": [
+      {
+        "id": "russia-neighbor-fin",
+        "label": "Drop a pin",
+        "progressLabel": "Finland"
+      },
+      {
+        "id": "russia-neighbor-prk",
+        "label": "Drop a pin",
+        "progressLabel": "North Korea"
+      },
+      {
+        "id": "russia-neighbor-mng",
+        "label": "Drop a pin",
+        "progressLabel": "Mongolia"
+      },
+      {
+        "id": "russia-neighbor-geo",
+        "label": "Drop a pin",
+        "progressLabel": "Georgia"
+      },
+      {
+        "id": "russia-neighbor-est",
+        "label": "Drop a pin",
+        "progressLabel": "Estonia"
       }
     ]
   }

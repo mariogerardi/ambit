@@ -63,8 +63,7 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-turkey-capital",
-      leadIn:
-        "Start with a country whose biggest city often steals the spotlight.",
+      leadIn: "Start where the biggest city isn’t the capital.",
       progressLabel: "Türkiye",
       title: "The famous distraction.",
       prompt: "What is the capital of Türkiye?",
@@ -95,8 +94,7 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-canberra-pin",
-      leadIn:
-        "Across the world, another capital sits away from the famous coast.",
+      leadIn: "Jump to Australia for another surprise.",
       progressLabel: "Australia",
       title: "Find Canberra.",
       label: "Drop a pin",
@@ -120,7 +118,7 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-abuja",
-      leadIn: "Now look for a capital that deliberately left the coast behind.",
+      leadIn: "Head to West Africa.",
       progressLabel: "Nigeria",
       title: "The capital that moved.",
       prompt:
@@ -147,7 +145,7 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-brasilia-marker",
-      leadIn: "Cross the Atlantic for another move from coast to interior.",
+      leadIn: "Cross the Atlantic to Brazil.",
       progressLabel: "Brazil",
       title: "Find Brasília.",
       label: "City",
@@ -175,7 +173,7 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-south-africa-capitals",
-      leadIn: "For the finale, question the idea that there must be just one.",
+      leadIn: "Finish with more than one capital.",
       progressLabel: "South Africa",
       title: "One country, three capitals.",
       label: "Cities",

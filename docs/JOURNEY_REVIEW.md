@@ -1,10 +1,12 @@
 # Journey review and retained rotation
 
 Owner decisions recorded October 10–11, 2026. The active daily rotation now
-contains **eleven five-question Journeys**. Six original packs are scrapped from
-rotation; Beyond borders is replaced by three connected drafts. All historical
-editions remain loadable for saved results and source material. The bundled
-archive contains 19 editions and 95 questions.
+contains **eleven five-question Journeys and 55 questions**. Six original packs
+were scrapped; Beyond borders was split into three new packs, and North America
+was replaced by its revised edition. All eight obsolete editions have now been
+removed from the runtime catalog, Admin, practice routes, and the playground.
+Saved attempts and overrides for those editions are discarded without disturbing
+retained progress. They cannot be resumed or loaded again.
 
 ## Editorial decisions
 
@@ -42,13 +44,18 @@ archive contains 19 editions and 95 questions.
   primary-capital dataset.
 
 New facts have primary-source links and review dates in their definitions.
+New Brunswick uses imported province boundaries and reveals the province rather
+than highlighting all of Canada. Lake Titicaca now offers six named choices,
+requires two selections, and reveals its location after submission.
 The existing four seed questions retain their reviewed answer rules. The original
-Beyond borders edition remains available at its practice route.
+Beyond borders edition has been removed.
 
 ## Copy and feedback
 
 All 55 active questions received a copy review. Most itineraries now include a
-brief, spoiler-safe `leadIn` above the prompt. Shared neighbors establishes its
+brief, spoiler-safe `leadIn` above the prompt. The latest pass reduces these to
+short directional cues, following On Russia’s doorstep; richer detail belongs in
+the reveal. Shared neighbors establishes its
 repeated pin challenge in the introduction instead of adding narration to every
 stop. Repeated mechanics remain intentional.
 
@@ -66,9 +73,9 @@ session actions. The maintained crafting guide is
 ## Daily selection and publication
 
 [`journeyRotation.ts`](../src/game/journeyRotation.ts) contains the explicit
-retained-ID list, independently of the complete archive. New selections repeat
+retained-ID list, aligned with the complete runtime catalog. New selections repeat
 these eleven packs by device-local date from October 5, 2026. Date reshuffling was
-explicitly accepted. Existing attempts remain pinned to their saved edition;
+explicitly accepted. Retained attempts remain pinned to their saved edition;
 admin overrides remain local to the current device.
 
 The cycle is usable for friends after deployment and repeats every eleven days.

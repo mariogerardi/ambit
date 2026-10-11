@@ -1,10 +1,10 @@
-import { SECOND_JOURNEY } from "./secondJourney";
+import { mapleFlagQuestion, andesCountriesQuestion } from "./questionSeeds";
 import { CAPITALS, capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
 import type { Journey, Question } from "./questions";
 
 const base: Question = {
-  ...SECOND_JOURNEY.rounds[0],
+  ...mapleFlagQuestion,
   image: undefined,
   source: mapSource,
   map: { borders: true, hover: false, muteOthers: true, revealOnAnswer: true },
@@ -16,9 +16,9 @@ export const ANDES_JOURNEY: Journey = {
     "Follow South America’s mountain spine: a highland capital, a lake shared by two countries, a towering peak, and a narrow Pacific finish.",
   rounds: [
     {
-      ...SECOND_JOURNEY.rounds[2],
+      ...andesCountriesQuestion,
       id: "andes-country-trio-v1",
-      leadIn: "First, find three countries along the mountain spine.",
+      leadIn: "Start along the mountain spine.",
       explanation:
         "The range crosses seven countries along South America’s western side. National borders don’t stop the mountains.",
     },
@@ -28,7 +28,7 @@ export const ANDES_JOURNEY: Journey = {
       label: "Capital",
       topic: "highland cities",
       title: "A capital in the mountains.",
-      leadIn: "Start our southward trip in Ecuador’s highlands.",
+      leadIn: "Head south to Ecuador’s highlands.",
       prompt: "What is the capital of Ecuador?",
       mode: "text",
       inputLabel: "Capital city",
@@ -55,22 +55,26 @@ export const ANDES_JOURNEY: Journey = {
       label: "Lake",
       topic: "lakes and borders",
       title: "Two shores, one lake.",
-      leadIn: "Continue south to the Altiplano, where water crosses a border.",
+      leadIn: "Continue south to a shared lake.",
       prompt: "Which two countries share Lake Titicaca?",
-      mode: "map-multiple",
+      instruction: "Choose two countries.",
+      mode: "choice-multiple",
       count: 2,
       commitment: "submit",
       rule: { type: "country-ids", ids: ["wurl:PER", "wurl:BOL"] },
-      selection: {
-        type: "ids",
-        ids: CAPITALS.filter((capital) => capital.continent === "SA").map(
-          (capital) => capital.countryId,
-        ),
-      },
-      disclosure: { ...base.disclosure, hoverNames: true },
+      selection: { type: "none" },
+      choices: [
+        { id: "wurl:CHL", label: "Chile" },
+        { id: "wurl:PER", label: "Peru" },
+        { id: "wurl:ECU", label: "Ecuador" },
+        { id: "wurl:ARG", label: "Argentina" },
+        { id: "wurl:BOL", label: "Bolivia" },
+        { id: "wurl:COL", label: "Colombia" },
+      ],
+      disclosure: { ...base.disclosure, namedChoices: true },
       contextIds: undefined,
       focus: { lat: -16, lng: -67, altitude: 1.1 },
-      places: [
+      feedbackPlaces: [
         {
           id: "clue:titicaca",
           name: "Lake Titicaca",
@@ -94,7 +98,7 @@ export const ANDES_JOURNEY: Journey = {
       label: "Peak",
       topic: "mountains",
       title: "The highest stop.",
-      leadIn: "Farther south, the mountain chain reaches its highest point.",
+      leadIn: "Follow the range to its highest peak.",
       prompt:
         "Which country contains Aconcagua, the highest mountain in the Americas?",
       rule: { type: "country-ids", ids: ["wurl:ARG"] },
@@ -114,7 +118,7 @@ export const ANDES_JOURNEY: Journey = {
       label: "Drop a pin",
       topic: "mountains and coastlines",
       title: "Down to the Pacific side.",
-      leadIn: "Cross to the Pacific side for one last landing.",
+      leadIn: "Cross to the Pacific side.",
       prompt: "Drop a pin inside Chile.",
       mode: "pin",
       commitment: "submit",

@@ -1,11 +1,11 @@
-import type { Journey, Question } from "./questions";
+import type { Journey, Question } from "../../../src/game/questions";
 import {
   CAPITALS,
   FEATURES,
   LANGUAGES,
   capitalSource,
   languageSource,
-} from "./quizData";
+} from "../../../src/game/quizData";
 const amman = CAPITALS.find((c) => c.name === "Amman")!;
 const tunis = CAPITALS.find((c) => c.name === "Tunis")!;
 const circle = { center: { lat: tunis.lat, lng: tunis.lng }, radiusKm: 1500 };

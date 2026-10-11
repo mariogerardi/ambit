@@ -4,66 +4,37 @@ import { LATITUDE_JOURNEY } from "./latitudeJourney";
 import { NORTH_AMERICA_JOURNEY } from "./northAmericaJourney";
 import { FIFTEENTH_JOURNEY } from "./fifteenthJourney";
 import { FOURTEENTH_JOURNEY } from "./fourteenthJourney";
-import { THIRTEENTH_JOURNEY } from "./thirteenthJourney";
 import { TWELFTH_JOURNEY } from "./twelfthJourney";
 import { ELEVENTH_JOURNEY } from "./eleventhJourney";
 import { TENTH_JOURNEY } from "./tenthJourney";
 import { NINTH_JOURNEY } from "./ninthJourney";
-import { EIGHTH_JOURNEY } from "./eighthJourney";
-import { JOURNEY } from "./journey";
-import { SECOND_JOURNEY } from "./secondJourney";
-import { THIRD_JOURNEY } from "./thirdJourney";
 import { FOURTH_JOURNEY } from "./fourthJourney";
-import { FIFTH_JOURNEY } from "./fifthJourney";
-import { SIXTH_JOURNEY } from "./sixthJourney";
-import { SEVENTH_JOURNEY } from "./seventhJourney";
 export const JOURNEYS = [
-  JOURNEY,
-  SECOND_JOURNEY,
-  THIRD_JOURNEY,
-  FOURTH_JOURNEY,
-  FIFTH_JOURNEY,
-  SIXTH_JOURNEY,
-  SEVENTH_JOURNEY,
-  EIGHTH_JOURNEY,
-  NINTH_JOURNEY,
-  TENTH_JOURNEY,
-  ELEVENTH_JOURNEY,
-  TWELFTH_JOURNEY,
-  THIRTEENTH_JOURNEY,
-  FOURTEENTH_JOURNEY,
-  FIFTEENTH_JOURNEY,
-  NORTH_AMERICA_JOURNEY,
   CANADA_JOURNEY,
+  FOURTH_JOURNEY,
+  NINTH_JOURNEY,
   ANDES_JOURNEY,
+  ELEVENTH_JOURNEY,
+  FOURTEENTH_JOURNEY,
+  NORTH_AMERICA_JOURNEY,
   LATITUDE_JOURNEY,
+  TENTH_JOURNEY,
+  TWELFTH_JOURNEY,
+  FIFTEENTH_JOURNEY,
 ];
 export function journeyPath(id: string) {
-  if (id === CANADA_JOURNEY.id) return "/journey/beyond-the-maple-leaf";
-  if (id === ANDES_JOURNEY.id) return "/journey/along-the-andes";
-  if (id === LATITUDE_JOURNEY.id) return "/journey/latitude-surprises";
-  if (id === NORTH_AMERICA_JOURNEY.id) return "/journey/north-america";
-  if (id === FIFTEENTH_JOURNEY.id) return "/journey/try-not-to-click-russia";
-  if (id === FOURTEENTH_JOURNEY.id) return "/journey/island-instincts";
-  if (id === THIRTEENTH_JOURNEY.id) return "/journey/the-z-trail";
-  if (id === TWELFTH_JOURNEY.id) return "/journey/exceptions-to-the-rule";
-  if (id === ELEVENTH_JOURNEY.id) return "/journey/not-the-obvious-city";
-  if (id === TENTH_JOURNEY.id) return "/journey/ring-of-fire";
-  return id === NINTH_JOURNEY.id
-    ? "/journey/shared-neighbors"
-    : id === EIGHTH_JOURNEY.id
-      ? "/journey/pins-and-cities"
-      : id === SEVENTH_JOURNEY.id
-        ? "/journey/borrowed-names"
-        : id === SIXTH_JOURNEY.id
-          ? "/journey/enclosed-territories"
-          : id === FIFTH_JOURNEY.id
-            ? "/journey/north-america-v1"
-            : id === FOURTH_JOURNEY.id
-              ? "/journey/mediterranean"
-              : id === THIRD_JOURNEY.id
-                ? "/journey/silk-roads"
-                : id === SECOND_JOURNEY.id
-                  ? "/journey/beyond-borders"
-                  : "/journey/long-way-home";
+  const paths: Record<string, string> = {
+    [CANADA_JOURNEY.id]: "/journey/beyond-the-maple-leaf",
+    [ANDES_JOURNEY.id]: "/journey/along-the-andes",
+    [LATITUDE_JOURNEY.id]: "/journey/latitude-surprises",
+    [NORTH_AMERICA_JOURNEY.id]: "/journey/north-america",
+    [FIFTEENTH_JOURNEY.id]: "/journey/try-not-to-click-russia",
+    [FOURTEENTH_JOURNEY.id]: "/journey/island-instincts",
+    [TWELFTH_JOURNEY.id]: "/journey/exceptions-to-the-rule",
+    [ELEVENTH_JOURNEY.id]: "/journey/not-the-obvious-city",
+    [TENTH_JOURNEY.id]: "/journey/ring-of-fire",
+    [NINTH_JOURNEY.id]: "/journey/shared-neighbors",
+    [FOURTH_JOURNEY.id]: "/journey/mediterranean",
+  };
+  return paths[id] ?? "/";
 }

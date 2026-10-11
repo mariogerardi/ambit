@@ -1,11 +1,11 @@
-import type { Journey, Question } from "./questions";
-import { mapSource } from "./countryFacts";
+import type { Journey, Question } from "../../../src/game/questions";
+import { mapSource } from "../../../src/game/countryFacts";
 import {
   capitalSource,
   FEATURES,
   languageFamilySource,
   tajikSource,
-} from "./quizData";
+} from "../../../src/game/quizData";
 
 const centralAsia = ["KAZ", "KGZ", "TKM", "UZB", "TJK"].map((c) => `wurl:${c}`);
 const capitalRoute = ["AZE", "RUS", "KAZ", "UZB", "TJK"].map(

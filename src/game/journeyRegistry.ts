@@ -9,10 +9,7 @@ export interface JourneySummary {
   rounds: Pick<Question, "id" | "label" | "progressLabel">[];
 }
 export const JOURNEY_INDEX = index;
-const modules = import.meta.glob<Record<string, unknown>>([
-  "./journey.ts",
-  "./*Journey.ts",
-]);
+const modules = import.meta.glob<Record<string, unknown>>(["./*Journey.ts"]);
 const pending = new Map<string, Promise<Journey>>();
 
 export function loadJourney(id: string): Promise<Journey> {

@@ -1,6 +1,6 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **19 editions and 95 questions**, with eleven active daily concepts, reviewed against
+The bundled catalog contains **11 Journeys and 55 questions**, with eleven active daily concepts, reviewed against
 the code on October 11, 2026. Each Journey has five rounds. Admin chooses today's
 Journey on this device; direct practice routes and `/playground` provide access
 to other bundled content. There is no current in-app authoring or AI generator.
@@ -8,27 +8,19 @@ Previously published local packs are read-only compatibility data.
 
 ## Bundled Journeys
 
-| #   | Title                           | Practice route                     | Definition                                                   |
-| --- | ------------------------------- | ---------------------------------- | ------------------------------------------------------------ |
-| 1   | The long way home               | `/journey/long-way-home`           | [journey.ts](../src/game/journey.ts)                         |
-| 2   | Beyond borders                  | `/journey/beyond-borders`          | [secondJourney.ts](../src/game/secondJourney.ts)             |
-| 3   | Across the Silk Roads           | `/journey/silk-roads`              | [thirdJourney.ts](../src/game/thirdJourney.ts)               |
-| 4   | Around the Mediterranean        | `/journey/mediterranean`           | [fourthJourney.ts](../src/game/fourthJourney.ts)             |
-| 5   | North America by name           | `/journey/north-america-v1`        | [fifthJourney.ts](../src/game/fifthJourney.ts)               |
-| 6   | Worlds within worlds            | `/journey/enclosed-territories`    | [sixthJourney.ts](../src/game/sixthJourney.ts)               |
-| 7   | Borrowed names                  | `/journey/borrowed-names`          | [seventhJourney.ts](../src/game/seventhJourney.ts)           |
-| 8   | Pins and cities                 | `/journey/pins-and-cities`         | [eighthJourney.ts](../src/game/eighthJourney.ts)             |
-| 9   | Shared neighbors                | `/journey/shared-neighbors`        | [ninthJourney.ts](../src/game/ninthJourney.ts)               |
-| 10  | Around the Ring of Fire         | `/journey/ring-of-fire`            | [tenthJourney.ts](../src/game/tenthJourney.ts)               |
-| 11  | Not the obvious city            | `/journey/not-the-obvious-city`    | [eleventhJourney.ts](../src/game/eleventhJourney.ts)         |
-| 12  | Exceptions to the rule          | `/journey/exceptions-to-the-rule`  | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
-| 13  | The Z trail                     | `/journey/the-z-trail`             | [thirteenthJourney.ts](../src/game/thirteenthJourney.ts)     |
-| 14  | Island instincts                | `/journey/island-instincts`        | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)     |
-| 15  | On Russia’s doorstep            | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
-| 16  | North America by name (revised) | `/journey/north-america`           | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts) |
-| 17  | Beyond the maple leaf           | `/journey/beyond-the-maple-leaf`   | [canadaJourney.ts](../src/game/canadaJourney.ts)             |
-| 18  | Along the Andes                 | `/journey/along-the-andes`         | [andesJourney.ts](../src/game/andesJourney.ts)               |
-| 19  | Latitude surprises              | `/journey/latitude-surprises`      | [latitudeJourney.ts](../src/game/latitudeJourney.ts)         |
+| #   | Title                    | Practice route                     | Definition                                                   |
+| --- | ------------------------ | ---------------------------------- | ------------------------------------------------------------ |
+| 1   | Beyond the maple leaf    | `/journey/beyond-the-maple-leaf`   | [canadaJourney.ts](../src/game/canadaJourney.ts)             |
+| 2   | Around the Mediterranean | `/journey/mediterranean`           | [fourthJourney.ts](../src/game/fourthJourney.ts)             |
+| 3   | Shared neighbors         | `/journey/shared-neighbors`        | [ninthJourney.ts](../src/game/ninthJourney.ts)               |
+| 4   | Along the Andes          | `/journey/along-the-andes`         | [andesJourney.ts](../src/game/andesJourney.ts)               |
+| 5   | Not the obvious city     | `/journey/not-the-obvious-city`    | [eleventhJourney.ts](../src/game/eleventhJourney.ts)         |
+| 6   | Island instincts         | `/journey/island-instincts`        | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)     |
+| 7   | North America by name    | `/journey/north-america`           | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts) |
+| 8   | Latitude surprises       | `/journey/latitude-surprises`      | [latitudeJourney.ts](../src/game/latitudeJourney.ts)         |
+| 9   | Around the Ring of Fire  | `/journey/ring-of-fire`            | [tenthJourney.ts](../src/game/tenthJourney.ts)               |
+| 10  | Exceptions to the rule   | `/journey/exceptions-to-the-rule`  | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
+| 11  | On Russia’s doorstep     | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
@@ -44,23 +36,23 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 95 bundled questions, not every possible engine pairing.
+Counts below refer to the 55 bundled questions, not every possible engine pairing.
 The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                | Control                | Questions |
 | ------------------- | ---------------------- | --------: |
-| `pin`               | Drop a pin             |        16 |
-| `city-single`       | Single city pick       |         3 |
-| `city-multiple`     | Multiple city picks    |         2 |
-| `map-single`        | Single country pick    |        19 |
-| `map-multiple`      | Multiple country picks |         9 |
-| `number`            | Number                 |         7 |
-| `text`              | Free response          |        16 |
-| `typed-regions`     | Typed region names     |         7 |
-| `ordered-countries` | Ordered country names  |         1 |
-| `ordered-capitals`  | Ordered capital names  |         1 |
-| `choice-single`     | Single choice          |        11 |
+| `pin`               | Drop a pin             |        13 |
+| `city-single`       | Single city pick       |         1 |
+| `city-multiple`     | Multiple city picks    |         1 |
+| `map-single`        | Single country pick    |        11 |
+| `map-multiple`      | Multiple country picks |         4 |
+| `number`            | Number                 |         2 |
+| `text`              | Free response          |        10 |
+| `typed-regions`     | Typed region names     |         3 |
+| `ordered-countries` | Ordered country names  |         0 |
+| `ordered-capitals`  | Ordered capital names  |         0 |
+| `choice-single`     | Single choice          |         7 |
 | `choice-multiple`   | Multiple choices       |         3 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
@@ -115,7 +107,7 @@ predicate if the question should be computed rather than fixed.
    candidate set must not reveal an answer that the question intends to hide.
 4. Register the Journey and route in [`journeys.ts`](../src/game/journeys.ts), and
    add its rounds to [`questionCatalog.ts`](../src/game/questionCatalog.ts).
-   Runtime lazy discovery covers `journey.ts` and files ending in `Journey.ts`;
+   Runtime lazy discovery covers files ending in `Journey.ts`;
    keep that naming pattern or update discovery deliberately.
 5. Run `npm run prepare:journeys`, then `npm test` and `npm run build`. Add focused
    checks for new answer behavior, disclosure, ambiguous geography, and metadata.
@@ -123,9 +115,12 @@ predicate if the question should be computed rather than fixed.
 
 Adding a bundled edition does not change the active rotation. Editing the explicit
 rotation list does change which editions subsequent dates select.
-Existing attempts remain pinned to their stored Journey. Review schedule policy
-and save compatibility before removing or reordering content; do not treat the
-index as an independently authored source.
+Retained attempts remain pinned to their stored Journey. Removed editions are
+absent from Admin, practice routes, and the playground. Their IDs are recorded
+only for save recovery: discard their attempts and overrides, while preserving
+retained progress and protecting unavailable custom packs. Evaluator fixtures in
+`tests/fixtures/engine` provide isolated rule coverage and are never runtime
+Journey content. Do not treat the index as an independently authored source.
 
 ## Crafting a daily
 
@@ -136,8 +131,9 @@ ownership-versus-location surprises, and On Russia’s doorstep repeats borderle
 pin placement. Establish the premise in the introduction and develop it in the
 reveals; preserve useful difficulty and favorite questions. Use a short, spoiler-safe
 `leadIn` before the prompt to make geographic movement or the developing idea
-explicit. Most trips should feel like a connected itinerary, without lengthy
-narration or hints that give away the next answer.
+explicit. Use On Russia’s doorstep as the model: a short directional cue such as
+“Head west again, this time to the Caucasus.” Keep detailed geographic context in
+the reveal, rather than adding a second paragraph before every question.
 
 Journey feedback uses Study’s answer-card layout, showing the correct answer
 rather than the incorrect guess. For questions accepting multiple valid answers,

@@ -1,9 +1,10 @@
-import { SECOND_JOURNEY } from "./secondJourney";
+import { CANADIAN_PROVINCES } from "./canadianRegions";
+import { mapleFlagQuestion, canadianLanguagesQuestion } from "./questionSeeds";
 import { CAPITALS, capitalSource } from "./quizData";
 import type { Journey, Question } from "./questions";
 
 const base: Question = {
-  ...SECOND_JOURNEY.rounds[1],
+  ...canadianLanguagesQuestion,
   mode: "choice-single",
   count: 1,
   source: capitalSource,
@@ -17,19 +18,19 @@ export const CANADA_JOURNEY: Journey = {
   id: "beyond-the-maple-leaf-v1",
   title: "Beyond the maple leaf",
   description:
-    "Start with a familiar flag, follow Canada’s two official languages to the east coast, then travel through its capital to the Arctic shore.",
+    "Start with a familiar flag, follow Canada’s two official languages to the east coast, then travel through its capital to the northern shore.",
   rounds: [
     {
-      ...SECOND_JOURNEY.rounds[0],
+      ...mapleFlagQuestion,
       id: "canada-maple-flag-v1",
-      leadIn: "Our first stop begins with a familiar leaf.",
+      leadIn: "Start with a familiar flag.",
       explanation:
         "The maple leaf is the national symbol at the heart of this flag.",
     },
     {
-      ...SECOND_JOURNEY.rounds[1],
+      ...canadianLanguagesQuestion,
       id: "canada-federal-languages-v1",
-      leadIn: "One flag, more than one official voice.",
+      leadIn: "Stay here for two official voices.",
       explanation:
         "Both have equal status in federal institutions. Provincial language policies differ.",
     },
@@ -39,8 +40,7 @@ export const CANADA_JOURNEY: Journey = {
       label: "Province",
       topic: "official languages",
       title: "Two voices on the Atlantic coast.",
-      leadIn:
-        "Head east, where federal bilingualism has a provincial counterpart.",
+      leadIn: "Head east to the Atlantic provinces.",
       prompt:
         "Which Canadian province is officially bilingual in English and French?",
       rule: { type: "choice-ids", ids: ["province:nb"] },
@@ -52,7 +52,17 @@ export const CANADA_JOURNEY: Journey = {
         { id: "province:mb", label: "Manitoba" },
         { id: "province:nl", label: "Newfoundland and Labrador" },
       ],
-      focus: { lat: 46, lng: -67, altitude: 0.65 },
+      importedRegions: CANADIAN_PROVINCES,
+      feedbackContextIds: ["wurl:CAN-NB"],
+      contextIds: CANADIAN_PROVINCES.map((province) => province.id),
+      map: {
+        borders: true,
+        hover: false,
+        muteOthers: true,
+        revealOnAnswer: true,
+      },
+      focus: { lat: 54, lng: -96, altitude: 1.1 },
+      feedbackFocus: { lat: 46.5, lng: -66.5, altitude: 0.45 },
       explanation:
         "It’s the only province with both as official languages, rather than simply a bilingual population.",
       source: {
@@ -67,7 +77,7 @@ export const CANADA_JOURNEY: Journey = {
       label: "Capital",
       topic: "capitals",
       title: "Back to the federal seat.",
-      leadIn: "Turn inland to the city where those federal institutions meet.",
+      leadIn: "Turn inland toward the capital.",
       prompt: "What is the capital of Canada?",
       mode: "text",
       inputLabel: "Capital city",
@@ -87,7 +97,7 @@ export const CANADA_JOURNEY: Journey = {
       label: "Ocean",
       topic: "coastlines",
       title: "The northern edge.",
-      leadIn: "Finish far north, where Canada’s islands meet the sea.",
+      leadIn: "Finish on the northern shore.",
       prompt: "Which ocean borders Canada to the north?",
       rule: { type: "choice-ids", ids: ["ocean:arctic"] },
       choices: [

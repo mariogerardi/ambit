@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import type { RegionFeature } from "../src/geography/types";
-import { JOURNEY, COUNTRY_FACTS } from "../src/game/journey";
+import { JOURNEY, COUNTRY_FACTS } from "./fixtures/engine/journey";
 import { gameReducer, initialGame, journeyScore } from "../src/game/state";
 import {
   createQuestionContext,

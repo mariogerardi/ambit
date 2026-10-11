@@ -43,7 +43,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "spain-regional-languages",
-      leadIn: "Begin in Spain, on the western side of our shared sea.",
+      leadIn: "Begin on Spain’s Mediterranean shore.",
       label: "Languages",
       topic: "regional languages",
       title: "Two regions, two languages.",
@@ -73,7 +73,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "italy-sicily",
-      leadIn: "Sail east to the island just off Italy’s toe.",
+      leadIn: "Sail east toward Italy.",
       label: "Island",
       topic: "islands",
       title: "Name this island.",
@@ -119,7 +119,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "libya-capital",
-      leadIn: "Cross to the southern shore for a capital on the coast.",
+      leadIn: "Cross to the southern shore.",
       label: "Capital",
       topic: "capitals",
       title: "A capital on the coast.",
@@ -137,8 +137,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "yugoslavia-six",
-      leadIn:
-        "Back on the northern side, the Adriatic leads us into the Balkans.",
+      leadIn: "Head north toward the Adriatic.",
       label: "Republics",
       topic: "historical geography",
       title: "Six republics, one former federation.",
@@ -177,7 +176,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "mediterranean-shores",
-      leadIn: "Zoom out: our stops belong to one much larger sea.",
+      leadIn: "Zoom out to the whole sea.",
       label: "Sea",
       topic: "coastlines",
       title: "How many shores?",

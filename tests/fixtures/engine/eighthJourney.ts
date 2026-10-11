@@ -1,7 +1,7 @@
-import type { Journey, Question } from "./questions";
-import { ANSWER_PLACES } from "./answerTargets";
-import { US_STATES } from "../geography/usStates";
-import { CAPITALS } from "./quizData";
+import type { Journey, Question } from "../../../src/game/questions";
+import { ANSWER_PLACES } from "../../../src/game/answerTargets";
+import { US_STATES } from "../../../src/geography/usStates";
+import { CAPITALS } from "../../../src/game/quizData";
 
 const europe = [
   "place:2988507",

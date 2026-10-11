@@ -1,3 +1,4 @@
+import { THIRD_JOURNEY } from "./fixtures/engine/thirdJourney";
 import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { geoArea, geoBounds } from "d3-geo";
@@ -42,7 +43,7 @@ describe("actual spherical renderer inputs", () => {
     expect(createGlobeRegionPreparer()(world)[0]).not.toBe(first[0]);
   });
   it("changes only the owning country's render objects for an exclave and restores cached originals", () => {
-    const q = QUESTION_CATALOG.find((q) => q.id === "nakhchivan-owner")!;
+    const q = THIRD_JOURNEY.rounds.find((q) => q.id === "nakhchivan-owner")!;
     const prepare = createGlobeRegionPreparer(),
       baseline = prepare(world);
     const input = questionRegions(world, q, "playing");

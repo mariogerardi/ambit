@@ -41,7 +41,7 @@ export const TENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "pacific-rising-sun",
-      leadIn: "Begin on the western rim of the Pacific.",
+      leadIn: "Begin on the western Pacific rim.",
       title: "Follow the sun.",
       label: "Flag",
       topic: "flags",
@@ -68,7 +68,7 @@ export const TENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "pacific-hokkaido",
-      leadIn: "Stay in the same archipelago, but head to its northern end.",
+      leadIn: "Head to the northern islands.",
       title: "An island apart.",
       label: "Island",
       topic: "islands",
@@ -106,7 +106,7 @@ export const TENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "pacific-indonesia-pin",
-      leadIn: "Follow the island chain south toward the Equator.",
+      leadIn: "Follow the islands south.",
       title: "Pick an island.",
       label: "Drop a pin",
       topic: "archipelagos",
@@ -127,7 +127,7 @@ export const TENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "pacific-andes-coast",
-      leadIn: "Cross the Pacific to the mountains on its eastern shore.",
+      leadIn: "Cross to the Pacific’s eastern shore.",
       title: "Mountains meet ocean.",
       label: "Mountains",
       topic: "mountains and coastlines",
@@ -163,7 +163,7 @@ export const TENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "pacific-wellington",
-      leadIn: "One last ocean crossing takes us to our southern finish.",
+      leadIn: "Finish on the southern rim.",
       title: "One last landing.",
       label: "Capital",
       topic: "capitals",

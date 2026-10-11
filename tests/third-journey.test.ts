@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { RegionFeature } from "../src/geography/types";
-import { THIRD_JOURNEY } from "../src/game/thirdJourney";
-import { COUNTRY_FACTS } from "../src/game/journey";
+import { THIRD_JOURNEY } from "./fixtures/engine/thirdJourney";
+import { COUNTRY_FACTS } from "./fixtures/engine/journey";
 import {
   createQuestionContext,
   canSubmit,
@@ -21,7 +21,7 @@ import {
 } from "../src/game/presentation";
 import { geoContains } from "d3-geo";
 import { sphericalGeometry } from "../src/geography/sphericalGeometry.mjs";
-import { SECOND_JOURNEY } from "../src/game/secondJourney";
+import { SECOND_JOURNEY } from "./fixtures/engine/secondJourney";
 
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),

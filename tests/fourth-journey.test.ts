@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { RegionFeature } from "../src/geography/types";
 import { FOURTH_JOURNEY, YUGOSLAV_REPUBLICS } from "../src/game/fourthJourney";
-import { COUNTRY_FACTS } from "../src/game/journey";
+import { COUNTRY_FACTS } from "./fixtures/engine/journey";
 import {
   createQuestionContext,
   isCorrect,
@@ -41,7 +41,7 @@ const reduce = (state: GameState, ...actions: Action[]) =>
 
 describe("fourth Journey", () => {
   it("registers all five questions for daily rotation, practice, and playground", () => {
-    expect(JOURNEYS).toHaveLength(19);
+    expect(JOURNEYS).toHaveLength(11);
     expect(journeyPath(FOURTH_JOURNEY.id)).toBe("/journey/mediterranean");
     expect(FOURTH_JOURNEY.rounds).toHaveLength(5);
     for (const q of FOURTH_JOURNEY.rounds) {

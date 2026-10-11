@@ -1,6 +1,6 @@
 import territoryData from "./data/enclosed-territories.v1.json";
-import type { RegionFeature } from "../geography/types";
-import type { FactSource, Journey, Question } from "./questions";
+import type { RegionFeature } from "../../../src/geography/types";
+import type { FactSource, Journey, Question } from "../../../src/game/questions";
 
 // Small pinned subset of the same canonical regions used by Explore. Do not
 // ship or triangulate every Russian/Australian subdivision for these clues.

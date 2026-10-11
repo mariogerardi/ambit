@@ -8,6 +8,7 @@ import {
   setDailyPuzzle,
 } from "../src/app/dailyProgress";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
+import { initialGame } from "../src/game/state";
 import {
   STUDY_KEY,
   emptyStudy,
@@ -39,6 +40,41 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+});
+
+it("removes retired runs during migration and ignores them when another device syncs", () => {
+  const keep = openDaily(emptyDaily, "2026-10-11");
+  const removed = {
+    date: "2026-10-10",
+    journeyId: "borrowed-names-v1",
+    scheduleVersion: 1,
+    game: { ...initialGame, phase: "playing" },
+  };
+  localStorage.setItem(
+    DAILY_KEY,
+    JSON.stringify({
+      ...keep,
+      attempts: { ...keep.attempts, [removed.date]: removed },
+      activeDate: removed.date,
+      overrides: { [removed.date]: removed.journeyId },
+    }),
+  );
+  const store = createDailySave(JOURNEY_INDEX);
+  expect(store.writable).toBe(true);
+  expect(store.load().attempts).toEqual(keep.attempts);
+  expect(store.load().overrides ?? {}).toEqual({});
+  store.mergeEntries([
+    {
+      version: 2,
+      clock: 3,
+      writer: "remote",
+      field: `attempt.${removed.date}`,
+      value: removed,
+    },
+  ]);
+  expect(store.load().attempts).toEqual(keep.attempts);
+  store.save({ ...store.load(), activeDate: "2026-10-11" });
+  expect(createDailySave(JOURNEY_INDEX).load().attempts).toEqual(keep.attempts);
 });
 function result(id: string): StudySave {
   let session = { ...startStudy(defaultSettings, 42), id };

@@ -1,4 +1,4 @@
-import { SECOND_JOURNEY } from "./secondJourney";
+import { africanLatitudeQuestion } from "./questionSeeds";
 import { CAPITALS, capitalSource } from "./quizData";
 import type { Journey, Question } from "./questions";
 
@@ -8,8 +8,7 @@ const comparisons = [
     reference: "Amman",
     continent: "AF",
     direction: "north",
-    leadIn:
-      "Start with a continent that reaches farther north than you might expect.",
+    leadIn: "Start above Amman’s latitude.",
     prompt: "Name an African capital city farther north than Amman, Jordan.",
     focus: { lat: 22, lng: 22, altitude: 1.5 },
     explanation:
@@ -20,8 +19,7 @@ const comparisons = [
     reference: "Ottawa",
     continent: "EU",
     direction: "south",
-    leadIn:
-      "Cross the Atlantic: Canada and Europe may not line up as you expect.",
+    leadIn: "Cross the Atlantic to Europe.",
     prompt: "Name a European capital city farther south than Ottawa, Canada.",
     focus: { lat: 46, lng: 12, altitude: 1.4 },
     explanation:
@@ -32,7 +30,7 @@ const comparisons = [
     reference: "Rome",
     continent: "AS",
     direction: "north",
-    leadIn: "Keep Europe in mind, then follow Rome’s latitude across Asia.",
+    leadIn: "Follow Rome’s latitude into Asia.",
     prompt: "Name an Asian capital city farther north than Rome, Italy.",
     focus: { lat: 40, lng: 82, altitude: 1.5 },
     explanation:
@@ -43,7 +41,7 @@ const comparisons = [
     reference: "Pretoria",
     continent: "SA",
     direction: "south",
-    leadIn: "Now head below the Equator and compare two southern continents.",
+    leadIn: "Head south to compare two continents.",
     prompt:
       "Name a South American capital city farther south than Pretoria, South Africa.",
     focus: { lat: -24, lng: -63, altitude: 1.4 },
@@ -55,8 +53,7 @@ const comparisons = [
     reference: "Buenos Aires",
     continent: "OC",
     direction: "south",
-    leadIn:
-      "Finish across the Pacific: can a capital take us farther south still?",
+    leadIn: "Finish across the Pacific.",
     prompt:
       "Name a capital city in Oceania farther south than Buenos Aires, Argentina.",
     focus: { lat: -25, lng: 162, altitude: 1.6 },
@@ -75,7 +72,7 @@ export const LATITUDE_JOURNEY: Journey = {
       (capital) => capital.name === comparison.reference,
     )!;
     return {
-      ...SECOND_JOURNEY.rounds[3],
+      ...africanLatitudeQuestion,
       id: `latitude-${comparison.id}-v1`,
       title: `Compare with ${comparison.reference}.`,
       label: "Latitude",

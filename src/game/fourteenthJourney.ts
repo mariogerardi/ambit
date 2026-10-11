@@ -140,16 +140,11 @@ export const FOURTEENTH_JOURNEY: Journey = {
       topic: "island ownership",
       title: definition.title,
       leadIn: {
-        "andaman-nicobar":
-          "Our first island hop takes us into the Bay of Bengal.",
-        bioko:
-          "Cross to the Gulf of Guinea, where the closest coast can mislead.",
-        svalbard:
-          "Head far north for an island group with some unexpected residents.",
-        galapagos:
-          "Cross into the Pacific, far from this island group’s mainland.",
-        reunion:
-          "Finish in the Indian Ocean, where the nearest country isn’t the owner.",
+        "andaman-nicobar": "Start in the Bay of Bengal.",
+        bioko: "Cross to the Gulf of Guinea.",
+        svalbard: "Head far north to the Arctic.",
+        galapagos: "Cross to the eastern Pacific.",
+        reunion: "Finish in the Indian Ocean.",
       }[definition.id],
       prompt: definition.prompt,
       instruction: "",

@@ -1,6 +1,6 @@
-import type { Journey, FactSource } from "./questions";
-import { mapSource, COUNTRY_FACTS } from "./countryFacts";
-export { mapSource, COUNTRY_FACTS } from "./countryFacts";
+import type { Journey, FactSource } from "../../../src/game/questions";
+import { mapSource, COUNTRY_FACTS } from "../../../src/game/countryFacts";
+export { mapSource, COUNTRY_FACTS } from "../../../src/game/countryFacts";
 const namesSource: FactSource = {
   name: "UN member states · common English naming",
   url: "https://www.un.org/en/about-us/member-states",

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import type { RegionFeature } from "../src/geography/types";
 import { ANSWER_TYPES, PLAYGROUND_JOURNEY } from "../src/game/questionCatalog";
-import { COUNTRY_FACTS, JOURNEY } from "../src/game/journey";
+import { COUNTRY_FACTS } from "../src/game/countryFacts";
+import { CANADA_JOURNEY as JOURNEY } from "../src/game/canadaJourney";
+import { NORTH_AMERICA_JOURNEY } from "../src/game/northAmericaJourney";
 import {
   createQuestionContext,
   canSelect,
@@ -27,15 +29,13 @@ const at = (id: string) =>
 describe("question playground", () => {
   it("catalogs Journey questions only, with distinct jump targets", () => {
     const rounds = PLAYGROUND_JOURNEY.rounds;
-    expect([...new Set(rounds.map((q) => q.mode))].sort()).toEqual(
-      Object.keys(ANSWER_TYPES).sort(),
-    );
-    expect(rounds).toHaveLength(95);
+    expect(rounds.every((q) => Object.hasOwn(ANSWER_TYPES, q.mode))).toBe(true);
+    expect(rounds).toHaveLength(55);
     expect(new Set(rounds.map((q) => q.id)).size).toBe(rounds.length);
     expect(rounds.slice(0, 5)).toEqual(JOURNEY.rounds);
   });
   it("keeps the border-count challenge blind and excludes every map pick", () => {
-    const q = JOURNEY.rounds[1];
+    const q = NORTH_AMERICA_JOURNEY.rounds[3];
     expect(q.map).toMatchObject({
       borders: false,
       hover: false,
@@ -49,11 +49,11 @@ describe("question playground", () => {
     expect(reduce(state, { type: "select", id: "wurl:NAM" })).toBe(state);
   });
   it("starts fresh when jumping from a fatal mistake and rejects invalid targets", () => {
-    const failed = reduce(at("four-letter-world"), {
+    const failed = reduce(at("canada-maple-flag-v1"), {
       type: "select",
       id: "wurl:FRA",
     });
-    expect(failed.phase).toBe("failed");
+    expect(failed.phase).toBe("feedback");
     const jumped = reduce(failed, { type: "jump", index: 5 });
     expect(jumped).toEqual({ ...initialGame, phase: "playing", roundIndex: 5 });
     for (const index of [-1, PLAYGROUND_JOURNEY.rounds.length, 1.5, NaN])

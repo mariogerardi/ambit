@@ -48,8 +48,7 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-france-border",
-      leadIn:
-        "First assumption: a European country’s longest border must be in Europe.",
+      leadIn: "Start with an unexpected border.",
       title: "The long way around.",
       label: "Border",
       prompt:
@@ -101,8 +100,7 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-double-landlocked",
-      leadIn:
-        "Next: one border should be enough to escape a landlocked country.",
+      leadIn: "Head inland, then farther inland.",
       title: "No coast in sight.",
       prompt:
         "Besides Liechtenstein, which landlocked country has only landlocked neighbors?",
@@ -134,7 +132,7 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-four-hemispheres",
-      leadIn: "Now try fitting one country into just one pair of hemispheres.",
+      leadIn: "Cross the Equator and keep going.",
       title: "Every direction at once.",
       label: "Hemispheres",
       prompt: "Which Pacific country has islands in all four hemispheres?",
@@ -176,8 +174,7 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-bolivia-coast",
-      leadIn:
-        "A coastline can disappear from a country’s map without moving the sea.",
+      leadIn: "Follow a coastline lost to history.",
       title: "A country remembers the sea.",
       label: "History",
       prompt: "Which country gained Bolivia’s coast in the War of the Pacific?",
@@ -221,7 +218,7 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-baku",
-      leadIn: "Last assumption: surely a city on land sits above sea level.",
+      leadIn: "Finish below sea level.",
       title: "How low can a capital go?",
       label: "Capital",
       prompt:

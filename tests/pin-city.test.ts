@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { EIGHTH_JOURNEY as journey } from "../src/game/eighthJourney";
+import { EIGHTH_JOURNEY as journey } from "./fixtures/engine/eighthJourney";
 import {
   ANSWER_PLACES,
   answerPlace,

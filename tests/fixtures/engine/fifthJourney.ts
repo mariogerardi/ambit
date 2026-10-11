@@ -1,12 +1,12 @@
 import { geoBounds } from "d3-geo";
-import { US_STATES } from "../geography/usStates";
-import canadaData from "../../public/geography/can-adm1.v1.json";
-import { catalogRegions, subdivisionKind } from "../geography/regions";
-import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
-import type { RegionFeature } from "../geography/types";
-import type { FactSource, Journey, Question } from "./questions";
+import { US_STATES } from "../../../src/geography/usStates";
+import canadaData from "../../../public/geography/can-adm1.v1.json";
+import { catalogRegions, subdivisionKind } from "../../../src/geography/regions";
+import { sphericalGeometry } from "../../../src/geography/sphericalGeometry.mjs";
+import type { RegionFeature } from "../../../src/geography/types";
+import type { FactSource, Journey, Question } from "../../../src/game/questions";
 
-export { US_STATES } from "../geography/usStates";
+export { US_STATES } from "../../../src/geography/usStates";
 export const CANADIAN_SUBDIVISIONS = catalogRegions(
   canadaData as RegionFeature[],
 );

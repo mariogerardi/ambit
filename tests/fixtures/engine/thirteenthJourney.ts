@@ -1,6 +1,6 @@
-import type { FactSource, Journey, Question } from "./questions";
-import { ANSWER_PLACES } from "./answerTargets";
-import { capitalSource } from "./quizData";
+import type { FactSource, Journey, Question } from "../../../src/game/questions";
+import { ANSWER_PLACES } from "../../../src/game/answerTargets";
+import { capitalSource } from "../../../src/game/quizData";
 
 const source = (name: string, url: string): FactSource => ({
   name,

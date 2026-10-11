@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { RegionFeature } from "../src/geography/types";
-import { JOURNEY, COUNTRY_FACTS } from "../src/game/journey";
+import { JOURNEY, COUNTRY_FACTS } from "./fixtures/engine/journey";
 import { createQuestionContext } from "../src/game/questions";
 import {
   journeyVisitedStates,
@@ -10,11 +10,11 @@ import {
 } from "../src/game/presentation";
 import type { Answer } from "../src/game/state";
 import { initialGame } from "../src/game/state";
-import { SECOND_JOURNEY } from "../src/game/secondJourney";
+import { SECOND_JOURNEY } from "./fixtures/engine/secondJourney";
 import { SECOND_VARIANTS } from "./fixtures/ruleVariants";
 import { playRegionStyle } from "../src/globe/themes";
 import { JOURNEYS } from "../src/game/journeys";
-import { FIFTH_JOURNEY, CANADIAN_TERRITORIES } from "../src/game/fifthJourney";
+import { FIFTH_JOURNEY, CANADIAN_TERRITORIES } from "./fixtures/engine/fifthJourney";
 
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),

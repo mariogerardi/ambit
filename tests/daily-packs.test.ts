@@ -28,14 +28,14 @@ import {
   US_STATES,
   CANADA_BORDER_STATES,
   CARDINAL_STATES,
-} from "../src/game/fifthJourney";
-import { SIXTH_JOURNEY } from "../src/game/sixthJourney";
+} from "./fixtures/engine/fifthJourney";
+import { SIXTH_JOURNEY } from "./fixtures/engine/sixthJourney";
 import {
   SEVENTH_JOURNEY,
   NEW_ENGLAND_STATES,
-} from "../src/game/seventhJourney";
+} from "./fixtures/engine/seventhJourney";
 import { TWELFTH_JOURNEY } from "../src/game/twelfthJourney";
-import { THIRTEENTH_JOURNEY } from "../src/game/thirteenthJourney";
+import { THIRTEENTH_JOURNEY } from "./fixtures/engine/thirteenthJourney";
 import { ANSWER_PLACES } from "../src/game/answerTargets";
 import { highlightedPartId } from "../src/game/presentation";
 import {
@@ -57,13 +57,7 @@ const play = (j: Journey, i: number, actions: Action[]) =>
   actions.reduce((s, a) => gameReducer(s, a, j, context(j)), at(i));
 
 describe("daily packs after removing the editor", () => {
-  for (const journey of [
-    FIFTH_JOURNEY,
-    SIXTH_JOURNEY,
-    SEVENTH_JOURNEY,
-    TWELFTH_JOURNEY,
-    THIRTEENTH_JOURNEY,
-  ]) {
+  for (const journey of [TWELFTH_JOURNEY]) {
     it(`${journey.id} retains five validated, locally playable questions and daily progress`, () => {
       expect(JOURNEYS).toContain(journey);
       expect(journeyPath(journey.id)).toMatch(/^\/journey\//);

@@ -1,25 +1,228 @@
-import { FIFTH_JOURNEY, CANADIAN_TERRITORIES } from "./fifthJourney";
-import type { Journey } from "./questions";
+import { geoBounds } from "d3-geo";
+import { US_STATES } from "../geography/usStates";
+import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
+import type { FactSource, Journey, Question } from "./questions";
 
+export { US_STATES } from "../geography/usStates";
+import {
+  CANADIAN_SUBDIVISIONS,
+  CANADIAN_TERRITORIES,
+  CANADIAN_PROVINCES as provinces,
+} from "./canadianRegions";
+export { CANADIAN_TERRITORIES } from "./canadianRegions";
+const boston = {
+  id: "place:4930956",
+  name: "Boston",
+  kind: "city" as const,
+  lat: 42.35843,
+  lng: -71.05977,
+  parentId: "wurl:USA",
+  sourceId: "geonames:4930956",
+};
+export const PROVINCES_SOUTH_OF_BOSTON = provinces
+  .filter((r) => geoBounds(sphericalGeometry(r.geometry))[0][1] < boston.lat)
+  .map((r) => r.id);
 export const MEXICO_BORDER_STATES = ["CA", "AZ", "NM", "TX"].map(
   (code) => `wurl:USA-${code}`,
 );
-
-/** Revised edition; published v1 remains loadable for existing results. */
+export const CARDINAL_STATES = US_STATES.filter((r) =>
+  /\b(north|south|east|west)\b/i.test(r.name),
+).map((r) => r.id);
+const subdivisionSource: FactSource = {
+  name: "Natural Earth · pinned administrative subdivisions",
+  url: "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/",
+  reviewedOn: "2026-10-05",
+};
+const base: Question = {
+  id: "",
+  label: "",
+  topic: "North American geography",
+  title: "",
+  prompt: "",
+  instruction: "",
+  mode: "map-multiple",
+  rule: { type: "region-ids", ids: [] },
+  count: 1,
+  selection: { type: "none" },
+  disclosure: {
+    hoverNames: false,
+    namedChoices: false,
+    committedNames: false,
+    previousVisits: false,
+  },
+  commitment: "submit",
+  failure: "feedback",
+  focus: { lat: 46, lng: -98, altitude: 0.95 },
+  source: subdivisionSource,
+  explanation: "",
+  map: {
+    borders: true,
+    hover: true,
+    muteOthers: true,
+    candidates: "highlighted",
+  },
+};
 export const NORTH_AMERICA_JOURNEY: Journey = {
-  ...FIFTH_JOURNEY,
   id: "north-america-v2",
+  title: "North America by name",
   description:
-    "Travel from Canada’s northern territories to the Mexican border, then find your way across the United States. Names, latitude, and borders are your guides.",
-  rounds: FIFTH_JOURNEY.rounds.map((question, index) => ({
+    "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
+  rounds: (
+    [
+      {
+        ...base,
+        id: "canada-three-territories",
+        label: "Territories",
+        title: "Canada’s far north.",
+        prompt: "Name one of Canada’s three northern territories.",
+        instruction: "",
+        mode: "typed-regions",
+        inputLabel: "Territory",
+        count: 1,
+        rule: { type: "region-ids", ids: CANADIAN_TERRITORIES, match: "any" },
+        selection: { type: "none" },
+        contextIds: CANADIAN_TERRITORIES,
+        map: {
+          borders: true,
+          hover: false,
+          muteOthers: true,
+          revealOnAnswer: true,
+        },
+        importedRegions: CANADIAN_SUBDIVISIONS,
+        focus: { lat: 64, lng: -108, altitude: 1.1 },
+        explanation:
+          "Yukon, Northwest Territories, and Nunavut are Canada’s three territories; its other ten subdivisions are provinces.",
+        source: {
+          name: "Government of Canada · provinces and territories",
+          url: "https://www.canada.ca/en/intergovernmental-affairs/services/provinces-territories.html",
+          reviewedOn: "2026-10-05",
+        },
+      },
+      {
+        qualification: "Province boundaries are simplified from Natural Earth.",
+        ...base,
+        id: "canada-south-of-boston",
+        label: "Latitude",
+        title: "A northern latitude check.",
+        prompt:
+          "Which Canadian province has some land south of Boston’s latitude?",
+        instruction: "The line marks Boston’s latitude.",
+        mode: "typed-regions",
+        inputLabel: "Province",
+        rule: {
+          type: "region-ids",
+          ids: PROVINCES_SOUTH_OF_BOSTON,
+          match: "any",
+        },
+        selection: { type: "none" },
+        contextIds: provinces.map((r) => r.id),
+        map: {
+          borders: true,
+          hover: false,
+          muteOthers: true,
+          revealOnAnswer: true,
+        },
+        importedRegions: CANADIAN_SUBDIVISIONS,
+        focus: { lat: 48, lng: -90, altitude: 0.9 },
+        places: [boston],
+        overlays: [
+          { id: "boston-latitude", type: "parallel", latitude: boston.lat },
+        ],
+        explanation:
+          "Ontario extends south of Boston’s latitude (about 42.36° N), including the Point Pelee area.",
+        sources: [
+          subdivisionSource,
+          {
+            name: "GeoNames · Boston coordinates",
+            url: "https://www.geonames.org/4930956/boston.html",
+            reviewedOn: "2026-10-05",
+          },
+        ],
+      },
+      {
+        ...base,
+        id: "state-bordering-mexico",
+        label: "Southern border",
+        title: "Across the southern border.",
+        prompt: "Name a U.S. state that borders Mexico.",
+        instruction: "",
+        mode: "typed-regions",
+        inputLabel: "State",
+        count: 1,
+        rule: { type: "region-ids", ids: MEXICO_BORDER_STATES, match: "any" },
+        selection: { type: "none" },
+        importedRegions: US_STATES,
+        map: {
+          borders: false,
+          hover: false,
+          muteOthers: true,
+          revealOnAnswer: true,
+        },
+        focus: { lat: 32, lng: -106, altitude: 1.3 },
+        explanation:
+          "Four states meet Mexico along the southern border. Any one qualifies.",
+        source: {
+          name: "U.S. Customs and Border Protection · Southwest Region",
+          url: "https://www.cbp.gov/sites/default/files/2025-07/250728%20AMO%20Southwest%20Region_0.pdf",
+          reviewedOn: "2026-10-05",
+        },
+      },
+      {
+        qualification:
+          "Routes use Natural Earth state boundaries. The result describes geography, not a driving itinerary.",
+        ...base,
+        id: "california-missouri-crossings",
+        label: "Crossings",
+        title: "The shortest state route.",
+        prompt:
+          "What is the fewest number of state border crossings from California to Missouri?",
+        instruction:
+          "Stay within the United States. States meeting at a single point don’t count.",
+        mode: "number",
+        inputLabel: "State border crossings",
+        rule: {
+          type: "shortest-borders",
+          from: "wurl:USA-CA",
+          to: "wurl:USA-MO",
+        },
+        contextIds: ["wurl:USA-CA", "wurl:USA-MO"],
+        importedRegions: US_STATES,
+        map: {
+          borders: false,
+          hover: false,
+          muteOthers: true,
+          revealOnAnswer: true,
+        },
+        focus: { lat: 37, lng: -104, altitude: 0.85 },
+        explanation:
+          "Only shared land borders count; states meeting at a single point are not neighbors.",
+      },
+      {
+        ...base,
+        id: "five-cardinal-states",
+        label: "Directions",
+        title: "Five names, four directions.",
+        prompt:
+          "Select the five U.S. states with North, South, East, or West in their name.",
+        instruction: "",
+        count: 5,
+        rule: { type: "region-ids", ids: CARDINAL_STATES },
+        selection: { type: "ids", ids: US_STATES.map((r) => r.id) },
+        importedRegions: US_STATES,
+        focus: { lat: 39, lng: -97, altitude: 0.9 },
+        explanation:
+          "North Carolina, South Carolina, North Dakota, South Dakota, and West Virginia. No U.S. state has East in its name.",
+      },
+    ] as Question[]
+  ).map((question, index) => ({
     ...question,
     id: `${question.id}-v2`,
     leadIn: [
-      "Begin in Canada’s far north, where territories take the place of provinces.",
-      "Now head south—farther south than Canada’s reputation suggests.",
-      "Keep heading south until the United States meets Mexico.",
-      "Turn inland and find the shortest way across the states.",
-      "Finish by finding the directions written into state names.",
+      "Start in the far north.",
+      "Head south for a latitude check.",
+      "Continue to the Mexican border.",
+      "Turn inland toward Missouri.",
+      "Finish with a few directional names.",
     ][index],
     explanation: [
       "These three territories make up Canada’s north; the other ten subdivisions are provinces.",
@@ -28,39 +231,5 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
       "",
       "No state has East in its name, but the other three directions all appear.",
     ][index],
-    ...(index === 0
-      ? {
-          prompt: "Name one of Canada’s three northern territories.",
-          count: 1,
-          rule: {
-            type: "region-ids" as const,
-            ids: CANADIAN_TERRITORIES,
-            match: "any" as const,
-          },
-        }
-      : {}),
-    ...(index === 2
-      ? {
-          id: "state-bordering-mexico-v2",
-          label: "Southern border",
-          title: "Across the southern border.",
-          prompt: "Name a U.S. state that borders Mexico.",
-          instruction: "",
-          count: 1,
-          rule: {
-            type: "region-ids" as const,
-            ids: MEXICO_BORDER_STATES,
-            match: "any" as const,
-          },
-          focus: { lat: 32, lng: -106, altitude: 1.3 },
-          explanation:
-            "Four states meet Mexico along the southern border. Any one qualifies.",
-          source: {
-            name: "U.S. Customs and Border Protection · Southwest Region",
-            url: "https://www.cbp.gov/sites/default/files/2025-07/250728%20AMO%20Southwest%20Region_0.pdf",
-            reviewedOn: "2026-10-10",
-          },
-        }
-      : {}),
   })),
 };

@@ -8,7 +8,7 @@ import {
   useMobileLayout,
 } from "../src/app/useMobileLayout";
 import { AnswerForm } from "../src/game/AnswerForm";
-import { JOURNEY, COUNTRY_FACTS } from "../src/game/journey";
+import { JOURNEY, COUNTRY_FACTS } from "./fixtures/engine/journey";
 import { createQuestionContext } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
 import { readFileSync } from "node:fs";

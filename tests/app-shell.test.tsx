@@ -39,10 +39,9 @@ import {
 } from "../src/study/engine";
 import { initialGame } from "../src/game/state";
 import { FOURTH_JOURNEY, YUGOSLAV_REPUBLICS } from "../src/game/fourthJourney";
-import { FIFTH_JOURNEY } from "../src/game/fifthJourney";
-import { SIXTH_JOURNEY } from "../src/game/sixthJourney";
-import { EIGHTH_JOURNEY } from "../src/game/eighthJourney";
-import { SEVENTH_JOURNEY } from "../src/game/seventhJourney";
+import { NORTH_AMERICA_JOURNEY as FIFTH_JOURNEY } from "../src/game/northAmericaJourney";
+import { CANADA_JOURNEY } from "../src/game/canadaJourney";
+import { ANDES_JOURNEY } from "../src/game/andesJourney";
 import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
 import { DAILY_KEY, openDaily } from "../src/app/dailyProgress";
 import { GLOBE_LAYERS_KEY, DEFAULT_LAYERS } from "../src/app/worldPreferences";
@@ -287,6 +286,89 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
+  it("offers only the eleven retained Journeys in Admin", async () => {
+    await mount();
+    await click("Admin");
+    const options = [
+      ...host.querySelectorAll<HTMLSelectElement>(".mode-incoming select"),
+    ][0].options;
+    expect([...options].map((option) => option.value)).toEqual([
+      "",
+      ...journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id),
+    ]);
+    expect(options).toHaveLength(12);
+    for (const id of [
+      "long-way-home-v2",
+      "beyond-borders-v1",
+      "silk-roads-v1",
+      "north-america-v1",
+      "enclosed-territories-v1",
+      "borrowed-names-v1",
+      "pins-and-cities-v1",
+      "the-z-trail-v1",
+    ])
+      expect([...options].some((option) => option.value === id)).toBe(false);
+  });
+
+  it.each([CANADA_JOURNEY, ANDES_JOURNEY])(
+    "renders usable third-question choices for $title",
+    async (journey) => {
+      const date = "2026-10-05";
+      localStorage.setItem(
+        DAILY_KEY,
+        JSON.stringify({
+          version: 1,
+          activeDate: date,
+          attempts: {
+            [date]: {
+              date,
+              journeyId: journey.id,
+              scheduleVersion: 1,
+              game: { ...initialGame, phase: "playing", roundIndex: 2 },
+            },
+          },
+        }),
+      );
+      history.replaceState(null, "", "/daily");
+      await mount();
+      const choices = [
+        ...host.querySelectorAll<HTMLButtonElement>(
+          ".mode-incoming .candidate-grid button",
+        ),
+      ];
+      expect(choices).toHaveLength(6);
+      if (journey === CANADA_JOURNEY) {
+        expect(
+          probe.props!.regions.some((region) => region.id === "wurl:CAN-NB"),
+        ).toBe(true);
+        expect(probe.props!.states["wurl:CAN"]).not.toBe("hinted");
+        await click("New Brunswick");
+        await click("Submit answer");
+        expect(probe.props!.states["wurl:CAN-NB"]).toBe("correct");
+        expect(probe.props!.states["wurl:CAN-ON"]).toBe("disabled");
+        expect(host.querySelector(".round-feedback")!.textContent).toContain(
+          "Correct answer: New Brunswick",
+        );
+      } else {
+        expect(probe.props!.regionInteraction).toBe(false);
+        expect(host.textContent).toContain("Choose two countries.");
+        await click("Peru");
+        expect(
+          host.querySelector<HTMLButtonElement>(
+            ".mode-incoming .candidate-grid + button",
+          )!.disabled,
+        ).toBe(true);
+        await click("Bolivia");
+        await click("Submit answer");
+        expect(host.querySelector(".round-feedback")!.textContent).toContain(
+          "Well spotted.",
+        );
+        expect(probe.props!.states["wurl:PER"]).toBe("correct");
+        expect(probe.props!.states["wurl:BOL"]).toBe("correct");
+      }
+    },
+  );
+
   it("reveals the globe after painting geography and keeps it presented across modes", async () => {
     const frames = new Map<number, FrameRequestCallback>();
     let nextFrame = 0;
@@ -885,105 +967,6 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector("canvas")).toBe(earth);
     expect(probe.mounts).toBe(1);
   });
-  it("keeps the mobile Earth mounted, preserves an enlarged pin preview, and returns to feedback after a map answer", async () => {
-    vi.stubGlobal("matchMedia", (query: string) => ({
-      matches: query === MOBILE_LAYOUT_QUERY,
-      addEventListener() {},
-      removeEventListener() {},
-    }));
-    const date = "2026-10-06";
-    localStorage.setItem(
-      DAILY_KEY,
-      JSON.stringify({
-        version: 1,
-        activeDate: date,
-        attempts: {
-          [date]: {
-            date,
-            journeyId: EIGHTH_JOURNEY.id,
-            scheduleVersion: 1,
-            game: { ...initialGame, phase: "playing" },
-          },
-        },
-      }),
-    );
-    history.replaceState(null, "", "/daily");
-    await mount();
-    const earth = host.querySelector("canvas");
-    await click("Enlarge globe");
-    expect(host.querySelector(".mode-incoming")!.hasAttribute("inert")).toBe(
-      true,
-    );
-    await act(async () =>
-      probe.props!.onCoordinateTap!({ lat: -12.04318, lng: -77.02824 }),
-    );
-    expect(
-      host.querySelector("main")!.classList.contains("globe-expanded"),
-    ).toBe(true);
-    expect(host.querySelector(".mobile-map-prompt")!.textContent).toContain(
-      "Pin placed",
-    );
-    await click("Show question");
-    await click("Submit pin");
-    await click("Next");
-    await click("Enlarge globe");
-    await act(async () =>
-      probe.props!.onPlace(
-        probe.props!.places.find((p) => p.id === "place:2988507")!,
-      ),
-    );
-    expect(
-      host.querySelector("main")!.classList.contains("globe-expanded"),
-    ).toBe(false);
-    expect(host.querySelector(".mode-incoming")!.hasAttribute("inert")).toBe(
-      false,
-    );
-    expect(host.querySelector(".round-feedback")!.textContent).toContain(
-      "Paris",
-    );
-    await click("Explore");
-    await settleLoads();
-    expect(host.querySelector(".explore-card")).not.toBeNull();
-    await click("Study");
-    await settleLoads();
-    expect(host.querySelector(".study-paths")).not.toBeNull();
-    await click("Custom");
-    expect(
-      host.querySelector<HTMLDetailsElement>(".study-advanced")!.open,
-    ).toBe(false);
-    await click("Start studying");
-    const prompt = host.querySelector(".study-question h1")!.textContent;
-    await click("Enlarge globe");
-    expect(host.querySelector(".mobile-map-prompt")!.textContent).toBe(prompt);
-    const target = savedStudy().settings;
-    expect(target.topics).toContain("countries");
-    await act(async () => probe.props!.onSelect(member("wurl:FRA")));
-    expect(
-      host.querySelector("main")!.classList.contains("globe-expanded"),
-    ).toBe(false);
-    expect(host.querySelector(".mode-incoming .round-feedback")).not.toBeNull();
-    expect(host.querySelector("canvas")).toBe(earth);
-    expect(probe.mounts).toBe(1);
-  });
-  it.each([
-    ["wurl:RUS", "Kalmyk", "Mansi"],
-    ["wurl:MOZ", "Portuguese (Mozambique)", "Makhuwa"],
-  ])(
-    "shows readable language names for %s in Explore",
-    async (id, first, second) => {
-      history.replaceState(null, "", "/explore");
-      await mount();
-      await act(async () => probe.props!.onSelect(member(id)));
-      const label = [...host.querySelectorAll(".mode-incoming dt")].find(
-        (dt) => dt.textContent === "Languages",
-      )!;
-      expect(label.nextElementSibling!.textContent).toContain(first);
-      expect(label.nextElementSibling!.textContent).toContain(second);
-      expect(label.nextElementSibling!.textContent).not.toMatch(
-        /\b(xal|vmw|mns)\b/,
-      );
-    },
-  );
   it("defers Journey warming until idle and retries a failed load without replacing Earth", async () => {
     const loader = vi.spyOn(journeyRegistry, "loadJourney");
     await mount();
@@ -1021,80 +1004,6 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus.length).toBeGreaterThan(0);
     expect(host.querySelector("canvas")).toBe(canvas);
   });
-  it("places editable pins on the shared globe and commits city markers without country answers", async () => {
-    const date = "2026-10-06";
-    localStorage.setItem(
-      DAILY_KEY,
-      JSON.stringify({
-        version: 1,
-        activeDate: date,
-        attempts: {
-          [date]: {
-            date,
-            journeyId: EIGHTH_JOURNEY.id,
-            scheduleVersion: 1,
-            game: { ...initialGame, phase: "playing" },
-          },
-        },
-      }),
-    );
-    history.replaceState(null, "", "/daily");
-    await mount();
-    expect(probe.props!.onCoordinateTap).toBeTypeOf("function");
-    expect(probe.props!.places).toEqual([]);
-    expect(probe.props!.showBorders).toBe(false);
-    await act(async () =>
-      probe.props!.onCoordinateTap!({ lat: -12.04318, lng: -77.02824 }),
-    );
-    expect(probe.props!.places).toHaveLength(1);
-    expect(probe.props!.places[0]).toMatchObject({
-      kind: "pin",
-      visualState: "selected",
-    });
-    expect(
-      JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts[date].game.pin,
-    ).toEqual({ lat: -12.04318, lng: -77.02824 });
-    await click("Submit pin");
-    expect(host.textContent).toContain("Your pin was less than 1 km away.");
-    expect(probe.props!.places).toHaveLength(2);
-    await click("Next");
-    expect(probe.props!.placeInteraction).toBe(true);
-    expect(probe.props!.regionInteraction).toBe(false);
-    expect(probe.props!.onCoordinateTap).toBeUndefined();
-    expect(probe.props!.places).toHaveLength(6);
-    expect(probe.props!.places.every((p) => !p.name && !p.hoverName)).toBe(
-      true,
-    );
-    expect(host.querySelector("#country-guess")).toBeNull(); // find-city prompts require location recall
-    await act(async () => probe.props!.onSelect(member("wurl:FRA")));
-    expect(host.querySelector(".round-feedback")).toBeNull();
-    await act(async () =>
-      probe.props!.onPlace(
-        probe.props!.places.find((p) => p.id === "place:2988507")!,
-      ),
-    );
-    expect(host.querySelector(".round-feedback")!.textContent).toContain(
-      "Correct answer: Paris",
-    );
-    expect(
-      probe.props!.places.find((p) => p.id === "place:2988507")!.visualState,
-    ).toBe("correct");
-    await click("Next");
-    expect(probe.props!.places).toEqual([]);
-    expect(probe.props!.showBorders).toBe(false);
-    expect(probe.props!.regions.some((r) => r.id === "wurl:USA-NM")).toBe(
-      false,
-    );
-    await act(async () =>
-      probe.props!.onCoordinateTap!({ lat: 34, lng: -106 }),
-    );
-    await click("Submit pin");
-    expect(host.querySelector(".round-feedback")!.textContent).toContain(
-      "Correct answer: New Mexico",
-    );
-    expect(probe.props!.states["wurl:USA-NM"]).toBe("correct");
-    expect(probe.mounts).toBe(1);
-  });
   it("keeps Antarctica on its cached country surface without exposing or fetching placeholder regions", async () => {
     await mount();
     await click("Explore");
@@ -1110,111 +1019,6 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       original,
     );
     expect(probe.mounts).toBe(1);
-  });
-  it("makes Journey 6 playable through Admin with its first typing-only question", async () => {
-    await mount();
-    await click("Admin");
-    const select = host.querySelector<HTMLSelectElement>(
-      ".mode-incoming select",
-    )!;
-    expect(
-      [...select.options].find((o) => o.value === SIXTH_JOURNEY.id)
-        ?.textContent,
-    ).toContain("Journey 6");
-    await act(async () => {
-      select.value = SIXTH_JOURNEY.id;
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    await click("Set today’s Journey");
-    await click("Home");
-    await click("Play");
-    expect(host.textContent).toContain(SIXTH_JOURNEY.rounds[0].prompt);
-    expect(probe.props!.regionNames).toBe("none");
-    expect(probe.props!.states["wurl:LSO"]).toBe("hinted");
-    expect(probe.mounts).toBe(1);
-  });
-  it("opens Journey 7 through Admin with hidden labels and no renderer replacement", async () => {
-    await mount();
-    await click("Admin");
-    const select = host.querySelector<HTMLSelectElement>(
-      ".mode-incoming select",
-    )!;
-    expect(
-      [...select.options].find((o) => o.value === SEVENTH_JOURNEY.id)
-        ?.textContent,
-    ).toContain("Journey 7");
-    await act(async () => {
-      select.value = SEVENTH_JOURNEY.id;
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    await click("Set today’s Journey");
-    await click("Home");
-    await click("Play");
-    expect(host.textContent).toContain(SEVENTH_JOURNEY.rounds[0].prompt);
-    expect(probe.props!.states["wurl:NZL"]).toBe("selectable");
-    expect(probe.props!.states["wurl:NLD-ZE"]).toBe("hinted");
-    expect(probe.props!.regionNames).toBe("none");
-    expect(probe.mounts).toBe(1);
-  });
-  it("accepts a Mexico globe tap without exposing Nuevo León until the answer is committed", async () => {
-    const date = "2026-10-06";
-    localStorage.setItem(
-      DAILY_KEY,
-      JSON.stringify({
-        version: 1,
-        activeDate: date,
-        attempts: {
-          [date]: {
-            date,
-            journeyId: SEVENTH_JOURNEY.id,
-            scheduleVersion: 1,
-            game: { ...initialGame, phase: "playing", roundIndex: 4 },
-          },
-        },
-      }),
-    );
-    history.replaceState(null, "", "/daily");
-    await mount();
-    expect(probe.props!.regions.some((r) => r.id === "wurl:MEX-NLE")).toBe(
-      false,
-    );
-    expect(probe.props!.states["wurl:MEX"]).toBe("selectable");
-    expect(probe.props!.regionNames).toBe("none");
-    await act(async () => probe.props!.onSelect(member("wurl:MEX")));
-    expect(host.textContent).toContain("Well spotted.");
-    expect(probe.props!.regions.some((r) => r.id === "wurl:MEX-NLE")).toBe(
-      true,
-    );
-    expect(probe.props!.states["wurl:MEX-NLE"]).toBe("correct");
-  });
-  it("shows selected state names and hover names in the New England question", async () => {
-    const date = "2026-10-06";
-    localStorage.setItem(
-      DAILY_KEY,
-      JSON.stringify({
-        version: 1,
-        activeDate: date,
-        attempts: {
-          [date]: {
-            date,
-            journeyId: SEVENTH_JOURNEY.id,
-            scheduleVersion: 1,
-            game: { ...initialGame, phase: "playing", roundIndex: 2 },
-          },
-        },
-      }),
-    );
-    history.replaceState(null, "", "/daily");
-    await mount();
-    expect(probe.props!.regionNames).toBe("all");
-    const maine = probe.props!.regions.find((r) => r.id === "wurl:USA-ME")!;
-    await act(async () => probe.props!.onSelect(maine));
-    expect(host.querySelector(".committed-choices")!.textContent).toContain(
-      "Maine",
-    );
-    expect(host.textContent).toContain(
-      "Select the six U.S. states that make up New England.",
-    );
   });
   it("prioritizes selected-country details, folds settings, and lazily loads a worldwide subdivision branch", async () => {
     await mount();
@@ -1401,7 +1205,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       );
     },
   );
-  it("resumes Journey 5 with five typing-only fields and reveals the state route after submission", async () => {
+  it("resumes North America with one typing-only field and reveals the state route after submission", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
     vi.setSystemTime(new Date(2026, 9, 5, 12));
     const date = "2026-10-05";
@@ -1423,9 +1227,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     await mount();
     await click("Resume");
-    expect(host.textContent).toContain(
-      "Name five U.S. states that border Canada",
-    );
+    expect(host.textContent).toContain("Name a U.S. state that borders Mexico");
     expect(probe.props!.showBorders).toBe(false);
     expect(probe.props!.regionNames).toBe("none");
     expect(probe.props!.places).toHaveLength(0);
@@ -1434,7 +1236,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         ".mode-incoming .answer-form input",
       ),
     ];
-    expect(fields).toHaveLength(5);
+    expect(fields).toHaveLength(1);
     const enter = async (field: HTMLInputElement, value: string) =>
       act(async () => {
         Object.getOwnPropertyDescriptor(
@@ -1443,29 +1245,16 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         )!.set!.call(field, value);
         field.dispatchEvent(new Event("input", { bubbles: true }));
       });
-    for (const [i, value] of [
-      "Maine",
-      "NY",
-      "Ohio",
-      "Washington",
-      "Alaska",
-    ].entries())
-      await enter(fields[i], value);
+    await enter(fields[0], "CA");
     await act(async () =>
       probe.props!.onSelect(
-        probe.props!.regions.find((r) => r.id === "wurl:USA-CA")!,
+        probe.props!.regions.find((r) => r.id === "wurl:USA-TX")!,
       ),
     );
-    expect(fields.map((f) => f.value)).toEqual([
-      "Maine",
-      "NY",
-      "Ohio",
-      "Washington",
-      "Alaska",
-    ]);
+    expect(fields[0].value).toBe("CA");
     await click("Submit answer");
     expect(host.textContent).toContain("Nicely remembered.");
-    expect(probe.props!.states["wurl:USA-ME"]).toBe("correct");
+    expect(probe.props!.states["wurl:USA-CA"]).toBe("correct");
     const next = [...host.querySelectorAll<HTMLButtonElement>("button")].find(
       (b) => !b.closest("[inert]") && b.textContent?.includes("Next"),
     )!;
@@ -1486,9 +1275,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "California → Arizona → New Mexico → Oklahoma → Missouri",
     );
     await click("Admin");
-    expect(host.textContent).toContain("Journey 5 is active.");
+    expect(host.textContent).toContain("Journey 7 is active.");
     expect(
-      host.querySelector('option[value="north-america-v1"]'),
+      host.querySelector('option[value="north-america-v2"]'),
     ).not.toBeNull();
     expect(probe.mounts).toBe(1);
   });
@@ -1938,7 +1727,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       select.dispatchEvent(new Event("change", { bubbles: true }));
     });
     await click("Set today’s Journey");
-    expect(host.textContent).toContain("Journey 4 is active.");
+    expect(host.textContent).toContain("Journey 2 is active.");
     expect(host.querySelector("canvas")).toBe(canvas);
     await click("Home");
     await click("Play");
@@ -2030,12 +1819,12 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       JSON.stringify({
         version: 1,
         attempts: {},
-        overrides: { "2026-10-05": "long-way-home-v2" },
+        overrides: {},
       }),
     );
     await mount();
     await click("Play");
-    await act(async () => probe.props!.onSelect(member("wurl:NAM")));
+    await act(async () => probe.props!.onSelect(member("wurl:CAN")));
     expect(host.textContent).toContain("Well spotted.");
     const saved = JSON.parse(localStorage.getItem(DAILY_KEY)!);
     expect(saved.attempts["2026-10-05"].game.answers).toHaveLength(1);
@@ -2045,13 +1834,13 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Home");
     expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
-      journeyRegistry.JOURNEY_INDEX[3].title,
+      FOURTH_JOURNEY.title,
     );
     expect(host.textContent).toContain("Continue 2026-10-05");
     await click("Continue 2026-10-05");
     expect(host.textContent).toContain("Well spotted.");
     await click("Next");
-    expect(probe.props!.showBorders).toBe(false);
+    expect(probe.props!.showBorders).toBe(true);
     expect(probe.props!.regionNames).toBe("none");
     await act(async () => {
       root.unmount();
@@ -2060,9 +1849,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await mount();
     expect(location.pathname).toBe("/daily");
     expect(host.textContent).toContain(
-      "What is the fewest number of international land borders you must cross from Namibia to Chad?",
+      "Which two languages are official at Canada’s federal level?",
     );
-    expect(probe.props!.showBorders).toBe(false);
+    expect(probe.props!.showBorders).toBe(true);
   });
   it("resumes natural rotation on entering Explore and Home after interaction", async () => {
     await mount();

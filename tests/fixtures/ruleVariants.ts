@@ -1,5 +1,5 @@
 // Engine coverage fixtures only; these are not authored or playable library questions.
-import { SECOND_JOURNEY } from "../../src/game/secondJourney";
+import { SECOND_JOURNEY } from "./engine/secondJourney";
 import { CAPITALS } from "../../src/game/quizData";
 import type { Question } from "../../src/game/questions";
 const amman = CAPITALS.find((c) => c.name === "Amman")!;

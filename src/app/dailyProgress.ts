@@ -1,3 +1,4 @@
+import { RETIRED_JOURNEY_IDS } from "../game/retiredJourneys";
 import { ACTIVE_JOURNEY_IDS } from "../game/journeyRotation";
 import { validPin } from "../game/answerTargets";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
@@ -236,7 +237,8 @@ export function recoverDaily(
 ): DailyProgress | undefined {
   if (!isRecord(value) || value.version !== DAILY_VERSION) return;
   // A temporarily unavailable locally published Journey may return later.
-  // Keep its entire original save untouched instead of treating it as damage.
+  // Keep its original save untouched instead of treating it as damage.
+  // Known retired editions are permanent removals, so their records can be dropped.
   const referenced = [
     ...[value.attempts, value.archivedAttempts].flatMap((items) =>
       isRecord(items)
@@ -249,7 +251,10 @@ export function recoverDaily(
   ];
   if (
     referenced.some(
-      (id) => typeof id === "string" && !catalog.some((j) => j.id === id),
+      (id) =>
+        typeof id === "string" &&
+        !RETIRED_JOURNEY_IDS.has(id) &&
+        !catalog.some((j) => j.id === id),
     )
   )
     return;

@@ -59,7 +59,7 @@ describe("local daily schedule and persistence", () => {
     expect(dailyJourney(date, switched)).toBe(JOURNEYS[3]);
     const fourth = openDaily(switched, date);
     expect(fourth.attempts[date].journeyId).toBe(JOURNEYS[3].id);
-    expect(dailyJourney("2026-10-06", fourth)).toBe(JOURNEYS[3]);
+    expect(dailyJourney("2026-10-06", fourth)).toBe(JOURNEYS[1]);
     const restored = setDailyPuzzle(fourth, date, JOURNEYS[0].id);
     expect(restored.attempts[date].game.text).toBe("saved input");
     expect(validDaily(JSON.parse(JSON.stringify(restored)))).toBe(true);
@@ -86,7 +86,7 @@ describe("local daily schedule and persistence", () => {
     const started = openDaily(emptyDaily, "2026-10-05");
     const persisted = JSON.parse(JSON.stringify(started));
     expect(validDaily(persisted)).toBe(true);
-    expect(dailyJourney("2026-10-06")).toBe(JOURNEYS[3]);
+    expect(dailyJourney("2026-10-06")).toBe(JOURNEYS[1]);
     expect(persisted.activeDate).toBe("2026-10-05");
     const nextDay = openDaily(persisted, "2026-10-06");
     expect(Object.keys(nextDay.attempts)).toHaveLength(2);
