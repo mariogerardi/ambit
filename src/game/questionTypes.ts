@@ -13,6 +13,7 @@ export const ANSWER_TYPES: Partial<Record<AnswerMode, string>> = {
   "ordered-capitals": "Ordered capital names",
   "choice-single": "Single choice",
   "choice-multiple": "Multiple choices",
+  "choice-order": "Order cards",
 };
 export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
   "pin-distance": "Place a pin near a local place",

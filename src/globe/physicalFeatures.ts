@@ -1,4 +1,5 @@
-import { Group } from "three";
+import { Group, Mesh, MeshBasicMaterial, DoubleSide } from "three";
+import ConicPolygonGeometry from "three-conic-polygon-geometry";
 import type { PerspectiveCamera } from "three";
 import { geoDistance, geoInterpolate } from "d3-geo";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
@@ -50,6 +51,7 @@ export class PhysicalFeatures {
   private labels = new PlaceLabels();
   private lines = new Map<string, { line: LineSegments2; rank: number }>();
   private activeLines = new Set<string>();
+  private surfaces = new Map<PhysicalFeature, Group>();
   private data?: PhysicalFeature[];
   private radius = 100;
   private labelLevels: PlaceFeature[][] = [[], [], []];
@@ -66,15 +68,65 @@ export class PhysicalFeatures {
     this.radius = radius;
     this.activeLines.clear();
     for (const { line } of this.lines.values()) line.visible = false;
-    const ranks = [
+    for (const surface of this.surfaces.values()) surface.visible = false;
+    for (const feature of layer.features) {
+      if (!feature.geometry) continue;
+      let surface = this.surfaces.get(feature);
+      if (!surface) {
+        surface = new Group();
+        const material = new MeshBasicMaterial({
+          color: feature.color ?? "#d7b17d",
+          opacity: feature.fillOpacity ?? 0.2,
+          transparent: true,
+          depthWrite: false,
+          side: DoubleSide,
+          polygonOffset: true,
+          polygonOffsetFactor: -1,
+          polygonOffsetUnits: -2,
+        });
+        const polygons =
+          feature.geometry.type === "Polygon"
+            ? [feature.geometry.coordinates]
+            : feature.geometry.coordinates;
+        for (const polygon of polygons) {
+          const mesh = new Mesh(
+            new ConicPolygonGeometry(
+              polygon,
+              0,
+              radius * (1 + physicalSurfaceAltitude),
+              false,
+              true,
+              false,
+              0.25,
+            ),
+            material,
+          );
+          mesh.raycast = () => {};
+          mesh.renderOrder = 4;
+          surface.add(mesh);
+        }
+        surface.raycast = () => {};
+        this.surfaces.set(feature, surface);
+        this.group.add(surface);
+      }
+      surface.visible = true;
+    }
+    const groups = [
       ...new Set(
-        layer.features.filter((f) => f.paths?.length).map((f) => f.rank),
+        layer.features
+          .filter((f) => f.paths?.length)
+          .map((f) => `${f.rank}|${f.color ?? "#72b9d2"}`),
       ),
     ];
     // Batch river segments by importance: a few draw calls instead of hundreds.
-    for (const rank of ranks) {
+    for (const group of groups) {
+      const [rankText, color] = group.split("|");
+      const rank = Number(rankText);
       const features = layer.features.filter(
-        (f) => f.rank === rank && f.paths?.length,
+        (f) =>
+          f.rank === rank &&
+          (f.color ?? "#72b9d2") === color &&
+          f.paths?.length,
       );
       const key = features.map((f) => f.id).join("|");
       this.activeLines.add(key);
@@ -88,7 +140,7 @@ export class PhysicalFeatures {
             ),
           ),
           new LineMaterial({
-            color: "#72b9d2",
+            color,
             linewidth: 1.6,
             transparent: true,
             opacity: 0.85,
@@ -176,6 +228,16 @@ export class PhysicalFeatures {
       line.material.dispose();
     }
     this.lines.clear();
+    for (const surface of this.surfaces.values()) {
+      const materials = new Set<MeshBasicMaterial>();
+      for (const object of surface.children) {
+        const mesh = object as Mesh<ConicPolygonGeometry, MeshBasicMaterial>;
+        mesh.geometry.dispose();
+        materials.add(mesh.material);
+      }
+      for (const material of materials) material.dispose();
+    }
+    this.surfaces.clear();
     this.group.clear();
     this.data = undefined;
   }

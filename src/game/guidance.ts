@@ -4,6 +4,15 @@ import type { GameState } from "./state";
 export type HelpStage = "hinted" | "assisted";
 export type HelpUsage = Record<string, HelpStage>;
 
+export function lockedOrderSlots(
+  question: Question,
+  game: Pick<GameState, "help">,
+) {
+  return game.help?.[question.id] === "assisted"
+    ? (question.guidance?.assist?.fixedSlots ?? [])
+    : [];
+}
+
 export function candidateAvailable(
   question: Question,
   game: Pick<GameState, "help" | "selectedIds">,

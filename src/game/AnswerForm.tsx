@@ -7,6 +7,7 @@ import { AnswerInput } from "./AnswerInput";
 import { AnswerCounter } from "./AnswerCounter";
 import { QuestionActions } from "./QuestionActions";
 import { candidateAvailable } from "./guidance";
+import { OrderAnswer } from "./OrderAnswer";
 
 export function AnswerForm({
   question,
@@ -21,6 +22,16 @@ export function AnswerForm({
   dispatch: Dispatch<Action>;
   webgl: boolean;
 }) {
+  if (question.mode === "choice-order")
+    return (
+      <OrderAnswer
+        key={question.id}
+        question={question}
+        context={context}
+        game={game}
+        dispatch={dispatch}
+      />
+    );
   const assistCandidates = question.guidance?.assist?.candidateIds;
   const guidance = question.guidance
     ? {
@@ -233,7 +244,9 @@ export function AnswerForm({
           <QuestionActions guidance={guidance} showSubmit={false} />
         )}
         {!question.disclosure.namedChoices &&
-          (!city || question.allowTyping === true || !webgl) && (
+          ((!city && question.allowTyping !== false) ||
+            question.allowTyping === true ||
+            !webgl) && (
             <details className="typed-country-guess" open={!webgl || undefined}>
               <summary>Answer by typing</summary>
               <form

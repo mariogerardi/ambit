@@ -44,25 +44,32 @@ Counts below refer to the 65 current questions, not every possible engine pairin
 The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
-| Mode                | Control                | Questions |
-| ------------------- | ---------------------- | --------: |
-| `pin`               | Drop a pin             |        15 |
-| `city-single`       | Single city pick       |         1 |
-| `city-multiple`     | Multiple city picks    |         1 |
-| `map-single`        | Single country pick    |        11 |
-| `map-multiple`      | Multiple country picks |         6 |
-| `number`            | Number                 |         2 |
-| `text`              | Free response          |        11 |
-| `typed-regions`     | Typed region names     |         3 |
-| `ordered-countries` | Ordered country names  |         0 |
-| `ordered-capitals`  | Ordered capital names  |         0 |
-| `choice-single`     | Single choice          |        12 |
-| `choice-multiple`   | Multiple choices       |         3 |
+| Mode                | Control                 | Questions |
+| ------------------- | ----------------------- | --------: |
+| `pin`               | Drop a pin              |        14 |
+| `city-single`       | Single city pick        |         1 |
+| `city-multiple`     | Multiple city picks     |         1 |
+| `map-single`        | Single country pick     |        11 |
+| `map-multiple`      | Multiple country picks  |         5 |
+| `number`            | Number                  |         2 |
+| `text`              | Free response           |        10 |
+| `typed-regions`     | Typed region names      |         3 |
+| `ordered-countries` | Ordered country names   |         0 |
+| `ordered-capitals`  | Ordered capital names   |         0 |
+| `choice-single`     | Single choice           |        14 |
+| `choice-multiple`   | Multiple choices        |         3 |
+| `choice-order`      | Order cards with spares |         1 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
 example or playground selector. Multiple-choice questions are capped at six
 options. The numeric counter supports nonnegative integers with explicit +/-
 controls and direct typing; a new numeric rule should respect that UI contract.
+
+`choice-order` stores candidate IDs in `Response.ordered`, with a
+`country-ids` rule marked `ordered: true`. It supports spare/distractor cards,
+mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
+The Andes finale is the reviewed example; correctness still requires all three
+original neighbors in the original order.
 
 ## Knowledge rules and data scope
 

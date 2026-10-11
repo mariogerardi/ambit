@@ -1,5 +1,5 @@
 import { validPin } from "./answerTargets";
-import { candidateAvailable } from "./guidance";
+import { candidateAvailable, lockedOrderSlots } from "./guidance";
 import type { HelpUsage } from "./guidance";
 import {
   canSelect,
@@ -31,6 +31,7 @@ export type Action =
   | { type: "guess-country" }
   | { type: "text"; value: string }
   | { type: "ordered"; index: number; value: string }
+  | { type: "order-card"; index: number; id: string }
   | { type: "clear" }
   | { type: "request-hint" }
   | { type: "request-assist" }
@@ -99,10 +100,26 @@ export function gameReducer(
     return round.guidance && !state.help?.[round.id]
       ? { ...state, help: { ...state.help, [round.id]: "hinted" } }
       : state;
-  if (action.type === "request-assist")
-    return round.guidance?.assist && state.help?.[round.id] === "hinted"
-      ? { ...state, help: { ...state.help, [round.id]: "assisted" } }
-      : state;
+  if (action.type === "request-assist") {
+    if (!round.guidance?.assist || state.help?.[round.id] !== "hinted")
+      return state;
+    const helped: GameState = {
+      ...state,
+      help: { ...state.help, [round.id]: "assisted" },
+    };
+    const fixed = lockedOrderSlots(round, helped);
+    if (fixed.length) {
+      helped.ordered = Array.from(
+        { length: round.count },
+        (_, index) =>
+          fixed.find((slot) => slot.index === index)?.id ??
+          (fixed.some((slot) => slot.id === state.ordered[index])
+            ? ""
+            : (state.ordered[index] ?? "")),
+      );
+    }
+    return helped;
+  }
   if (action.type === "drop-pin")
     return round.mode === "pin" && validPin(action)
       ? {
@@ -114,6 +131,7 @@ export function gameReducer(
   if (action.type === "text")
     return { ...state, text: action.value, inputError: undefined };
   if (action.type === "ordered") {
+    if (round.mode === "choice-order") return state;
     if (action.index < 0 || action.index >= responseCount(round, context))
       return state;
     const ordered = Array.from(
@@ -122,10 +140,46 @@ export function gameReducer(
     );
     return { ...state, ordered, inputError: undefined };
   }
+  if (action.type === "order-card") {
+    const fixed = lockedOrderSlots(round, state);
+    if (
+      round.mode !== "choice-order" ||
+      !Number.isInteger(action.index) ||
+      action.index < -1 ||
+      action.index >= round.count ||
+      !canSelect(round, context, action.id) ||
+      fixed.some((slot) => slot.id === action.id || slot.index === action.index)
+    )
+      return state;
+    const ordered = Array.from(
+      { length: round.count },
+      (_, i) => state.ordered[i] ?? "",
+    );
+    const from = ordered.indexOf(action.id);
+    if (from === action.index) return state;
+    if (from >= 0)
+      ordered[from] = action.index >= 0 ? ordered[action.index] : "";
+    if (action.index >= 0) ordered[action.index] = action.id;
+    return { ...state, ordered, inputError: undefined };
+  }
   if (action.type === "clear")
     return round.commitment === "immediate"
       ? state
-      : { ...state, pin: undefined, selectedIds: [], text: "", ordered: [] };
+      : {
+          ...state,
+          pin: undefined,
+          selectedIds: [],
+          text: "",
+          ordered: lockedOrderSlots(round, state).length
+            ? Array.from(
+                { length: round.count },
+                (_, index) =>
+                  lockedOrderSlots(round, state).find(
+                    (slot) => slot.index === index,
+                  )?.id ?? "",
+              )
+            : [],
+        };
   if (action.type === "select" || action.type === "guess-country") {
     if (
       round.mode !== "city-single" &&

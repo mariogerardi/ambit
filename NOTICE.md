@@ -211,3 +211,17 @@ No connections are fabricated. The derived database is available under **ODbL
 `src/game/data/danube-context.v1.json`. The application attributes OpenStreetMap
 beside the Journey map and links the downloadable data in World credits.
 The two-bank feedback diagram is explicitly schematic, not sourced urban geometry.
+
+## Andes Journey physical context
+
+`src/game/data/andes-context.v1.json` extracts the Andes and Altiplano extents,
+Lake Titicaca shoreline, and summit coordinates from **Natural Earth v5.1.2**,
+public domain. Source URLs and SHA-256 checksums are embedded in the asset.
+`scripts/prepare-andes-context.py` retains source vertices rounded to four decimal
+places; mountain footprints are generalized extents, not precise ridgelines.
+The northern display uses the main Andes extent south of 8°N plus the separately
+sourced Cordillera de Mérida footprint, excluding the Venezuelan Coastal Range
+from this Journey's Andean convention. Clipping intersections are retained.
+Chile’s frontier highlights use only shared edges of the bundled canonical
+country geometry. These display-only features never change country picking
+or grading.

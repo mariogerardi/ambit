@@ -116,6 +116,10 @@ export interface PhysicalFeature {
   lng: number;
   rank: number;
   paths?: number[][][];
+  /** Display-only extent/shoreline; never enters political picking or grading. */
+  geometry?: Polygon | MultiPolygon;
+  color?: string;
+  fillOpacity?: number;
   /** Alternate anchors inside a large feature, used to keep its name in regional views. */
   labelAnchors?: number[][];
 }

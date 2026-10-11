@@ -119,6 +119,7 @@ export function correctAnswerSummary(
   const ordered = [
     "ordered-countries",
     "ordered-capitals",
+    "choice-order",
     "land-path",
   ].includes(question.mode);
   return {

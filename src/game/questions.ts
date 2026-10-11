@@ -42,6 +42,7 @@ export type AnswerMode =
   | "ordered-capitals"
   | "land-path"
   | "choice-single"
+  | "choice-order"
   | "choice-multiple";
 export interface FactSource {
   name: string;
@@ -123,6 +124,8 @@ export interface Question {
       overlays?: MapOverlay[];
       /** Named reference places may help locate an unmarked target. */
       places?: PlaceFeature[];
+      /** A stronger ordering assist may place and lock an authored card. */
+      fixedSlots?: { index: number; id: string }[];
     };
   };
   instruction: string;
@@ -193,7 +196,7 @@ export interface Question {
     /** Keep the highlighted fragment on feedback instead of restoring the owner. */
     reveal?: "part" | "part-and-owner";
   }[];
-  /** City map prompts require a marker pick unless typing is explicitly enabled. */
+  /** Explicit false suppresses the typing shortcut; unavailable-globe fallback remains. */
   allowTyping?: boolean;
   places?: PlaceFeature[];
   feedbackPlaces?: PlaceFeature[];
@@ -205,6 +208,8 @@ export interface Question {
   feedbackPhysicalFeatures?: PhysicalFeature[];
   image?: { src: string; alt: string; feedbackAlt: string };
   choices?: { id: string; label: string }[];
+  /** Directional captions for an ordering puzzle's slots. */
+  orderLabels?: string[];
   overlays?: MapOverlay[];
   /** Explanatory guides appear only after submission, never as playable clues. */
   feedbackOverlays?: MapOverlay[];
@@ -329,6 +334,35 @@ export function createQuestionContext(
         throw Error(
           `Assist must preserve answers and plausible alternatives: ${round.id}.`,
         );
+    }
+    if (round.mode === "choice-order") {
+      const ids = (round.choices ?? []).map((choice) => choice.id);
+      const expected = solutionIds(round, context);
+      const fixed = round.guidance?.assist?.fixedSlots ?? [];
+      if (
+        round.rule.type !== "country-ids" ||
+        !round.rule.ordered ||
+        round.commitment !== "submit" ||
+        round.selection.type !== "none" ||
+        new Set(ids).size !== ids.length ||
+        ids.length < round.count ||
+        expected.length !== round.count ||
+        new Set(expected).size !== expected.length ||
+        expected.some((id) => !ids.includes(id)) ||
+        new Set(fixed.map((slot) => slot.index)).size !== fixed.length ||
+        fixed.some(
+          (slot) =>
+            !Number.isInteger(slot.index) ||
+            slot.index < 0 ||
+            slot.index >= round.count ||
+            expected[slot.index] !== slot.id,
+        ) ||
+        fixed.length >= round.count ||
+        (round.orderLabels && round.orderLabels.length !== round.count)
+      )
+        throw Error(`Invalid ordering puzzle configuration: ${round.id}.`);
+    } else if (round.guidance?.assist?.fixedSlots?.length) {
+      throw Error(`Fixed slots require an ordering puzzle: ${round.id}.`);
     }
     if (
       round.disclosure.namedChoices &&
@@ -502,7 +536,7 @@ export function selectableIds(
   context: QuestionContext,
 ): string[] {
   const selection = question.selection;
-  if (question.mode === "choice-single" || question.mode === "choice-multiple")
+  if (question.mode.startsWith("choice-"))
     return (question.choices ?? []).map((c) => c.id);
   if (selection.type === "none") return [];
   if (selection.type === "ids") return selection.ids;
@@ -624,6 +658,14 @@ export function canSubmit(
       Number(response.text) >= 0
     );
   if (question.mode === "text") return response.text.trim() !== "";
+  if (question.mode === "choice-order")
+    return (
+      response.ordered.length === question.count &&
+      new Set(response.ordered).size === question.count &&
+      response.ordered.every((id) =>
+        selectableIds(question, context).includes(id),
+      )
+    );
   if (
     question.mode === "typed-regions" ||
     question.mode === "ordered-countries" ||
@@ -642,6 +684,11 @@ export function isCorrect(
 ) {
   const rule = question.rule,
     expected = solutionIds(question, context);
+  if (question.mode === "choice-order")
+    return (
+      canSubmit(question, context, response) &&
+      response.ordered.every((id, index) => id === expected[index])
+    );
   if (rule.type === "pin-distance") {
     const distance = pinDistance(question, response);
     return distance !== undefined && distance <= rule.radiusKm + 1e-7;

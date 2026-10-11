@@ -70,11 +70,16 @@ describe("connected Journey drafts and answer feedback", () => {
       ANDES_JOURNEY.title,
       ANDES_JOURNEY,
       [
-        select("wurl:COL", "wurl:ECU", "wurl:PER"),
-        text("Quito"),
+        select("city:bogota"),
+        select("peak:chimborazo"),
         select("wurl:PER", "wurl:BOL"),
         select("wurl:ARG"),
-        [{ type: "drop-pin", lat: -33.45, lng: -70.67 }, { type: "submit" }],
+        [
+          { type: "order-card", index: 0, id: "wurl:PER" },
+          { type: "order-card", index: 1, id: "wurl:BOL" },
+          { type: "order-card", index: 2, id: "wurl:ARG" },
+          { type: "submit" },
+        ],
       ],
     ],
     [
@@ -109,14 +114,13 @@ describe("connected Journey drafts and answer feedback", () => {
     },
   );
 
-  it("preserves the four seed questions' reviewed answer rules", () => {
+  it("preserves the unmodified seed questions' reviewed answer rules", () => {
     expect(CANADA_JOURNEY.rounds[0].rule).toEqual(
       SECOND_JOURNEY.rounds[0].rule,
     );
     expect(CANADA_JOURNEY.rounds[1].rule).toEqual(
       SECOND_JOURNEY.rounds[1].rule,
     );
-    expect(ANDES_JOURNEY.rounds[0].rule).toEqual(SECOND_JOURNEY.rounds[2].rule);
     expect(LATITUDE_JOURNEY.rounds[0].rule).toEqual(
       SECOND_JOURNEY.rounds[3].rule,
     );
@@ -165,14 +169,10 @@ describe("connected Journey drafts and answer feedback", () => {
     expect(
       correctAnswerSummary(missed.question, missed.context, missed.game),
     ).toEqual({ label: "One correct answer", value: "Algiers" });
-    const trio = play(
-      ANDES_JOURNEY,
-      0,
-      select("wurl:ARG", "wurl:BOL", "wurl:CHL"),
-    );
+    const trio = play(ANDES_JOURNEY, 2, select("wurl:PER", "wurl:BOL"));
     expect(
       correctAnswerSummary(trio.question, trio.context, trio.game),
-    ).toEqual({ label: "Correct answers", value: "Argentina, Bolivia, Chile" });
+    ).toEqual({ label: "Correct answers", value: "Peru, Bolivia" });
     const pin = play(ELEVENTH_JOURNEY, 1, [
       { type: "drop-pin", lat: 0, lng: 0 },
       { type: "submit" },

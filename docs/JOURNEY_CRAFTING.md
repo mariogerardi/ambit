@@ -144,6 +144,9 @@ understand the question.
   it must not turn reference geography into an answer marker.
 - Request stages separately. Keep the hint visible after assistance, preserve
   player selections, and record help use per round through reloads and sync.
+- Ordering assists may explicitly place and lock a card, while leaving meaningful
+  work in the remaining slots. Return displaced cards to the spare bank, explain
+  the change, enforce locks in the reducer, and keep the original grading rule.
 - Preserve correctness and completion without point deductions. Record the strongest
   stage as unassisted, hinted, or assisted; count rounds using hints and assists
   separately, with an assisted round counted in both.
@@ -167,6 +170,17 @@ Current implementation details that matter:
   and verify that correct polygons or their display fragments are clickable.
 - A collapsed typing alternative is accessibility/fallback support, not a repair
   for a broken primary map interaction.
+- Author typed recall as `mode: "text"`, with an immediately visible input. For
+  globe-only questions, set `allowTyping: false`; retain typing when WebGL is
+  unavailable. Do not accidentally inherit a bypass from unrelated content.
+- For card ordering, author explicit slots, direction, candidate cards, and any
+  distractors. Allow spare cards, swapping, removal, touch dragging, and keyboard
+  placement. Validate unique IDs, complete slots, order, and assist locks.
+
+Reuse mechanics through technical defaults or builders, and content through
+deliberate adaptation of the same question. Never spread an unrelated completed
+question as a configuration base. Each round's mode, eligibility, commitment,
+and map interaction should be understandable from its own declaration.
 
 A neutral multiple-country configuration can look like this:
 
@@ -260,6 +274,12 @@ transformations, license notices, and downloadable data where required.
 answer-bearing context after submission. These features are display-only and do
 not alter eligibility or grading. Author each stop's cumulative context explicitly
 so an earlier side reveal does not accidentally leak into a later question.
+
+Mountain extents can provide the same persistent continuity as a river. Use
+reviewed footprints rather than an invented ridge or route line, and distinguish
+generalized extent from precise topography. A lake-border reveal needs the actual
+shoreline/area, not only a point label. Withhold that geometry before submission
+when tracing it across visible political borders would supply the answer.
 
 ### Choreograph cameras as a separate review pass
 

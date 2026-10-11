@@ -365,7 +365,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         );
       } else {
         expect(probe.props!.regionInteraction).toBe(false);
-        expect(host.textContent).toContain("Choose two countries.");
+        expect(host.textContent).toContain(
+          "Which two countries share Lake Titicaca?",
+        );
+        expect(host.textContent).not.toContain("Choose two countries.");
         await click("Peru");
         expect(
           host.querySelector<HTMLButtonElement>(

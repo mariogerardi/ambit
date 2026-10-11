@@ -94,17 +94,17 @@
   {
     "id": "along-the-andes-v1",
     "title": "Along the Andes",
-    "description": "Follow South America’s mountain spine: a highland capital, a lake shared by two countries, a towering peak, and a narrow Pacific finish.",
+    "description": "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and Chile’s neighbors.",
     "path": "/journey/along-the-andes",
     "module": "./andesJourney.ts",
     "rounds": [
       {
-        "id": "andes-country-trio-v1",
-        "label": "Mountains"
+        "id": "andes-capital-v2",
+        "label": "Capital"
       },
       {
-        "id": "andes-quito-v1",
-        "label": "Capital"
+        "id": "andes-chimborazo-v2",
+        "label": "Equator"
       },
       {
         "id": "andes-titicaca-v1",
@@ -115,8 +115,8 @@
         "label": "Peak"
       },
       {
-        "id": "andes-chile-pin-v1",
-        "label": "Drop a pin"
+        "id": "andes-chile-neighbors-v2",
+        "label": "Border"
       }
     ]
   },

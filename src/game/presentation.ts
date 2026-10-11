@@ -310,8 +310,10 @@ export function questionVisualStates(
         states[id] = "hinted";
     if (game.phase === "playing" && game.help?.[question.id] === "assisted")
       for (const id of selectableIds(question, context))
-        if (context.targets.has(id) && !candidateAvailable(question, game, id))
-          states[id] = "disabled";
+        if (context.targets.has(id)) {
+          if (!candidateAvailable(question, game, id)) states[id] = "disabled";
+          else if (question.mode.startsWith("map-")) states[id] = "selectable";
+        }
     if (!question.mode.startsWith("choice-"))
       for (const id of game.selectedIds)
         if (context.targets.has(id))
@@ -367,13 +369,16 @@ export function questionVisualStates(
   if (
     question.mode === "typed-regions" ||
     question.mode === "ordered-countries" ||
-    question.mode === "ordered-capitals"
+    question.mode === "ordered-capitals" ||
+    question.mode === "choice-order"
   )
     game.ordered.forEach((value, i) => {
       const id =
-        question.mode === "ordered-capitals"
-          ? capitalForName(context, value)?.countryId
-          : countryIdForName(context, value);
+        question.mode === "choice-order"
+          ? value
+          : question.mode === "ordered-capitals"
+            ? capitalForName(context, value)?.countryId
+            : countryIdForName(context, value);
       if (!id) return;
       const correct =
         question.mode === "typed-regions"
