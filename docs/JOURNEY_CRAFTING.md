@@ -40,7 +40,7 @@ does not shorten the player's question.
 - Make the heading one clear question or task. Do not put scene-setting,
   instructions, and tolerance into the same large heading.
 - Use `instruction` for important mechanics, counts, ordering, or precision.
-  “Drop a pin in Vienna.” can be the heading; “Land within 80 km of the city
+  “Drop a pin in Vienna.” can be the heading; “Land within 50 km of the city
   center.” belongs underneath.
 - Match the instruction to the visible control. “Tap both countries on the
   globe” is clearer than “Choose two countries” when there are no choice buttons.
@@ -60,15 +60,26 @@ before submission. A borderless pin challenge should be an established premise,
 with appropriate targets and tolerance, as in On Russia’s doorstep. Do not inherit
 its settings merely because a new question also uses a pin.
 
-A marker or river segment can locate the subject without naming the answer. For
-example, a marked gorge can ask which countries border it; otherwise the question
-also quietly requires knowing where the gorge is. Decide whether that additional
-knowledge is intended.
+A marker or line can establish where we are, but can also supply the answer
+without a label. Separating location from answer identification takes more than
+turning country names off. If a highlighted line touches exactly two clickable
+polygons, tapping those polygons tests observation, not knowledge of their names.
+Use that deliberately when observation is the intended skill. Otherwise consider
+named choices, typing, a wider context, or different clue geometry.
 
-Review camera centers as clues. A wide view can establish a region; a camera
-centered exactly on a hidden target can undermine the question. For a river
-itinerary, show only the relevant section. An opening full-length river could
-reveal the final destination several questions early.
+**Run the naive-inspection test:** Could someone with none of the intended
+knowledge produce the correct input by tracing a visible line, comparing marker
+positions, following the camera center, or clicking adjacent polygons? Also check
+names disclosed by hovering or selecting. If yes, either make visual observation
+the intended skill or revise the input and display. A plausible prompt can still
+be undermined by its map.
+
+For pin questions, select tolerance deliberately. Check nearby cities, borders,
+and alternative plausible targets, then test both sides of the acceptance radius.
+Convert that radius to the precision available on the smallest supported screen.
+Do not choose an enormous radius to compensate for a poorly framed camera or
+inaccessible input. Conversely, do not demand accuracy the visible map cannot
+support. State the tolerance before submission and show it in the reveal.
 
 Audit Journey descriptions, lead-ins, instructions, input labels, image alt text,
 map labels, and earlier feedback for answer leaks. Naming Vienna is intentional
@@ -118,8 +129,7 @@ map: {
 ```
 
 Do not copy a base multiple-choice configuration into a map or pin question
-without reviewing every inherited setting. The Danube's Iron Gates question and
-the revised Sun of May question originally failed this check.
+without reviewing every inherited setting.
 
 ## Make the reveal explain the answer
 
@@ -140,17 +150,75 @@ The map should explain the same answer as the text:
 - Reveal useful borders, targets, radius guides, or explanatory features after
   both success and failure. Keep color-key wording consistent with what is shown.
 
-`physicalFeatures` supplies local physical context during a question;
-`feedbackPhysicalFeatures` adds answer-bearing context only after submission.
-Reuse reviewed cartographic geometry. These features are display-only and must
-not change answer eligibility or grading. Do not invent a straight line and
-present it as an actual river or underground cave route. Label generalized or
-schematic geography honestly.
+Match the visual emphasis to the actual answer object. A city answer needs a
+city marker, not answer-colored national territory; a sea needs its receiving
+waterbody identified. Keep unrelated land neutral. Pull back if a close-up becomes
+an abstract field without useful reference geography. When the data cannot show
+the relevant urban detail, a small, explicitly **schematic** diagram can explain a
+relationship better than a false impression of map precision.
 
-The Danube's local layers are regenerated with `npm run prepare:journey-map`
-from the existing reviewed `public/geography/physical.v1.json` snapshot. The small
-derived asset records its source revision and clips actual river paths to each
-stop; it does not load the whole physical catalog into the Journey bundle.
+Match feedback praise to the skill used: reasoning, recalling, spotting, or
+placing. An authored override is appropriate when the widget alone does not tell
+us what the player did.
+
+## Treat the map as authored information
+
+Review geometry, highlights, labels, camera framing, and reveal state with the
+same care as the question wording. They jointly control what the player knows.
+
+### Maintain geographic continuity
+
+When one feature carries a Journey, keep previously traveled portions legible and
+extend the route as the story moves forward. A camera change should read as
+traveling farther along the same feature. Context can leave the viewport; it
+should not disappear from the underlying route without an editorial reason.
+Side excursions need not persist when the main itinerary resumes.
+
+Progressive revelation is part of the clue budget. Do not show a full route early
+if its endpoint solves a later question. Reveal the next reach only when it is
+safe, and reserve the true terminus for its intended payoff. Make a shortened
+itinerary explicit, for example “route so far,” so its drawn end does not claim to
+be the physical feature's end.
+
+### Make linear features cartographically honest
+
+A clipped river, road, or coastline can silently tell the player “it ends here.”
+Its visible end must either reach its true terminus, continue beyond the frame,
+fade at the viewport edge, or be clearly qualified as a partial route, local
+segment, or schematic. At a destination reveal, show the actual connection to the
+receiving feature. A narrative claim of arrival cannot repair a visible gap.
+
+Reuse reviewed source geometry. Join segments only where the source establishes
+connectivity; preserve junctions and true endpoints when simplifying. Never
+invent a connector to hide a source gap. If a source cannot support the story,
+choose a better reviewed source or change the display. Keep provenance,
+transformations, license notices, and downloadable data where required.
+
+`physicalFeatures` supplies question context; `feedbackPhysicalFeatures` adds
+answer-bearing context after submission. These features are display-only and do
+not alter eligibility or grading. Author each stop's cumulative context explicitly
+so an earlier side reveal does not accidentally leak into a later question.
+
+### Choreograph cameras as a separate review pass
+
+Review the question camera and feedback camera together for all five stops.
+A question camera should orient the player without centering a hidden target so
+precisely that the framing solves the task. A feedback camera should explain the
+answer at a useful scale. Preserve a sense of movement into the next stop without
+revealing its answer too early. Camera position is part of the clue budget.
+
+Check desktop and narrow screens: labels, cards, and controls change the useful
+map area. Avoid dramatic zooms that lose all geographic context. An authored
+coordinate is a hypothesis until its actual rendered view has been inspected.
+
+### Resolve the whole Journey
+
+Completion should pay off the premise. For a geographic itinerary, show the full
+route and all resolved stops together, rather than a generic answer-country
+flyover. Use meaningful destination labels in the recap; keep active step labels
+spoiler-safe and semantically consistent. A shared-feature Journey can instead
+resolve its common pattern. The completion map must agree with the five reveals
+and must remain legible on a small screen.
 
 ## Review and validation before publishing
 
@@ -158,7 +226,8 @@ Run three distinct passes. Each catches problems the others miss.
 
 1. **Editorial pass:** Read the five stops in order. Confirm premise, concise
    headings, usable instructions, difficulty progression, source support, and
-   no early answer leaks. Read every reveal for repetition and useful insight.
+   no early answer leaks. Run the naive-inspection test for each question. Read
+   every reveal for repetition, useful insight, and emphasis on the right object.
 2. **Interaction and presentation tests:** Check answer acceptance and rejection,
    but also inspect the prepared world: borders, interaction flags, disabled
    states, label disclosure, clue geometry, and feedback features. Exercise the
@@ -166,7 +235,8 @@ Run three distinct passes. Each catches problems the others miss.
 3. **Browser playthrough:** Complete every stop through the intended visible
    controls on desktop and mobile. Tap the actual canvas for map/pin questions;
    typing or direct reducer actions do not substitute. Check small-screen scroll,
-   visible clues, focus changes, labels, and reveals. Verify fallback controls
+   visible clues, route continuity, focus changes, labels, reveals, and the
+   completion payoff. Verify fallback controls
    separately. Use Admin practice; do not change shared dates to test a pack.
 
 A green scoring test is not a completed player-experience review. Record what was

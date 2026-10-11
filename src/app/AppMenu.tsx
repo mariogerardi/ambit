@@ -147,11 +147,18 @@ export function AppMenu({
                 cities &amp; continent membership: GeoNames (CC BY 4.0). Flags:
                 public-domain SVGs from Wikimedia Commons. Regional boundaries:
                 geoBoundaries / U.S. Census Bureau (CC BY 4.0). Map and clue
-                assets are served locally. Question sources appear after
-                answering.
+                assets are served locally. Danube route: OpenStreetMap
+                contributors (ODbL). Question sources appear after answering.
               </p>
               <a href="/NOTICE.txt" target="_blank" rel="noreferrer">
                 Full source and license notices
+              </a>
+              <a
+                href="/geography/danube-context.v1.json"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Danube map data (ODbL)
               </a>
             </details>
           </div>

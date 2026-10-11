@@ -16,6 +16,7 @@ import {
   correctAnswerSummary,
   feedbackLegend,
   roundIdentity,
+  resolvedRoundIdentity,
 } from "./copy";
 export function GameShell({
   journey,
@@ -145,6 +146,32 @@ export function GameShell({
               {feedbackText && (
                 <p className="journey-explanation">{feedbackText}</p>
               )}
+              {round.feedbackDiagram?.type === "river-banks" && (
+                <figure className="river-banks-diagram">
+                  <svg
+                    viewBox="0 0 320 108"
+                    role="img"
+                    aria-label={`${round.feedbackDiagram.westBank} on the west bank, ${round.feedbackDiagram.eastBank} on the east bank of the ${round.feedbackDiagram.river}`}
+                  >
+                    <path d="M164 0 C133 28 181 50 157 76 S153 100 154 108" />
+                    <text x="68" y="43">
+                      {round.feedbackDiagram.westBank}
+                    </text>
+                    <text x="252" y="43">
+                      {round.feedbackDiagram.eastBank}
+                    </text>
+                    <text className="bank-direction" x="68" y="66">
+                      West bank
+                    </text>
+                    <text className="bank-direction" x="252" y="66">
+                      East bank
+                    </text>
+                  </svg>
+                  <figcaption>
+                    {round.feedbackDiagram.river} · schematic
+                  </figcaption>
+                </figure>
+              )}
               {pinFeedback && (
                 <p className="journey-pin-distance">{pinFeedback}</p>
               )}
@@ -221,7 +248,11 @@ export function GameShell({
               return (
                 <li key={question.id}>
                   <span>{String(i + 1).padStart(2, "0")}</span>
-                  <strong>{roundIdentity(question)}</strong>
+                  <strong>
+                    {answer
+                      ? resolvedRoundIdentity(question)
+                      : roundIdentity(question)}
+                  </strong>
                   <span
                     className={
                       answer && !answer.correct
@@ -235,6 +266,11 @@ export function GameShell({
               );
             })}
           </ol>
+          {game.phase === "finished" && journey.completion?.caption && (
+            <p className="journey-route-caption">
+              {journey.completion.caption}
+            </p>
+          )}
           <div className="finish-actions result-actions">
             <button className="primary-button" onClick={onHome}>
               <ActionIcon name="home" />
@@ -254,6 +290,28 @@ export function GameShell({
             </button>
           )}
         </section>
+      )}
+      {(journey.mapAttribution || round.mapCaption) && (
+        <aside className="journey-map-notes" aria-label="Map notes">
+          {round.mapCaption && (
+            <span>
+              {game.phase === "finished"
+                ? (round.feedbackMapCaption ?? round.mapCaption)
+                : game.phase === "feedback"
+                  ? (round.feedbackMapCaption ?? round.mapCaption)
+                  : round.mapCaption}
+            </span>
+          )}
+          {journey.mapAttribution && (
+            <a
+              href={journey.mapAttribution.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {journey.mapAttribution.label}
+            </a>
+          )}
+        </aside>
       )}
       <div className="board-tools">
         {inGame && game.phase === "playing" && (

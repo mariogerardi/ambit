@@ -43,6 +43,8 @@ export interface PlaceFeature {
   visualState?: VisualState;
   answerTarget?: boolean;
   labelHidden?: boolean;
+  /** Authored context can try alternate anchors without becoming an answer target. */
+  labelFlexible?: boolean;
   /** Label-only geographic context must never create a city/capital marker. */
   markerHidden?: boolean;
   hoverName?: string;

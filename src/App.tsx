@@ -1197,6 +1197,10 @@ export function App() {
       return;
     stop();
     setHover(undefined);
+    if (game.phase === "finished" && journey.completion) {
+      frame(journey.completion.focus);
+      return;
+    }
     const stops = journeyStops(journey, context, game.answers);
     if (reduced && stops[0]) frame(stops[0]);
     else globe.current?.flyover(stops);

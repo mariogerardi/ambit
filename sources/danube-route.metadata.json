@@ -1,0 +1,12 @@
+{
+  "attribution": "© OpenStreetMap contributors",
+  "license": "ODbL-1.0",
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "sourceUrl": "https://api.openstreetmap.org/api/0.6/relation/89652/full.json",
+  "reviewedOn": "2026-10-11",
+  "relationVersion": 420,
+  "asset": "/geography/danube-route-source.v1.geojson",
+  "sha256": "54350bc58c2a16fa10d0b156331508f3914422e73d67139d678f5e186a4c6a91",
+  "downloadSha256": "7e6ec44dcc3e948d031756b1d20a658d4c5ce52ee18ad38bec1062b1732b6e2b",
+  "transform": "Main-stream member ways joined only at identical OSM node IDs; three connected named distributary reaches retained. Source coordinates unchanged. Display simplification uses retained vertices and preserves junctions and mouths."
+}

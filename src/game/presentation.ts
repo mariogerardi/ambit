@@ -317,6 +317,7 @@ export function questionVisualStates(
     return states;
   }
   const expected = solutionIds(question, context);
+  if (question.map?.feedbackRegions === "neutral") return states;
   // A pin question's outlined clues stay yellow on reveal; they are not answers.
   if (question.mode === "pin")
     for (const id of question.contextIds ?? [])

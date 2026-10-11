@@ -600,7 +600,7 @@ export class PlaceLabels {
         width,
         height,
         occupied,
-        !!place.answerTarget,
+        !!place.answerTarget || !!place.labelFlexible,
       );
       if (!placement) continue;
       const { box } = placement;

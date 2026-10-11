@@ -5,6 +5,11 @@ import type { PhysicalFeature, PlaceFeature } from "../geography/types";
 import mapContext from "./data/danube-context.v1.json";
 
 const segments = mapContext.segments as Record<string, PhysicalFeature[]>;
+const stages = ["upper", "vienna", "budapest", "gorge", "lower", "delta"];
+const route = (through: string) =>
+  stages
+    .slice(0, stages.indexOf(through) + 1)
+    .flatMap((stage) => segments[stage]);
 const landmark = (
   id: string,
   name: string,
@@ -17,6 +22,7 @@ const landmark = (
   lng,
   kind: "other",
   sourceId: "danube:reviewed-context",
+  labelFlexible: true,
 });
 
 const source = (name: string, url: string): FactSource => ({
@@ -25,8 +31,8 @@ const source = (name: string, url: string): FactSource => ({
   reviewedOn: "2026-10-11",
 });
 const riverSource = source(
-  "Natural Earth · river centerlines",
-  "https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/",
+  "OpenStreetMap contributors · connected Danube river route",
+  "https://www.openstreetmap.org/relation/89652",
 );
 const vienna = CAPITALS.find((capital) => capital.countryId === "wurl:AUT")!;
 const budapest = CAPITALS.find((capital) => capital.countryId === "wurl:HUN")!;
@@ -57,6 +63,7 @@ const base: Question = {
   focus: { lat: 47, lng: 18, altitude: 1.1 },
   map: { borders: true, hover: false, muteOthers: true, revealOnAnswer: true },
   source: basinSource,
+  mapCaption: "Danube · route so far",
 };
 
 export const DANUBE_JOURNEY: Journey = {
@@ -64,11 +71,34 @@ export const DANUBE_JOURNEY: Journey = {
   title: "Down the Danube",
   description:
     "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
+  mapAttribution: {
+    label: "© OpenStreetMap contributors",
+    url: "https://www.openstreetmap.org/copyright",
+  },
+  completion: {
+    focus: { lat: 46.7, lng: 19.2, altitude: 0.95 },
+    physicalFeatures: [
+      ...route("delta"),
+      ...segments.branches,
+      ...segments.sea,
+    ],
+    places: [
+      landmark("seepage", "Danube seepage", 47.936, 8.76635),
+      { ...vienna, labelFlexible: true },
+      { ...budapest, labelFlexible: true },
+      landmark("iron-gates", "Iron Gates", 44.65, 22.3),
+      landmark("delta", "Danube Delta", 45.15, 29.6),
+    ],
+    caption:
+      "From the upper river to the Black Sea: five stops, one continuous journey.",
+  },
   rounds: [
     {
       ...base,
       id: "danube-underground-detour-v1",
       label: "Detour",
+      resolvedLabel: "Danube seepage",
+      correctFeedback: "Nice connection.",
       title: "The river takes a shortcut.",
       leadIn:
         "In southern Germany, some Danube water disappears underground and resurfaces at a spring.",
@@ -84,6 +114,7 @@ export const DANUBE_JOURNEY: Journey = {
       feedbackContextIds: [],
       physicalFeatures: segments.upper,
       feedbackPhysicalFeatures: segments.rhine,
+      feedbackMapCaption: "Danube route so far · local Rhine context",
       feedbackPlaces: [landmark("seepage", "Danube seepage", 47.936, 8.76635)],
       focus: { lat: 48, lng: 9, altitude: 1 },
       feedbackFocus: { lat: 47.9, lng: 8.7, altitude: 0.23 },
@@ -104,16 +135,18 @@ export const DANUBE_JOURNEY: Journey = {
     {
       ...base,
       id: "danube-vienna-pin-v1",
-      label: "Drop a pin",
+      label: "Capital",
+      resolvedLabel: "Vienna",
       title: "The first capital downstream.",
       leadIn: "Follow the river east into Austria.",
       prompt: "Drop a pin in Vienna.",
-      instruction: "Land within 80 km of the city center.",
+      instruction: "Land within 50 km of the city center.",
       mode: "pin",
-      rule: { type: "pin-distance", targetId: vienna.id, radiusKm: 80 },
+      rule: { type: "pin-distance", targetId: vienna.id, radiusKm: 50 },
       disclosure: { ...base.disclosure, namedChoices: false },
       focus: { lat: 48, lng: 13, altitude: 1.2 },
       feedbackFocus: { lat: vienna.lat, lng: vienna.lng, altitude: 0.65 },
+      physicalFeatures: route("upper"),
       feedbackPhysicalFeatures: segments.vienna,
       map: {
         borders: true,
@@ -133,6 +166,7 @@ export const DANUBE_JOURNEY: Journey = {
       ...base,
       id: "danube-two-banks-city-v1",
       label: "Two banks",
+      resolvedLabel: "Budapest",
       title: "A city made across the river.",
       leadIn: "Downstream, Buda and Pest face each other across the river.",
       prompt: "What capital brings the two banks together?",
@@ -140,25 +174,24 @@ export const DANUBE_JOURNEY: Journey = {
       inputLabel: "Capital city",
       rule: { type: "capital-name", countryId: "wurl:HUN" },
       focus: { lat: 47, lng: 19, altitude: 1.1 },
+      physicalFeatures: route("vienna"),
       feedbackPlaces: [
-        // Labels sit within the two districts, staggered for narrow screens.
         {
-          ...landmark("buda", "Buda", 47.535, 19),
-          markerHidden: true,
-          priority: 1000,
-        },
-        {
-          ...landmark("pest", "Pest", 47.46, 19.14),
-          markerHidden: true,
+          ...budapest,
+          visualState: "answer",
+          labelFlexible: true,
           priority: 1000,
         },
       ],
-      feedbackPhysicalFeatures: segments.budapest.map((feature) => ({
-        ...feature,
-        // The question establishes the river; leave label space to its banks.
-        labelAnchors: [],
-      })),
-      feedbackFocus: { lat: budapest.lat, lng: 19.053, altitude: 0.012 },
+      feedbackPhysicalFeatures: segments.budapest,
+      feedbackFocus: { lat: budapest.lat, lng: budapest.lng, altitude: 0.24 },
+      feedbackDiagram: {
+        type: "river-banks",
+        river: "Danube",
+        westBank: "Buda",
+        eastBank: "Pest",
+      },
+      map: { ...base.map!, feedbackRegions: "neutral" },
       explanation:
         "The river separates Buda on the west bank from Pest on the east. Their 1873 union also included Óbuda: the familiar name leaves one founding town out.",
       source: source(
@@ -178,29 +211,26 @@ export const DANUBE_JOURNEY: Journey = {
       ...base,
       id: "danube-iron-gates-border-v1",
       label: "Gorge",
+      resolvedLabel: "Iron Gates",
+      correctFeedback: "Exactly right.",
       title: "A river between two countries.",
       leadIn: "Travel southeast into the Iron Gates gorge.",
       prompt: "Which two countries border this stretch of the Danube?",
-      instruction:
-        "Tap both countries on the globe. The blue line marks the gorge.",
-      mode: "map-multiple",
+      instruction: "Choose both countries.",
+      mode: "choice-multiple",
       count: 2,
-      selection: { type: "members" },
-      map: {
-        borders: true,
-        hover: true,
-        muteOthers: true,
-        candidates: "neutral",
-        revealOnAnswer: true,
-      },
-      physicalFeatures: segments.gorge,
+      choices: [
+        { id: "wurl:HUN", label: "Hungary" },
+        { id: "wurl:SRB", label: "Serbia" },
+        { id: "wurl:BGR", label: "Bulgaria" },
+        { id: "wurl:ROU", label: "Romania" },
+        { id: "wurl:CRO", label: "Croatia" },
+        { id: "wurl:SVK", label: "Slovakia" },
+      ],
+      physicalFeatures: route("gorge"),
       rule: { type: "country-ids", ids: ["wurl:SRB", "wurl:ROU"] },
-      disclosure: {
-        ...base.disclosure,
-        namedChoices: false,
-        committedNames: true,
-      },
-      focus: { lat: 44.6, lng: 22, altitude: 0.55 },
+      focus: { lat: 44.6, lng: 22, altitude: 0.8 },
+      feedbackPlaces: [landmark("iron-gates", "Iron Gates", 44.65, 22.3)],
       explanation:
         "Dams at the gorge generate power, but block an ancient upstream route for sturgeon. The river is a border for people and a corridor for fish.",
       source: source(
@@ -213,8 +243,10 @@ export const DANUBE_JOURNEY: Journey = {
       ...base,
       id: "danube-delta-sea-v1",
       label: "Delta",
+      resolvedLabel: "Danube Delta",
+      correctFeedback: "Exactly right.",
       title: "One river becomes many channels.",
-      leadIn: "Finish where the river fans into a delta.",
+      leadIn: "Follow the lower river toward its delta.",
       prompt: "Which sea does the Danube flow into?",
       rule: { type: "choice-ids", ids: ["sea:black"] },
       choices: [
@@ -225,8 +257,14 @@ export const DANUBE_JOURNEY: Journey = {
         { id: "sea:aegean", label: "Aegean Sea" },
         { id: "sea:north", label: "North Sea" },
       ],
-      focus: { lat: 43, lng: 22, altitude: 1.8 },
-      feedbackPhysicalFeatures: [...segments.delta, ...segments.sea],
+      focus: { lat: 44.9, lng: 26, altitude: 0.9 },
+      physicalFeatures: route("lower"),
+      feedbackPhysicalFeatures: [
+        ...segments.delta,
+        ...segments.branches,
+        ...segments.sea,
+      ],
+      feedbackMapCaption: "Danube · full route to the sea",
       feedbackPlaces: [
         {
           id: "danube:delta",
@@ -237,7 +275,7 @@ export const DANUBE_JOURNEY: Journey = {
           sourceId: "icpdr:river-basin",
         },
       ],
-      feedbackFocus: { lat: 44, lng: 32, altitude: 0.65 },
+      feedbackFocus: { lat: 45.1, lng: 29.9, altitude: 0.38 },
       explanation:
         "Three main branches spread into a maze of channels, lakes, and wetlands. Our above-ground route ends here; the opening detour eventually reaches the North Sea instead.",
       sources: [riverSource],

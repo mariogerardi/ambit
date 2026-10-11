@@ -185,3 +185,29 @@ interface. Numeric border questions can show one useful shortest route.
 Reviewed facts, explanations, source links, and disclosure settings live with the
 Journey definitions linked above. Use those definitions and the current guides
 when maintaining content.
+
+## Authored map narrative and completion
+
+Questions may supply `physicalFeatures` during play and add
+`feedbackPhysicalFeatures` after submission. Route Journeys should explicitly
+include previously traveled segments in each stop's context; side reveals are
+not automatically accumulated. Use stable, distinct IDs for fixed geometry.
+`mapCaption` / `feedbackMapCaption` qualify partial or local features.
+
+`map.feedbackRegions: "neutral"` keeps land neutral when the answer is a city or
+physical feature; supply its answer marker separately in `feedbackPlaces`.
+`labelFlexible` allows explanatory place labels to use alternate screen anchors
+without making them playable answer targets. A `feedbackDiagram` of type
+`river-banks` explains bank relationships schematically without claiming sourced
+urban geometry. `correctFeedback` overrides widget-derived praise when needed.
+
+`resolvedLabel` replaces a spoiler-safe step label only in the answered completion
+receipt. `Journey.completion` authors a static focus, physical features, stop
+markers, and optional caption instead of the default answer-country flyover.
+`Journey.mapAttribution` supplies required on-map source credits.
+
+`npm run prepare:journey-map` regenerates the Danube context from the reviewed,
+local OSM route and Natural Earth snapshots. It retains source vertices, preserves
+junctions and river mouths, and ships a matching downloadable ODbL database.
+[NOTICE](../NOTICE.md#danube-journey-river-route) records provenance and licensing.
+The broader editorial rules are in [Crafting a Journey](JOURNEY_CRAFTING.md).

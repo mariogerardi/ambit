@@ -16,6 +16,7 @@ import type { GameState } from "./state";
 
 /** Praise the action used to answer, rather than varying praise at random. */
 export function correctAnswerCopy(question: Question): string {
+  if (question.correctFeedback) return question.correctFeedback;
   if (question.mode === "pin") return "Nicely placed.";
   if (
     [
@@ -49,6 +50,9 @@ export function correctAnswerCopy(question: Question): string {
 
 export const roundIdentity = (question: Question) =>
   question.progressLabel ?? question.label;
+
+export const resolvedRoundIdentity = (question: Question) =>
+  question.resolvedLabel ?? roundIdentity(question);
 
 /** Canonical answers, independent of the submitted guess and explanatory prose. */
 export function correctAnswerSummary(

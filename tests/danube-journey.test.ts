@@ -19,29 +19,60 @@ const at = (roundIndex: number): GameState => ({
   phase: "playing",
   roundIndex,
 });
-it("uses reviewed river vertices without fabricating cross-basin connections", () => {
-  const physical = JSON.parse(
-    readFileSync("public/geography/physical.v1.json", "utf8"),
+it("keeps the sourced river continuous, preserves branch junctions and reaches actual mouths", () => {
+  const source = JSON.parse(
+    readFileSync("public/geography/danube-route-source.v1.geojson", "utf8"),
   );
-  expect(mapContext.sourceRevision).toBe(physical.revision);
-  const paths: number[][][] = physical.features
-    .filter((f: { name: string }) =>
-      ["Danube", "Rhine", "Rhein"].includes(f.name),
-    )
-    .flatMap((f: { paths: number[][][] }) => f.paths);
-  const edges = new Set(
-    paths.flatMap((path) =>
-      path.slice(1).map((point, index) => JSON.stringify([path[index], point])),
-    ),
+  const sourcePaths: number[][][] = source.features.map(
+    (f: { geometry: { coordinates: number[][] } }) => f.geometry.coordinates,
   );
-  for (const features of Object.values(mapContext.segments))
-    for (const feature of features)
-      if ("paths" in feature)
-        for (const path of feature.paths)
-          for (let i = 1; i < path.length; i++)
-            expect(edges.has(JSON.stringify([path[i - 1], path[i]]))).toBe(
-              true,
-            );
+  const stages = [
+    "upper",
+    "vienna",
+    "budapest",
+    "gorge",
+    "lower",
+    "delta",
+  ] as const;
+  const main = stages.flatMap((stage) =>
+    mapContext.segments[stage][0].paths[0].slice(stage === "upper" ? 0 : 1),
+  );
+  const retainedInOrder = (path: number[][], original: number[][]) => {
+    let cursor = -1;
+    for (const point of path) {
+      cursor = original.findIndex(
+        (p, i) => i > cursor && p[0] === point[0] && p[1] === point[1],
+      );
+      expect(cursor).toBeGreaterThanOrEqual(0);
+    }
+  };
+  retainedInOrder(main, sourcePaths[0]);
+  expect(main[0]).toEqual(sourcePaths[0][0]);
+  expect(main.at(-1)).toEqual(sourcePaths[0].at(-1));
+  for (let i = 1; i < stages.length; i++)
+    expect(mapContext.segments[stages[i - 1]][0].paths[0].at(-1)).toEqual(
+      mapContext.segments[stages[i]][0].paths[0][0],
+    );
+  const rendered = [
+    main,
+    ...mapContext.segments.branches.map((f) => f.paths[0]),
+  ];
+  for (const [i, feature] of mapContext.segments.branches.entries()) {
+    const path = feature.paths[0];
+    retainedInOrder(path, sourcePaths[i + 1]);
+    expect(path.at(-1)).toEqual(sourcePaths[i + 1].at(-1));
+    expect(
+      rendered.some(
+        (other) =>
+          other !== path &&
+          other.some((p) => p[0] === path[0][0] && p[1] === path[0][1]),
+      ),
+    ).toBe(true);
+  }
+  expect(mapContext.license).toBe("ODbL-1.0");
+  expect(readFileSync("public/geography/danube-context.v1.json", "utf8")).toBe(
+    readFileSync("src/game/data/danube-context.v1.json", "utf8"),
+  );
 });
 it("follows the river through five playable stops, from an underground detour to its delta", () => {
   const answers: Action[][] = [
@@ -69,20 +100,20 @@ it("follows the river through five playable stops, from an underground detour to
   expect(game.phase).toBe("finished");
   expect(journeyScore(game)).toBe(5);
 });
-it("makes the gorge countries tappable without exposing their names, and keeps city pin borders", () => {
+it("keeps borders for the pin and requires named knowledge at the gorge, not tracing polygons", () => {
   const pin = journeyWorld(world, DANUBE_JOURNEY, at(1), context);
   expect(pin.showBorders).toBe(true);
   expect(pin.regionNames).toBe("none");
   expect(pin.places).toEqual([]);
-  expect(pin.physicalFeatures).toEqual([]);
+  expect(pin.physicalFeatures.length).toBe(1);
   const gorge = journeyWorld(world, DANUBE_JOURNEY, at(3), context);
-  expect(gorge.regionInteraction).toBe(true);
-  expect(gorge.showBorders).toBe(true);
-  expect(gorge.regionNames).toBe("committed");
-  for (const id of ["wurl:SRB", "wurl:ROU", "wurl:BGR"])
-    expect(gorge.selectDisabled || gorge.states[id] !== "disabled").toBe(true);
+  expect(DANUBE_JOURNEY.rounds[3].mode).toBe("choice-multiple");
+  expect(DANUBE_JOURNEY.rounds[3].choices?.length).toBe(6);
+  expect(gorge.regionInteraction).toBe(false);
+  expect(gorge.selectDisabled).toBe(false);
+  expect(gorge.regionNames).toBe("none");
+  expect(Object.values(gorge.states).every((s) => s === "disabled")).toBe(true);
   expect(gorge.physicalFeatures.some((f) => f.paths?.length)).toBe(true);
-  expect(gorge.namedRegionIds).toEqual([]);
 });
 it("reveals relevant physical geography without coloring starting context as the answer or leaking later stops", () => {
   const before = journeyWorld(world, DANUBE_JOURNEY, at(0), context);
@@ -118,14 +149,50 @@ it("reveals relevant physical geography without coloring starting context as the
     "Black Sea",
   );
   const city = reveal(2);
-  expect(city.places.map((p) => p.name)).toEqual(["Buda", "Pest"]);
-  expect(city.places[0].lng).toBeLessThan(city.places[1].lng);
+  expect(city.places.map((p) => p.name)).toEqual(["Budapest"]);
+  expect(city.places[0].visualState).toBe("answer");
+  expect(city.states["wurl:HUN"]).toBe("disabled");
+  expect(DANUBE_JOURNEY.rounds[2].feedbackDiagram?.westBank).toBe("Buda");
   expect(city.physicalFeatures.some((f) => f.paths?.length)).toBe(true);
-  expect(city.focus.altitude).toBeLessThan(0.05);
+  expect(city.focus.altitude).toBeGreaterThan(0.1);
   const last = journeyWorld(world, DANUBE_JOURNEY, at(4), context);
-  expect(last.physicalFeatures).toEqual([]);
+  expect(last.physicalFeatures.length).toBe(5);
   expect(last.places).toEqual([]);
   expect(reveal(4).physicalFeatures.map((f) => f.name)).toContain("Black Sea");
+  for (let i = 1; i < 5; i++) {
+    const current = journeyWorld(world, DANUBE_JOURNEY, at(i), context);
+    const previous = journeyWorld(world, DANUBE_JOURNEY, at(i - 1), context);
+    expect(current.physicalFeatures.map((f) => f.id)).toEqual(
+      expect.arrayContaining(previous.physicalFeatures.map((f) => f.id)),
+    );
+    expect(
+      current.physicalFeatures.some(
+        (f) => f.kind === "ocean" || f.id.includes("branch"),
+      ),
+    ).toBe(false);
+    expect(current.physicalFeatures.some((f) => f.name === "Rhine")).toBe(
+      false,
+    );
+  }
+  const finished = journeyWorld(
+    world,
+    DANUBE_JOURNEY,
+    { ...at(4), phase: "finished" },
+    context,
+  );
+  expect(finished.physicalFeatures).toEqual(
+    DANUBE_JOURNEY.completion?.physicalFeatures,
+  );
+  expect(finished.places.map((p) => p.name)).toEqual([
+    "Danube seepage",
+    "Vienna",
+    "Budapest",
+    "Iron Gates",
+    "Danube Delta",
+  ]);
+  expect(Object.values(finished.states).every((s) => s === "disabled")).toBe(
+    true,
+  );
 });
 it("grades the city radius and the gorge’s exact border pair", () => {
   const pin = DANUBE_JOURNEY.rounds[1];
@@ -134,6 +201,14 @@ it("grades the city radius and the gorge’s exact border pair", () => {
   ).toBe(true);
   expect(
     isCorrect(pin, context, { ...initialGame, pin: { lat: 47.5, lng: 19 } }),
+  ).toBe(false);
+  expect(pin.rule).toMatchObject({ radiusKm: 50 });
+  // Bratislava is only about 55 km away: do not award a different capital.
+  expect(
+    isCorrect(pin, context, {
+      ...initialGame,
+      pin: { lat: 48.1482, lng: 17.1067 },
+    }),
   ).toBe(false);
   const gorge = DANUBE_JOURNEY.rounds[3];
   expect(

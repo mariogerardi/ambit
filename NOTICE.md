@@ -89,10 +89,6 @@ source naming/identifiers (including Mexico City), and creates alternate label
 anchors inside large physical regions. These are generalized cartographic
 features, not precise boundaries of physical landforms. Country layers are split
 for local, on-demand loading. No runtime external geography API is used.
-`scripts/prepare-journey-map-context.mjs` clips this same reviewed physical snapshot
-into local Danube and Rhine display segments and a Black Sea label for Journey
-clues and reveals. Source revision and preparation notes accompany the derived
-`src/game/data/danube-context.v1.json`; no river connections are invented.
 `scripts/prepare-regional-display.mjs` also generates display-only footprints
 clipped to the parent map outline. Border samples and a Voronoi partition assign
 missing cartographic edge strips to adjacent subdivisions, then dissolve them
@@ -190,3 +186,28 @@ are linked after answering and are not fetched at runtime.
 The enlarged sun detail in `public/flags/clues/sun-detail-01.svg` uses the same
 Uruguay flag artwork as `public/flags/study/flag-186.svg`, cropped by its SVG
 view box. The original flag artwork’s attribution and license also apply.
+
+## Danube Journey river route
+
+**© OpenStreetMap contributors**, licensed under the **Open Database License
+(ODbL) 1.0**: https://www.openstreetmap.org/copyright and
+https://opendatacommons.org/licenses/odbl/1-0/.
+The reviewed snapshot of Danube relation **89652**, version **420**, was retrieved
+on October 11, 2026 from
+https://api.openstreetmap.org/api/0.6/relation/89652/full.json.
+
+`public/geography/danube-route-source.v1.geojson` is the downloadable source subset:
+main-stream member ways joined only at identical source node IDs, with connected
+Tulcea, Sulina, and Sfântu Gheorghe distributary reaches. Source coordinates are
+unchanged. Way IDs and versions accompany each feature; input/output checksums
+and provenance are recorded in `sources/danube-route.metadata.json`.
+
+`scripts/prepare-journey-map-context.mjs` splits the connected route into itinerary
+stages and simplifies it by retaining source vertices, preserving stage endpoints,
+branch junctions, and actual river mouths. It also extracts local Rhine context
+and the Black Sea label from the reviewed Natural Earth public-domain snapshot.
+No connections are fabricated. The derived database is available under **ODbL
+1.0** at `/geography/danube-context.v1.json`, identical to the bundled
+`src/game/data/danube-context.v1.json`. The application attributes OpenStreetMap
+beside the Journey map and links the downloadable data in World credits.
+The two-bank feedback diagram is explicitly schematic, not sourced urban geometry.

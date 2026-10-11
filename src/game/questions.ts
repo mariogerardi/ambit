@@ -104,6 +104,8 @@ export interface Question {
   label: string;
   /** Short, spoiler-free identity for Journey progress and recaps. */
   progressLabel?: string;
+  /** Resolved destination used only in the completed receipt. */
+  resolvedLabel?: string;
   topic: string;
   /** Short authoring label for the question library; the prompt is the player heading. */
   title: string;
@@ -132,6 +134,15 @@ export interface Question {
   /** Optional camera reveal for questions linking geographically distant places. */
   feedbackFocus?: Focus;
   explanation: string;
+  /** Optional praise matching the knowledge/skill, rather than the input widget. */
+  correctFeedback?: string;
+  /** A clearly schematic explanation; never used as playable geography. */
+  feedbackDiagram?: {
+    type: "river-banks";
+    river: string;
+    westBank: string;
+    eastBank: string;
+  };
   /** Source qualifications, separate from rules needed to answer. */
   qualification?: string;
   source: FactSource;
@@ -150,6 +161,8 @@ export interface Question {
     revealOnCorrect?: boolean;
     revealOnAnswer?: boolean;
     candidates?: "highlighted" | "decorative" | "neutral";
+    /** City/physical answers can leave countries neutral on reveal. */
+    feedbackRegions?: "neutral";
   };
   highlightParts?: {
     countryId: string;
@@ -169,7 +182,10 @@ export interface Question {
   allowTyping?: boolean;
   places?: PlaceFeature[];
   feedbackPlaces?: PlaceFeature[];
-  /** Reviewed, local physical context; omit answer-bearing features until feedback. */
+  /** Short cartographic qualification shown beside the map. */
+  mapCaption?: string;
+  feedbackMapCaption?: string;
+  /** Reviewed physical context; omit answer-bearing features until feedback. */
   physicalFeatures?: PhysicalFeature[];
   feedbackPhysicalFeatures?: PhysicalFeature[];
   image?: { src: string; alt: string; feedbackAlt: string };
@@ -187,6 +203,14 @@ export interface Journey {
   title: string;
   description: string;
   rounds: Question[];
+  /** Authored geographic payoff, independent of generic answer-country flyovers. */
+  completion?: {
+    focus: Focus;
+    physicalFeatures: PhysicalFeature[];
+    places: PlaceFeature[];
+    caption?: string;
+  };
+  mapAttribution?: { label: string; url: string };
 }
 export interface QuestionContext {
   regions: RegionFeature[];

@@ -82,8 +82,8 @@ const guest: AccountAccess = {
     return undefined;
   },
 };
-const Accounts = createContext<AccountAccess>(guest);
-export const useAccount = () => useContext(Accounts);
+export const AccountContext = createContext<AccountAccess>(guest);
+export const useAccount = () => useContext(AccountContext);
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -282,7 +282,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return current?.access_token;
   }
   return (
-    <Accounts.Provider
+    <AccountContext.Provider
       value={{
         user,
         admin: isAdmin(user),
@@ -295,6 +295,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </Accounts.Provider>
+    </AccountContext.Provider>
   );
 }

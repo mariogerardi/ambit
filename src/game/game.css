@@ -1494,3 +1494,70 @@
     flex-wrap: wrap;
   }
 }
+
+/* Authored geographic explanations stay distinct from playable map geometry. */
+.river-banks-diagram {
+  margin: 16px 0;
+  padding: 12px 16px 8px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 12px;
+  background: rgb(var(--ui-raised-rgb) / 1);
+}
+.river-banks-diagram svg {
+  display: block;
+  width: 100%;
+  max-height: 108px;
+}
+.river-banks-diagram path {
+  stroke: #72b9d2;
+  stroke-width: 12;
+  fill: none;
+}
+.river-banks-diagram text {
+  fill: var(--ui-text);
+  font-family: inherit;
+  font-size: 18px;
+  text-anchor: middle;
+}
+.river-banks-diagram text.bank-direction {
+  fill: var(--ui-muted);
+  font-size: 12px;
+}
+.river-banks-diagram figcaption {
+  margin-top: 6px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  text-align: center;
+}
+.experience .finish-story > p.journey-route-caption {
+  margin: 16px 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.journey-map-notes {
+  position: absolute;
+  right: 28px;
+  bottom: 12px;
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgb(var(--ui-surface-rgb) / 0.95);
+  color: var(--ui-muted);
+  font-size: 11px;
+  line-height: 1.5;
+  pointer-events: auto;
+  text-align: right;
+}
+.journey-map-notes a {
+  color: inherit;
+}
+@media (max-width: 700px) {
+  .journey-map-notes {
+    position: relative;
+    inset: auto;
+    margin-top: 16px;
+    text-align: left;
+    font-size: 11px;
+  }
+}

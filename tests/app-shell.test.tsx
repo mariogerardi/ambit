@@ -1770,7 +1770,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Play");
     expect(host.textContent).toContain("official in parts of Spain");
   });
-  it("plays the Danube through visible controls and supplies tappable countries and useful map reveals", async () => {
+  it("plays the Danube through visible controls and supplies progressive river geography and an authored completion", async () => {
     history.replaceState(null, "", "/journey/down-the-danube");
     await mount();
     expect(probe.props!.physicalFeatures?.map((f) => f.name)).toEqual([
@@ -1778,6 +1778,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     ]);
     await click("Rhine");
     await click("Submit answer");
+    expect(
+      host.querySelector(".mode-incoming .feedback-label")?.textContent,
+    ).toContain("Nice connection.");
     expect(probe.props!.states["wurl:DEU"]).toBe("disabled");
     expect(probe.props!.physicalFeatures?.map((f) => f.name)).toContain(
       "Rhine",
@@ -1806,34 +1809,55 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       answer.dispatchEvent(new Event("input", { bubbles: true }));
     });
     await click("Submit answer");
-    expect(probe.props!.places.map((p) => p.name)).toEqual(["Buda", "Pest"]);
+    expect(probe.props!.places.map((p) => p.name)).toEqual(["Budapest"]);
+    expect(probe.props!.states["wurl:HUN"]).toBe("disabled");
+    expect(
+      host.querySelector(".mode-incoming .river-banks-diagram")?.textContent,
+    ).toContain("schematic");
     await click("Next");
-    expect(probe.props!.regionInteraction).toBe(true);
-    expect(probe.props!.selectDisabled).toBe(true);
+    expect(probe.props!.regionInteraction).toBe(false);
+    expect(probe.props!.selectDisabled).toBe(false);
     expect(probe.props!.namedRegionIds).toEqual([]);
     expect(probe.props!.physicalFeatures?.some((f) => f.paths?.length)).toBe(
       true,
     );
-    for (const id of ["wurl:SRB", "wurl:ROU"])
-      await act(async () => probe.props!.onSelect(member(id)));
-    expect(
-      host.querySelector(".mode-incoming .committed-choices")?.textContent,
-    ).toContain("2 of 2");
+    await click("Serbia");
+    await click("Romania");
     await click("Submit answer");
     expect(
       host.querySelector(".mode-incoming .journey-correct-answer")?.textContent,
     ).toContain("Romania");
     await click("Next");
-    expect(probe.props!.physicalFeatures).toEqual([]);
+    expect(probe.props!.physicalFeatures?.length).toBe(5);
     await click("Black Sea");
     await click("Submit answer");
     expect(probe.props!.physicalFeatures?.map((f) => f.name)).toContain(
       "Black Sea",
     );
+    const toursBeforeCompletion = probe.tours.length;
     await click("See results");
+    expect(probe.tours.length).toBe(toursBeforeCompletion);
+    expect(probe.focus.at(-1)).toMatchObject({
+      lat: 46.7,
+      lng: 19.2,
+      altitude: 0.95,
+    });
     expect(
       host.querySelector(".mode-incoming .journey-score")?.textContent,
     ).toContain("5/5");
+    expect(
+      host.querySelector(".mode-incoming .journey-receipt")?.textContent,
+    ).toContain("Vienna");
+    expect(probe.props!.places.map((p) => p.name)).toEqual([
+      "Danube seepage",
+      "Vienna",
+      "Budapest",
+      "Iron Gates",
+      "Danube Delta",
+    ]);
+    expect(
+      probe.props!.physicalFeatures?.some((f) => f.name === "Black Sea"),
+    ).toBe(true);
   });
   it("allows six republic picks through the globe's eligibility states before submitting", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
