@@ -145,6 +145,11 @@ Journey content. Do not treat the index as an independently authored source.
 
 ## Crafting a daily
 
+See [Journey crafting](JOURNEY_CRAFTING.md) for the full editorial and interaction
+review. Answer validation alone does not verify that globe taps are enabled or
+that clue and reveal displays support the task. Review inherited map settings
+whenever changing answer modes, and make borderless difficulty explicit.
+
 A throughline may be an itinerary, a shared surprise, or a distinctive mechanic
 repeated across five questions. Do not require varied controls for their own sake.
 Shared neighbors uses irregular country footprints, Island instincts repeats

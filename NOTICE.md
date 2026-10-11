@@ -89,6 +89,10 @@ source naming/identifiers (including Mexico City), and creates alternate label
 anchors inside large physical regions. These are generalized cartographic
 features, not precise boundaries of physical landforms. Country layers are split
 for local, on-demand loading. No runtime external geography API is used.
+`scripts/prepare-journey-map-context.mjs` clips this same reviewed physical snapshot
+into local Danube and Rhine display segments and a Black Sea label for Journey
+clues and reveals. Source revision and preparation notes accompany the derived
+`src/game/data/danube-context.v1.json`; no river connections are invented.
 `scripts/prepare-regional-display.mjs` also generates display-only footprints
 clipped to the parent map outline. Border samples and a Voronoi partition assign
 missing cartographic edge strips to adjacent subdivisions, then dissolve them

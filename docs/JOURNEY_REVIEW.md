@@ -154,6 +154,27 @@ absent from Admin choices, practice routes, and the playground.
 
 ## Down the Danube
 
+The interaction/presentation correction retains the itinerary and answer IDs.
+Vienna now shows borders without city clues and puts the 80 km tolerance below
+the short heading. The Iron Gates uses neutral, tappable countries with hidden
+names and a sourced local river segment. The same input correction applies to
+the revised Sun of May question. Multiple-choice defaults must not silently
+disable map inputs when reused for another mode.
+
+Local Natural Earth river segments explain the opening detour, Vienna, Budapest,
+and the gorge. The opening reveal no longer marks Germany as the correct river
+answer. Budapest's reveal zooms to the river and labels both banks; the final
+reveal identifies the Black Sea. Answer-bearing physical features remain hidden
+until submission, and the opening river clip cannot expose the final sea.
+See [Journey crafting](JOURNEY_CRAFTING.md) for the resulting review checklist.
+
+Verification included desktop choice/text submissions, a real canvas pin with
+miss feedback, and correct two-country globe submissions for the Iron Gates and
+Sun of May. The 390 px layout check covered Vienna's borders and short prompt,
+Budapest text submission and both bank labels, and the final sea reveal. Scoring,
+input gates, phase-specific clues, and sourced geometry have regression tests;
+automated coordinate input is separate from real canvas verification.
+
 The throughline follows the river downstream, beginning with a disappearing-water
 surprise rather than a source-country quiz. A city pin, a name formed across two
 banks, a shared-border map pick, and the receiving sea complete the route. The

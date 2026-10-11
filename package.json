@@ -15,6 +15,7 @@
     "prepare:explore": "node scripts/prepare-explore.mjs",
     "prepare:regional-display": "node scripts/prepare-regional-display.mjs",
     "prepare:journeys": "node scripts/prepare-journey-index.mjs",
+    "prepare:journey-map": "node scripts/prepare-journey-map-context.mjs",
     "prepare:languages": "node scripts/prepare-language-names.mjs",
     "check:docs": "prettier --check README.md NOTICE.md \"docs/**/*.md\""
   },

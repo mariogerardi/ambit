@@ -21,6 +21,7 @@ import type {
   Focus,
   VisualState,
   PlaceFeature,
+  PhysicalFeature,
 } from "../src/geography/types";
 import { createGlobeRegionPreparer } from "../src/globe/geometry";
 import { App, PlayerWorkspace } from "../src/App";
@@ -61,7 +62,7 @@ interface GlobeProps {
   namedRegionIds?: string[];
   borderRegionIds?: string[];
   showBorders: boolean;
-  physicalFeatures?: { kind: string }[];
+  physicalFeatures?: PhysicalFeature[];
   onReady(): void;
   onInteraction(): void;
   onSelect(region: RegionFeature): void;
@@ -1495,7 +1496,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
 
     await click("Play");
     expect(probe.props!.showBorders).toBe(true);
-    expect(probe.props!.physicalFeatures).toBeUndefined();
+    expect(probe.props!.physicalFeatures).toEqual([]);
     expect(probe.props!.places.length).toBeLessThan(10);
     await click("Home");
     await act(async () => root.unmount());
@@ -1768,6 +1769,71 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Play");
     expect(host.textContent).toContain("official in parts of Spain");
+  });
+  it("plays the Danube through visible controls and supplies tappable countries and useful map reveals", async () => {
+    history.replaceState(null, "", "/journey/down-the-danube");
+    await mount();
+    expect(probe.props!.physicalFeatures?.map((f) => f.name)).toEqual([
+      "Danube",
+    ]);
+    await click("Rhine");
+    await click("Submit answer");
+    expect(probe.props!.states["wurl:DEU"]).toBe("disabled");
+    expect(probe.props!.physicalFeatures?.map((f) => f.name)).toContain(
+      "Rhine",
+    );
+    await click("Next");
+    expect(probe.props!.showBorders).toBe(true);
+    expect(probe.props!.places).toEqual([]);
+    expect(probe.props!.regionNames).toBe("none");
+    expect(probe.props!.onCoordinateTap).toBeTypeOf("function");
+    await act(async () =>
+      probe.props!.onCoordinateTap!({ lat: 48.208, lng: 16.373 }),
+    );
+    await click("Submit pin");
+    expect(probe.props!.physicalFeatures?.map((f) => f.name)).toContain(
+      "Danube",
+    );
+    await click("Next");
+    const answer = host.querySelector<HTMLInputElement>(
+      ".mode-incoming #written-answer",
+    )!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!.call(answer, "Budapest");
+      answer.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await click("Submit answer");
+    expect(probe.props!.places.map((p) => p.name)).toEqual(["Buda", "Pest"]);
+    await click("Next");
+    expect(probe.props!.regionInteraction).toBe(true);
+    expect(probe.props!.selectDisabled).toBe(true);
+    expect(probe.props!.namedRegionIds).toEqual([]);
+    expect(probe.props!.physicalFeatures?.some((f) => f.paths?.length)).toBe(
+      true,
+    );
+    for (const id of ["wurl:SRB", "wurl:ROU"])
+      await act(async () => probe.props!.onSelect(member(id)));
+    expect(
+      host.querySelector(".mode-incoming .committed-choices")?.textContent,
+    ).toContain("2 of 2");
+    await click("Submit answer");
+    expect(
+      host.querySelector(".mode-incoming .journey-correct-answer")?.textContent,
+    ).toContain("Romania");
+    await click("Next");
+    expect(probe.props!.physicalFeatures).toEqual([]);
+    await click("Black Sea");
+    await click("Submit answer");
+    expect(probe.props!.physicalFeatures?.map((f) => f.name)).toContain(
+      "Black Sea",
+    );
+    await click("See results");
+    expect(
+      host.querySelector(".mode-incoming .journey-score")?.textContent,
+    ).toContain("5/5");
   });
   it("allows six republic picks through the globe's eligibility states before submitting", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });

@@ -22,12 +22,26 @@ import { gameReducer, initialGame, journeyScore } from "../src/game/state";
 import type { Response } from "../src/game/questions";
 import type { Action, GameState } from "../src/game/state";
 import type { RegionFeature } from "../src/geography/types";
+import { journeyWorld } from "../src/app/journeyWorld";
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
 const context = createQuestionContext(world, COUNTRY_FACTS, SUN_FLAGS_JOURNEY);
 
 describe("Chasing the sun", () => {
+  it("allows both Sun of May countries to be tapped with names hidden until selection", () => {
+    const view = journeyWorld(
+      world,
+      SUN_FLAGS_JOURNEY,
+      { ...initialGame, phase: "playing" },
+      context,
+    );
+    expect(view.regionInteraction).toBe(true);
+    expect(view.regionNames).toBe("committed");
+    expect(view.namedRegionIds).toEqual([]);
+    for (const id of ["wurl:ARG", "wurl:URY", "wurl:CHL"])
+      expect(view.selectDisabled || view.states[id] !== "disabled").toBe(true);
+  });
   it("plays five distinct stops with history, observation, symbolism and geographic placement", () => {
     const answers: Action[][] = [
       [

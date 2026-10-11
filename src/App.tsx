@@ -1696,7 +1696,7 @@ export function App() {
                   (mode === "explore" ? exploreRegions : namedRegions)
                 }
                 warmRegions={warmRegions}
-                physicalFeatures={physicalFeatures}
+                physicalFeatures={world?.physicalFeatures ?? physicalFeatures}
                 states={states}
                 places={places}
                 placeContextual={!!displayLayers || !!studyDisplay}

@@ -3,6 +3,7 @@ import type {
   PlaceFeature,
   RegionFeature,
   MapOverlay,
+  PhysicalFeature,
 } from "../geography/types";
 import {
   CAPITALS,
@@ -168,6 +169,9 @@ export interface Question {
   allowTyping?: boolean;
   places?: PlaceFeature[];
   feedbackPlaces?: PlaceFeature[];
+  /** Reviewed, local physical context; omit answer-bearing features until feedback. */
+  physicalFeatures?: PhysicalFeature[];
+  feedbackPhysicalFeatures?: PhysicalFeature[];
   image?: { src: string; alt: string; feedbackAlt: string };
   choices?: { id: string; label: string }[];
   overlays?: MapOverlay[];

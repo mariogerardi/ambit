@@ -99,6 +99,7 @@ Start with the [documentation index](docs/README.md).
 - [Architecture](docs/ARCHITECTURE.md): module responsibilities and globe state.
 - [Development](docs/DEVELOPMENT.md): commands, data preparation, and maintenance.
 - [Question catalog and authoring](docs/QUESTION_CATALOG.md): Journeys, rules, and content review.
+- [Journey crafting](docs/JOURNEY_CRAFTING.md): Throughlines, difficulty, globe interaction, and meaningful reveals.
 - [Geographic catalog policy](docs/CATALOG_POLICY.md) and [Explore data](docs/EXPLORE_DATA.md): identities, source conventions, and display limits.
 - [Save persistence](docs/SAVE_PERSISTENCE.md): migration, recovery, and conflicts.
 - [Release readiness](docs/RELEASE_READINESS.md): current gaps and deployment handoff.

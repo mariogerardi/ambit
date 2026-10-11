@@ -139,6 +139,15 @@ export function journeyWorld(
       game,
     ),
     routes,
+    physicalFeatures:
+      game.phase === "playing" || game.phase === "feedback"
+        ? [
+            ...(round.physicalFeatures ?? []),
+            ...(game.phase === "feedback"
+              ? (round.feedbackPhysicalFeatures ?? [])
+              : []),
+          ]
+        : [],
     overlays:
       game.phase === "playing" || game.phase === "feedback"
         ? [

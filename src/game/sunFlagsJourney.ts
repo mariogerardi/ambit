@@ -52,11 +52,18 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       leadIn: "Begin in South America.",
       prompt:
         "The Sun of May has a face. Which two South American countries put it on their national flags?",
-      instruction: "Choose two countries.",
+      instruction: "Tap both countries on the globe.",
       mode: "map-multiple",
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
       selection: { type: "members" },
+      map: {
+        borders: true,
+        hover: true,
+        muteOthers: true,
+        candidates: "neutral",
+        revealOnAnswer: true,
+      },
       disclosure: {
         ...base.disclosure,
         namedChoices: false,
