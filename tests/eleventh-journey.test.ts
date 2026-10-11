@@ -50,8 +50,15 @@ describe("not the obvious city", () => {
       reduce(selected, { type: "submit" }),
       context,
     );
-    expect(after.states["wurl:TUR"]).toBe("correct");
-    expect(after.places.map((p) => p.name)).toEqual(["Ankara", "Istanbul"]);
+    expect(after.states["wurl:TUR"]).toBe("hinted");
+    expect(after.places.map((p) => p.name)).toEqual([
+      "Ankara · capital since 1923",
+      "Istanbul · famous city",
+    ]);
+    expect(after.places.map((p) => p.visualState)).toEqual([
+      "answer",
+      "hinted",
+    ]);
     expect(after.focus.altitude).toBeLessThan(before.focus.altitude!);
   });
   it("grades Canberra with the 150km tolerance and reveals Sydney and Melbourne only afterward", () => {
@@ -87,9 +94,9 @@ describe("not the obvious city", () => {
     );
     expect(after.places.map((p) => p.name)).toEqual([
       "Your pin",
-      "Canberra",
-      "Sydney",
-      "Melbourne",
+      "Canberra · purpose-built capital",
+      "Sydney · reference city",
+      "Melbourne · reference city",
     ]);
     expect(new Set(after.places.map((p) => p.id)).size).toBe(
       after.places.length,
@@ -105,7 +112,11 @@ describe("not the obvious city", () => {
       reduce(at(2), { type: "text", value: "Abuja" }, { type: "submit" }),
       context,
     );
-    expect(after.places.map((p) => p.name)).toEqual(["Abuja", "Lagos"]);
+    expect(after.places.map((p) => p.name)).toEqual([
+      "Abuja · planned capital",
+      "Lagos · former capital",
+    ]);
+    expect(after.states["wurl:NGA"]).toBe("hinted");
   });
   it("keeps all Brazilian markers anonymous through hover and highlights Rio only on reveal", () => {
     const before = journeyWorld(world, journey, at(3), context);
@@ -128,11 +139,11 @@ describe("not the obvious city", () => {
     );
     expect(after.places.every((p) => p.name && !p.labelHidden)).toBe(true);
     expect(
-      after.places.find((p) => p.name === "Rio de Janeiro")?.visualState,
+      after.places.find((p) => p.id === "place:3451190")?.visualState,
     ).toBe("hinted");
-    expect(after.places.find((p) => p.name === "Brasília")?.visualState).toBe(
-      "correct",
-    );
+    expect(
+      after.places.find((p) => p.id === "place:3469058")?.visualState,
+    ).toBe("correct");
     const wrong = journeyWorld(
       world,
       journey,
@@ -140,7 +151,7 @@ describe("not the obvious city", () => {
       context,
     );
     expect(
-      wrong.places.find((p) => p.name === "Rio de Janeiro")?.visualState,
+      wrong.places.find((p) => p.id === "place:3451190")?.visualState,
     ).toBe("incorrect");
   });
   it("names all six South African cities equally, then reveals the three roles and semantic feedback", () => {
@@ -214,5 +225,44 @@ describe("not the obvious city", () => {
     expect(s.phase).toBe("finished");
     expect(s.answers).toHaveLength(5);
     expect(s.answers.every((a) => a.correct)).toBe(true);
+    const completion = journeyWorld(world, journey, s, context);
+    expect(completion.places.map((place) => place.name)).toEqual([
+      "Ankara",
+      "Canberra",
+      "Abuja",
+      "Brasília",
+      "Pretoria",
+      "Cape Town",
+      "Bloemfontein",
+    ]);
+    expect(
+      completion.places.every(
+        (place) => place.kind === "capital" && place.visualState === "answer",
+      ),
+    ).toBe(true);
+    expect(completion.routes).toEqual([]);
+    expect(completion.physicalFeatures).toEqual([]);
+    expect(completion.focus).toEqual(journey.completion!.focus);
+    expect(journey.completion!.views).toHaveLength(5);
+  });
+  it("keeps countries as context on every city reveal and omits filler lead-ins", () => {
+    expect(journey.rounds.slice(1, 4).every((round) => !round.leadIn)).toBe(
+      true,
+    );
+    expect(journey.rounds[1].prompt).toBe("Drop a pin in Canberra, Australia.");
+    expect(journey.rounds[1].instruction).toContain("150 km");
+    for (let roundIndex = 0; roundIndex < journey.rounds.length; roundIndex++) {
+      const round = journey.rounds[roundIndex];
+      const game: GameState = {
+        ...at(roundIndex),
+        phase: "feedback",
+        answers: [{ ...initialGame, roundId: round.id, correct: true }],
+      };
+      const reveal = journeyWorld(world, journey, game, context);
+      expect(reveal.states[round.contextIds![0]]).toBe("hinted");
+      expect(Object.values(reveal.states)).not.toContain("correct");
+      expect(Object.values(reveal.states)).not.toContain("answer");
+      expect(round.label).not.toBe("Drop a pin");
+    }
   });
 });

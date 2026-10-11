@@ -231,14 +231,20 @@ describe("authored Journey hint and assist stages", () => {
     ).toBe(true);
   });
 
-  it("adds a broad pin search area without recentering, exposing the target, or changing grading", () => {
+  it("adds named pin reference cities without recentering, exposing the target, or changing grading", () => {
     const q = journey.rounds[1];
     const before = journeyWorld(regions, journey, at(1), context);
     const assist = helped(1);
     const world = journeyWorld(regions, journey, assist, context);
-    expect(world.places).toEqual([]);
+    expect(world.places.map((place) => place.name)).toEqual([
+      "Sydney",
+      "Melbourne",
+    ]);
+    expect(world.places.every((place) => place.visualState === "hinted")).toBe(
+      true,
+    );
     expect(world.focus).toEqual(before.focus);
-    expect(world.overlays).toEqual(q.guidance!.assist!.overlays);
+    expect(world.overlays).toEqual([]);
     const target = ANSWER_PLACES.get("place:2172517")!;
     for (const pin of [
       target,
@@ -254,8 +260,10 @@ describe("authored Journey hint and assist stages", () => {
         isCorrect(q, context, { ...initialGame, pin }),
       );
       expect(
-        journeyWorld(regions, journey, submitted, context).overlays,
-      ).not.toContainEqual(q.guidance!.assist!.overlays![0]);
+        journeyWorld(regions, journey, submitted, context).places.filter(
+          (place) => place.id === "place:2147714",
+        ),
+      ).toHaveLength(1);
     }
     expect(q.rule).toMatchObject({ radiusKm: 150 });
   });

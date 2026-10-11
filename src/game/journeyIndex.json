@@ -129,27 +129,27 @@
     "rounds": [
       {
         "id": "unexpected-turkey-capital",
-        "label": "Capital",
+        "label": "Famous city",
         "progressLabel": "Türkiye"
       },
       {
         "id": "unexpected-canberra-pin",
-        "label": "Drop a pin",
+        "label": "Planned capital",
         "progressLabel": "Australia"
       },
       {
         "id": "unexpected-abuja",
-        "label": "Capital",
+        "label": "Capital move",
         "progressLabel": "Nigeria"
       },
       {
         "id": "unexpected-brasilia-marker",
-        "label": "City",
+        "label": "New capital",
         "progressLabel": "Brazil"
       },
       {
         "id": "unexpected-south-africa-capitals",
-        "label": "Cities",
+        "label": "Three capitals",
         "progressLabel": "South Africa"
       }
     ]

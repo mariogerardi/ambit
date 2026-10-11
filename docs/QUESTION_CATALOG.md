@@ -223,7 +223,8 @@ commitment without an extra submit step. Questions without authored help retain
 the disabled placeholder; only **Not the obvious city** currently supplies help.
 
 `guidance.hint` is an authored semantic clue. An optional `guidance.assist` supplies
-separate copy, surviving `candidateIds`, and/or broad search `overlays`. The first
+separate copy, surviving `candidateIds`, named reference `places`, and/or broad
+search `overlays`. The first
 request reveals the hint; the button then changes from “Need a hint?” with a bulb
 to “Need an assist?” with a lifebuoy, in a different color. After all available
 help is used it remains visible and disabled. Assists never modify the rule or

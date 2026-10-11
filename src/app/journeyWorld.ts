@@ -135,9 +135,12 @@ export function journeyWorld(
       : game.phase === "finished"
         ? journeyVisitedStates(journey, context, game.answers)
         : questionVisualStates(round, context, game),
-    places:
-      completion?.places ??
-      questionPlaces(round, context, game.phase, game.text, correct, game),
+    places: completion?.places ?? [
+      ...questionPlaces(round, context, game.phase, game.text, correct, game),
+      ...(game.phase === "playing" && game.help?.[round.id] === "assisted"
+        ? (round.guidance?.assist?.places ?? [])
+        : []),
+    ],
     routes,
     physicalFeatures:
       completion?.physicalFeatures ??

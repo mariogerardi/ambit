@@ -211,7 +211,13 @@ describe("product copy follows the answer and visible reveal", () => {
       { type: "submit" },
     ]);
     expect(feedbackLegend(question, context, game).map((e) => e.label)).toEqual(
-      ["Correct", "Other correct answers", "Incorrect pick", "Other places"],
+      [
+        "Correct",
+        "Other correct answers",
+        "Incorrect pick",
+        "Highlighted context",
+        "Other places",
+      ],
     );
   });
   it("explains a pin target and highlighted clues without claiming multiple correct answers", () => {

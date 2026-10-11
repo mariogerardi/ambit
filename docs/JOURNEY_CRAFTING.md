@@ -37,10 +37,13 @@ color to carry the hierarchy, without a vertical break. `title` is an internal
 identity, not a second visible heading. Editing `title` does not shorten the
 player's question.
 
-- Use a short lead-in to establish movement or a necessary observation. Put rich
-  context in the reveal, not a second introductory paragraph at every stop.
-- Make `prompt` one clear question or task. Keep movement in the short lead-in;
-  keep mechanics and tolerance in the separate instruction, not in the paragraph.
+- A lead-in is optional. Include it only when it adds necessary orientation,
+  conceptual context, or meaningful movement that the globe does not already
+  communicate. Context and question should form one thought; omit travel filler.
+  Put rich context in the reveal, not a second introduction at every stop.
+- Make `prompt` one clear question or task. Keep mechanics and tolerance in the
+  separate instruction, not in the paragraph. Round overlines describe content,
+  rather than mixing destinations with interaction instructions.
 - Use `instruction` for important mechanics, counts, ordering, or precision.
   “Drop a pin in Vienna.” can be the heading; “Land within 50 km of the city
   center.” belongs underneath.
@@ -136,6 +139,9 @@ understand the question.
 - Keep grading fixed, especially pin tolerances and country boundaries. A broad
   search area is an assist, not a new acceptance zone; its center must not mark the
   answer. Explain the distinction in the assist copy.
+- Prefer meaningful reference places to generic shaded areas when the clue names
+  those places. An assist can mark nearby cities while keeping the target absent;
+  it must not turn reference geography into an answer marker.
 - Request stages separately. Keep the hint visible after assistance, preserve
   player selections, and record help use per round through reloads and sync.
 - Preserve correctness and completion without point deductions. Record the strongest
@@ -275,6 +281,13 @@ flyover. Use meaningful destination labels in the recap; keep active step labels
 spoiler-safe and semantically consistent. A shared-feature Journey can instead
 resolve its common pattern. The completion map must agree with the five reveals
 and must remain legible on a small screen.
+
+For a conceptual Journey spanning distant countries, a constellation of resolved
+places can be more honest than a connected route. Use separate authored views
+when one globe hemisphere cannot show every destination comfortably, and provide
+a static reduced-motion view. Label comparison cities by their relevant roles
+(former capital, current capital, reference city), with sources covering those
+claims. Country fills remain context when the answer object is a city.
 
 ## Review and validation before publishing
 

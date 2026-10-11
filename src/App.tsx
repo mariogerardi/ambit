@@ -1198,8 +1198,10 @@ export function App() {
     stop();
     setHover(undefined);
     if (game.phase === "finished" && journey.completion) {
-      frame(journey.completion.focus);
-      return;
+      if (!reduced && journey.completion.views?.length)
+        globe.current?.flyover(journey.completion.views);
+      else frame(journey.completion.focus);
+      return () => globe.current?.cancelFlyover();
     }
     const stops = journeyStops(journey, context, game.answers);
     if (reduced && stops[0]) frame(stops[0]);

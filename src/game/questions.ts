@@ -121,6 +121,8 @@ export interface Question {
       candidateIds?: string[];
       /** Broad search context, never a grading boundary or target-centered tolerance. */
       overlays?: MapOverlay[];
+      /** Named reference places may help locate an unmarked target. */
+      places?: PlaceFeature[];
     };
   };
   instruction: string;
@@ -219,6 +221,8 @@ export interface Journey {
   /** Authored geographic payoff, independent of generic answer-country flyovers. */
   completion?: {
     focus: Focus;
+    /** Separate views for widely dispersed destinations; never implies a connecting route. */
+    views?: Focus[];
     physicalFeatures: PhysicalFeature[];
     places: PlaceFeature[];
     caption?: string;

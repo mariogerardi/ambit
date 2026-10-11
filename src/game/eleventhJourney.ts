@@ -7,7 +7,7 @@ const place = (id: string) => ANSWER_PLACES.get(id)!;
 const source = (name: string, url: string): FactSource => ({
   name,
   url,
-  reviewedOn: "2026-10-06",
+  reviewedOn: "2026-10-11",
 });
 export const BRAZIL_CITY_TARGETS = [
   "3469058",
@@ -50,7 +50,13 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 20, lng: 0, altitude: 1.3 },
-  map: { borders: true, hover: false, muteOthers: true },
+  map: {
+    borders: true,
+    hover: false,
+    muteOthers: true,
+    feedbackRegions: "neutral",
+  },
+  feedbackContextIds: [],
   source: capitalSource,
 };
 
@@ -63,8 +69,10 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-turkey-capital",
-      leadIn: "Start where the biggest city isn’t the capital.",
+      leadIn: "Start where the famous city isn’t the capital.",
       progressLabel: "Türkiye",
+      resolvedLabel: "Ankara",
+      label: "Famous city",
       title: "The famous distraction.",
       prompt: "What is the capital of Türkiye?",
       guidance: {
@@ -93,35 +101,48 @@ export const ELEVENTH_JOURNEY: Journey = {
       focus: { lat: 39, lng: 34, altitude: 0.82 },
       contextIds: ["wurl:TUR"],
       feedbackFocus: { lat: 40.4, lng: 31, altitude: 0.38 },
-      feedbackContextIds: ["wurl:TUR"],
-      feedbackPlaces: [place("place:323786"), place("place:745044")],
+      feedbackHintIds: ["wurl:TUR"],
+      feedbackPlaces: [
+        {
+          ...place("place:323786"),
+          name: "Ankara · capital since 1923",
+          visualState: "answer",
+          priority: 100,
+        },
+        {
+          ...place("place:745044"),
+          name: "Istanbul · famous city",
+          visualState: "hinted",
+          priority: 90,
+        },
+      ],
       explanation:
-        "Istanbul is the largest city, but that doesn’t make it the capital.",
+        "The inland city was chosen as the capital in 1923, just before the republic was proclaimed. A familiar name isn’t always the seat of government.",
+      source: source(
+        "Türkiye Ministry of Culture and Tourism · 1923 chronology",
+        "https://www.ktb.gov.tr/EN-103934/1923.html",
+      ),
+      sources: [capitalSource],
     },
     {
       ...base,
       id: "unexpected-canberra-pin",
-      leadIn: "Jump to Australia for another surprise.",
       progressLabel: "Australia",
+      resolvedLabel: "Canberra",
       title: "Find Canberra.",
-      label: "Drop a pin",
-      prompt: "Drop a pin within 150 km of Canberra, Australia.",
+      label: "Planned capital",
+      prompt: "Drop a pin in Canberra, Australia.",
       guidance: {
         hint: "The capital is inland in southeastern Australia, between Sydney and Melbourne.",
         assist: {
-          text: "The shaded area narrows your search to the southeast; its center is not the answer. You still need to land within 150 km.",
-          overlays: [
-            {
-              id: "assist:canberra-search",
-              type: "circle",
-              center: { lat: -34, lng: 145 },
-              radiusKm: 800,
-              shade: true,
-            },
+          text: "Sydney and Melbourne are now marked. Look inland between them; Canberra itself is still unmarked. Land within 150 km of its center.",
+          places: [
+            { ...place("place:2147714"), visualState: "hinted", priority: 95 },
+            { ...place("place:2158177"), visualState: "hinted", priority: 95 },
           ],
         },
       },
-      instruction: "",
+      instruction: "Land within 150 km of the city center.",
       mode: "pin",
       rule: { type: "pin-distance", targetId: "place:2172517", radiusKm: 150 },
       focus: { lat: -26, lng: 134, altitude: 1.02 },
@@ -131,23 +152,44 @@ export const ELEVENTH_JOURNEY: Journey = {
         borderIds: ["wurl:AUS"],
         hover: false,
         muteOthers: true,
+        feedbackRegions: "neutral",
       },
-      feedbackContextIds: ["wurl:AUS"],
-      feedbackPlaces: [place("place:2147714"), place("place:2158177")],
+      feedbackHintIds: ["wurl:AUS"],
+      feedbackFocus: { lat: -35.3, lng: 148.5, altitude: 0.4 },
+      feedbackPlaces: [
+        {
+          ...place("place:2172517"),
+          name: "Canberra · purpose-built capital",
+          priority: 100,
+        },
+        {
+          ...place("place:2147714"),
+          name: "Sydney · reference city",
+          visualState: "hinted",
+          priority: 90,
+        },
+        {
+          ...place("place:2158177"),
+          name: "Melbourne · reference city",
+          visualState: "hinted",
+          priority: 90,
+        },
+      ],
       sources: [
         source(
-          "National Capital Authority · Canberra’s history",
-          "https://www.nca.gov.au/education/canberras-history",
+          "National Capital Authority · Federation and the national capital",
+          "https://www.nca.gov.au/education/canberras-history/federation-and-national-capital",
         ),
       ],
       explanation:
-        "Look inland, between Sydney and Melbourne. The capital isn’t either of the two famous coastal cities.",
+        "The site had to be at least 100 miles from Sydney. A purpose-built inland capital avoided choosing either of the two rival cities.",
     },
     {
       ...base,
       id: "unexpected-abuja",
-      leadIn: "Head to West Africa.",
       progressLabel: "Nigeria",
+      resolvedLabel: "Abuja",
+      label: "Capital move",
       title: "The capital that moved.",
       prompt:
         "Nigeria moved its capital away from Lagos in 1991. What is its current capital?",
@@ -162,9 +204,24 @@ export const ELEVENTH_JOURNEY: Journey = {
       rule: { type: "capital-name", countryId: "wurl:NGA" },
       contextIds: ["wurl:NGA"],
       focus: { lat: 9, lng: 8, altitude: 0.76 },
-      feedbackPlaces: [place("place:2352778"), place("place:2332459")],
+      feedbackHintIds: ["wurl:NGA"],
+      feedbackFocus: { lat: 7.8, lng: 5.3, altitude: 0.4 },
+      feedbackPlaces: [
+        {
+          ...place("place:2352778"),
+          name: "Abuja · planned capital",
+          visualState: "answer",
+          priority: 100,
+        },
+        {
+          ...place("place:2332459"),
+          name: "Lagos · former capital",
+          visualState: "hinted",
+          priority: 90,
+        },
+      ],
       explanation:
-        "The move in 1991 took the federal capital inland. Lagos stayed on the coast.",
+        "The new city offered room to grow and a central location accessible from across Nigeria, away from the crowded former capital on the coast.",
       source: source(
         "Federal Capital Development Authority · history of Abuja",
         "https://fcda.gov.ng/the-history-of-abuja/",
@@ -179,10 +236,10 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-brasilia-marker",
-      leadIn: "Cross the Atlantic to Brazil.",
       progressLabel: "Brazil",
+      resolvedLabel: "Brasília",
       title: "Find Brasília.",
-      label: "City",
+      label: "New capital",
       prompt: "Which marker is Brasília, Brazil’s capital since 1960?",
       guidance: {
         hint: "Moving the capital was a push toward the interior. Look away from the Atlantic coast, into central Brazil.",
@@ -197,12 +254,21 @@ export const ELEVENTH_JOURNEY: Journey = {
       selection: { type: "ids", ids: BRAZIL_CITY_TARGETS },
       commitment: "immediate",
       contextIds: ["wurl:BRA"],
-      feedbackContextIds: ["wurl:BRA"],
+      feedbackHintIds: ["wurl:BRA"],
       focus: { lat: -13, lng: -54, altitude: 1.05 },
       feedbackFocus: { lat: -15, lng: -51, altitude: 0.82 },
       feedbackPlaces: [
-        { ...place("place:3469058"), priority: 100 },
-        { ...place("place:3451190"), visualState: "hinted", priority: 90 },
+        {
+          ...place("place:3469058"),
+          name: "Brasília · planned capital",
+          priority: 100,
+        },
+        {
+          ...place("place:3451190"),
+          name: "Rio de Janeiro · former capital",
+          visualState: "hinted",
+          priority: 90,
+        },
       ],
       explanation:
         "In 1960, the seat of government moved from coastal Rio de Janeiro to a planned city in the interior.",
@@ -210,17 +276,24 @@ export const ELEVENTH_JOURNEY: Journey = {
         "Presidency of Brazil · Law 3,273, capital transfer date",
         "https://www.planalto.gov.br/ccivil_03/leis/l3273.htm",
       ),
+      sources: [
+        source(
+          "IPHAN · Brasília, a purpose-built capital",
+          "https://www.gov.br/iphan/pt-br/superintendencias/distrito-federal/patrimonio-mundial",
+        ),
+      ],
     },
     {
       ...base,
       id: "unexpected-south-africa-capitals",
       leadIn: "Finish with more than one capital.",
       progressLabel: "South Africa",
+      resolvedLabel: "Pretoria, Cape Town & Bloemfontein",
       title: "One country, three capitals.",
-      label: "Cities",
+      label: "Three capitals",
       prompt: "Select South Africa’s three national capitals.",
       guidance: {
-        hint: "Government is split across three cities: one hosts the administration, one Parliament, and one the Supreme Court of Appeal.",
+        hint: "Look for Parliament on the southwest coast. The administrative and judicial capitals are inland.",
         assist: {
           text: "Four candidates remain for three roles. A major commercial city is still among them, so don’t select every marker.",
           candidateIds: [...SOUTH_AFRICA_CAPITAL_TARGETS, "place:993800"],
@@ -238,7 +311,7 @@ export const ELEVENTH_JOURNEY: Journey = {
         committedNames: true,
       },
       contextIds: ["wurl:ZAF"],
-      feedbackContextIds: ["wurl:ZAF"],
+      feedbackHintIds: ["wurl:ZAF"],
       focus: { lat: -28.5, lng: 25, altitude: 0.42 },
       feedbackPlaces: [
         { ...place("place:964137"), name: "Pretoria · administrative" },
@@ -253,4 +326,30 @@ export const ELEVENTH_JOURNEY: Journey = {
       ),
     },
   ],
+  completion: {
+    focus: { lat: -15, lng: 25, altitude: 1.8 },
+    views: [
+      { lat: 39, lng: 32, altitude: 1.6 },
+      { lat: -30, lng: 149, altitude: 1.6 },
+      { lat: 9, lng: 8, altitude: 1.6 },
+      { lat: -15, lng: -47, altitude: 1.6 },
+      { lat: -28, lng: 25, altitude: 0.55 },
+    ],
+    physicalFeatures: [],
+    places: [
+      "place:323786",
+      "place:2172517",
+      "place:2352778",
+      "place:3469058",
+      ...SOUTH_AFRICA_CAPITAL_TARGETS,
+    ].map((id) => ({
+      ...place(id),
+      kind: "capital",
+      visualState: "answer",
+      priority: 100,
+      labelFlexible: true,
+    })),
+    caption:
+      "Famous cities, coastal hubs and former capitals can all mislead. Sometimes even the idea of one capital falls short.",
+  },
 };
