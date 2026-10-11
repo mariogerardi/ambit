@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { readFileSync } from "node:fs";
-import { act, useReducer } from "react";
-import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, it, expect, vi } from "vitest";
 import { geoContains } from "d3-geo";
 import { ANDES_JOURNEY as journey } from "../src/game/andesJourney";
 import { AnswerForm } from "../src/game/AnswerForm";
+import { GameShell } from "../src/game/GameShell";
+import { placeMarkerSize } from "../src/globe/placeLabels";
+import { ANSWER_PLACES, pinDistanceTier } from "../src/game/answerTargets";
+import { EARTH_KM } from "../src/game/spatial";
 import { gameReducer, initialGame } from "../src/game/state";
 import type { Action, GameState } from "../src/game/state";
 import {
@@ -14,7 +16,6 @@ import {
   canSubmit,
   isCorrect,
 } from "../src/game/questions";
-import { correctAnswerSummary } from "../src/game/copy";
 import { journeyWorld } from "../src/app/journeyWorld";
 import { PhysicalFeatures } from "../src/globe/physicalFeatures";
 import { sphericalGeometry } from "../src/geography/sphericalGeometry.mjs";
@@ -35,16 +36,7 @@ const reduce = (state: GameState, ...actions: Action[]) =>
     (game, action) => gameReducer(game, action, journey, context),
     state,
   );
-const order = journey.rounds[4];
-const placed = () =>
-  reduce(
-    at(4),
-    ...["wurl:PER", "wurl:BOL", "wurl:ARG"].map(
-      (id, index): Action => ({ type: "order-card", id, index }),
-    ),
-  );
-
-describe("Along the Andes authored map and ordering puzzle", () => {
+describe("Along the Andes authored map and recap", () => {
   it("provides the physical spine throughout, without leaking exact targets", () => {
     const footprint = journey.rounds[0].physicalFeatures![0].geometry!;
     expect(geoContains(sphericalGeometry(footprint), [-74.0818, 4.6097])).toBe(
@@ -53,7 +45,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     expect(geoContains(sphericalGeometry(footprint), [-66.8792, 10.488])).toBe(
       false,
     );
-    for (let index = 0; index < 5; index++) {
+    for (let index = 0; index < 4; index++) {
       const map = journeyWorld(regions, journey, at(index), context);
       expect(map.physicalFeatures.map((feature) => feature.id)).toEqual([
         "andes:range",
@@ -62,7 +54,8 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       expect(map.physicalFeatures[0].relief!.hachures.length).toBeGreaterThan(
         1000,
       );
-      if (index !== 1) expect(map.places).toEqual([]);
+      if (index !== 3) expect(map.places).toEqual([]);
+      else expect(map.places.every((place) => place.markerHidden)).toBe(true);
       expect(journey.rounds[index].guidance?.assist).toBeTruthy();
     }
     const lakeQuestion = journey.rounds[2];
@@ -160,7 +153,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       recap.places.some((place) => place.name.includes("Pacific finish")),
     ).toBe(false);
   });
-  it("uses summit choices without answer-bearing markers and reveals Chimborazo afterward", () => {
+  it("asks why Chimborazo is farther from the center, then reveals the summit and schematic", () => {
     const map = journeyWorld(regions, journey, at(1), context);
     expect(map.overlays).toContainEqual({
       id: "andes:equator",
@@ -178,271 +171,386 @@ describe("Along the Andes authored map and ordering puzzle", () => {
           webgl={webgl}
         />,
       );
-      for (const name of ["Chimborazo", "Cotopaxi", "Cayambe", "Antisana"])
+      for (const name of [
+        "Earth bulges around the Equator.",
+        "Chimborazo is taller above sea level.",
+        "Earth is wider around its poles.",
+        "Everest’s height is measured from its base.",
+      ])
         expect(html).toContain(name);
       expect(html).not.toContain("Tap a summit marker");
     }
     const answered = reduce(
       at(1),
-      { type: "select", id: "peak:chimborazo" },
+      { type: "select", id: "earth:equatorial-bulge" },
       { type: "submit" },
     );
     expect(answered.answers.at(-1)?.correct).toBe(true);
+    const html = renderToStaticMarkup(
+      <GameShell
+        journey={journey}
+        context={context}
+        game={answered}
+        dispatch={() => {}}
+        webgl
+        frame={() => {}}
+        onHome={() => {}}
+        onStudy={() => {}}
+        onPlayground={() => {}}
+      />,
+    );
+    expect(html).toContain('class="earth-shape-diagram"');
+    expect(html).toContain("shape and heights exaggerated");
+
     expect(
       journeyWorld(regions, journey, answered, context).places.map(
         (place) => place.name,
       ),
     ).toEqual(["Chimborazo"]);
   });
-  it("makes Aconcagua selectable through the actual map contract and keeps assists neutral", () => {
+  it("keeps Aconcagua hidden while pinning, grades distance, and reveals pins, distance line and tolerance", () => {
+    const round = journey.rounds[3];
+    const target = round.places!.find(
+      (place) => place.id === "andes:aconcagua",
+    )!;
     const map = journeyWorld(regions, journey, at(3), context);
-    expect(map.regionInteraction).toBe(true);
-    expect(map.selectDisabled).toBe(true);
+    expect(map.regionInteraction).toBe(false);
     expect(map.showBorders).toBe(true);
-    for (const id of ["wurl:CHL", "wurl:ARG", "wurl:PRY", "wurl:URY"])
-      expect(map.states[id]).toBe("selectable");
-    expect(map.borderRegionIds).toEqual([
-      "wurl:ARG",
-      "wurl:CHL",
-      "wurl:PRY",
-      "wurl:URY",
+    expect(map.borderRegionIds).toEqual(["wurl:ARG", "wurl:CHL"]);
+    expect(map.places.map((place) => place.name)).toEqual([
+      "Argentina",
+      "Chile",
     ]);
+    expect(map.overlays).toEqual([]);
+    expect(canSubmit(round, context, at(3))).toBe(false);
     const helped = reduce(
       at(3),
       { type: "request-hint" },
       { type: "request-assist" },
     );
     const assistMap = journeyWorld(regions, journey, helped, context);
-    expect(assistMap.states["wurl:CHL"]).toBe("selectable");
-    expect(assistMap.states["wurl:ARG"]).toBe("selectable");
-    expect(reduce(helped, { type: "select", id: "wurl:PER" })).toBe(helped);
+    expect(assistMap.places.map((place) => place.name)).toEqual([
+      "Argentina",
+      "Chile",
+      "Santiago",
+    ]);
+    expect(assistMap.places.some((place) => place.id === target.id)).toBe(
+      false,
+    );
     const answer = reduce(
       helped,
-      { type: "select", id: "wurl:ARG" },
+      { type: "drop-pin", lat: target.lat, lng: target.lng },
       { type: "submit" },
     );
     expect(answer.answers.at(-1)?.correct).toBe(true);
     const reveal = journeyWorld(regions, journey, answer, context);
-    const summit = reveal.places[0];
+    expect(reveal.places.find((place) => place.id === target.id)).toMatchObject(
+      { kind: "pin", visualState: "answer" },
+    );
+    expect(reveal.routes).toHaveLength(1);
+    expect(reveal.overlays).toContainEqual(
+      expect.objectContaining({ type: "circle", radiusKm: 450 }),
+    );
+    expect(reveal.focus).toEqual(round.feedbackFocus);
+    expect(
+      isCorrect(round, context, {
+        ...at(3),
+        pin: { lat: target.lat + 5, lng: target.lng },
+      }),
+    ).toBe(false);
+    // The scoring radius crosses the border; nationality never overrides proximity.
+    const nearbyChile = { lat: target.lat, lng: target.lng - 0.2 };
     expect(
       geoContains(
-        sphericalGeometry(context.targets.get("wurl:ARG")!.geometry),
-        [summit.lng, summit.lat],
+        sphericalGeometry(context.targets.get("wurl:CHL")!.geometry),
+        [nearbyChile.lng, nearbyChile.lat],
       ),
     ).toBe(true);
-    expect(reveal.focus).toEqual(journey.rounds[3].feedbackFocus);
-    for (const webgl of [true, false]) {
-      const html = renderToStaticMarkup(
+    expect(isCorrect(round, context, { ...at(3), pin: nearbyChile })).toBe(
+      true,
+    );
+    expect(
+      renderToStaticMarkup(
         <AnswerForm
-          question={journey.rounds[3]}
+          question={round}
           context={context}
           game={at(3)}
           dispatch={() => {}}
-          webgl={webgl}
+          webgl={false}
+        />,
+      ),
+    ).toContain("Enter coordinates");
+  });
+  it("grades all three bullseye tiers as correct with inclusive edges and distinct feedback", () => {
+    const round = journey.rounds[3];
+    const target = round.places!.find(
+      (place) => place.id === "andes:aconcagua",
+    )!;
+    for (const [km, expectedFeedback] of [
+      [0, "Bullseye!"],
+      [150, "Bullseye!"],
+      [150.001, "Very close."],
+      [300, "Very close."],
+      [300.001, "In range."],
+      [450, "In range."],
+      [450.001, undefined],
+    ] as const) {
+      const answer = reduce(
+        at(3),
+        {
+          type: "drop-pin",
+          lat: target.lat + ((km / EARTH_KM) * 180) / Math.PI,
+          lng: target.lng,
+        },
+        { type: "submit" },
+      );
+      expect(answer.answers.at(-1)?.correct, `${km} km`).toBe(
+        !!expectedFeedback,
+      );
+      expect(pinDistanceTier(round, answer)?.feedback, `${km} km`).toBe(
+        expectedFeedback,
+      );
+      const html = renderToStaticMarkup(
+        <GameShell
+          journey={journey}
+          context={context}
+          game={answer}
+          dispatch={() => {}}
+          webgl
+          frame={() => {}}
+          onHome={() => {}}
+          onStudy={() => {}}
+          onPlayground={() => {}}
         />,
       );
-      expect(html.includes("Answer by typing")).toBe(!webgl);
+      expect(html).toContain(expectedFeedback ?? "Not quite.");
+      expect(html).toContain("Your pin was");
+      const rings = journeyWorld(regions, journey, answer, context).overlays!;
+      expect(
+        rings.map((ring) =>
+          ring.type === "circle" ? ring.radiusKm : undefined,
+        ),
+      ).toEqual([150, 300, 450]);
+      expect(new Set(rings.map((ring) => ring.id)).size).toBe(3);
+    }
+    // Tier boundaries must be ordered, cover the complete target, and have feedback.
+    for (const tiers of [
+      [],
+      [{ radiusKm: 150, feedback: "Close" }],
+      [
+        { radiusKm: 300, feedback: "Close" },
+        { radiusKm: 150, feedback: "Closer" },
+        { radiusKm: 450, feedback: "In range" },
+      ],
+      [
+        { radiusKm: NaN, feedback: "Close" },
+        { radiusKm: 450, feedback: "In range" },
+      ],
+      [
+        { radiusKm: 150, feedback: "" },
+        { radiusKm: 450, feedback: "In range" },
+      ],
+    ]) {
+      if (round.rule.type !== "pin-distance")
+        throw Error("Expected pin distance rule");
+      const rule = round.rule;
+      expect(() =>
+        createQuestionContext(regions, [], {
+          ...journey,
+          rounds: [{ ...round, rule: { ...rule, tiers } }],
+        }),
+      ).toThrow("Invalid pin distance tiers");
     }
   });
-  it("grades complete, unique card order with a real distractor", () => {
-    expect(canSubmit(order, context, at(4))).toBe(true);
-    expect(isCorrect(order, context, at(4))).toBe(false);
-    expect(reduce(at(4), { type: "jump", index: 4 }).ordered).toEqual(
-      order.orderInitial,
+  it("accepts the seven Andean countries in any order and rejects a distractor", () => {
+    const round = journey.rounds[4];
+    const ids = [
+      "wurl:ARG",
+      "wurl:CHL",
+      "wurl:BOL",
+      "wurl:PER",
+      "wurl:ECU",
+      "wurl:COL",
+      "wurl:VEN",
+    ];
+    const selected = reduce(
+      at(4),
+      ...ids.map((id): Action => ({ type: "select", id })),
     );
-    const correct = placed();
-    expect(canSubmit(order, context, correct)).toBe(true);
-    expect(isCorrect(order, context, correct)).toBe(true);
-    expect(reduce(correct, { type: "submit" }).answers.at(-1)?.correct).toBe(
+    expect(canSubmit(round, context, selected)).toBe(true);
+    expect(reduce(selected, { type: "submit" }).answers.at(-1)?.correct).toBe(
       true,
     );
-    expect(correctAnswerSummary(order, context, correct).value).toBe(
-      "Peru → Bolivia → Argentina",
-    );
-    for (const ordered of [
-      ["wurl:BOL", "wurl:PER", "wurl:ARG"],
-      ["wurl:PER", "wurl:PRY", "wurl:ARG"],
-      ["wurl:PER", "wurl:PER", "wurl:ARG"],
-      ["wurl:PER", "wurl:BOL"],
-    ])
-      expect(isCorrect(order, context, { ...correct, ordered })).toBe(false);
     expect(
-      reduce(correct, { type: "order-card", id: "wurl:USA", index: 0 }),
-    ).toBe(correct);
+      isCorrect(round, context, {
+        ...selected,
+        selectedIds: [...ids.slice(0, 6), "wurl:BRA"],
+      }),
+    ).toBe(false);
     expect(
-      reduce(correct, { type: "order-card", id: "wurl:PER", index: 3 }),
-    ).toBe(correct);
-    expect(
-      reduce(correct, { type: "ordered", index: 0, value: "wurl:PRY" }),
-    ).toBe(correct);
+      canSubmit(round, context, { ...selected, selectedIds: ids.slice(0, 6) }),
+    ).toBe(false);
+    expect(reduce(selected, { type: "select", id: "wurl:BRA" })).toBe(selected);
+    expect(reduce(at(4), { type: "select", id: "wurl:USA" })).toEqual(at(4));
   });
-  it("swaps placed cards, returns displaced cards to spares, and enforces assist locks", () => {
-    const correct = placed();
-    const swapped = reduce(correct, {
-      type: "order-card",
-      id: "wurl:ARG",
-      index: 0,
-    });
-    expect(swapped.ordered).toEqual(["wurl:ARG", "wurl:BOL", "wurl:PER"]);
-    const displaced = reduce(swapped, {
-      type: "order-card",
-      id: "wurl:PRY",
-      index: 2,
-    });
-    expect(displaced.ordered).toEqual(["wurl:ARG", "wurl:BOL", "wurl:PRY"]);
+  it("locks Venezuela and Chile through map taps, typing, clearing and resumed help", () => {
+    const round = journey.rounds[4];
     const helped = reduce(
-      displaced,
+      at(4),
       { type: "request-hint" },
       { type: "request-assist" },
     );
-    expect(helped.ordered).toEqual(["wurl:PRY", "wurl:BOL", "wurl:ARG"]);
-    expect(helped.help?.[order.id]).toBe("assisted");
-    for (const action of [
-      { type: "order-card", id: "wurl:ARG", index: -1 },
-      { type: "order-card", id: "wurl:PRY", index: 2 },
-    ] as Action[])
-      expect(reduce(helped, action)).toBe(helped);
-    const cleared = reduce(helped, { type: "clear" });
-    expect(cleared.ordered).toEqual(["wurl:BOL", "wurl:PRY", "wurl:ARG"]);
-    const bankSwap = reduce(correct, {
-      type: "order-card",
-      id: "wurl:PER",
-      index: -1,
-    });
-    expect(bankSwap.ordered).toEqual(["wurl:PRY", "wurl:BOL", "wurl:ARG"]);
+    expect(helped.selectedIds).toEqual(["wurl:VEN", "wurl:CHL"]);
+    expect(round.guidance?.hint).toBe(
+      "We've mentioned every country at least once this Journey!",
+    );
+    for (const id of helped.selectedIds)
+      expect(reduce(helped, { type: "select", id })).toBe(helped);
     expect(
       reduce(
-        cleared,
-        { type: "order-card", id: "wurl:PER", index: 0 },
-        { type: "order-card", id: "wurl:BOL", index: 1 },
+        helped,
+        { type: "text", value: "Chile" },
+        { type: "guess-country" },
+      ).selectedIds,
+    ).toEqual(helped.selectedIds);
+    expect(
+      reduce(helped, { type: "select", id: "wurl:BRA" }, { type: "clear" })
+        .selectedIds,
+    ).toEqual(helped.selectedIds);
+    const stale = { ...helped, selectedIds: [] };
+    expect(reduce(stale, { type: "clear" }).selectedIds).toEqual(
+      helped.selectedIds,
+    );
+    const map = journeyWorld(regions, journey, stale, context);
+    expect(map.states["wurl:VEN"]).toBe("selected");
+    expect(map.states["wurl:CHL"]).toBe("selected");
+    const html = renderToStaticMarkup(
+      <AnswerForm
+        question={round}
+        context={context}
+        game={stale}
+        dispatch={() => {}}
+        webgl
+      />,
+    );
+    expect(html.match(/Locked/g)).toHaveLength(2);
+    const full = {
+      ...at(4),
+      selectedIds: [
+        "wurl:COL",
+        "wurl:ECU",
+        "wurl:PER",
+        "wurl:BOL",
+        "wurl:ARG",
+        "wurl:BRA",
+        "wurl:PRY",
+      ],
+    };
+    const preserved = reduce(
+      full,
+      { type: "request-hint" },
+      { type: "request-assist" },
+    );
+    expect(preserved.selectedIds).toHaveLength(9);
+    expect(canSubmit(round, context, preserved)).toBe(false);
+    expect(
+      renderToStaticMarkup(
+        <AnswerForm
+          question={round}
+          context={context}
+          game={preserved}
+          dispatch={() => {}}
+          webgl
+        />,
+      ),
+    ).toContain("Paraguay");
+    expect(
+      reduce(
+        preserved,
+        { type: "select", id: "wurl:BRA" },
+        { type: "select", id: "wurl:PRY" },
         { type: "submit" },
       ).answers.at(-1)?.correct,
     ).toBe(true);
-    expect(() =>
-      createQuestionContext(regions, [], {
-        ...journey,
-        rounds: [
-          {
-            ...order,
-            guidance: {
-              hint: "Hint",
-              assist: {
-                text: "Assist",
-                fixedSlots: [{ index: 2, id: "wurl:PRY" }],
+    for (const fixedSelections of [["wurl:BRA"], ["wurl:VEN", "wurl:VEN"]])
+      expect(() =>
+        createQuestionContext(regions, [], {
+          ...journey,
+          rounds: [
+            {
+              ...round,
+              guidance: {
+                hint: "Hint",
+                assist: { text: "Assist", fixedSelections },
               },
             },
-          },
-        ],
-      }),
-    ).toThrow("Invalid ordering");
+          ],
+        }),
+      ).toThrow("Invalid fixed selection assist");
   });
-  it("supports button placement, pointer drag, and the hint-to-lock transition", async () => {
-    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  it("highlights Q3 selections using the existing chosen-button class and offsets its initial camera", () => {
+    const round = journey.rounds[2];
+    const selected = reduce(
+      at(2),
+      { type: "select", id: "wurl:PER" },
+      { type: "select", id: "wurl:BOL" },
+    );
+    const html = renderToStaticMarkup(
+      <AnswerForm
+        question={round}
+        context={context}
+        game={selected}
+        dispatch={() => {}}
+        webgl
+      />,
+    );
     const host = document.createElement("div");
-    document.body.append(host);
-    const root = createRoot(host);
-    function Puzzle() {
-      const [game, dispatch] = useReducer(
-        (state: GameState, action: Action) =>
-          gameReducer(state, action, journey, context),
-        at(4),
-      );
-      return (
-        <AnswerForm
-          question={order}
-          context={context}
-          game={game}
-          dispatch={dispatch}
-          webgl
-        />
-      );
-    }
-    try {
-      await act(async () => root.render(<Puzzle />));
-      const button = (text: string) =>
-        [...host.querySelectorAll<HTMLButtonElement>("button")].find(
-          (element) => element.textContent?.includes(text),
-        )!;
-      await act(async () => button("Peru").click());
-      await act(async () =>
-        host
-          .querySelector<HTMLButtonElement>('[aria-label="North: Bolivia"]')!
-          .click(),
-      );
-      expect(host.querySelector('[aria-label="North: Peru"]')).toBeTruthy();
-      expect(host.querySelectorAll(".order-card")).toHaveLength(4);
-      expect(host.textContent).not.toContain("Spare cards");
-      expect(host.textContent).toContain("Impostor");
-      expect(host.textContent).not.toContain("North → South");
-      expect(host.textContent).not.toContain("empty");
-      const card = button("Bolivia");
-      const middle = host.querySelector<HTMLElement>('[data-order-slot="1"]')!;
-      Object.defineProperty(document, "elementFromPoint", {
-        configurable: true,
-        value: () => middle,
-      });
-      card.getBoundingClientRect = () =>
-        ({ left: 40, top: 60, width: 240, height: 44 }) as DOMRect;
-      await act(async () =>
-        card.dispatchEvent(
-          new MouseEvent("pointerdown", {
-            bubbles: true,
-            clientX: 100,
-            clientY: 80,
-          }),
-        ),
-      );
-      await act(async () =>
-        card.dispatchEvent(
-          new MouseEvent("pointermove", {
-            bubbles: true,
-            clientX: 300,
-            clientY: 150,
-          }),
-        ),
-      );
-      const preview = document.body.querySelector<HTMLElement>(
-        ".order-drag-preview",
-      )!;
-      expect(host.contains(preview)).toBe(false); // Escape transformed panel ancestors.
-      expect(preview.style.left).toBe("240px");
-      expect(preview.style.top).toBe("130px");
-      expect(preview.style.width).toBe("240px");
-      expect(preview.style.height).toBe("44px");
-      await act(async () =>
-        card.dispatchEvent(
-          new MouseEvent("pointerup", {
-            bubbles: true,
-            clientX: 300,
-            clientY: 150,
-          }),
-        ),
-      );
-      expect(document.body.querySelector(".order-drag-preview")).toBeNull();
-      expect(host.querySelector('[aria-label="Middle: Bolivia"]')).toBeTruthy();
-      await act(async () => button("Need a hint?").click());
-      await act(async () => button("Need an assist?").click());
-      expect(
-        host.querySelector<HTMLButtonElement>(
-          '[aria-label="South: Argentina, locked by assist"]',
-        )!.disabled,
-      ).toBe(true);
-      expect(button("Submit answer").disabled).toBe(false);
-      expect(
-        host.querySelector('[data-order-slot="-1"]')?.textContent,
-      ).toContain("Paraguay");
-    } finally {
-      await act(async () => root.unmount());
-      host.remove();
-      vi.unstubAllGlobals();
-      delete (document as unknown as Record<string, unknown>).elementFromPoint;
-    }
+    host.innerHTML = html;
+    expect(
+      [...host.querySelectorAll("button.chosen")].map(
+        (button) => button.textContent,
+      ),
+    ).toEqual(["Peru✓", "Bolivia✓"]);
+    expect(host.querySelectorAll('[aria-pressed="true"]')).toHaveLength(2);
+    expect(round.focus.lat).toBeGreaterThan(-16);
+    expect(round.focus.lng).toBeLessThan(-69);
+    expect(round.feedbackFocus).toEqual({
+      lat: -15.8,
+      lng: -69.3,
+      altitude: 0.2,
+    });
   });
-  it("hides Chile and borders before ordering, then tours consistently styled resolved stops", () => {
+  it("enlarges Q1 reveal stars without changing ordinary map capital sizes", () => {
+    const answer = reduce(
+      at(0),
+      { type: "select", id: "city:bogota" },
+      { type: "submit" },
+    );
+    const places = journeyWorld(regions, journey, answer, context).places;
+    expect(places.map(placeMarkerSize)).toEqual([30, 30]);
+    expect(places.every((place) => place.kind === "capital")).toBe(true);
+    expect(placeMarkerSize(ANSWER_PLACES.get(places[0].id)!)).toBe(18);
+  });
+  it("hides the mountain trace during the recap, then reveals all seven countries", () => {
     const before = journeyWorld(regions, journey, at(4), context);
-    expect(before.showBorders).toBe(false);
-    expect(before.states["wurl:CHL"]).toBe("disabled");
-    const finished = { ...placed(), phase: "finished" as const };
+    expect(before.showBorders).toBe(true);
+    expect(before.regionNames).toBe("all");
+    expect(before.physicalFeatures).toEqual([]);
+    expect(before.places).toEqual([]);
+    const answered = reduce(
+      at(4),
+      ...["VEN", "COL", "ECU", "PER", "BOL", "CHL", "ARG"].map(
+        (id): Action => ({ type: "select", id: `wurl:${id}` }),
+      ),
+      { type: "submit" },
+    );
+    const reveal = journeyWorld(regions, journey, answered, context);
+    expect(reveal.physicalFeatures.map((feature) => feature.id)).toEqual([
+      "andes:range",
+    ]);
+    expect(reveal.places).toEqual([]);
+    expect(before.states["wurl:CHL"]).toBe("selectable");
+    const finished = { ...at(4), phase: "finished" as const };
     const recap = journeyWorld(regions, journey, finished, context);
     expect(
       journey.completion!.views!.slice(0, 5).map((view) => view.lat),
@@ -450,9 +558,17 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     expect(recap.places.every((place) => place.visualState === "visited")).toBe(
       true,
     );
-    for (const id of ["wurl:PER", "wurl:BOL", "wurl:ARG"])
+    for (const id of [
+      "wurl:VEN",
+      "wurl:COL",
+      "wurl:ECU",
+      "wurl:PER",
+      "wurl:BOL",
+      "wurl:CHL",
+      "wurl:ARG",
+    ])
       expect(recap.states[id]).toBe("visited");
-    expect(recap.states["wurl:CHL"]).toBe("disabled");
+    expect(recap.states["wurl:BRA"]).toBe("disabled");
   });
   it("renders terrain ink instead of the mountain footprint and cleans it up", () => {
     const physical = new PhysicalFeatures();

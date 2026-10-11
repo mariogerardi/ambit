@@ -187,7 +187,7 @@
     letter-spacing: -0.5px;
   }
   .experience .finish-story > h1.journey-result-heading {
-    font-size: clamp(24px, 7vw, 28px);
+    font-size: clamp(18px, 5.5vw, 28px);
   }
   .experience.experience .finish-story {
     padding-inline: 6px;

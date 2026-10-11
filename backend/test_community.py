@@ -155,6 +155,22 @@ class CommunityTests(unittest.TestCase):
         self.call("PATCH /account/friends/{id}", "b", {"action": "block"}, id="a")
         self.assertEqual(self.call("GET /account/friends/{id}/profile", "a", id="b")[0], 403)
 
+    def test_journey_reset_removes_old_scores_and_allows_a_fresh_run(self):
+        self.db.saves = [self.daily_record("a"), self.daily_record("a", writer="stale"), self.daily_record("a", day="2026-10-09")]
+        reset = {"pk": "user#a", "namespace": "daily", "field": "reset.2026-10-10/test", "writer": "admin", "clock": 2, "valueJson": "2"}
+        self.db.saves.append(reset)
+        summary = community.progress_summary("a", fresh=True)
+        self.assertEqual([a["date"] for a in summary["activity"]], ["2026-10-09"])
+        replay = self.daily_record("a", phase="playing", writer="fresh")
+        attempt = json.loads(replay["valueJson"])
+        attempt["startedAt"] = 3
+        replay["valueJson"] = json.dumps(attempt)
+        self.db.saves.append(replay)
+        summary = community.progress_summary("a", fresh=True)
+        current = next(a for a in summary["activity"] if a["date"] == "2026-10-10")
+        self.assertEqual(current["status"], "in_progress")
+        self.assertIsNone(current["correct"])
+
     def test_help_is_aggregated_monotonically_without_disclosing_clues_or_bypassing_score_lock(self):
         self.friends()
         record = self.daily_record("b")

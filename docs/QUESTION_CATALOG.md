@@ -46,11 +46,11 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 
 | Mode                | Control                 | Questions |
 | ------------------- | ----------------------- | --------: |
-| `pin`               | Drop a pin              |        14 |
+| `pin`               | Drop a pin              |        15 |
 | `city-single`       | Single city pick        |         1 |
 | `city-multiple`     | Multiple city picks     |         1 |
-| `map-single`        | Single country pick     |        11 |
-| `map-multiple`      | Multiple country picks  |         5 |
+| `map-single`        | Single country pick     |        10 |
+| `map-multiple`      | Multiple country picks  |         6 |
 | `number`            | Number                  |         2 |
 | `text`              | Free response           |        10 |
 | `typed-regions`     | Typed region names      |         3 |
@@ -58,7 +58,7 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `ordered-capitals`  | Ordered capital names   |         0 |
 | `choice-single`     | Single choice           |        14 |
 | `choice-multiple`   | Multiple choices        |         3 |
-| `choice-order`      | Order cards with spares |         1 |
+| `choice-order`      | Order cards with spares |         0 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
 example or playground selector. Multiple-choice questions are capped at six
@@ -68,8 +68,16 @@ controls and direct typing; a new numeric rule should respect that UI contract.
 `choice-order` stores candidate IDs in `Response.ordered`, with a
 `country-ids` rule marked `ordered: true`. It supports spare/distractor cards,
 mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
-The Andes finale is the reviewed example; correctness still requires all three
-original neighbors in the original order.
+There is no current catalog example; focused ordering-control tests retain coverage.
+The Andes finale instead asks for all seven Andean countries in any order. Its
+`assist.fixedSelections` locks Venezuela and Chile, preserves existing picks, and
+keeps the anchors selected after clearing. More than seven picks disables submission
+until the player removes extras. The Aconcagua round accepts pins within 450 km of
+the summit by distance alone, with inclusive tiers at 150, 300 and 450 km. All tiers
+earn one correct answer; tier-specific praise and concentric rings appear on reveal.
+`pin-distance.tiers` is optional, ordered from smallest to largest radius, and must
+end at the rule's `radiusKm`. Questions without tiers keep their single-radius behavior.
+The finale hides prior landmarks; the full results scene retains the Journey tour.
 
 ## Knowledge rules and data scope
 
@@ -211,7 +219,8 @@ physical feature; supply its answer marker separately in `feedbackPlaces`.
 `labelFlexible` allows explanatory place labels to use alternate screen anchors
 without making them playable answer targets. A `feedbackDiagram` of type
 `river-banks` explains bank relationships schematically without claiming sourced
-urban geometry. `correctFeedback` overrides widget-derived praise when needed.
+urban geometry; `earth-shape` compares center distance with sea-level height using
+an explicitly exaggerated schematic. `correctFeedback` overrides widget-derived praise when needed.
 
 `resolvedLabel` replaces a spoiler-safe step label only in the answered completion
 receipt. `Journey.completion` authors a static focus, physical features, stop

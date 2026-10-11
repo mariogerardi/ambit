@@ -26,7 +26,12 @@ export function questionPlaces(
   if (phase === "home" || phase === "finished") return [];
   if (question.mode === "pin") {
     const reveal = phase === "feedback" || phase === "failed";
-    const result: PlaceFeature[] = [];
+    const result: PlaceFeature[] = (question.places ?? []).filter(
+      (place) =>
+        place.markerHidden &&
+        (question.rule.type !== "pin-distance" ||
+          place.id !== question.rule.targetId),
+    );
     if (response?.pin)
       result.push({
         id: `pin:${question.id}:guess`,

@@ -1,7 +1,6 @@
 import { withReliefClearance } from "../geography/relief";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { CAPITALS, capitalSource } from "./quizData";
-import { mapSource } from "./countryFacts";
 import type { FactSource, Journey } from "./questions";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
 import relief from "./data/andes-relief.v1.json";
@@ -16,7 +15,6 @@ const lake: PhysicalFeature = {
   fillOpacity: 1,
 };
 const andesAtLake = withReliefClearance(andes, lake.id);
-const frontiers = geography.frontiers as PhysicalFeature[];
 const source = (name: string, url: string): FactSource => ({
   name,
   url,
@@ -60,9 +58,6 @@ const aconcagua = summit(
   geography.peaks["Cerro Aconcagua"],
   "wurl:ARG",
 );
-const southernCandidates = ["ARG", "CHL", "PRY", "URY"].map(
-  (id) => `wurl:${id}`,
-);
 const lakeCandidates = ["CHL", "PER", "ECU", "ARG", "BOL", "COL"].map(
   (id) => `wurl:${id}`,
 );
@@ -94,12 +89,35 @@ const countryLabel = (
   labelFlexible: true,
   priority: 100,
 });
-const borderLabels = [
-  countryLabel("PER", "Peru · northern neighbor", -12, -75),
-  countryLabel("BOL", "Bolivia · middle neighbor", -18, -64),
-  countryLabel("ARG", "Argentina · southern neighbor", -35, -63),
-  countryLabel("PRY", "Paraguay · no Chilean border", -23, -58),
+const andeanCountries = ["VEN", "COL", "ECU", "PER", "BOL", "CHL", "ARG"].map(
+  (id) => `wurl:${id}`,
+);
+const southAmerica = [
+  "VEN",
+  "COL",
+  "ECU",
+  "PER",
+  "BOL",
+  "CHL",
+  "ARG",
+  "BRA",
+  "GUY",
+  "SUR",
+  "PRY",
+  "URY",
+].map((id) => `wurl:${id}`);
+const discoveries: PlaceFeature[] = [
+  {
+    ...bogota,
+    visualState: "visited",
+    labelFlexible: true,
+    priority: 100,
+    markerSize: 30,
+  },
+  { ...chimborazo, visualState: "visited" },
+  { ...aconcagua, visualState: "visited" },
 ];
+const santiago = CAPITALS.find((city) => city.countryId === "wurl:CHL")!;
 // Shared presentation only. Every round declares its own answer method and rule.
 const common = definePresentation({
   instruction: "",
@@ -124,7 +142,7 @@ export const ANDES_JOURNEY: Journey = {
   id: "along-the-andes-v1",
   title: "Along the Andes",
   description:
-    "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and Chile’s neighbors.",
+    "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and a seven-country recap.",
   mapAttribution: {
     label: "Terrain · USGS / NOAA via Mapzen",
     url: "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
@@ -139,23 +157,11 @@ export const ANDES_JOURNEY: Journey = {
       { lat: -40, lng: -73, altitude: 0.7 },
       { lat: -20, lng: -72, altitude: 1.65 },
     ],
-    regionIds: ["wurl:PER", "wurl:BOL", "wurl:ARG"],
-    physicalFeatures: [
-      andesAtLake,
-      lake,
-      ...frontiers.map((feature) => ({ ...feature, color: "#bba5f1" })),
-    ],
-    places: [
-      { ...bogota, visualState: "visited", labelFlexible: true, priority: 100 },
-      { ...chimborazo, visualState: "visited" },
-      { ...aconcagua, visualState: "visited" },
-      {
-        ...countryLabel("CHL", "Chile", -40, -73),
-        visualState: "visited",
-      },
-    ],
+    regionIds: andeanCountries,
+    physicalFeatures: [andesAtLake, lake],
+    places: discoveries,
     caption:
-      "From Bogotá’s highlands to Chile’s Pacific edge, one mountain system connects our five stops.",
+      "From the Caribbean to Patagonia, the Andes pass through Venezuela, Colombia, Ecuador, Peru, Bolivia, Chile and Argentina.",
   },
   rounds: [
     defineQuestion({
@@ -190,6 +196,7 @@ export const ANDES_JOURNEY: Journey = {
         {
           ...bogota,
           name: "Bogotá",
+          markerSize: 30,
           visualState: "answer",
           labelFlexible: true,
           priority: 100,
@@ -197,6 +204,7 @@ export const ANDES_JOURNEY: Journey = {
         {
           ...caracas,
           name: "Caracas",
+          markerSize: 30,
           visualState: "hinted",
           labelFlexible: true,
           priority: 100,
@@ -239,15 +247,24 @@ export const ANDES_JOURNEY: Journey = {
       leadIn:
         "Head south into Ecuador, where the Andes cross almost directly over the Equator.",
       prompt:
-        "Which Ecuadorian peak is Earth’s farthest point from its center?",
+        "Ecuador’s Chimborazo reaches farther from Earth’s center than Everest. What gives it that advantage?",
       mode: "choice-single",
-      rule: { type: "choice-ids", ids: ["peak:chimborazo"] },
+      rule: { type: "choice-ids", ids: ["earth:equatorial-bulge"] },
       selection: { type: "none" },
       choices: [
-        { id: "peak:chimborazo", label: "Chimborazo" },
-        { id: "peak:cotopaxi", label: "Cotopaxi" },
-        { id: "peak:cayambe", label: "Cayambe" },
-        { id: "peak:antisana", label: "Antisana" },
+        {
+          id: "earth:equatorial-bulge",
+          label: "Earth bulges around the Equator.",
+        },
+        {
+          id: "earth:sea-level",
+          label: "Chimborazo is taller above sea level.",
+        },
+        { id: "earth:polar-bulge", label: "Earth is wider around its poles." },
+        {
+          id: "earth:mountain-base",
+          label: "Everest’s height is measured from its base.",
+        },
       ],
       contextIds: ["wurl:ECU"],
       feedbackHintIds: ["wurl:ECU"],
@@ -256,33 +273,20 @@ export const ANDES_JOURNEY: Journey = {
       focus: { lat: -1.5, lng: -78, altitude: 0.3 },
       feedbackFocus: { lat: -1.5, lng: -78.8, altitude: 0.18 },
       feedbackPlaces: [chimborazo],
+      feedbackDiagram: { type: "earth-shape" },
       explanation:
-        "Earth’s equatorial bulge gives this summit an edge over Everest when measured from the planet’s center, rather than sea level.",
+        "Earth bulges around the Equator. Chimborazo sits near that bulge, so its summit is farther from Earth’s center. Everest is higher above sea level; these are two different measurements.",
       correctFeedback: "Nice connection.",
       source: source(
         "NOAA · Earth’s farthest summit from its center",
         "https://oceanservice.noaa.gov/facts/highestpoint.html",
       ),
-      sources: [
-        ...common.sources!,
-        source(
-          "Smithsonian GVP · Cotopaxi",
-          "https://volcano.si.edu/volcano.cfm?vn=352050",
-        ),
-        source(
-          "Smithsonian GVP · Cayambe",
-          "https://volcano.si.edu/volcano.cfm?vn=352006",
-        ),
-        source(
-          "Smithsonian GVP · Antisana",
-          "https://volcano.si.edu/volcano.cfm?vn=352030",
-        ),
-      ],
+      sources: common.sources,
       guidance: {
-        hint: "Distance from Earth’s center depends on both elevation and latitude: the planet bulges at the Equator.",
+        hint: "Consider the shape of the planet, rather than the height of the mountain alone.",
         assist: {
-          text: "Cotopaxi and Chimborazo remain. Compare their height as well as latitude.",
-          candidateIds: ["peak:chimborazo", "peak:cotopaxi"],
+          text: "The two height-measurement options are ruled out. Where is Earth wider?",
+          candidateIds: ["earth:equatorial-bulge", "earth:polar-bulge"],
         },
       },
     }),
@@ -311,7 +315,7 @@ export const ANDES_JOURNEY: Journey = {
       },
       map: { ...common.map, hoverFeedback: true, candidates: "highlighted" },
       instruction: "Choose two countries on the globe or below.",
-      focus: { lat: -16, lng: -69, altitude: 0.8 },
+      focus: { lat: -13.5, lng: -72, altitude: 0.8 },
       feedbackFocus: { lat: -15.8, lng: -69.3, altitude: 0.2 },
       feedbackPhysicalFeatures: [andesAtLake, lake],
       explanation:
@@ -340,23 +344,34 @@ export const ANDES_JOURNEY: Journey = {
       title: "The highest stop.",
       leadIn: "Follow the range south to its highest peak.",
       prompt:
-        "Which country contains Aconcagua, the highest mountain in the Americas?",
-      instruction: "Tap one of the four highlighted countries.",
-      mode: "map-single",
-      rule: { type: "country-ids", ids: ["wurl:ARG"] },
-      selection: { type: "ids", ids: southernCandidates },
-      allowTyping: false,
+        "Aconcagua is the highest mountain in the Americas, on the Argentine side of the Chilean border. Drop a pin as close to its summit as you can.",
+      instruction:
+        "Land within 450 km of the summit. Aim for the 150 km bullseye; the 300 km and 450 km rings also count as correct.",
+      mode: "pin",
+      rule: {
+        type: "pin-distance",
+        targetId: aconcagua.id,
+        radiusKm: 450,
+        tiers: [
+          { radiusKm: 150, feedback: "Bullseye!" },
+          { radiusKm: 300, feedback: "Very close." },
+          { radiusKm: 450, feedback: "In range." },
+        ],
+      },
+      selection: { type: "none" },
       map: {
         ...common.map,
-        hoverFeedback: true,
-        candidates: "highlighted",
-        borderIds: southernCandidates,
+        feedbackRegions: "neutral",
+        borderIds: ["wurl:ARG", "wurl:CHL"],
       },
-      disclosure: { ...common.disclosure, hoverNames: true },
-      contextIds: [],
-      feedbackHintIds: ["wurl:CHL"],
-      focus: { lat: -34, lng: -65, altitude: 0.72 },
+      contextIds: ["wurl:ARG", "wurl:CHL"],
+      focus: { lat: -34, lng: -68.5, altitude: 0.4 },
       feedbackFocus: { lat: -32.65, lng: -70, altitude: 0.2 },
+      places: [
+        aconcagua,
+        countryLabel("ARG", "Argentina", -33.5, -66.5),
+        countryLabel("CHL", "Chile", -34.5, -71.5),
+      ],
       feedbackPlaces: [aconcagua],
       explanation:
         "The summit rises in Mendoza province, about 15 km east of the Chilean frontier. The highest point is on the Argentine side.",
@@ -364,11 +379,19 @@ export const ANDES_JOURNEY: Journey = {
         "Argentina’s space agency · Aconcagua beside the Chilean frontier",
         "https://www.argentina.gob.ar/ciencia/conae/educacion-y-formacion-masiva/materiales-educativos/cerro-aconcagua-mendoza-sentinel-2a-msi-28-de-febrero-de-2017",
       ),
+      sources: [...common.sources!, capitalSource],
       guidance: {
-        hint: "It rises extremely close to the Chilean border—but on the eastern side of it.",
+        hint: "Look in western Mendoza province, just east of the Chilean border.",
         assist: {
-          text: "Choose between Chile and Argentina. Both remain selectable; the summit itself stays hidden until the reveal.",
-          candidateIds: ["wurl:CHL", "wurl:ARG"],
+          text: "Santiago is marked as a reference. Search north of it, on the Argentine side of the border.",
+          places: [
+            {
+              ...santiago,
+              visualState: "hinted",
+              labelFlexible: true,
+              priority: 100,
+            },
+          ],
         },
       },
     }),
@@ -377,41 +400,49 @@ export const ANDES_JOURNEY: Journey = {
 
       ...common,
       id: "andes-chile-neighbors-v2",
-      label: "Border",
-      resolvedLabel: "Chile’s neighbors",
-      topic: "mountains and borders",
-      title: "North to south beside Chile.",
-      leadIn: "Finish beside Chile.",
+      label: "Recap",
+      resolvedLabel: "Seven Andean countries",
+      topic: "mountains and countries",
+      title: "Rebuild the mountain spine.",
+      leadIn: "Bring together the countries from all four stops.",
       prompt:
-        "Order Chile’s land neighbors north to south and isolate the Impostor.",
-      mode: "choice-order",
-      count: 3,
-      selection: { type: "none" },
-      rule: {
-        type: "country-ids",
-        ids: ["wurl:PER", "wurl:BOL", "wurl:ARG"],
-        ordered: true,
-      },
-      choices: choices(["wurl:BOL", "wurl:PRY", "wurl:ARG", "wurl:PER"]),
-      orderLabels: ["North", "Middle", "South"],
-      orderInitial: ["wurl:BOL", "wurl:PRY", "wurl:PER"],
-      orderAsideLabel: "Impostor",
+        "From the Caribbean to Patagonia, which seven countries do the Andes pass through?",
+      instruction:
+        "Choose seven countries on the globe, in any order. Tap a selected country again to remove it.",
+      mode: "map-multiple",
+      count: 7,
+      selection: { type: "ids", ids: southAmerica },
+      rule: { type: "country-ids", ids: andeanCountries },
       contextIds: [],
-      map: { ...common.map, borders: false },
-      feedbackHintIds: ["wurl:CHL"],
-      focus: { lat: -29, lng: -68, altitude: 1.35 },
-      feedbackFocus: { lat: -27, lng: -64, altitude: 1.35 },
-      feedbackPlaces: borderLabels,
-      feedbackPhysicalFeatures: frontiers,
+      disclosure: {
+        ...common.disclosure,
+        hoverNames: true,
+        committedNames: true,
+      },
+      map: {
+        ...common.map,
+        hoverFeedback: true,
+        candidates: "highlighted",
+        borderIds: southAmerica,
+      },
+      focus: { lat: -20, lng: -72, altitude: 1.65 },
+      feedbackFocus: { lat: -20, lng: -72, altitude: 1.65 },
+      physicalFeatures: [],
+      places: [],
+      feedbackPlaces: [],
+      feedbackPhysicalFeatures: [andes],
       explanation:
-        "Peru meets Chile at its northern tip, Bolivia farther south, and Argentina along the long eastern frontier. Paraguay lies farther east and has no Chilean border.",
-      correctFeedback: "Nicely ordered.",
-      source: mapSource,
+        "Seven countries share the Andes: Venezuela, Colombia, Ecuador, Peru, Bolivia, Chile and Argentina. They connect this Journey’s highland capital, equatorial summit, shared lake and highest peak.",
+      correctFeedback: "Journey rebuilt.",
+      source: source(
+        "Andean Mountain Initiative · seven Andean countries",
+        "https://iam-andes.org/?lang=en",
+      ),
       guidance: {
-        hint: "One card belongs farther east and never reaches Chile.",
+        hint: "We've mentioned every country at least once this Journey!",
         assist: {
-          text: "Argentina is placed and locked in the southernmost slot. Resolve the northern slots and isolate the impostor.",
-          fixedSlots: [{ index: 2, id: "wurl:ARG" }],
+          text: "Venezuela and Chile are locked in. Fill in the gaps along the Pacific. If you have more than seven selected, remove the extra picks.",
+          fixedSelections: ["wurl:VEN", "wurl:CHL"],
         },
       },
     }),

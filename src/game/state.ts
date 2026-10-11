@@ -1,6 +1,11 @@
 import { orderedCards, swapOrderCard } from "./ordering";
 import { pointAnswerNoun, validPin } from "./answerTargets";
-import { candidateAvailable, lockedOrderSlots } from "./guidance";
+import {
+  candidateAvailable,
+  lockedOrderSlots,
+  lockedSelectionIds,
+  withLockedSelections,
+} from "./guidance";
 import type { HelpUsage } from "./guidance";
 import {
   canSelect,
@@ -109,6 +114,7 @@ export function gameReducer(
         };
   }
   if (state.phase !== "playing") return state;
+  state = withLockedSelections(round, state);
   if (action.type === "request-hint")
     return round.guidance && !state.help?.[round.id]
       ? { ...state, help: { ...state.help, [round.id]: "hinted" } }
@@ -140,7 +146,7 @@ export function gameReducer(
             : (state.ordered[index] ?? "")),
       );
     }
-    return helped;
+    return withLockedSelections(round, helped);
   }
   if (action.type === "drop-pin")
     return round.mode === "pin" && validPin(action)
@@ -184,7 +190,7 @@ export function gameReducer(
       : {
           ...state,
           pin: undefined,
-          selectedIds: [],
+          selectedIds: [...lockedSelectionIds(round, state)],
           text: "",
           ordered: round.orderInitial
             ? lockedOrderSlots(round, state).reduce(
@@ -246,7 +252,8 @@ export function gameReducer(
           }
         : state;
     if (state.selectedIds.includes(id))
-      return round.commitment === "immediate"
+      return round.commitment === "immediate" ||
+        lockedSelectionIds(round, state).includes(id)
         ? state
         : {
             ...state,

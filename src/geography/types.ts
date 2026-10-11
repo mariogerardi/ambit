@@ -47,6 +47,8 @@ export interface PlaceFeature {
   labelFlexible?: boolean;
   /** Label-only geographic context must never create a city/capital marker. */
   markerHidden?: boolean;
+  /** Authored reveal marker diameter, including texture padding, in screen pixels. */
+  markerSize?: number;
   hoverName?: string;
   aliases?: string[];
   /** Pinned source place population; display importance, not metro population. */

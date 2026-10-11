@@ -64,6 +64,12 @@ allowing a stale tab to change the chosen Journey. Conflicting answers at
 the same progress level resolve deterministically by revision; this is not a
 collaborative multi-player session.
 
+Admin's **Clear my Journey attempt** removes the current-day attempt rather than
+creating a replay. A monotonic `reset.<date>/<journeyId>` register excludes earlier
+runs of that edition from local saves and server activity summaries, so stale
+tabs and devices cannot restore their answers or score. New attempts start after
+the reset cutoff. Other dates, editions, Study progress, and users are preserved.
+
 Storage events refresh visible saves. Incoming updates are merged against the
 pre-event baseline, preserving local results/settings already queued by React.
 Active Study progress is shared across tabs and signed-in devices. Advanced

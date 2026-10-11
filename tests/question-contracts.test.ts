@@ -50,9 +50,13 @@ describe("safe question authoring contracts", () => {
       readFileSync("public/geography/world.v1.json", "utf8"),
     ) as RegionFeature[];
     const round = {
-      ...ANDES_JOURNEY.rounds[3],
-      map: { ...ANDES_JOURNEY.rounds[3].map!, hoverFeedback: false },
-      disclosure: { ...ANDES_JOURNEY.rounds[3].disclosure, hoverNames: false },
+      ...ANDES_JOURNEY.rounds[2],
+      map: { ...ANDES_JOURNEY.rounds[2].map!, hoverFeedback: false },
+      disclosure: {
+        ...ANDES_JOURNEY.rounds[2].disclosure,
+        hoverNames: false,
+        committedNames: false,
+      },
     };
     const journey = { ...ANDES_JOURNEY, rounds: [round] };
     const context = createQuestionContext(regions, [], journey);

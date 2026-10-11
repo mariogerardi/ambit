@@ -6,7 +6,11 @@ import { canSubmit, responseCount, selectableIds } from "./questions";
 import { AnswerInput } from "./AnswerInput";
 import { AnswerCounter } from "./AnswerCounter";
 import { QuestionActions } from "./QuestionActions";
-import { candidateAvailable } from "./guidance";
+import {
+  candidateAvailable,
+  lockedSelectionIds,
+  withLockedSelections,
+} from "./guidance";
 import { OrderAnswer } from "./OrderAnswer";
 
 export function AnswerForm({
@@ -22,6 +26,8 @@ export function AnswerForm({
   dispatch: Dispatch<Action>;
   webgl: boolean;
 }) {
+  game = withLockedSelections(question, game);
+  const locked = lockedSelectionIds(question, game);
   if (question.mode === "choice-order")
     return (
       <OrderAnswer
@@ -180,6 +186,7 @@ export function AnswerForm({
             {selectableIds(question, context).map((id) => (
               <button
                 key={id}
+                className={game.selectedIds.includes(id) ? "chosen" : ""}
                 onClick={() => dispatch({ type: "select", id })}
                 disabled={!candidateAvailable(question, game, id)}
                 aria-label={`${name(id)} — ${question.commitment === "immediate" ? "answer now" : "select answer"}`}
@@ -202,27 +209,33 @@ export function AnswerForm({
               {question.commitment === "immediate" ? "found" : "chosen"}
             </p>
             <ol>
-              {Array.from({ length: count }, (_, i) => (
-                <li key={i}>
-                  <span>{i + 1}</span>
-                  {game.selectedIds[i]
-                    ? question.disclosure.committedNames
-                      ? name(game.selectedIds[i])
-                      : question.commitment === "immediate"
-                        ? "Answer final"
-                        : "Selected"
-                    : city
-                      ? `Your next ${pointNoun}`
-                      : regional
-                        ? "Your next region"
-                        : "Your next country"}
-                  <i>
-                    {game.selectedIds[i] && question.commitment === "immediate"
-                      ? "✓"
-                      : "·"}
-                  </i>
-                </li>
-              ))}
+              {Array.from(
+                { length: Math.max(count, game.selectedIds.length) },
+                (_, i) => (
+                  <li key={i}>
+                    <span>{i + 1}</span>
+                    {game.selectedIds[i]
+                      ? question.disclosure.committedNames
+                        ? name(game.selectedIds[i])
+                        : question.commitment === "immediate"
+                          ? "Answer final"
+                          : "Selected"
+                      : city
+                        ? `Your next ${pointNoun}`
+                        : regional
+                          ? "Your next region"
+                          : "Your next country"}
+                    <i>
+                      {locked.includes(game.selectedIds[i])
+                        ? "Locked"
+                        : game.selectedIds[i] &&
+                            question.commitment === "immediate"
+                          ? "✓"
+                          : "·"}
+                    </i>
+                  </li>
+                ),
+              )}
             </ol>
           </div>
         )}

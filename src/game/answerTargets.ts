@@ -45,6 +45,14 @@ export function pinDistance(question: Question, response: Response) {
         6371.0088
     : undefined;
 }
+/** The innermost containing tier wins, with the same boundary tolerance as grading. */
+export function pinDistanceTier(question: Question, response: Response) {
+  if (question.rule.type !== "pin-distance") return undefined;
+  const distance = pinDistance(question, response);
+  return distance === undefined
+    ? undefined
+    : question.rule.tiers?.find((tier) => distance <= tier.radiusKm + 1e-7);
+}
 export function pinInside(
   question: Question,
   context: QuestionContext,

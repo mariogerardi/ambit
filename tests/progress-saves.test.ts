@@ -6,6 +6,8 @@ import {
   emptyDaily,
   openDaily,
   setDailyPuzzle,
+  resetDailyAttempt,
+  validDaily,
 } from "../src/app/dailyProgress";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 import { initialGame } from "../src/game/state";
@@ -40,6 +42,111 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+});
+
+it("clears the current attempt durably without restoring stale tabs/devices or changing other progress", () => {
+  const day = "2026-10-11";
+  const owner = "admin-owner";
+  const store = createDailySave(JOURNEY_INDEX, owner);
+  const previous = openDaily(emptyDaily, "2026-10-10");
+  const progress = openDaily(previous, day);
+  const attempt = progress.attempts[day];
+  const completed = {
+    ...progress,
+    attempts: {
+      ...progress.attempts,
+      [day]: {
+        ...attempt,
+        game: {
+          ...attempt.game,
+          phase: "finished" as const,
+          answers: JOURNEY_INDEX.find(
+            (j) => j.id === attempt.journeyId,
+          )!.rounds.map((q) => ({
+            roundId: q.id,
+            correct: true,
+            text: "answer",
+            selectedIds: [],
+            ordered: [],
+          })),
+          help: {
+            [JOURNEY_INDEX.find((j) => j.id === attempt.journeyId)!.rounds[0]
+              .id]: "assisted" as const,
+          },
+        },
+      },
+    },
+  };
+  store.save(completed);
+  const stale = createDailySave(JOURNEY_INDEX, owner);
+  const staleProgress = stale.load();
+  const oldCloud = stale.entries();
+  const other = createDailySave(JOURNEY_INDEX, "another-user");
+  other.save(completed);
+  const cleared = store.save(resetDailyAttempt(store.load(), day));
+  expect(cleared.ok).toBe(true);
+  expect(cleared.value.attempts[day]).toBeUndefined();
+  expect(cleared.value.activeDate).toBeUndefined();
+  expect(cleared.value.attempts["2026-10-10"]).toEqual(
+    previous.attempts["2026-10-10"],
+  );
+  expect(other.load().attempts[day]).toEqual(completed.attempts[day]);
+  stale.save({
+    ...staleProgress,
+    attempts: {
+      ...staleProgress.attempts,
+      [day]: {
+        ...staleProgress.attempts[day],
+        game: { ...staleProgress.attempts[day].game, text: "late edit" },
+      },
+    },
+  });
+  const reloaded = createDailySave(JOURNEY_INDEX, owner);
+  reloaded.mergeEntries(oldCloud);
+  expect(reloaded.load().attempts[day]).toBeUndefined();
+  const device = createDailySave(JOURNEY_INDEX, "fresh-device");
+  device.mergeEntries(reloaded.entries());
+  expect(device.load().attempts[day]).toBeUndefined();
+  const fresh = device.save(openDaily(device.load(), day));
+  expect(fresh.value.attempts[day].runId).not.toBe(attempt.runId);
+  expect(fresh.value.attempts[day].game).toMatchObject({
+    roundIndex: 0,
+    answers: [],
+    text: "",
+    selectedIds: [],
+  });
+  expect(fresh.value.attempts[day].game.help).toBeUndefined();
+  reloaded.mergeEntries(device.entries());
+  expect(reloaded.load().attempts[day]).toEqual(fresh.value.attempts[day]);
+});
+
+it("validates reset markers and preserves the strongest reset when stale devices sync", () => {
+  const day = "2026-10-11";
+  const journeyId = JOURNEY_INDEX[0].id;
+  const key = `${day}/${journeyId}`;
+  for (const [field, cutoff] of [
+    [key, -1],
+    [key, NaN],
+    [key, 1.5],
+    [`2026-02-30/${journeyId}`, 5],
+    [`${day}/unknown`, 5],
+    [`${key}/extra`, 5],
+  ])
+    expect(
+      validDaily({ version: 1, attempts: {}, resets: { [field]: cutoff } }),
+    ).toBe(false);
+  const store = createDailySave(JOURNEY_INDEX);
+  store.save({ ...emptyDaily, resets: { [key]: 100 } });
+  store.mergeEntries([
+    {
+      version: 2,
+      field: `reset.${key}`,
+      value: 50,
+      clock: 1000,
+      writer: "stale-reset",
+    },
+  ]);
+  expect(store.load().resets?.[key]).toBe(100);
 });
 
 it("removes retired runs during migration and ignores them when another device syncs", () => {

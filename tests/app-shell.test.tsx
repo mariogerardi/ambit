@@ -298,6 +298,50 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
+  it("clears the signed-in admin's Journey and starts a fresh attempt from Home", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 9, 11, 12));
+    authProbe.subject = "owner";
+    const day = "2026-10-11";
+    const save = createDailySave(journeyRegistry.JOURNEY_INDEX, "owner");
+    const progress = openDaily(save.load(), day);
+    save.save(progress);
+    const fetcher = fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/account/saves"))
+          return new Response(
+            JSON.stringify(
+              init?.method === "POST" ? { saved: true } : { entries: [] },
+            ),
+          );
+        if (url.includes("/account/profile"))
+          return new Response(JSON.stringify(null));
+        return fetcher(url, init);
+      }),
+    );
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    history.replaceState(null, "", "/admin");
+    await mount();
+    // Let the initial account hydration run, without waiting for any real service.
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 30)));
+    await click("Clear my Journey attempt");
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(host.textContent).toContain("Attempt cleared.");
+    expect(save.load().attempts[day]).toBeUndefined();
+    await click("Home");
+    expect(host.querySelector(".daily-levels")?.textContent).not.toContain("✓");
+    await click("Play");
+    const fresh = save.load().attempts[day];
+    expect(fresh.runId).not.toBe(progress.attempts[day].runId);
+    expect(fresh.game).toMatchObject({
+      phase: "playing",
+      roundIndex: 0,
+      answers: [],
+    });
+  });
+
   it("offers retained Journeys and the new sun and river Journeys in Admin", async () => {
     await mount();
     await click("Admin");

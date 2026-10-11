@@ -60,6 +60,7 @@ export function placeStyle(kind: PlaceFeature["kind"]) {
 }
 /** Texture padding is included: city dots are ~4px, ~5.5px for large cities. */
 export function placeMarkerSize(place: PlaceFeature) {
+  if (place.markerSize !== undefined) return place.markerSize;
   if (place.kind === "pin") return 36;
   if (place.answerTarget) return place.visualState === "selected" ? 34 : 30;
   return place.kind === "capital"

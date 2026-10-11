@@ -6,6 +6,7 @@ import {
 import { useAccount } from "../services/accounts";
 import type { useJourneySchedule } from "../services/journeySchedule";
 import { dailyJourney, dateOrdinal } from "./dailyProgress";
+import type { DailyAttempt } from "./dailyProgress";
 
 const formatDay = (date: string, long = false) =>
   new Date(`${date}T12:00:00`).toLocaleDateString(
@@ -57,9 +58,15 @@ function RefreshIcon() {
 export function AdminPanel({
   date,
   schedule,
+  attempt,
+  resetReady = false,
+  onResetAttempt,
 }: {
   date: string;
   schedule: ReturnType<typeof useJourneySchedule>;
+  attempt?: DailyAttempt;
+  resetReady?: boolean;
+  onResetAttempt?: () => boolean;
 }) {
   const account = useAccount();
   const [day, setDay] = useState(date);
@@ -70,6 +77,8 @@ export function AdminPanel({
   const [draft, setDraft] = useState({ day, value: saved, saved });
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
+  useEffect(() => setResetMessage(""), [date]);
   // Refresh published dates without erasing a Journey the admin is still choosing.
   useEffect(() => {
     setDraft((current) =>
@@ -102,6 +111,35 @@ export function AdminPanel({
       <p className="muted">
         Choose what players discover next, and review their feedback.
       </p>
+      <section className="admin-journey-card" aria-label="Your Journey attempt">
+        <h2>Your current Journey attempt</h2>
+        <p className="muted">
+          {attempt
+            ? `${JOURNEY_INDEX.find((journey) => journey.id === attempt.journeyId)?.title ?? "Today's Journey"} · ${attempt.game.answers.length} of 5 answered.`
+            : "You have no Journey attempt for today."}
+        </p>
+        <p>Clear your answers, score, and help use for today to start fresh.</p>
+        <button
+          className="quiet-button tertiary-action"
+          disabled={!attempt || !resetReady || !onResetAttempt}
+          onClick={() => {
+            if (
+              !window.confirm(
+                "Clear your current Journey attempt? Your answers, score, and help use for today will be removed from your account. You can then start fresh from Home.",
+              )
+            )
+              return;
+            setResetMessage(
+              onResetAttempt?.()
+                ? "Attempt cleared. Start fresh from Home."
+                : "Couldn’t clear the attempt. Please try again.",
+            );
+          }}
+        >
+          Clear my Journey attempt
+        </button>
+        {resetMessage && <p role="status">{resetMessage}</p>}
+      </section>
       <div className="admin-journey-card journey-scheduler-card">
         <header className="journey-scheduler-heading">
           <div>

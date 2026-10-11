@@ -71,15 +71,21 @@ describe("connected Journey drafts and answer feedback", () => {
       ANDES_JOURNEY,
       [
         select("city:bogota"),
-        select("peak:chimborazo"),
+        select("earth:equatorial-bulge"),
         select("wurl:PER", "wurl:BOL"),
-        select("wurl:ARG"),
         [
-          { type: "order-card", index: 0, id: "wurl:PER" },
-          { type: "order-card", index: 1, id: "wurl:BOL" },
-          { type: "order-card", index: 2, id: "wurl:ARG" },
+          { type: "drop-pin", ...ANDES_JOURNEY.rounds[3].places![0] },
           { type: "submit" },
         ],
+        select(
+          "wurl:VEN",
+          "wurl:COL",
+          "wurl:ECU",
+          "wurl:PER",
+          "wurl:BOL",
+          "wurl:CHL",
+          "wurl:ARG",
+        ),
       ],
     ],
     [

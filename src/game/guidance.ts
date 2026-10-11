@@ -4,6 +4,29 @@ import type { GameState } from "./state";
 export type HelpStage = "hinted" | "assisted";
 export type HelpUsage = Record<string, HelpStage>;
 
+export function lockedSelectionIds(
+  question: Question,
+  game: Pick<GameState, "help">,
+) {
+  return game.help?.[question.id] === "assisted"
+    ? (question.guidance?.assist?.fixedSelections ?? [])
+    : [];
+}
+
+/** Reapply monotonic help when a resumed or merged draft predates the assist. */
+export function withLockedSelections(
+  question: Question,
+  game: GameState,
+): GameState {
+  if (game.phase !== "playing") return game;
+  const missing = lockedSelectionIds(question, game).filter(
+    (id) => !game.selectedIds.includes(id),
+  );
+  return missing.length
+    ? { ...game, selectedIds: [...game.selectedIds, ...missing] }
+    : game;
+}
+
 export function lockedOrderSlots(
   question: Question,
   game: Pick<GameState, "help">,

@@ -1,7 +1,7 @@
 import { QuestionSources } from "./QuestionSources";
 import { QuestionHelp } from "../app/QuestionHelp";
 import { ActionIcon } from "../app/ActionIcon";
-import { pinDistance } from "./answerTargets";
+import { pinDistance, pinDistanceTier } from "./answerTargets";
 import { useRef } from "react";
 import type { RegionFeature, Focus } from "../geography/types";
 import type { Journey, QuestionContext } from "./questions";
@@ -66,6 +66,7 @@ export function GameShell({
       ? hover.name
       : undefined;
   const distance = pinDistance(round, game);
+  const distanceTier = pinDistanceTier(round, game);
   const feedbackText = explanation(round, context, game.selectedIds, !!correct);
   const correctAnswer = correctAnswerSummary(round, context, game);
   const pinFeedback =
@@ -85,7 +86,11 @@ export function GameShell({
         />
       )}
       {inGame && context && (
-        <section className="question-card" aria-label="Current round">
+        <section
+          className="question-card"
+          aria-label="Current round"
+          data-question-id={round.id}
+        >
           <div className="round-overline">
             <span
               className="round-number journey-step"
@@ -145,7 +150,9 @@ export function GameShell({
             >
               <div className="feedback-label">
                 <span>{correct ? "✳" : "◎"}</span>
-                {correct ? correctAnswerCopy(round) : "Not quite."}
+                {correct
+                  ? (distanceTier?.feedback ?? correctAnswerCopy(round))
+                  : "Not quite."}
               </div>
               <p className="study-response study-correction journey-correct-answer">
                 <span>{correctAnswer.label}: </span>
@@ -177,8 +184,53 @@ export function GameShell({
                   </svg>
                 </figure>
               )}
+              {round.feedbackDiagram?.type === "earth-shape" && (
+                <figure className="earth-shape-diagram">
+                  <svg
+                    viewBox="0 0 360 190"
+                    role="img"
+                    aria-label="Schematic: Earth bulges at the Equator. Chimborazo is farther from the center; Everest is higher above sea level."
+                  >
+                    <ellipse cx="150" cy="105" rx="98" ry="60" />
+                    <path className="earth-equator" d="M40 105 H265" />
+                    <path
+                      className="earth-radius"
+                      d="M150 105 L213 37 M150 105 H263"
+                    />
+                    <path
+                      className="earth-peak"
+                      d="M201 57 L213 37 L219 66 M244 98 L263 105 L244 112"
+                    />
+                    <circle cx="150" cy="105" r="3" />
+                    <text x="214" y="22">
+                      Everest
+                    </text>
+                    <text x="273" y="110">
+                      Chimborazo
+                    </text>
+                    <text className="earth-detail" x="112" y="124">
+                      Center
+                    </text>
+                    <text className="earth-detail" x="40" y="94">
+                      Equator
+                    </text>
+                  </svg>
+                  <figcaption>
+                    Schematic · shape and heights exaggerated.
+                  </figcaption>
+                </figure>
+              )}
               {pinFeedback && (
                 <p className="journey-pin-distance">{pinFeedback}</p>
+              )}
+              {round.rule.type === "pin-distance" && round.rule.tiers && (
+                <p className="journey-pin-tiers">
+                  Target rings:{" "}
+                  {round.rule.tiers
+                    .map((tier) => `${tier.radiusKm} km`)
+                    .join(" · ")}
+                  . All rings count as correct.
+                </p>
               )}
               {legend.length > 0 && (
                 <div className="feedback-map-key" aria-label="Map color key">
@@ -251,6 +303,7 @@ export function GameShell({
               const answer = game.answers.find(
                 (answer) => answer.roundId === question.id,
               );
+              const help = game.help?.[question.id];
               return (
                 <li key={question.id}>
                   <span>{String(i + 1).padStart(2, "0")}</span>
@@ -258,22 +311,34 @@ export function GameShell({
                     {answer
                       ? resolvedRoundIdentity(question)
                       : roundIdentity(question)}
-                    {game.help?.[question.id] && (
-                      <small className="journey-round-help">
-                        {game.help[question.id] === "assisted"
-                          ? "Assisted"
-                          : "Hinted"}
-                      </small>
-                    )}
                   </strong>
-                  <span
-                    className={
-                      answer && !answer.correct
-                        ? "journey-incorrect"
-                        : undefined
-                    }
-                  >
-                    {answer ? (answer.correct ? "✓" : "×") : "Not reached"}
+                  <span className="journey-round-result">
+                    {help && (
+                      <span
+                        className="journey-row-help"
+                        data-help={help}
+                        role="img"
+                        aria-label={
+                          help === "assisted" ? "Assist used" : "Hint used"
+                        }
+                        title={
+                          help === "assisted" ? "Assist used" : "Hint used"
+                        }
+                      >
+                        <ActionIcon
+                          name={help === "assisted" ? "assist" : "hint"}
+                        />
+                      </span>
+                    )}
+                    <span
+                      className={
+                        answer && !answer.correct
+                          ? "journey-incorrect"
+                          : undefined
+                      }
+                    >
+                      {answer ? (answer.correct ? "✓" : "×") : "Not reached"}
+                    </span>
                   </span>
                 </li>
               );

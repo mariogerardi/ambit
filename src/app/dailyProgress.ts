@@ -84,6 +84,8 @@ export interface DailyProgress {
   /** Device-local admin choices apply to one local calendar day. */
   overrides?: Record<string, string>;
   archivedAttempts?: Record<string, DailyAttempt>;
+  /** Clear earlier runs of one date/edition, including stale synced copies. */
+  resets?: Record<string, number>;
 }
 export const emptyDaily: DailyProgress = { version: 1, attempts: {} };
 export function validGame(
@@ -192,7 +194,56 @@ export function validDaily(
       ))
   )
     return false;
+  if (
+    value.resets !== undefined &&
+    (!isRecord(value.resets) ||
+      !Object.entries(value.resets).every(([key, cutoff]) => {
+        const [date, journeyId] = key.split("/");
+        try {
+          dateOrdinal(date);
+        } catch {
+          return false;
+        }
+        return (
+          key === `${date}/${journeyId}` &&
+          catalog.some((journey) => journey.id === journeyId) &&
+          typeof cutoff === "number" &&
+          Number.isSafeInteger(cutoff) &&
+          cutoff >= 0
+        );
+      }))
+  )
+    return false;
   return true;
+}
+/** Admin reset: remove this attempt without resetting other dates or editions. */
+export function resetDailyAttempt(
+  progress: DailyProgress,
+  date: string,
+): DailyProgress {
+  const attempt = progress.attempts[date];
+  if (!attempt) return progress;
+  const key = `${date}/${attempt.journeyId}`;
+  const attempts = { ...progress.attempts };
+  delete attempts[date];
+  const archivedAttempts = { ...progress.archivedAttempts };
+  const archived = archivedAttempts[key];
+  delete archivedAttempts[key];
+  return {
+    ...progress,
+    activeDate: progress.activeDate === date ? undefined : progress.activeDate,
+    attempts,
+    archivedAttempts,
+    resets: {
+      ...progress.resets,
+      [key]: Math.max(
+        Date.now(),
+        (attempt.startedAt ?? 0) + 1,
+        (archived?.startedAt ?? 0) + 1,
+        (progress.resets?.[key] ?? 0) + 1,
+      ),
+    },
+  };
 }
 /** Switch today's Journey while keeping a resumable attempt for every chosen Journey. */
 export function setDailyPuzzle(
@@ -227,6 +278,9 @@ export function openDaily(
   assignments?: Record<string, string>,
 ): DailyProgress {
   const existing = progress.attempts[date];
+  const journeyId =
+    existing?.journeyId ??
+    dailyJourney(date, progress, catalog, assignments).id;
   const attempt =
     existing && !replay
       ? existing.game.phase === "feedback" && existing.game.answers.length === 5
@@ -237,11 +291,13 @@ export function openDaily(
         : existing
       : {
           runId: crypto.randomUUID(),
-          startedAt: Math.max(Date.now(), (existing?.startedAt ?? 0) + 1),
+          startedAt: Math.max(
+            Date.now(),
+            (existing?.startedAt ?? 0) + 1,
+            (progress.resets?.[`${date}/${journeyId}`] ?? 0) + 1,
+          ),
           date,
-          journeyId:
-            existing?.journeyId ??
-            dailyJourney(date, progress, catalog, assignments).id,
+          journeyId,
           scheduleVersion: DAILY_VERSION,
           game: { ...initialGame, phase: "playing" as const },
         };
@@ -312,11 +368,22 @@ export function recoverDaily(
         })
       : [],
   );
+  const resets = Object.fromEntries(
+    isRecord(value.resets)
+      ? Object.entries(value.resets).filter(([key, cutoff]) =>
+          validDaily(
+            { version: 1, attempts: {}, resets: { [key]: cutoff } },
+            catalog,
+          ),
+        )
+      : [],
+  );
   return {
     version: 1,
     attempts: attempts as Record<string, DailyAttempt>,
     archivedAttempts: archivedAttempts as Record<string, DailyAttempt>,
     overrides: overrides as Record<string, string>,
+    resets: resets as Record<string, number>,
     ...(typeof value.activeDate === "string" && attempts[value.activeDate]
       ? { activeDate: value.activeDate }
       : {}),

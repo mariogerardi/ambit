@@ -293,8 +293,15 @@ def progress_summary(subject, fresh=False):
     now = int(time.time())
     if not fresh and cached and 0 <= now - cached.get("updatedAt", 0) < 60:
         return cached
-    attempts, studies = {}, {}
-    for record in saved_records(subject):
+    attempts, studies, resets = {}, {}, {}
+    records = saved_records(subject)
+    for record in records:
+        if record["namespace"] == "daily" and record["field"].startswith("reset."):
+            cutoff = json.loads(record["valueJson"])
+            if type(cutoff) is int and 0 <= cutoff <= 9007199254740991:
+                key = record["field"][6:]
+                resets[key] = max(resets.get(key, 0), cutoff)
+    for record in records:
         value = json.loads(record["valueJson"])
         if not isinstance(value, dict):
             continue
@@ -310,6 +317,9 @@ def progress_summary(subject, fresh=False):
             started = value.get("startedAt", 0)
             version = value.get("scheduleVersion", 1)
             if game.get("phase") not in ("home", "playing", "feedback", "finished", "failed") or not isinstance(game.get("answers", []), list) or len(game.get("answers", [])) > 5 or type(started) not in (int, float) or not math.isfinite(started) or type(version) is not int or version < 1:
+                continue
+            cutoff = resets.get("/".join(identity))
+            if cutoff is not None and started <= cutoff:
                 continue
             prior = attempts.get(identity)
             rank = lambda a: (a.get("startedAt", 0), len(a["game"].get("answers", [])), a["game"].get("phase") in ("finished", "failed"))

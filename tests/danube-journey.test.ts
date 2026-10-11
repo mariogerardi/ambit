@@ -152,7 +152,10 @@ it("reveals relevant physical geography without coloring starting context as the
   expect(city.places.map((p) => p.name)).toEqual(["Budapest"]);
   expect(city.places[0].visualState).toBe("answer");
   expect(city.states["wurl:HUN"]).toBe("disabled");
-  expect(DANUBE_JOURNEY.rounds[2].feedbackDiagram?.westBank).toBe("Buda");
+  expect(DANUBE_JOURNEY.rounds[2].feedbackDiagram).toMatchObject({
+    type: "river-banks",
+    westBank: "Buda",
+  });
   expect(city.physicalFeatures.some((f) => f.paths?.length)).toBe(true);
   expect(city.focus.altitude).toBeGreaterThan(0.1);
   const last = journeyWorld(world, DANUBE_JOURNEY, at(4), context);

@@ -29,8 +29,12 @@ Cognito access tokens with `openid` scope, and the Lambda checks group membershi
 Hiding a menu item is not the API authorization boundary. No password or account
 is created on the owner's behalf: use **Create account** and verify that address.
 
-The admin view offers feedback review and the existing device-local daily
-Journey override. It is not a central Journey publishing service.
+The admin view offers shared Journey scheduling, feedback review, and **Clear my
+Journey attempt**. Clearing asks for confirmation and removes the signed-in
+admin's current-day attempt, including its answers, score, and help use. Other
+dates and users remain intact. Start again from Home to use the currently
+scheduled Journey. The reset saves locally and synchronizes through the existing
+account save service.
 
 ## Profiles, dashboard, and friends
 

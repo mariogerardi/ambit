@@ -240,7 +240,7 @@
   position: absolute;
   left: 48px;
   top: 150px;
-  width: 345px;
+  width: 420px;
   z-index: 2;
   background: rgb(var(--ui-surface-rgb) / 0.941);
   border: 1px solid rgb(var(--ui-line-rgb) / 0.11);
@@ -650,6 +650,7 @@
 }
 .finish-story {
   top: 115px;
+  width: 420px;
   max-width: 420px;
 }
 .finish-story h1 {
@@ -678,7 +679,6 @@
   font-size: 10px;
   color: var(--ui-muted, #a2bdaa);
   line-height: 1.5;
-  max-width: 60px;
 }
 .finish-story > p {
   font-size: 12px;
@@ -688,30 +688,32 @@
   list-style: none;
   padding: 0;
   margin: 17px 0 20px;
-  width: 280px;
+  width: 100%;
 }
 .journey-receipt li {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.145);
-  font-size: 10px;
+  font-size: 14px;
 }
 .journey-receipt li > span:first-child {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--ui-faint, #6e9587);
 }
 .journey-receipt strong {
+  flex: 1;
+  min-width: 0;
   font-weight: 500;
   color: var(--ui-muted, #aec5b0);
 }
 .journey-receipt li > span:last-child {
   margin-left: auto;
   color: var(--ui-accent, #d6c28b);
-  font-size: 9px;
+  font-size: 13px;
 }
-.journey-receipt li > span.journey-incorrect {
+.journey-receipt .journey-incorrect {
   font-size: 18px;
   font-weight: 500;
   line-height: 1;
@@ -727,6 +729,8 @@
 }
 .journey-replay {
   margin-top: 12px;
+  width: 100%;
+  justify-content: flex-start;
 }
 .finish-story small {
   font-size: 9px;
@@ -800,7 +804,7 @@
   }
   .question-card {
     top: 170px;
-    width: 360px;
+    width: 435px;
   }
   .country-picker {
     left: 443px;
@@ -864,7 +868,8 @@
     font-size: 57px;
   }
   .question-card {
-    width: 300px;
+    /* Keep the globe's center available where the desktop camera has no offset. */
+    width: min(375px, calc(50vw - 44px));
   }
   .country-picker {
     left: 345px;
@@ -1628,6 +1633,48 @@
 .river-banks-diagram text.bank-direction {
   fill: var(--ui-muted);
   font-size: 12px;
+}
+
+.earth-shape-diagram {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 12px;
+  background: rgb(var(--ui-raised-rgb) / 1);
+}
+.earth-shape-diagram svg {
+  display: block;
+  width: 100%;
+}
+.earth-shape-diagram ellipse {
+  fill: rgb(var(--ui-line-rgb) / 0.08);
+  stroke: var(--ui-muted);
+}
+.earth-shape-diagram path {
+  fill: none;
+  stroke: var(--ui-muted);
+}
+.earth-shape-diagram .earth-equator {
+  stroke-dasharray: 4 4;
+}
+.earth-shape-diagram .earth-radius,
+.earth-shape-diagram .earth-peak {
+  stroke: var(--ui-text);
+  stroke-width: 2;
+}
+.earth-shape-diagram circle,
+.earth-shape-diagram text {
+  fill: var(--ui-text);
+}
+.earth-shape-diagram text {
+  font-family: inherit;
+  font-size: 13px;
+}
+.earth-shape-diagram .earth-detail,
+.earth-shape-diagram figcaption {
+  fill: var(--ui-muted);
+  color: var(--ui-muted);
+  font-size: 11px;
 }
 
 .experience .finish-story > p.journey-route-caption {

@@ -59,7 +59,13 @@ export interface CountryFact {
   source: FactSource;
 }
 export type KnowledgeRule =
-  | { type: "pin-distance"; targetId: string; radiusKm: number }
+  | {
+      type: "pin-distance";
+      targetId: string;
+      radiusKm: number;
+      /** Ascending, inclusive distance tiers; all count as correct for now. */
+      tiers?: { radiusKm: number; feedback: string }[];
+    }
   | { type: "pin-inside"; ids: string[] }
   | { type: "place-ids"; ids: string[]; match?: "all" | "any" }
   | { type: "manual-text"; answers: string[] }
@@ -128,6 +134,8 @@ export interface Question {
       places?: PlaceFeature[];
       /** A stronger ordering assist may place and lock an authored card. */
       fixedSlots?: { index: number; id: string }[];
+      /** A multiple-country assist may select and lock known answers. */
+      fixedSelections?: string[];
     };
   };
   instruction: string;
@@ -155,12 +163,14 @@ export interface Question {
   /** Optional praise matching the knowledge/skill, rather than the input widget. */
   correctFeedback?: string;
   /** A clearly schematic explanation; never used as playable geography. */
-  feedbackDiagram?: {
-    type: "river-banks";
-    river: string;
-    westBank: string;
-    eastBank: string;
-  };
+  feedbackDiagram?:
+    | {
+        type: "river-banks";
+        river: string;
+        westBank: string;
+        eastBank: string;
+      }
+    | { type: "earth-shape" };
   /** Source qualifications, separate from rules needed to answer. */
   qualification?: string;
   source: FactSource;
@@ -330,6 +340,22 @@ export function createQuestionContext(
         `Multiple-choice questions may have at most six choices: ${round.id}.`,
       );
     const survivors = round.guidance?.assist?.candidateIds;
+    const fixedSelections = round.guidance?.assist?.fixedSelections;
+    if (fixedSelections) {
+      const expected = solutionIds(round, context);
+      const eligible = selectableIds(round, context);
+      if (
+        round.mode !== "map-multiple" ||
+        round.commitment !== "submit" ||
+        !fixedSelections.length ||
+        fixedSelections.length >= round.count ||
+        new Set(fixedSelections).size !== fixedSelections.length ||
+        fixedSelections.some(
+          (id) => !expected.includes(id) || !eligible.includes(id),
+        )
+      )
+        throw Error(`Invalid fixed selection assist: ${round.id}.`);
+    }
     if (survivors) {
       const eligible = round.mode.startsWith("choice-")
         ? (round.choices ?? []).map((choice) => choice.id)
@@ -468,6 +494,20 @@ export function createQuestionContext(
         throw Error(
           `Missing pin location or invalid tolerance for ${round.id}.`,
         );
+      if (round.rule.type === "pin-distance" && round.rule.tiers) {
+        const { tiers, radiusKm } = round.rule;
+        if (
+          !tiers.length ||
+          tiers.at(-1)!.radiusKm !== radiusKm ||
+          tiers.some(
+            (tier, index) =>
+              !Number.isFinite(tier.radiusKm) ||
+              tier.radiusKm <= (tiers[index - 1]?.radiusKm ?? 0) ||
+              !tier.feedback.trim(),
+          )
+        )
+          throw Error(`Invalid pin distance tiers for ${round.id}.`);
+      }
       if (
         round.rule.type === "pin-inside" &&
         (!round.rule.ids.length ||

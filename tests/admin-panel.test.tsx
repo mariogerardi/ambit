@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { AdminPanel } from "../src/app/AdminPanel";
 import type { useJourneySchedule } from "../src/services/journeySchedule";
+import { emptyDaily, openDaily } from "../src/app/dailyProgress";
 
 const token = vi.hoisted(() =>
   vi.fn(async (): Promise<string | undefined> => "test-admin"),
@@ -182,4 +183,36 @@ it("blocks publication when the schedule is unavailable and preserves a draft af
     "Sign in again",
   );
   expect(host.querySelector("select")?.value).toBe("chasing-the-sun-v2");
+});
+
+it("clears an attempt only after confirmation and reports save failures", async () => {
+  const attempt = openDaily(emptyDaily, "2026-10-11").attempts["2026-10-11"];
+  const reset = vi.fn(() => true);
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  const renderReset = async (ready: boolean) =>
+    act(async () =>
+      root.render(
+        <AdminPanel
+          date="2026-10-11"
+          schedule={schedule}
+          attempt={attempt}
+          resetReady={ready}
+          onResetAttempt={reset}
+        />,
+      ),
+    );
+  await renderReset(false);
+  await click("Clear my Journey attempt");
+  expect(confirm).not.toHaveBeenCalled();
+  await renderReset(true);
+  await click("Clear my Journey attempt");
+  expect(reset).not.toHaveBeenCalled();
+  confirm.mockReturnValue(true);
+  await click("Clear my Journey attempt");
+  expect(reset).toHaveBeenCalledTimes(1);
+  expect(host.textContent).toContain("Attempt cleared. Start fresh from Home.");
+  reset.mockReturnValue(false);
+  await click("Clear my Journey attempt");
+  expect(host.textContent).toContain("Couldn’t clear the attempt.");
+  confirm.mockRestore();
 });

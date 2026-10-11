@@ -1,5 +1,6 @@
 import { isRegionAnswer } from "../game/questionBuilder";
 import { answerPlace } from "../game/answerTargets";
+import { withLockedSelections } from "../game/guidance";
 import type { RegionFeature, RouteFeature } from "../geography/types";
 import type { GameState } from "../game/state";
 import type { Journey, QuestionContext } from "../game/questions";
@@ -48,6 +49,7 @@ export function journeyWorld(
   context: QuestionContext,
 ) {
   const round = journey.rounds[game.roundIndex];
+  game = withLockedSelections(round, game);
   const correct = !!game.answers.at(-1)?.correct;
   const map = questionMapPresentation(round, game.phase, correct);
   const completion = game.phase === "finished" ? journey.completion : undefined;
@@ -109,6 +111,18 @@ export function journeyWorld(
       });
   }
   const destination = solutionIds(round, context).at(-1);
+  const pinRule = round.rule.type === "pin-distance" ? round.rule : undefined;
+  const pinTarget = pinRule && answerPlace(round, pinRule.targetId);
+  const pinRings =
+    game.phase === "feedback" && pinRule && pinTarget
+      ? (pinRule.tiers ?? [{ radiusKm: pinRule.radiusKm }]).map((tier) => ({
+          id: `pin-tolerance:${round.id}${pinRule.tiers ? `:${tier.radiusKm}` : ""}`,
+          type: "circle" as const,
+          center: pinTarget,
+          radiusKm: tier.radiusKm,
+          shade: !!pinRule.tiers,
+        }))
+      : [];
   const selected = catalog.get(game.selectedIds.at(-1) ?? "");
   const focus =
     completion?.focus ??
@@ -172,19 +186,7 @@ export function journeyWorld(
             ...(game.phase === "feedback"
               ? (round.feedbackOverlays ?? [])
               : []),
-            ...(game.phase === "feedback" &&
-            round.rule.type === "pin-distance" &&
-            answerPlace(round, round.rule.targetId)
-              ? [
-                  {
-                    id: `pin-tolerance:${round.id}`,
-                    type: "circle" as const,
-                    center: answerPlace(round, round.rule.targetId)!,
-                    radiusKm: round.rule.radiusKm,
-                    shade: false,
-                  },
-                ]
-              : []),
+            ...pinRings,
           ]
         : undefined,
     showBorders: map.borders,

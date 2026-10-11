@@ -285,7 +285,7 @@ describe("authored Journey hint and assist stages", () => {
     });
     const html = renderToStaticMarkup(shell({ ...game, phase: "finished" }));
     expect(html).toContain("1 hint · 1 assist");
-    expect(html).toContain("Assisted");
+    expect(html).toContain('aria-label="Assist used"');
     expect(validGame(JSON.parse(JSON.stringify(game)), journey)).toBe(true);
     expect(validGame({ ...game, help: { fake: "hinted" } }, journey)).toBe(
       false,
@@ -297,5 +297,46 @@ describe("authored Journey hint and assist stages", () => {
       ),
     ).toBe(false);
     expect(validGame(at(), journey)).toBe(true);
+  });
+  it("shows one help icon beside each result mark with accessible labels and no row wording", () => {
+    const game: GameState = {
+      ...at(),
+      phase: "finished",
+      help: {
+        [journey.rounds[0].id]: "hinted",
+        [journey.rounds[1].id]: "assisted",
+      },
+      answers: journey.rounds.slice(0, 3).map((round, index) => ({
+        roundId: round.id,
+        selectedIds: [],
+        ordered: [],
+        text: "",
+        correct: index !== 1,
+      })),
+    };
+    const content = document.createElement("div");
+    content.innerHTML = renderToStaticMarkup(shell(game));
+    const rows = content.querySelectorAll(".journey-receipt li");
+    expect(
+      rows[0].querySelector(
+        '.journey-round-result [aria-label="Hint used"] svg',
+      ),
+    ).toBeTruthy();
+    expect(
+      rows[1].querySelector(
+        '.journey-round-result [aria-label="Assist used"] svg',
+      ),
+    ).toBeTruthy();
+    expect(rows[1].querySelector(".journey-incorrect")?.textContent).toBe("×");
+    expect(rows[2].querySelector(".journey-row-help")).toBeNull();
+    expect(rows[0].querySelector(".journey-round-result")?.textContent).toBe(
+      "✓",
+    );
+    expect(rows[3].querySelector(".journey-round-result")?.textContent).toBe(
+      "Not reached",
+    );
+    expect(content.querySelectorAll(".journey-row-help")).toHaveLength(2);
+    for (const row of rows)
+      expect(row.textContent).not.toMatch(/Hinted|Assisted/);
   });
 });

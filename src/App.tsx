@@ -86,6 +86,7 @@ import {
   localDateKey,
   millisecondsToMidnight,
   openDaily,
+  resetDailyAttempt,
   unfinished,
   validDaily,
 } from "./app/dailyProgress";
@@ -1465,7 +1466,38 @@ export function App() {
     ) : mode === "admin" ? (
       <AdminAccess onAccount={() => navigate("/account")}>
         <div className="admin-content">
-          <AdminPanel date={today} schedule={schedule} />
+          <AdminPanel
+            date={today}
+            schedule={schedule}
+            attempt={daily.attempts[today]}
+            resetReady={
+              !!subject && dailyLoaded && cloudSave.hydrated && canSave
+            }
+            onResetAttempt={() => {
+              const store = dailyStore.current;
+              if (
+                !account.admin ||
+                !subject ||
+                !store ||
+                !cloudSave.hydrated ||
+                today !== localDateKey()
+              )
+                return false;
+              try {
+                const current = store.load();
+                if (!current.attempts[today]) return false;
+                const saved = store.save(resetDailyAttempt(current, today));
+                setDailySaveOk(saved.ok);
+                if (!saved.ok) return false;
+                setDaily(saved.value);
+                cloudSave.retry();
+                return true;
+              } catch {
+                setDailySaveOk(false);
+                return false;
+              }
+            }}
+          />
           <FeedbackReview />
         </div>
       </AdminAccess>

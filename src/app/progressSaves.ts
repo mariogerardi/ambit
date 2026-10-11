@@ -203,6 +203,12 @@ export function dailySaveCodec(
     encode(save) {
       return {
         ...(save.activeDate ? { activeDate: save.activeDate } : {}),
+        ...Object.fromEntries(
+          Object.entries(save.resets ?? {}).map(([key, cutoff]) => [
+            `reset.${key}`,
+            cutoff,
+          ]),
+        ),
         // Progress belongs to a run; the currently chosen run is a separate
         // pointer. A stale tab editing an old run cannot change that selection.
         ...Object.fromEntries(
@@ -235,6 +241,8 @@ export function dailySaveCodec(
       const save: DailyProgress = { version: 1, attempts: {} };
       for (const [field, value] of Object.entries(fields)) {
         if (field === "activeDate" && value) save.activeDate = String(value);
+        else if (field.startsWith("reset.") && typeof value === "number")
+          (save.resets ??= {})[field.slice(6)] = value;
         else if (field.startsWith("attempt.") && value)
           save.attempts[field.slice(8)] = value as DailyAttempt;
         else if (field.startsWith("archive.") && value)
@@ -269,6 +277,16 @@ export function dailySaveCodec(
         if (latest)
           save.archivedAttempts![key] = preferAttempt(attempt, latest);
       }
+      const cleared = (attempt: DailyAttempt) => {
+        const cutoff = save.resets?.[`${attempt.date}/${attempt.journeyId}`];
+        return cutoff !== undefined && (attempt.startedAt ?? 0) <= cutoff;
+      };
+      for (const [date, attempt] of Object.entries(save.attempts))
+        if (cleared(attempt)) delete save.attempts[date];
+      for (const [key, attempt] of Object.entries(save.archivedAttempts ?? {}))
+        if (cleared(attempt)) delete save.archivedAttempts![key];
+      if (save.activeDate && !save.attempts[save.activeDate])
+        delete save.activeDate;
       return save;
     },
     accepts(field, value) {
@@ -289,6 +307,11 @@ export function dailySaveCodec(
             { version: 1, attempts: { [field.slice(8)]: value } },
             catalog,
           )
+        );
+      if (field.startsWith("reset."))
+        return validDaily(
+          { version: 1, attempts: {}, resets: { [field.slice(6)]: value } },
+          catalog,
         );
       if (field.startsWith("run."))
         return (
@@ -341,6 +364,8 @@ export function dailySaveCodec(
       return false;
     },
     resolve(field, previous, next) {
+      if (field.startsWith("reset."))
+        return Math.max(Number(previous), Number(next));
       if (
         !(
           field.startsWith("run.") ||
