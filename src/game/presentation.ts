@@ -135,7 +135,7 @@ export function questionMapPresentation(
       (correct && question.map?.revealOnCorrect));
   return {
     borders: recap || !!reveal || question.map?.borders !== false,
-    hover: recap || !!reveal || question.map?.hover !== false,
+    hover: recap || !!reveal || question.map?.hoverFeedback !== false,
     muteOthers:
       !recap &&
       !reveal &&

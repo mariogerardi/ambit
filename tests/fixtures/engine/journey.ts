@@ -83,7 +83,7 @@ export const JOURNEY: Journey = {
       contextIds: ["wurl:NAM", "wurl:TCD"],
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnCorrect: true,
       },

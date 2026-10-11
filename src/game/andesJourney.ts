@@ -1,10 +1,15 @@
+import { defineQuestion, definePresentation } from "./questionBuilder";
 import { CAPITALS, capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
-import type { FactSource, Journey, Question } from "./questions";
+import type { FactSource, Journey } from "./questions";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
+import relief from "./data/andes-relief.v1.json";
 import geography from "./data/andes-context.v1.json";
 
-const andes = geography.andes as PhysicalFeature;
+const andes: PhysicalFeature = {
+  ...(geography.andes as PhysicalFeature),
+  relief,
+};
 const lake = geography.lake as PhysicalFeature;
 const altiplano = geography.altiplano as PhysicalFeature;
 const frontiers = geography.frontiers as PhysicalFeature[];
@@ -13,6 +18,10 @@ const source = (name: string, url: string): FactSource => ({
   url,
   reviewedOn: "2026-10-11",
 });
+const terrainSource = source(
+  "Mapzen Terrain Tiles · elevation-derived relief",
+  "https://registry.opendata.aws/terrain-tiles/",
+);
 const physicalSource = source(
   "Natural Earth · physical geography",
   "https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-geography-regions/",
@@ -98,10 +107,8 @@ const borderLabels = [
   countryLabel("BRA", "Brazil · no Chilean border", -14, -52),
 ];
 // Shared presentation only. Every round declares its own answer method and rule.
-const common = {
+const common = definePresentation({
   instruction: "",
-  count: 1,
-  commitment: "submit",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -109,26 +116,25 @@ const common = {
     committedNames: false,
     previousVisits: false,
   },
-  map: { borders: true, hover: false, muteOthers: true, revealOnAnswer: true },
+  map: {
+    borders: true,
+    hoverFeedback: false,
+    muteOthers: true,
+    revealOnAnswer: true,
+  },
   physicalFeatures: [andes],
-  sources: [physicalSource],
-} satisfies Pick<
-  Question,
-  | "instruction"
-  | "count"
-  | "commitment"
-  | "failure"
-  | "disclosure"
-  | "map"
-  | "physicalFeatures"
-  | "sources"
->;
+  sources: [physicalSource, terrainSource],
+});
 
 export const ANDES_JOURNEY: Journey = {
   id: "along-the-andes-v1",
   title: "Along the Andes",
   description:
     "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and Chile’s neighbors.",
+  mapAttribution: {
+    label: "Terrain · USGS / NOAA via Mapzen",
+    url: "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
+  },
   completion: {
     focus: { lat: -20, lng: -72, altitude: 1.65 },
     physicalFeatures: [andes, lake, ...frontiers],
@@ -154,7 +160,10 @@ export const ANDES_JOURNEY: Journey = {
       "From Bogotá’s highlands to Chile’s Pacific edge, one mountain system connects our five stops.",
   },
   rounds: [
-    {
+    defineQuestion({
+      count: 1,
+      commitment: "submit",
+
       ...common,
       id: "andes-capital-v2",
       label: "Capital",
@@ -217,10 +226,14 @@ export const ANDES_JOURNEY: Journey = {
           candidateIds: ["city:bogota", "city:caracas"],
         },
       },
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      commitment: "submit",
+
       ...common,
       id: "andes-chimborazo-v2",
+      overlays: [{ id: "andes:equator", type: "parallel", latitude: 0 }],
       label: "Equator",
       resolvedLabel: "Chimborazo",
       topic: "mountains and Earth’s shape",
@@ -259,8 +272,10 @@ export const ANDES_JOURNEY: Journey = {
           candidateIds: ["peak:chimborazo", "peak:cotopaxi"],
         },
       },
-    },
-    {
+    }),
+    defineQuestion({
+      commitment: "submit",
+
       ...common,
       id: "andes-titicaca-v1",
       label: "Lake",
@@ -291,8 +306,11 @@ export const ANDES_JOURNEY: Journey = {
           candidateIds: ["wurl:CHL", "wurl:PER", "wurl:BOL"],
         },
       },
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      commitment: "submit",
+
       ...common,
       id: "andes-aconcagua-v1",
       label: "Peak",
@@ -307,7 +325,7 @@ export const ANDES_JOURNEY: Journey = {
       rule: { type: "country-ids", ids: ["wurl:ARG"] },
       selection: { type: "ids", ids: southAmerica },
       allowTyping: false,
-      map: { ...common.map, hover: true, candidates: "neutral" },
+      map: { ...common.map, hoverFeedback: true, candidates: "neutral" },
       contextIds: ["wurl:CHL"],
       feedbackHintIds: ["wurl:CHL"],
       focus: { lat: -29, lng: -68, altitude: 0.65 },
@@ -326,8 +344,10 @@ export const ANDES_JOURNEY: Journey = {
           candidateIds: ["wurl:CHL", "wurl:ARG"],
         },
       },
-    },
-    {
+    }),
+    defineQuestion({
+      commitment: "submit",
+
       ...common,
       id: "andes-chile-neighbors-v2",
       label: "Border",
@@ -365,6 +385,6 @@ export const ANDES_JOURNEY: Journey = {
           fixedSlots: [{ index: 2, id: "wurl:ARG" }],
         },
       },
-    },
+    }),
   ],
 };

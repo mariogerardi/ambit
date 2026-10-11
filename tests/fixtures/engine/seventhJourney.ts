@@ -37,7 +37,7 @@ const base: Question = {
   focus: { lat: 14, lng: 24, altitude: 1.65 },
   explanation: "",
   source: source("", ""),
-  map: { borders: true, hover: false, muteOthers: true },
+  map: { borders: true, hoverFeedback: false, muteOthers: true },
 };
 
 export const SEVENTH_JOURNEY: Journey = {
@@ -60,7 +60,7 @@ export const SEVENTH_JOURNEY: Journey = {
       commitment: "immediate",
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },
@@ -95,7 +95,7 @@ export const SEVENTH_JOURNEY: Journey = {
       commitment: "immediate",
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },
@@ -128,7 +128,7 @@ export const SEVENTH_JOURNEY: Journey = {
       },
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },
@@ -172,7 +172,7 @@ export const SEVENTH_JOURNEY: Journey = {
       commitment: "immediate",
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },
@@ -199,7 +199,7 @@ export const SEVENTH_JOURNEY: Journey = {
       commitment: "immediate",
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },

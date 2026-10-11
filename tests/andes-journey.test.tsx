@@ -59,6 +59,9 @@ describe("Along the Andes authored map and ordering puzzle", () => {
         "andes:range",
       ]);
       expect(map.physicalFeatures[0].geometry?.type).toBe("MultiPolygon");
+      expect(map.physicalFeatures[0].relief!.hachures.length).toBeGreaterThan(
+        1000,
+      );
       expect(map.places).toEqual([]);
       expect(journey.rounds[index].guidance?.assist).toBeTruthy();
     }
@@ -91,6 +94,15 @@ describe("Along the Andes authored map and ordering puzzle", () => {
             ),
           ),
       ).toBe(true);
+  });
+  it("shows the equator as free orientation at Chimborazo", () => {
+    const map = journeyWorld(regions, journey, at(1), context);
+    expect(map.overlays).toContainEqual({
+      id: "andes:equator",
+      type: "parallel",
+      latitude: 0,
+    });
+    expect(map.places).toEqual([]);
   });
   it("makes Aconcagua selectable through the actual map contract and keeps assists neutral", () => {
     const map = journeyWorld(regions, journey, at(3), context);
@@ -299,6 +311,38 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       vi.unstubAllGlobals();
       delete (document as unknown as Record<string, unknown>).elementFromPoint;
     }
+  });
+  it("renders terrain ink instead of the mountain footprint and cleans it up", () => {
+    const physical = new PhysicalFeatures();
+    physical.update(
+      {
+        id: "physical",
+        kind: "physical-features",
+        features: journey.rounds[0].physicalFeatures!,
+      },
+      100,
+    );
+    expect(
+      physical.group.children.some(
+        (group) => group.children[0]?.type === "Mesh",
+      ),
+    ).toBe(false);
+    const lines = physical.group.children.filter(
+      (group) => group.type === "LineSegments2",
+    );
+    expect(lines).toHaveLength(3);
+    for (const line of lines) {
+      const intersections: unknown[] = [];
+      line.raycast({} as never, intersections as never);
+      expect(intersections).toEqual([]);
+    }
+    physical.update(
+      { id: "physical", kind: "physical-features", features: [] },
+      100,
+    );
+    expect(lines.every((line) => !line.visible)).toBe(true);
+    physical.dispose();
+    expect(physical.group.children).toEqual([]);
   });
   it("keeps sourced physical surfaces noninteractive, hides inactive ones, and disposes them", () => {
     const physical = new PhysicalFeatures();

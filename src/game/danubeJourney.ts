@@ -1,4 +1,5 @@
-import type { FactSource, Journey, Question } from "./questions";
+import { defineQuestion, definePresentation } from "./questionBuilder";
+import type { FactSource, Journey } from "./questions";
 import { CAPITALS, capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
@@ -40,19 +41,10 @@ const basinSource = source(
   "ICPDR · the Danube River Basin",
   "https://www.icpdr.org/danube-basin/danube-river-basin",
 );
-const base: Question = {
-  id: "",
-  title: "",
+const base = definePresentation({
   label: "River",
   topic: "the Danube",
-  prompt: "",
   instruction: "",
-  explanation: "",
-  mode: "choice-single",
-  rule: { type: "choice-ids", ids: [] },
-  count: 1,
-  selection: { type: "none" },
-  commitment: "submit",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -61,10 +53,15 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 47, lng: 18, altitude: 1.1 },
-  map: { borders: true, hover: false, muteOthers: true, revealOnAnswer: true },
+  map: {
+    borders: true,
+    hoverFeedback: false,
+    muteOthers: true,
+    revealOnAnswer: true,
+  },
   source: basinSource,
   mapCaption: "Danube · route so far",
-};
+});
 
 export const DANUBE_JOURNEY: Journey = {
   id: "down-the-danube-v1",
@@ -93,7 +90,12 @@ export const DANUBE_JOURNEY: Journey = {
       "From the upper river to the Black Sea: five stops, one continuous journey.",
   },
   rounds: [
-    {
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "danube-underground-detour-v1",
       label: "Detour",
@@ -131,8 +133,12 @@ export const DANUBE_JOURNEY: Journey = {
           "https://www.aach.de/de/Unsere-Stadt/Aachquelle",
         ),
       ],
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "danube-vienna-pin-v1",
       label: "Capital",
@@ -150,7 +156,7 @@ export const DANUBE_JOURNEY: Journey = {
       feedbackPhysicalFeatures: segments.vienna,
       map: {
         borders: true,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -161,8 +167,12 @@ export const DANUBE_JOURNEY: Journey = {
         "https://www.wien.gv.at/en/environment/danube-island",
       ),
       sources: [capitalSource, riverSource],
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "danube-two-banks-city-v1",
       label: "Two banks",
@@ -206,8 +216,11 @@ export const DANUBE_JOURNEY: Journey = {
           "https://www.budapestinfo.hu/en/top-sights",
         ),
       ],
-    },
-    {
+    }),
+    defineQuestion({
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "danube-iron-gates-border-v1",
       label: "Gorge",
@@ -239,8 +252,13 @@ export const DANUBE_JOURNEY: Journey = {
         "https://www.icpdr.org/tasks-topics/tasks/river-basin-management/sturgeon-conservation/we-pass-facilitating-fish-migration",
       ),
       sources: [mapSource, riverSource],
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "danube-delta-sea-v1",
       label: "Delta",
@@ -280,6 +298,6 @@ export const DANUBE_JOURNEY: Journey = {
       explanation:
         "Three main branches spread into a maze of channels, lakes, and wetlands. Our above-ground route ends here; the opening detour eventually reaches the North Sea instead.",
       sources: [riverSource],
-    },
+    }),
   ],
 };

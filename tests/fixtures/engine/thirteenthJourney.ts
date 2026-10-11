@@ -29,7 +29,7 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 0, lng: 20, altitude: 1.3 },
-  map: { borders: true, hover: false, muteOthers: true },
+  map: { borders: true, hoverFeedback: false, muteOthers: true },
   source: capitalSource,
 };
 export const THIRTEENTH_JOURNEY: Journey = {
@@ -54,7 +54,7 @@ export const THIRTEENTH_JOURNEY: Journey = {
       map: {
         borders: false,
         borderIds: ["wurl:CHE"],
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
       },
       feedbackPlaces: [place("place:2661552")],
@@ -115,7 +115,7 @@ export const THIRTEENTH_JOURNEY: Journey = {
       map: {
         borders: false,
         borderIds: ["wurl:ZMB", "wurl:ZWE"],
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
       },
       focus: { lat: -16.8, lng: 28.7, altitude: 0.72 },
@@ -170,7 +170,7 @@ export const THIRTEENTH_JOURNEY: Journey = {
           name: "Unguja",
         },
       ],
-      map: { borders: false, hover: false, muteOthers: true },
+      map: { borders: false, hoverFeedback: false, muteOthers: true },
       focus: { lat: -6, lng: 39.2, altitude: 0.3 },
       feedbackFocus: { lat: -6, lng: 35.6, altitude: 0.62 },
       feedbackPlaces: [
@@ -203,7 +203,7 @@ export const THIRTEENTH_JOURNEY: Journey = {
       selection: { type: "members" },
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "neutral",
       },

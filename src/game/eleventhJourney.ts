@@ -1,4 +1,5 @@
-import type { Journey, Question, FactSource } from "./questions";
+import { defineQuestion, definePresentation } from "./questionBuilder";
+import type { Journey, FactSource } from "./questions";
 import { ANSWER_PLACES } from "./answerTargets";
 import { capitalSource } from "./quizData";
 import flagCatalog from "./data/flags.v1.json";
@@ -29,19 +30,10 @@ export const SOUTH_AFRICA_CAPITAL_TARGETS = SOUTH_AFRICA_CITY_TARGETS.slice(
   0,
   3,
 );
-const base: Question = {
-  id: "",
-  title: "",
+const base = definePresentation({
   label: "Capital",
   topic: "capital geography",
-  prompt: "",
   instruction: "",
-  explanation: "",
-  mode: "text",
-  rule: { type: "manual-text", answers: [] },
-  count: 1,
-  selection: { type: "none" },
-  commitment: "submit",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -52,13 +44,13 @@ const base: Question = {
   focus: { lat: 20, lng: 0, altitude: 1.3 },
   map: {
     borders: true,
-    hover: false,
+    hoverFeedback: false,
     muteOthers: true,
     feedbackRegions: "neutral",
   },
   feedbackContextIds: [],
   source: capitalSource,
-};
+});
 
 export const ELEVENTH_JOURNEY: Journey = {
   id: "not-the-obvious-city-v1",
@@ -66,7 +58,11 @@ export const ELEVENTH_JOURNEY: Journey = {
   description:
     "Leave the famous cities behind: discover where capitals moved, why expectations mislead, and when one capital is not enough.",
   rounds: [
-    {
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "unexpected-turkey-capital",
       leadIn: "Start where the famous city isn’t the capital.",
@@ -123,8 +119,12 @@ export const ELEVENTH_JOURNEY: Journey = {
         "https://www.ktb.gov.tr/EN-103934/1923.html",
       ),
       sources: [capitalSource],
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "unexpected-canberra-pin",
       progressLabel: "Australia",
@@ -150,7 +150,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       map: {
         borders: false,
         borderIds: ["wurl:AUS"],
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         feedbackRegions: "neutral",
       },
@@ -183,8 +183,13 @@ export const ELEVENTH_JOURNEY: Journey = {
       ],
       explanation:
         "The site had to be at least 100 miles from Sydney. A purpose-built inland capital avoided choosing either of the two rival cities.",
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "text",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "unexpected-abuja",
       progressLabel: "Nigeria",
@@ -232,8 +237,10 @@ export const ELEVENTH_JOURNEY: Journey = {
           "https://documents.worldbank.org/curated/en/929431468063249516/pdf/SFG1989-RP-P103499-Box394881B-PUBLIC-Disclosed-3-28-2016.pdf",
         ),
       ],
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+
       ...base,
       id: "unexpected-brasilia-marker",
       progressLabel: "Brazil",
@@ -282,8 +289,10 @@ export const ELEVENTH_JOURNEY: Journey = {
           "https://www.gov.br/iphan/pt-br/superintendencias/distrito-federal/patrimonio-mundial",
         ),
       ],
-    },
-    {
+    }),
+    defineQuestion({
+      commitment: "submit",
+
       ...base,
       id: "unexpected-south-africa-capitals",
       leadIn: "Finish with more than one capital.",
@@ -324,7 +333,7 @@ export const ELEVENTH_JOURNEY: Journey = {
         "South African Government · three national capitals",
         "https://www.gov.za/about-sa/south-africas-provinces",
       ),
-    },
+    }),
   ],
   completion: {
     focus: { lat: -15, lng: 25, altitude: 1.8 },

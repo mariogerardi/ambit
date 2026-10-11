@@ -1,3 +1,4 @@
+import { validateQuestionContract } from "./questionBuilder";
 import type {
   Focus,
   PlaceFeature,
@@ -174,7 +175,8 @@ export interface Question {
     borders: boolean;
     /** When present, only these regions receive outlines, including on feedback. */
     borderIds?: string[];
-    hover: boolean;
+    /** Hover styling/inspection only; answering is derived from the answer mode. */
+    hoverFeedback: boolean;
     muteOthers: boolean;
     revealOnCorrect?: boolean;
     revealOnAnswer?: boolean;
@@ -311,6 +313,7 @@ export function createQuestionContext(
     capitalMatches: new Map(),
   };
   for (const round of journey.rounds) {
+    validateQuestionContract(round);
     for (const target of round.importedRegions ?? []) {
       context.targets.set(target.id, target);
       context.names.set(target.id, target.name);

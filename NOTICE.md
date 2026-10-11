@@ -225,3 +225,21 @@ from this Journey's Andean convention. Clipping intersections are retained.
 Chile’s frontier highlights use only shared edges of the bundled canonical
 country geometry. These display-only features never change country picking
 or grading.
+
+## Andes mountain hatching
+
+`src/game/data/andes-relief.v1.json` is derived from Mapzen/Tilezen Terrain Tiles
+on AWS, accessed October 11, 2026. Global GMTED2010 and SRTM elevation data are
+courtesy of the U.S. Geological Survey; ETOPO1 data are from DOC/NOAA/NESDIS/NCEI,
+National Centers for Environmental Information, U.S. Department of Commerce.
+These U.S. government data are not subject to copyright protection within the
+United States. Attribution and source terms are documented at
+<https://github.com/tilezen/joerd/blob/master/docs/attribution.md>.
+
+`scripts/prepare-mountain-relief.py` generalizes zoom-5 elevation tiles, detects
+cross-slope crests, and traces downhill hachures within the reviewed Andes extent.
+Pale ink denotes high elevation, not permanent snow. This is stylized relief,
+not surveyed ridgelines or navigation data. Source tile URLs, SHA-256 hashes,
+processing conventions, and the derived asset hash are recorded in
+`sources/andes-relief-manifest.json`. Raw elevation stays in the preparation cache;
+play uses bundled vector ink without live terrain requests.

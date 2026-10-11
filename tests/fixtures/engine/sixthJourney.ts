@@ -34,7 +34,7 @@ const base: Question = {
   focus: { lat: 0, lng: 0, altitude: 1.4 },
   explanation: "",
   source: source("", ""),
-  map: { borders: true, hover: false, muteOthers: true },
+  map: { borders: true, hoverFeedback: false, muteOthers: true },
 };
 
 export const SIXTH_JOURNEY: Journey = {

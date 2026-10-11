@@ -1,4 +1,5 @@
-import type { FactSource, Journey, Question } from "./questions";
+import { defineQuestion, definePresentation } from "./questionBuilder";
+import type { FactSource, Journey } from "./questions";
 import flagCatalog from "./data/flags.v1.json";
 import { mapSource } from "./countryFacts";
 import { CAPITALS } from "./quizData";
@@ -17,19 +18,10 @@ const flag = (code: string, alt: string) => ({
   alt,
   feedbackAlt: `National flag of ${({ ARG: "Argentina", URY: "Uruguay", KAZ: "Kazakhstan", JPN: "Japan", MWI: "Malawi", PHL: "the Philippines" } as Record<string, string>)[code]}`,
 });
-const base: Question = {
-  id: "",
-  title: "",
+const base = definePresentation({
   label: "Flag",
   topic: "sun symbols",
-  prompt: "",
   instruction: "",
-  explanation: "",
-  mode: "choice-single",
-  rule: { type: "choice-ids", ids: [] },
-  count: 1,
-  selection: { type: "none" },
-  commitment: "submit",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -38,9 +30,14 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 10, lng: 0, altitude: 1.7 },
-  map: { borders: true, hover: false, muteOthers: true, revealOnAnswer: true },
+  map: {
+    borders: true,
+    hoverFeedback: false,
+    muteOthers: true,
+    revealOnAnswer: true,
+  },
   source: mapSource,
-};
+});
 
 export const SUN_FLAGS_JOURNEY: Journey = {
   id: "chasing-the-sun-v2",
@@ -49,7 +46,9 @@ export const SUN_FLAGS_JOURNEY: Journey = {
   description:
     "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
   rounds: [
-    {
+    defineQuestion({
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-may-pair-v2",
       label: "Shared sun",
@@ -65,7 +64,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       contextIds: southAmerica,
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "neutral",
         revealOnAnswer: true,
@@ -88,8 +87,13 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "Buenos Aires City Government · the national flag’s sun",
         "https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-philippines-revolution-v2",
       label: "Revolution",
@@ -120,8 +124,13 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "Philippine Supreme Court · constitutional discussion of the flag",
         "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/24/51077",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-kazakhstan-grain-v1",
       label: "Symbolism",
@@ -151,8 +160,12 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "President of Kazakhstan · national flag symbolism",
         "https://www.akorda.kz/en/state_symbols/kazakhstan_flag",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-pacific-pin-v1",
       label: "Drop a pin",
@@ -168,7 +181,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       feedbackFocus: { lat: 37, lng: 138, altitude: 0.85 },
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -179,8 +192,13 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "https://web-japan.org/factsheet/en/pdf/11NFlagAnthem.pdf",
       ),
       sources: [mapSource],
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-malawi-dawn-v1",
       label: "Meaning",
@@ -210,6 +228,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "Embassy of Malawi in Cairo · national flag",
         "https://www.malawiembassycairo.org/about-malawi",
       ),
-    },
+    }),
   ],
 };

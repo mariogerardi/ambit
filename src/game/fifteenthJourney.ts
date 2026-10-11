@@ -1,3 +1,4 @@
+import { defineQuestion } from "./questionBuilder";
 import type { Journey, Question } from "./questions";
 
 const destinations = [
@@ -44,46 +45,47 @@ export const FIFTEENTH_JOURNEY: Journey = {
   description:
     "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",
   rounds: destinations.map(
-    ({ code, name, focus, explanation }): Question => ({
-      id: `russia-neighbor-${code.toLowerCase()}`,
-      label: "Drop a pin",
-      progressLabel: name,
-      topic: "Russia’s neighbors",
-      title: `Try not to click Russia: ${name}`,
-      prompt: `Drop a pin inside ${name}.`,
-      leadIn: {
-        FIN: "Start on the western side of the giant neighbor.",
-        PRK: "Jump east to its short border near the Pacific.",
-        MNG: "Move inland to a broad landlocked neighbor.",
-        GEO: "Head west again, this time to the Caucasus.",
-        EST: "Circle back toward the Baltic for our final landing.",
-      }[code],
-      instruction: "",
-      mode: "pin",
-      rule: { type: "pin-inside", ids: [`wurl:${code}`] },
-      count: 1,
-      selection: { type: "none" },
-      disclosure: {
-        hoverNames: false,
-        namedChoices: false,
-        committedNames: false,
-        previousVisits: false,
-      },
-      commitment: "submit",
-      failure: "feedback",
-      focus,
-      map: {
-        borders: false,
-        hover: false,
-        muteOthers: true,
-        revealOnAnswer: true,
-      },
-      explanation,
-      source: {
-        name: "Natural Earth · country boundaries",
-        url: "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/",
-        reviewedOn: "2026-10-09",
-      },
-    }),
+    ({ code, name, focus, explanation }): Question =>
+      defineQuestion({
+        id: `russia-neighbor-${code.toLowerCase()}`,
+        label: "Drop a pin",
+        progressLabel: name,
+        topic: "Russia’s neighbors",
+        title: `Try not to click Russia: ${name}`,
+        prompt: `Drop a pin inside ${name}.`,
+        leadIn: {
+          FIN: "Start on the western side of the giant neighbor.",
+          PRK: "Jump east to its short border near the Pacific.",
+          MNG: "Move inland to a broad landlocked neighbor.",
+          GEO: "Head west again, this time to the Caucasus.",
+          EST: "Circle back toward the Baltic for our final landing.",
+        }[code],
+        instruction: "",
+        mode: "pin",
+        rule: { type: "pin-inside", ids: [`wurl:${code}`] },
+        count: 1,
+        selection: { type: "none" },
+        disclosure: {
+          hoverNames: false,
+          namedChoices: false,
+          committedNames: false,
+          previousVisits: false,
+        },
+        commitment: "submit",
+        failure: "feedback",
+        focus,
+        map: {
+          borders: false,
+          hoverFeedback: false,
+          muteOthers: true,
+          revealOnAnswer: true,
+        },
+        explanation,
+        source: {
+          name: "Natural Earth · country boundaries",
+          url: "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/",
+          reviewedOn: "2026-10-09",
+        },
+      }),
   ),
 };

@@ -1,3 +1,4 @@
+import { isRegionAnswer } from "../game/questionBuilder";
 import { answerPlace } from "../game/answerTargets";
 import type { RegionFeature, RouteFeature } from "../geography/types";
 import type { GameState } from "../game/state";
@@ -182,14 +183,15 @@ export function journeyWorld(
       game.phase === "home" || game.phase === "finished"
         ? undefined
         : round.map?.borderIds,
-    regionInteraction: round.mode.startsWith("city-") ? false : map.hover,
+    regionInteraction:
+      isRegionAnswer(round) ||
+      (game.phase === "feedback" &&
+        !round.mode.startsWith("city-") &&
+        map.hover),
     // Neutral land is still eligible for blind map picks; the engine validates IDs.
-    selectDisabled:
-      game.phase === "playing" &&
-      map.hover &&
-      round.map?.candidates === "neutral",
+    selectDisabled: game.phase === "playing" && isRegionAnswer(round),
     regionNames:
-      round.mode.startsWith("city-") || !map.hover
+      round.mode.startsWith("city-") || (!isRegionAnswer(round) && !map.hover)
         ? ("none" as const)
         : game.phase !== "playing" || round.disclosure.hoverNames
           ? ("all" as const)

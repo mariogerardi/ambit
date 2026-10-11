@@ -1,4 +1,5 @@
-import type { FactSource, Journey, Question } from "./questions";
+import { defineQuestion, definePresentation } from "./questionBuilder";
+import type { FactSource, Journey } from "./questions";
 import flagCatalog from "./data/flags.v1.json";
 import { mapSource } from "./countryFacts";
 
@@ -12,19 +13,10 @@ const flag = (code: string, alt: string) => ({
   alt,
   feedbackAlt: `National flag of ${({ ARG: "Argentina", URY: "Uruguay", KAZ: "Kazakhstan", JPN: "Japan", MWI: "Malawi" } as Record<string, string>)[code]}`,
 });
-const base: Question = {
-  id: "",
-  title: "",
+const base = definePresentation({
   label: "Flag",
   topic: "sun symbols",
-  prompt: "",
   instruction: "",
-  explanation: "",
-  mode: "choice-single",
-  rule: { type: "choice-ids", ids: [] },
-  count: 1,
-  selection: { type: "none" },
-  commitment: "submit",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -33,9 +25,14 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 10, lng: 0, altitude: 1.7 },
-  map: { borders: true, hover: false, muteOthers: true, revealOnAnswer: true },
+  map: {
+    borders: true,
+    hoverFeedback: false,
+    muteOthers: true,
+    revealOnAnswer: true,
+  },
   source: mapSource,
-};
+});
 
 export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
   id: "chasing-the-sun-v1",
@@ -44,7 +41,12 @@ export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
   description:
     "Five flags, one familiar symbol. Cross oceans and continents to discover how differently the same sun can shine.",
   rounds: [
-    {
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-revolution-month-v1",
       label: "History",
@@ -69,8 +71,12 @@ export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
         "Buenos Aires City Government · the national flag’s sun",
         "https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-uruguay-rays-v1",
       label: "Look closely",
@@ -102,8 +108,13 @@ export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
           "https://www.argentina.gob.ar/pais/simbolos/bandera",
         ),
       ],
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-kazakhstan-grain-v1",
       label: "Symbolism",
@@ -131,8 +142,12 @@ export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
         "President of Kazakhstan · national flag symbolism",
         "https://www.akorda.kz/en/state_symbols/kazakhstan_flag",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-pacific-pin-v1",
       label: "Drop a pin",
@@ -148,7 +163,7 @@ export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
       feedbackFocus: { lat: 37, lng: 138, altitude: 0.85 },
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -159,8 +174,13 @@ export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
         "https://web-japan.org/factsheet/en/pdf/11NFlagAnthem.pdf",
       ),
       sources: [mapSource],
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "sun-flags-malawi-dawn-v1",
       label: "Meaning",
@@ -188,6 +208,6 @@ export const ORIGINAL_SUN_FLAGS_JOURNEY: Journey = {
         "Embassy of Malawi in Cairo · national flag",
         "https://www.malawiembassycairo.org/about-malawi",
       ),
-    },
+    }),
   ],
 };

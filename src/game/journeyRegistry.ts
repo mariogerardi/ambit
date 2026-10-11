@@ -1,3 +1,4 @@
+import { validateJourneyContracts } from "./questionBuilder";
 import index from "./journeyIndex.json";
 import type { Journey, Question } from "./questions";
 
@@ -35,6 +36,7 @@ export function loadJourney(id: string): Promise<Journey> {
         value.id === id,
     );
     if (!journey) throw Error("The Journey could not be loaded.");
+    validateJourneyContracts(journey);
     return journey;
   });
   pending.set(id, promise);

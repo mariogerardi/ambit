@@ -152,7 +152,7 @@ describe("Chasing the sun", () => {
       ).toBe(false);
     expect(SUN_FLAGS_JOURNEY.rounds[3].map).toMatchObject({
       borders: false,
-      hover: false,
+      hoverFeedback: false,
       revealOnAnswer: true,
     });
   });

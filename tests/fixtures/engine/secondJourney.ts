@@ -73,7 +73,7 @@ export const SECOND_JOURNEY: Journey = {
       choices: LANGUAGES,
       selection: { type: "none" },
       contextIds: ["wurl:CAN"],
-      map: { borders: true, hover: false, muteOthers: true },
+      map: { borders: true, hoverFeedback: false, muteOthers: true },
       focus: { lat: 55, lng: -95, altitude: 1.5 },
       commitment: "submit",
       explanation:

@@ -38,7 +38,7 @@ describe("question playground", () => {
     const q = NORTH_AMERICA_JOURNEY.rounds[3];
     expect(q.map).toMatchObject({
       borders: false,
-      hover: false,
+      hoverFeedback: false,
       muteOthers: true,
     });
     for (const region of world) {

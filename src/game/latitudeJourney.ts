@@ -1,4 +1,4 @@
-import { africanLatitudeQuestion } from "./questionSeeds";
+import { defineQuestion } from "./questionBuilder";
 import { CAPITALS, capitalSource } from "./quizData";
 import type { Journey, Question } from "./questions";
 
@@ -71,8 +71,22 @@ export const LATITUDE_JOURNEY: Journey = {
     const reference = CAPITALS.find(
       (capital) => capital.name === comparison.reference,
     )!;
-    return {
-      ...africanLatitudeQuestion,
+    return defineQuestion({
+      mode: "text",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
+      qualification:
+        "We compare one primary capital per UN member state using GeoNames coordinates, downloaded in October 2026.",
+      topic: "latitude",
+      disclosure: {
+        hoverNames: false,
+        namedChoices: false,
+        committedNames: false,
+        previousVisits: false,
+      },
+      failure: "feedback",
       id: `latitude-${comparison.id}-v1`,
       title: `Compare with ${comparison.reference}.`,
       label: "Latitude",
@@ -105,6 +119,6 @@ export const LATITUDE_JOURNEY: Journey = {
       ],
       explanation: comparison.explanation,
       source: capitalSource,
-    };
+    });
   }),
 };

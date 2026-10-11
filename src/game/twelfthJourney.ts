@@ -1,4 +1,5 @@
-import type { FactSource, Journey, Question } from "./questions";
+import { defineQuestion, definePresentation } from "./questionBuilder";
+import type { FactSource, Journey } from "./questions";
 import type { PlaceFeature, RegionFeature } from "../geography/types";
 import geography from "./data/exceptions-geography.v1.json";
 import { ANSWER_PLACES } from "./answerTargets";
@@ -15,19 +16,10 @@ const neighbors = [
   ["wurl:AFG", "Afghanistan", 33.5, 66],
   ["wurl:TKM", "Turkmenistan", 39.5, 58.5],
 ] as const;
-const base: Question = {
-  id: "",
+const base = definePresentation({
   label: "Country",
   topic: "geographic exceptions",
-  title: "",
-  prompt: "",
   instruction: "",
-  explanation: "",
-  mode: "map-single",
-  rule: { type: "country-ids", ids: [] },
-  count: 1,
-  selection: { type: "members" },
-  commitment: "submit",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -36,16 +28,19 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 20, lng: 0, altitude: 1.3 },
-  map: { borders: true, hover: true, muteOthers: false },
+  map: { borders: true, hoverFeedback: true, muteOthers: false },
   source: source("", ""),
-};
+});
 export const TWELFTH_JOURNEY: Journey = {
   id: "exceptions-to-the-rule-v1",
   title: "Exceptions to the rule",
   description:
     "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
   rounds: [
-    {
+    defineQuestion({
+      count: 1,
+      commitment: "submit",
+
       ...base,
       id: "exceptions-france-border",
       leadIn: "Start with an unexpected border.",
@@ -68,7 +63,7 @@ export const TWELFTH_JOURNEY: Journey = {
           "Suriname",
         ][i],
       })),
-      map: { borders: true, hover: false, muteOthers: true },
+      map: { borders: true, hoverFeedback: false, muteOthers: true },
       focus: { lat: 28, lng: -25, altitude: 1.7 },
       highlightParts: [
         {
@@ -96,8 +91,13 @@ export const TWELFTH_JOURNEY: Journey = {
         "Presidency of Brazil · France’s longest land border",
         "https://www.gov.br/planalto/en/latest-news/2023/05/presidents-lula-and-macron-meet-at-the-g7-summit-and-seal-resumption-of-brazil-france-relations",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "map-single",
+      count: 1,
+      selection: { type: "members" },
+      commitment: "submit",
+
       ...base,
       id: "exceptions-double-landlocked",
       leadIn: "Head inland, then farther inland.",
@@ -128,8 +128,11 @@ export const TWELFTH_JOURNEY: Journey = {
         "World Bank · Uzbekistan country overview",
         "https://www.worldbank.org/ext/en/country/uzbekistan",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      commitment: "submit",
+
       ...base,
       id: "exceptions-four-hemispheres",
       leadIn: "Cross the Equator and keep going.",
@@ -151,7 +154,7 @@ export const TWELFTH_JOURNEY: Journey = {
           "Marshall Islands",
         ][i],
       })),
-      map: { borders: false, hover: false, muteOthers: true },
+      map: { borders: false, hoverFeedback: false, muteOthers: true },
       focus: { lat: -3, lng: -173, altitude: 1.25 },
       feedbackFocus: { lat: 0, lng: -173, altitude: 0.85 },
       feedbackOverlays: [
@@ -170,8 +173,13 @@ export const TWELFTH_JOURNEY: Journey = {
         "https://mfed.gov.ki/sites/default/files/2025-09/KDP%202024-2027_Launched_17.09.25_3.pdf",
       ),
       sources: [geography.islandSource],
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "map-single",
+      count: 1,
+      selection: { type: "members" },
+      commitment: "submit",
+
       ...base,
       id: "exceptions-bolivia-coast",
       leadIn: "Follow a coastline lost to history.",
@@ -184,7 +192,7 @@ export const TWELFTH_JOURNEY: Journey = {
       map: {
         borders: false,
         borderIds: ["wurl:BOL"],
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "neutral",
       },
@@ -214,8 +222,13 @@ export const TWELFTH_JOURNEY: Journey = {
         "International Court of Justice · Bolivia v. Chile, historical background",
         "https://www.icj-cij.org/case/153",
       ),
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "map-single",
+      count: 1,
+      selection: { type: "members" },
+      commitment: "submit",
+
       ...base,
       id: "exceptions-baku",
       leadIn: "Finish below sea level.",
@@ -234,6 +247,6 @@ export const TWELFTH_JOURNEY: Journey = {
         "Azerbaijan · Baku’s Caspian setting and elevation",
         "https://azerbaijan.az/en/related-information/217",
       ),
-    },
+    }),
   ],
 };

@@ -6,6 +6,9 @@ const server = await createServer({ server: { middlewareMode: true } });
 try {
   const { JOURNEYS, COMPATIBILITY_JOURNEYS, journeyPath } =
     await server.ssrLoadModule("/src/game/journeys.ts");
+  const { validateJourneyContracts } = await server.ssrLoadModule(
+    "/src/game/questionBuilder.ts",
+  );
   const editions = [...JOURNEYS, ...COMPATIBILITY_JOURNEYS];
   const files = (await readdir("src/game")).filter(
     (name) => name === "journey.ts" || name.endsWith("Journey.ts"),
@@ -18,6 +21,7 @@ try {
     }
   }
   const index = editions.map((journey) => {
+    validateJourneyContracts(journey);
     if (!modules.has(journey.id)) throw Error(`Missing module: ${journey.id}`);
     return {
       id: journey.id,

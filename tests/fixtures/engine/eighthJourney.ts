@@ -39,7 +39,7 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 20, lng: 0, altitude: 1.6 },
-  map: { borders: false, hover: false, muteOthers: true, revealOnAnswer: true },
+  map: { borders: false, hoverFeedback: false, muteOthers: true, revealOnAnswer: true },
   explanation: "",
   source: {
     name: "Pinned local geography and GeoNames coordinates",
@@ -77,7 +77,7 @@ export const EIGHTH_JOURNEY: Journey = {
       commitment: "immediate",
       prompt: "Which of the six marked European capitals is Paris?",
       instruction: "",
-      map: { borders: true, hover: false, muteOthers: true },
+      map: { borders: true, hoverFeedback: false, muteOthers: true },
       focus: { lat: 47, lng: 8, altitude: 0.52 },
       explanation: "Paris sits on the Seine in northern France.",
     },
@@ -115,7 +115,7 @@ export const EIGHTH_JOURNEY: Journey = {
       prompt: "Select the three marked capitals farther north than Rome.",
       instruction: "The line marks Rome’s latitude.",
       focus: { lat: 47, lng: 8, altitude: 0.52 },
-      map: { borders: true, hover: false, muteOthers: true },
+      map: { borders: true, hoverFeedback: false, muteOthers: true },
       disclosure: { ...base.disclosure, committedNames: true },
       overlays: [
         {
@@ -141,7 +141,7 @@ export const EIGHTH_JOURNEY: Journey = {
         "Which of the six marked cities in Australia and New Zealand is Sydney?",
       instruction: "",
       focus: { lat: -33, lng: 145, altitude: 0.85 },
-      map: { borders: true, hover: false, muteOthers: true },
+      map: { borders: true, hoverFeedback: false, muteOthers: true },
       explanation:
         "Sydney is on Australia’s southeastern coast, northeast of Melbourne.",
     },

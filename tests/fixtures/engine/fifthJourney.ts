@@ -76,7 +76,7 @@ const base: Question = {
   explanation: "",
   map: {
     borders: true,
-    hover: true,
+    hoverFeedback: true,
     muteOthers: true,
     candidates: "highlighted",
   },
@@ -102,7 +102,7 @@ export const FIFTH_JOURNEY: Journey = {
       contextIds: CANADIAN_TERRITORIES,
       map: {
         borders: true,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -136,7 +136,7 @@ export const FIFTH_JOURNEY: Journey = {
       contextIds: provinces.map((r) => r.id),
       map: {
         borders: true,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -172,7 +172,7 @@ export const FIFTH_JOURNEY: Journey = {
       importedRegions: US_STATES,
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -207,7 +207,7 @@ export const FIFTH_JOURNEY: Journey = {
       importedRegions: US_STATES,
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },

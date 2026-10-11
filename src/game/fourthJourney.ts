@@ -1,4 +1,5 @@
-import type { Journey, Question } from "./questions";
+import { defineQuestion, definePresentation } from "./questionBuilder";
+import type { Journey } from "./questions";
 import { CAPITALS, FEATURES, capitalSource } from "./quizData";
 
 const tripoli = CAPITALS.find((c) => c.countryId === "wurl:LBY")!;
@@ -10,37 +11,31 @@ export const YUGOSLAV_REPUBLICS = [
   "SRB",
   "SVN",
 ].map((c) => `wurl:${c}`);
-const base: Question = {
-  id: "",
-  title: "",
+const base = definePresentation({
   label: "",
   topic: "",
-  prompt: "",
   instruction: "",
-  mode: "choice-single",
-  rule: { type: "choice-ids", ids: [] },
-  count: 1,
-  selection: { type: "none" },
   disclosure: {
     hoverNames: false,
     namedChoices: false,
     committedNames: false,
     previousVisits: false,
   },
-  commitment: "submit",
   failure: "feedback",
   focus: { lat: 36, lng: 17, altitude: 1.4 },
-  explanation: "",
   source: capitalSource,
-  map: { borders: true, hover: false, muteOthers: true },
-};
+  map: { borders: true, hoverFeedback: false, muteOthers: true },
+});
 export const FOURTH_JOURNEY: Journey = {
   id: "mediterranean-v1",
   title: "Around the Mediterranean",
   description:
     "Follow the Mediterranean from Spain to an Italian island, across to Libya, and back to the Balkans. Five stops, one shared sea.",
   rounds: [
-    {
+    defineQuestion({
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "spain-regional-languages",
       leadIn: "Begin on Spain’s Mediterranean shore.",
@@ -69,8 +64,13 @@ export const FOURTH_JOURNEY: Journey = {
         url: "https://mptmd.gob.es/en/portal/politica-territorial/autonomica/lenguas-cooficiales",
         reviewedOn: "2026-10-05",
       },
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "italy-sicily",
       leadIn: "Sail east toward Italy.",
@@ -115,8 +115,12 @@ export const FOURTH_JOURNEY: Journey = {
         url: "https://www.visitsicily.info/wp-content/uploads/2024/11/SR_Brochure-Sicilia_20241102_Inglese_Maggiore-risoluzione.pdf",
         reviewedOn: "2026-10-05",
       },
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "libya-capital",
       leadIn: "Cross to the southern shore.",
@@ -133,8 +137,10 @@ export const FOURTH_JOURNEY: Journey = {
       feedbackPlaces: [tripoli],
       explanation:
         "On Libya’s Mediterranean coast, this city ties our southern stop back to the same sea.",
-    },
-    {
+    }),
+    defineQuestion({
+      commitment: "submit",
+
       ...base,
       id: "yugoslavia-six",
       leadIn: "Head north toward the Adriatic.",
@@ -160,7 +166,7 @@ export const FOURTH_JOURNEY: Journey = {
       },
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },
@@ -172,8 +178,12 @@ export const FOURTH_JOURNEY: Journey = {
         url: "https://www.icty.org/en/about/what-former-yugoslavia",
         reviewedOn: "2026-10-05",
       },
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "mediterranean-shores",
       leadIn: "Zoom out to the whole sea.",
@@ -188,7 +198,7 @@ export const FOURTH_JOURNEY: Journey = {
       rule: { type: "feature-count", featureId: "mediterranean" },
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -213,6 +223,6 @@ export const FOURTH_JOURNEY: Journey = {
           reviewedOn: "2026-10-05",
         },
       ],
-    },
+    }),
   ],
 };

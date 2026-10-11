@@ -1,14 +1,24 @@
+import { defineQuestion, definePresentation } from "./questionBuilder";
 import { CANADIAN_PROVINCES } from "./canadianRegions";
-import { mapleFlagQuestion, canadianLanguagesQuestion } from "./questionSeeds";
-import { CAPITALS, capitalSource } from "./quizData";
-import type { Journey, Question } from "./questions";
+import { CAPITALS, LANGUAGES, capitalSource, languageSource } from "./quizData";
+import type { Journey } from "./questions";
 
-const base: Question = {
-  ...canadianLanguagesQuestion,
-  mode: "choice-single",
-  count: 1,
+const base = definePresentation({
+  label: "Languages",
+  topic: "official languages",
+  instruction: "",
+  disclosure: {
+    hoverNames: false,
+    namedChoices: false,
+    committedNames: true,
+    previousVisits: false,
+  },
+  failure: "feedback",
+  focus: { lat: 55, lng: -95, altitude: 1.5 },
   source: capitalSource,
-};
+  contextIds: ["wurl:CAN"],
+  map: { borders: true, hoverFeedback: false, muteOthers: true },
+});
 const regionsSource = {
   name: "Government of Canada · Canada’s regions",
   url: "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html",
@@ -20,21 +30,76 @@ export const CANADA_JOURNEY: Journey = {
   description:
     "Start with a familiar flag, follow two official languages to the east coast, then travel through the capital to the northern shore.",
   rounds: [
-    {
-      ...mapleFlagQuestion,
+    defineQuestion({
+      mode: "map-single",
+      rule: { type: "flag-country", countryId: "wurl:CAN" },
+      count: 1,
+      selection: { type: "members" },
+      commitment: "immediate",
+
+      title: "A flag, a place.",
+      label: "Flag",
+      topic: "flags",
+      prompt: "Which country flies this flag?",
+      instruction: "",
+      disclosure: {
+        hoverNames: false,
+        namedChoices: false,
+        committedNames: true,
+        previousVisits: false,
+      },
+      failure: "feedback",
+      focus: { lat: 14, lng: 24, altitude: 1.65 },
+      source: {
+        name: "Government of Canada · national flag",
+        url: "https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html",
+        reviewedOn: "2026-10-05",
+      },
+      image: {
+        src: "/flags/clue-01.svg",
+        alt: "Flag clue: red side panels and an eleven-point red maple leaf on white.",
+        feedbackAlt: "National flag of Canada",
+      },
       id: "canada-maple-flag-v1",
       leadIn: "Start with a familiar flag.",
       explanation:
         "The maple leaf is the national symbol at the heart of this flag.",
-    },
-    {
-      ...canadianLanguagesQuestion,
+    }),
+    defineQuestion({
+      mode: "choice-multiple",
+      rule: { type: "official-languages", countryId: "wurl:CAN", match: "all" },
+      count: 2,
+      selection: { type: "none" },
+      commitment: "submit",
+
+      title: "One country, two languages.",
+      label: "Languages",
+      topic: "official languages",
+      prompt: "Which two languages are official at Canada’s federal level?",
+      instruction: "",
+      disclosure: {
+        hoverNames: false,
+        namedChoices: false,
+        committedNames: true,
+        previousVisits: false,
+      },
+      failure: "feedback",
+      focus: { lat: 55, lng: -95, altitude: 1.5 },
+      source: languageSource,
+      choices: LANGUAGES,
+      contextIds: ["wurl:CAN"],
+      map: { borders: true, hoverFeedback: false, muteOthers: true },
       id: "canada-federal-languages-v1",
       leadIn: "Stay here for two official voices.",
       explanation:
         "Both have equal status in federal institutions. Provincial language policies differ.",
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "canada-bilingual-province-v1",
       label: "Province",
@@ -57,7 +122,7 @@ export const CANADA_JOURNEY: Journey = {
       contextIds: CANADIAN_PROVINCES.map((province) => province.id),
       map: {
         borders: true,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -70,8 +135,12 @@ export const CANADA_JOURNEY: Journey = {
         url: "https://www.gnb.ca/en/admin/about-nb/basic-facts.html",
         reviewedOn: "2026-10-11",
       },
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "canada-ottawa-v1",
       label: "Capital",
@@ -90,8 +159,13 @@ export const CANADA_JOURNEY: Journey = {
       explanation:
         "The federal capital sits in Ontario, beside Quebec—not in Toronto or Montreal.",
       source: regionsSource,
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "choice-single",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "canada-arctic-shore-v1",
       label: "Ocean",
@@ -111,6 +185,6 @@ export const CANADA_JOURNEY: Journey = {
       explanation:
         "Canada reaches three oceans: this northern shore completes the trio with the Atlantic and Pacific.",
       source: regionsSource,
-    },
+    }),
   ],
 };

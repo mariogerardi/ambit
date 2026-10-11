@@ -1,3 +1,4 @@
+import { defineQuestion } from "./questionBuilder";
 import type { Focus } from "../geography/types";
 import type { Journey, Question } from "./questions";
 import { mapSource } from "./countryFacts";
@@ -64,37 +65,38 @@ export const NINTH_JOURNEY: Journey = {
   description:
     "Two neighbors name the country; an unfamiliar outline makes pinning it another challenge. Find the shared neighbor five times.",
   rounds: SHARED_NEIGHBOR_CLUES.map(
-    (clue): Question => ({
-      id: clue.id,
-      title: "One shared neighbor.",
-      label: "Drop a pin",
-      progressLabel: `${clue.names[0]} + ${clue.names[1]}`,
-      topic: "shared land borders",
-      prompt: `Place a pin inside the country that shares a land border with both ${clue.names[0]} and ${clue.names[1]}.`,
-      instruction: "",
-      mode: "pin",
-      rule: { type: "pin-inside", ids: [clue.answer] },
-      count: 1,
-      selection: { type: "none" },
-      commitment: "submit",
-      failure: "feedback",
-      disclosure: {
-        hoverNames: false,
-        namedChoices: false,
-        committedNames: false,
-        previousVisits: false,
-      },
-      contextIds: [...clue.countries],
-      focus: clue.focus,
-      map: {
-        borders: false,
-        borderIds: [...clue.countries],
-        hover: false,
-        muteOthers: true,
-        revealOnAnswer: true,
-      },
-      explanation: clue.explanation,
-      source: { ...mapSource, reviewedOn: "2026-10-06" },
-    }),
+    (clue): Question =>
+      defineQuestion({
+        id: clue.id,
+        title: "One shared neighbor.",
+        label: "Drop a pin",
+        progressLabel: `${clue.names[0]} + ${clue.names[1]}`,
+        topic: "shared land borders",
+        prompt: `Place a pin inside the country that shares a land border with both ${clue.names[0]} and ${clue.names[1]}.`,
+        instruction: "",
+        mode: "pin",
+        rule: { type: "pin-inside", ids: [clue.answer] },
+        count: 1,
+        selection: { type: "none" },
+        commitment: "submit",
+        failure: "feedback",
+        disclosure: {
+          hoverNames: false,
+          namedChoices: false,
+          committedNames: false,
+          previousVisits: false,
+        },
+        contextIds: [...clue.countries],
+        focus: clue.focus,
+        map: {
+          borders: false,
+          borderIds: [...clue.countries],
+          hoverFeedback: false,
+          muteOthers: true,
+          revealOnAnswer: true,
+        },
+        explanation: clue.explanation,
+        source: { ...mapSource, reviewedOn: "2026-10-06" },
+      }),
   ),
 };

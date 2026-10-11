@@ -1,4 +1,5 @@
-import type { Journey, Question } from "./questions";
+import { defineQuestion, definePresentation } from "./questionBuilder";
+import type { Journey } from "./questions";
 import { CAPITALS, FEATURES, capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
 import flagCatalog from "./data/flags.v1.json";
@@ -7,19 +8,10 @@ export const PACIFIC_ANDEAN_COUNTRIES = ["COL", "ECU", "PER", "CHL"].map(
   (code) => `wurl:${code}`,
 );
 const wellington = CAPITALS.find((c) => c.countryId === "wurl:NZL")!;
-const base: Question = {
-  id: "",
-  title: "",
+const base = definePresentation({
   label: "",
   topic: "Pacific geography",
-  prompt: "",
   instruction: "",
-  explanation: "",
-  mode: "text",
-  rule: { type: "manual-text", answers: [] },
-  count: 1,
-  selection: { type: "none" },
-  commitment: "submit",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -28,9 +20,9 @@ const base: Question = {
     previousVisits: false,
   },
   focus: { lat: 20, lng: 145, altitude: 1.5 },
-  map: { borders: true, hover: false, muteOthers: true },
+  map: { borders: true, hoverFeedback: false, muteOthers: true },
   source: { ...mapSource, reviewedOn: "2026-10-06" },
-};
+});
 
 export const TENTH_JOURNEY: Journey = {
   id: "ring-of-fire-v1",
@@ -38,7 +30,9 @@ export const TENTH_JOURNEY: Journey = {
   description:
     "Trace the Pacific’s island arcs, cross to the Andes, and finish on its southern rim. One ocean connects every stop.",
   rounds: [
-    {
+    defineQuestion({
+      count: 1,
+
       ...base,
       id: "pacific-rising-sun",
       leadIn: "Begin on the western Pacific rim.",
@@ -58,14 +52,18 @@ export const TENTH_JOURNEY: Journey = {
       },
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: false,
         candidates: "decorative",
       },
       explanation:
         "The red disc represents the sun. Our trip around the Pacific begins here.",
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "pacific-hokkaido",
       leadIn: "Head to the northern islands.",
@@ -102,8 +100,12 @@ export const TENTH_JOURNEY: Journey = {
         url: "https://www.japan.travel/en/destinations/hokkaido/hokkaido/",
         reviewedOn: "2026-10-06",
       },
-    },
-    {
+    }),
+    defineQuestion({
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "pacific-indonesia-pin",
       leadIn: "Follow the islands south.",
@@ -117,14 +119,16 @@ export const TENTH_JOURNEY: Journey = {
       focus: { lat: -5, lng: 118, altitude: 1.15 },
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
       explanation:
         "The archipelago bridges the Indian and Pacific oceans. A pin on any of its land counts.",
-    },
-    {
+    }),
+    defineQuestion({
+      commitment: "submit",
+
       ...base,
       id: "pacific-andes-coast",
       leadIn: "Cross to the Pacific’s eastern shore.",
@@ -151,7 +155,7 @@ export const TENTH_JOURNEY: Journey = {
       focus: { lat: -17, lng: -65, altitude: 1.3 },
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },
@@ -159,8 +163,13 @@ export const TENTH_JOURNEY: Journey = {
         "Here the Andes meet the Pacific. The other Andean countries either lack a Pacific coast or are landlocked.",
       source: FEATURES.andes.source,
       sources: [FEATURES.andes.source, mapSource],
-    },
-    {
+    }),
+    defineQuestion({
+      mode: "text",
+      count: 1,
+      selection: { type: "none" },
+      commitment: "submit",
+
       ...base,
       id: "pacific-wellington",
       leadIn: "Finish on the southern rim.",
@@ -177,6 +186,6 @@ export const TENTH_JOURNEY: Journey = {
       explanation:
         "At the southern tip of the North Island, the capital is our last landing on the Pacific rim.",
       source: capitalSource,
-    },
+    }),
   ],
 };

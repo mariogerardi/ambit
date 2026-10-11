@@ -1,3 +1,4 @@
+import { defineQuestion } from "./questionBuilder";
 import type { FactSource, Journey, Question } from "./questions";
 import type { RegionFeature } from "../geography/types";
 import islands from "./data/island-clues.v1.json";
@@ -133,7 +134,7 @@ export const FOURTEENTH_JOURNEY: Journey = {
       (island) => island.id === definition.id,
     )!;
     const candidates = definition.candidates.map((code) => `wurl:${code}`);
-    return {
+    return defineQuestion({
       id: `island-owner-${definition.id}`,
       label: "Island",
       progressLabel: definition.label,
@@ -177,13 +178,13 @@ export const FOURTEENTH_JOURNEY: Journey = {
       map: {
         borders: false,
         borderIds: [...candidates, `clue-part:${island.countryId}`],
-        hover: true,
+        hoverFeedback: true,
         muteOthers: true,
         candidates: "highlighted",
       },
       explanation: definition.explanation,
       source: definition.source,
       sources: [source(islands.source, islands.sourceUrl)],
-    };
+    });
   }),
 };

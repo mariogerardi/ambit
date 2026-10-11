@@ -159,13 +159,14 @@ and `GlobeView` hit handling to the reducer.
 
 Current implementation details that matter:
 
-- `map.hover: false` also disables country-region interaction in `journeyWorld`.
-  It is not just a tooltip preference. Pin coordinate taps have a separate path.
+- Map picking is derived from the answer mode, independently of display settings.
+  `map.hoverFeedback` controls hover inspection/styling; it cannot disable answers.
+  Pin coordinate taps and city-marker picking have their own paths.
 - `muteOthers: true` normally leaves countries in the `disabled` visual state.
   `GlobeView` rejects disabled country taps unless `selectDisabled` is enabled.
-- For an anonymous, neutral country map pick, use `hover: true` and
-  `candidates: "neutral"`; hide names with disclosure settings. The neutral
-  candidate setting allows polygon taps while correctness still uses eligibility.
+- For an anonymous, neutral country map pick, use `candidates: "neutral"` and
+  hide names with disclosure settings. Polygon eligibility remains authoritative
+  even when a muted country has a disabled visual style.
 - For specifically highlighted candidates, use the highlighted-candidate contract
   and verify that correct polygons or their display fragments are clickable.
 - A collapsed typing alternative is accessibility/fallback support, not a repair
@@ -196,15 +197,27 @@ disclosure: {
 },
 map: {
   borders: true,
-  hover: true,
+  hoverFeedback: true,
   muteOthers: true,
   candidates: "neutral",
   revealOnAnswer: true,
 },
 ```
 
-Do not copy a base multiple-choice configuration into a map or pin question
-without reviewing every inherited setting.
+Author every round with `defineQuestion` from `questionBuilder.ts`. Its discriminated
+contract binds the answer mode to valid rules, selection, count, commitment, and
+required input fields. Shared presentation must use `definePresentation`, whose
+exact-key check rejects whole questions even when hidden behind object spreads.
+Do not put answer contracts or clue copy into shared presentation defaults.
+
+Completed questions are leaf content, not reusable templates. Reuse data and
+presentation deliberately; declare each round's interaction explicitly. The
+constructor, Journey loader, index preparation, and context creation validate
+contracts before play. Context validation additionally checks actual targets,
+answer counts, candidate eligibility, and help configuration.
+
+Map modes may offer named button alternatives when explicitly authored; this is
+a supported dual-input contract, not an accidental inherited choice list.
 
 ## Make the reveal explain the answer
 
@@ -338,3 +351,14 @@ strategy. Original editions can remain loadable for started attempts while being
 excluded from Admin choices and practice routes. Never silently regrade prior
 results. Register and regenerate metadata, update the catalog, and follow the
 normal test/build/release checks before publication.
+
+## Render mountain context from terrain
+
+Mountain hatching must follow reviewed elevation data, not decorative peak stamps
+or a polygon boundary presented as a ridgeline. Derive crest strokes and downhill
+hachures from a generalized elevation grid; record input checksums, sampling,
+clipping, and source attribution. Pale high-elevation strokes do not imply
+permanent snow. Keep lines subordinate to answer markers and borders, and reduce
+detail contrast at distant zooms. Relief is display-only: its geometry never
+changes eligibility or grading. A general mountain footprint may limit rendering
+but should not appear as a hard terrain boundary.

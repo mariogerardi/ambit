@@ -67,7 +67,7 @@ export const THIRD_JOURNEY: Journey = {
       commitment: "immediate",
       map: {
         borders: true,
-        hover: true,
+        hoverFeedback: true,
         muteOthers: false,
         candidates: "highlighted",
       },
@@ -92,7 +92,7 @@ export const THIRD_JOURNEY: Journey = {
       contextIds: ["wurl:TJK", "wurl:ARM"],
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnCorrect: true,
       },
@@ -113,7 +113,7 @@ export const THIRD_JOURNEY: Journey = {
       focus: { lat: 42, lng: 51, altitude: 1.15 },
       map: {
         borders: false,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },
@@ -176,7 +176,7 @@ export const THIRD_JOURNEY: Journey = {
       focus: { lat: 44, lng: 63, altitude: 1.6 },
       map: {
         borders: true,
-        hover: false,
+        hoverFeedback: false,
         muteOthers: true,
         revealOnAnswer: true,
       },

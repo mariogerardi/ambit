@@ -120,6 +120,14 @@ export interface PhysicalFeature {
   geometry?: Polygon | MultiPolygon;
   color?: string;
   fillOpacity?: number;
+  lineWidth?: number;
+  lineOpacity?: number;
+  /** Elevation-derived ink replaces the filled footprint and its outline. */
+  relief?: {
+    ridges: number[][][];
+    hachures: number[][][];
+    highlights: number[][][];
+  };
   /** Alternate anchors inside a large feature, used to keep its name in regional views. */
   labelAnchors?: number[][];
 }

@@ -49,7 +49,10 @@ export function physicalLinePositions(paths: number[][][], radius: number) {
 export class PhysicalFeatures {
   readonly group = new Group();
   private labels = new PlaceLabels();
-  private lines = new Map<string, { line: LineSegments2; rank: number }>();
+  private lines = new Map<
+    string,
+    { line: LineSegments2; rank: number; opacity: number; relief: boolean }
+  >();
   private activeLines = new Set<string>();
   private surfaces = new Map<PhysicalFeature, Group>();
   private data?: PhysicalFeature[];
@@ -70,7 +73,7 @@ export class PhysicalFeatures {
     for (const { line } of this.lines.values()) line.visible = false;
     for (const surface of this.surfaces.values()) surface.visible = false;
     for (const feature of layer.features) {
-      if (!feature.geometry) continue;
+      if (!feature.geometry || feature.relief) continue;
       let surface = this.surfaces.get(feature);
       if (!surface) {
         surface = new Group();
@@ -111,24 +114,59 @@ export class PhysicalFeatures {
       }
       surface.visible = true;
     }
+    const ink = layer.features.flatMap((feature): PhysicalFeature[] =>
+      feature.relief
+        ? [
+            {
+              ...feature,
+              id: `${feature.id}:ridges`,
+              paths: feature.relief.ridges,
+              color: "#745a40",
+              lineWidth: 1.25,
+              lineOpacity: 0.82,
+            },
+            {
+              ...feature,
+              id: `${feature.id}:slopes`,
+              paths: feature.relief.hachures,
+              color: "#927453",
+              lineWidth: 0.85,
+              lineOpacity: 0.64,
+            },
+            {
+              ...feature,
+              id: `${feature.id}:highlights`,
+              paths: feature.relief.highlights,
+              color: "#eedbc0",
+              lineWidth: 1.45,
+              lineOpacity: 0.86,
+            },
+          ]
+        : [feature],
+    );
     const groups = [
       ...new Set(
-        layer.features
+        ink
           .filter((f) => f.paths?.length)
-          .map((f) => `${f.rank}|${f.color ?? "#72b9d2"}`),
+          .map(
+            (f) =>
+              `${f.rank}|${f.color ?? "#72b9d2"}|${f.lineWidth ?? 1.6}|${f.lineOpacity ?? 0.85}`,
+          ),
       ),
     ];
     // Batch river segments by importance: a few draw calls instead of hundreds.
     for (const group of groups) {
-      const [rankText, color] = group.split("|");
+      const [rankText, color, widthText, opacityText] = group.split("|");
       const rank = Number(rankText);
-      const features = layer.features.filter(
+      const features = ink.filter(
         (f) =>
           f.rank === rank &&
           (f.color ?? "#72b9d2") === color &&
+          (f.lineWidth ?? 1.6) === Number(widthText) &&
+          (f.lineOpacity ?? 0.85) === Number(opacityText) &&
           f.paths?.length,
       );
-      const key = features.map((f) => f.id).join("|");
+      const key = `${radius}|${group}|${features.map((f) => f.id).join("|")}`;
       this.activeLines.add(key);
       let line = this.lines.get(key)?.line;
       if (!line) {
@@ -141,9 +179,9 @@ export class PhysicalFeatures {
           ),
           new LineMaterial({
             color,
-            linewidth: 1.6,
+            linewidth: Number(widthText),
             transparent: true,
-            opacity: 0.85,
+            opacity: Number(opacityText),
             depthTest: true,
             depthWrite: false,
             alphaToCoverage: true,
@@ -154,7 +192,12 @@ export class PhysicalFeatures {
         );
         line.renderOrder = 5;
         line.raycast = () => {};
-        this.lines.set(key, { line, rank });
+        this.lines.set(key, {
+          line,
+          rank,
+          opacity: Number(opacityText),
+          relief: features.some((f) => !!f.relief),
+        });
         this.group.add(line);
       }
       line.visible = true;
@@ -215,10 +258,14 @@ export class PhysicalFeatures {
       );
     }
     this.labels.view(camera, width, height, reserved);
-    for (const [key, { line, rank }] of this.lines)
+    for (const [key, { line, rank, opacity, relief }] of this.lines) {
+      if (relief)
+        line.material.opacity =
+          opacity * (altitude >= 1.2 ? 0.52 : altitude >= 0.4 ? 0.82 : 1);
       line.visible =
         this.activeLines.has(key) &&
         (altitude < 0.4 || rank <= (altitude < 1.2 ? 5 : 3));
+    }
     // Inactive cached lines stay hidden when changing toggles.
   }
   dispose() {

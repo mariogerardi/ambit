@@ -1,3 +1,4 @@
+import { defineQuestion, definePresentation } from "./questionBuilder";
 import { geoBounds } from "d3-geo";
 import { US_STATES } from "../geography/usStates";
 import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
@@ -33,35 +34,26 @@ const subdivisionSource: FactSource = {
   url: "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/",
   reviewedOn: "2026-10-05",
 };
-const base: Question = {
-  id: "",
+const base = definePresentation({
   label: "",
   topic: "North American geography",
-  title: "",
-  prompt: "",
   instruction: "",
-  mode: "map-multiple",
-  rule: { type: "region-ids", ids: [] },
-  count: 1,
-  selection: { type: "none" },
   disclosure: {
     hoverNames: false,
     namedChoices: false,
     committedNames: false,
     previousVisits: false,
   },
-  commitment: "submit",
   failure: "feedback",
   focus: { lat: 46, lng: -98, altitude: 0.95 },
   source: subdivisionSource,
-  explanation: "",
   map: {
     borders: true,
-    hover: true,
+    hoverFeedback: true,
     muteOthers: true,
     candidates: "highlighted",
   },
-};
+});
 export const NORTH_AMERICA_JOURNEY: Journey = {
   id: "north-america-v2",
   title: "North America by name",
@@ -69,7 +61,9 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
     "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
   rounds: (
     [
-      {
+      defineQuestion({
+        commitment: "submit",
+
         ...base,
         id: "canada-three-territories",
         label: "Territories",
@@ -84,7 +78,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         contextIds: CANADIAN_TERRITORIES,
         map: {
           borders: true,
-          hover: false,
+          hoverFeedback: false,
           muteOthers: true,
           revealOnAnswer: true,
         },
@@ -97,8 +91,11 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           url: "https://www.canada.ca/en/intergovernmental-affairs/services/provinces-territories.html",
           reviewedOn: "2026-10-05",
         },
-      },
-      {
+      }),
+      defineQuestion({
+        count: 1,
+        commitment: "submit",
+
         qualification: "Province boundaries are simplified from Natural Earth.",
         ...base,
         id: "canada-south-of-boston",
@@ -118,7 +115,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         contextIds: provinces.map((r) => r.id),
         map: {
           borders: true,
-          hover: false,
+          hoverFeedback: false,
           muteOthers: true,
           revealOnAnswer: true,
         },
@@ -138,8 +135,10 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
             reviewedOn: "2026-10-05",
           },
         ],
-      },
-      {
+      }),
+      defineQuestion({
+        commitment: "submit",
+
         ...base,
         id: "state-bordering-mexico",
         label: "Southern border",
@@ -154,7 +153,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         importedRegions: US_STATES,
         map: {
           borders: false,
-          hover: false,
+          hoverFeedback: false,
           muteOthers: true,
           revealOnAnswer: true,
         },
@@ -166,8 +165,12 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           url: "https://www.cbp.gov/sites/default/files/2025-07/250728%20AMO%20Southwest%20Region_0.pdf",
           reviewedOn: "2026-10-05",
         },
-      },
-      {
+      }),
+      defineQuestion({
+        count: 1,
+        selection: { type: "none" },
+        commitment: "submit",
+
         qualification:
           "Routes use Natural Earth state boundaries. The result describes geography, not a driving itinerary.",
         ...base,
@@ -189,15 +192,18 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         importedRegions: US_STATES,
         map: {
           borders: false,
-          hover: false,
+          hoverFeedback: false,
           muteOthers: true,
           revealOnAnswer: true,
         },
         focus: { lat: 37, lng: -104, altitude: 0.85 },
         explanation:
           "Only shared land borders count; states meeting at a single point are not neighbors.",
-      },
-      {
+      }),
+      defineQuestion({
+        mode: "map-multiple",
+        commitment: "submit",
+
         ...base,
         id: "five-cardinal-states",
         label: "Directions",
@@ -212,7 +218,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         focus: { lat: 39, lng: -97, altitude: 0.9 },
         explanation:
           "North Carolina, South Carolina, North Dakota, South Dakota, and West Virginia. No U.S. state has East in its name.",
-      },
+      }),
     ] as Question[]
   ).map((question, index) => ({
     ...question,
