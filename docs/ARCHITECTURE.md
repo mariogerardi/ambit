@@ -111,8 +111,8 @@ Idle motion and Fidget share playback state. Home, Explore and the Study overvie
 continue from the globe's live orientation with rotation enabled; returning from
 a close view zooms out smoothly. Explore clears its prior selection on mode entry,
 and neither Explore nor Study stores/restores a mode-specific camera position.
-Explicit default views still apply at Home startup, not Explore startup. Camera
-flights fit their destination against the live viewport while panels move.
+Legacy saved camera defaults are no longer applied. Globe display preferences
+are saved separately and do not move the camera. Camera flights fit their destination against the live viewport while panels move.
 Overview flights recalculate their world framing as the viewport settles; hidden
 mobile pages retain the normal map frame instead of a full-screen fitting area.
 Fidget restores prior playback and
@@ -134,9 +134,18 @@ but geography and WebGL errors remain visible.
 
 Account access lives beside the menu in the header, opening profile, stats, and
 friends. The menu groups Home, Journey, Explore, and Study above feedback, admin,
-credits, and theme settings. Its heading is simply “Ambit”. Explore keeps a persistent
-search field and settings cog together; globe settings open in a viewport-bounded
-popover outside the panel, so opening them does not change the globe frame.
+credits, and theme settings. Its heading is simply “Ambit”. Explore opens search
+through the underlined introduction link. Selected-country
+details keep the input out of their layout; “Search another country” opens a
+floating search box without clearing or reframing the current selection. A shared
+cog beside the globe motion controls opens display settings in Home, Explore and
+the Study overview. Preferences save automatically in `wurl.globe-layers.v1`;
+legacy display choices migrate without restoring a camera. On mobile, rotation
+speed is also in this popup so the control strip stays compact. Settings and floating
+search use opaque theme surfaces. Country actions form a compact toolbar above
+the subdivision toggle; changing countries clears the prior regional branch and
+selection, including entry from Home. Quiz display
+hints remain governed by question disclosure and Study session settings.
 Leaving a Study builder skips the outgoing panel copy, which would otherwise
 remount the editor as the Study overview during the exit animation.
 

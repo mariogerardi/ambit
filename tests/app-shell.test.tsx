@@ -45,7 +45,7 @@ import { EIGHTH_JOURNEY } from "../src/game/eighthJourney";
 import { SEVENTH_JOURNEY } from "../src/game/seventhJourney";
 import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
 import { DAILY_KEY, openDaily } from "../src/app/dailyProgress";
-import { DEFAULT_VIEW_KEY, DEFAULT_LAYERS } from "../src/app/worldPreferences";
+import { GLOBE_LAYERS_KEY, DEFAULT_LAYERS } from "../src/app/worldPreferences";
 import { MOBILE_LAYOUT_QUERY } from "../src/app/useMobileLayout";
 import { STUDY_PATHS } from "../src/study/paths";
 interface GlobeProps {
@@ -1236,7 +1236,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Globe settings");
     const borderToggle = [
-      ...document.querySelectorAll<HTMLLabelElement>(".explore-controls label"),
+      ...document.querySelectorAll<HTMLLabelElement>(
+        ".explore-settings-popover label",
+      ),
     ]
       .find((label) => label.textContent?.trim() === "Country borders")!
       .querySelector<HTMLInputElement>("input")!;
@@ -1246,7 +1248,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     const panel = host.querySelector(".mode-incoming .explore-card")!;
     expect(panel.querySelector("h1")?.textContent).toBe("Brazil");
     expect(panel.querySelector(".explore-controls")).toBeNull();
-    expect(panel.querySelector(".explore-search-field")).not.toBeNull();
+    expect(panel.querySelector(".explore-search-field")).toBeNull();
     expect(panel.querySelector(".explore-heading .detail-flag")).not.toBeNull();
     expect(panel.textContent).not.toContain("YOUR CURRENT PLACE");
     const toggle = panel.querySelector<HTMLInputElement>(
@@ -1535,7 +1537,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.textContent).toContain("Tokyo");
     expect(probe.focus).toHaveLength(before + 2);
     expect(probe.focus.at(-1)).toEqual(member("wurl:JPN").focus);
-    await click("◎ Zoom to country");
+    await click("Zoom to country");
     expect(probe.focus.length).toBe(before + 3);
     await click("Home");
     const onHome = probe.focus.length;
@@ -1588,7 +1590,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         ),
     ).toHaveLength(1);
   });
-  it("uses a saved default only at startup while overview navigation keeps the live orientation", async () => {
+  it("shares display settings while overview navigation keeps the live orientation", async () => {
     await mount();
     await click("Admin");
     await click("Home");
@@ -1598,7 +1600,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     const saved = { lat: 40, lng: -75, altitude: 0.45 };
     probe.currentView = saved;
     await click("Globe settings");
-    await click("Make this my default view");
+    const borders = document.querySelector<HTMLInputElement>(
+      ".explore-settings-popover input",
+    )!;
+    await act(async () => borders.click());
     await click("Home");
     expect(probe.currentView).toMatchObject({ lat: saved.lat, lng: saved.lng });
     expect(probe.currentView.altitude).toBeGreaterThan(0.45);
@@ -1614,24 +1619,25 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Play");
     expect(probe.focus.at(-1)).not.toEqual(saved);
     expect(
-      JSON.parse(localStorage.getItem("wurl.default-view.v1")!).focus,
-    ).toEqual(saved);
+      JSON.parse(localStorage.getItem(GLOBE_LAYERS_KEY)!),
+    ).not.toHaveProperty("focus");
     expect(probe.mounts).toBe(1);
   });
-  it("uses the persisted default on initial load and fully resets it", async () => {
+  it("ignores legacy saved cameras and removes default-view actions", async () => {
     const saved = { lat: -25, lng: 130, altitude: 0.55 };
     localStorage.setItem(
       "wurl.default-view.v1",
       JSON.stringify({ version: 1, focus: saved }),
     );
     await mount();
-    expect(probe.props!.initialFocus).toEqual(saved);
+    expect(probe.props!.initialFocus).not.toEqual(saved);
     await click("Explore");
     await click("Globe settings");
-    await click("Reset default view");
+    expect(
+      document.querySelector(".explore-settings-popover")!.textContent,
+    ).not.toContain("default view");
     await click("Home");
     expect(probe.focus.at(-1)).not.toEqual(saved);
-    expect(localStorage.getItem("wurl.default-view.v1")).toBeNull();
     await click("Admin");
     expect(probe.focus.at(-1)).not.toEqual(saved);
   });
@@ -1652,9 +1658,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         .querySelector("input")!;
       await act(async () => input.click());
     }
-    await click("Make this my default view");
-    const saved = JSON.parse(localStorage.getItem(DEFAULT_VIEW_KEY)!);
-    expect(saved.layers).toEqual({
+    const saved = JSON.parse(localStorage.getItem(GLOBE_LAYERS_KEY)!);
+    expect(saved).toEqual({
       ...DEFAULT_LAYERS,
       borders: false,
       names: false,
@@ -1693,26 +1698,21 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Explore");
     expectLayers();
     await click("Globe settings");
-    await click("Reset default view");
-    await click("Home");
-    expect(probe.props!.places).toEqual([]);
-    expect(probe.props!.physicalFeatures).toBeUndefined();
+    expect(
+      document.querySelector(".explore-settings-popover")!.textContent,
+    ).not.toContain("default view");
   });
-  it("updates defaults saved in another open tab without replacing the globe", async () => {
+  it("updates display settings from another tab without replacing or reframing the globe", async () => {
     await mount();
-    const focus = { lat: 20, lng: 140, altitude: 2 };
+    const flights = probe.focus.length;
     localStorage.setItem(
-      DEFAULT_VIEW_KEY,
-      JSON.stringify({
-        version: 1,
-        focus,
-        layers: { ...DEFAULT_LAYERS, rivers: true },
-      }),
+      GLOBE_LAYERS_KEY,
+      JSON.stringify({ ...DEFAULT_LAYERS, rivers: true }),
     );
     await act(async () =>
-      dispatchEvent(new StorageEvent("storage", { key: DEFAULT_VIEW_KEY })),
+      dispatchEvent(new StorageEvent("storage", { key: GLOBE_LAYERS_KEY })),
     );
-    expect(probe.focus.at(-1)).toEqual(focus);
+    expect(probe.focus).toHaveLength(flights);
     expect(probe.props!.places.some((p) => p.kind === "capital")).toBe(true);
     expect(probe.props!.physicalFeatures!.some((f) => f.kind === "river")).toBe(
       true,
@@ -1751,18 +1751,46 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Home");
     expect(probe.props!.regions).toHaveLength(242);
   });
+  it("clears subdivisions when changing countries, including returning from Home, and ignores stale region taps", async () => {
+    await mount();
+    await click("Explore");
+    await act(async () => probe.props!.onSelect(member("wurl:CAN")));
+    const toggle = host.querySelector<HTMLInputElement>(
+      ".regional-toggle input",
+    )!;
+    await act(async () => toggle.click());
+    const ontario = probe.props!.regions.find((r) => r.id === "wurl:CAN-ON")!;
+    await act(async () => probe.props!.onSelect(ontario));
+    expect(host.querySelector(".region-detail")?.textContent).toContain(
+      "Ontario",
+    );
+    await act(async () => probe.props!.onSelect(member("wurl:RUS")));
+    expect(host.querySelector(".explore-heading h1")?.textContent).toBe(
+      "Russia",
+    );
+    expect(host.querySelector(".region-detail")).toBeNull();
+    expect(probe.props!.states["wurl:RUS"]).toBe("selected");
+    expect(
+      host.querySelector<HTMLInputElement>(".regional-toggle input")?.checked,
+    ).toBe(false);
+    await act(async () => probe.props!.onSelect(ontario));
+    expect(host.querySelector(".explore-heading h1")?.textContent).toBe(
+      "Russia",
+    );
+    await click("Home");
+    await act(async () => probe.props!.onSurfaceTap?.(member("wurl:UZB")));
+    expect(host.querySelector(".explore-heading h1")?.textContent).toBe(
+      "Uzbekistan",
+    );
+    expect(host.querySelector(".region-detail")).toBeNull();
+    expect(probe.props!.states["wurl:UZB"]).toBe("selected");
+  });
   it("frames small Explore countries from search and can refocus the same selection", async () => {
     await mount();
     await click("Explore");
     expect(document.querySelector(".explore-search-popup")).toBeNull();
-    expect(host.querySelector(".explore-search-field")).not.toBeNull();
-    await act(async () =>
-      host
-        .querySelector<HTMLInputElement>(
-          ".mode-incoming .explore-search-field input",
-        )!
-        .focus(),
-    );
+    expect(host.querySelector(".explore-search-field")).toBeNull();
+    await click("Search countries");
     const input = host.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -1776,28 +1804,35 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     });
     await click("Andorra");
     expect(document.querySelector(".explore-search-popup")).toBeNull();
-    expect(host.querySelector(".explore-search-field")).not.toBeNull();
+    expect(host.querySelector(".explore-search-field")).toBeNull();
     expect(document.activeElement).toBe(
-      host.querySelector(".mode-incoming .explore-search-field input"),
+      host.querySelector(".mode-incoming .explore-country-search-trigger"),
     );
     expect(probe.focus.at(-1)).toEqual(member("wurl:AND").focus);
     expect(probe.focus.at(-1)!.altitude).toBeLessThan(0.1);
     const count = probe.focus.length;
+    await click("Search another country");
+    expect(
+      document.querySelector('.explore-country-search[role="dialog"]'),
+    ).not.toBeNull();
+    expect(host.querySelector(".explore-search-field")).toBeNull();
+    expect(host.querySelector(".country-facts")?.textContent).toContain(
+      "Andorra",
+    );
+    expect(probe.focus).toHaveLength(count);
+    await act(async () =>
+      dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })),
+    );
+    expect(document.querySelector(".explore-country-search")).toBeNull();
     await act(async () => probe.props!.onSelect(member("wurl:AND")));
     expect(probe.focus).toHaveLength(count + 1);
     expect(probe.focus.at(-1)).toEqual(member("wurl:AND").focus);
   });
-  it("clears Explore search with Escape or Clear and restores focus without replacing Earth", async () => {
+  it("dismisses Explore search with Escape or Close and restores focus without replacing Earth", async () => {
     await mount();
     await click("Explore");
     const earth = host.querySelector("canvas");
-    await act(async () =>
-      host
-        .querySelector<HTMLInputElement>(
-          ".mode-incoming .explore-search-field input",
-        )!
-        .focus(),
-    );
+    await click("Search countries");
     const input = host.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -1806,21 +1841,15 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
       );
     });
-    expect(host.querySelector(".explore-search-field")).not.toBeNull();
+    expect(host.querySelector(".explore-search-field")).toBeNull();
     expect(document.activeElement).toBe(
-      host.querySelector(".mode-incoming .explore-search-field input"),
+      host.querySelector(".mode-incoming .explore-search-link"),
     );
-    await act(async () =>
-      host
-        .querySelector<HTMLInputElement>(
-          ".mode-incoming .explore-search-field input",
-        )!
-        .focus(),
-    );
-    await click("Clear search");
-    expect(host.querySelector(".explore-search-field")).not.toBeNull();
+    await click("Search countries");
+    await click("Close search");
+    expect(host.querySelector(".explore-search-field")).toBeNull();
     expect(document.activeElement).toBe(
-      host.querySelector(".mode-incoming .explore-search-field input"),
+      host.querySelector(".mode-incoming .explore-search-link"),
     );
     expect(host.querySelector("canvas")).toBe(earth);
     expect(probe.mounts).toBe(1);
@@ -2537,29 +2566,39 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector(".app-menu-content")).toBeNull();
     expect(host.querySelector("canvas")).toBe(canvas);
   });
-  it("adjusts rotation speed without restarting rotation and offers a temporary Fidget alongside it", async () => {
-    await mount();
-    expect(host.querySelector(".home-menu > .overline")).toBeNull();
-    expect(probe.props!.rotationSpeed).toBe(1);
-    await act(async () => probe.props!.onInteraction());
-    const canvas = host.querySelector("canvas");
-    const speed = host.querySelector<HTMLSelectElement>(
-      ".globe-controls select",
-    )!;
-    await act(async () => {
-      speed.value = "8";
-      speed.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    expect(probe.props!.rotationSpeed).toBe(8);
-    expect(probe.props!.motion).toBe(false);
-    await click("Fidget");
-    expect(probe.fidgets).toBeGreaterThan(0);
-    expect(host.querySelector("canvas")).toBe(canvas);
-    await click("Rotate Earth");
-    expect(probe.props!.motion).toBe(true);
-    await click("Explore");
-    expect(probe.props!.rotationSpeed).toBe(8);
-  });
+  it.each([false, true])(
+    "adjusts rotation speed without restarting rotation (mobile: %s)",
+    async (mobile) => {
+      vi.stubGlobal("matchMedia", (query: string) => ({
+        matches: mobile && query === MOBILE_LAYOUT_QUERY,
+        addEventListener() {},
+        removeEventListener() {},
+      }));
+      await mount();
+      expect(host.querySelector(".home-menu > .overline")).toBeNull();
+      expect(probe.props!.rotationSpeed).toBe(1);
+      await act(async () => probe.props!.onInteraction());
+      const canvas = host.querySelector("canvas");
+      if (mobile) await click("Globe settings");
+      const speed = document.querySelector<HTMLSelectElement>(
+        'select[aria-label="Rotation speed"]',
+      )!;
+      await act(async () => {
+        speed.value = "8";
+        speed.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(probe.props!.rotationSpeed).toBe(8);
+      expect(probe.props!.motion).toBe(false);
+      if (mobile) await click("Close globe settings");
+      await click("Fidget");
+      expect(probe.fidgets).toBeGreaterThan(0);
+      expect(host.querySelector("canvas")).toBe(canvas);
+      await click("Rotate Earth");
+      expect(probe.props!.motion).toBe(true);
+      await click("Explore");
+      expect(probe.props!.rotationSpeed).toBe(8);
+    },
+  );
   it("lets Island instincts use either country taps or six immediate choices without making the clue answerable", async () => {
     history.replaceState(null, "", "/journey/island-instincts");
     await mount();

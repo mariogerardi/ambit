@@ -756,6 +756,12 @@
     min-height: 44px;
     font-size: 13px;
   }
+  .experience .study-path button.study-path-customize {
+    min-height: 44px;
+  }
+  .experience button.explore-search-link {
+    min-height: 0;
+  }
   .experience .study-preferences .display-settings legend {
     font-size: 16px;
   }

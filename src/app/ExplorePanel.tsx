@@ -17,16 +17,12 @@ import { OFFICIAL_LANGUAGES, LANGUAGES } from "../game/quizData";
 import { PanelActive } from "./ModePanels";
 import { InfoTooltip } from "./InfoTooltip";
 import { normalizeAnswer, countryIdForName } from "../game/questions";
-import { SettingsIcon } from "./SettingsIcon";
 export type { GlobeLayers as ExploreSettings } from "./worldPreferences";
-import type { GlobeLayers as ExploreSettings } from "./worldPreferences";
 export function ExplorePanel({
   regions,
   selected,
   selectedRegion,
-  settings,
   onSelect,
-  onSettings,
   onFocus,
   search,
   onSearch,
@@ -34,9 +30,6 @@ export function ExplorePanel({
   onBreakdown,
   regionalStatus,
   regionalLayers = [],
-  onSaveView,
-  onResetView,
-  defaultViewStatus,
   onContentHeight,
 }: {
   onContentHeight?(height: number): void;
@@ -45,17 +38,12 @@ export function ExplorePanel({
   regions: RegionFeature[];
   selected?: string;
   selectedRegion?: RegionFeature;
-  settings: ExploreSettings;
   onSelect(id?: string): void;
-  onSettings(settings: ExploreSettings): void;
   onFocus(region: RegionFeature): void;
   breakdown?: string;
   onBreakdown(id?: string): void;
   regionalStatus: string;
   regionalLayers?: readonly { parentId: string; key: string; label: string }[];
-  onSaveView(): void;
-  onResetView(): void;
-  defaultViewStatus: string;
 }) {
   const card = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
@@ -70,11 +58,8 @@ export function ExplorePanel({
   }, [onContentHeight]);
   const active = useContext(PanelActive),
     input = useRef<HTMLInputElement>(null),
-    settingsButton = useRef<HTMLButtonElement>(null),
-    settingsPanel = useRef<HTMLDivElement>(null),
+    searchButton = useRef<HTMLButtonElement>(null),
     restoreSearchFocus = useRef(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  useEffect(() => setSettingsOpen(false), [selected, active]);
   const [anchor, setAnchor] = useState({
       left: 0,
       top: 0,
@@ -95,7 +80,7 @@ export function ExplorePanel({
   useEffect(() => {
     if (!open && active && restoreSearchFocus.current) {
       restoreSearchFocus.current = false;
-      input.current?.focus();
+      searchButton.current?.focus();
     }
   }, [open, active, selected]);
   useEffect(() => {
@@ -171,18 +156,33 @@ export function ExplorePanel({
   }, [search, active, open]);
   useEffect(() => {
     if (!open) return;
-    const dismiss = (e: PointerEvent) => {
+    const dismiss = (e: Event) => {
       if (
         !(e.target as Element)?.closest?.(
-          ".explore-search-popup, .explore-search-field, .explore-search-toggle",
+          ".explore-search-popup, .explore-country-search, .explore-search-field, .explore-search-link, .explore-country-search-trigger",
         )
       )
         closeSearch();
     };
     addEventListener("pointerdown", dismiss);
-    return () => removeEventListener("pointerdown", dismiss);
+    addEventListener("focusin", dismiss);
+    return () => {
+      removeEventListener("pointerdown", dismiss);
+      removeEventListener("focusin", dismiss);
+    };
   }, [open, closeSearch]);
-  const searchField = (
+  useEffect(() => {
+    if (!open || !active) return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSearch(true);
+      }
+    };
+    addEventListener("keydown", escape);
+    return () => removeEventListener("keydown", escape);
+  }, [open, active, closeSearch]);
+  const searchField = open && (
     <div id="explore-search" className="explore-search-field">
       <label className="field">
         <span className="sr-only">Find a country</span>
@@ -198,7 +198,6 @@ export function ExplorePanel({
           aria-controls="explore-search-results"
           onFocus={() => {
             setOpen(true);
-            setSettingsOpen(false);
           }}
           onChange={(event) => {
             setOpen(true);
@@ -208,8 +207,8 @@ export function ExplorePanel({
       </label>
       <button
         className="explore-search-close"
-        aria-label="Clear search"
-        title="Clear search"
+        aria-label="Close search"
+        title="Close search"
         onClick={() => closeSearch(true)}
       >
         <svg
@@ -225,205 +224,11 @@ export function ExplorePanel({
       </button>
     </div>
   );
-  const tools = (
-    <div className="explore-toolbar">
-      {searchField}
-      <button
-        ref={settingsButton}
-        className="settings-button"
-        aria-label="Globe settings"
-        title="Globe settings"
-        aria-expanded={settingsOpen && active}
-        aria-controls="explore-settings"
-        onClick={() => {
-          closeSearch();
-          setSettingsOpen((value) => !value);
-        }}
-      >
-        <SettingsIcon />
-      </button>
-    </div>
-  );
-  const [settingsAnchor, setSettingsAnchor] = useState({
-    left: 12,
-    top: 12,
-    width: 320,
-    maxHeight: 540,
-    transform: "none",
-  });
-  useLayoutEffect(() => {
-    if (!settingsOpen || !active) return;
-    const position = () => {
-      const bounds = settingsButton.current?.getBoundingClientRect();
-      if (!bounds) return;
-      const visual = window.visualViewport;
-      const viewportTop = visual?.offsetTop ?? 0;
-      const viewportLeft = visual?.offsetLeft ?? 0;
-      const width = Math.min(360, (visual?.width ?? innerWidth) - 24);
-      const bottom = viewportTop + (visual?.height ?? innerHeight);
-      const upperAnchor = Math.min(bounds.top - 8, bottom - 12);
-      const lowerAnchor = Math.max(bounds.bottom + 8, viewportTop + 12);
-      const below = bottom - lowerAnchor - 12;
-      const above = upperAnchor - viewportTop - 12;
-      const flip = below < 300 && above > below;
-      const maxHeight = Math.max(100, Math.min(540, flip ? above : below));
-      setSettingsAnchor({
-        left: Math.max(
-          viewportLeft + 12,
-          Math.min(
-            bounds.right - width,
-            viewportLeft + (visual?.width ?? innerWidth) - width - 12,
-          ),
-        ),
-        top: flip ? upperAnchor : lowerAnchor,
-        width,
-        maxHeight,
-        transform: flip ? "translateY(-100%)" : "none",
-      });
-    };
-    position();
-    addEventListener("resize", position);
-    addEventListener("scroll", position, true);
-    window.visualViewport?.addEventListener("resize", position);
-    window.visualViewport?.addEventListener("scroll", position);
-    const timer = setTimeout(position, 230);
-    return () => {
-      clearTimeout(timer);
-      removeEventListener("resize", position);
-      removeEventListener("scroll", position, true);
-      window.visualViewport?.removeEventListener("resize", position);
-      window.visualViewport?.removeEventListener("scroll", position);
-    };
-  }, [settingsOpen, active]);
-  useEffect(() => {
-    if (!settingsOpen || !active) return;
-    settingsPanel.current?.querySelector<HTMLInputElement>("input")?.focus();
-    const dismiss = (event: Event) => {
-      if (
-        !settingsPanel.current?.contains(event.target as Node) &&
-        !settingsButton.current?.contains(event.target as Node)
-      )
-        setSettingsOpen(false);
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      setSettingsOpen(false);
-      settingsButton.current?.focus();
-    };
-    addEventListener("pointerdown", dismiss);
-    addEventListener("focusin", dismiss);
-    addEventListener("keydown", escape);
-    return () => {
-      removeEventListener("pointerdown", dismiss);
-      removeEventListener("focusin", dismiss);
-      removeEventListener("keydown", escape);
-    };
-  }, [settingsOpen, active]);
-  const settingsControls =
-    settingsOpen &&
-    active &&
-    createPortal(
-      <div
-        id="explore-settings"
-        ref={settingsPanel}
-        className="explore-controls explore-settings-popover"
-        role="dialog"
-        style={settingsAnchor}
-        aria-label="Globe settings"
-      >
-        <div className="explore-settings-heading">
-          <h2>Globe settings</h2>
-          <button
-            aria-label="Close globe settings"
-            onClick={() => {
-              setSettingsOpen(false);
-              settingsButton.current?.focus();
-            }}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="m6 6 12 12M18 6 6 18" />
-            </svg>
-          </button>
-        </div>
-        <fieldset className="display-settings">
-          <legend>On your globe</legend>
-          {(
-            [
-              "borders",
-              "names",
-              "capitals",
-              "cities",
-              "rivers",
-              "mountains",
-              "landforms",
-              "oceans",
-            ] as const
-          ).map((key) => (
-            <label key={key}>
-              <input
-                type="checkbox"
-                checked={settings[key]}
-                onChange={(e) =>
-                  onSettings({ ...settings, [key]: e.target.checked })
-                }
-              />
-              {
-                {
-                  borders: "Country borders",
-                  names: "Country names",
-                  capitals: "Capital markers & names",
-                  cities: "Major cities",
-                  rivers: "Rivers",
-                  mountains: "Mountain ranges",
-                  landforms: "Deserts & other landforms",
-                  oceans: "Ocean & sea names",
-                }[key]
-              }
-            </label>
-          ))}
-        </fieldset>
-        <div className="explore-default-view">
-          <button className="quiet-button tertiary-action" onClick={onSaveView}>
-            Make this my default view
-          </button>
-          <button
-            className="quiet-button tertiary-action"
-            onClick={onResetView}
-          >
-            Reset default view
-          </button>
-          {defaultViewStatus && (
-            <small role="status">{defaultViewStatus}</small>
-          )}
-        </div>
-      </div>,
-      document.body,
-    );
   return (
     <section
       ref={card}
       className="info-view explore-card"
       aria-label="Countries and capitals explorer"
-      onKeyDown={(event) => {
-        if (open && event.key === "Escape") {
-          event.preventDefault();
-          closeSearch(true);
-        } else if (settingsOpen && event.key === "Escape") {
-          event.preventDefault();
-          setSettingsOpen(false);
-          settingsButton.current?.focus();
-        }
-      }}
     >
       <header className="explore-heading">
         <div className="explore-title">
@@ -453,12 +258,34 @@ export function ExplorePanel({
       {!country && (
         <>
           <p className="muted explore-introduction">
-            Tap a country to see its flag, capital, and more. Or search by name.
+            Tap a country to see its flag, capital, and more.{" "}
+            <button
+              ref={searchButton}
+              className="explore-search-link"
+              aria-label="Search countries"
+              aria-expanded={open}
+              aria-controls="explore-search"
+              onClick={() => setOpen((value) => !value)}
+            >
+              Or search by name.
+            </button>
           </p>
         </>
       )}
-      {tools}
-      {settingsControls}
+      {!country && searchField}
+      {country &&
+        open &&
+        active &&
+        createPortal(
+          <div
+            className="explore-country-search"
+            role="dialog"
+            aria-label="Search countries"
+          >
+            {searchField}
+          </div>,
+          document.body,
+        )}
       {!!search.trim() &&
         open &&
         active &&
@@ -554,33 +381,54 @@ export function ExplorePanel({
               </>
             )}
           </dl>
-          <div className="inline-actions explore-country-actions">
-            <button
-              className="quiet-button tertiary-action"
-              disabled={!region}
-              onClick={() => region && onFocus(region)}
+          <div className="explore-country-tools">
+            <div
+              className="inline-actions explore-country-actions"
+              role="group"
+              aria-label="Country actions"
             >
-              ◎ Zoom to country
-            </button>
-            <button
-              className="quiet-button tertiary-action"
-              onClick={() => onSelect()}
-            >
-              Clear selection
-            </button>
+              <button
+                className="quiet-button explore-tool-button"
+                aria-label="Zoom to country"
+                title="Zoom to country"
+                disabled={!region}
+                onClick={() => region && onFocus(region)}
+              >
+                ◎ Zoom
+              </button>
+              <button
+                ref={searchButton}
+                className="quiet-button explore-tool-button explore-country-search-trigger"
+                aria-label="Search another country"
+                title="Search another country"
+                aria-expanded={open}
+                aria-controls="explore-search"
+                onClick={() => setOpen(true)}
+              >
+                Search
+              </button>
+              <button
+                className="quiet-button explore-tool-button explore-clear-selection"
+                aria-label="Clear selection"
+                title="Clear selection"
+                onClick={() => onSelect()}
+              >
+                Clear
+              </button>
+            </div>
+            {layer && (
+              <label className="regional-toggle">
+                <input
+                  type="checkbox"
+                  checked={!!breakdown}
+                  onChange={(e) =>
+                    onBreakdown(e.target.checked ? selected : undefined)
+                  }
+                />
+                {layer.label}
+              </label>
+            )}
           </div>
-          {layer && (
-            <label className="regional-toggle">
-              <input
-                type="checkbox"
-                checked={!!breakdown}
-                onChange={(e) =>
-                  onBreakdown(e.target.checked ? selected : undefined)
-                }
-              />
-              {layer.label}
-            </label>
-          )}
           {selectedRegion && (
             <div className="region-detail">
               <div className="overline">

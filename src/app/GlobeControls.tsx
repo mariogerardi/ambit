@@ -1,3 +1,6 @@
+import { GlobeDisplaySettings } from "./GlobeDisplaySettings";
+import type { GlobeLayers } from "./worldPreferences";
+
 export function GlobeControls({
   compact = false,
   motion,
@@ -7,6 +10,9 @@ export function GlobeControls({
   onToggle,
   onSpeed,
   onFidget,
+  layers,
+  onLayers,
+  scope,
 }: {
   compact?: boolean;
   motion: boolean;
@@ -16,6 +22,9 @@ export function GlobeControls({
   onToggle(): void;
   onSpeed(speed: number): void;
   onFidget(): void;
+  layers: GlobeLayers;
+  onLayers(layers: GlobeLayers): void;
+  scope: string;
 }) {
   const rotationLabel = reduced
     ? "Rotation disabled by reduced motion preference"
@@ -44,34 +53,36 @@ export function GlobeControls({
             )}
           </svg>
         </button>
-        <label
-          className="globe-speed"
-          title={compact ? undefined : `Rotation speed: ${speed}×`}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
+        {!compact && (
+          <label
+            className="globe-speed"
+            title={compact ? undefined : `Rotation speed: ${speed}×`}
           >
-            <path d="M4 18a9 9 0 1 1 16 0M12 12l4-4" />
-            <circle cx="12" cy="12" r="1.5" />
-          </svg>
-          <select
-            aria-label="Rotation speed"
-            value={speed}
-            disabled={reduced || !ready}
-            onChange={(event) => onSpeed(Number(event.target.value))}
-          >
-            {[0.25, 0.5, 1, 2, 4, 8].map((value) => (
-              <option key={value} value={value}>
-                {value}×
-              </option>
-            ))}
-          </select>
-        </label>
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            >
+              <path d="M4 18a9 9 0 1 1 16 0M12 12l4-4" />
+              <circle cx="12" cy="12" r="1.5" />
+            </svg>
+            <select
+              aria-label="Rotation speed"
+              value={speed}
+              disabled={reduced || !ready}
+              onChange={(event) => onSpeed(Number(event.target.value))}
+            >
+              {[0.25, 0.5, 1, 2, 4, 8].map((value) => (
+                <option key={value} value={value}>
+                  {value}×
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
       <span className="globe-motion-divider" aria-hidden="true" />
       <button
@@ -92,6 +103,14 @@ export function GlobeControls({
           <path d="M12 3 21 12 12 21 3 12Z" />
         </svg>
       </button>
+      <GlobeDisplaySettings
+        settings={layers}
+        onSettings={onLayers}
+        scope={scope}
+        speed={compact ? speed : undefined}
+        onSpeed={onSpeed}
+        motionDisabled={reduced || !ready}
+      />
     </div>
   );
 }

@@ -260,7 +260,8 @@ describe("product copy follows the answer and visible reveal", () => {
     const finished = renderToStaticMarkup(
       <GameShell {...props} game={{ ...game, phase: "finished" }} />,
     );
-    expect(finished).toContain("JOURNEY COMPLETE");
+    expect(finished).not.toContain("JOURNEY COMPLETE");
+    expect(finished).toContain("Look how far");
     expect(finished).not.toContain(JOURNEY.description);
   });
   it.each(["typing", "choices", "map"] as const)(
@@ -368,7 +369,8 @@ describe("product copy follows the answer and visible reveal", () => {
       "Choose a path, or build a session of your own.",
     );
     expect(setup).toContain("African capitals");
-    expect(setup).toContain("Worldwide");
+    expect(setup).toContain("Recognize the flags of countries worldwide.");
+    expect(setup).not.toContain("Tap globe · 10 questions");
     expect(setup).not.toContain("your pool");
   });
   it("accepts Türkiye and Turkey while displaying Türkiye", () => {

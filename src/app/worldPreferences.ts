@@ -19,6 +19,31 @@ export const DEFAULT_LAYERS: GlobeLayers = {
   landforms: false,
   oceans: false,
 };
+export const HOME_LAYERS: GlobeLayers = {
+  ...DEFAULT_LAYERS,
+  names: false,
+  capitals: false,
+  cities: false,
+};
+export const GLOBE_LAYERS_KEY = "wurl.globe-layers.v1";
+export function readGlobeLayers(): GlobeLayers | undefined {
+  try {
+    const value = JSON.parse(localStorage.getItem(GLOBE_LAYERS_KEY) ?? "null");
+    if (validLayers(value)) return { ...DEFAULT_LAYERS, ...value };
+    // Keep previously chosen display hints, without restoring a saved camera.
+    return readDefaultPreferences()?.layers;
+  } catch {
+    return undefined;
+  }
+}
+export function saveGlobeLayers(layers: GlobeLayers): boolean {
+  try {
+    localStorage.setItem(GLOBE_LAYERS_KEY, JSON.stringify(layers));
+    return true;
+  } catch {
+    return false;
+  }
+}
 export interface DefaultView {
   version: 1;
   focus: Focus;

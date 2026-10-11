@@ -31,9 +31,10 @@ import {
 import type { PhysicalSnapshot } from "./geography/physical";
 import {
   DEFAULT_LAYERS,
-  DEFAULT_VIEW_KEY,
-  readDefaultPreferences,
-  saveDefaultView,
+  HOME_LAYERS,
+  GLOBE_LAYERS_KEY,
+  readGlobeLayers,
+  saveGlobeLayers,
 } from "./app/worldPreferences";
 import { worldAltitude } from "./globe/camera";
 import { useAccount } from "./services/accounts";
@@ -209,20 +210,14 @@ export function App() {
     setTheme(value);
     saveTheme(value);
   };
-  const [initialDefault] = useState(readDefaultPreferences);
-  const defaultView = useRef(initialDefault?.focus);
-  const [defaultLayers, setDefaultLayers] = useState(initialDefault?.layers);
+  const [defaultLayers, setDefaultLayers] = useState(readGlobeLayers);
   const [nextDefaultView] = useState(() => {
     const cycle = createDefaultViewCycle();
-    return (altitude: number) =>
-      defaultView.current
-        ? { ...defaultView.current, altitude }
-        : cycle(altitude);
+    return (altitude: number) => cycle(altitude);
   });
   const [initialFocus] = useState(() =>
     createDefaultViewCycle()(worldAltitude(innerWidth, innerHeight)),
   );
-  const [defaultViewStatus, setDefaultViewStatus] = useState("");
   const [boundaryLoader, setBoundaryLoader] = useState<LayerLoader>();
   const [regional, setRegional] = useState<RegionalRuntime>();
   const [loaded, setLoaded] = useState<{
@@ -274,7 +269,7 @@ export function App() {
   const pendingExploreFocus = useRef<string | undefined>(undefined);
   const [exploreSearch, setExploreSearch] = useState("");
   const [explore, setExplore] = useState<ExploreSettings>(
-    initialDefault?.layers ?? DEFAULT_LAYERS,
+    defaultLayers ?? DEFAULT_LAYERS,
   );
   const unrestricted =
     mode === "home" ||
@@ -891,14 +886,17 @@ export function App() {
     (id?: string) => {
       stop();
       setExploreSearch("");
-      const regional = exploreRegions.find(
+      const subdivision = exploreRegions.find(
         (r) => r.id === id && r.level !== "ADM0",
       );
-      if (regional) {
-        setSelectedRegion(regional);
-        focusExplore(regional);
+      if (subdivision) {
+        // Ignore taps from a subdivision layer that is being replaced.
+        if (regional?.regionalRoot(subdivision.id) !== selected) return;
+        setSelectedRegion(subdivision);
+        focusExplore(subdivision);
         return;
       }
+      if (id && !namedRegions.some((region) => region.id === id)) return;
       setSelectedRegion(undefined);
       setSelected(id);
       if (id !== selected) {
@@ -908,8 +906,19 @@ export function App() {
       const region = namedRegions.find((r) => r.id === id);
       if (region) focusExplore(region);
     },
-    [stop, namedRegions, exploreRegions, selected, focusExplore],
+    [stop, namedRegions, exploreRegions, selected, focusExplore, regional],
   );
+  useEffect(() => {
+    if (
+      selectedRegion &&
+      regional?.regionalRoot(selectedRegion.id) !== selected
+    )
+      setSelectedRegion(undefined);
+    if (breakdown && regional?.regionalRoot(breakdown) !== selected) {
+      setBreakdown(undefined);
+      setBranches([]);
+    }
+  }, [selected, selectedRegion, breakdown, regional]);
   useEffect(() => {
     globe.current?.cancelFidget();
   }, [mode]);
@@ -942,18 +951,14 @@ export function App() {
   }, []);
   useEffect(() => {
     const change = (event: StorageEvent) => {
-      if (event.key !== DEFAULT_VIEW_KEY && event.key !== null) return;
-      const saved = readDefaultPreferences();
-      defaultView.current = saved?.focus;
-      setDefaultLayers(saved?.layers);
-      if (saved?.layers) setExplore(saved.layers);
-
-      if (unrestricted)
-        globe.current?.focus(saved?.focus ?? initialFocus, false);
+      if (event.key !== GLOBE_LAYERS_KEY && event.key !== null) return;
+      const layers = readGlobeLayers();
+      setDefaultLayers(layers);
+      setExplore(layers ?? DEFAULT_LAYERS);
     };
     addEventListener("storage", change);
     return () => removeEventListener("storage", change);
-  }, [unrestricted, initialFocus]);
+  }, []);
   useEffect(() => {
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => setReduced(media.matches);
@@ -1438,10 +1443,8 @@ export function App() {
         onContentHeight={mobile.enabled ? setExploreContentHeight : undefined}
         regions={namedRegions}
         selected={selected}
-        settings={explore}
         search={exploreSearch}
         onSearch={setExploreSearch}
-        onSettings={setExplore}
         onSelect={selectExplore}
         onFocus={focusExplore}
         selectedRegion={selectedRegion}
@@ -1452,29 +1455,6 @@ export function App() {
         }}
         regionalStatus={regionalStatus || physicalError}
         regionalLayers={regional?.REGIONAL_LAYERS}
-        defaultViewStatus={defaultViewStatus}
-        onSaveView={() => {
-          const view = globe.current?.view();
-          if (!view) return;
-          if (saveDefaultView(view, explore)) {
-            defaultView.current = { ...view };
-            setDefaultLayers({ ...explore });
-
-            setDefaultViewStatus(
-              "Your Home starting view and visible layers are saved.",
-            );
-          } else setDefaultViewStatus("Could not save your default view.");
-        }}
-        onResetView={() => {
-          if (!saveDefaultView()) {
-            setDefaultViewStatus("Could not reset your default view.");
-            return;
-          }
-          defaultView.current = undefined;
-          setDefaultLayers(undefined);
-
-          setDefaultViewStatus("Default view reset.");
-        }}
       />
     ) : mode === "study" ? (
       <StudyPanel
@@ -1605,9 +1585,21 @@ export function App() {
       : studying
         ? session!.phase
         : "playing";
-  const motionControls = (mode === "home" || mode === "explore") && (
+  const motionControls = (mode === "home" ||
+    mode === "explore" ||
+    (mode === "study" &&
+      unrestricted &&
+      !studyEditorOpen &&
+      !studyCustomizing)) && (
     <GlobeControls
       compact={mobile.enabled}
+      scope={mode}
+      layers={displayLayers ?? HOME_LAYERS}
+      onLayers={(layers) => {
+        setDefaultLayers(layers);
+        setExplore(layers);
+        if (!saveGlobeLayers(layers)) reportFailure("globe settings save");
+      }}
       motion={motion}
       speed={rotationSpeed}
       reduced={reduced}
@@ -1658,11 +1650,7 @@ export function App() {
               <GlobeView
                 active={!panelOnly}
                 ref={globe}
-                initialFocus={
-                  mode === "home"
-                    ? (defaultView.current ?? initialFocus)
-                    : initialFocus
-                }
+                initialFocus={initialFocus}
                 theme="play"
                 palette={theme}
                 layout="game"
@@ -1780,6 +1768,9 @@ export function App() {
                 onSurfaceTap={
                   mode === "home"
                     ? (region) => {
+                        setSelectedRegion(undefined);
+                        setBreakdown(undefined);
+                        setBranches([]);
                         setSelected(region?.id);
                         pendingExploreFocus.current = region?.id;
                         stop();
