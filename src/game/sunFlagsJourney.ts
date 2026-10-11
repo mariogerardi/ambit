@@ -1,6 +1,11 @@
 import type { FactSource, Journey, Question } from "./questions";
 import flagCatalog from "./data/flags.v1.json";
 import { mapSource } from "./countryFacts";
+import { CAPITALS } from "./quizData";
+
+const southAmerica = CAPITALS.filter(
+  (capital) => capital.continent === "SA",
+).map((capital) => capital.countryId);
 
 const source = (name: string, url: string): FactSource => ({
   name,
@@ -57,6 +62,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
       selection: { type: "members" },
+      contextIds: southAmerica,
       map: {
         borders: true,
         hover: true,
@@ -74,8 +80,8 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         alt: "A golden sun with a human face and alternating straight and wavy rays.",
         feedbackAlt: "The Sun of May, shown here in Uruguay’s flag design",
       },
-      focus: { lat: -20, lng: -62, altitude: 1.4 },
-      feedbackFocus: { lat: -34, lng: -60, altitude: 1.1 },
+      focus: { lat: -22, lng: -62, altitude: 1.05 },
+      feedbackFocus: { lat: -34, lng: -60, altitude: 0.6 },
       explanation:
         "This shared face recalls the May Revolution of 1810. The two neighbors draw its rays differently, but carry the same Sun of May.",
       source: source(
@@ -104,9 +110,10 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "PHL",
         "Blue and red bands beside a white triangle containing a golden sun and three stars.",
       ),
-      focus: { lat: 14, lng: 122, altitude: 1.35 },
-      feedbackContextIds: ["wurl:PHL", "wurl:ESP"],
-      feedbackFocus: { lat: 30, lng: 65, altitude: 1.8 },
+      contextIds: ["wurl:PHL"],
+      focus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
+      feedbackContextIds: ["wurl:ESP"],
+      feedbackFocus: { lat: 40.28, lng: -3.66, altitude: 0.35 },
       explanation:
         "Each ray preserves the memory of a province in the uprising. Like the Sun of May, this sun carries a story of independence rather than a weather forecast.",
       source: source(
@@ -133,9 +140,11 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "KAZ",
         "A golden sun with tapered rays above a soaring bird, on a blue field with a vertical ornamental band.",
       ),
-      focus: { lat: 42, lng: 65, altitude: 1.35 },
-      feedbackContextIds: ["wurl:KAZ"],
-      feedbackFocus: { lat: 48, lng: 68, altitude: 1.1 },
+      contextIds: ["wurl:KAZ"],
+      focus: { lat: 48.36, lng: 67.24, altitude: 0.65 },
+      feedbackContextIds: [],
+      feedbackHintIds: ["wurl:KAZ"],
+      feedbackFocus: { lat: 48.36, lng: 67.24, altitude: 0.65 },
       explanation:
         "The sun represents life and abundance. Its rays connect that idea to the harvest; the eagle below stands for independence.",
       source: source(
@@ -190,9 +199,11 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "MWI",
         "Black, red, and green horizontal stripes, with a red sun rising within the black stripe.",
       ),
-      focus: { lat: -10, lng: 30, altitude: 1.3 },
-      feedbackContextIds: ["wurl:MWI"],
-      feedbackFocus: { lat: -13, lng: 34, altitude: 0.85 },
+      contextIds: ["wurl:MWI"],
+      focus: { lat: -13.19, lng: 34.27, altitude: 0.24 },
+      feedbackContextIds: [],
+      feedbackHintIds: ["wurl:MWI"],
+      feedbackFocus: { lat: -13.19, lng: 34.27, altitude: 0.24 },
       explanation:
         "This dawn looks beyond one country to a whole continent. Our route ends with the sun as a promise of a new beginning.",
       source: source(

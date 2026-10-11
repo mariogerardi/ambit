@@ -318,6 +318,8 @@ export function questionVisualStates(
   }
   const expected = solutionIds(question, context);
   if (question.map?.feedbackRegions === "neutral") return states;
+  for (const id of question.feedbackHintIds ?? [])
+    if (context.targets.has(id)) states[id] = "hinted";
   // A pin question's outlined clues stay yellow on reveal; they are not answers.
   if (question.mode === "pin")
     for (const id of question.contextIds ?? [])

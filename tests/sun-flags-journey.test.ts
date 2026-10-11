@@ -8,6 +8,7 @@ import {
   loadJourney,
 } from "../src/game/journeyRegistry";
 import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
+import { CAPITALS } from "../src/game/quizData";
 import { ORIGINAL_SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsOriginalJourney";
 import {
   dailyJourney,
@@ -39,8 +40,73 @@ describe("Chasing the sun", () => {
     expect(view.regionInteraction).toBe(true);
     expect(view.regionNames).toBe("committed");
     expect(view.namedRegionIds).toEqual([]);
-    for (const id of ["wurl:ARG", "wurl:URY", "wurl:CHL"])
-      expect(view.selectDisabled || view.states[id] !== "disabled").toBe(true);
+    const countries = CAPITALS.filter(
+      (capital) => capital.continent === "SA",
+    ).map((capital) => capital.countryId);
+    expect(countries).toHaveLength(12);
+    for (const id of countries) expect(view.states[id]).toBe("hinted");
+    expect(view.states["wurl:MEX"]).toBe("disabled");
+    expect(new Set(countries.map((id) => view.states[id])).size).toBe(1);
+  });
+  it("shows known settings, pivots the colonial reveal to Spain, and keeps the Japan pin blind", () => {
+    const prepared = (
+      roundIndex: number,
+      phase: GameState["phase"] = "playing",
+      correct = false,
+    ) =>
+      journeyWorld(
+        world,
+        SUN_FLAGS_JOURNEY,
+        {
+          ...initialGame,
+          roundIndex,
+          phase,
+          answers:
+            phase === "feedback"
+              ? [
+                  {
+                    ...initialGame,
+                    roundId: SUN_FLAGS_JOURNEY.rounds[roundIndex].id,
+                    correct,
+                  },
+                ]
+              : [],
+        },
+        context,
+      );
+    for (const [index, id] of [
+      [1, "wurl:PHL"],
+      [2, "wurl:KAZ"],
+      [4, "wurl:MWI"],
+    ] as const) {
+      expect(prepared(index).states[id]).toBe("hinted");
+      expect(prepared(index).regionNames).toBe("none");
+      expect(prepared(index).focus.lng).toBeCloseTo(
+        world.find((r) => r.id === id)!.focus.lng,
+        1,
+      );
+    }
+    for (const correct of [false, true]) {
+      const spain = prepared(1, "feedback", correct);
+      expect(spain.states["wurl:ESP"]).toBe(correct ? "correct" : "answer");
+      expect(spain.states["wurl:PHL"]).toBe("disabled");
+      expect(spain.focus.lng).toBeCloseTo(-3.66);
+      for (const [index, id] of [
+        [2, "wurl:KAZ"],
+        [4, "wurl:MWI"],
+      ] as const) {
+        expect(prepared(index, "feedback", correct).states[id]).toBe("hinted");
+        expect(
+          Object.values(prepared(index, "feedback", correct).states),
+        ).not.toContain("correct");
+      }
+    }
+    const japan = prepared(3);
+    expect(japan.showBorders).toBe(false);
+    expect(japan.states["wurl:JPN"]).toBe("disabled");
+    expect(japan.regionNames).toBe("none");
+    expect(japan.places).toEqual([]);
+    expect(japan.focus).toEqual({ lat: 25, lng: 132, altitude: 1.5 });
   });
   it("plays five distinct stops with history, observation, symbolism and geographic placement", () => {
     const answers: Action[][] = [

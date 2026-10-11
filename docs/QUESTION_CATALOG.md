@@ -194,6 +194,11 @@ include previously traveled segments in each stop's context; side reveals are
 not automatically accumulated. Use stable, distinct IDs for fixed geometry.
 `mapCaption` / `feedbackMapCaption` qualify partial or local features.
 
+`contextIds` highlights known setting geography during play. `feedbackHintIds`
+retains context-colored geography on reveal; `feedbackContextIds` identifies
+answer-colored regions. Explicitly separate these when the answer is a symbol or
+historical fact rather than the country whose flag is shown.
+
 `map.feedbackRegions: "neutral"` keeps land neutral when the answer is a city or
 physical feature; supply its answer marker separately in `feedbackPlaces`.
 `labelFlexible` allows explanatory place labels to use alternate screen anchors

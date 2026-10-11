@@ -51,6 +51,33 @@ player's question.
 - Use short step labels consistently. Avoid implying a special challenge through
   a label while silently configuring a different one.
 
+## Separate the setting from the answer
+
+For each stop, distinguish **where we are**, **what we are examining**, and
+**what the player must supply**. Do not obscure information the prompt already
+gives. A named country can be centered and context-highlighted when the task is
+about its flag, history, or symbolism; finding that country is not an additional
+hidden task. A clear setting makes the trip readable without solving the question.
+
+When the task asks players to select countries within an explicitly named region,
+show the whole candidate region consistently. Highlight all eligible countries
+with the same context treatment, not just the correct answers. Keep selected,
+correct, and incorrect states distinguishable, and verify that highlighted
+polygons remain tappable. Hiding country names can still provide the intended
+identification challenge.
+
+Conversely, a blind location question must not highlight, outline, label, or
+center the hidden target in a way that supplies its location. Show only the broad
+orientation the premise promises. Judge each question separately instead of
+inheriting a single anonymous, muted map for an entire Journey.
+
+Context is not an answer. On reveal, retain known setting geography in a context
+color when useful; reserve answer colors for the actual answer object. If the
+answer takes us to a different place, pivot the feedback camera directly there.
+Do not frame the midpoint between distant countries merely to include both:
+that can strand both subjects near the horizon. Use an intentional sequence or
+separate explanatory view when the relationship itself needs both locations.
+
 ## Make difficulty deliberate
 
 Country borders, country names, city markers, river lines, and camera placement
@@ -143,9 +170,10 @@ clearly labelled example or set on a miss.
 The map should explain the same answer as the text:
 
 - A river answer needs river context; coloring its starting country as “Correct”
-  is misleading. `contextIds` can become answer-colored on feedback for choice
-  questions. Use explicit `feedbackContextIds` (including an empty array) when
-  that inherited behavior is inappropriate.
+  is misleading. `contextIds` highlights known geography during play.
+  `feedbackContextIds` can become answer-colored on feedback; use an explicit
+  empty array when that would misrepresent the answer. `feedbackHintIds` retains
+  setting geography in its context color after submission.
 - A two-bank city story should show the river and the banks at a useful scale,
   not only a generic capital marker at continental scale.
 - A receiving-sea answer should identify the sea, not only a delta point.

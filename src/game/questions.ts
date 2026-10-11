@@ -151,6 +151,8 @@ export interface Question {
   contextIds?: string[];
   /** Feedback can reveal a different region from the highlighted clue. */
   feedbackContextIds?: string[];
+  /** Known geographic setting remains context-colored, not answer-colored. */
+  feedbackHintIds?: string[];
   sources?: FactSource[];
   map?: {
     borders: boolean;
