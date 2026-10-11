@@ -120,6 +120,7 @@ def template():
     r["Authorizer"] = resource("AWS::ApiGatewayV2::Authorizer", {"ApiId": ref("Api"), "Name": "accounts", "AuthorizerType": "JWT", "IdentitySource": ["$request.header.Authorization"], "JwtConfiguration": {"Audience": [ref("Client")], "Issuer": sub("https://cognito-idp.${AWS::Region}.amazonaws.com/${Users}")}})
     community_routes = [(name, route, True) for name, route in [
         ("ReadProfile", "GET /account/profile"), ("WriteProfile", "PATCH /account/profile"),
+        ("HandleAvailability", "GET /account/handles/{handle}"), ("FriendActivity", "GET /account/friends/activity"), ("FriendProfile", "GET /account/friends/{id}/profile"),
         ("FindPlayer", "GET /account/players/{handle}"), ("ReadFriends", "GET /account/friends"),
         ("RequestFriend", "POST /account/friends"), ("UpdateFriend", "PATCH /account/friends/{id}"),
         ("FriendJourneys", "GET /account/friends/{id}/journeys"),

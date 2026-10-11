@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { createCommunityClient } from "../services/community";
+import { CommunityError, createCommunityClient } from "../services/community";
 import { AVATARS, FLAG_AVATARS, ProfileAvatar } from "./ProfileAvatar";
 import {
   cachedProfile,
@@ -11,7 +11,6 @@ import type {
   AccountProfile,
   CommunityClient,
   Friendship,
-  JourneyScore,
   PlayerProfile,
 } from "../services/community";
 import { useAccount } from "../services/accounts";
@@ -20,7 +19,8 @@ import type { DailyProgress } from "./dailyProgress";
 import { emptyStudy } from "../study/engine";
 import type { StudySave } from "../study/engine";
 import { accountProgress } from "./accountProgress";
-import { JOURNEY_INDEX } from "../game/journeyRegistry";
+import { useHandleAvailability } from "../services/useHandleAvailability";
+import { FriendsPanel } from "./FriendsPanel";
 import "./account.css";
 
 const newProfile = (id: string): AccountProfile => ({
@@ -30,12 +30,10 @@ const newProfile = (id: string): AccountProfile => ({
   avatar: "globe",
   favoriteRegion: "",
   bio: "",
-  shareJourneyScores: false,
+  shareJourneyScores: true,
   presets: [],
   revision: 0,
 });
-const titleFor = (id: string) =>
-  JOURNEY_INDEX.find((j) => j.id === id)?.title ?? "Journey";
 function Avatar({
   player,
 }: {
@@ -85,16 +83,19 @@ export function AccountDashboard({
   const dirty = useRef(false);
   const [friends, setFriends] = useState<Friendship[]>([]);
   const [friendsError, setFriendsError] = useState("");
-  const [tab, setTab] = useState("dashboard"),
+  const [tab, setTab] = useState(() =>
+      new URLSearchParams(location.search).has("friend")
+        ? "friends"
+        : "dashboard",
+    ),
     [loading, setLoading] = useState(!initialProfile),
     [working, setWorking] = useState(false);
   const [error, setError] = useState(""),
     [notice, setNotice] = useState("");
-  const [handle, setHandle] = useState("");
   const [available, setAvailable] = useState(!!initialProfile);
-  const [comparison, setComparison] = useState<{
-    friend: Friendship;
-    scores: JourneyScore[];
+  const [handleCollision, setHandleCollision] = useState<{
+    handle: string;
+    suggestions: string[];
   }>();
   const controller = useRef<AbortController | undefined>(undefined);
   const metrics = accountProgress(daily, study);
@@ -184,7 +185,17 @@ export function AccountDashboard({
     e.preventDefault();
     void perform(
       async () => {
-        const saved = await saveProfile(draft);
+        let saved: AccountProfile;
+        try {
+          saved = await saveProfile(draft);
+        } catch (error) {
+          if (error instanceof CommunityError && error.field === "handle")
+            setHandleCollision({
+              handle: draft.handle,
+              suggestions: error.suggestions,
+            });
+          throw error;
+        }
         if (controller.current?.signal.aborted) return;
         setProfile(saved);
         setDraft(saved);
@@ -197,6 +208,18 @@ export function AccountDashboard({
     );
   };
   const disabled = working || loading || busy || !available;
+  const handleAvailability = useHandleAvailability(
+    api,
+    draft.handle,
+    profile?.handle,
+    tab === "profile" && (!profile || editingProfile) && available,
+  );
+  const takenHandle =
+    handleCollision?.handle === draft.handle
+      ? handleCollision
+      : handleAvailability?.state === "taken"
+        ? handleAvailability
+        : undefined;
   return (
     <section
       className="info-view account-dashboard"
@@ -401,6 +424,9 @@ export function AccountDashboard({
               <label className="field">
                 <span>Handle</span>
                 <input
+                  aria-label="Handle"
+                  aria-describedby="handle-help handle-availability"
+                  aria-invalid={!!takenHandle}
                   autoComplete="off"
                   autoCapitalize="none"
                   spellCheck={false}
@@ -412,10 +438,41 @@ export function AccountDashboard({
                     setDraft({ ...draft, handle: e.target.value.toLowerCase() })
                   }
                 />
-                <small>
+                <small id="handle-help">
                   3–24 letters, numbers or underscores. Friends can find you by
                   this handle.
                 </small>
+                <div
+                  id="handle-availability"
+                  className="handle-availability"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {takenHandle ? (
+                    <>
+                      <span>That handle is already in use.</span>
+                      <div className="handle-suggestions">
+                        {takenHandle.suggestions.map((suggestion) => (
+                          <button
+                            type="button"
+                            key={suggestion}
+                            onClick={() =>
+                              setDraft({ ...draft, handle: suggestion })
+                            }
+                          >
+                            @{suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : handleAvailability?.state === "checking" ? (
+                    "Checking availability…"
+                  ) : handleAvailability?.state === "available" ? (
+                    "This handle is available."
+                  ) : handleAvailability?.state === "offline" ? (
+                    "Availability couldn’t be checked. Saving will check again."
+                  ) : null}
+                </div>
               </label>
             </div>
             <fieldset className="avatar-picker">
@@ -515,205 +572,49 @@ export function AccountDashboard({
                 placeholder="What sparks your curiosity?"
               />
             </label>
-            <button className="primary-button" disabled={disabled}>
+            <button
+              className="primary-button"
+              disabled={disabled || !!takenHandle}
+            >
               Save profile
             </button>
           </form>
         ))}
       {tab === "friends" && (
-        <>
-          {friendsError && <p role="alert">{friendsError}</p>}
-          <h2>A little company for the Journey.</h2>
-          <p className="muted">
-            Send a request using your friend’s exact handle.
-          </p>
-          <form
-            className="account-inline-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void perform(
-                () =>
-                  api.request("friends", "POST", {
-                    handle: handle.trim().replace(/^@/, "").toLowerCase(),
-                  }),
-                "Friend request sent.",
-              ).then((ok) => {
-                if (ok) setHandle("");
-              });
-            }}
-          >
-            <label className="field">
-              Friend’s handle
-              <input
-                autoComplete="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                maxLength={25}
-                required
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
-                placeholder="@fellow_explorer"
-              />
-            </label>
-            <button
-              className="primary-button"
-              disabled={disabled || !profile || !handle.trim()}
-            >
-              Send request
-            </button>
-          </form>
-          {!friends.length && !friendsError && (
-            <p className="muted">
-              No friends yet. Invite someone you know to make an Ambit profile.
-            </p>
-          )}
-          <ul className="account-list friend-list">
-            {friends.map((friend) => (
-              <li key={friend.id}>
-                <Avatar
-                  player={
-                    friend.player ?? { avatar: "globe", displayName: "Player" }
-                  }
-                />
-                <div>
-                  <strong>{friend.player?.displayName ?? "Player"}</strong>
-                  <small>
-                    @{friend.player?.handle ?? "unavailable"} ·{" "}
-                    {friend.status === "accepted"
-                      ? "Friend"
-                      : friend.status === "incoming"
-                        ? "Wants to be friends"
-                        : friend.status === "outgoing"
-                          ? "Request sent"
-                          : "Blocked"}
-                  </small>
-                  {friend.player?.favoriteRegion && (
-                    <small>{friend.player.favoriteRegion}</small>
-                  )}
-                  {friend.player?.bio && (
-                    <p className="muted">{friend.player.bio}</p>
-                  )}
-                </div>
-                <div className="account-row-actions">
-                  {friend.status === "incoming" && (
-                    <>
-                      <button
-                        disabled={disabled}
-                        onClick={() => void friendAction(friend.id, "accept")}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        disabled={disabled}
-                        onClick={() => void friendAction(friend.id, "decline")}
-                      >
-                        Decline
-                      </button>
-                    </>
-                  )}
-                  {friend.status === "outgoing" && (
-                    <button
-                      disabled={disabled}
-                      onClick={() => void friendAction(friend.id, "cancel")}
-                    >
-                      Cancel request
-                    </button>
-                  )}
-                  {friend.status === "accepted" && (
-                    <>
-                      <button
-                        disabled={disabled}
-                        onClick={() =>
-                          void perform(
-                            async () => {
-                              const scores = await api.request<JourneyScore[]>(
-                                `friends/${encodeURIComponent(friend.id)}/journeys`,
-                              );
-                              setComparison({ friend, scores });
-                            },
-                            "",
-                            false,
-                          )
-                        }
-                      >
-                        Compare Journeys
-                      </button>
-
-                      <button
-                        disabled={disabled}
-                        onClick={() => void friendAction(friend.id, "remove")}
-                      >
-                        Remove
-                      </button>
-                    </>
-                  )}
-                  {friend.status !== "blocked" ? (
-                    <button
-                      disabled={disabled}
-                      onClick={() => void friendAction(friend.id, "block")}
-                    >
-                      Block
-                    </button>
-                  ) : (
-                    <button
-                      disabled={disabled}
-                      onClick={() => void friendAction(friend.id, "unblock")}
-                    >
-                      Unblock
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-          {comparison && (
-            <div className="account-comparison">
-              <h2>
-                You and {comparison.friend.player?.displayName ?? "your friend"}
-              </h2>
-              <p className="muted">
-                Completed Journey totals, without answer spoilers.
-              </p>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Journey</th>
-                    <th>You</th>
-                    <th>{comparison.friend.player?.displayName ?? "Friend"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparison.scores.map((score) => {
-                    const yours = metrics.journeys.find(
-                      (j) =>
-                        j.date === score.date &&
-                        j.journeyId === score.journeyId,
-                    );
-                    return (
-                      <tr key={`${score.date}/${score.journeyId}`}>
-                        <td>
-                          {titleFor(score.journeyId)}
-                          <small>{score.date}</small>
-                        </td>
-                        <td>
-                          {yours ? `${yours.correct}/${yours.total}` : "—"}
-                        </td>
-                        <td>
-                          {score.correct}/{score.total}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {!comparison.scores.length && (
-                <p className="muted">
-                  Your friend hasn’t completed a Journey yet.
-                </p>
-              )}
-            </div>
-          )}
-        </>
+        <FriendsPanel
+          api={api}
+          friends={friends}
+          player={profile}
+          disabled={disabled}
+          error={friendsError}
+          onAction={friendAction}
+          onRefresh={async () => {
+            try {
+              const value = await api.request<Friendship[]>(
+                "friends",
+                "GET",
+                undefined,
+                controller.current?.signal,
+              );
+              if (!controller.current?.signal.aborted) {
+                setFriends(value);
+                setFriendsError("");
+              }
+            } catch (error) {
+              if (!controller.current?.signal.aborted)
+                setFriendsError(
+                  "Couldn’t load your friends. Please refresh your account.",
+                );
+              throw error;
+            }
+          }}
+          onRequest={(handle) =>
+            perform(
+              () => api.request("friends", "POST", { handle }),
+              "Friend request sent.",
+            )
+          }
+        />
       )}
       <footer className="account-footer">
         <p className="muted">

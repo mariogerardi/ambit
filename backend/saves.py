@@ -87,4 +87,6 @@ def handle(event):
             if error.response["Error"]["Code"] != "ConditionalCheckFailedException":
                 raise
             # The same or newer revision is already durable; retries are harmless.
+    if os.environ.get("COMMUNITY_TABLE") and any(item["namespace"] == "daily" or item["field"].startswith("history.") for item in items):
+        boto3.resource("dynamodb").Table(os.environ["COMMUNITY_TABLE"]).delete_item(Key={"pk": owner, "sk": "activity-v1"})
     return response(200, {"saved": True})

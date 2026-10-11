@@ -26,10 +26,55 @@ export interface Friendship {
   player: PlayerProfile | null;
 }
 export interface JourneyScore {
+  gameId?: string;
+  gameVersion?: number;
   date: string;
   journeyId: string;
   correct: number;
   total: number;
+}
+export interface HandleAvailability {
+  handle: string;
+  available: boolean;
+  suggestions: string[];
+}
+export interface FriendStats {
+  journeyStreak: number;
+  journeysCompleted: number;
+  studySessions: number;
+  studyQuestions: number;
+  studyAccuracy: number | null;
+}
+export interface DailyActivity {
+  date: string;
+  status: "not_started" | "in_progress" | "completed";
+  journeyId?: string;
+  scoreLocked: boolean;
+  score?: JourneyScore;
+}
+export interface PlayerActivity {
+  stats: FriendStats;
+  today: DailyActivity;
+  journeys: JourneyScore[];
+}
+export interface FriendActivity extends PlayerActivity {
+  player: PlayerProfile;
+}
+export interface FriendActivityPage {
+  date: string;
+  you: PlayerActivity;
+  friends: FriendActivity[];
+  cursor?: string;
+}
+export class CommunityError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public field?: string,
+    public suggestions: string[] = [],
+  ) {
+    super(message);
+  }
 }
 export interface Challenge {
   id: string;
@@ -80,17 +125,25 @@ export function createCommunityClient(
           },
         );
         const data: unknown = await response.json();
-        if (!response.ok)
-          throw new Error(
+        if (!response.ok) {
+          const details = data as {
+            error?: string;
+            field?: string;
+            suggestions?: string[];
+          } | null;
+          throw new CommunityError(
             response.status === 401
               ? "Your session needs renewal. Try again or sign in again."
-              : typeof data === "object" &&
-                  data &&
-                  "error" in data &&
-                  typeof data.error === "string"
-                ? data.error
+              : typeof details?.error === "string"
+                ? details.error
                 : "Couldn’t load your account. Please try again.",
+            response.status,
+            typeof details?.field === "string" ? details.field : undefined,
+            Array.isArray(details?.suggestions)
+              ? details.suggestions.filter((item) => typeof item === "string")
+              : [],
           );
+        }
         return data as T;
       } catch (error) {
         if (error instanceof TypeError || error instanceof DOMException)

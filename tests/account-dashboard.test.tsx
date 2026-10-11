@@ -9,7 +9,7 @@ import {
   openStudyChallenge,
 } from "../src/app/accountProgress";
 import { emptyDaily } from "../src/app/dailyProgress";
-import { challengeSettings } from "../src/services/community";
+import { CommunityError, challengeSettings } from "../src/services/community";
 import type {
   AccountProfile,
   Challenge,
@@ -45,6 +45,7 @@ const sharedSettings = challengeSettings(
 );
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  history.replaceState(null, "", "/account");
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
@@ -84,6 +85,45 @@ beforeEach(() => {
       return structuredClone(profile);
     }
     if (path === "friends") return structuredClone(friends);
+    if (path.startsWith("friends/activity?"))
+      return {
+        date: "2026-10-10",
+        you: {
+          today: {
+            date: "2026-10-10",
+            status: "not_started",
+            scoreLocked: false,
+          },
+          journeys: [],
+          stats: {
+            journeyStreak: 0,
+            journeysCompleted: 0,
+            studySessions: 0,
+            studyQuestions: 0,
+            studyAccuracy: null,
+          },
+        },
+        friends: friends
+          .filter((item) => item.status === "accepted")
+          .map((item) => ({
+            player: item.player,
+            today: {
+              date: "2026-10-10",
+              status: "completed",
+              scoreLocked: true,
+            },
+            journeys: [],
+            stats: {
+              journeyStreak: 2,
+              journeysCompleted: 5,
+              studySessions: 2,
+              studyQuestions: 20,
+              studyAccuracy: 75,
+            },
+          })),
+      };
+    if (path.startsWith("handles/"))
+      return { handle: path.slice(8), available: true, suggestions: [] };
     if (path === "challenges") return structuredClone(challenges);
     if (path === "friends/b" && method === "PATCH") {
       friends[0].status = "accepted";
@@ -138,7 +178,10 @@ it("loads private account data and accepts an incoming request for the displayed
   expect(request).toHaveBeenCalledWith("friends/b", "PATCH", {
     action: "accept",
   });
-  expect(host.textContent).toContain("@bob · Friend");
+  expect(host.textContent).toContain("@bob");
+  expect(host.querySelector(".friend-card")?.textContent).toContain(
+    "Completed",
+  );
 });
 it("retains an edited profile and shows a handle collision instead of silently losing changes", async () => {
   await mount();
@@ -161,6 +204,73 @@ it("retains an edited profile and shows a handle collision instead of silently l
       .value,
   ).toBe("Updated Alice");
   expect(profile.displayName).toBe("Alice");
+});
+it("checks handles without changing saved identity and offers available alternatives", async () => {
+  vi.useFakeTimers();
+  try {
+    const original = request.getMockImplementation()! as (
+      path: string,
+      method?: string,
+      body?: unknown,
+    ) => Promise<unknown>;
+    request.mockImplementation(
+      async (path: string, method = "GET", body?: unknown) =>
+        path === "handles/bob"
+          ? { handle: "bob", available: false, suggestions: ["bob_world"] }
+          : original(path, method, body),
+    );
+    await mount();
+    await click("Profile");
+    await click("Edit profile");
+    await input('input[aria-label="Handle"]', "BOB");
+    await act(async () => vi.advanceTimersByTimeAsync(400));
+    expect(
+      host.querySelector('[aria-label="Handle"]')?.getAttribute("aria-invalid"),
+    ).toBe("true");
+    expect(
+      host.querySelector<HTMLButtonElement>(".profile-form .primary-button")
+        ?.disabled,
+    ).toBe(true);
+    expect(
+      host.querySelector(".account-heading .account-handle")?.textContent,
+    ).toBe("@alice");
+    await click("@bob_world");
+    await act(async () => vi.advanceTimersByTimeAsync(400));
+    expect(host.textContent).toContain("This handle is available");
+    await act(async () =>
+      host
+        .querySelector("form")!
+        .dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+    );
+    expect(profile.handle).toBe("bob_world");
+  } finally {
+    vi.useRealTimers();
+  }
+});
+it("shows a save-time handle collision even if the availability check passed", async () => {
+  await mount();
+  await click("Profile");
+  await click("Edit profile");
+  await input('input[aria-label="Handle"]', "newhandle");
+  request.mockImplementationOnce(async () => {
+    throw new CommunityError("That handle is already in use.", 409, "handle", [
+      "newhandle_world",
+    ]);
+  });
+  await act(async () =>
+    host
+      .querySelector("form")!
+      .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+  );
+  expect(host.querySelector(".handle-availability")?.textContent).toContain(
+    "@newhandle_world",
+  );
+  expect(
+    host.querySelector<HTMLInputElement>('[aria-label="Handle"]')?.value,
+  ).toBe("newhandle");
+  expect(profile.handle).toBe("alice");
 });
 it("opens a saved profile card before editing and cancels unsaved edits", async () => {
   await mount();

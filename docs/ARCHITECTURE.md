@@ -133,7 +133,16 @@ produce it. Reduced motion reveals the globe immediately. Loading copy is omitte
 but geography and WebGL errors remain visible.
 
 Account access lives beside the menu in the header, opening profile, stats, and
-friends. The menu groups Home, Journey, Explore, and Study above feedback, admin,
+friends. Friends mixes daily activity cards with comparisons for matching Journeys.
+Accepted friends can open profiles and aggregate Study stats; scores unlock only
+when the viewer has synced completion for the same date, Journey and game version.
+Study sessions vary in difficulty and are not ranked. Account IDs own friendships
+and progress independently of case-insensitive, atomically reserved handles.
+The editor checks availability and suggests alternatives, while saving remains
+protected against concurrent claims. Profile links prefill the friend finder.
+Activity pages contain at most 24 friends, with bounded server fan-out and cached
+summaries invalidated by progress sync. See [services](SERVICES.md) for API behavior.
+The menu groups Home, Journey, Explore, and Study above feedback, admin,
 credits, and theme settings. Its heading is simply “Ambit”. Explore opens search
 through the underlined introduction link. Selected-country
 details keep the input out of their layout; “Search another country” opens a

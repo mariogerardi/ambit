@@ -472,3 +472,310 @@
     width: 100%;
   }
 }
+
+/* Friends balance daily activity with small, comparable score tables. */
+.friends-panel {
+  display: grid;
+  gap: 24px;
+}
+.friends-panel h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+.friends-panel h3 {
+  margin: 0 0 12px;
+  font-size: 23px;
+}
+.friends-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.friends-heading p {
+  margin: 0;
+  max-width: 52ch;
+}
+.friend-add,
+.friend-today,
+.friend-profile {
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 14px;
+  background: rgb(var(--ui-surface-rgb));
+}
+.friends-panel summary {
+  cursor: pointer;
+  color: var(--ui-accent);
+  font-size: 14px;
+  padding: 8px 0;
+}
+.friend-find-form {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-top: 12px;
+}
+.friend-find-form .field {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.friend-find-form input {
+  width: 100%;
+}
+.experience .friends-panel .friend-action-button,
+.experience .friends-panel .friend-refresh {
+  min-height: 44px;
+  width: auto;
+  padding: 8px 14px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 8px;
+  background: rgb(var(--ui-line-rgb) / 0.08);
+  color: var(--ui-accent);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.experience .friends-panel .friend-action-button:hover,
+.experience .friends-panel .friend-refresh:hover {
+  border-color: var(--ui-accent);
+  background: rgb(var(--ui-line-rgb) / 0.14);
+}
+.friend-found,
+.friend-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.friend-found {
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.friend-identity {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+  min-width: 0;
+}
+.friend-identity strong {
+  font-size: 17px;
+  color: var(--ui-text);
+  overflow-wrap: anywhere;
+}
+.friend-identity > span {
+  font-size: 13px;
+  color: var(--ui-muted);
+  overflow-wrap: anywhere;
+}
+.friends-panel .profile-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 28px;
+}
+.friend-share {
+  margin-top: 12px;
+}
+.friend-share p {
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+.friend-requests .account-list {
+  margin-bottom: 0;
+}
+.friend-requests .account-list li > .friend-identity {
+  flex: 1;
+}
+.friend-today h3 {
+  margin-top: 8px;
+}
+.friend-today > p {
+  margin: 12px 0;
+}
+.friend-your-day {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+  font-size: 14px;
+}
+.friend-your-day > span {
+  flex: 1;
+  color: var(--ui-muted);
+}
+.friend-standings {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-top: 12px;
+}
+.friend-standings :is(th, td) {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+}
+.friend-standings :is(th, td):last-child {
+  text-align: right;
+  width: 80px;
+}
+.friend-standings th {
+  font-size: 12px;
+  color: var(--ui-muted);
+  font-weight: 500;
+}
+.friend-standings .is-you {
+  color: var(--ui-accent);
+  background: rgb(var(--ui-line-rgb) / 0.05);
+}
+.friend-count {
+  font: 14px var(--font-ui);
+  color: var(--ui-muted);
+}
+.friend-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.experience .friends-panel button.friend-card {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  padding: 18px;
+  text-align: left;
+  color: var(--ui-text);
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 14px;
+  background: rgb(var(--ui-surface-rgb));
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+.experience .friends-panel button.friend-card:hover {
+  border-color: rgb(var(--ui-accent-rgb) / 0.6);
+  transform: translateY(-2px);
+}
+.friend-card-heading > span:last-child {
+  color: var(--ui-accent);
+}
+.friend-daily-status {
+  font-size: 14px;
+  color: var(--ui-muted);
+}
+.friend-daily-status.status-completed {
+  color: var(--ui-accent);
+}
+.friend-card-streak {
+  font-size: 12px;
+  color: var(--ui-muted);
+  line-height: 1.5;
+}
+.friend-profile > header {
+  flex-wrap: wrap;
+}
+.friend-profile .friend-identity {
+  flex: 1;
+}
+.friend-manage {
+  margin-left: auto;
+}
+.friend-manage .account-row-actions {
+  justify-content: start;
+}
+.friend-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  padding-block: 16px;
+}
+.friend-stats dt {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.friend-stats dd {
+  margin: 6px 0 0;
+  font: 28px var(--font-editorial);
+}
+.friend-stats dd span {
+  font: 12px var(--font-ui);
+}
+.friends-panel .friend-data-note {
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+.friend-blocked {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  padding-top: 12px;
+}
+.friend-blocked li {
+  justify-content: space-between;
+}
+.handle-availability {
+  font-size: 12px;
+  color: var(--ui-muted);
+  line-height: 1.6;
+}
+.handle-availability:empty {
+  display: none;
+}
+.handle-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.experience .handle-suggestions button {
+  width: auto;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+  border-radius: 7px;
+  color: var(--ui-accent);
+  font-size: 12px;
+}
+@media (max-width: 700px) {
+  .friends-heading {
+    flex-wrap: wrap;
+  }
+  .friend-cards {
+    grid-template-columns: 1fr;
+  }
+  .friend-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .friend-find-form {
+    flex-wrap: wrap;
+  }
+  .friend-find-form .field {
+    flex-basis: 100%;
+  }
+  .friend-add,
+  .friend-today,
+  .friend-profile {
+    padding: 16px;
+  }
+  .friend-requests .account-list li {
+    flex-wrap: wrap;
+  }
+  .experience .handle-suggestions button {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .experience .friends-panel button.friend-card {
+    transition: none;
+  }
+  .experience .friends-panel button.friend-card:hover {
+    transform: none;
+  }
+}
+.friend-profile .friend-identity strong {
+  font: 32px/1.1 var(--font-editorial);
+}
+.friend-profile .profile-avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 36px;
+}

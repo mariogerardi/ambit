@@ -196,6 +196,16 @@ class SaveTests(unittest.TestCase):
         self.assertEqual(self.saves.handle(event)["statusCode"], 400)
         self.db.put_item.assert_not_called()
 
+    def test_progress_sync_invalidates_only_the_callers_social_summary(self):
+        with patch.dict(os.environ, {"COMMUNITY_TABLE": "community"}), patch.object(self.saves.boto3, "resource") as resource:
+            event = self.event()
+            body = json.loads(event["body"])
+            body["entries"][0].update(namespace="daily", field="run.today")
+            event["body"] = json.dumps(body)
+            self.assertEqual(self.saves.handle(event)["statusCode"], 200)
+            resource.return_value.Table.assert_called_with("community")
+            resource.return_value.Table.return_value.delete_item.assert_called_once_with(Key={"pk": "user#player-a", "sk": "activity-v1"})
+
     def test_paginated_reads_are_private_and_restore_json_types(self):
         item = {"pk": "user#player-a", **self.saves.validate({"namespace": "daily", "version": 2, "clock": 2, "writer": "a", "field": "draft", "value": {"n": 1.25, "b": True}})}
         self.db.query.return_value = {"Items": [item], "LastEvaluatedKey": {"pk": item["pk"], "sk": item["sk"]}}

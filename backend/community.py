@@ -1,15 +1,18 @@
-"""Profiles and opt-in social play. Caller identity always comes from the JWT.
+"""Profiles and mutual-friend activity. Caller identity always comes from the JWT.
 
 Handle reservations and reciprocal inboxes use conditional transactions. Private
 save bodies never leave this module: friends receive only completed score totals.
 """
 import base64
 import json
+import math
 import os
 import re
 import secrets
 import time
 import uuid
+from datetime import date, timedelta
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 COUNTRIES = set(json.loads(Path(__file__).with_name("study-countries.json").read_text()))
@@ -23,8 +26,8 @@ from botocore.exceptions import ClientError
 
 
 class Problem(Exception):
-    def __init__(self, status, message):
-        self.status, self.message = status, message
+    def __init__(self, status, message, **details):
+        self.status, self.message, self.details = status, message, details
 
 
 def table():
@@ -136,12 +139,39 @@ def public_profile(subject):
     return {"id": subject, **{k: profile[k] for k in ("displayName", "handle", "avatar", "favoriteRegion", "bio")}} if profile else None
 
 
+def normalized_handle(value):
+    handle = string(value, 24, True).lower()
+    if not re.fullmatch(r"[a-z][a-z0-9_]{2,23}", handle):
+        raise Problem(400, "Handles need 3–24 letters, numbers, or underscores and must start with a letter.")
+    return handle
+
+
+def handle_availability(subject, value):
+    handle = normalized_handle(value)
+    owner = get("handle#" + handle, "owner")
+    available = not owner or owner["id"] == subject
+    suggestions = []
+    if not available:
+        for suffix in ("_explorer", "_atlas", "_world", "_2", "_3"):
+            candidate = handle[:24 - len(suffix)] + suffix
+            if not get("handle#" + candidate, "owner"):
+                suggestions.append(candidate)
+            if len(suggestions) == 3:
+                break
+    return {"handle": handle, "available": available, "suggestions": suggestions}
+
+
+def handle_collision(subject, handle):
+    availability = handle_availability(subject, handle)
+    if not availability["available"]:
+        raise Problem(409, "That handle is already in use. Choose another.", field="handle", suggestions=availability["suggestions"])
+
+
 def save_profile(subject, body):
     owner = "user#" + subject
     old = get(owner, "profile")
-    handle = string(body.get("handle"), 24, True).lower()
-    if not re.fullmatch(r"[a-z][a-z0-9_]{2,23}", handle):
-        raise Problem(400, "Handles need 3–24 letters, numbers, or underscores and must start with a letter.")
+    handle = normalized_handle(body.get("handle"))
+    handle_collision(subject, handle)
     avatar = body.get("avatar", "globe")
     if not isinstance(avatar, str) or not (avatar in AVATARS or (avatar.startswith("flag:") and avatar[5:] in COUNTRIES)):
         raise Problem(400, "Choose an avatar.")
@@ -160,13 +190,19 @@ def save_profile(subject, body):
         clean_presets.append({"id": identifier, "name": string(preset.get("name"), 60, True), "settings": settings(preset.get("settings"))})
     if len({p["id"] for p in clean_presets}) != len(clean_presets):
         raise Problem(400, "Each preset needs its own identifier.")
-    value = {"id": subject, "displayName": string(body.get("displayName"), 40, True), "handle": handle, "avatar": avatar, "favoriteRegion": string(body.get("favoriteRegion", ""), 60), "bio": string(body.get("bio", ""), 160), "shareJourneyScores": body.get("shareJourneyScores", False), "presets": clean_presets, "revision": (old or {}).get("revision", 0) + 1}
+    value = {"id": subject, "displayName": string(body.get("displayName"), 40, True), "handle": handle, "avatar": avatar, "favoriteRegion": string(body.get("favoriteRegion", ""), 60), "bio": string(body.get("bio", ""), 160), "shareJourneyScores": True, "presets": clean_presets, "revision": (old or {}).get("revision", 0) + 1}
     operations = [put(owner, "profile", value, old)]
     if not old or old["handle"] != handle:
         operations.append(put("handle#" + handle, "owner", {"id": subject}))
         if old:
             operations.append(delete("handle#" + old["handle"], "owner"))
-    transact(operations)
+    try:
+        transact(operations)
+    except Problem as error:
+        if error.status == 409:
+            # A preflight check cannot reserve a handle. The transaction is authoritative.
+            handle_collision(subject, handle)
+        raise
     return value
 
 
@@ -200,6 +236,8 @@ def friend_action(subject, other, action):
         existing = rows(left, "friend#")
         if len(existing) >= 200 or sum(r["status"] == "outgoing" for r in existing) >= 20:
             raise Problem(429, "Please resolve your existing friend requests first.")
+        if len(rows(right, "friend#")) >= 200:
+            raise Problem(429, "That player’s friends list is full right now.")
         value = {"status": "requested", "requester": subject}
         transact([put(owner, "relation", value), put(left, "friend#" + other, {"id": other, "status": "outgoing"}), put(right, "friend#" + subject, {"id": subject, "status": "incoming"})])
     elif action == "accept":
@@ -225,46 +263,158 @@ def friend_action(subject, other, action):
     return {"saved": True}
 
 
-def saved_values(subject, namespace, field=None):
+def saved_records(subject):
     db = boto3.resource("dynamodb").Table(os.environ["SAVES_TABLE"])
     values, cursor = {}, None
-    # Bounded reads; the regular sync protocol continues to own full save recovery.
+    # Match private save register semantics; never expose registers or answers.
     for _ in range(10):
         options = {"KeyConditionExpression": "pk = :owner", "ExpressionAttributeValues": {":owner": "user#" + subject}, "ProjectionExpression": "#ns, #field, writer, #clock, valueJson", "ExpressionAttributeNames": {"#ns": "namespace", "#field": "field", "#clock": "clock"}, "ConsistentRead": True, "Limit": 100}
         if cursor:
             options["ExclusiveStartKey"] = cursor
         page = db.query(**options)
         for item in page.get("Items", []):
-            if item["namespace"] != namespace or (field and item["field"] != field):
-                continue
-            address = (item["field"], item["writer"])
+            address = (item["namespace"], item["field"], item["writer"])
             if address not in values or int(item["clock"]) > int(values[address]["clock"]):
                 values[address] = item
         cursor = page.get("LastEvaluatedKey")
         if not cursor:
             break
-    return [json.loads(item["valueJson"]) for item in values.values()]
+    if cursor:
+        raise Problem(503, "There’s a lot of progress to catch up on. Please try again later.")
+    return list(values.values())
 
 
-def journey_scores(subject):
-    latest = {}
-    for attempt in saved_values(subject, "daily"):
-        if not isinstance(attempt, dict) or not isinstance(attempt.get("game"), dict):
+def saved_values(subject, namespace, field=None):
+    return [json.loads(item["valueJson"]) for item in saved_records(subject) if item["namespace"] == namespace and (not field or item["field"] == field)]
+
+
+def progress_summary(subject, fresh=False):
+    cached = get("user#" + subject, "activity-v1")
+    now = int(time.time())
+    if not fresh and cached and 0 <= now - cached.get("updatedAt", 0) < 60:
+        return cached
+    attempts, studies = {}, {}
+    for record in saved_records(subject):
+        value = json.loads(record["valueJson"])
+        if not isinstance(value, dict):
             continue
-        identity = (attempt.get("date"), attempt.get("journeyId"))
-        if not all(isinstance(v, str) for v in identity):
+        if record["namespace"] == "daily" and isinstance(value.get("game"), dict):
+            identity = (value.get("date"), value.get("journeyId"))
+            if not all(isinstance(v, str) for v in identity):
+                continue
+            try:
+                date.fromisoformat(identity[0])
+            except ValueError:
+                continue
+            game = value["game"]
+            started = value.get("startedAt", 0)
+            version = value.get("scheduleVersion", 1)
+            if game.get("phase") not in ("home", "playing", "feedback", "finished", "failed") or not isinstance(game.get("answers", []), list) or len(game.get("answers", [])) > 5 or type(started) not in (int, float) or not math.isfinite(started) or type(version) is not int or version < 1:
+                continue
+            prior = attempts.get(identity)
+            rank = lambda a: (a.get("startedAt", 0), len(a["game"].get("answers", [])), a["game"].get("phase") in ("finished", "failed"))
+            if not prior or rank(value) > rank(prior):
+                attempts[identity] = value
+        elif record["namespace"] == "study" and record["field"].startswith("history.") and isinstance(value.get("session"), dict):
+            if not isinstance(value["session"].get("history", []), list) or not isinstance(value["session"].get("settings", {}), dict):
+                continue
+            identifier = record["field"]
+            prior = studies.get(identifier)
+            if not prior or len(value["session"].get("history", [])) > len(prior["session"].get("history", [])):
+                studies[identifier] = value
+    activity = []
+    for (day, journey), attempt in sorted(attempts.items(), reverse=True):
+        game = attempt["game"]
+        answers = game.get("answers", [])
+        if not isinstance(answers, list) or len(answers) > 5:
             continue
-        prior = latest.get(identity)
-        rank = lambda a: (a.get("startedAt", 0), len(a["game"].get("answers", [])), a["game"].get("phase") in ("finished", "failed"))
-        if not prior or rank(attempt) > rank(prior):
-            latest[identity] = attempt
-    scores = []
-    for (date, journey), attempt in sorted(latest.items(), reverse=True):
-        answers = attempt["game"].get("answers", [])
-        if attempt["game"].get("phase") not in ("finished", "failed") or not isinstance(answers, list) or len(answers) > 5:
+        completed = game.get("phase") in ("finished", "failed")
+        activity.append({"date": day, "journeyId": journey, "gameId": "journey", "gameVersion": attempt.get("scheduleVersion", 1), "status": "completed" if completed else "not_started" if game.get("phase") == "home" else "in_progress", "correct": sum(a.get("correct") is True for a in answers if isinstance(a, dict)) if completed else None, "total": 5, "startedAt": attempt.get("startedAt", 0)})
+    completed_studies, correct, questions = 0, 0, 0
+    for record in studies.values():
+        session = record["session"]
+        answers = session.get("history", [])
+        if not isinstance(answers, list):
             continue
-        scores.append({"date": date, "journeyId": journey, "correct": sum(a.get("correct") is True for a in answers if isinstance(a, dict)), "total": 5})
-    return scores[:30]
+        answers = [a for a in answers if isinstance(a, dict) and type(a.get("correct")) is bool]
+        questions += len(answers)
+        correct += sum(a["correct"] for a in answers)
+        length = session.get("settings", {}).get("length")
+        complete = (type(length) is int and len(answers) >= length) or (length == "all" and not session.get("remaining") and bool(answers) and isinstance(answers[-1].get("prompt"), dict) and isinstance(session.get("prompt"), dict) and answers[-1]["prompt"].get("ordinal") == session["prompt"].get("ordinal"))
+        completed_studies += session.get("phase") == "summary" and complete
+    value = {"updatedAt": now, "activity": activity, "studySessions": completed_studies, "studyQuestions": questions, "studyAccuracy": int(100 * correct / questions + 0.5) if questions else None}
+    table().put_item(Item=packed("user#" + subject, "activity-v1", value))
+    return value
+
+
+def activity_date(params):
+    value = (params or {}).get("date", date.today().isoformat())
+    try:
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            raise ValueError()
+        date.fromisoformat(value)
+    except ValueError:
+        raise Problem(400, "Choose a valid Journey date.") from None
+    return value
+
+
+def shared_activity(summary, viewer, today):
+    completed = [a for a in summary["activity"] if a["status"] == "completed"]
+    finished = {(a["date"], a["journeyId"], a["gameVersion"]) for a in viewer["activity"] if a["status"] == "completed"}
+    days = {date.fromisoformat(a["date"]) for a in completed}
+    day, streak = date.fromisoformat(today), 0
+    if day not in days:
+        day -= timedelta(days=1)
+    while day in days:
+        streak += 1
+        day -= timedelta(days=1)
+    daily = max((a for a in summary["activity"] if a["date"] == today), key=lambda a: a["startedAt"], default=None)
+    today_status = {"date": today, "status": daily["status"] if daily else "not_started", "scoreLocked": bool(daily and daily["status"] == "completed" and (today, daily["journeyId"], daily["gameVersion"]) not in finished)}
+    if daily:
+        today_status["journeyId"] = daily["journeyId"]
+        if daily["status"] == "completed" and not today_status["scoreLocked"]:
+            today_status["score"] = {k: daily[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total")}
+    # Lock historical results by Journey identity too, including admin overrides.
+    scores = [{k: a[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total")} for a in completed if (a["date"], a["journeyId"], a["gameVersion"]) in finished][:30]
+    return {"today": today_status, "stats": {"journeyStreak": streak, "journeysCompleted": len(completed), "studySessions": summary["studySessions"], "studyQuestions": summary["studyQuestions"], "studyAccuracy": summary["studyAccuracy"]}, "journeys": scores}
+
+
+def friend_activity(subject, other, viewer, today):
+    require_friend(subject, other)
+    player = public_profile(other)
+    if not player:
+        raise Problem(404, "This profile is unavailable.")
+    value = {"player": player, **shared_activity(progress_summary(other), viewer, today)}
+    require_friend(subject, other)
+    return value
+
+
+def activity_page(subject, params):
+    today = activity_date(params)
+    cursor = (params or {}).get("cursor", "")
+    if not isinstance(cursor, str) or len(cursor) > 200:
+        raise Problem(400, "Invalid friends cursor.")
+    accepted = sorted((r for r in rows("user#" + subject, "friend#") if r["status"] == "accepted"), key=lambda r: r["id"])
+    selected = [r for r in accepted if r["id"] > cursor][:24]
+    viewer = progress_summary(subject, fresh=True)
+    def read_entry(entry):
+        try:
+            return friend_activity(subject, entry["id"], viewer, today)
+        except Problem as error:
+            if error.status not in (403, 404):
+                raise
+            return None
+    # Keep network fan-out bounded rather than making one call per friend in the browser.
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        entries = [entry for entry in executor.map(read_entry, selected) if entry]
+    result = {"date": today, "you": shared_activity(viewer, viewer, today), "friends": entries}
+    if selected and any(r["id"] > selected[-1]["id"] for r in accepted):
+        result["cursor"] = selected[-1]["id"]
+    return result
+
+
+def journey_scores(subject, viewer):
+    return shared_activity(progress_summary(subject), viewer, date.today().isoformat())["journeys"]
 
 
 def challenge_view(subject, value):
@@ -334,6 +484,14 @@ def handle(event):
             value = get("user#" + subject, "profile")
         elif route == "PATCH /account/profile":
             value = save_profile(subject, body)
+        elif route == "GET /account/handles/{handle}":
+            value = handle_availability(subject, params.get("handle"))
+        elif route == "GET /account/friends/activity":
+            value = activity_page(subject, event.get("queryStringParameters"))
+        elif route == "GET /account/friends/{id}/profile":
+            other = params.get("id")
+            require_friend(subject, other)
+            value = friend_activity(subject, other, progress_summary(subject, fresh=True), activity_date(event.get("queryStringParameters")))
         elif route == "GET /account/players/{handle}":
             handle = string(params.get("handle"), 24, True).lower()
             reservation = get("handle#" + handle, "owner")
@@ -353,9 +511,7 @@ def handle(event):
         elif route == "GET /account/friends/{id}/journeys":
             other = params.get("id")
             require_friend(subject, other)
-            if not (get("user#" + other, "profile") or {}).get("shareJourneyScores"):
-                raise Problem(403, "Your friend hasn’t enabled Journey score sharing.")
-            value = journey_scores(other)
+            value = journey_scores(other, progress_summary(subject, fresh=True))
         elif route == "GET /account/challenges":
             value = []
             for entry in rows("user#" + subject, "challenge#", 50):
@@ -382,6 +538,6 @@ def handle(event):
             raise Problem(404, "Not found.")
         return response(200, value)
     except Problem as error:
-        return response(error.status, {"error": error.message})
+        return response(error.status, {"error": error.message, **error.details})
     except (ValueError, TypeError, KeyError, UnicodeError):
         return response(400, {"error": "Please check the account details and try again."})

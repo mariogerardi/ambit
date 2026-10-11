@@ -20,6 +20,9 @@ class Database:
         item = self.items.get((Key["pk"], Key["sk"]))
         return {"Item": copy.deepcopy(item)} if item else {}
 
+    def put_item(self, Item, **kwargs):
+        self.items[(Item["pk"], Item["sk"])] = copy.deepcopy(Item)
+
     def query(self, **kwargs):
         values = kwargs["ExpressionAttributeValues"]
         if kwargs.get("ProjectionExpression"):
@@ -59,8 +62,8 @@ class CommunityTests(unittest.TestCase):
         self.addCleanup(self.resource.stop)
         self.addCleanup(self.client.stop)
 
-    def call(self, route, subject="a", body=None, **params):
-        event = {"routeKey": route, "headers": {"origin": "https://playambit.com", "content-type": "application/json"}, "requestContext": {"authorizer": {"jwt": {"claims": {"sub": subject}}}}, "pathParameters": params}
+    def call(self, route, subject="a", body=None, query=None, **params):
+        event = {"routeKey": route, "headers": {"origin": "https://playambit.com", "content-type": "application/json"}, "requestContext": {"authorizer": {"jwt": {"claims": {"sub": subject}}}}, "pathParameters": params, "queryStringParameters": query}
         if body is not None:
             event["body"] = json.dumps(body)
         result = community.handle(event)
@@ -124,18 +127,94 @@ class CommunityTests(unittest.TestCase):
         self.assertEqual(self.call("PATCH /account/friends/{id}", "a", {"action": "unblock"}, id="b")[0], 403)
         self.assertEqual(self.call("PATCH /account/friends/{id}", "b", {"action": "unblock"}, id="a")[0], 200)
 
-    def test_only_friends_with_explicit_sharing_expose_completed_totals(self):
+    def daily_record(self, subject, day="2026-10-10", journey="test", phase="finished", writer="browser", correct=3, version=1):
+        attempt = {"date": day, "journeyId": journey, "scheduleVersion": version, "startedAt": 1, "game": {"phase": phase, "answers": [{"correct": i < correct, "text": "private answer", "pin": {"lat": 1, "lng": 2}} for i in range(5 if phase == "finished" else 1)]}}
+        return {"pk": "user#" + subject, "namespace": "daily", "field": "run." + day + "/" + journey, "writer": writer, "clock": 1, "valueJson": json.dumps(attempt)}
+
+    def test_scores_unlock_only_for_mutual_friends_who_finished_the_same_journey_version(self):
         self.friends()
-        attempt = {"date": "2026-10-10", "journeyId": "test", "startedAt": 1, "game": {"phase": "finished", "answers": [{"correct": True, "text": "secret answer", "pin": {"lat": 1, "lng": 2}}]}}
-        self.db.saves = [{"pk": "user#b", "namespace": "daily", "field": "run.test", "writer": "browser", "clock": 1, "valueJson": json.dumps(attempt)}]
-        status, scores = self.call("GET /account/friends/{id}/journeys", "a", id="b")
+        self.db.saves = [self.daily_record("b")]
+        self.assertEqual(self.call("GET /account/friends/{id}/journeys", "a", id="b"), (200, []))
+        status, value = self.call("GET /account/friends/{id}/profile", "a", id="b", query={"date": "2026-10-10"})
         self.assertEqual(status, 200)
-        self.assertEqual(scores, [{"date": "2026-10-10", "journeyId": "test", "correct": 1, "total": 5}])
-        self.assertNotIn("secret", str(scores))
-        self.assertEqual(self.call("GET /account/friends/{id}/journeys", "c", id="b")[0], 403)
-        b = self.call("GET /account/profile", "b")[1]
-        self.call("PATCH /account/profile", "b", {**b, "shareJourneyScores": False})
-        self.assertEqual(self.call("GET /account/friends/{id}/journeys", "a", id="b")[0], 403)
+        self.assertEqual(value["today"]["status"], "completed")
+        self.assertTrue(value["today"]["scoreLocked"])
+        self.assertNotIn("score", value["today"])
+        self.assertNotIn("correct", json.dumps(value))
+        self.db.saves += [self.daily_record("a", journey="different"), self.daily_record("a", version=2, writer="other")]
+        self.assertEqual(self.call("GET /account/friends/{id}/journeys", "a", id="b"), (200, []))
+        completed = self.daily_record("a", correct=4)
+        value = json.loads(completed["valueJson"])
+        value["startedAt"] = 2
+        completed["valueJson"] = json.dumps(value)
+        self.db.saves.append(completed)
+        scores = self.call("GET /account/friends/{id}/journeys", "a", id="b")[1]
+        self.assertEqual(scores, [{"date": "2026-10-10", "journeyId": "test", "gameId": "journey", "gameVersion": 1, "correct": 3, "total": 5}])
+        self.assertNotIn("private", str(scores))
+        self.assertEqual(self.call("GET /account/friends/{id}/profile", "c", id="b")[0], 403)
+        self.call("PATCH /account/friends/{id}", "b", {"action": "block"}, id="a")
+        self.assertEqual(self.call("GET /account/friends/{id}/profile", "a", id="b")[0], 403)
+
+    def test_handle_availability_is_case_insensitive_and_suggests_unclaimed_alternatives(self):
+        value = self.profile("a", "Alice")
+        own = self.call("GET /account/handles/{handle}", "a", handle="ALICE")[1]
+        self.assertTrue(own["available"])
+        other = self.call("GET /account/handles/{handle}", "b", handle="Alice")[1]
+        self.assertFalse(other["available"])
+        self.assertEqual(len(other["suggestions"]), 3)
+        self.assertEqual(self.call("GET /account/handles/{handle}", "b", handle="!!")[0], 400)
+        status, error = self.call("PATCH /account/profile", "b", {**value, "revision": 0})
+        self.assertEqual(status, 409)
+        self.assertEqual(error["field"], "handle")
+        self.assertEqual(error["suggestions"], other["suggestions"])
+
+    def test_atomic_reservation_prevents_a_collision_even_when_both_preflight_checks_pass(self):
+        with patch.object(community, "handle_availability", return_value={"available": True}):
+            first = self.profile("a", "Shared")
+            status, _ = self.call("PATCH /account/profile", "b", {**first, "handle": "SHARED", "revision": 0})
+        self.assertEqual(status, 409)
+        self.assertIsNone(community.get("user#b", "profile"))
+        self.assertEqual(community.get("handle#shared", "owner"), {"id": "a"})
+
+    def test_handle_changes_keep_friendships_and_results_on_the_account_id(self):
+        self.friends()
+        before = self.call("GET /account/profile", "b")[1]
+        self.assertEqual(self.call("PATCH /account/profile", "b", {**before, "handle": "bob_new"})[0], 200)
+        self.assertEqual(self.call("GET /account/friends", "a")[1][0]["player"]["handle"], "bob_new")
+        self.assertEqual(self.call("GET /account/players/{handle}", "a", handle="bob")[0], 404)
+        self.assertEqual(community.require_friend("a", "b")["status"], "accepted")
+
+    def test_activity_has_statuses_deduplicated_stats_and_no_private_answers(self):
+        self.friends()
+        self.db.saves = [self.daily_record("b"), self.daily_record("b", writer="second"), self.daily_record("b", day="2026-10-09"), self.daily_record("a", phase="playing")]
+        study = {"session": {"phase": "summary", "settings": SETTINGS, "history": [{"correct": i < 7, "response": "secret", "prompt": {"ordinal": i}} for i in range(10)]}}
+        self.db.saves.extend({"pk": "user#b", "namespace": "study", "field": "history.run-one", "writer": writer, "clock": 1, "valueJson": json.dumps(study)} for writer in ("one", "two"))
+        self.db.saves.append({"pk": "user#b", "namespace": "study", "field": "session.run-one", "writer": "one", "clock": 1, "valueJson": json.dumps(study["session"])})
+        status, page = self.call("GET /account/friends/activity", "a", query={"date": "2026-10-10"})
+        self.assertEqual(status, 200)
+        self.assertEqual(page["you"]["today"]["status"], "in_progress")
+        stats = page["friends"][0]["stats"]
+        self.assertEqual(stats, {"journeyStreak": 2, "journeysCompleted": 2, "studySessions": 1, "studyQuestions": 10, "studyAccuracy": 70})
+        self.assertNotIn("secret", json.dumps(page))
+        self.assertNotIn("private answer", json.dumps(page))
+        self.assertNotIn("email", json.dumps(page))
+        self.assertEqual(self.call("GET /account/friends/activity", "a", query={"date": "2026-02-30"})[0], 400)
+
+    def test_friend_activity_pages_are_bounded_and_include_only_accepted_relationships(self):
+        self.profile("a", "alice")
+        for index in range(26):
+            other = f"friend{index:02d}"
+            self.profile(other, other)
+            community.friend_action("a", other, "request")
+            community.friend_action(other, "a", "accept")
+        self.profile("pending", "pending")
+        community.friend_action("a", "pending", "request")
+        first = self.call("GET /account/friends/activity", "a", query={"date": "2026-10-10"})[1]
+        second = self.call("GET /account/friends/activity", "a", query={"date": "2026-10-10", "cursor": first["cursor"]})[1]
+        self.assertEqual(len(first["friends"]), 24)
+        self.assertEqual(len(second["friends"]), 2)
+        self.assertNotIn("cursor", second)
+        self.assertEqual(len({entry["player"]["id"] for entry in first["friends"] + second["friends"]}), 26)
 
     def test_challenge_participation_and_results_use_synced_sessions_not_caller_scores(self):
         challenge = self.challenge()
@@ -164,7 +243,7 @@ class CommunityTests(unittest.TestCase):
 
     def test_all_social_routes_are_authorized_and_storage_is_retained(self):
         resources = template()["Resources"]
-        for name in ("ReadProfile", "WriteProfile", "FindPlayer", "ReadFriends", "RequestFriend", "UpdateFriend", "FriendJourneys", "ReadChallenges", "CreateChallenge", "UpdateChallenge"):
+        for name in ("ReadProfile", "WriteProfile", "HandleAvailability", "FriendActivity", "FriendProfile", "FindPlayer", "ReadFriends", "RequestFriend", "UpdateFriend", "FriendJourneys", "ReadChallenges", "CreateChallenge", "UpdateChallenge"):
             properties = resources[name + "Route"]["Properties"]
             self.assertEqual(properties["AuthorizationType"], "JWT")
             self.assertEqual(properties["AuthorizationScopes"], ["openid"])

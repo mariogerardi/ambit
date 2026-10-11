@@ -18,6 +18,11 @@ export function isAdmin(user: User | null) {
   );
 }
 export function safeReturnPath(value: unknown) {
+  if (
+    typeof value === "string" &&
+    /^\/account\?friend=[a-zA-Z][a-zA-Z0-9_]{2,23}$/.test(value)
+  )
+    return value.toLowerCase();
   return typeof value === "string" &&
     /^\/(?!\/)[a-zA-Z0-9/_-]*$/.test(value) &&
     value !== "/auth/callback"
@@ -192,7 +197,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     try {
       const client = signup ? createManager(true) : accountManager();
       await client.signinRedirect({
-        state: safeReturnPath(location.pathname),
+        state: safeReturnPath(
+          location.pathname === "/account"
+            ? location.pathname + location.search
+            : location.pathname,
+        ),
       });
     } catch {
       setError("Couldn’t open sign-in. Please try again.");

@@ -67,12 +67,39 @@ profile editing, and connection errors show a player-facing retry message.
 Friends are requested by exact handle and require the recipient's acceptance.
 Requests can be declined/cancelled; friendships can be removed and players can
 be blocked/unblocked. A block removes reciprocal inbox access and prevents new
-requests, comparisons and challenge access. Completed Journey totals are shared
-only with accepted friends when the internal profile sharing flag is enabled
-(off by default). That flag is not shown or editable in the profile UI.
-The API derives totals from private synced saves; answers, pins,
-typed responses, drafts and email are never returned to friends. Comparison reads
-are bounded to 1,000 save registers and expose up to 30 recent totals.
+requests, comparisons and challenge access. The Friends tab offers daily completion
+status, friend cards, requests, handle lookup and shareable `/account?friend=handle`
+links. Clicking a friend opens their profile, streak, completed Journey count,
+Study completion/accuracy stats and recent shared results. Study stats are
+informational; sessions with different settings are not ranked.
+
+`GET /account/handles/{handle}` checks case-insensitive availability and suggests
+up to three alternatives. An availability check does not reserve a handle:
+`PATCH /account/profile` atomically claims it, releases the old claim on rename,
+and returns a field-specific 409 if another account wins the claim. Relationships
+and results use account IDs, so renaming never breaks friendships.
+
+Scores are visible only to accepted friends after the viewer has synced completion
+for the same date, Journey ID and game version. Completion status is visible
+beforehand. The sharing rule is internal and enabled for mutual friendships;
+the legacy profile flag has no user-facing control. All score endpoints enforce
+this rule, including the older `/friends/{id}/journeys` endpoint. The API derives
+totals from private synced saves; answers, pins, typed responses, drafts and email
+are never returned to friends.
+
+`GET /account/friends/activity?date=YYYY-MM-DD` returns your own activity and up to
+24 accepted friends with a continuation cursor. `GET /account/friends/{id}/profile`
+returns one accepted friend's public profile and aggregate activity. Summary reads
+use a 60-second cache in the community table, invalidated by daily and archived
+Study sync. Viewer completion is read fresh for score disclosure. Server fan-out
+is bounded to four concurrent reads; historical comparisons expose at most 30
+results. Projection reads are bounded to 1,000 save registers and fail explicitly
+rather than show incomplete totals when that bound is exceeded.
+
+Friendship records, versioned Journey results and challenge records stay separate.
+Future minigames can add game-specific result projections without changing friend
+identities or inboxes. Current results come from client-graded synced progress;
+verified competitive rankings require authoritative grading for the new game.
 
 The backend includes challenge routes for a future feature,
 but Account no longer requests or exposes them. These routes use a fixed 10/20/50-question Study configuration and a server-generated

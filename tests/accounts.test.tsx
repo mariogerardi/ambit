@@ -121,6 +121,9 @@ it("rejects external or token-bearing return destinations", () => {
   ])
     expect(safeReturnPath(path)).toBe("/account");
   expect(safeReturnPath("/study")).toBe("/study");
+  expect(safeReturnPath("/account?friend=Mars")).toBe("/account?friend=mars");
+  expect(safeReturnPath("/account?friend=mars&token=secret")).toBe("/account");
+  expect(safeReturnPath("/account?friend=//evil.test")).toBe("/account");
 });
 it("consumes a successful callback and removes authorization parameters", async () => {
   history.replaceState(null, "", "/auth/callback?code=secret&state=opaque");
