@@ -99,9 +99,15 @@ export function GameShell({
               sources={<QuestionSources question={round} />}
             />
           </div>
-          {round.leadIn && <p className="journey-context">{round.leadIn}</p>}
-          <h1 ref={heading} tabIndex={-1}>
-            {questionPrompt(round, context)}
+          <h1 className="journey-question-copy" ref={heading} tabIndex={-1}>
+            {round.leadIn && (
+              <>
+                <span className="journey-lead-in">{round.leadIn}</span>{" "}
+              </>
+            )}
+            <span className="journey-prompt">
+              {questionPrompt(round, context)}
+            </span>
           </h1>
           {round.image && (
             <figure className="flag-clue">
@@ -151,7 +157,7 @@ export function GameShell({
                   <svg
                     viewBox="0 0 320 108"
                     role="img"
-                    aria-label={`${round.feedbackDiagram.westBank} on the west bank, ${round.feedbackDiagram.eastBank} on the east bank of the ${round.feedbackDiagram.river}`}
+                    aria-label={`Schematic: ${round.feedbackDiagram.westBank} on the west bank, ${round.feedbackDiagram.eastBank} on the east bank of the ${round.feedbackDiagram.river}`}
                   >
                     <path d="M164 0 C133 28 181 50 157 76 S153 100 154 108" />
                     <text x="68" y="43">
@@ -167,9 +173,6 @@ export function GameShell({
                       East bank
                     </text>
                   </svg>
-                  <figcaption>
-                    {round.feedbackDiagram.river} · schematic
-                  </figcaption>
                 </figure>
               )}
               {pinFeedback && (

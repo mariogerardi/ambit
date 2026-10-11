@@ -5,6 +5,7 @@ import type { Question, QuestionContext } from "./questions";
 import { canSubmit, responseCount, selectableIds } from "./questions";
 import { AnswerInput } from "./AnswerInput";
 import { AnswerCounter } from "./AnswerCounter";
+import { QuestionActions } from "./QuestionActions";
 
 export function AnswerForm({
   question,
@@ -41,13 +42,11 @@ export function AnswerForm({
           </p>
         )}
         <div className="pin-answer-actions">
-          <button
-            className="primary-button"
+          <QuestionActions
+            label="Submit pin"
             disabled={!canSubmit(question, context, game)}
-            onClick={() => dispatch({ type: "submit" })}
-          >
-            Submit pin <span>→</span>
-          </button>
+            onSubmit={() => dispatch({ type: "submit" })}
+          />
           {game.pin && (
             <button
               className="quiet-button tertiary-action"
@@ -133,15 +132,11 @@ export function AnswerForm({
             </button>
           ))}
         </div>
-        {question.commitment === "submit" && (
-          <button
-            className="primary-button"
-            disabled={!canSubmit(question, context, game)}
-            onClick={() => dispatch({ type: "submit" })}
-          >
-            Submit answer <span>→</span>
-          </button>
-        )}
+        <QuestionActions
+          showSubmit={question.commitment === "submit"}
+          disabled={!canSubmit(question, context, game)}
+          onSubmit={() => dispatch({ type: "submit" })}
+        />
       </div>
     );
   if (
@@ -211,13 +206,13 @@ export function AnswerForm({
                 : "Your first answer is final."}
           </p>
         ) : (
-          <button
-            className="primary-button"
+          <QuestionActions
             disabled={!canSubmit(question, context, game)}
-            onClick={() => dispatch({ type: "submit" })}
-          >
-            Submit answer <span>→</span>
-          </button>
+            onSubmit={() => dispatch({ type: "submit" })}
+          />
+        )}
+        {question.commitment === "immediate" && (
+          <QuestionActions showSubmit={false} />
         )}
         {!question.disclosure.namedChoices &&
           (!city || question.allowTyping === true || !webgl) && (
@@ -379,12 +374,10 @@ export function AnswerForm({
           )}
         </>
       )}
-      <button
-        className="primary-button"
+      <QuestionActions
+        submitType="submit"
         disabled={!canSubmit(question, context, game)}
-      >
-        Submit answer <span>→</span>
-      </button>
+      />
     </form>
   );
 }

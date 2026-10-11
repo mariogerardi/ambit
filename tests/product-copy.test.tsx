@@ -112,7 +112,18 @@ describe("product copy follows the answer and visible reveal", () => {
         );
         expect(html).toContain(
           renderToStaticMarkup(
-            <h1 tabIndex={-1}>{questionPrompt(question, context)}</h1>,
+            <h1 className="journey-question-copy" tabIndex={-1}>
+              {question.leadIn && (
+                <>
+                  <span className="journey-lead-in">
+                    {question.leadIn}
+                  </span>{" "}
+                </>
+              )}
+              <span className="journey-prompt">
+                {questionPrompt(question, context)}
+              </span>
+            </h1>,
           ),
         );
         expect(html).not.toContain("question-prompt");

@@ -17,11 +17,11 @@ export function QuestionHelp({
       icon={
         <svg
           viewBox="0 0 24 24"
-          width="22"
-          height="22"
+          width="18"
+          height="18"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.25"
           strokeLinecap="round"
           aria-hidden="true"
         >

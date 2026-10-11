@@ -79,7 +79,7 @@ async function enter(value: string) {
   });
 }
 const submit = () =>
-  host.querySelector<HTMLButtonElement>("button.primary-button")!;
+  host.querySelector<HTMLButtonElement>("button.answer-submit-button")!;
 
 describe("Journey answer controls", () => {
   it("starts unanswered, steps explicitly down to zero, and submits the player's chosen number", async () => {
@@ -132,9 +132,9 @@ describe("Journey answer controls", () => {
         <Harness journey={FIFTEENTH_JOURNEY} pin={{ lat: 61, lng: 25 }} />,
       ),
     );
-    expect(host.querySelector(".pin-answer-actions .primary-button")).toBe(
-      submit(),
-    );
+    expect(
+      host.querySelector(".pin-answer-actions .answer-submit-button"),
+    ).toBe(submit());
     expect(submit().disabled).toBe(false);
     expect(host.querySelector("summary")!.textContent).toBe(
       "Enter coordinates",

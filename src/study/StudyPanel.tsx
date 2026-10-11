@@ -19,6 +19,7 @@ import type {
 } from "./engine";
 import { PanelActive } from "../app/ModePanels";
 import { QuestionHelp } from "../app/QuestionHelp";
+import { QuestionActions } from "../game/QuestionActions";
 import { capitalSource } from "../game/quizData";
 import { SettingsIcon } from "../app/SettingsIcon";
 import { StudyResults } from "./StudyResults";
@@ -294,6 +295,7 @@ export function StudyPanel({
                     ? "The globe is unavailable. Answer by country name below."
                     : "The globe is unavailable. Open session settings to build a session with another answer method."}
               </p>
+              <QuestionActions showSubmit={false} />
               {canTypeStudyAnswer(prompt) && (
                 <details
                   className="typed-country-guess"
@@ -320,12 +322,10 @@ export function StudyPanel({
                         }
                       />
                     </label>
-                    <button
-                      className="primary-button"
+                    <QuestionActions
+                      submitType="submit"
                       disabled={!session.text.trim()}
-                    >
-                      Submit answer <span>→</span>
-                    </button>
+                    />
                   </form>
                 </details>
               )}
@@ -375,16 +375,14 @@ export function StudyPanel({
                   </label>
                 </>
               )}
-              <button
-                className="primary-button"
+              <QuestionActions
+                submitType="submit"
                 disabled={
                   prompt.style === "choices"
                     ? !session.choiceId
                     : !session.text.trim()
                 }
-              >
-                Submit answer <span>→</span>
-              </button>
+              />
             </form>
           )
         ) : (

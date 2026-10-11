@@ -156,7 +156,7 @@ Shared neighbors uses irregular country footprints, Island instincts repeats
 ownership-versus-location surprises, and On Russia’s doorstep repeats borderless
 pin placement. Establish the premise in the introduction and develop it in the
 reveals; preserve useful difficulty and favorite questions. Use a short, spoiler-safe
-`leadIn` before the prompt to make geographic movement or the developing idea
+`leadIn` alongside the prompt to make geographic movement or the developing idea
 explicit. Use On Russia’s doorstep as the model: a short directional cue such as
 “Head west again, this time to the Caucasus.” Keep detailed geographic context in
 the reveal, rather than adding a second paragraph before every question.
@@ -211,3 +211,8 @@ local OSM route and Natural Earth snapshots. It retains source vertices, preserv
 junctions and river mouths, and ships a matching downloadable ODbL database.
 [NOTICE](../NOTICE.md#danube-journey-river-route) records provenance and licensing.
 The broader editorial rules are in [Crafting a Journey](JOURNEY_CRAFTING.md).
+
+Journey and Study answer footers share `QuestionActions`: a disabled hint
+placeholder on the left and submission on the right. Immediate-answer questions
+show the hint placeholder without introducing a second commitment step. Hint
+content and scoring rules are not implemented yet.

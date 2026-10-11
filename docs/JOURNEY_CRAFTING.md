@@ -31,14 +31,16 @@ For each stop, decide these things before writing its final prompt:
 
 ## Keep the question visually central
 
-The renderer displays `leadIn`, then the actual `prompt` as the large heading.
-`title` is an internal identity, not a second visible heading. Editing `title`
-does not shorten the player's question.
+The renderer joins `leadIn` and `prompt` into one continuous question paragraph,
+with equal font size and line-height. Muted context and a brighter question use
+color to carry the hierarchy, without a vertical break. `title` is an internal
+identity, not a second visible heading. Editing `title` does not shorten the
+player's question.
 
 - Use a short lead-in to establish movement or a necessary observation. Put rich
   context in the reveal, not a second introductory paragraph at every stop.
-- Make the heading one clear question or task. Do not put scene-setting,
-  instructions, and tolerance into the same large heading.
+- Make `prompt` one clear question or task. Keep movement in the short lead-in;
+  keep mechanics and tolerance in the separate instruction, not in the paragraph.
 - Use `instruction` for important mechanics, counts, ordering, or precision.
   “Drop a pin in Vienna.” can be the heading; “Land within 50 km of the city
   center.” belongs underneath.

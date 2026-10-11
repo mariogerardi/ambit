@@ -2765,9 +2765,9 @@ body
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 40px;
-  min-height: 40px;
-  padding: 8px;
+  width: 32px;
+  min-height: 32px;
+  padding: 7px;
   border-radius: 8px;
   color: var(--ui-muted);
   text-decoration: none;
@@ -2807,11 +2807,23 @@ body
   outline-offset: 1px;
 }
 
-.experience .question-card .journey-context {
-  margin: 0 0 10px;
-  font-size: 13px;
-  line-height: 1.5;
+.experience .question-card .round-overline {
+  margin-bottom: 8px;
+}
+.experience .question-card h1.journey-question-copy {
+  margin: 0 0 18px;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.35px;
+}
+.journey-question-copy > span {
+  font: inherit;
+}
+.journey-question-copy .journey-lead-in {
   color: var(--ui-muted);
+}
+.journey-question-copy .journey-prompt {
+  color: color-mix(in srgb, var(--ui-text) 90%, #f4ecd8);
 }
 .experience .round-feedback .journey-correct-answer {
   border-left-color: var(--ui-correct);
@@ -3109,5 +3121,57 @@ body
   }
   .journey-scheduler-heading h2 {
     font-size: 22px;
+  }
+}
+
+/* Answer and hint share the same two-column rhythm as multiple-choice answers. */
+.experience .question-answer-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-top: 18px;
+}
+.experience .question-answer-actions > .primary-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 12px 10px;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.experience .question-answer-actions .answer-hint-button:disabled {
+  background: rgb(var(--ui-accent-rgb) / 0.12);
+  color: var(--ui-accent);
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.3);
+  box-shadow: none;
+  opacity: 0.75;
+  cursor: default;
+}
+.question-answer-actions .action-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.study-map-answer:has(> .typed-country-guess[open]) > .question-answer-actions {
+  display: none;
+}
+.experience .pin-answer-actions > .question-answer-actions {
+  margin-top: 0;
+}
+@media (max-width: 700px) {
+  .experience .question-card h1.journey-question-copy {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+  .experience .round-overline .question-help-button {
+    position: relative;
+  }
+  .experience .round-overline .question-help-button::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
   }
 }

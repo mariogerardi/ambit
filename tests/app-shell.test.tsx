@@ -369,7 +369,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         await click("Peru");
         expect(
           host.querySelector<HTMLButtonElement>(
-            ".mode-incoming .candidate-grid + button",
+            ".mode-incoming .candidate-grid + .question-answer-actions .answer-submit-button",
           )!.disabled,
         ).toBe(true);
         await click("Bolivia");
@@ -1776,6 +1776,21 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.physicalFeatures?.map((f) => f.name)).toEqual([
       "Danube",
     ]);
+    const copy = host.querySelector(".mode-incoming .journey-question-copy")!;
+    expect(copy.querySelector(".journey-lead-in")?.textContent).toContain(
+      "southern Germany",
+    );
+    expect(copy.querySelector(".journey-prompt")?.textContent).toContain(
+      "Which other river",
+    );
+    const actions = host.querySelector(
+      ".mode-incoming .question-answer-actions",
+    )!;
+    const buttons = actions.querySelectorAll<HTMLButtonElement>("button");
+    expect(buttons[0].textContent).toContain("Need a hint?");
+    expect(buttons[0].disabled).toBe(true);
+    expect(buttons[0].type).toBe("button");
+    expect(buttons[1].textContent).toContain("Submit answer");
     await click("Rhine");
     await click("Submit answer");
     expect(
@@ -1812,8 +1827,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.places.map((p) => p.name)).toEqual(["Budapest"]);
     expect(probe.props!.states["wurl:HUN"]).toBe("disabled");
     expect(
-      host.querySelector(".mode-incoming .river-banks-diagram")?.textContent,
-    ).toContain("schematic");
+      host
+        .querySelector(".mode-incoming .river-banks-diagram svg")
+        ?.getAttribute("aria-label"),
+    ).toContain("Schematic");
     await click("Next");
     expect(probe.props!.regionInteraction).toBe(false);
     expect(probe.props!.selectDisabled).toBe(false);
@@ -1840,7 +1857,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus.at(-1)).toMatchObject({
       lat: 46.7,
       lng: 19.2,
-      altitude: 0.95,
+      altitude: 0.5,
     });
     expect(
       host.querySelector(".mode-incoming .journey-score")?.textContent,

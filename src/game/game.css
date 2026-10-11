@@ -1523,12 +1523,7 @@
   fill: var(--ui-muted);
   font-size: 12px;
 }
-.river-banks-diagram figcaption {
-  margin-top: 6px;
-  color: var(--ui-muted);
-  font-size: 12px;
-  text-align: center;
-}
+
 .experience .finish-story > p.journey-route-caption {
   margin: 16px 0 24px;
   font-size: 15px;
