@@ -41,7 +41,7 @@ const reduce = (state: GameState, ...actions: Action[]) =>
 
 describe("fourth Journey", () => {
   it("registers all five questions for daily rotation, practice, and playground", () => {
-    expect(JOURNEYS).toHaveLength(11);
+    expect(JOURNEYS).toHaveLength(12);
     expect(journeyPath(FOURTH_JOURNEY.id)).toBe("/journey/mediterranean");
     expect(FOURTH_JOURNEY.rounds).toHaveLength(5);
     for (const q of FOURTH_JOURNEY.rounds) {

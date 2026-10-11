@@ -92,6 +92,7 @@ export function GameShell({
             </span>
             <span className="overline">{round.label.toUpperCase()}</span>
             <QuestionHelp
+              sourcesLocked={game.phase === "playing"}
               key={round.id}
               onReport={onReport ? () => onReport(round.id) : undefined}
               sources={<QuestionSources question={round} />}

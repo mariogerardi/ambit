@@ -1,10 +1,12 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **11 Journeys and 55 questions**, with eleven active daily concepts, reviewed against
-the code on October 11, 2026. Each Journey has five rounds. Admin chooses today's
-Journey on this device; direct practice routes and `/playground` provide access
-to other bundled content. There is no current in-app authoring or AI generator.
-Previously published local packs are read-only compatibility data.
+The bundled catalog contains **12 Journeys and 60 questions**, with eleven active
+daily concepts, reviewed against the code on October 11, 2026. Each Journey has
+five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
+everyone; unassigned dates use the automatic rotation. Direct practice routes and
+`/playground` are Admin-only. Chasing the sun is ready for a date assignment and
+has not been added to the automatic rotation. There is no current in-app authoring
+or AI generator. Previously published local packs are read-only compatibility data.
 
 ## Bundled Journeys
 
@@ -21,6 +23,7 @@ Previously published local packs are read-only compatibility data.
 | 9   | Around the Ring of Fire  | `/journey/ring-of-fire`            | [tenthJourney.ts](../src/game/tenthJourney.ts)               |
 | 10  | Exceptions to the rule   | `/journey/exceptions-to-the-rule`  | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
 | 11  | On Russia’s doorstep     | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
+| 12  | Chasing the sun          | `/journey/chasing-the-sun`         | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)         |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
@@ -36,23 +39,23 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 55 bundled questions, not every possible engine pairing.
+Counts below refer to the 60 bundled questions, not every possible engine pairing.
 The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                | Control                | Questions |
 | ------------------- | ---------------------- | --------: |
-| `pin`               | Drop a pin             |        13 |
+| `pin`               | Drop a pin             |        14 |
 | `city-single`       | Single city pick       |         1 |
 | `city-multiple`     | Multiple city picks    |         1 |
 | `map-single`        | Single country pick    |        11 |
 | `map-multiple`      | Multiple country picks |         4 |
-| `number`            | Number                 |         2 |
+| `number`            | Number                 |         3 |
 | `text`              | Free response          |        10 |
 | `typed-regions`     | Typed region names     |         3 |
 | `ordered-countries` | Ordered country names  |         0 |
 | `ordered-capitals`  | Ordered capital names  |         0 |
-| `choice-single`     | Single choice          |         7 |
+| `choice-single`     | Single choice          |        10 |
 | `choice-multiple`   | Multiple choices       |         3 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
@@ -66,7 +69,7 @@ A rule describes correctness independently of its answer control:
 
 | Family                 | Rule IDs                                                                                        | Authority/limits                                                                                        |
 | ---------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `country-ids`, `region-ids`, `place-ids`          | Reviewed explicit answers, aliases, and membership sets; `manual-number` has no bundled example.        |
+| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `country-ids`, `region-ids`, `place-ids`          | Reviewed explicit answers, aliases, and membership sets; ray-counting uses `manual-number`.             |
 | Pin placement          | `pin-inside`, `pin-distance`                                                                    | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
 | Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                      | Sourced fact context or the explicit common-English-name UN roster.                                     |
 | Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                 | Bundled capital/flag records; capital-order checks the specified route.                                 |
@@ -105,6 +108,10 @@ predicate if the question should be computed rather than fixed.
 3. Set a permitted playable `focus`, optional feedback focus, explanation, and
    `source`/`sources` with review dates. A camera, label, flag alt text, or highlighted
    candidate set must not reveal an answer that the question intends to hide.
+   Audit the Journey title/description, lead-ins, instructions, and input labels
+   alongside each prompt, including earlier reveals that could solve later stops.
+   The shared question help keeps sources locked until submission because a source
+   title or destination page can reveal the answer.
 4. Register the Journey and route in [`journeys.ts`](../src/game/journeys.ts), and
    add its rounds to [`questionCatalog.ts`](../src/game/questionCatalog.ts).
    Runtime lazy discovery covers files ending in `Journey.ts`;

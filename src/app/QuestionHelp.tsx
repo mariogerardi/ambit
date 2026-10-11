@@ -4,8 +4,10 @@ import { InfoTooltip } from "./InfoTooltip";
 export function QuestionHelp({
   sources,
   onReport,
+  sourcesLocked = false,
 }: {
   sources?: ReactNode;
+  sourcesLocked?: boolean;
   onReport?(): void;
 }) {
   return (
@@ -33,7 +35,13 @@ export function QuestionHelp({
           {sources && (
             <details className="question-help-sources">
               <summary>Sources</summary>
-              <div>{sources}</div>
+              <div>
+                {sourcesLocked ? (
+                  <p>Sources appear after you answer.</p>
+                ) : (
+                  sources
+                )}
+              </div>
             </details>
           )}
           {onReport && (

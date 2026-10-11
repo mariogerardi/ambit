@@ -87,7 +87,10 @@ describe("retained daily rotation", () => {
     expect(() =>
       setDailyPuzzle(emptyDaily, "2026-10-10", "enclosed-territories-v1"),
     ).toThrow("Unknown Journey");
-    expect(JOURNEY_INDEX.map((entry) => entry.id)).toEqual(ACTIVE_JOURNEY_IDS);
+    expect(JOURNEY_INDEX.map((entry) => entry.id)).toEqual([
+      ...ACTIVE_JOURNEY_IDS,
+      "chasing-the-sun-v1",
+    ]);
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === NORTH_AMERICA_JOURNEY.id)
         ?.path,

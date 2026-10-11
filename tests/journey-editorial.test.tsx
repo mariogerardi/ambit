@@ -194,4 +194,51 @@ describe("connected Journey drafts and answer feedback", () => {
       }
     }
   });
+  it("keeps hidden canonical answers out of introductions and supplemental question copy", () => {
+    const normalize = (value: string) =>
+      value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+    const contains = (copy: string, answer: string) => {
+      const words = normalize(copy)
+        .split(/[^a-z0-9]+/)
+        .filter(Boolean)
+        .join(" ");
+      const target = normalize(answer)
+        .split(/[^a-z0-9]+/)
+        .filter(Boolean)
+        .join(" ");
+      return ` ${words} `.includes(` ${target} `);
+    };
+    for (const journey of JOURNEYS) {
+      const context = createQuestionContext(world, COUNTRY_FACTS, journey);
+      for (const question of journey.rounds) {
+        const answers =
+          question.rule.type === "capital-coordinate"
+            ? matchingCapitals(question, context).map((capital) => capital.name)
+            : correctAnswerSummary(question, context, initialGame).value.split(
+                /, | → /,
+              );
+        const supplemental = [
+          journey.title,
+          journey.description,
+          question.leadIn,
+          question.instruction,
+          question.inputLabel,
+          question.image?.alt,
+        ]
+          .filter(Boolean)
+          .join(" ");
+        for (const answer of answers) {
+          // Some tasks intentionally name the destination and ask players to locate it.
+          if (contains(question.prompt, answer)) continue;
+          expect(
+            contains(supplemental, answer),
+            `${question.id}: supplemental copy reveals ${answer}`,
+          ).toBe(false);
+        }
+      }
+    }
+  });
 });

@@ -182,3 +182,7 @@ UN ICTY legacy page for Yugoslavia’s six constituent republics, and UNEP/MAP�
 coastal-country list plus UNRWA’s Gaza coastline description for the explicit
 22-country Mediterranean convention. Facts are authored locally; source pages
 are linked after answering and are not fetched at runtime.
+
+The enlarged sun detail in `public/flags/clues/sun-detail-01.svg` uses the same
+Uruguay flag artwork as `public/flags/study/flag-186.svg`, cropped by its SVG
+view box. The original flag artwork’s attribution and license also apply.

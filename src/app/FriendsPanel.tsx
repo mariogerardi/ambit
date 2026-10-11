@@ -369,15 +369,10 @@ export function FriendsPanel({
   return (
     <div className="friends-panel">
       <header className="friends-heading">
-        <div>
-          <h2>Find your people.</h2>
-          <p className="muted">
-            Find a player by handle, manage requests, or open a friend’s
-            profile.
-          </p>
-        </div>
         <button
           className="quiet-button friend-refresh"
+          aria-label="Refresh friends"
+          title="Refresh friends"
           disabled={disabled || loading}
           onClick={() => {
             setToday(localDateKey());
@@ -388,278 +383,316 @@ export function FriendsPanel({
             else setRevision((v) => v + 1);
           }}
         >
-          Refresh
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 7v5h-5M4 17v-5h5" />
+            <path d="M6.1 7a7 7 0 0 1 11.7-1L20 9M4 15l2.2 3A7 7 0 0 0 17.9 17" />
+          </svg>
         </button>
       </header>
       {notices}
-      <section className="friend-add" aria-label="Find a friend">
-        <h3>Find a friend</h3>
-        <p className="muted">Find a player, then send a request to connect.</p>
-        <form
-          className="friend-find-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const request = ++lookupRequest.current;
-            setLookupBusy(true);
-            setLookupError("");
-            setFound(undefined);
-            void api
-              .request<PlayerProfile>(
-                `players/${encodeURIComponent(handle.trim().replace(/^@/, "").toLowerCase())}`,
-                "GET",
-                undefined,
-                lifetime.current?.signal,
-              )
-              .then((value) => {
-                if (
-                  !lifetime.current?.signal.aborted &&
-                  request === lookupRequest.current
-                )
-                  setFound(value);
-              })
-              .catch((e: unknown) => {
-                if (
-                  !lifetime.current?.signal.aborted &&
-                  request === lookupRequest.current
-                )
-                  setLookupError(
-                    e instanceof Error
-                      ? e.message
-                      : "Couldn’t find this player.",
-                  );
-              })
-              .finally(() => {
-                if (
-                  !lifetime.current?.signal.aborted &&
-                  request === lookupRequest.current
-                )
-                  setLookupBusy(false);
-              });
-          }}
-        >
-          <label className="field">
-            Friend’s handle
-            <input
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              maxLength={25}
-              required
-              value={handle}
-              onChange={(event) => {
-                lookupRequest.current++;
-                setLookupBusy(false);
-                setHandle(event.target.value);
-                setFound(undefined);
+      <div className="friends-workspace">
+        <aside className="friends-search-column">
+          <section className="friend-add" aria-label="Find a friend">
+            <form
+              className="friend-find-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const request = ++lookupRequest.current;
+                setLookupBusy(true);
                 setLookupError("");
-              }}
-              placeholder="@fellow_explorer"
-            />
-          </label>
-          <button
-            className="friend-action-button"
-            disabled={disabled || lookupBusy || !handle.trim()}
-          >
-            Find player
-          </button>
-        </form>
-        {lookupError && <p role="alert">{lookupError}</p>}
-        {found && (
-          <div className="friend-found">
-            <Identity player={found} />
-            {found.id === player?.id ? (
-              <span className="muted">That’s you.</span>
-            ) : friends.some((friend) => friend.id === found.id) ? (
-              <span className="muted">
-                {friends.find((friend) => friend.id === found.id)?.status ===
-                "accepted"
-                  ? "Already friends"
-                  : "Request already pending"}
-              </span>
-            ) : (
-              <button
-                className="friend-action-button"
-                disabled={disabled || !player}
-                onClick={() => {
-                  void onRequest(found.handle).then((saved) => {
-                    if (saved && !lifetime.current?.signal.aborted) {
-                      setFound(undefined);
-                      setHandle("");
-                    }
+                setFound(undefined);
+                void api
+                  .request<PlayerProfile>(
+                    `players/${encodeURIComponent(handle.trim().replace(/^@/, "").toLowerCase())}`,
+                    "GET",
+                    undefined,
+                    lifetime.current?.signal,
+                  )
+                  .then((value) => {
+                    if (
+                      !lifetime.current?.signal.aborted &&
+                      request === lookupRequest.current
+                    )
+                      setFound(value);
+                  })
+                  .catch((e: unknown) => {
+                    if (
+                      !lifetime.current?.signal.aborted &&
+                      request === lookupRequest.current
+                    )
+                      setLookupError(
+                        e instanceof Error
+                          ? e.message
+                          : "Couldn’t find this player.",
+                      );
+                  })
+                  .finally(() => {
+                    if (
+                      !lifetime.current?.signal.aborted &&
+                      request === lookupRequest.current
+                    )
+                      setLookupBusy(false);
                   });
-                }}
+              }}
+            >
+              <label className="field">
+                <span>Search players</span>
+                <input
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  maxLength={25}
+                  required
+                  value={handle}
+                  onChange={(event) => {
+                    lookupRequest.current++;
+                    setLookupBusy(false);
+                    setHandle(event.target.value);
+                    setFound(undefined);
+                    setLookupError("");
+                  }}
+                  placeholder="Search by handle"
+                />
+              </label>
+              <button
+                className="friend-action-button friend-search-button"
+                aria-label="Find player"
+                title="Find player"
+                disabled={disabled || lookupBusy || !handle.trim()}
               >
-                Send request
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path d="m16 16 5 5" />
+                </svg>
               </button>
+            </form>
+            {lookupError && <p role="alert">{lookupError}</p>}
+            {found && (
+              <div className="friend-found">
+                <Identity player={found} />
+                {found.id === player?.id ? (
+                  <span className="muted">That’s you.</span>
+                ) : friends.some((friend) => friend.id === found.id) ? (
+                  <span className="muted">
+                    {friends.find((friend) => friend.id === found.id)
+                      ?.status === "accepted"
+                      ? "Already friends"
+                      : "Request already pending"}
+                  </span>
+                ) : (
+                  <button
+                    className="friend-action-button"
+                    disabled={disabled || !player}
+                    onClick={() => {
+                      void onRequest(found.handle).then((saved) => {
+                        if (saved && !lifetime.current?.signal.aborted) {
+                          setFound(undefined);
+                          setHandle("");
+                        }
+                      });
+                    }}
+                  >
+                    Send request
+                  </button>
+                )}
+              </div>
             )}
+            {player && (
+              <div className="friend-share">
+                <button
+                  className="quiet-button tertiary-action"
+                  onClick={() => {
+                    const link = `${location.origin}/account?friend=${encodeURIComponent(player.handle)}`;
+                    if (!navigator.clipboard?.writeText) {
+                      setNotice(`Your profile link: ${link}`);
+                      return;
+                    }
+                    void navigator.clipboard
+                      .writeText(link)
+                      .then(() => {
+                        if (!lifetime.current?.signal.aborted)
+                          setNotice("Your profile link is copied.");
+                      })
+                      .catch(() => {
+                        if (!lifetime.current?.signal.aborted)
+                          setNotice(`Your profile link: ${link}`);
+                      });
+                  }}
+                >
+                  Copy your profile link ↗
+                </button>
+              </div>
+            )}
+          </section>
+          {!!friends.filter(
+            (item) => item.status === "incoming" || item.status === "outgoing",
+          ).length && (
+            <section className="friend-requests">
+              <h3>Requests</h3>
+              <ul className="account-list">
+                {friends
+                  .filter(
+                    (item) =>
+                      item.status === "incoming" || item.status === "outgoing",
+                  )
+                  .map((friend) => (
+                    <li key={friend.id}>
+                      <Identity
+                        player={
+                          friend.player ?? {
+                            id: friend.id,
+                            avatar: "globe",
+                            displayName: "Player",
+                            handle: "unavailable",
+                            bio: "",
+                            favoriteRegion: "",
+                          }
+                        }
+                      />
+                      <div className="account-row-actions">
+                        {friend.status === "incoming" ? (
+                          <>
+                            <button
+                              disabled={disabled}
+                              onClick={() => void onAction(friend.id, "accept")}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              disabled={disabled}
+                              onClick={() =>
+                                void onAction(friend.id, "decline")
+                              }
+                            >
+                              Decline
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span className="muted">Request sent</span>
+                            <button
+                              disabled={disabled}
+                              onClick={() => void onAction(friend.id, "cancel")}
+                            >
+                              Cancel request
+                            </button>
+                          </>
+                        )}
+                        <button
+                          disabled={disabled}
+                          onClick={() => void onAction(friend.id, "block")}
+                        >
+                          Block
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          )}
+          {!!friends.filter((item) => item.status === "blocked").length && (
+            <details className="friend-blocked">
+              <summary>Blocked players</summary>
+              <ul className="account-list">
+                {friends
+                  .filter((item) => item.status === "blocked")
+                  .map((friend) => (
+                    <li key={friend.id}>
+                      <span>{friend.player?.displayName ?? "Player"}</span>
+                      <button
+                        className="quiet-button tertiary-action"
+                        disabled={disabled}
+                        onClick={() => void onAction(friend.id, "unblock")}
+                      >
+                        Unblock
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </details>
+          )}
+        </aside>
+        <section className="friends-grid-column" aria-label="Your friends">
+          <h3>
+            Your friends <span className="friend-count">{accepted.length}</span>
+          </h3>
+          {loading && !page && accepted.length > 0 && (
+            <p role="status" className="muted">
+              Opening your friends…
+            </p>
+          )}
+          <div className="friend-cards">
+            {accepted.map((relationship) => {
+              const friend = activity.find(
+                (item) => item.player.id === relationship.id,
+              );
+              const identity = friend?.player ?? relationship.player;
+              if (!identity) return null;
+              return (
+                <button
+                  key={identity.id}
+                  className="friend-card"
+                  aria-label={`View ${identity.displayName}’s profile`}
+                  onClick={() => void viewProfile(identity.id)}
+                >
+                  <span className="friend-card-heading">
+                    <Identity player={identity} />
+                    <span aria-hidden="true">→</span>
+                  </span>
+                  {friend && (
+                    <>
+                      <span
+                        className={`friend-daily-status status-${friend.today.status}`}
+                      >
+                        {statusLabel[friend.today.status]}
+                        {friend.today.score &&
+                          ` · ${friend.today.score.correct}/${friend.today.score.total}`}
+                      </span>
+                      <span className="friend-card-streak">
+                        {friend.stats.journeyStreak} day streak ·{" "}
+                        {friend.stats.journeysCompleted} Journeys
+                      </span>
+                    </>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        )}
-        {player && (
-          <div className="friend-share">
+          {!accepted.length && !error && (
+            <p className="muted">
+              Find a player by handle to start your circle.
+            </p>
+          )}
+          {page?.cursor && (
             <button
               className="quiet-button tertiary-action"
-              onClick={() => {
-                const link = `${location.origin}/account?friend=${encodeURIComponent(player.handle)}`;
-                if (!navigator.clipboard?.writeText) {
-                  setNotice(`Your profile link: ${link}`);
-                  return;
-                }
-                void navigator.clipboard
-                  .writeText(link)
-                  .then(() => {
-                    if (!lifetime.current?.signal.aborted)
-                      setNotice("Your profile link is copied.");
-                  })
-                  .catch(() => {
-                    if (!lifetime.current?.signal.aborted)
-                      setNotice(`Your profile link: ${link}`);
-                  });
-              }}
+              disabled={loading}
+              onClick={() => void more()}
             >
-              Copy your profile link ↗
+              Load more activity →
             </button>
-            <p className="muted">
-              Friendships start when a request is accepted.
-            </p>
-          </div>
-        )}
-      </section>
-      {!!friends.filter(
-        (item) => item.status === "incoming" || item.status === "outgoing",
-      ).length && (
-        <section className="friend-requests">
-          <h3>Requests</h3>
-          <ul className="account-list">
-            {friends
-              .filter(
-                (item) =>
-                  item.status === "incoming" || item.status === "outgoing",
-              )
-              .map((friend) => (
-                <li key={friend.id}>
-                  <Identity
-                    player={
-                      friend.player ?? {
-                        id: friend.id,
-                        avatar: "globe",
-                        displayName: "Player",
-                        handle: "unavailable",
-                        bio: "",
-                        favoriteRegion: "",
-                      }
-                    }
-                  />
-                  <div className="account-row-actions">
-                    {friend.status === "incoming" ? (
-                      <>
-                        <button
-                          disabled={disabled}
-                          onClick={() => void onAction(friend.id, "accept")}
-                        >
-                          Accept
-                        </button>
-                        <button
-                          disabled={disabled}
-                          onClick={() => void onAction(friend.id, "decline")}
-                        >
-                          Decline
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <span className="muted">Request sent</span>
-                        <button
-                          disabled={disabled}
-                          onClick={() => void onAction(friend.id, "cancel")}
-                        >
-                          Cancel request
-                        </button>
-                      </>
-                    )}
-                    <button
-                      disabled={disabled}
-                      onClick={() => void onAction(friend.id, "block")}
-                    >
-                      Block
-                    </button>
-                  </div>
-                </li>
-              ))}
-          </ul>
+          )}
         </section>
-      )}
-      <section aria-label="Your friends">
-        <h3>
-          Your friends <span className="friend-count">{accepted.length}</span>
-        </h3>
-        {loading && !page && accepted.length > 0 && (
-          <p role="status" className="muted">
-            Opening your friends…
-          </p>
-        )}
-        <div className="friend-cards">
-          {activity.map((friend) => (
-            <button
-              key={friend.player.id}
-              className="friend-card"
-              aria-label={`View ${friend.player.displayName}’s profile`}
-              onClick={() => void viewProfile(friend.player.id)}
-            >
-              <span className="friend-card-heading">
-                <Identity player={friend.player} />
-                <span aria-hidden="true">→</span>
-              </span>
-              <span
-                className={`friend-daily-status status-${friend.today.status}`}
-              >
-                {statusLabel[friend.today.status]}
-                {friend.today.score &&
-                  ` · ${friend.today.score.correct}/${friend.today.score.total}`}
-              </span>
-              <span className="friend-card-streak">
-                {friend.stats.journeyStreak} day streak ·{" "}
-                {friend.stats.journeysCompleted} Journeys finished
-              </span>
-            </button>
-          ))}
-        </div>
-        {!accepted.length && !error && (
-          <p className="muted">
-            Your circle starts with one friend. Find someone by handle or share
-            your profile link.
-          </p>
-        )}
-        {page?.cursor && (
-          <button
-            className="quiet-button tertiary-action"
-            disabled={loading}
-            onClick={() => void more()}
-          >
-            Load more friends →
-          </button>
-        )}
-      </section>
-      {!!friends.filter((item) => item.status === "blocked").length && (
-        <details className="friend-blocked">
-          <summary>Blocked players</summary>
-          <ul className="account-list">
-            {friends
-              .filter((item) => item.status === "blocked")
-              .map((friend) => (
-                <li key={friend.id}>
-                  <span>{friend.player?.displayName ?? "Player"}</span>
-                  <button
-                    className="quiet-button tertiary-action"
-                    disabled={disabled}
-                    onClick={() => void onAction(friend.id, "unblock")}
-                  >
-                    Unblock
-                  </button>
-                </li>
-              ))}
-          </ul>
-        </details>
-      )}
+      </div>
     </div>
   );
 }

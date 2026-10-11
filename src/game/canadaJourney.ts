@@ -18,7 +18,7 @@ export const CANADA_JOURNEY: Journey = {
   id: "beyond-the-maple-leaf-v1",
   title: "Beyond the maple leaf",
   description:
-    "Start with a familiar flag, follow Canada’s two official languages to the east coast, then travel through its capital to the northern shore.",
+    "Start with a familiar flag, follow two official languages to the east coast, then travel through the capital to the northern shore.",
   rounds: [
     {
       ...mapleFlagQuestion,

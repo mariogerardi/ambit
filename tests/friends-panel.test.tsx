@@ -115,7 +115,15 @@ it("shows completion without leaking a locked daily score and opens a friend’s
   );
   expect(host.querySelector(".friend-standings")).toBeNull();
   expect(host.querySelector(".friend-today")).toBeNull();
-  expect(host.textContent).toContain("Find a player, then send a request");
+  expect(host.querySelector(".friends-search-column input")).not.toBeNull();
+  expect(
+    host.querySelector(".friends-grid-column .friend-card"),
+  ).not.toBeNull();
+  expect(
+    host.querySelector('[aria-label="Refresh friends"] svg'),
+  ).not.toBeNull();
+  expect(host.textContent).not.toContain("Find your people.");
+  expect(host.textContent).not.toContain("Friendships start when");
   await click("View Bob’s profile");
   expect(host.querySelector(".friend-stats")?.textContent).toContain("75%");
   expect(host.textContent).toContain(
@@ -216,11 +224,27 @@ it("loads another page without duplicating friend cards and keeps request errors
       : page,
   );
   await mount();
-  await click("Load more friends →");
+  await click("Load more activity →");
   expect(host.querySelectorAll(".friend-card")).toHaveLength(2);
   request.mockRejectedValue(new Error("Offline"));
-  await click("Refresh");
+  await click("Refresh friends");
   expect(host.querySelector('[role="alert"]')?.textContent).toContain(
     "Offline",
   );
+});
+
+it("shows all accepted friends before their paged activity arrives", async () => {
+  page.cursor = "next";
+  const cathy = { ...bob, id: "c", displayName: "Cathy", handle: "cathy" };
+  friends.push({ id: "c", status: "accepted", player: cathy });
+  await mount();
+  expect(
+    host.querySelectorAll(".friends-grid-column .friend-card"),
+  ).toHaveLength(2);
+  expect(
+    host.querySelector('[aria-label="View Cathy’s profile"]')?.textContent,
+  ).toContain("@cathy");
+  expect(
+    host.querySelector('[aria-label="View Cathy’s profile"]')?.textContent,
+  ).not.toContain("Not started");
 });

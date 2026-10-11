@@ -206,7 +206,9 @@ it("keeps email and sign-out beside the profile card and off Dashboard and Frien
   ).not.toBeNull();
   expect(side.textContent).toContain("alice@example.com");
   expect(side.textContent).toContain("Only you can see your email.");
-  expect(side.textContent).toContain("Copy profile link");
+  expect(side.textContent).toContain("Your account");
+  expect(side.textContent).not.toContain("Your profile link");
+  expect(side.textContent).not.toContain("Copy profile link");
   expect(host.textContent).not.toContain("Sign in on another device");
   await click("Sign out");
   expect(onSignOut).toHaveBeenCalledOnce();

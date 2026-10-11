@@ -589,37 +589,6 @@ export function AccountDashboard({
             </form>
           )}
           <aside className="account-profile-aside" aria-label="Account details">
-            {profile && (
-              <section className="profile-share">
-                <h2>Your profile link</h2>
-                <p className="muted">
-                  Share your profile so friends can find you.
-                </p>
-                <p className="profile-share-handle">@{profile.handle}</p>
-                <button
-                  className="quiet-button tertiary-action"
-                  onClick={() => {
-                    const link = `${location.origin}/account?friend=${encodeURIComponent(profile.handle)}`;
-                    if (!navigator.clipboard?.writeText) {
-                      setNotice(`Your profile link: ${link}`);
-                      return;
-                    }
-                    void navigator.clipboard
-                      .writeText(link)
-                      .then(() => {
-                        if (!controller.current?.signal.aborted)
-                          setNotice("Your profile link is copied.");
-                      })
-                      .catch(() => {
-                        if (!controller.current?.signal.aborted)
-                          setNotice(`Your profile link: ${link}`);
-                      });
-                  }}
-                >
-                  Copy profile link ↗
-                </button>
-              </section>
-            )}
             <section className="account-login-details">
               <h2>Your account</h2>
               {email && (

@@ -430,15 +430,6 @@
   margin: 0 0 12px;
   line-height: 1.6;
 }
-.profile-share {
-  padding-bottom: 22px;
-  margin-bottom: 22px;
-  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-}
-.profile-share-handle {
-  color: var(--ui-accent);
-  font-size: 17px;
-}
 .account-email {
   overflow-wrap: anywhere;
 }
@@ -793,4 +784,121 @@
   width: 64px;
   height: 64px;
   font-size: 36px;
+}
+
+.friends-panel {
+  gap: 14px;
+}
+.friends-heading {
+  justify-content: flex-end;
+}
+.experience .friends-panel .friend-refresh {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  min-height: 36px;
+  padding: 8px;
+}
+.friends-workspace {
+  display: grid;
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+.friends-search-column {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+.friends-grid-column {
+  min-width: 0;
+}
+.friend-add {
+  padding: 16px;
+}
+.friend-find-form {
+  gap: 8px;
+  margin: 0;
+}
+.friend-find-form .field {
+  font-size: 13px;
+  gap: 8px;
+}
+.experience .friend-find-form input {
+  height: 40px;
+  font-size: 13px;
+  padding-inline: 10px;
+}
+.experience .friends-panel .friend-search-button {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  min-height: 40px;
+  padding: 8px;
+}
+.friend-found {
+  align-items: start;
+}
+.friend-found > .friend-action-button {
+  width: 100%;
+}
+.friend-requests .account-list li {
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-block: 12px;
+}
+.friend-requests .account-row-actions {
+  width: 100%;
+  justify-content: start;
+}
+.friends-search-column .friend-share .tertiary-action {
+  font-size: 12px;
+}
+.friends-panel h3 {
+  font-size: 20px;
+}
+.experience .friends-panel button.friend-card {
+  padding: 14px;
+  gap: 8px;
+  border-radius: 12px;
+}
+.friend-card .profile-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 22px;
+}
+.friend-card-heading {
+  gap: 9px;
+}
+.friend-card .friend-identity strong {
+  font-size: 15px;
+}
+.friend-card .friend-identity > span,
+.friend-card .friend-daily-status {
+  font-size: 12px;
+}
+.friend-card .friend-card-streak {
+  font-size: 11px;
+}
+@media (max-width: 700px) {
+  .friends-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .friend-find-form {
+    flex-wrap: nowrap;
+  }
+  .friend-find-form .field {
+    flex-basis: auto;
+  }
+  .friend-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+@media (max-width: 380px) {
+  .friend-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

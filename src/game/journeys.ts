@@ -1,3 +1,4 @@
+import { SUN_FLAGS_JOURNEY } from "./sunFlagsJourney";
 import { CANADA_JOURNEY } from "./canadaJourney";
 import { ANDES_JOURNEY } from "./andesJourney";
 import { LATITUDE_JOURNEY } from "./latitudeJourney";
@@ -21,9 +22,11 @@ export const JOURNEYS = [
   TENTH_JOURNEY,
   TWELFTH_JOURNEY,
   FIFTEENTH_JOURNEY,
+  SUN_FLAGS_JOURNEY,
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [SUN_FLAGS_JOURNEY.id]: "/journey/chasing-the-sun",
     [CANADA_JOURNEY.id]: "/journey/beyond-the-maple-leaf",
     [ANDES_JOURNEY.id]: "/journey/along-the-andes",
     [LATITUDE_JOURNEY.id]: "/journey/latitude-surprises",

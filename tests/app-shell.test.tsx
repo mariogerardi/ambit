@@ -297,7 +297,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
-  it("offers only the eleven retained Journeys in Admin", async () => {
+  it("offers retained Journeys and the new sun Journey in Admin", async () => {
     await mount();
     await click("Admin");
     const options = [
@@ -307,7 +307,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "",
       ...journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id),
     ]);
-    expect(options).toHaveLength(12);
+    expect(options).toHaveLength(13);
     for (const id of [
       "long-way-home-v2",
       "beyond-borders-v1",

@@ -2,7 +2,7 @@
   {
     "id": "beyond-the-maple-leaf-v1",
     "title": "Beyond the maple leaf",
-    "description": "Start with a familiar flag, follow Canada’s two official languages to the east coast, then travel through its capital to the northern shore.",
+    "description": "Start with a familiar flag, follow two official languages to the east coast, then travel through the capital to the northern shore.",
     "path": "/journey/beyond-the-maple-leaf",
     "module": "./canadaJourney.ts",
     "rounds": [
@@ -254,7 +254,7 @@
   {
     "id": "ring-of-fire-v1",
     "title": "Around the Ring of Fire",
-    "description": "Trace the Pacific rim from Japan through Indonesia to the Andes and New Zealand. One ocean connects every stop.",
+    "description": "Trace the Pacific’s island arcs, cross to the Andes, and finish on its southern rim. One ocean connects every stop.",
     "path": "/journey/ring-of-fire",
     "module": "./tenthJourney.ts",
     "rounds": [
@@ -340,6 +340,35 @@
         "id": "russia-neighbor-est",
         "label": "Drop a pin",
         "progressLabel": "Estonia"
+      }
+    ]
+  },
+  {
+    "id": "chasing-the-sun-v1",
+    "title": "Chasing the sun",
+    "description": "Five flags, one familiar symbol. Cross oceans and continents to discover how differently the same sun can shine.",
+    "path": "/journey/chasing-the-sun",
+    "module": "./sunFlagsJourney.ts",
+    "rounds": [
+      {
+        "id": "sun-flags-revolution-month-v1",
+        "label": "History"
+      },
+      {
+        "id": "sun-flags-uruguay-rays-v1",
+        "label": "Look closely"
+      },
+      {
+        "id": "sun-flags-kazakhstan-grain-v1",
+        "label": "Symbolism"
+      },
+      {
+        "id": "sun-flags-pacific-pin-v1",
+        "label": "Drop a pin"
+      },
+      {
+        "id": "sun-flags-malawi-dawn-v1",
+        "label": "Meaning"
       }
     ]
   }

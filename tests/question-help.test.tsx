@@ -26,13 +26,26 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 const report = vi.fn();
-async function render(roundIndex = 0) {
+async function render(roundIndex = 0, answered = false) {
   await act(async () =>
     root.render(
       <GameShell
         journey={SECOND_JOURNEY}
         context={context}
-        game={{ ...initialGame, phase: "playing", roundIndex }}
+        game={{
+          ...initialGame,
+          phase: answered ? "feedback" : "playing",
+          roundIndex,
+          answers: answered
+            ? [
+                {
+                  ...initialGame,
+                  roundId: SECOND_JOURNEY.rounds[roundIndex].id,
+                  correct: false,
+                },
+              ]
+            : [],
+        }}
         dispatch={() => {}}
         webgl
         frame={() => {}}
@@ -66,7 +79,11 @@ it("keeps source/report controls out of the question body and opens the current 
   expect(details.open).toBe(false);
   await act(async () => details.querySelector("summary")!.click());
   expect(details.open).toBe(true);
-  expect(dialog.querySelector("a")?.href).toMatch(/^https:/);
+  expect(dialog.querySelector("a")).toBeNull();
+  expect(dialog.textContent).toContain("Sources appear after you answer.");
+  expect(dialog.textContent).not.toContain(
+    SECOND_JOURNEY.rounds[0].source.name,
+  );
   await act(async () =>
     dialog.querySelector<HTMLButtonElement>("button")!.click(),
   );
@@ -84,10 +101,23 @@ it("closes on Escape and on changing questions, without leaking the prior questi
     host.querySelector(".question-help-button"),
   );
   await open();
-  await render(1);
+  await render(1, true);
   expect(document.querySelector('[role="dialog"]')).toBeNull();
   await open();
   expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
     SECOND_JOURNEY.rounds[1].source.name.replace(/ · pinned /, " · "),
+  );
+});
+
+it("reveals source links after answering without needing to leave the question", async () => {
+  await render();
+  await open();
+  expect(document.querySelector('[role="dialog"] a')).toBeNull();
+  await render(0, true);
+  expect(
+    document.querySelector('[role="dialog"] a')?.getAttribute("href"),
+  ).toBe(SECOND_JOURNEY.rounds[0].source.url);
+  expect(document.querySelector('[role="dialog"]')?.textContent).not.toContain(
+    "Sources appear after you answer.",
   );
 });
