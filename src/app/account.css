@@ -402,16 +402,69 @@
   font-size: 13px;
   color: var(--ui-accent);
 }
-.account-footer {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+.account-profile-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 28px;
+}
+.account-profile-layout.is-editing {
+  display: block;
+}
+.account-profile-layout > .profile-card {
+  min-width: 0;
+}
+.account-profile-aside {
+  min-width: 0;
+  padding: 4px 0 0 12px;
+}
+.account-profile-layout.is-editing > .account-profile-aside {
+  width: calc(50% - 14px);
+  margin: 28px 0 0 auto;
+}
+.account-profile-aside h2 {
+  margin: 0 0 10px;
+  font-size: 23px;
+}
+.account-profile-aside p {
+  margin: 0 0 12px;
+  line-height: 1.6;
+}
+.profile-share {
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+}
+.profile-share-handle {
+  color: var(--ui-accent);
+  font-size: 17px;
+}
+.account-email {
+  overflow-wrap: anywhere;
+}
+.account-email small {
+  display: block;
+  margin-top: 4px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.account-profile-aside .tertiary-action {
+  min-height: 44px;
+  padding-block: 8px;
 }
 .account-dashboard button:disabled {
   cursor: default;
   opacity: 0.5;
 }
 @media (max-width: 700px) {
+  .account-profile-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .account-profile-layout .account-profile-aside {
+    padding: 0;
+    width: 100%;
+  }
   .avatar-options {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -497,12 +550,17 @@
   max-width: 52ch;
 }
 .friend-add,
-.friend-today,
 .friend-profile {
   padding: 20px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
   border-radius: 14px;
   background: rgb(var(--ui-surface-rgb));
+}
+.friend-add > h3 {
+  margin: 0 0 8px;
+}
+.friend-add > p {
+  margin: 0 0 18px;
 }
 .friends-panel summary {
   cursor: pointer;
@@ -584,48 +642,6 @@
 }
 .friend-requests .account-list li > .friend-identity {
   flex: 1;
-}
-.friend-today h3 {
-  margin-top: 8px;
-}
-.friend-today > p {
-  margin: 12px 0;
-}
-.friend-your-day {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 0;
-  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.14);
-  font-size: 14px;
-}
-.friend-your-day > span {
-  flex: 1;
-  color: var(--ui-muted);
-}
-.friend-standings {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  margin-top: 12px;
-}
-.friend-standings :is(th, td) {
-  text-align: left;
-  padding: 10px 8px;
-  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.14);
-}
-.friend-standings :is(th, td):last-child {
-  text-align: right;
-  width: 80px;
-}
-.friend-standings th {
-  font-size: 12px;
-  color: var(--ui-muted);
-  font-weight: 500;
-}
-.friend-standings .is-you {
-  color: var(--ui-accent);
-  background: rgb(var(--ui-line-rgb) / 0.05);
 }
 .friend-count {
   font: 14px var(--font-ui);
@@ -752,7 +768,6 @@
     flex-basis: 100%;
   }
   .friend-add,
-  .friend-today,
   .friend-profile {
     padding: 16px;
   }

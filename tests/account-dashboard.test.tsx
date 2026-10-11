@@ -172,7 +172,7 @@ async function input(selector: string, value: string) {
 it("loads private account data and accepts an incoming request for the displayed player", async () => {
   await mount();
   expect(host.textContent).toContain("Hello, Alice.");
-  expect(host.textContent).toContain("alice@example.com");
+  expect(host.textContent).not.toContain("alice@example.com");
   await click("Friends · New");
   await click("Accept");
   expect(request).toHaveBeenCalledWith("friends/b", "PATCH", {
@@ -182,6 +182,38 @@ it("loads private account data and accepts an incoming request for the displayed
   expect(host.querySelector(".friend-card")?.textContent).toContain(
     "Completed",
   );
+});
+it("keeps email and sign-out beside the profile card and off Dashboard and Friends", async () => {
+  const onSignOut = vi.fn();
+  const retry = vi.fn();
+  await mount({
+    onSignOut,
+    sync: {
+      status: "synced",
+      message:
+        "Progress is saved to your account. Sign in on another device to continue.",
+      retry,
+    },
+  });
+  expect(host.textContent).not.toContain("alice@example.com");
+  expect(host.textContent).not.toContain("Sign out");
+  await click("Profile");
+  const side = host.querySelector(
+    ".account-profile-layout > .account-profile-aside",
+  )!;
+  expect(
+    host.querySelector(".account-profile-layout > .profile-card"),
+  ).not.toBeNull();
+  expect(side.textContent).toContain("alice@example.com");
+  expect(side.textContent).toContain("Only you can see your email.");
+  expect(side.textContent).toContain("Copy profile link");
+  expect(host.textContent).not.toContain("Sign in on another device");
+  await click("Sign out");
+  expect(onSignOut).toHaveBeenCalledOnce();
+  await click("Friends · New");
+  expect(host.textContent).not.toContain("alice@example.com");
+  expect(host.textContent).not.toContain("Sign out");
+  expect(host.textContent).not.toContain("Sign in on another device");
 });
 it("retains an edited profile and shows a handle collision instead of silently losing changes", async () => {
   await mount();

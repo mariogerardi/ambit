@@ -114,7 +114,8 @@ it("shows completion without leaking a locked daily score and opens a friend’s
     "Completed",
   );
   expect(host.querySelector(".friend-standings")).toBeNull();
-  expect(host.textContent).toContain("Finish your Journey to reveal scores");
+  expect(host.querySelector(".friend-today")).toBeNull();
+  expect(host.textContent).toContain("Find a player, then send a request");
   await click("View Bob’s profile");
   expect(host.querySelector(".friend-stats")?.textContent).toContain("75%");
   expect(host.textContent).toContain(
@@ -124,7 +125,7 @@ it("shows completion without leaking a locked daily score and opens a friend’s
   await click("Block");
   expect(onAction).toHaveBeenCalledWith("b", "block");
 });
-it("includes your own result and compares only the same Journey and version", async () => {
+it("keeps the directory focused on friends and shows comparisons inside their profile", async () => {
   page.you.today = {
     date: score.date,
     status: "completed",
@@ -153,10 +154,8 @@ it("includes your own result and compares only the same Journey and version", as
     journeys: [],
   });
   await mount();
-  const table = host.querySelector(".friend-standings")!;
-  expect(table.textContent).toContain("Alice · You");
-  expect(table.textContent).toContain("Bob");
-  expect(table.textContent).not.toContain("Cathy");
+  expect(host.querySelector(".friend-standings")).toBeNull();
+  expect(host.querySelectorAll(".friend-card")).toHaveLength(2);
   await click("View Bob’s profile");
   expect(
     host.querySelector(".account-comparison tbody")?.textContent,

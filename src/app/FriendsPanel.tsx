@@ -241,22 +241,6 @@ export function FriendsPanel({
   const activity = (page?.friends ?? []).filter((item) =>
     accepted.some((friend) => friend.id === item.player.id),
   );
-  const standings = [
-    ...(player && page?.you.today.score
-      ? [{ player, score: page.you.today.score, you: true }]
-      : []),
-    ...activity.flatMap((item) =>
-      item.today.score &&
-      item.today.score.journeyId === page?.you.today.score?.journeyId &&
-      item.today.score.gameVersion === page?.you.today.score?.gameVersion
-        ? [{ player: item.player, score: item.today.score, you: false }]
-        : [],
-    ),
-  ].sort(
-    (a, b) =>
-      b.score.correct - a.score.correct ||
-      a.player.displayName.localeCompare(b.player.displayName),
-  );
   const notices = (
     <>
       {(error || failure) && (
@@ -386,9 +370,10 @@ export function FriendsPanel({
     <div className="friends-panel">
       <header className="friends-heading">
         <div>
-          <h2>A little company for the Journey.</h2>
+          <h2>Find your people.</h2>
           <p className="muted">
-            See where your friends have wandered—and how today went.
+            Find a player by handle, manage requests, or open a friend’s
+            profile.
           </p>
         </div>
         <button
@@ -407,14 +392,9 @@ export function FriendsPanel({
         </button>
       </header>
       {notices}
-      <details
-        className="friend-add"
-        open={
-          !accepted.length ||
-          !!new URLSearchParams(location.search).get("friend")
-        }
-      >
-        <summary>Add a friend</summary>
+      <section className="friend-add" aria-label="Find a friend">
+        <h3>Find a friend</h3>
+        <p className="muted">Find a player, then send a request to connect.</p>
         <form
           className="friend-find-form"
           onSubmit={(event) => {
@@ -543,7 +523,7 @@ export function FriendsPanel({
             </p>
           </div>
         )}
-      </details>
+      </section>
       {!!friends.filter(
         (item) => item.status === "incoming" || item.status === "outgoing",
       ).length && (
@@ -608,77 +588,15 @@ export function FriendsPanel({
           </ul>
         </section>
       )}
-      <section
-        className="friend-today"
-        aria-label="Today’s Journey with friends"
-      >
-        <span className="overline">TODAY’S JOURNEY</span>
-        <h3>A shared daily discovery.</h3>
-        {loading && !page && (
-          <p role="status" className="muted">
-            Opening your circle…
-          </p>
-        )}
-        {page && (
-          <>
-            <p className="muted">
-              {
-                activity.filter((item) => item.today.status === "completed")
-                  .length
-              }{" "}
-              of {activity.length} friends on this page have finished today.
-              {page.you.today.status !== "completed" &&
-                " Finish your Journey to reveal scores."}
-            </p>
-            <div className="friend-your-day">
-              <strong>You</strong>
-              <span>{statusLabel[page.you.today.status]}</span>
-              {page.you.today.score && (
-                <strong>
-                  {page.you.today.score.correct}/{page.you.today.score.total}
-                </strong>
-              )}
-            </div>
-          </>
-        )}
-        {!!standings.length && (
-          <table
-            className="friend-standings"
-            aria-label="Today’s Journey scores"
-          >
-            <thead>
-              <tr>
-                <th>Explorer</th>
-                <th>Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {standings.map((item) => (
-                <tr
-                  key={item.player.id}
-                  className={item.you ? "is-you" : undefined}
-                >
-                  <td>
-                    {item.player.displayName}
-                    {item.you && <span> · You</span>}
-                  </td>
-                  <td>
-                    {item.score.correct}/{item.score.total}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        <p className="friend-data-note">
-          Scores unlock after you finish the same Journey. Synced activity
-          refreshes within a minute.
-        </p>
-      </section>
       <section aria-label="Your friends">
         <h3>
           Your friends <span className="friend-count">{accepted.length}</span>
         </h3>
+        {loading && !page && accepted.length > 0 && (
+          <p role="status" className="muted">
+            Opening your friends…
+          </p>
+        )}
         <div className="friend-cards">
           {activity.map((friend) => (
             <button

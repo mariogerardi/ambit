@@ -332,254 +332,315 @@ export function AccountDashboard({
           </dl>
         </>
       )}
-      {tab === "profile" &&
-        (!profile && loading ? (
-          <p className="muted">Opening your profile…</p>
-        ) : profile && !editingProfile ? (
-          <article className="profile-card" aria-label="Your profile">
-            <header>
-              <Avatar player={profile} />
-              <div>
-                <span className="overline">EXPLORER</span>
-                <h2>{profile.displayName}</h2>
-                <p className="account-handle">@{profile.handle}</p>
-              </div>
-              <button
-                className="quiet-button profile-edit-button"
-                aria-label="Edit profile"
-                title="Edit profile"
-                onClick={() => {
-                  dirty.current = false;
-                  setDraft(profile);
-                  setEditingProfile(true);
-                }}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="m15 4 5 5M4 20l4-1L20 7a2 2 0 0 0-4-4L4 15Z" />
-                </svg>
-              </button>
-            </header>
-            <p className="profile-bio">
-              {profile.bio || "A curious mind. A world to explore."}
-            </p>
-            <dl className="profile-card-details">
-              <div>
-                <dt>Favorite place</dt>
-                <dd>{profile.favoriteRegion || "Still exploring"}</dd>
-              </div>
-              <div>
-                <dt>Journeys finished</dt>
-                <dd>{metrics.journeys.length}</dd>
-              </div>
-            </dl>
-          </article>
-        ) : (
-          <form
-            className="profile-form"
-            onSubmit={submitProfile}
-            onChange={() => {
-              dirty.current = true;
-            }}
-          >
-            <header className="profile-form-heading">
-              <h2>Make it yours.</h2>
-              <p className="muted">Choose how you appear around Ambit.</p>
-              {profile && (
+      {tab === "profile" && (
+        <div
+          className={`account-profile-layout${editingProfile || !profile ? " is-editing" : ""}`}
+        >
+          {!profile && loading ? (
+            <p className="muted">Opening your profile…</p>
+          ) : profile && !editingProfile ? (
+            <article className="profile-card" aria-label="Your profile">
+              <header>
+                <Avatar player={profile} />
+                <div>
+                  <span className="overline">EXPLORER</span>
+                  <h2>{profile.displayName}</h2>
+                  <p className="account-handle">@{profile.handle}</p>
+                </div>
                 <button
-                  type="button"
-                  className="quiet-button profile-edit-cancel"
+                  className="quiet-button profile-edit-button"
+                  aria-label="Edit profile"
+                  title="Edit profile"
                   onClick={() => {
-                    setDraft(profile);
                     dirty.current = false;
-                    setEditingProfile(false);
+                    setDraft(profile);
+                    setEditingProfile(true);
                   }}
                 >
-                  ← Back to profile
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m15 4 5 5M4 20l4-1L20 7a2 2 0 0 0-4-4L4 15Z" />
+                  </svg>
                 </button>
-              )}
-            </header>
-            <div className="profile-fields">
-              <label className="field">
-                <span>Display name</span>
-                <input
-                  autoComplete="nickname"
-                  maxLength={40}
-                  required
-                  value={draft.displayName}
-                  onChange={(e) =>
-                    setDraft({ ...draft, displayName: e.target.value })
-                  }
-                />
-              </label>
-              <label className="field">
-                <span>Handle</span>
-                <input
-                  aria-label="Handle"
-                  aria-describedby="handle-help handle-availability"
-                  aria-invalid={!!takenHandle}
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  pattern="[a-zA-Z][a-zA-Z0-9_]{2,23}"
-                  maxLength={24}
-                  required
-                  value={draft.handle}
-                  onChange={(e) =>
-                    setDraft({ ...draft, handle: e.target.value.toLowerCase() })
-                  }
-                />
-                <small id="handle-help">
-                  3–24 letters, numbers or underscores. Friends can find you by
-                  this handle.
-                </small>
-                <div
-                  id="handle-availability"
-                  className="handle-availability"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {takenHandle ? (
-                    <>
-                      <span>That handle is already in use.</span>
-                      <div className="handle-suggestions">
-                        {takenHandle.suggestions.map((suggestion) => (
-                          <button
-                            type="button"
-                            key={suggestion}
-                            onClick={() =>
-                              setDraft({ ...draft, handle: suggestion })
-                            }
-                          >
-                            @{suggestion}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  ) : handleAvailability?.state === "checking" ? (
-                    "Checking availability…"
-                  ) : handleAvailability?.state === "available" ? (
-                    "This handle is available."
-                  ) : handleAvailability?.state === "offline" ? (
-                    "Availability couldn’t be checked. Saving will check again."
-                  ) : null}
+              </header>
+              <p className="profile-bio">
+                {profile.bio || "A curious mind. A world to explore."}
+              </p>
+              <dl className="profile-card-details">
+                <div>
+                  <dt>Favorite place</dt>
+                  <dd>{profile.favoriteRegion || "Still exploring"}</dd>
                 </div>
-              </label>
-            </div>
-            <fieldset className="avatar-picker">
-              <legend>Choose your avatar</legend>
-              <div className="avatar-options">
-                {Object.entries(AVATARS)
-                  .filter(([, preset]) => !preset.hidden)
-                  .map(([value, preset]) => (
-                    <label
-                      key={value}
-                      className={`${draft.avatar === value ? "chosen" : ""} ${preset.image && !__AVATAR_IMAGES__.includes(preset.image) ? "avatar-pending" : ""}`}
-                    >
-                      <input
-                        type="radio"
-                        name="avatar"
-                        value={value}
-                        checked={draft.avatar === value}
-                        disabled={
-                          !!preset.image &&
-                          !__AVATAR_IMAGES__.includes(preset.image)
-                        }
-                        onChange={() =>
-                          setDraft({
-                            ...draft,
-                            avatar: value as AccountProfile["avatar"],
-                          })
-                        }
-                      />
-                      {preset.image &&
-                      !__AVATAR_IMAGES__.includes(preset.image) ? (
-                        <span className="avatar-slot" aria-hidden="true">
-                          {value.slice(-2)}
-                        </span>
-                      ) : (
-                        <ProfileAvatar
-                          avatar={value as AccountProfile["avatar"]}
-                          label={preset.label}
-                        />
-                      )}
-                      <small>{preset.label}</small>
-                    </label>
-                  ))}
-              </div>
-              {!__AVATAR_IMAGES__.length && (
-                <p className="muted avatar-coming-soon">
-                  More avatars are coming soon. Choose a flag below.
-                </p>
-              )}
-              <label className="field flag-avatar-choice">
-                <span>Or use a country flag</span>
-                <div className="flag-avatar-select">
-                  <ProfileAvatar avatar={draft.avatar} />
-                  <select
-                    aria-label="Country flag avatar"
-                    value={draft.avatar.startsWith("flag:") ? draft.avatar : ""}
-                    onChange={(event) => {
-                      if (event.target.value)
-                        setDraft({
-                          ...draft,
-                          avatar: event.target
-                            .value as AccountProfile["avatar"],
-                        });
+                <div>
+                  <dt>Journeys finished</dt>
+                  <dd>{metrics.journeys.length}</dd>
+                </div>
+              </dl>
+            </article>
+          ) : (
+            <form
+              className="profile-form"
+              onSubmit={submitProfile}
+              onChange={() => {
+                dirty.current = true;
+              }}
+            >
+              <header className="profile-form-heading">
+                <h2>Make it yours.</h2>
+                <p className="muted">Choose how you appear around Ambit.</p>
+                {profile && (
+                  <button
+                    type="button"
+                    className="quiet-button profile-edit-cancel"
+                    onClick={() => {
+                      setDraft(profile);
+                      dirty.current = false;
+                      setEditingProfile(false);
                     }}
                   >
-                    <option value="">Choose a country</option>
-                    {FLAG_AVATARS.map((country) => (
-                      <option key={country.id} value={`flag:${country.id}`}>
-                        {country.name}
-                      </option>
+                    ← Back to profile
+                  </button>
+                )}
+              </header>
+              <div className="profile-fields">
+                <label className="field">
+                  <span>Display name</span>
+                  <input
+                    autoComplete="nickname"
+                    maxLength={40}
+                    required
+                    value={draft.displayName}
+                    onChange={(e) =>
+                      setDraft({ ...draft, displayName: e.target.value })
+                    }
+                  />
+                </label>
+                <label className="field">
+                  <span>Handle</span>
+                  <input
+                    aria-label="Handle"
+                    aria-describedby="handle-help handle-availability"
+                    aria-invalid={!!takenHandle}
+                    autoComplete="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    pattern="[a-zA-Z][a-zA-Z0-9_]{2,23}"
+                    maxLength={24}
+                    required
+                    value={draft.handle}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        handle: e.target.value.toLowerCase(),
+                      })
+                    }
+                  />
+                  <small id="handle-help">
+                    3–24 letters, numbers or underscores. Friends can find you
+                    by this handle.
+                  </small>
+                  <div
+                    id="handle-availability"
+                    className="handle-availability"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {takenHandle ? (
+                      <>
+                        <span>That handle is already in use.</span>
+                        <div className="handle-suggestions">
+                          {takenHandle.suggestions.map((suggestion) => (
+                            <button
+                              type="button"
+                              key={suggestion}
+                              onClick={() =>
+                                setDraft({ ...draft, handle: suggestion })
+                              }
+                            >
+                              @{suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : handleAvailability?.state === "checking" ? (
+                      "Checking availability…"
+                    ) : handleAvailability?.state === "available" ? (
+                      "This handle is available."
+                    ) : handleAvailability?.state === "offline" ? (
+                      "Availability couldn’t be checked. Saving will check again."
+                    ) : null}
+                  </div>
+                </label>
+              </div>
+              <fieldset className="avatar-picker">
+                <legend>Choose your avatar</legend>
+                <div className="avatar-options">
+                  {Object.entries(AVATARS)
+                    .filter(([, preset]) => !preset.hidden)
+                    .map(([value, preset]) => (
+                      <label
+                        key={value}
+                        className={`${draft.avatar === value ? "chosen" : ""} ${preset.image && !__AVATAR_IMAGES__.includes(preset.image) ? "avatar-pending" : ""}`}
+                      >
+                        <input
+                          type="radio"
+                          name="avatar"
+                          value={value}
+                          checked={draft.avatar === value}
+                          disabled={
+                            !!preset.image &&
+                            !__AVATAR_IMAGES__.includes(preset.image)
+                          }
+                          onChange={() =>
+                            setDraft({
+                              ...draft,
+                              avatar: value as AccountProfile["avatar"],
+                            })
+                          }
+                        />
+                        {preset.image &&
+                        !__AVATAR_IMAGES__.includes(preset.image) ? (
+                          <span className="avatar-slot" aria-hidden="true">
+                            {value.slice(-2)}
+                          </span>
+                        ) : (
+                          <ProfileAvatar
+                            avatar={value as AccountProfile["avatar"]}
+                            label={preset.label}
+                          />
+                        )}
+                        <small>{preset.label}</small>
+                      </label>
                     ))}
-                  </select>
                 </div>
+                {!__AVATAR_IMAGES__.length && (
+                  <p className="muted avatar-coming-soon">
+                    More avatars are coming soon. Choose a flag below.
+                  </p>
+                )}
+                <label className="field flag-avatar-choice">
+                  <span>Or use a country flag</span>
+                  <div className="flag-avatar-select">
+                    <ProfileAvatar avatar={draft.avatar} />
+                    <select
+                      aria-label="Country flag avatar"
+                      value={
+                        draft.avatar.startsWith("flag:") ? draft.avatar : ""
+                      }
+                      onChange={(event) => {
+                        if (event.target.value)
+                          setDraft({
+                            ...draft,
+                            avatar: event.target
+                              .value as AccountProfile["avatar"],
+                          });
+                      }}
+                    >
+                      <option value="">Choose a country</option>
+                      {FLAG_AVATARS.map((country) => (
+                        <option key={country.id} value={`flag:${country.id}`}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </label>
+              </fieldset>
+              <label className="field">
+                <span>
+                  Favorite place or region <small>Optional</small>
+                </span>
+                <input
+                  maxLength={60}
+                  value={draft.favoriteRegion}
+                  onChange={(e) =>
+                    setDraft({ ...draft, favoriteRegion: e.target.value })
+                  }
+                  placeholder="The Mediterranean"
+                />
               </label>
-            </fieldset>
-            <label className="field">
-              <span>
-                Favorite place or region <small>Optional</small>
-              </span>
-              <input
-                maxLength={60}
-                value={draft.favoriteRegion}
-                onChange={(e) =>
-                  setDraft({ ...draft, favoriteRegion: e.target.value })
-                }
-                placeholder="The Mediterranean"
-              />
-            </label>
-            <label className="field">
-              <span>
-                A little about you <small>Optional · 160 characters</small>
-              </span>
-              <textarea
-                maxLength={160}
-                rows={3}
-                value={draft.bio}
-                onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
-                placeholder="What sparks your curiosity?"
-              />
-            </label>
-            <button
-              className="primary-button"
-              disabled={disabled || !!takenHandle}
-            >
-              Save profile
-            </button>
-          </form>
-        ))}
+              <label className="field">
+                <span>
+                  A little about you <small>Optional · 160 characters</small>
+                </span>
+                <textarea
+                  maxLength={160}
+                  rows={3}
+                  value={draft.bio}
+                  onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
+                  placeholder="What sparks your curiosity?"
+                />
+              </label>
+              <button
+                className="primary-button"
+                disabled={disabled || !!takenHandle}
+              >
+                Save profile
+              </button>
+            </form>
+          )}
+          <aside className="account-profile-aside" aria-label="Account details">
+            {profile && (
+              <section className="profile-share">
+                <h2>Your profile link</h2>
+                <p className="muted">
+                  Share your profile so friends can find you.
+                </p>
+                <p className="profile-share-handle">@{profile.handle}</p>
+                <button
+                  className="quiet-button tertiary-action"
+                  onClick={() => {
+                    const link = `${location.origin}/account?friend=${encodeURIComponent(profile.handle)}`;
+                    if (!navigator.clipboard?.writeText) {
+                      setNotice(`Your profile link: ${link}`);
+                      return;
+                    }
+                    void navigator.clipboard
+                      .writeText(link)
+                      .then(() => {
+                        if (!controller.current?.signal.aborted)
+                          setNotice("Your profile link is copied.");
+                      })
+                      .catch(() => {
+                        if (!controller.current?.signal.aborted)
+                          setNotice(`Your profile link: ${link}`);
+                      });
+                  }}
+                >
+                  Copy profile link ↗
+                </button>
+              </section>
+            )}
+            <section className="account-login-details">
+              <h2>Your account</h2>
+              {email && (
+                <p className="account-email">
+                  {email}
+                  <small>Only you can see your email.</small>
+                </p>
+              )}
+              {onSignOut && (
+                <button
+                  className="quiet-button tertiary-action"
+                  disabled={busy}
+                  onClick={onSignOut}
+                >
+                  Sign out
+                </button>
+              )}
+            </section>
+          </aside>
+        </div>
+      )}
       {tab === "friends" && (
         <FriendsPanel
           api={api}
@@ -616,35 +677,16 @@ export function AccountDashboard({
           }
         />
       )}
-      <footer className="account-footer">
-        <p className="muted">
-          {email} <span>· Only you can see your email.</span>
-        </p>
-        {sync && (
-          <>
-            <p role="status" className="muted">
-              {sync.message}
-            </p>
-            {(sync.status === "offline" || sync.status === "error") && (
-              <button
-                className="quiet-button tertiary-action"
-                onClick={sync.retry}
-              >
-                Retry sync
-              </button>
-            )}
-          </>
-        )}
-        {onSignOut && (
-          <button
-            className="quiet-button tertiary-action"
-            disabled={busy}
-            onClick={onSignOut}
-          >
-            Sign out
+      {sync && (sync.status === "offline" || sync.status === "error") && (
+        <div className="account-message" role="status">
+          <p role="status" className="muted">
+            {sync.message}
+          </p>
+          <button className="quiet-button tertiary-action" onClick={sync.retry}>
+            Retry sync
           </button>
-        )}
-      </footer>
+        </div>
+      )}
     </section>
   );
 }
