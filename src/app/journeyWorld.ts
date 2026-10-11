@@ -153,6 +153,9 @@ export function journeyWorld(
       game.phase === "playing" || game.phase === "feedback"
         ? [
             ...(round.overlays ?? []),
+            ...(game.phase === "playing" && game.help?.[round.id] === "assisted"
+              ? (round.guidance?.assist?.overlays ?? [])
+              : []),
             ...(game.phase === "feedback"
               ? (round.feedbackOverlays ?? [])
               : []),

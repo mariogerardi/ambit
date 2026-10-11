@@ -106,6 +106,16 @@ export function validGame(
     value.answers.length > journey.rounds.length
   )
     return false;
+  if (
+    value.help !== undefined &&
+    (!isRecord(value.help) ||
+      !Object.entries(value.help).every(
+        ([id, stage]) =>
+          journey.rounds.some((round) => round.id === id) &&
+          (stage === "hinted" || stage === "assisted"),
+      ))
+  )
+    return false;
   return value.answers.every(
     (a) =>
       isRecord(a) &&

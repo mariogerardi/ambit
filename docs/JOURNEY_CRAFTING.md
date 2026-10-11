@@ -116,6 +116,32 @@ when the task is locating Vienna. Naming the country being guessed is not.
 Sources remain locked until submission because their titles or pages can reveal
 answers.
 
+## Author help that teaches before it narrows
+
+Use **Question → Hint → Assist → Answer/reveal**. A hint adds an authored
+semantic foothold while preserving the task. An assist changes its presentation:
+removing options, narrowing a search area, or exposing spelling information.
+Every round should eventually have a hint; an assist is optional. Never generate
+help automatically from the answer, and never charge for orientation needed to
+understand the question.
+
+- Add information beyond the prompt: a relationship, meaningful region, historical
+  reason, or useful exception. Repeating a multiple-select predicate is not a hint.
+- Review both stages for naive-inspection leaks and spoilers for later rounds.
+  Help should leave meaningful work, not reveal a target through a camera center,
+  answer-centered circle, or exactly the required set of remaining candidates.
+- Author candidate elimination deliberately. Preserve every correct answer and
+  plausible alternatives; do not require a generic 50/50 reduction. All surviving
+  map candidates have equivalent styling, without hidden name disclosure.
+- Keep grading fixed, especially pin tolerances and country boundaries. A broad
+  search area is an assist, not a new acceptance zone; its center must not mark the
+  answer. Explain the distinction in the assist copy.
+- Request stages separately. Keep the hint visible after assistance, preserve
+  player selections, and record help use per round through reloads and sync.
+- Preserve correctness and completion without point deductions. Record the strongest
+  stage as unassisted, hinted, or assisted; count rounds using hints and assists
+  separately, with an assisted round counted in both.
+
 ## Verify that the required interaction is possible
 
 Correct answers accepted by the reducer do not establish that a player can enter

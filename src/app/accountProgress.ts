@@ -3,6 +3,7 @@ import type { DailyProgress } from "./dailyProgress";
 import { studyComplete, leaveStudy, startStudy } from "../study/engine";
 import type { StudySave } from "../study/engine";
 import type { JourneyScore, Challenge } from "../services/community";
+import { helpSummary } from "../game/guidance";
 
 export function openStudyChallenge(
   save: StudySave,
@@ -47,6 +48,7 @@ export function accountProgress(
       journeyId: a.journeyId,
       correct: a.game.answers.filter((answer) => answer.correct).length,
       total: 5,
+      ...(a.game.help ? { help: helpSummary(a.game) } : {}),
     }));
   const completedDays = new Set(journeys.map((a) => dateOrdinal(a.date)));
   let day = dateOrdinal(today),

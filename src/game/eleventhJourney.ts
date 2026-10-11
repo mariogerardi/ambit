@@ -67,6 +67,13 @@ export const ELEVENTH_JOURNEY: Journey = {
       progressLabel: "Türkiye",
       title: "The famous distraction.",
       prompt: "What is the capital of Türkiye?",
+      guidance: {
+        hint: "Look to inland Anatolia, rather than a city on the coast.",
+        assist: {
+          text: "Three choices remain. Think beyond the famous city on the Bosporus.",
+          candidateIds: ["city:ankara", "city:istanbul", "city:bursa"],
+        },
+      },
       instruction: "",
       mode: "choice-single",
       rule: { type: "choice-ids", ids: ["city:ankara"] },
@@ -99,6 +106,21 @@ export const ELEVENTH_JOURNEY: Journey = {
       title: "Find Canberra.",
       label: "Drop a pin",
       prompt: "Drop a pin within 150 km of Canberra, Australia.",
+      guidance: {
+        hint: "The capital is inland in southeastern Australia, between Sydney and Melbourne.",
+        assist: {
+          text: "The shaded area narrows your search to the southeast; its center is not the answer. You still need to land within 150 km.",
+          overlays: [
+            {
+              id: "assist:canberra-search",
+              type: "circle",
+              center: { lat: -34, lng: 145 },
+              radiusKm: 800,
+              shade: true,
+            },
+          ],
+        },
+      },
       instruction: "",
       mode: "pin",
       rule: { type: "pin-distance", targetId: "place:2172517", radiusKm: 150 },
@@ -112,6 +134,12 @@ export const ELEVENTH_JOURNEY: Journey = {
       },
       feedbackContextIds: ["wurl:AUS"],
       feedbackPlaces: [place("place:2147714"), place("place:2158177")],
+      sources: [
+        source(
+          "National Capital Authority · Canberra’s history",
+          "https://www.nca.gov.au/education/canberras-history",
+        ),
+      ],
       explanation:
         "Look inland, between Sydney and Melbourne. The capital isn’t either of the two famous coastal cities.",
     },
@@ -123,6 +151,12 @@ export const ELEVENTH_JOURNEY: Journey = {
       title: "The capital that moved.",
       prompt:
         "Nigeria moved its capital away from Lagos in 1991. What is its current capital?",
+      guidance: {
+        hint: "The new capital was planned near the country’s center, making it more accessible from across Nigeria.",
+        assist: {
+          text: "Its name has five letters and begins with A: A _ _ _ _.",
+        },
+      },
       instruction: "",
       inputLabel: "Capital city",
       rule: { type: "capital-name", countryId: "wurl:NGA" },
@@ -150,6 +184,13 @@ export const ELEVENTH_JOURNEY: Journey = {
       title: "Find Brasília.",
       label: "City",
       prompt: "Which marker is Brasília, Brazil’s capital since 1960?",
+      guidance: {
+        hint: "Moving the capital was a push toward the interior. Look away from the Atlantic coast, into central Brazil.",
+        assist: {
+          text: "Three inland candidates remain. Look for the one farther into central Brazil, rather than the cluster in the southeast.",
+          candidateIds: ["place:3469058", "place:3448439", "place:3470127"],
+        },
+      },
       instruction: "",
       mode: "city-single",
       rule: { type: "place-ids", ids: ["place:3469058"] },
@@ -178,6 +219,13 @@ export const ELEVENTH_JOURNEY: Journey = {
       title: "One country, three capitals.",
       label: "Cities",
       prompt: "Select South Africa’s three national capitals.",
+      guidance: {
+        hint: "Government is split across three cities: one hosts the administration, one Parliament, and one the Supreme Court of Appeal.",
+        assist: {
+          text: "Four candidates remain for three roles. A major commercial city is still among them, so don’t select every marker.",
+          candidateIds: [...SOUTH_AFRICA_CAPITAL_TARGETS, "place:993800"],
+        },
+      },
       instruction: "",
       mode: "city-multiple",
       count: 3,

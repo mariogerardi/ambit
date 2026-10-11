@@ -217,7 +217,20 @@ junctions and river mouths, and ships a matching downloadable ODbL database.
 [NOTICE](../NOTICE.md#danube-journey-river-route) records provenance and licensing.
 The broader editorial rules are in [Crafting a Journey](JOURNEY_CRAFTING.md).
 
-Journey and Study answer footers share `QuestionActions`: a disabled hint
-placeholder on the left and submission on the right. Immediate-answer questions
-show the hint placeholder without introducing a second commitment step. Hint
-content and scoring rules are not implemented yet.
+Journey and Study answer footers share `QuestionActions`, with help on the left
+and submission on the right. Immediate-answer questions keep their original
+commitment without an extra submit step. Questions without authored help retain
+the disabled placeholder; only **Not the obvious city** currently supplies help.
+
+`guidance.hint` is an authored semantic clue. An optional `guidance.assist` supplies
+separate copy, surviving `candidateIds`, and/or broad search `overlays`. The first
+request reveals the hint; the button then changes from “Need a hint?” with a bulb
+to “Need an assist?” with a lifebuoy, in a different color. After all available
+help is used it remains visible and disabled. Assists never modify the rule or
+grading tolerance. Eliminated choices cannot be newly selected through the map,
+buttons, or typing; existing selections are preserved and can still be removed.
+
+`GameState.help` records each round’s strongest stage (`hinted` or `assisted`).
+Older saves can omit it. The daily save codec validates round IDs and stages,
+merges help monotonically within the same run, and keeps new replays independent.
+Results show help counts and per-round annotations without subtracting points.

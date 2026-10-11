@@ -13,6 +13,7 @@ import type { PlaceFeature, RegionFeature } from "../geography/types";
 import { geoContains } from "d3-geo";
 import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
 import type { Answer, GameState } from "./state";
+import { candidateAvailable } from "./guidance";
 
 export function questionPlaces(
   question: Question,
@@ -51,6 +52,8 @@ export function questionPlaces(
     return [
       ...(question.places ?? []),
       ...selectableIds(question, context).flatMap((id) => {
+        if (!reveal && response && !candidateAvailable(question, response, id))
+          return [];
         const place = answerPlace(question, id);
         if (!place) return [];
         const selected = response?.selectedIds.includes(id);
@@ -300,6 +303,10 @@ export function questionVisualStates(
     for (const id of question.contextIds ?? [])
       if (!question.highlightParts?.some((part) => part.countryId === id))
         states[id] = "hinted";
+    if (game.phase === "playing" && game.help?.[question.id] === "assisted")
+      for (const id of selectableIds(question, context))
+        if (context.targets.has(id) && !candidateAvailable(question, game, id))
+          states[id] = "disabled";
     if (!question.mode.startsWith("choice-"))
       for (const id of game.selectedIds)
         if (context.targets.has(id))

@@ -313,8 +313,18 @@ def progress_summary(subject, fresh=False):
                 continue
             prior = attempts.get(identity)
             rank = lambda a: (a.get("startedAt", 0), len(a["game"].get("answers", [])), a["game"].get("phase") in ("finished", "failed"))
-            if not prior or rank(value) > rank(prior):
-                attempts[identity] = value
+            preferred = value if not prior or rank(value) > rank(prior) else prior
+            if prior and prior.get("runId") == value.get("runId") and prior.get("startedAt", 0) == started and prior.get("scheduleVersion", 1) == version:
+                usage = {}
+                for candidate in (prior, value):
+                    help_used = candidate["game"].get("help", {})
+                    if isinstance(help_used, dict):
+                        for identifier, stage in help_used.items():
+                            if stage in ("hinted", "assisted") and usage.get(identifier) != "assisted":
+                                usage[identifier] = stage
+                if usage:
+                    preferred = {**preferred, "game": {**preferred["game"], "help": usage}}
+            attempts[identity] = preferred
         elif record["namespace"] == "study" and record["field"].startswith("history.") and isinstance(value.get("session"), dict):
             if not isinstance(value["session"].get("history", []), list) or not isinstance(value["session"].get("settings", {}), dict):
                 continue
@@ -330,6 +340,14 @@ def progress_summary(subject, fresh=False):
             continue
         completed = game.get("phase") in ("finished", "failed")
         activity.append({"date": day, "journeyId": journey, "gameId": "journey", "gameVersion": attempt.get("scheduleVersion", 1), "status": "completed" if completed else "not_started" if game.get("phase") == "home" else "in_progress", "correct": sum(a.get("correct") is True for a in answers if isinstance(a, dict)) if completed else None, "total": 5, "startedAt": attempt.get("startedAt", 0)})
+        usage = game.get("help", {})
+        if completed and isinstance(usage, dict):
+            # Only aggregate help for answered rounds; never disclose IDs, clues or inputs.
+            answered = {a.get("roundId") for a in answers if isinstance(a, dict) and isinstance(a.get("roundId"), str)}
+            stages = [usage.get(identifier) for identifier in answered if usage.get(identifier) in ("hinted", "assisted")]
+            if stages:
+                assists = stages.count("assisted")
+                activity[-1]["help"] = {"hints": len(stages), "assists": assists, "status": "assisted" if assists else "hinted"}
     completed_studies, correct, questions = 0, 0, 0
     for record in studies.values():
         session = record["session"]
@@ -373,9 +391,9 @@ def shared_activity(summary, viewer, today):
     if daily:
         today_status["journeyId"] = daily["journeyId"]
         if daily["status"] == "completed" and not today_status["scoreLocked"]:
-            today_status["score"] = {k: daily[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total")}
+            today_status["score"] = {k: daily[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total", "help") if k in daily}
     # Lock historical results by Journey identity too, including admin overrides.
-    scores = [{k: a[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total")} for a in completed if (a["date"], a["journeyId"], a["gameVersion"]) in finished][:30]
+    scores = [{k: a[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total", "help") if k in a} for a in completed if (a["date"], a["journeyId"], a["gameVersion"]) in finished][:30]
     return {"today": today_status, "stats": {"journeyStreak": streak, "journeysCompleted": len(completed), "studySessions": summary["studySessions"], "studyQuestions": summary["studyQuestions"], "studyAccuracy": summary["studyAccuracy"]}, "journeys": scores}
 
 

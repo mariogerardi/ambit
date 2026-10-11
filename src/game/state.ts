@@ -1,4 +1,6 @@
 import { validPin } from "./answerTargets";
+import { candidateAvailable } from "./guidance";
+import type { HelpUsage } from "./guidance";
 import {
   canSelect,
   canSubmit,
@@ -18,6 +20,7 @@ export interface GameState extends Response {
   roundIndex: number;
   answers: Answer[];
   inputError?: string;
+  help?: HelpUsage;
 }
 export type Action =
   | { type: "start" }
@@ -29,6 +32,8 @@ export type Action =
   | { type: "text"; value: string }
   | { type: "ordered"; index: number; value: string }
   | { type: "clear" }
+  | { type: "request-hint" }
+  | { type: "request-assist" }
   | { type: "submit" }
   | { type: "next" };
 export const initialGame: GameState = {
@@ -90,6 +95,14 @@ export function gameReducer(
         };
   }
   if (state.phase !== "playing") return state;
+  if (action.type === "request-hint")
+    return round.guidance && !state.help?.[round.id]
+      ? { ...state, help: { ...state.help, [round.id]: "hinted" } }
+      : state;
+  if (action.type === "request-assist")
+    return round.guidance?.assist && state.help?.[round.id] === "hinted"
+      ? { ...state, help: { ...state.help, [round.id]: "assisted" } }
+      : state;
   if (action.type === "drop-pin")
     return round.mode === "pin" && validPin(action)
       ? {
@@ -146,6 +159,14 @@ export function gameReducer(
               round.selection.excludeIds?.includes("wurl:TCD")
                 ? " Chad is already given."
                 : ""),
+          }
+        : state;
+    if (!candidateAvailable(round, state, id))
+      return action.type === "guess-country"
+        ? {
+            ...state,
+            inputError:
+              "That option was removed by the assist. Choose one of the remaining candidates.",
           }
         : state;
     if (state.selectedIds.includes(id))

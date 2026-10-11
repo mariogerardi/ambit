@@ -32,6 +32,11 @@ export interface JourneyScore {
   journeyId: string;
   correct: number;
   total: number;
+  help?: {
+    hints: number;
+    assists: number;
+    status: "unassisted" | "hinted" | "assisted";
+  };
 }
 export interface HandleAvailability {
   handle: string;

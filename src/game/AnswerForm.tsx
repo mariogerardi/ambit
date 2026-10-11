@@ -6,6 +6,7 @@ import { canSubmit, responseCount, selectableIds } from "./questions";
 import { AnswerInput } from "./AnswerInput";
 import { AnswerCounter } from "./AnswerCounter";
 import { QuestionActions } from "./QuestionActions";
+import { candidateAvailable } from "./guidance";
 
 export function AnswerForm({
   question,
@@ -20,6 +21,18 @@ export function AnswerForm({
   dispatch: Dispatch<Action>;
   webgl: boolean;
 }) {
+  const assistCandidates = question.guidance?.assist?.candidateIds;
+  const guidance = question.guidance
+    ? {
+        content: question.guidance,
+        stage: game.help?.[question.id],
+        preservedSelection:
+          !!assistCandidates &&
+          game.selectedIds.some((id) => !assistCandidates.includes(id)),
+        onHint: () => dispatch({ type: "request-hint" }),
+        onAssist: () => dispatch({ type: "request-assist" }),
+      }
+    : undefined;
   const city = question.mode.startsWith("city-");
   const single =
     question.mode === "map-single" || question.mode === "city-single";
@@ -43,6 +56,7 @@ export function AnswerForm({
         )}
         <div className="pin-answer-actions">
           <QuestionActions
+            guidance={guidance}
             label="Submit pin"
             disabled={!canSubmit(question, context, game)}
             onSubmit={() => dispatch({ type: "submit" })}
@@ -125,6 +139,7 @@ export function AnswerForm({
               key={choice.id}
               className={game.selectedIds.includes(choice.id) ? "chosen" : ""}
               aria-pressed={game.selectedIds.includes(choice.id)}
+              disabled={!candidateAvailable(question, game, choice.id)}
               onClick={() => dispatch({ type: "select", id: choice.id })}
             >
               <span>{choice.label}</span>
@@ -133,6 +148,7 @@ export function AnswerForm({
           ))}
         </div>
         <QuestionActions
+          guidance={guidance}
           showSubmit={question.commitment === "submit"}
           disabled={!canSubmit(question, context, game)}
           onSubmit={() => dispatch({ type: "submit" })}
@@ -153,6 +169,7 @@ export function AnswerForm({
               <button
                 key={id}
                 onClick={() => dispatch({ type: "select", id })}
+                disabled={!candidateAvailable(question, game, id)}
                 aria-label={`${name(id)} — ${question.commitment === "immediate" ? "answer now" : "select answer"}`}
                 aria-pressed={
                   question.commitment === "submit"
@@ -207,12 +224,13 @@ export function AnswerForm({
           </p>
         ) : (
           <QuestionActions
+            guidance={guidance}
             disabled={!canSubmit(question, context, game)}
             onSubmit={() => dispatch({ type: "submit" })}
           />
         )}
         {question.commitment === "immediate" && (
-          <QuestionActions showSubmit={false} />
+          <QuestionActions guidance={guidance} showSubmit={false} />
         )}
         {!question.disclosure.namedChoices &&
           (!city || question.allowTyping === true || !webgl) && (
@@ -375,6 +393,7 @@ export function AnswerForm({
         </>
       )}
       <QuestionActions
+        guidance={guidance}
         submitType="submit"
         disabled={!canSubmit(question, context, game)}
       />

@@ -85,6 +85,59 @@ function result(id: string): StudySave {
   return archiveStudy({ ...emptyStudy, session });
 }
 
+it("persists assistance through reload, stale draft writes and device merges without carrying it into a replay", () => {
+  const date = "2026-10-11";
+  const journeyId = "not-the-obvious-city-v1";
+  const selected = setDailyPuzzle(emptyDaily, date, journeyId, JOURNEY_INDEX);
+  const save = openDaily(selected, date, false, JOURNEY_INDEX);
+  const first = createDailySave(JOURNEY_INDEX);
+  first.save(save);
+  const second = createDailySave(JOURNEY_INDEX);
+  const stale = second.load();
+  const round = JOURNEY_INDEX.find((journey) => journey.id === journeyId)!
+    .rounds[0].id;
+  const used = {
+    ...save,
+    attempts: {
+      ...save.attempts,
+      [date]: {
+        ...save.attempts[date],
+        game: {
+          ...save.attempts[date].game,
+          help: { [round]: "assisted" as const },
+        },
+      },
+    },
+  };
+  first.save(used);
+  second.save({
+    ...stale,
+    attempts: {
+      ...stale.attempts,
+      [date]: {
+        ...stale.attempts[date],
+        game: {
+          ...stale.attempts[date].game,
+          text: "new draft",
+          help: { [round]: "hinted" },
+        },
+      },
+    },
+  });
+  const reloaded = createDailySave(JOURNEY_INDEX);
+  expect(reloaded.load().attempts[date].game.help).toEqual({
+    [round]: "assisted",
+  });
+  reloaded.mergeEntries(second.entries());
+  expect(reloaded.load().attempts[date].game.help).toEqual({
+    [round]: "assisted",
+  });
+  reloaded.save(openDaily(reloaded.load(), date, true, JOURNEY_INDEX));
+  expect(
+    createDailySave(JOURNEY_INDEX).load().attempts[date].game.help,
+  ).toBeUndefined();
+});
+
 describe("durable player saves", () => {
   it("keeps results when a stale tab updates preferences, including after reload", () => {
     const a = createStudySave(),

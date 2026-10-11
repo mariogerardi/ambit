@@ -7,6 +7,7 @@ import type { RegionFeature, Focus } from "../geography/types";
 import type { Journey, QuestionContext } from "./questions";
 import { explanation, questionPrompt, committedNameVisible } from "./questions";
 import { journeyScore } from "./state";
+import { helpSummary, helpCountCopy } from "./guidance";
 import type { GameState, Action } from "./state";
 import { questionMapPresentation } from "./presentation";
 import { AnswerForm } from "./AnswerForm";
@@ -53,6 +54,7 @@ export function GameShell({
   const round = journey.rounds[game.roundIndex];
   const inGame = game.phase === "playing" || game.phase === "feedback";
   const ended = game.phase === "finished" || game.phase === "failed";
+  const helpCounts = helpCountCopy(helpSummary(game));
   const feedback = game.answers.at(-1),
     correct = feedback?.correct;
   const mapPresentation = questionMapPresentation(round, game.phase, !!correct);
@@ -235,6 +237,7 @@ export function GameShell({
             </strong>
             <span>correct answers</span>
           </div>
+          {helpCounts && <p className="journey-help-summary">{helpCounts}</p>}
           {(playground || game.phase === "failed") && (
             <p>
               {playground
@@ -255,6 +258,13 @@ export function GameShell({
                     {answer
                       ? resolvedRoundIdentity(question)
                       : roundIdentity(question)}
+                    {game.help?.[question.id] && (
+                      <small className="journey-round-help">
+                        {game.help[question.id] === "assisted"
+                          ? "Assisted"
+                          : "Hinted"}
+                      </small>
+                    )}
                   </strong>
                   <span
                     className={

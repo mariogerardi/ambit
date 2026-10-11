@@ -140,14 +140,18 @@ it("keeps the directory focused on friends and shows comparisons inside their pr
     scoreLocked: false,
     score: { ...score, correct: 3 },
   };
-  page.you.journeys = [{ ...score, correct: 3 }];
+  page.you.journeys = [
+    { ...score, correct: 3, help: { hints: 1, assists: 0, status: "hinted" } },
+  ];
   page.friends[0].today = {
     date: score.date,
     status: "completed",
     scoreLocked: false,
     score,
   };
-  page.friends[0].journeys = [score];
+  page.friends[0].journeys = [
+    { ...score, help: { hints: 2, assists: 1, status: "assisted" } },
+  ];
   const other = { ...bob, id: "c", displayName: "Cathy", handle: "cathy" };
   friends.push({ id: "c", status: "accepted", player: other });
   page.friends.push({
@@ -171,6 +175,12 @@ it("keeps the directory focused on friends and shows comparisons inside their pr
   expect(
     host.querySelector(".account-comparison tbody")?.textContent,
   ).toContain("4/5");
+  expect(
+    host.querySelector(".account-comparison tbody")?.textContent,
+  ).toContain("Hinted");
+  expect(
+    host.querySelector(".account-comparison tbody")?.textContent,
+  ).toContain("Assisted");
 });
 it("finds a handle before sending a request and supports cancel, decline, and unblock", async () => {
   friends = [

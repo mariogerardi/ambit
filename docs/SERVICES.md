@@ -87,6 +87,12 @@ this rule, including the older `/friends/{id}/journeys` endpoint. The API derive
 totals from private synced saves; answers, pins, typed responses, drafts and email
 are never returned to friends.
 
+Journey results may include aggregate help counts and the strongest help status
+(hinted or assisted). Assisted rounds count as both a hint and an assist. Friends
+comparisons label results as unassisted, hinted, or assisted without point
+deductions. The projection counts answered rounds only and never exposes per-round
+help records, clues, eliminated choices, or other answer information.
+
 `GET /account/friends/activity?date=YYYY-MM-DD` returns your own activity and up to
 24 accepted friends with a continuation cursor. `GET /account/friends/{id}/profile`
 returns one accepted friend's public profile and aggregate activity. Summary reads

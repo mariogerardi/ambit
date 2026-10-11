@@ -112,6 +112,17 @@ export interface Question {
   prompt: string;
   /** Brief, spoiler-safe context connecting this stop to the Journey. */
   leadIn?: string;
+  /** A semantic clue first; an optional, separately requested change to the task display. */
+  guidance?: {
+    hint: string;
+    assist?: {
+      text: string;
+      /** Authored survivors, including every correct answer and plausible alternatives. */
+      candidateIds?: string[];
+      /** Broad search context, never a grading boundary or target-centered tolerance. */
+      overlays?: MapOverlay[];
+    };
+  };
   instruction: string;
   inputLabel?: string;
   mode: AnswerMode;
@@ -299,6 +310,22 @@ export function createQuestionContext(
       throw Error(
         `Multiple-choice questions may have at most six choices: ${round.id}.`,
       );
+    const survivors = round.guidance?.assist?.candidateIds;
+    if (survivors) {
+      const eligible = round.mode.startsWith("choice-")
+        ? (round.choices ?? []).map((choice) => choice.id)
+        : selectableIds(round, context);
+      const expected = solutionIds(round, context);
+      if (
+        new Set(survivors).size !== survivors.length ||
+        survivors.some((id) => !eligible.includes(id)) ||
+        expected.some((id) => !survivors.includes(id)) ||
+        survivors.length <= responseCount(round, context)
+      )
+        throw Error(
+          `Assist must preserve answers and plausible alternatives: ${round.id}.`,
+        );
+    }
     if (
       round.disclosure.namedChoices &&
       selectableIds(round, context).length > 6

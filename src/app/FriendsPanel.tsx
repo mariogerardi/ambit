@@ -5,10 +5,25 @@ import type {
   FriendActivityPage,
   Friendship,
   PlayerProfile,
+  JourneyScore,
 } from "../services/community";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { localDateKey } from "./dailyProgress";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
+import { helpCountCopy } from "../game/guidance";
+
+function ScoreHelp({ score }: { score: JourneyScore }) {
+  const status = score.help?.status ?? "unassisted";
+  return (
+    <small title={score.help ? helpCountCopy(score.help) : undefined}>
+      {status === "assisted"
+        ? "Assisted"
+        : status === "hinted"
+          ? "Hinted"
+          : "Unassisted"}
+    </small>
+  );
+}
 
 const statusLabel = {
   not_started: "Not started",
@@ -344,9 +359,11 @@ export function FriendsPanel({
                         </td>
                         <td>
                           {yours ? `${yours.correct}/${yours.total}` : "—"}
+                          {yours && <ScoreHelp score={yours} />}
                         </td>
                         <td>
                           {score.correct}/{score.total}
+                          <ScoreHelp score={score} />
                         </td>
                       </tr>
                     );

@@ -1,6 +1,7 @@
 import { RecordSave } from "./recordSave";
 import type { SaveCodec } from "./recordSave";
 import { isRecord } from "./storage";
+import { mergeHelp } from "../game/guidance";
 import {
   DAILY_KEY,
   emptyDaily,
@@ -184,7 +185,16 @@ export function dailySaveCodec(
       { home: 0, playing: 1, feedback: 2, finished: 3, failed: 3 }[
         attempt.game.phase
       ];
-    return rank(a) > rank(b) ? a : b;
+    const preferred = rank(a) > rank(b) ? a : b;
+    return a.game.help || b.game.help
+      ? {
+          ...preferred,
+          game: {
+            ...preferred.game,
+            help: mergeHelp(a.game.help, b.game.help),
+          },
+        }
+      : preferred;
   };
   return {
     empty: emptyDaily,

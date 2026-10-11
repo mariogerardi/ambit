@@ -155,6 +155,39 @@ class CommunityTests(unittest.TestCase):
         self.call("PATCH /account/friends/{id}", "b", {"action": "block"}, id="a")
         self.assertEqual(self.call("GET /account/friends/{id}/profile", "a", id="b")[0], 403)
 
+    def test_help_is_aggregated_monotonically_without_disclosing_clues_or_bypassing_score_lock(self):
+        self.friends()
+        record = self.daily_record("b")
+        attempt = json.loads(record["valueJson"])
+        attempt["runId"] = "same-run"
+        for i, answer in enumerate(attempt["game"]["answers"]):
+            answer["roundId"] = "private-round-" + str(i)
+        attempt["game"]["help"] = {"private-round-0": "assisted", "private-round-1": "hinted", "not-answered": "assisted"}
+        record["valueJson"] = json.dumps(attempt)
+        stale = {**record, "writer": "stale"}
+        old = json.loads(record["valueJson"])
+        old["game"]["help"] = {"private-round-0": "hinted"}
+        stale["valueJson"] = json.dumps(old)
+        self.db.saves = [record, stale]
+        locked = self.call("GET /account/friends/{id}/profile", "a", id="b", query={"date": "2026-10-10"})[1]
+        self.assertNotIn("score", locked["today"])
+        self.assertNotIn("help", json.dumps(locked))
+        self.db.saves.append(self.daily_record("a"))
+        scores = self.call("GET /account/friends/{id}/journeys", "a", id="b")[1]
+        self.assertEqual(scores[0]["help"], {"hints": 2, "assists": 1, "status": "assisted"})
+        self.assertEqual(scores[0]["correct"], 3)
+        self.assertNotIn("private", json.dumps(scores))
+        self.assertNotIn("not-answered", json.dumps(scores))
+        # Replays are distinct attempts; assistance from the old run must not carry over.
+        replay = self.daily_record("b", writer="replay")
+        new = json.loads(replay["valueJson"])
+        new.update({"runId": "new-run", "startedAt": 2})
+        replay["valueJson"] = json.dumps(new)
+        self.db.saves.append(replay)
+        self.db.items.pop(("user#b", "activity-v1"), None)
+        fresh_scores = self.call("GET /account/friends/{id}/journeys", "a", id="b")[1]
+        self.assertNotIn("help", fresh_scores[0])
+
     def test_handle_availability_is_case_insensitive_and_suggests_unclaimed_alternatives(self):
         value = self.profile("a", "Alice")
         own = self.call("GET /account/handles/{handle}", "a", handle="ALICE")[1]
