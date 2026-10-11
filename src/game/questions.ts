@@ -216,6 +216,7 @@ export interface Question {
   /** Filled answer slots plus one implicit distractor. Dragging always swaps. */
   orderInitial?: string[];
   orderGroupLabel?: string;
+  orderAsideLabel?: string;
   overlays?: MapOverlay[];
   /** Explanatory guides appear only after submission, never as playable clues. */
   feedbackOverlays?: MapOverlay[];

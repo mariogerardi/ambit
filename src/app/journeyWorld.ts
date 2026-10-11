@@ -152,10 +152,14 @@ export function journeyWorld(
       completion?.physicalFeatures ??
       (game.phase === "playing" || game.phase === "feedback"
         ? [
-            ...(round.physicalFeatures ?? []),
-            ...(game.phase === "feedback"
-              ? (round.feedbackPhysicalFeatures ?? [])
-              : []),
+            ...new Map(
+              [
+                ...(round.physicalFeatures ?? []),
+                ...(game.phase === "feedback"
+                  ? (round.feedbackPhysicalFeatures ?? [])
+                  : []),
+              ].map((feature) => [feature.id, feature]),
+            ).values(),
           ]
         : []),
     overlays:

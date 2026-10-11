@@ -130,6 +130,16 @@ export interface PhysicalFeature {
     /** Closed pictorial face rings, anchored in reviewed terrain; not range fills. */
     lightFaces?: number[][][];
     darkFaces?: number[][][];
+    /** Offline whole-symbol exclusions for question-specific feature clearance. */
+    clearances?: Record<
+      string,
+      Partial<
+        Record<
+          "ridges" | "hachures" | "highlights" | "lightFaces" | "darkFaces",
+          number[]
+        >
+      >
+    >;
   };
   /** Alternate anchors inside a large feature, used to keep its name in regional views. */
   labelAnchors?: number[][];

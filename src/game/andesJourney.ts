@@ -1,3 +1,4 @@
+import { withReliefClearance } from "../geography/relief";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { CAPITALS, capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
@@ -10,8 +11,11 @@ const andes: PhysicalFeature = {
   ...(geography.andes as PhysicalFeature),
   relief,
 };
-const lake = geography.lake as PhysicalFeature;
-const altiplano = geography.altiplano as PhysicalFeature;
+const lake: PhysicalFeature = {
+  ...(geography.lake as PhysicalFeature),
+  fillOpacity: 1,
+};
+const andesAtLake = withReliefClearance(andes, lake.id);
 const frontiers = geography.frontiers as PhysicalFeature[];
 const source = (name: string, url: string): FactSource => ({
   name,
@@ -87,20 +91,9 @@ const aconcagua = summit(
   geography.peaks["Cerro Aconcagua"],
   "wurl:ARG",
 );
-const southAmerica = [
-  "ARG",
-  "BOL",
-  "BRA",
-  "CHL",
-  "COL",
-  "ECU",
-  "GUY",
-  "PRY",
-  "PER",
-  "SUR",
-  "URY",
-  "VEN",
-].map((id) => `wurl:${id}`);
+const southernCandidates = ["ARG", "CHL", "PRY", "URY"].map(
+  (id) => `wurl:${id}`,
+);
 const lakeCandidates = ["CHL", "PER", "ECU", "ARG", "BOL", "COL"].map(
   (id) => `wurl:${id}`,
 );
@@ -170,7 +163,7 @@ export const ANDES_JOURNEY: Journey = {
   completion: {
     focus: { lat: -20, lng: -72, altitude: 1.65 },
     views: [
-      { lat: 5, lng: -74, altitude: 0.55 },
+      { lat: 4.6, lng: -74.1, altitude: 0.42 },
       { lat: -1, lng: -78.5, altitude: 0.4 },
       { lat: -15.8, lng: -69.3, altitude: 0.5 },
       { lat: -32.65, lng: -70, altitude: 0.55 },
@@ -179,28 +172,16 @@ export const ANDES_JOURNEY: Journey = {
     ],
     regionIds: ["wurl:PER", "wurl:BOL", "wurl:ARG"],
     physicalFeatures: [
-      andes,
+      andesAtLake,
       lake,
       ...frontiers.map((feature) => ({ ...feature, color: "#bba5f1" })),
     ],
     places: [
       { ...bogota, visualState: "visited", labelFlexible: true, priority: 100 },
       { ...chimborazo, visualState: "visited" },
-      {
-        id: "andes:lake-stop",
-        name: "Lake Titicaca",
-        kind: "other",
-        lat: -15.8,
-        lng: -69.3,
-        sourceId: "natural-earth:5.1.2",
-        markerHidden: true,
-        labelFlexible: true,
-        priority: 100,
-        visualState: "visited",
-      },
       { ...aconcagua, visualState: "visited" },
       {
-        ...countryLabel("CHL", "Chile · Pacific finish", -40, -73),
+        ...countryLabel("CHL", "Chile", -40, -73),
         visualState: "visited",
       },
     ],
@@ -235,7 +216,7 @@ export const ANDES_JOURNEY: Journey = {
       feedbackContextIds: [],
       map: { ...common.map, feedbackRegions: "neutral" },
       focus: { lat: 6, lng: -72, altitude: 0.6 },
-      feedbackFocus: { lat: 7.5, lng: -70, altitude: 0.4 },
+      feedbackFocus: { lat: 5.5, lng: -73, altitude: 0.32 },
       feedbackPlaces: [
         {
           ...bogota,
@@ -268,7 +249,7 @@ export const ANDES_JOURNEY: Journey = {
         ),
       ],
       guidance: {
-        hint: "The Andes reach both Colombia and Venezuela, but their capitals don’t have the same relationship to the range.",
+        hint: "The Andes reach both Colombia and Venezuela, but only one of their capitals lies within the range.",
         assist: {
           text: "Medellín and Paramaribo are ruled out. Choose between Bogotá and Caracas.",
           candidateIds: ["city:bogota", "city:caracas"],
@@ -328,7 +309,7 @@ export const ANDES_JOURNEY: Journey = {
       guidance: {
         hint: "Chimborazo stands south of Quito, in Ecuador’s western cordillera.",
         assist: {
-          text: "Two summit markers remain. Chimborazo is the farther south of the pair.",
+          text: "Two summit markers remain: Chimborazo and Cotopaxi. Choose the marker you think is Chimborazo.",
           candidateIds: [chimborazo.id, "andes:cotopaxi"],
         },
       },
@@ -344,15 +325,23 @@ export const ANDES_JOURNEY: Journey = {
       title: "Two shores, one lake.",
       leadIn: "Continue south to a shared lake high on the Altiplano.",
       prompt: "Which two countries share Lake Titicaca?",
-      mode: "choice-multiple",
+      mode: "map-multiple",
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:PER", "wurl:BOL"] },
-      selection: { type: "none" },
+      selection: { type: "ids", ids: lakeCandidates },
       choices: choices(lakeCandidates),
-      contextIds: lakeCandidates,
+      contextIds: [],
+      disclosure: {
+        ...common.disclosure,
+        hoverNames: true,
+        namedChoices: true,
+        committedNames: true,
+      },
+      map: { ...common.map, hoverFeedback: true, candidates: "highlighted" },
+      instruction: "Choose two countries on the globe or below.",
       focus: { lat: -16, lng: -69, altitude: 0.8 },
       feedbackFocus: { lat: -15.8, lng: -69.3, altitude: 0.2 },
-      feedbackPhysicalFeatures: [altiplano, lake],
+      feedbackPhysicalFeatures: [andesAtLake, lake],
       explanation:
         "The lake spans their border high on the Altiplano, between Andean ranges.",
       source: source(
@@ -380,15 +369,21 @@ export const ANDES_JOURNEY: Journey = {
       leadIn: "Follow the range south to its highest peak.",
       prompt:
         "Which country contains Aconcagua, the highest mountain in the Americas?",
-      instruction: "Tap a country on the globe.",
+      instruction: "Tap one of the four highlighted countries.",
       mode: "map-single",
       rule: { type: "country-ids", ids: ["wurl:ARG"] },
-      selection: { type: "ids", ids: southAmerica },
+      selection: { type: "ids", ids: southernCandidates },
       allowTyping: false,
-      map: { ...common.map, hoverFeedback: true, candidates: "neutral" },
+      map: {
+        ...common.map,
+        hoverFeedback: true,
+        candidates: "highlighted",
+        borderIds: southernCandidates,
+      },
+      disclosure: { ...common.disclosure, hoverNames: true },
       contextIds: [],
       feedbackHintIds: ["wurl:CHL"],
-      focus: { lat: -29, lng: -68, altitude: 0.65 },
+      focus: { lat: -34, lng: -65, altitude: 0.72 },
       feedbackFocus: { lat: -32.65, lng: -70, altitude: 0.2 },
       feedbackPlaces: [aconcagua],
       explanation:
@@ -416,7 +411,7 @@ export const ANDES_JOURNEY: Journey = {
       title: "North to south beside Chile.",
       leadIn: "Finish beside Chile.",
       prompt:
-        "Order Chile’s land neighbors north to south, and move the non-neighbor to Distractor.",
+        "Order Chile’s land neighbors north to south and isolate the Impostor.",
       mode: "choice-order",
       count: 3,
       selection: { type: "none" },
@@ -428,7 +423,7 @@ export const ANDES_JOURNEY: Journey = {
       choices: choices(["wurl:BOL", "wurl:PRY", "wurl:ARG", "wurl:PER"]),
       orderLabels: ["North", "Middle", "South"],
       orderInitial: ["wurl:BOL", "wurl:PRY", "wurl:PER"],
-      orderGroupLabel: "North → South",
+      orderAsideLabel: "Impostor",
       contextIds: [],
       map: { ...common.map, borders: false },
       feedbackHintIds: ["wurl:CHL"],
@@ -443,7 +438,7 @@ export const ANDES_JOURNEY: Journey = {
       guidance: {
         hint: "One card belongs farther east and never reaches Chile.",
         assist: {
-          text: "Argentina is placed and locked in the southernmost slot. The displaced card swaps places with it. Resolve the northern slots and the distractor.",
+          text: "Argentina is placed and locked in the southernmost slot. Resolve the northern slots and isolate the impostor.",
           fixedSlots: [{ index: 2, id: "wurl:ARG" }],
         },
       },

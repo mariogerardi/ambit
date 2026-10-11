@@ -238,7 +238,10 @@ United States. Attribution and source terms are documented at
 
 `scripts/prepare-mountain-relief.py` generalizes zoom-5 elevation tiles and uses
 spaced regional high points to anchor joined pictorial mountain forms, shaded
-faces and attached hatching within the reviewed Andes extent. Pale faces do not
+faces and attached hatching within the reviewed Andes extent. Symbols are scaled
+to 85% of their initial size. An optional whole-symbol clearance around Titicaca
+uses its reviewed shoreline plus a 0.08-degree display margin; it is applied only
+when the lake is the authored focal feature. Pale faces do not
 denote permanent snow. These are cartographic symbols, not exact summit outlines,
 surveyed ridgelines or navigation data. Source tile URLs, SHA-256 hashes,
 processing conventions, and the derived asset hash are recorded in

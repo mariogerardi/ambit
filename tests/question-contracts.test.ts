@@ -52,6 +52,7 @@ describe("safe question authoring contracts", () => {
     const round = {
       ...ANDES_JOURNEY.rounds[3],
       map: { ...ANDES_JOURNEY.rounds[3].map!, hoverFeedback: false },
+      disclosure: { ...ANDES_JOURNEY.rounds[3].disclosure, hoverNames: false },
     };
     const journey = { ...ANDES_JOURNEY, rounds: [round] };
     const context = createQuestionContext(regions, [], journey);

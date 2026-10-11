@@ -81,8 +81,8 @@ export class PhysicalFeatures {
         if (feature.relief) {
           // Two batched face meshes for the whole chain. Never fill its footprint.
           for (const [rings, color, opacity] of [
-            [feature.relief.lightFaces ?? [], "#d8c29b", 0.42],
-            [feature.relief.darkFaces ?? [], "#745a40", 0.32],
+            [feature.relief.lightFaces ?? [], "#c1b79a", 1],
+            [feature.relief.darkFaces ?? [], "#99896d", 1],
           ] as const) {
             if (!rings.length) continue;
             const pieces = rings.map(
@@ -104,7 +104,7 @@ export class PhysicalFeatures {
               new MeshBasicMaterial({
                 color,
                 opacity,
-                transparent: true,
+                transparent: false,
                 depthWrite: false,
                 side: DoubleSide,
                 polygonOffset: true,

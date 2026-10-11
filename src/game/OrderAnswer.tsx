@@ -103,10 +103,8 @@ export function OrderAnswer({
           ? "Drag to swap, or select two cards."
           : `Drag cards into the slots, or choose a card and then a slot.${spareCount > 0 ? ` Leave ${spareCopy} aside.` : ""}`}
       </p>
-      {populated && (
-        <p className="order-group-title">
-          {question.orderGroupLabel ?? "Ordered group"}
-        </p>
+      {populated && question.orderGroupLabel && (
+        <p className="order-group-title">{question.orderGroupLabel}</p>
       )}
       <ol className="order-slots" aria-label="Ordered answer slots">
         {Array.from({ length: question.count }, (_, index) => {
@@ -160,7 +158,9 @@ export function OrderAnswer({
         data-order-slot={-1}
       >
         <span className="order-position">
-          {populated ? "Distractor" : "Spare cards"}
+          {populated
+            ? (question.orderAsideLabel ?? "Distractor")
+            : "Spare cards"}
         </span>
         <div className="order-spares">
           {(question.choices ?? [])

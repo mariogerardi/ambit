@@ -13,7 +13,7 @@ from urllib.request import urlopen
 import numpy as np
 from PIL import Image
 from scipy.ndimage import gaussian_filter, maximum_filter
-from shapely.geometry import Point, shape
+from shapely.geometry import Point, Polygon, shape
 from shapely.prepared import prep
 
 ZOOM = 5
@@ -49,7 +49,10 @@ for x, y, _, _, elevation in tiles:
     height[(y - YS.start)*SIZE:(y-YS.start+1)*SIZE,
            (x - XS.start)*SIZE:(x-XS.start+1)*SIZE] = elevation
 height = gaussian_filter(height, 1.2)
-footprint = prep(shape(json.loads(Path("src/game/data/andes-context.v1.json").read_text())["andes"]["geometry"]))
+context = json.loads(Path("src/game/data/andes-context.v1.json").read_text())
+footprint = prep(shape(context["andes"]["geometry"]))
+# A small breathing margin around the actual shoreline; only applied when authored.
+lake_clearance = prep(shape(context["lake"]["geometry"]).buffer(.08))
 
 def location(y, x):
     # Pixel centers in Web Mercator. GeoJSON coordinates are always lng, lat.
@@ -72,10 +75,13 @@ for y, x in candidates:
     if inside(y, x) and all((y-ay)**2 + (x-ax)**2 >= 64 for ay, ax in anchors):
         anchors.append((y, x))
 ridges, highlights, hachures, light_faces, dark_faces = [], [], [], [], []
+collections = {"ridges": ridges, "highlights": highlights, "hachures": hachures,
+               "lightFaces": light_faces, "darkFaces": dark_faces}
+clearance = {key: [] for key in collections}
 for y, x in sorted(anchors):
     # Two joined peaks with a shared saddle, shoulders and attached slope ink.
     # Scale gently with elevation; shadows indicate a drawn face, never snow.
-    scale = .8 + min(height[y, x]/5000, 1) * .35
+    scale = (.8 + min(height[y, x]/5000, 1) * .35) * .85
     seed = (int(y)*31 + int(x)*17) % 11
     width, rise = 11*scale, (11 + seed*.25)*scale
     left = (y+4*scale, x-width)
@@ -88,6 +94,7 @@ for y, x in sorted(anchors):
     outline = [left, top, saddle, second, right, foot]
     if not all(inside(*point) for point in outline):
         continue
+    starts = {key: len(paths) for key, paths in collections.items()}
     loc = lambda point: location(*point)
     shoulder = (y-rise*.28, x-width*.5)
     notch = (y-rise*.4, x-width*.46)
@@ -107,8 +114,13 @@ for y, x in sorted(anchors):
             hachures.append(list(map(loc, [start, mid, end])))
     # Secondary peak shares the first peak's foothills.
     ridges.append(list(map(loc, [second, (y+1*scale,x+4.5*scale), right])))
+    if lake_clearance.intersects(Polygon(light_faces[-1])) or lake_clearance.intersects(Polygon(dark_faces[-1])):
+        # Remove the complete symbol, including attached ink, never chopped peaks.
+        for key, paths in collections.items():
+            clearance[key].extend(range(starts[key], len(paths)))
 result = {"ridges": ridges, "hachures": hachures, "highlights": highlights,
-          "lightFaces": light_faces, "darkFaces": dark_faces}
+          "lightFaces": light_faces, "darkFaces": dark_faces,
+          "clearances": {context["lake"]["id"]: clearance}}
 OUT.write_text(json.dumps(result, separators=(",", ":")) + "\n")
 MANIFEST.write_text(json.dumps({
     "source": "Mapzen/Tilezen Terrain Tiles on AWS; USGS GMTED2010/SRTM and NOAA ETOPO1",
@@ -116,6 +128,6 @@ MANIFEST.write_text(json.dumps({
     "attributionUrl": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
     "tiles": {url: digest for _, _, url, digest, _ in tiles},
     "derivedSha256": hashlib.sha256(OUT.read_bytes()).hexdigest(),
-    "processing": "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. All vertices clipped to reviewed Andes extent. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading."
+    "processing": "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. Symbols scaled to 85% of the initial pictorial size. All vertices clipped to reviewed Andes extent. Optional whole-symbol lake clearance uses actual Titicaca shoreline plus 0.08 degree display margin. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading."
 }, indent=2)+"\n")
 print(f"Prepared {len(ridges)} crest segments, {len(hachures)} slope strokes, {len(highlights)} high-elevation segments; {OUT.stat().st_size} bytes.")

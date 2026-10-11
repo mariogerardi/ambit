@@ -364,7 +364,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
           "Correct answer: New Brunswick",
         );
       } else {
-        expect(probe.props!.regionInteraction).toBe(false);
+        expect(probe.props!.regionInteraction).toBe(true);
+        expect(probe.props!.regionNames).toBe("all");
         expect(host.textContent).toContain(
           "Which two countries share Lake Titicaca?",
         );
@@ -372,10 +373,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         await click("Peru");
         expect(
           host.querySelector<HTMLButtonElement>(
-            ".mode-incoming .candidate-grid + .question-answer-actions .answer-submit-button",
+            ".mode-incoming .question-answer-actions .answer-submit-button",
           )!.disabled,
         ).toBe(true);
-        await click("Bolivia");
+        await act(async () => probe.props!.onSelect(member("wurl:BOL")));
         await click("Submit answer");
         expect(host.querySelector(".round-feedback")!.textContent).toContain(
           "Well spotted.",

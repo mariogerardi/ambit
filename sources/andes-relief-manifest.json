@@ -32,6 +32,6 @@
     "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/5/9/22.png": "4c3deed534a893cf5357413302c9664863743cf5db9b07ba72d280c9e90c3821",
     "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/5/10/22.png": "bae0553ae56435122c89c9f166cd94a5ced26c0a27ddf723050eddd15fe2a329"
   },
-  "derivedSha256": "18e3767387f130b6746e2b085b41fc8039ef3fd5676b521ff7370293bc838db4",
-  "processing": "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. All vertices clipped to reviewed Andes extent. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading."
+  "derivedSha256": "b14955e16538a44a80eeeb3b2897c0ac17819821cf6b4110343cd07906c3619c",
+  "processing": "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. Symbols scaled to 85% of the initial pictorial size. All vertices clipped to reviewed Andes extent. Optional whole-symbol lake clearance uses actual Titicaca shoreline plus 0.08 degree display margin. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading."
 }

@@ -68,7 +68,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     const lakeQuestion = journey.rounds[2];
     const before = journeyWorld(regions, journey, at(2), context);
     for (const choice of lakeQuestion.choices!)
-      expect(before.states[choice.id]).toBe("hinted");
+      expect(before.states[choice.id]).toBe("selectable");
     const answered = reduce(
       at(2),
       { type: "select", id: "wurl:PER" },
@@ -94,6 +94,71 @@ describe("Along the Andes authored map and ordering puzzle", () => {
             ),
           ),
       ).toBe(true);
+  });
+  it("supports named lake picks on the globe and buttons, with a clear single-label lake reveal", () => {
+    const round = journey.rounds[2];
+    const before = journeyWorld(regions, journey, at(2), context);
+    expect(before.regionInteraction).toBe(true);
+    expect(before.regionNames).toBe("all");
+    const buttons = renderToStaticMarkup(
+      <AnswerForm
+        question={round}
+        context={context}
+        game={at(2)}
+        dispatch={() => {}}
+        webgl
+      />,
+    );
+    expect(buttons).toContain("Peru — select answer");
+    expect(buttons).toContain("Bolivia — select answer");
+    const answered = reduce(
+      at(2),
+      { type: "select", id: "wurl:PER" },
+      { type: "select", id: "wurl:BOL" },
+      { type: "submit" },
+    );
+    const after = journeyWorld(regions, journey, answered, context);
+    const cleared = after.physicalFeatures.find(
+      (feature) => feature.id === "andes:range",
+    )!;
+    const original = round.physicalFeatures![0];
+    expect(
+      after.physicalFeatures.filter((feature) => feature.id === "andes:range"),
+    ).toHaveLength(1);
+    expect(cleared.relief!.lightFaces!.length).toBeLessThan(
+      original.relief!.lightFaces!.length,
+    );
+    const lake = after.physicalFeatures.find(
+      (feature) => feature.id === "andes:titicaca",
+    )!;
+    for (const ring of [
+      ...cleared.relief!.lightFaces!,
+      ...cleared.relief!.darkFaces!,
+    ])
+      for (const point of ring)
+        expect(
+          geoContains(
+            sphericalGeometry(lake.geometry!),
+            point as [number, number],
+          ),
+        ).toBe(false);
+    expect(
+      after.physicalFeatures.some((feature) => feature.name === "Altiplano"),
+    ).toBe(false);
+    const recap = journeyWorld(
+      regions,
+      journey,
+      { ...answered, phase: "finished" },
+      context,
+    );
+    expect(
+      [...recap.physicalFeatures, ...recap.places].filter(
+        (feature) => feature.name === "Lake Titicaca",
+      ),
+    ).toHaveLength(1);
+    expect(
+      recap.places.some((place) => place.name.includes("Pacific finish")),
+    ).toBe(false);
   });
   it("shows the equator as free orientation at Chimborazo", () => {
     const map = journeyWorld(regions, journey, at(1), context);
@@ -138,8 +203,14 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     expect(map.regionInteraction).toBe(true);
     expect(map.selectDisabled).toBe(true);
     expect(map.showBorders).toBe(true);
-    expect(map.states["wurl:CHL"]).toBe("disabled");
-    expect(map.states["wurl:ARG"]).toBe("disabled");
+    for (const id of ["wurl:CHL", "wurl:ARG", "wurl:PRY", "wurl:URY"])
+      expect(map.states[id]).toBe("selectable");
+    expect(map.borderRegionIds).toEqual([
+      "wurl:ARG",
+      "wurl:CHL",
+      "wurl:PRY",
+      "wurl:URY",
+    ]);
     const helped = reduce(
       at(3),
       { type: "request-hint" },
@@ -305,6 +376,8 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       expect(host.querySelector('[aria-label="North: Peru"]')).toBeTruthy();
       expect(host.querySelectorAll(".order-card")).toHaveLength(4);
       expect(host.textContent).not.toContain("Spare cards");
+      expect(host.textContent).toContain("Impostor");
+      expect(host.textContent).not.toContain("North → South");
       expect(host.textContent).not.toContain("empty");
       const card = button("Bolivia");
       const middle = host.querySelector<HTMLElement>('[data-order-slot="1"]')!;
@@ -362,7 +435,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     const recap = journeyWorld(regions, journey, finished, context);
     expect(
       journey.completion!.views!.slice(0, 5).map((view) => view.lat),
-    ).toEqual([5, -1, -15.8, -32.65, -40]);
+    ).toEqual([4.6, -1, -15.8, -32.65, -40]);
     expect(recap.places.every((place) => place.visualState === "visited")).toBe(
       true,
     );
@@ -385,6 +458,10 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     )!;
     expect(faces.children).toHaveLength(2); // Batched symbols, no range footprint.
     for (const face of faces.children) {
+      expect((face as Mesh).material).toMatchObject({
+        opacity: 1,
+        transparent: false,
+      });
       const intersections: unknown[] = [];
       face.raycast({} as never, intersections as never);
       expect(intersections).toEqual([]);
