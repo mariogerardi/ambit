@@ -36,7 +36,7 @@ export const TENTH_JOURNEY: Journey = {
   id: "ring-of-fire-v1",
   title: "Around the Ring of Fire",
   description:
-    "Across the Pacific, islands, mountains, and capitals connect one Journey.",
+    "Trace the Pacific rim from Japan through Indonesia to the Andes and New Zealand. One ocean connects every stop.",
   rounds: [
     {
       ...base,

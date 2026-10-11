@@ -1,3 +1,4 @@
+import { NORTH_AMERICA_JOURNEY } from "./northAmericaJourney";
 import { FIFTEENTH_JOURNEY } from "./fifteenthJourney";
 import { FOURTEENTH_JOURNEY } from "./fourteenthJourney";
 import { THIRTEENTH_JOURNEY } from "./thirteenthJourney";
@@ -34,6 +35,7 @@ export const QUESTION_CATALOG: Question[] = [
   ...THIRTEENTH_JOURNEY.rounds,
   ...FOURTEENTH_JOURNEY.rounds,
   ...FIFTEENTH_JOURNEY.rounds,
+  ...NORTH_AMERICA_JOURNEY.rounds,
 ];
 export const PLAYGROUND_JOURNEY: Journey = {
   id: "question-playground-v1",

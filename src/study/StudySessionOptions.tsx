@@ -10,7 +10,6 @@ export function StudySessionOptions({
   returnFocus,
   onApply,
   onClose,
-  onReport,
   onFinish,
   locked = false,
   onPause,
@@ -20,7 +19,6 @@ export function StudySessionOptions({
   onPause?(): void;
   onPreferencesChange?(visible: boolean): void;
   settings: StudySettings;
-  onReport?(): void;
   onFinish?(): void;
   returnFocus: RefObject<HTMLButtonElement | null>;
   onApply(settings: StudySettings): void;
@@ -114,11 +112,6 @@ export function StudySessionOptions({
         </div>
         {!preferences ? (
           <div className="study-options-actions">
-            {onReport && (
-              <button className="quiet-button" onClick={onReport}>
-                Report this question
-              </button>
-            )}
             {!locked && (
               <button
                 className="quiet-button"

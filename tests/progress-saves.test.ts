@@ -207,7 +207,9 @@ describe("durable player saves", () => {
       latest = b.load();
     const attempt = latest.attempts[date];
     const answer = {
-      roundId: JOURNEY_INDEX[0].rounds[0].id,
+      roundId: JOURNEY_INDEX.find(
+        (journey) => journey.id === attempt.journeyId,
+      )!.rounds[0].id,
       correct: true,
       text: "",
       ordered: [],
@@ -269,7 +271,7 @@ describe("durable player saves", () => {
       first = JOURNEY_INDEX[0].id,
       second = JOURNEY_INDEX[1].id;
     const store = createDailySave(JOURNEY_INDEX);
-    store.save(openDaily(emptyDaily, date));
+    store.save(openDaily(setDailyPuzzle(emptyDaily, date, first), date));
     store.save(setDailyPuzzle(store.load(), date, second));
     vi.mocked(Date.now).mockReturnValue(200);
     store.save(openDaily(store.load(), date));

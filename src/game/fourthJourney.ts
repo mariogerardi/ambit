@@ -38,7 +38,7 @@ export const FOURTH_JOURNEY: Journey = {
   id: "mediterranean-v1",
   title: "Around the Mediterranean",
   description:
-    "Around one sea, islands, languages, and shared histories bring many countries together.",
+    "Follow the Mediterranean from Spain to an Italian island, across to Libya, and back to the Balkans. Five stops, one shared sea.",
   rounds: [
     {
       ...base,

@@ -30,7 +30,7 @@ describe("question playground", () => {
     expect([...new Set(rounds.map((q) => q.mode))].sort()).toEqual(
       Object.keys(ANSWER_TYPES).sort(),
     );
-    expect(rounds).toHaveLength(75);
+    expect(rounds).toHaveLength(80);
     expect(new Set(rounds.map((q) => q.id)).size).toBe(rounds.length);
     expect(rounds.slice(0, 5)).toEqual(JOURNEY.rounds);
   });

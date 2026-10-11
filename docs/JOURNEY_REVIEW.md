@@ -1,98 +1,112 @@
-# Journey review for discussion
+# Journey review and retained rotation
 
-Reviewed October 10, 2026: all 15 authored Journeys and their 75 questions, plus
-daily scheduling, answer handling, result storage and Friends comparisons.
-These are editorial recommendations, not approved removals or a fresh geographic
-fact check. No Journey content or rotation has been changed in this pass.
+Owner decisions recorded October 10, 2026. These replace the preliminary review.
+The active daily rotation now contains **nine concepts**. Six packs are scrapped
+from that rotation; their definitions remain loadable for existing saves and
+source material. The four-letter idea from Journey 1 can be reused later.
 
-## Settle the daily format first
+## Editorial decisions
 
-- Five questions with a clear theme or a thread connecting the stops. A daily
-  should feel like one small discovery, with a satisfying final question.
-- One official attempt per player per published day; normal wrong answers should
-  explain and continue through all five questions. Keep practice and admin replays
-  separate from the official result.
-- Agree on the reset: one worldwide reset gives friends the same daily at the same
-  time; local midnight follows the current implementation. This decision must
-  also settle the meaning of a day for streaks and archives.
-- Score out of five, without time penalties initially. Keep difficulty approachable
-  and allow equivalent written answers wherever practical. Decide whether
-  precision pin questions belong in the daily or in specialist practice.
-- The recap should contain five expandable question rows. Each can show a small
-  friends-correct count, with names and outcomes inside the expanded row. Both
-  players must finish the same published Journey before comparisons unlock;
-  friends' guesses stay private.
-- Separate the playable archive from authored source packs. An archive can provide
-  past discoveries as practice without creating new official daily scores.
+| #   | Journey                  | Decision                            | Next work                                                                                                                       |
+| --- | ------------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | The long way home        | Scrap                               | Save the four-letter idea for another daily.                                                                                    |
+| 2   | Beyond borders           | Rework                              | Keep questions 1–4. Connect the Canadian flag/languages pair to the Andes and latitude questions; replace the finale if needed. |
+| 3   | Across the Silk Roads    | Scrap                               | Remove from the active daily rotation.                                                                                          |
+| 4   | Around the Mediterranean | Rework                              | Keep the challenge; establish a journey around the sea in the introduction and feedback.                                        |
+| 5   | North America by name    | Rework, lighter edition implemented | Ask for one Canadian territory and one U.S. state bordering Mexico. Make the north-to-south-to-east route explicit.             |
+| 6   | Worlds within worlds     | Scrap                               | Too demanding as a daily pack.                                                                                                  |
+| 7   | Borrowed names           | Scrap                               | Remove from the active daily rotation.                                                                                          |
+| 8   | Pins and cities          | Scrap                               | Remove from the active daily rotation.                                                                                          |
+| 9   | Shared neighbors         | Keep                                | Preserve all five pins: deducing a country does not make its irregular footprint or location easy to pin. This is the premise.  |
+| 10  | Around the Ring of Fire  | Rework                              | Keep the questions; make the Pacific itinerary clearer.                                                                         |
+| 11  | Not the obvious city     | Keep, strengthen thread             | Preserve the challenge; frame each stop as a reason the familiar city is not the capital.                                       |
+| 12  | Exceptions to the rule   | Rework                              | Preserve the individual questions; connect the exceptions into one developing idea.                                             |
+| 13  | The Z trail              | Scrap                               | Remove from the active daily rotation.                                                                                          |
+| 14  | Island instincts         | Keep                                | Preserve the repeated ownership-versus-location quirk. Mechanic repetition is intentional.                                      |
+| 15  | On Russia's doorstep     | Keep                                | Preserve the borderless pin challenge and current difficulty.                                                                   |
 
-## Preliminary shortlist
+## Crafting principles for this pass
 
-“Keep” means retain the concept in the daily shortlist, with normal polishing and
-fact verification. “Rework” means preserve useful material but change the pack.
-“Move to practice” means remove it from the proposed daily rotation, not delete
-the authored questions or existing results.
+A throughline can be a geographic itinerary, a shared surprise, or one distinctive
+mechanic used five times. Variety is not a requirement. Repeated mechanics work
+when each stop develops the premise: unfamiliar outlines in Shared neighbors,
+misleading island locations in Island instincts, and borderless placement around
+Russia in On Russia's doorstep.
 
-| Journey                  | Recommendation   | Reason and next edit                                                                                                                                                                                                |
-| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The long way home        | Keep, polish     | The strongest connected itinerary: Windhoek, border crossings, short names, Lima, then the route home. Simplify the ordered great-circle finale and make its wrong-answer behavior consistent with the other packs. |
-| Beyond borders           | Rework           | Strong individual questions, but Canada, the Andes, Amman and Tunis do not yet make a coherent trip. Give it a clearer thread and reconsider the circle-count finale.                                               |
-| Across the Silk Roads    | Keep, polish     | A regional story spanning language, borders, a sea, an exclave and capitals. Reduce the burden of the final ordered-capitals response; review adjacency conventions.                                                |
-| Around the Mediterranean | Keep, polish     | A recognizable regional theme with varied questions. Explicitly review the sea/coastline counting convention and historical-republic wording before publication.                                                    |
-| North America by name    | Rework           | A useful regional pack, but three typed-region questions involve many entries. Keep the latitude surprise; reduce repeated typing and clarify the naming theme.                                                     |
-| Worlds within worlds     | Keep             | A strong surrounded/separated-place theme and memorable reveals. Balance the more obscure administrative-region clues with accessible entry questions.                                                              |
-| Borrowed names           | Keep, polish     | A distinctive idea connecting distant places. Four single-country selections are repetitive; vary one or two interactions and review namesake wording carefully.                                                    |
-| Pins and cities          | Move to practice | Primarily a tour of pin and city-marker mechanics. Preserve it as location practice or onboarding, rather than a featured daily story.                                                                              |
-| Shared neighbors         | Rework           | Border deduction is a good premise, but all five questions use the same pin interaction. Keep the best clues, vary the responses and build a progression.                                                           |
-| Around the Ring of Fire  | Keep, polish     | Good regional scope and interaction variety. Strengthen the connection to the title so the questions feel like a single Pacific story.                                                                              |
-| Not the obvious city     | Keep             | One of the clearest premises, with varied formats and a natural reveal. Revisit pin tolerance and wording around multiple national capitals.                                                                        |
-| Exceptions to the rule   | Keep             | The most direct surprise-and-discovery pack. Balance choices against country selections and make every explanation worth reading.                                                                                   |
-| The Z trail              | Rework           | A memorable naming hook with varied interactions, but the letter supplies most of the connection. Strengthen the final payoff and reconsider the unusually tight pin tolerance.                                     |
-| Island instincts         | Rework           | A strong ownership-versus-location theme. All five questions ask essentially the same thing; keep two or three islands and vary the other stops.                                                                    |
-| On Russia's doorstep     | Move to practice | A deliberately demanding, borderless five-pin challenge. Better suited to a specialist pack or later minigame than the general daily audience.                                                                      |
+Copy should establish that premise before play and reinforce it in the reveals.
+A generic regional title does not by itself connect five unrelated questions.
+Keep worthwhile difficulty; reduce response burden where specifically requested.
+Do not replace favorite questions merely to manufacture a more uniform pack.
 
-Proposed starting point: **8 core daily concepts, 5 rewrites, 2 practice packs**.
-Retain the source material until the replacement questions and archive policy are
-approved. Some individual questions from the practice packs could still support
-new daily stories.
+The maintained repository guide is [Question catalog and authoring](QUESTION_CATALOG.md).
+No separate Journey crafting guide was present in the repository during this pass.
 
-## Publication constraints found in the implementation
+## Changes already implemented
 
-The current daily chooses a pack by local calendar date and modulo the bundled
-catalog length. Removing or reordering packs changes which Journey a date selects.
-Before pruning the rotation, publish an explicit date-to-Journey schedule and keep
-past entries stable. Preserve immutable question IDs and version revised packs
-instead of rewriting an already published edition.
+The Mediterranean, Ring of Fire, Not the obvious city, and Exceptions introductions
+now state their intended connection more clearly. Their questions remain intact;
+the deeper feedback and finale work below is still for discussion.
 
-The first pack's final question uses `end-game` for an incorrect response; the
-other 74 questions use feedback-and-continue. Standardize this deliberately rather
-than letting one pack produce different completion semantics.
+North America has a new `north-america-v2` edition. Question 1 accepts any one
+Canadian territory. Question 3 accepts any one U.S. state bordering Mexico,
+including postal abbreviations. Its introduction explains the geographic route.
+The v1 edition and original round IDs remain readable for saved results.
 
-Pin tolerances vary, and multi-entry/ordered answers can require considerably more
-work than one-tap answers even though each question is worth one point. Difficulty
-and mobile usability need a shared standard before Friends comparisons become
-more competitive.
+Question information lives in a question-mark button in the top-right question
+row. Sources expand inside its popover; reporting opens the existing feedback
+form. Study's cog retains session actions, not question reporting.
 
-The current Friends API exposes completion and score totals, not per-question
-outcomes. The proposed recap would need a minimal outcome-only API with the same
-friendship and completion gates. Competitive results are currently based on synced,
-client-graded saves; later ranked minigames should use authoritative scoring.
+Daily selection uses the explicit retained-ID list in
+[`journeyRotation.ts`](../src/game/journeyRotation.ts), independently of the complete
+loadable archive. Existing attempts stay pinned to their edition. New selections
+repeat the nine retained packs by local calendar date from October 5, 2026;
+reshuffling dates was explicitly accepted. Adding archived editions no longer
+changes the active rotation. Admin's local override remains device-specific.
 
-Some explanations are generated from rules at runtime. Review the final feedback
-the player receives, rather than treating an empty authored explanation as proof
-that feedback is missing.
+## Salvage proposals to discuss
 
-## New concepts to develop after the shortlist
+- **Beyond borders:** the first pair already connects national identity and
+  language. The Andes and latitude questions can develop borders that cross
+  landscapes and assumptions, but that may still be too broad. First write a
+  one-sentence premise that genuinely explains all four; then choose a fifth
+  question that pays it off. Avoid a title-only repair.
+- **Mediterranean:** frame a trip between the shores of one sea: Spain's regional
+  languages, an Italian island, Libya's capital, former Yugoslav republics, then
+  a coastline count bringing the whole sea together. The descriptions and reveals
+  should carry the itinerary without adding hint-heavy instructions.
+- **Ring of Fire:** Japan → its northern island → Indonesia → the Pacific-facing
+  Andes → New Zealand. Tie each reveal to the Pacific rim; don't imply every
+  question is asking about volcanoes.
+- **Not the obvious city:** Ankara, Canberra, Abuja, Brasília, then South Africa's
+  split capitals. Develop the reasons capitals depart from expectations, with the
+  last question challenging the assumption that there must be just one.
+- **Exceptions:** longest-border intuition → landlocked neighbors → hemispheres
+  → a lost coastline → a capital below sea level. A possible premise is “five ways
+  a familiar map rule breaks.” Needs an introduction and a deliberate final reveal,
+  not a claim that the questions form a continuous physical itinerary.
 
-1. **A river's journey:** follow one river through five discoveries, using the
-   globe to connect its landscape, countries and cities. Adds more physical geography.
-2. **Closer than they look:** five counterintuitive latitude or distance clues,
-   with clear reference lines and accessible answer formats.
-3. **One place, many worlds:** connect a region's language, landscape, borders,
-   flag and city through one itinerary. Use an underrepresented region in the
-   retained catalog rather than adding another capital-heavy global assortment.
+These are directions, not implemented question replacements or a fresh fact check.
 
-These are concept sketches. Choose regions, verify primary sources, then draft
-the five questions and their explanations together before implementing them.
+## Daily publication proposal
 
-Suggested discussion order: agree on the daily rules, review the eight core packs,
-choose which rewrites deserve work, then write three new packs to fill the gaps.
+The nine-pack cycle is usable for friends now after deployment, but repeats every
+nine days. Before advertising a permanent daily, polish the retained packs and
+add enough new five-question Journeys for a 14-day opening run. Keep the four
+mechanic-led packs intact and alternate them with itineraries and surprise packs.
+
+Publish an explicit date-to-edition calendar for that opening run. Keep one scored
+attempt, five questions, score out of five, and completion-gated friend totals.
+Admin overrides only affect the current device and should not be used to publish a
+shared daily. Decide together whether reset stays at local midnight or becomes a
+single worldwide reset before promising synchronized launch times.
+
+Three possible new directions: follow one river through five discoveries; use
+five counterintuitive latitude/distance comparisons; or return to four-letter
+places with a simpler unifying mechanic. Draft and verify each pack together
+before implementation.
+
+Friends currently exposes completion and total scores, not per-question outcomes.
+The five-row recap would need outcome-only data gated on accepted friendship and
+both players finishing the same date and edition; guesses should remain private.
+Competitive minigames will need authoritative scoring beyond today's client-graded
+synced saves.

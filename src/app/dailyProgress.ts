@@ -1,3 +1,4 @@
+import { ACTIVE_JOURNEY_IDS } from "../game/journeyRotation";
 import { validPin } from "../game/answerTargets";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import type { JourneySummary } from "../game/journeyRegistry";
@@ -48,9 +49,11 @@ export function dailyJourney(
   if (override)
     return catalog.find((j) => j.id === override.journeyId) ?? catalog[0];
   const offset = dateOrdinal(date) - dateOrdinal(DAILY_SCHEDULE.begins);
-  const bundled = catalog.filter((j) =>
-    JOURNEY_INDEX.some((entry) => entry.id === j.id),
-  );
+  const bundled = ACTIVE_JOURNEY_IDS.flatMap((id) => {
+    const journey = catalog.find((entry) => entry.id === id);
+    return journey ? [journey] : [];
+  });
+  if (!bundled.length) throw Error("No active Journeys are available");
   return bundled[((offset % bundled.length) + bundled.length) % bundled.length];
 }
 export function millisecondsToMidnight(now = new Date()): number {

@@ -1926,7 +1926,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     vi.setSystemTime(new Date(2026, 9, 5, 12));
     await mount();
     await click("Play");
-    await act(async () => probe.props!.onSelect(member("wurl:NAM")));
+    await act(async () => probe.props!.onSelect(member("wurl:CAN")));
     const canvas = host.querySelector("canvas");
     await click("Admin");
     expect(location.pathname).toBe("/admin");
@@ -2025,6 +2025,14 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   it("retains daily answers and partial input across home, refresh, and midnight", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
     vi.setSystemTime(new Date(2026, 9, 5, 23, 59, 59));
+    localStorage.setItem(
+      DAILY_KEY,
+      JSON.stringify({
+        version: 1,
+        attempts: {},
+        overrides: { "2026-10-05": "long-way-home-v2" },
+      }),
+    );
     await mount();
     await click("Play");
     await act(async () => probe.props!.onSelect(member("wurl:NAM")));
@@ -2037,7 +2045,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Home");
     expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
-      journeyRegistry.JOURNEY_INDEX[1].title,
+      journeyRegistry.JOURNEY_INDEX[3].title,
     );
     expect(host.textContent).toContain("Continue 2026-10-05");
     await click("Continue 2026-10-05");

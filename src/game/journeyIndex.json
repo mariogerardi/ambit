@@ -89,7 +89,7 @@
   {
     "id": "mediterranean-v1",
     "title": "Around the Mediterranean",
-    "description": "Around one sea, islands, languages, and shared histories bring many countries together.",
+    "description": "Follow the Mediterranean from Spain to an Italian island, across to Libya, and back to the Balkans. Five stops, one shared sea.",
     "path": "/journey/mediterranean",
     "module": "./fourthJourney.ts",
     "rounds": [
@@ -119,7 +119,7 @@
     "id": "north-america-v1",
     "title": "North America by name",
     "description": "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
-    "path": "/journey/north-america",
+    "path": "/journey/north-america-v1",
     "module": "./fifthJourney.ts",
     "rounds": [
       {
@@ -273,7 +273,7 @@
   {
     "id": "ring-of-fire-v1",
     "title": "Around the Ring of Fire",
-    "description": "Across the Pacific, islands, mountains, and capitals connect one Journey.",
+    "description": "Trace the Pacific rim from Japan through Indonesia to the Andes and New Zealand. One ocean connects every stop.",
     "path": "/journey/ring-of-fire",
     "module": "./tenthJourney.ts",
     "rounds": [
@@ -302,7 +302,7 @@
   {
     "id": "not-the-obvious-city-v1",
     "title": "Not the obvious city",
-    "description": "The best-known city isn’t always the capital. Find the places behind the familiar names.",
+    "description": "Leave the famous cities behind: discover where capitals moved, why expectations mislead, and when one capital is not enough.",
     "path": "/journey/not-the-obvious-city",
     "module": "./eleventhJourney.ts",
     "rounds": [
@@ -336,7 +336,7 @@
   {
     "id": "exceptions-to-the-rule-v1",
     "title": "Exceptions to the rule",
-    "description": "Geography rewards a second look. The exceptions can be the most memorable places on the map.",
+    "description": "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
     "path": "/journey/exceptions-to-the-rule",
     "module": "./twelfthJourney.ts",
     "rounds": [
@@ -456,6 +456,35 @@
         "id": "russia-neighbor-est",
         "label": "Drop a pin",
         "progressLabel": "Estonia"
+      }
+    ]
+  },
+  {
+    "id": "north-america-v2",
+    "title": "North America by name",
+    "description": "Travel from Canada’s northern territories to the Mexican border, then find your way across the United States. Names, latitude, and borders are your guides.",
+    "path": "/journey/north-america",
+    "module": "./northAmericaJourney.ts",
+    "rounds": [
+      {
+        "id": "canada-three-territories-v2",
+        "label": "Territories"
+      },
+      {
+        "id": "canada-south-of-boston-v2",
+        "label": "Latitude"
+      },
+      {
+        "id": "state-bordering-mexico-v2",
+        "label": "Southern border"
+      },
+      {
+        "id": "california-missouri-crossings-v2",
+        "label": "Crossings"
+      },
+      {
+        "id": "five-cardinal-states-v2",
+        "label": "Directions"
       }
     ]
   }

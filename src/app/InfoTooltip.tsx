@@ -8,10 +8,14 @@ export function InfoTooltip({
   label,
   children,
   compact = false,
+  icon,
+  className = "",
 }: {
   label: string;
-  children: ReactNode;
+  children: ReactNode | ((close: () => void) => ReactNode);
   compact?: boolean;
+  icon?: ReactNode;
+  className?: string;
 }) {
   const id = useId();
   const active = useContext(PanelActive);
@@ -95,21 +99,22 @@ export function InfoTooltip({
       <button
         ref={trigger}
         id={`${id}-label`}
-        className={`info-note-button${compact ? " info-note-footnote" : " tertiary-action"}`}
-        aria-label={compact ? label : undefined}
-        title={compact ? label : undefined}
+        className={`info-note-button${compact ? " info-note-footnote" : " tertiary-action"} ${className}`}
+        aria-label={compact || icon ? label : undefined}
+        title={compact || icon ? label : undefined}
         aria-expanded={open && active}
         aria-controls={open && active ? id : undefined}
         aria-haspopup="dialog"
         onClick={() => setOpen((value) => !value)}
       >
-        {compact ? (
-          <sup aria-hidden="true">1</sup>
-        ) : (
-          <>
-            {label} <span aria-hidden="true">ⓘ</span>
-          </>
-        )}
+        {icon ??
+          (compact ? (
+            <sup aria-hidden="true">1</sup>
+          ) : (
+            <>
+              {label} <span aria-hidden="true">ⓘ</span>
+            </>
+          ))}
       </button>
       {open &&
         active &&
@@ -123,7 +128,12 @@ export function InfoTooltip({
             className="info-note-tooltip"
             style={position}
           >
-            {children}
+            {typeof children === "function"
+              ? children(() => {
+                  setOpen(false);
+                  trigger.current?.focus();
+                })
+              : children}
           </div>,
           document.body,
         )}

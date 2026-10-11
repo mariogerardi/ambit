@@ -18,6 +18,8 @@ import type {
   StudyPrompt,
 } from "./engine";
 import { PanelActive } from "../app/ModePanels";
+import { QuestionHelp } from "../app/QuestionHelp";
+import { capitalSource } from "../game/quizData";
 import { SettingsIcon } from "../app/SettingsIcon";
 import { StudyResults } from "./StudyResults";
 import { StudySetup } from "./StudySetup";
@@ -193,14 +195,6 @@ export function StudyPanel({
                 }
               : undefined
           }
-          onReport={
-            onReport
-              ? () => {
-                  closeSettings();
-                  onReport(prompt);
-                }
-              : undefined
-          }
           onFinish={() => {
             closeSettings();
             onAction({ type: "finish" });
@@ -242,6 +236,31 @@ export function StudyPanel({
                 ? "ONE FULL PASS"
                 : `OF ${session.settings.length}`}
           </span>
+          <QuestionHelp
+            key={`${prompt.ordinal}/${prompt.targetId}`}
+            onReport={onReport ? () => onReport(prompt) : undefined}
+            sources={
+              <a
+                className="fact-source"
+                href={
+                  prompt.topic === "capitals"
+                    ? capitalSource.url
+                    : prompt.topic === "flags"
+                      ? "https://github.com/lipis/flag-icons/tree/c09927e63705529bbf59ca6684cd9b23225dddad"
+                      : "https://www.un.org/en/about-us/member-states"
+                }
+                target="_blank"
+                rel="noreferrer"
+              >
+                {prompt.topic === "capitals"
+                  ? capitalSource.name
+                  : prompt.topic === "flags"
+                    ? "flag-icons · pinned flag artwork"
+                    : "United Nations · member states"}{" "}
+                ↗
+              </a>
+            }
+          />
           <button
             ref={settingsButton}
             className="settings-button"

@@ -1,3 +1,4 @@
+import { NORTH_AMERICA_JOURNEY } from "./northAmericaJourney";
 import { FIFTEENTH_JOURNEY } from "./fifteenthJourney";
 import { FOURTEENTH_JOURNEY } from "./fourteenthJourney";
 import { THIRTEENTH_JOURNEY } from "./thirteenthJourney";
@@ -29,8 +30,10 @@ export const JOURNEYS = [
   THIRTEENTH_JOURNEY,
   FOURTEENTH_JOURNEY,
   FIFTEENTH_JOURNEY,
+  NORTH_AMERICA_JOURNEY,
 ];
 export function journeyPath(id: string) {
+  if (id === NORTH_AMERICA_JOURNEY.id) return "/journey/north-america";
   if (id === FIFTEENTH_JOURNEY.id) return "/journey/try-not-to-click-russia";
   if (id === FOURTEENTH_JOURNEY.id) return "/journey/island-instincts";
   if (id === THIRTEENTH_JOURNEY.id) return "/journey/the-z-trail";
@@ -46,7 +49,7 @@ export function journeyPath(id: string) {
         : id === SIXTH_JOURNEY.id
           ? "/journey/enclosed-territories"
           : id === FIFTH_JOURNEY.id
-            ? "/journey/north-america"
+            ? "/journey/north-america-v1"
             : id === FOURTH_JOURNEY.id
               ? "/journey/mediterranean"
               : id === THIRD_JOURNEY.id

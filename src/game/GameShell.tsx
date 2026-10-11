@@ -1,4 +1,5 @@
-import { InfoTooltip } from "../app/InfoTooltip";
+import { QuestionSources } from "./QuestionSources";
+import { QuestionHelp } from "../app/QuestionHelp";
 import { ActionIcon } from "../app/ActionIcon";
 import { answerPlace, pinDistance } from "./answerTargets";
 import { useRef } from "react";
@@ -100,6 +101,11 @@ export function GameShell({
               {game.roundIndex + 1}
             </span>
             <span className="overline">{round.label.toUpperCase()}</span>
+            <QuestionHelp
+              key={round.id}
+              onReport={onReport ? () => onReport(round.id) : undefined}
+              sources={<QuestionSources question={round} />}
+            />
           </div>
           <h1 ref={heading} tabIndex={-1}>
             {questionPrompt(round, context)}
@@ -163,63 +169,6 @@ export function GameShell({
                   : "Next"}
                 <span>→</span>
               </button>
-              {onReport && (
-                <button
-                  className="quiet-button tertiary-action report-question"
-                  onClick={() => onReport(round.id)}
-                >
-                  Report this question
-                </button>
-              )}
-              <InfoTooltip key={round.id} label="Sources">
-                {round.qualification && <p>{round.qualification}</p>}
-                {[
-                  ...new Map(
-                    [round.source, ...(round.sources ?? [])]
-                      .filter((s) => s.name.trim() || s.url)
-                      .map((s) => [`${s.url}:${s.name}`, s]),
-                  ).values(),
-                ].map((source) =>
-                  /^https?:\/\//i.test(source.url) ? (
-                    <a
-                      key={`${source.url}:${source.name}`}
-                      className="fact-source"
-                      href={source.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {source.name.replace(/ · pinned /, " · ")} ↗
-                    </a>
-                  ) : (
-                    <span
-                      key={`${source.url}:${source.name}`}
-                      className="fact-source"
-                    >
-                      {source.name}
-                    </span>
-                  ),
-                )}
-                {(round.importedRegions ?? [])
-                  .filter((r) => r.attribution)
-                  .map((r) => (
-                    <p className="fact-source" key={r.id}>
-                      {r.name} · {r.attribution}
-                      {r.sourceUrl && /^https?:\/\//i.test(r.sourceUrl) && (
-                        <>
-                          {" "}
-                          ·{" "}
-                          <a
-                            href={r.sourceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Source ↗
-                          </a>
-                        </>
-                      )}
-                    </p>
-                  ))}
-              </InfoTooltip>
             </div>
           )}
         </section>
@@ -227,8 +176,17 @@ export function GameShell({
       {ended && (
         <section className="finish-story">
           {(playground || game.phase === "failed") && (
-            <div className="overline">
-              {playground ? "QUESTION PLAYGROUND" : "ONE WRONG TURN"}
+            <div className="round-overline">
+              <span className="overline">
+                {playground ? "QUESTION PLAYGROUND" : "ONE WRONG TURN"}
+              </span>
+              {game.phase === "failed" && (
+                <QuestionHelp
+                  key={round.id}
+                  onReport={onReport ? () => onReport(round.id) : undefined}
+                  sources={<QuestionSources question={round} />}
+                />
+              )}
             </div>
           )}
           <h1 className="journey-result-heading" ref={heading} tabIndex={-1}>
@@ -256,14 +214,7 @@ export function GameShell({
                 : feedbackText}
             </p>
           )}
-          {game.phase === "failed" && onReport && (
-            <button
-              className="quiet-button tertiary-action report-question"
-              onClick={() => onReport(round.id)}
-            >
-              Report this question
-            </button>
-          )}
+
           <ol className="journey-receipt">
             {journey.rounds.map((question, i) => {
               const answer = game.answers.find(

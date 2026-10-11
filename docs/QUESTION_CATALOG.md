@@ -1,6 +1,6 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **15 Journeys and 75 questions**, reviewed against
+The bundled catalog contains **16 editions and 80 questions**, with nine active daily concepts, reviewed against
 the code on October 10, 2026. Each Journey has five rounds. Admin chooses today's
 Journey on this device; direct practice routes and `/playground` provide access
 to other bundled content. There is no current in-app authoring or AI generator.
@@ -8,27 +8,30 @@ Previously published local packs are read-only compatibility data.
 
 ## Bundled Journeys
 
-| #   | Title                    | Practice route                     | Definition                                               |
-| --- | ------------------------ | ---------------------------------- | -------------------------------------------------------- |
-| 1   | The long way home        | `/journey/long-way-home`           | [journey.ts](../src/game/journey.ts)                     |
-| 2   | Beyond borders           | `/journey/beyond-borders`          | [secondJourney.ts](../src/game/secondJourney.ts)         |
-| 3   | Across the Silk Roads    | `/journey/silk-roads`              | [thirdJourney.ts](../src/game/thirdJourney.ts)           |
-| 4   | Around the Mediterranean | `/journey/mediterranean`           | [fourthJourney.ts](../src/game/fourthJourney.ts)         |
-| 5   | North America by name    | `/journey/north-america`           | [fifthJourney.ts](../src/game/fifthJourney.ts)           |
-| 6   | Worlds within worlds     | `/journey/enclosed-territories`    | [sixthJourney.ts](../src/game/sixthJourney.ts)           |
-| 7   | Borrowed names           | `/journey/borrowed-names`          | [seventhJourney.ts](../src/game/seventhJourney.ts)       |
-| 8   | Pins and cities          | `/journey/pins-and-cities`         | [eighthJourney.ts](../src/game/eighthJourney.ts)         |
-| 9   | Shared neighbors         | `/journey/shared-neighbors`        | [ninthJourney.ts](../src/game/ninthJourney.ts)           |
-| 10  | Around the Ring of Fire  | `/journey/ring-of-fire`            | [tenthJourney.ts](../src/game/tenthJourney.ts)           |
-| 11  | Not the obvious city     | `/journey/not-the-obvious-city`    | [eleventhJourney.ts](../src/game/eleventhJourney.ts)     |
-| 12  | Exceptions to the rule   | `/journey/exceptions-to-the-rule`  | [twelfthJourney.ts](../src/game/twelfthJourney.ts)       |
-| 13  | The Z trail              | `/journey/the-z-trail`             | [thirteenthJourney.ts](../src/game/thirteenthJourney.ts) |
-| 14  | Island instincts         | `/journey/island-instincts`        | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts) |
-| 15  | On Russia’s doorstep     | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)   |
+| #   | Title                           | Practice route                     | Definition                                                   |
+| --- | ------------------------------- | ---------------------------------- | ------------------------------------------------------------ |
+| 1   | The long way home               | `/journey/long-way-home`           | [journey.ts](../src/game/journey.ts)                         |
+| 2   | Beyond borders                  | `/journey/beyond-borders`          | [secondJourney.ts](../src/game/secondJourney.ts)             |
+| 3   | Across the Silk Roads           | `/journey/silk-roads`              | [thirdJourney.ts](../src/game/thirdJourney.ts)               |
+| 4   | Around the Mediterranean        | `/journey/mediterranean`           | [fourthJourney.ts](../src/game/fourthJourney.ts)             |
+| 5   | North America by name           | `/journey/north-america-v1`        | [fifthJourney.ts](../src/game/fifthJourney.ts)               |
+| 6   | Worlds within worlds            | `/journey/enclosed-territories`    | [sixthJourney.ts](../src/game/sixthJourney.ts)               |
+| 7   | Borrowed names                  | `/journey/borrowed-names`          | [seventhJourney.ts](../src/game/seventhJourney.ts)           |
+| 8   | Pins and cities                 | `/journey/pins-and-cities`         | [eighthJourney.ts](../src/game/eighthJourney.ts)             |
+| 9   | Shared neighbors                | `/journey/shared-neighbors`        | [ninthJourney.ts](../src/game/ninthJourney.ts)               |
+| 10  | Around the Ring of Fire         | `/journey/ring-of-fire`            | [tenthJourney.ts](../src/game/tenthJourney.ts)               |
+| 11  | Not the obvious city            | `/journey/not-the-obvious-city`    | [eleventhJourney.ts](../src/game/eleventhJourney.ts)         |
+| 12  | Exceptions to the rule          | `/journey/exceptions-to-the-rule`  | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
+| 13  | The Z trail                     | `/journey/the-z-trail`             | [thirteenthJourney.ts](../src/game/thirteenthJourney.ts)     |
+| 14  | Island instincts                | `/journey/island-instincts`        | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)     |
+| 15  | On Russia’s doorstep            | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
+| 16  | North America by name (revised) | `/journey/north-america`           | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts) |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
-cycles the catalog from October 5, 2026. Results use Home/Study as primary exits,
+cycles the nine retained concepts from October 5, 2026, using the explicit IDs in
+[`journeyRotation.ts`](../src/game/journeyRotation.ts). See
+[Journey review](JOURNEY_REVIEW.md) for the keep/scrap decisions. Results use Home/Study as primary exits,
 with daily replay secondary and available only to admins. A results flyover follows answer stops in round order and
 loops; player interaction or reduced motion interrupts it.
 
@@ -38,7 +41,7 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 75 bundled questions, not every possible engine pairing.
+Counts below refer to the 80 bundled questions, not every possible engine pairing.
 The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
@@ -48,10 +51,10 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `city-single`       | Single city pick       |         3 |
 | `city-multiple`     | Multiple city picks    |         2 |
 | `map-single`        | Single country pick    |        17 |
-| `map-multiple`      | Multiple country picks |         6 |
-| `number`            | Number                 |         6 |
+| `map-multiple`      | Multiple country picks |         7 |
+| `number`            | Number                 |         7 |
 | `text`              | Free response          |         9 |
-| `typed-regions`     | Typed region names     |         4 |
+| `typed-regions`     | Typed region names     |         7 |
 | `ordered-countries` | Ordered country names  |         1 |
 | `ordered-capitals`  | Ordered capital names  |         1 |
 | `choice-single`     | Single choice          |         9 |
@@ -115,10 +118,20 @@ predicate if the question should be computed rather than fixed.
    checks for new answer behavior, disclosure, ambiguous geography, and metadata.
    Update this catalog table/counts when adding/removing content.
 
-Adding a bundled Journey changes the repeating schedule for subsequent dates.
+Adding a bundled edition does not change the active rotation. Editing the explicit
+rotation list does change which editions subsequent dates select.
 Existing attempts remain pinned to their stored Journey. Review schedule policy
 and save compatibility before removing or reordering content; do not treat the
 index as an independently authored source.
+
+## Crafting a daily
+
+A throughline may be an itinerary, a shared surprise, or a distinctive mechanic
+repeated across five questions. Do not require varied controls for their own sake.
+Shared neighbors uses irregular country footprints, Island instincts repeats
+ownership-versus-location surprises, and On Russia’s doorstep repeats borderless
+pin placement. Establish the premise in the introduction and develop it in the
+reveals; preserve useful difficulty and favorite questions.
 
 ## Review checklist
 
@@ -131,8 +144,8 @@ index as an independently authored source.
   until a stage is active/completed; avoid cached tooltips leaking old disclosure.
 - Use canonical geometry for grading, display footprints for presentation, and
   source links for attribution. Do not fetch unchecked facts during gameplay.
-- After submission, reveal useful geography and reasoning. Sources belong below
-  Next as a small tertiary control; avoid repeating the question as an answer recap.
+- After submission, reveal useful geography and reasoning. Sources and reporting belong in the question-mark popover in the top-right
+  question row; avoid repeating the question as an answer recap.
 
 Reviewed facts, explanations, source links, and disclosure settings live with the
 Journey definitions linked above. Use those definitions and the current guides

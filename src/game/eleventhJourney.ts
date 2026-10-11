@@ -58,7 +58,7 @@ export const ELEVENTH_JOURNEY: Journey = {
   id: "not-the-obvious-city-v1",
   title: "Not the obvious city",
   description:
-    "The best-known city isn’t always the capital. Find the places behind the familiar names.",
+    "Leave the famous cities behind: discover where capitals moved, why expectations mislead, and when one capital is not enough.",
   rounds: [
     {
       ...base,

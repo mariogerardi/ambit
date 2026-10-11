@@ -197,7 +197,7 @@ describe("Study completion, replay, and alternate answers", () => {
 });
 
 it.each([false, true])(
-  "puts session actions in the cog and supports edit, report and finish (compact=%s)",
+  "keeps edit/finish in the cog and reporting in question information (compact=%s)",
   async (compact) => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
     const host = document.createElement("div"),
@@ -243,6 +243,8 @@ it.each([false, true])(
         document.querySelector(".study-options-dialog")?.textContent,
       ).toContain("Apply & resume");
       await click("Back to session actions");
+      await click("Close Session settings");
+      await click("Question information");
       await click("Report this question");
       expect(onReport).toHaveBeenCalledWith(session.prompt);
       expect(document.querySelector("[role=dialog]")).toBeNull();

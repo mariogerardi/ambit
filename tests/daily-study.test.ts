@@ -1,3 +1,4 @@
+import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -42,21 +43,24 @@ describe("local daily schedule and persistence", () => {
     expect(millisecondsToMidnight(new Date(2026, 9, 5, 23, 59, 59))).toBe(1000);
     for (let i = 0; i < 9; i++)
       expect(dailyJourney(`2026-10-${String(i + 5).padStart(2, "0")}`).id).toBe(
-        JOURNEYS[i % JOURNEYS.length].id,
+        ACTIVE_JOURNEY_IDS[i % ACTIVE_JOURNEY_IDS.length],
       );
     expect(() => dateOrdinal("2026-02-30")).toThrow();
     expect(dateOrdinal("2026-11-02") - dateOrdinal("2026-11-01")).toBe(1);
   });
   it("persists admin choices, archives progress, restores it when switching back, and resets the choice at midnight", () => {
     const date = "2026-10-05";
-    const started = openDaily(emptyDaily, date);
+    const started = openDaily(
+      setDailyPuzzle(emptyDaily, date, JOURNEYS[0].id),
+      date,
+    );
     started.attempts[date].game.text = "saved input";
     const switched = setDailyPuzzle(started, date, JOURNEYS[3].id);
     expect(dailyJourney(date, switched)).toBe(JOURNEYS[3]);
     const fourth = openDaily(switched, date);
     expect(fourth.attempts[date].journeyId).toBe(JOURNEYS[3].id);
-    expect(dailyJourney("2026-10-06", fourth)).toBe(JOURNEYS[1]);
-    const restored = setDailyPuzzle(fourth, date);
+    expect(dailyJourney("2026-10-06", fourth)).toBe(JOURNEYS[3]);
+    const restored = setDailyPuzzle(fourth, date, JOURNEYS[0].id);
     expect(restored.attempts[date].game.text).toBe("saved input");
     expect(validDaily(JSON.parse(JSON.stringify(restored)))).toBe(true);
     expect(validDaily({ ...restored, overrides: { [date]: "unknown" } })).toBe(
@@ -82,7 +86,7 @@ describe("local daily schedule and persistence", () => {
     const started = openDaily(emptyDaily, "2026-10-05");
     const persisted = JSON.parse(JSON.stringify(started));
     expect(validDaily(persisted)).toBe(true);
-    expect(dailyJourney("2026-10-06")).toBe(JOURNEYS[1]);
+    expect(dailyJourney("2026-10-06")).toBe(JOURNEYS[3]);
     expect(persisted.activeDate).toBe("2026-10-05");
     const nextDay = openDaily(persisted, "2026-10-06");
     expect(Object.keys(nextDay.attempts)).toHaveLength(2);

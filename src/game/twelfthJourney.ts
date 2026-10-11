@@ -43,7 +43,7 @@ export const TWELFTH_JOURNEY: Journey = {
   id: "exceptions-to-the-rule-v1",
   title: "Exceptions to the rule",
   description:
-    "Geography rewards a second look. The exceptions can be the most memorable places on the map.",
+    "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
   rounds: [
     {
       ...base,
