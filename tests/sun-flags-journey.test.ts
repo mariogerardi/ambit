@@ -2,8 +2,20 @@ import { readFileSync, existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsJourney";
 import { JOURNEYS } from "../src/game/journeys";
-import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
+import {
+  JOURNEY_INDEX,
+  AVAILABLE_JOURNEY_INDEX,
+  loadJourney,
+} from "../src/game/journeyRegistry";
 import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
+import { ORIGINAL_SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsOriginalJourney";
+import {
+  dailyJourney,
+  openDaily,
+  emptyDaily,
+  validDaily,
+} from "../src/app/dailyProgress";
+import { modeForPath } from "../src/app/modes";
 import { COUNTRY_FACTS } from "../src/game/countryFacts";
 import { createQuestionContext, isCorrect } from "../src/game/questions";
 import { gameReducer, initialGame, journeyScore } from "../src/game/state";
@@ -18,8 +30,12 @@ const context = createQuestionContext(world, COUNTRY_FACTS, SUN_FLAGS_JOURNEY);
 describe("Chasing the sun", () => {
   it("plays five distinct stops with history, observation, symbolism and geographic placement", () => {
     const answers: Action[][] = [
-      [{ type: "select", id: "month:may" }, { type: "submit" }],
-      [{ type: "text", value: "16" }, { type: "submit" }],
+      [
+        { type: "select", id: "wurl:ARG" },
+        { type: "select", id: "wurl:URY" },
+        { type: "submit" },
+      ],
+      [{ type: "select", id: "power:spain" }, { type: "submit" }],
       [{ type: "select", id: "rays:grain" }, { type: "submit" }],
       [{ type: "drop-pin", lat: 35.68, lng: 139.69 }, { type: "submit" }],
       [{ type: "select", id: "dawn:freedom" }, { type: "submit" }],
@@ -39,10 +55,11 @@ describe("Chasing the sun", () => {
     expect(game.phase).toBe("finished");
     expect(journeyScore(game)).toBe(5);
   });
-  it("rejects alternate ray counts, symbols, and mainland pins", () => {
+  it("rejects incomplete or wrong country pairs, colonial powers, symbols, and mainland pins", () => {
     for (const [index, response] of [
-      [0, { selectedIds: ["month:july"] }],
-      [1, { text: "32" }],
+      [0, { selectedIds: ["wurl:ARG"] }],
+      [0, { selectedIds: ["wurl:ARG", "wurl:CHL"] }],
+      [1, { selectedIds: ["power:portugal"] }],
       [2, { selectedIds: ["rays:feathers"] }],
       [3, { pin: { lat: 39.9, lng: 116.4 } }],
       [4, { selectedIds: ["dawn:equator"] }],
@@ -65,5 +82,39 @@ describe("Chasing the sun", () => {
       JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)?.path,
     ).toBe("/journey/chasing-the-sun");
     expect(ACTIVE_JOURNEY_IDS).not.toContain(SUN_FLAGS_JOURNEY.id);
+  });
+  it("revises new attempts while preserving the original edition for started saves", async () => {
+    const day = "2026-10-11";
+    const assignments = { [day]: ORIGINAL_SUN_FLAGS_JOURNEY.id };
+    const started = openDaily(
+      emptyDaily,
+      day,
+      false,
+      [ORIGINAL_SUN_FLAGS_JOURNEY],
+      assignments,
+    );
+    expect(started.attempts[day].journeyId).toBe(ORIGINAL_SUN_FLAGS_JOURNEY.id);
+    expect(dailyJourney(day, undefined, JOURNEY_INDEX, assignments).id).toBe(
+      SUN_FLAGS_JOURNEY.id,
+    );
+    expect(
+      openDaily(emptyDaily, day, false, JOURNEY_INDEX, assignments).attempts[
+        day
+      ].journeyId,
+    ).toBe(SUN_FLAGS_JOURNEY.id);
+    expect(
+      openDaily(started, day, false, JOURNEY_INDEX, assignments).attempts[day]
+        .journeyId,
+    ).toBe(ORIGINAL_SUN_FLAGS_JOURNEY.id);
+    expect(validDaily(started, JOURNEY_INDEX)).toBe(true);
+    expect(
+      (await loadJourney(ORIGINAL_SUN_FLAGS_JOURNEY.id)).rounds[0].id,
+    ).toBe("sun-flags-revolution-month-v1");
+    expect(
+      AVAILABLE_JOURNEY_INDEX.some(
+        (journey) => journey.id === ORIGINAL_SUN_FLAGS_JOURNEY.id,
+      ),
+    ).toBe(false);
+    expect(modeForPath("/")).toBe("home");
   });
 });

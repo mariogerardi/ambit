@@ -175,6 +175,10 @@ export interface Question {
   feedbackOverlays?: MapOverlay[];
 }
 export interface Journey {
+  /** A revised edition replaces this ID for new attempts, while started saves keep it. */
+  supersedes?: string;
+  /** Saved-attempt compatibility only; exclude from Admin choices and practice routes. */
+  compatibilityOnly?: boolean;
   id: string;
   title: string;
   description: string;

@@ -1,8 +1,58 @@
 import { useEffect, useState } from "react";
-import { JOURNEY_INDEX } from "../game/journeyRegistry";
+import {
+  JOURNEY_INDEX,
+  AVAILABLE_JOURNEY_INDEX,
+} from "../game/journeyRegistry";
 import { useAccount } from "../services/accounts";
 import type { useJourneySchedule } from "../services/journeySchedule";
 import { dailyJourney, dateOrdinal } from "./dailyProgress";
+
+const formatDay = (date: string, long = false) =>
+  new Date(`${date}T12:00:00`).toLocaleDateString(
+    undefined,
+    long
+      ? { weekday: "long", month: "long", day: "numeric", year: "numeric" }
+      : { weekday: "short", month: "short", day: "numeric" },
+  );
+const monthStart = (month: string, offset = 0) => {
+  const [year, number] = month.split("-").map(Number);
+  return new Date(Date.UTC(year, number - 1 + offset, 1))
+    .toISOString()
+    .slice(0, 7);
+};
+function calendarDays(month: string) {
+  const first = new Date(`${month}-01T00:00:00Z`);
+  const start = dateOrdinal(`${month}-01`) - first.getUTCDay();
+  const count =
+    Math.ceil(
+      (new Date(
+        Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0),
+      ).getUTCDate() +
+        first.getUTCDay()) /
+        7,
+    ) * 7;
+  return Array.from({ length: count }, (_, index) =>
+    new Date((start + index) * 86400000).toISOString().slice(0, 10),
+  );
+}
+function RefreshIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 7v5h-5M4 17v-5h5" />
+      <path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
+    </svg>
+  );
+}
 
 export function AdminPanel({
   date,
@@ -13,64 +63,199 @@ export function AdminPanel({
 }) {
   const account = useAccount();
   const [day, setDay] = useState(date);
+  const [month, setMonth] = useState(date.slice(0, 7));
   const assignments = schedule.schedule?.assignments ?? {};
-  const saved = assignments[day] ?? "";
-  const [selection, setSelection] = useState(saved);
+  const current = dailyJourney(day, undefined, JOURNEY_INDEX, assignments);
+  const saved = assignments[day] ? current.id : "";
+  const [draft, setDraft] = useState({ day, value: saved, saved });
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  // Refresh published dates without erasing a Journey the admin is still choosing.
   useEffect(() => {
-    setSelection(saved);
+    setDraft((current) =>
+      current.day !== day || current.value === current.saved
+        ? { day, value: saved, saved }
+        : { ...current, saved },
+    );
   }, [day, saved]);
   useEffect(() => setMessage(""), [day]);
-  const current = dailyJourney(
-    day || date,
-    undefined,
-    JOURNEY_INDEX,
-    assignments,
-  );
-  const upcoming = Array.from({ length: 14 }, (_, i) =>
-    new Date((dateOrdinal(date) + i) * 86400000).toISOString().slice(0, 10),
-  );
+  const selection = draft.day === day ? draft.value : saved;
+  const preview =
+    JOURNEY_INDEX.find((journey) => journey.id === selection) ??
+    dailyJourney(day, undefined, JOURNEY_INDEX, {});
+  const dirty = selection !== saved;
+  const busy = submitting || schedule.busy;
+  function chooseDay(next: string) {
+    setDay(next);
+    setMonth(next.slice(0, 7));
+  }
+  function chooseJourney(value: string) {
+    setDraft({ day, value, saved });
+    setMessage("");
+  }
   return (
     <section className="info-view admin-panel" aria-label="Admin menu">
-      <span className="overline">ADMIN · {date}</span>
+      <span className="overline">ADMIN</span>
       <h1 className="editorial-heading">
-        A clearer <em>world view.</em>
+        A Journey for <em>every day.</em>
       </h1>
       <p className="muted">
-        Schedule daily Journeys and review player feedback.
+        Choose what players discover next, and review their feedback.
       </p>
-      <div className="admin-journey-card">
-        <h2>Journey calendar</h2>
-        <p className="muted">
-          Assign a Journey to a date for everyone. Unassigned dates follow the
-          automatic rotation.
-        </p>
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-            setMessage("");
-            try {
-              const token = await account.accessToken();
-              if (!token) {
-                setMessage("Sign in again to save the schedule.");
-                return;
+      <div className="admin-journey-card journey-scheduler-card">
+        <header className="journey-scheduler-heading">
+          <div>
+            <h2>Daily Journey schedule</h2>
+            <p className="muted">
+              Choose a day, pick a Journey, then publish it for everyone.
+            </p>
+          </div>
+          <button
+            className="quiet-button scheduler-icon"
+            aria-label="Refresh schedule"
+            title="Refresh schedule"
+            onClick={() => void schedule.refresh()}
+            disabled={busy}
+          >
+            <RefreshIcon />
+          </button>
+        </header>
+        {schedule.error && (
+          <p role="alert" className="schedule-notice">
+            {schedule.error}
+          </p>
+        )}
+        {!schedule.ready && !schedule.error && (
+          <p role="status">Opening the schedule…</p>
+        )}
+        <div className="journey-scheduler">
+          <section className="journey-month" aria-label="Journey calendar">
+            <header className="journey-month-heading">
+              <h3>
+                {new Date(`${month}-01T12:00:00`).toLocaleDateString(
+                  undefined,
+                  { month: "long", year: "numeric" },
+                )}
+              </h3>
+              <div className="journey-month-actions">
+                <button
+                  className="quiet-button scheduler-today"
+                  onClick={() => chooseDay(date)}
+                  disabled={busy}
+                >
+                  Today
+                </button>
+                <button
+                  className="quiet-button scheduler-icon"
+                  aria-label="Previous month"
+                  onClick={() => setMonth(monthStart(month, -1))}
+                  disabled={busy}
+                >
+                  ‹
+                </button>
+                <button
+                  className="quiet-button scheduler-icon"
+                  aria-label="Next month"
+                  onClick={() => setMonth(monthStart(month, 1))}
+                  disabled={busy}
+                >
+                  ›
+                </button>
+              </div>
+            </header>
+            <div className="journey-calendar-weekdays" aria-hidden="true">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((name) => (
+                <span key={name}>{name}</span>
+              ))}
+            </div>
+            <div className="journey-calendar">
+              {calendarDays(month).map((calendarDay) => {
+                const journey = dailyJourney(
+                  calendarDay,
+                  undefined,
+                  JOURNEY_INDEX,
+                  assignments,
+                );
+                const assigned = !!assignments[calendarDay];
+                return (
+                  <button
+                    className={`journey-calendar-day${calendarDay.slice(0, 7) !== month ? " is-outside-month" : ""}${calendarDay === date ? " is-today" : ""}`}
+                    key={calendarDay}
+                    onClick={() => chooseDay(calendarDay)}
+                    disabled={busy}
+                    aria-pressed={calendarDay === day}
+                    aria-label={formatDay(calendarDay)}
+                    aria-describedby={`${calendarDay}-journey ${calendarDay}-status`}
+                    title={`${formatDay(calendarDay, true)} · ${journey.title} · ${assigned ? "Scheduled" : "Automatic"}`}
+                  >
+                    <span className="journey-calendar-date">
+                      <time dateTime={calendarDay}>
+                        {Number(calendarDay.slice(-2))}
+                      </time>
+                      <span
+                        className={`schedule-dot${assigned ? " is-assigned" : ""}`}
+                        aria-label={assigned ? "Scheduled" : "Automatic"}
+                      />
+                    </span>
+                    <strong id={`${calendarDay}-journey`}>
+                      {journey.title}
+                    </strong>
+                    <span id={`${calendarDay}-status`} className="sr-only">
+                      {assigned ? "Scheduled" : "Automatic"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="journey-calendar-legend">
+              <span>
+                <i className="schedule-dot is-assigned" /> Scheduled
+              </span>
+              <span>
+                <i className="schedule-dot" /> Automatic rotation
+              </span>
+            </p>
+          </section>
+          <form
+            className="journey-date-editor"
+            aria-label="Schedule selected date"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              if (!dirty || busy || !schedule.ready) return;
+              setMessage("");
+              setSubmitting(true);
+              try {
+                const token = await account.accessToken();
+                if (!token) {
+                  setMessage("Sign in again to save the schedule.");
+                  return;
+                }
+                if (await schedule.save(day, selection || undefined, token))
+                  setMessage(
+                    selection
+                      ? `Published ${preview.title} for ${formatDay(day)}.`
+                      : `Restored automatic rotation for ${formatDay(day)}.`,
+                  );
+              } catch {
+                setMessage("Couldn’t save the schedule. Please try again.");
+              } finally {
+                setSubmitting(false);
               }
-              if (await schedule.save(day, selection || undefined, token))
-                setMessage(`Saved ${day} for everyone.`);
-            } catch {
-              setMessage("Couldn’t save the schedule. Please try again.");
-            }
-          }}
-        >
-          <div className="journey-schedule-fields">
+            }}
+          >
+            <header>
+              <span className="overline">SELECTED DAY</span>
+              <h3>{formatDay(day, true)}</h3>
+            </header>
             <label className="field">
               <span>Journey date</span>
               <input
                 type="date"
                 required
                 value={day}
+                disabled={busy}
                 onChange={(event) => {
-                  if (event.target.value) setDay(event.target.value);
+                  if (event.target.value) chooseDay(event.target.value);
                 }}
               />
             </label>
@@ -78,76 +263,75 @@ export function AdminPanel({
               <span>Playable Journey</span>
               <select
                 value={selection}
-                onChange={(event) => setSelection(event.target.value)}
+                disabled={busy || !schedule.ready}
+                onChange={(event) => chooseJourney(event.target.value)}
               >
                 <option value="">Automatic rotation</option>
-                {JOURNEY_INDEX.map((journey) => (
+                {AVAILABLE_JOURNEY_INDEX.map((journey) => (
                   <option key={journey.id} value={journey.id}>
                     {journey.title}
                   </option>
                 ))}
               </select>
             </label>
-          </div>
-          <p className="muted">
-            {day || date}: <strong>{current.title}</strong>
-            {saved ? " · Assigned" : " · Rotation"}
-          </p>
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={!schedule.ready || schedule.busy}
-          >
-            {schedule.busy ? "Saving…" : "Save date assignment"}
-            <span>→</span>
-          </button>
-        </form>
-        <p role="status">{message}</p>
-        {schedule.error && <p role="alert">{schedule.error}</p>}
-        <button
-          className="quiet-button tertiary-action"
-          onClick={() => void schedule.refresh()}
-          disabled={schedule.busy}
-        >
-          Refresh schedule
-        </button>
-        <small>
-          Dates turn over at each player’s local midnight. Started Journeys keep
-          their original edition and progress.
-        </small>
-      </div>
-      <div className="admin-journey-card">
-        <h2>Next two weeks</h2>
-        <div className="journey-calendar">
-          {upcoming.map((calendarDay) => (
-            <button
-              className="journey-calendar-day"
-              key={calendarDay}
-              onClick={() => setDay(calendarDay)}
-              aria-pressed={calendarDay === day}
+            <article
+              className={`scheduled-journey-preview${dirty ? " is-draft" : ""}`}
+              aria-label="Journey preview"
             >
-              <time dateTime={calendarDay}>
-                {new Date(`${calendarDay}T12:00:00`).toLocaleDateString(
-                  undefined,
-                  { weekday: "short", month: "short", day: "numeric" },
-                )}
-              </time>
-              <strong>
-                {
-                  dailyJourney(
-                    calendarDay,
-                    undefined,
-                    JOURNEY_INDEX,
-                    assignments,
-                  ).title
-                }
-              </strong>
-              <small>
-                {assignments[calendarDay] ? "Assigned" : "Rotation"}
-              </small>
+              <span className="schedule-preview-label">
+                {dirty
+                  ? "Ready to publish"
+                  : saved
+                    ? "Scheduled"
+                    : "Automatic rotation"}
+              </span>
+              <h4>{preview.title}</h4>
+              <p>{preview.description}</p>
+              <a href={preview.path} className="tertiary-action">
+                Preview five questions <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+            {dirty && (
+              <p className="schedule-current">
+                Currently published: <strong>{current.title}</strong>
+                {saved ? " · Scheduled" : " · Automatic"}
+              </p>
+            )}
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={!schedule.ready || busy || !dirty}
+            >
+              {busy
+                ? "Publishing…"
+                : !dirty
+                  ? "No changes to publish"
+                  : selection
+                    ? `Publish for ${formatDay(day).replace(/^[^,]+, /, "")}`
+                    : "Restore automatic rotation"}
+              <span aria-hidden="true">→</span>
             </button>
-          ))}
+            {saved && selection && (
+              <button
+                type="button"
+                className="quiet-button tertiary-action schedule-restore"
+                disabled={busy}
+                onClick={() => chooseJourney("")}
+              >
+                Use automatic rotation instead
+              </button>
+            )}
+            {message && (
+              <p className="schedule-notice" role="status">
+                {message}
+              </p>
+            )}
+          </form>
         </div>
+        <p className="schedule-footnote">
+          Unassigned days use the automatic rotation. Dates change at each
+          player’s local midnight; players who have started keep their Journey.
+        </p>
       </div>
     </section>
   );

@@ -44,9 +44,11 @@ export function dailyJourney(
   catalog: JourneySummary[] = JOURNEY_INDEX,
   assignments?: Record<string, string>,
 ): JourneySummary {
-  const selected = catalog.find(
-    (j) => j.id === (assignments ?? progress?.overrides)?.[date],
-  );
+  const assignedId = (assignments ?? progress?.overrides)?.[date];
+  const selected =
+    catalog.find(
+      (journey) => journey.supersedes === assignedId && !!assignedId,
+    ) ?? catalog.find((journey) => journey.id === assignedId);
   if (selected) return selected;
   const override = DAILY_SCHEDULE.overrides.find(
     (entry) => entry.date === date,

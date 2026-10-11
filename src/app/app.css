@@ -2825,43 +2825,289 @@ body
   color: var(--ui-muted);
 }
 
-.journey-schedule-fields {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: 1rem;
+.admin-panel .journey-scheduler-card {
+  padding: 24px;
+  background: rgb(var(--ui-surface-rgb));
 }
+.journey-scheduler-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.journey-scheduler-heading h2 {
+  margin: 0 0 8px;
+}
+.journey-scheduler-heading p {
+  margin: 0;
+  font-size: 14px;
+}
+.journey-scheduler {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.journey-month {
+  min-width: 0;
+}
+.journey-month-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.journey-month-heading h3 {
+  margin: 0;
+  font: 19px var(--font-ui);
+}
+.journey-month-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.experience .admin-panel .scheduler-icon,
+.experience .admin-panel .scheduler-today {
+  display: inline-grid;
+  place-items: center;
+  width: auto;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 8px;
+  background: rgb(var(--ui-line-rgb) / 0.06);
+  color: var(--ui-accent);
+  font-size: 13px;
+}
+.experience .admin-panel .scheduler-icon {
+  width: 36px;
+  font-size: 24px;
+}
+.experience .admin-panel .scheduler-icon:hover,
+.experience .admin-panel .scheduler-today:hover {
+  background: rgb(var(--ui-line-rgb) / 0.14);
+}
+.journey-calendar-weekdays,
 .journey-calendar {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
 }
-.journey-calendar-day {
+.journey-calendar-weekdays {
+  margin-bottom: 8px;
+  text-align: center;
+  color: var(--ui-muted);
+  font-size: 11px;
+}
+.experience .admin-panel .journey-calendar-day {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-  padding: 1rem;
+  align-items: stretch;
+  justify-content: start;
+  gap: 8px;
+  width: 100%;
+  min-height: 76px;
+  padding: 8px 6px;
   text-align: left;
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: rgb(var(--ui-surface-rgb) / 1);
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  border-radius: 8px;
+  background: rgb(var(--ui-line-rgb) / 0.04);
+  color: var(--ui-text);
 }
-.journey-calendar-day:hover,
-.journey-calendar-day[aria-pressed="true"] {
-  border-color: var(--ui-focus);
+.journey-calendar-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
 }
-.journey-calendar-day time,
-.journey-calendar-day small {
+.journey-calendar-date time {
+  font: 13px var(--font-ui);
+}
+.journey-calendar-day strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 11px/1.25 var(--font-ui);
+  overflow-wrap: normal;
+}
+.schedule-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  flex: 0 0 5px;
+  border-radius: 50%;
+  background: rgb(var(--ui-line-rgb) / 0.35);
+}
+.schedule-dot.is-assigned {
+  background: var(--ui-accent);
+}
+.experience .admin-panel .journey-calendar-day.is-outside-month {
   color: var(--ui-muted);
-  font-size: 0.85rem;
+  background: transparent;
 }
-@media (max-width: 600px) {
-  .journey-schedule-fields,
-  .journey-calendar {
+.journey-calendar-day.is-outside-month strong {
+  opacity: 0.5;
+}
+.experience .admin-panel .journey-calendar-day.is-today time {
+  color: var(--ui-accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.experience .admin-panel .journey-calendar-day:hover,
+.experience .admin-panel .journey-calendar-day[aria-pressed="true"] {
+  background: rgb(var(--ui-accent-rgb) / 0.12);
+  border-color: var(--ui-accent);
+}
+.journey-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 14px 0 0;
+  color: var(--ui-muted);
+  font-size: 11px;
+}
+.journey-calendar-legend > span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.admin-panel .journey-date-editor {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding-left: 24px;
+  border-left: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+}
+.journey-date-editor header h3 {
+  margin: 6px 0 0;
+  font: 18px/1.4 var(--font-ui);
+}
+.journey-date-editor .overline {
+  font-size: 10px;
+}
+.experience .journey-date-editor input,
+.experience .journey-date-editor select {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  font-size: 13px;
+}
+.admin-panel .journey-date-editor .field {
+  gap: 7px;
+  font-size: 12px;
+}
+.scheduled-journey-preview {
+  padding: 16px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 12px;
+  background: rgb(var(--ui-line-rgb) / 0.05);
+}
+.scheduled-journey-preview.is-draft {
+  border-color: rgb(var(--ui-accent-rgb) / 0.55);
+}
+.schedule-preview-label {
+  color: var(--ui-accent);
+  font: 10px var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.scheduled-journey-preview h4 {
+  margin: 10px 0 8px;
+  font: 23px/1.15 var(--font-editorial);
+}
+.scheduled-journey-preview p {
+  margin: 0 0 12px;
+  color: var(--ui-muted);
+  font: 12px/1.6 var(--font-ui);
+}
+.scheduled-journey-preview a {
+  font-size: 12px;
+  color: var(--ui-accent);
+}
+.schedule-current {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ui-muted);
+}
+.experience .journey-date-editor .primary-button {
+  min-height: 44px;
+  padding: 12px 16px;
+  font-size: 13px;
+}
+.experience .journey-date-editor .schedule-restore {
+  justify-self: start;
+  width: auto;
+  min-height: 32px;
+  padding: 0;
+  font-size: 12px;
+}
+.schedule-notice {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.journey-scheduler-card > .schedule-notice {
+  margin-bottom: 16px;
+}
+.schedule-footnote {
+  margin: 22px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ui-muted);
+}
+@media (max-width: 800px) {
+  .journey-scheduler {
     grid-template-columns: minmax(0, 1fr);
   }
+  .admin-panel .journey-date-editor {
+    padding: 24px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  }
+  .journey-calendar-day strong {
+    font-size: 11px;
+  }
 }
-
-.admin-journey-card + .admin-journey-card {
-  margin-top: 1.25rem;
+@media (max-width: 500px) {
+  .admin-panel .journey-scheduler-card {
+    padding: 16px;
+  }
+  .journey-month-heading h3 {
+    font-size: 16px;
+  }
+  .experience .admin-panel .journey-calendar-day {
+    min-height: 44px;
+    padding: 8px;
+    justify-content: center;
+  }
+  .journey-calendar-day strong {
+    display: none;
+  }
+  .journey-calendar-date time {
+    font-size: 14px;
+  }
+  .journey-calendar-date {
+    justify-content: center;
+    position: relative;
+  }
+  .journey-calendar-date .schedule-dot {
+    position: absolute;
+    right: -3px;
+    top: -2px;
+    width: 4px;
+    height: 4px;
+  }
+  .journey-scheduler-heading {
+    gap: 8px;
+  }
+  .journey-scheduler-heading h2 {
+    font-size: 22px;
+  }
 }

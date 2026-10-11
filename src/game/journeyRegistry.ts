@@ -4,11 +4,19 @@ import type { Journey, Question } from "./questions";
 /** Enough to route, schedule and validate saves without loading clue geometry. */
 export interface JourneySummary {
   id: string;
+  supersedes?: string;
+  compatibilityOnly?: boolean;
   title: string;
   description: string;
   rounds: Pick<Question, "id" | "label" | "progressLabel">[];
 }
-export const JOURNEY_INDEX = index;
+export const JOURNEY_INDEX: (JourneySummary & {
+  path: string;
+  module: string;
+})[] = index;
+export const AVAILABLE_JOURNEY_INDEX = JOURNEY_INDEX.filter(
+  (journey) => !journey.compatibilityOnly,
+);
 const modules = import.meta.glob<Record<string, unknown>>(["./*Journey.ts"]);
 const pending = new Map<string, Promise<Journey>>();
 

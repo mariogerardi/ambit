@@ -30,7 +30,7 @@ describe("question playground", () => {
   it("catalogs Journey questions only, with distinct jump targets", () => {
     const rounds = PLAYGROUND_JOURNEY.rounds;
     expect(rounds.every((q) => Object.hasOwn(ANSWER_TYPES, q.mode))).toBe(true);
-    expect(rounds).toHaveLength(60);
+    expect(rounds).toHaveLength(65);
     expect(new Set(rounds.map((q) => q.id)).size).toBe(rounds.length);
     expect(rounds.slice(0, 5)).toEqual(JOURNEY.rounds);
   });

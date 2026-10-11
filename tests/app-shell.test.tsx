@@ -297,7 +297,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
-  it("offers retained Journeys and the new sun Journey in Admin", async () => {
+  it("offers retained Journeys and the new sun and river Journeys in Admin", async () => {
     await mount();
     await click("Admin");
     const options = [
@@ -305,9 +305,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     ][0].options;
     expect([...options].map((option) => option.value)).toEqual([
       "",
-      ...journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id),
+      ...journeyRegistry.AVAILABLE_JOURNEY_INDEX.map((journey) => journey.id),
     ]);
-    expect(options).toHaveLength(13);
+    expect(options).toHaveLength(14);
     for (const id of [
       "long-way-home-v2",
       "beyond-borders-v1",
@@ -1291,7 +1291,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "California → Arizona → New Mexico → Oklahoma → Missouri",
     );
     await click("Admin");
-    expect(host.textContent).toContain("Journey calendar");
+    expect(host.textContent).toContain("Daily Journey schedule");
     expect(
       host.querySelector('option[value="north-america-v2"]'),
     ).not.toBeNull();
@@ -1743,9 +1743,11 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       select.value = "mediterranean-v1";
       select.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    await click("Save date assignment");
+    await click("Publish for Oct 5");
     expect(scheduleState.assignments["2026-10-05"]).toBe("mediterranean-v1");
-    expect(host.textContent).toContain("Saved 2026-10-05 for everyone.");
+    expect(host.textContent).toContain(
+      "Published Around the Mediterranean for Mon, Oct 5.",
+    );
     expect(host.querySelector("canvas")).toBe(canvas);
     await click("Home");
     await click("Resume");
@@ -1864,11 +1866,13 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       picker.value = ANDES_JOURNEY.id;
       picker.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    await click("Save date assignment");
+    await click("Publish for Oct 6");
     expect(scheduleState.assignments).toEqual({
       "2026-10-06": ANDES_JOURNEY.id,
     });
-    expect(host.textContent).toContain("Saved 2026-10-06 for everyone.");
+    expect(host.textContent).toContain(
+      "Published Along the Andes for Tue, Oct 6.",
+    );
     await click("Home");
     expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
       CANADA_JOURNEY.title,
@@ -1882,10 +1886,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       reset.value = "";
       reset.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    await click("Save date assignment");
+    await click("Restore automatic rotation");
     expect(scheduleState.assignments).toEqual({});
     expect(host.textContent).toContain(
-      "2026-10-06: Around the Mediterranean · Rotation",
+      "Restored automatic rotation for Tue, Oct 6.",
     );
   });
   it("blocks guessing today's edition when the shared schedule cannot load", async () => {

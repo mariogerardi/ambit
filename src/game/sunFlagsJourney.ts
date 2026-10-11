@@ -10,7 +10,7 @@ const source = (name: string, url: string): FactSource => ({
 const flag = (code: string, alt: string) => ({
   src: flagCatalog.flags.find((item) => item.countryId === `wurl:${code}`)!.src,
   alt,
-  feedbackAlt: `National flag of ${({ ARG: "Argentina", URY: "Uruguay", KAZ: "Kazakhstan", JPN: "Japan", MWI: "Malawi" } as Record<string, string>)[code]}`,
+  feedbackAlt: `National flag of ${({ ARG: "Argentina", URY: "Uruguay", KAZ: "Kazakhstan", JPN: "Japan", MWI: "Malawi", PHL: "the Philippines" } as Record<string, string>)[code]}`,
 });
 const base: Question = {
   id: "",
@@ -38,32 +38,39 @@ const base: Question = {
 };
 
 export const SUN_FLAGS_JOURNEY: Journey = {
-  id: "chasing-the-sun-v1",
+  id: "chasing-the-sun-v2",
+  supersedes: "chasing-the-sun-v1",
   title: "Chasing the sun",
   description:
-    "Five flags, one familiar symbol. Cross oceans and continents to discover how differently the same sun can shine.",
+    "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
   rounds: [
     {
       ...base,
-      id: "sun-flags-revolution-month-v1",
-      label: "History",
-      title: "A sun with a date.",
-      leadIn: "Begin beside the Río de la Plata.",
+      id: "sun-flags-may-pair-v2",
+      label: "Shared sun",
+      title: "Two flags, one face.",
+      leadIn: "Begin in South America.",
       prompt:
-        "Argentina’s sun recalls a revolution in 1810. Which month gives the ‘Sun of ___’ its name?",
-      rule: { type: "choice-ids", ids: ["month:may"] },
-      choices: ["January", "March", "May", "July", "September", "November"].map(
-        (month) => ({ id: `month:${month.toLowerCase()}`, label: month }),
-      ),
-      image: flag(
-        "ARG",
-        "Light-blue and white stripes with a golden, human-faced sun at the center.",
-      ),
-      focus: { lat: -24, lng: -58, altitude: 1.35 },
-      feedbackContextIds: ["wurl:ARG"],
-      feedbackFocus: { lat: -35, lng: -64, altitude: 1.1 },
+        "The Sun of May has a face. Which two South American countries put it on their national flags?",
+      instruction: "Choose two countries.",
+      mode: "map-multiple",
+      count: 2,
+      rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
+      selection: { type: "members" },
+      disclosure: {
+        ...base.disclosure,
+        namedChoices: false,
+        committedNames: true,
+      },
+      image: {
+        src: "/flags/clues/sun-detail-01.svg",
+        alt: "A golden sun with a human face and alternating straight and wavy rays.",
+        feedbackAlt: "The Sun of May, shown here in Uruguay’s flag design",
+      },
+      focus: { lat: -20, lng: -62, altitude: 1.4 },
+      feedbackFocus: { lat: -34, lng: -60, altitude: 1.1 },
       explanation:
-        "The emblem recalls the 1810 revolution. Across the Río de la Plata, the same symbol appears on Uruguay’s flag.",
+        "This shared face recalls the May Revolution of 1810. The two neighbors draw its rays differently, but carry the same Sun of May.",
       source: source(
         "Buenos Aires City Government · the national flag’s sun",
         "https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia",
@@ -71,43 +78,41 @@ export const SUN_FLAGS_JOURNEY: Journey = {
     },
     {
       ...base,
-      id: "sun-flags-uruguay-rays-v1",
-      label: "Look closely",
-      title: "A familiar face, a different count.",
-      leadIn: "Cross the river and take a closer look.",
+      id: "sun-flags-philippines-revolution-v2",
+      label: "Revolution",
+      title: "A revolution in the rays.",
+      leadIn: "Cross the Pacific to another revolutionary sun.",
       prompt:
-        "Uruguay shares that sun—but not the same ray count. How many rays surround its face?",
-      instruction: "Count both straight and wavy rays.",
-      inputLabel: "Number of rays",
-      mode: "number",
-      rule: { type: "manual-number", value: 16 },
-      image: {
-        src: "/flags/clues/sun-detail-01.svg",
-        alt: "Enlarged detail of the flag’s golden sun, with straight and wavy rays alternating around a face.",
-        feedbackAlt: "The sun detail from Uruguay’s national flag",
-      },
-      focus: { lat: -29, lng: -58, altitude: 1.1 },
-      feedbackContextIds: ["wurl:URY"],
-      feedbackFocus: { lat: -33, lng: -56, altitude: 0.7 },
-      explanation:
-        "Eight straight rays alternate with eight wavy ones. Argentina’s version has twice as many: the same emblem, two different designs.",
-      source: source(
-        "Intendencia de Canelones · history of the national flag",
-        "https://www.imcanelones.gub.uy/noticias/182o-aniversario-del-primer-pabellon-nacional",
-      ),
-      sources: [
-        source(
-          "Government of Argentina · national flag design",
-          "https://www.argentina.gob.ar/pais/simbolos/bandera",
-        ),
+        "The Philippine flag’s eight sun rays honor provinces that rose in the 1896 revolution. Against which colonial power?",
+      rule: { type: "choice-ids", ids: ["power:spain"] },
+      choices: [
+        { id: "power:portugal", label: "Portugal" },
+        { id: "power:britain", label: "Britain" },
+        { id: "power:netherlands", label: "The Netherlands" },
+        { id: "power:spain", label: "Spain" },
+        { id: "power:usa", label: "The United States" },
+        { id: "power:france", label: "France" },
       ],
+      image: flag(
+        "PHL",
+        "Blue and red bands beside a white triangle containing a golden sun and three stars.",
+      ),
+      focus: { lat: 14, lng: 122, altitude: 1.35 },
+      feedbackContextIds: ["wurl:PHL", "wurl:ESP"],
+      feedbackFocus: { lat: 30, lng: 65, altitude: 1.8 },
+      explanation:
+        "Each ray preserves the memory of a province in the uprising. Like the Sun of May, this sun carries a story of independence rather than a weather forecast.",
+      source: source(
+        "Philippine Supreme Court · constitutional discussion of the flag",
+        "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/24/51077",
+      ),
     },
     {
       ...base,
       id: "sun-flags-kazakhstan-grain-v1",
       label: "Symbolism",
       title: "Read the rays.",
-      leadIn: "Cross to the Central Asian steppe.",
+      leadIn: "Head northwest to the Central Asian steppe.",
       prompt:
         "Kazakhstan gives its sun a different kind of ray. What are the golden rays designed to resemble?",
       rule: { type: "choice-ids", ids: ["rays:grain"] },

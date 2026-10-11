@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
-import { JOURNEY_INDEX, loadJourney } from "../src/game/journeyRegistry";
+import {
+  JOURNEY_INDEX,
+  AVAILABLE_JOURNEY_INDEX,
+  loadJourney,
+} from "../src/game/journeyRegistry";
 import {
   NORTH_AMERICA_JOURNEY,
   MEXICO_BORDER_STATES,
@@ -87,9 +91,10 @@ describe("retained daily rotation", () => {
     expect(() =>
       setDailyPuzzle(emptyDaily, "2026-10-10", "enclosed-territories-v1"),
     ).toThrow("Unknown Journey");
-    expect(JOURNEY_INDEX.map((entry) => entry.id)).toEqual([
+    expect(AVAILABLE_JOURNEY_INDEX.map((entry) => entry.id)).toEqual([
       ...ACTIVE_JOURNEY_IDS,
-      "chasing-the-sun-v1",
+      "chasing-the-sun-v2",
+      "down-the-danube-v1",
     ]);
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === NORTH_AMERICA_JOURNEY.id)

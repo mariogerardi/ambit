@@ -1,11 +1,11 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **12 Journeys and 60 questions**, with eleven active
+The bundled catalog contains **13 current Journeys and 65 questions**, with eleven active
 daily concepts, reviewed against the code on October 11, 2026. Each Journey has
 five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
 everyone; unassigned dates use the automatic rotation. Direct practice routes and
-`/playground` are Admin-only. Chasing the sun is ready for a date assignment and
-has not been added to the automatic rotation. There is no current in-app authoring
+`/playground` are Admin-only. Chasing the sun and Down the Danube are ready for date assignments and
+have not been added to the automatic rotation. There is no current in-app authoring
 or AI generator. Previously published local packs are read-only compatibility data.
 
 ## Bundled Journeys
@@ -24,6 +24,7 @@ or AI generator. Previously published local packs are read-only compatibility da
 | 10  | Exceptions to the rule   | `/journey/exceptions-to-the-rule`  | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
 | 11  | On Russia’s doorstep     | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
 | 12  | Chasing the sun          | `/journey/chasing-the-sun`         | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)         |
+| 13  | Down the Danube          | `/journey/down-the-danube`         | [danubeJourney.ts](../src/game/danubeJourney.ts)             |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
@@ -39,23 +40,23 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 60 bundled questions, not every possible engine pairing.
+Counts below refer to the 65 current questions, not every possible engine pairing.
 The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                | Control                | Questions |
 | ------------------- | ---------------------- | --------: |
-| `pin`               | Drop a pin             |        14 |
+| `pin`               | Drop a pin             |        15 |
 | `city-single`       | Single city pick       |         1 |
 | `city-multiple`     | Multiple city picks    |         1 |
 | `map-single`        | Single country pick    |        11 |
-| `map-multiple`      | Multiple country picks |         4 |
-| `number`            | Number                 |         3 |
-| `text`              | Free response          |        10 |
+| `map-multiple`      | Multiple country picks |         6 |
+| `number`            | Number                 |         2 |
+| `text`              | Free response          |        11 |
 | `typed-regions`     | Typed region names     |         3 |
 | `ordered-countries` | Ordered country names  |         0 |
 | `ordered-capitals`  | Ordered capital names  |         0 |
-| `choice-single`     | Single choice          |        10 |
+| `choice-single`     | Single choice          |        12 |
 | `choice-multiple`   | Multiple choices       |         3 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
@@ -69,7 +70,7 @@ A rule describes correctness independently of its answer control:
 
 | Family                 | Rule IDs                                                                                        | Authority/limits                                                                                        |
 | ---------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `country-ids`, `region-ids`, `place-ids`          | Reviewed explicit answers, aliases, and membership sets; ray-counting uses `manual-number`.             |
+| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `country-ids`, `region-ids`, `place-ids`          | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
 | Pin placement          | `pin-inside`, `pin-distance`                                                                    | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
 | Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                      | Sourced fact context or the explicit common-English-name UN roster.                                     |
 | Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                 | Bundled capital/flag records; capital-order checks the specified route.                                 |
@@ -119,6 +120,19 @@ predicate if the question should be computed rather than fixed.
 5. Run `npm run prepare:journeys`, then `npm test` and `npm run build`. Add focused
    checks for new answer behavior, disclosure, ambiguous geography, and metadata.
    Update this catalog table/counts when adding/removing content.
+
+The month calendar highlights scheduled dates and previews pending selections
+before publication. Automatic dates show the actual rotation title. Admin can
+navigate months, jump to today, enter a date directly, or restore automatic
+rotation for an assigned day.
+
+The revised sun Journey uses `chasing-the-sun-v2`, with `supersedes` pointing to
+its original ID. New attempts resolve published original-ID assignments to the
+revised edition; started attempts keep their saved ID, questions, and scores.
+A compatibility-only original definition remains loadable for those saves, but
+has no practice route and is excluded from Admin choices and the playground.
+The index generator includes both current and compatibility metadata; the current
+question catalog contains only 65 questions.
 
 Adding a bundled edition does not change the active rotation. Editing the explicit
 rotation list does change which editions subsequent dates select.

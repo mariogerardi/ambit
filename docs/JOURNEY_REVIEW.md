@@ -2,7 +2,7 @@
 
 Owner decisions recorded October 10–11, 2026. The active daily rotation now
 contains **eleven five-question Journeys and 55 questions**. The additional
-**Chasing the sun** edition brings the available catalog to **12 Journeys and 60
+**Chasing the sun** and **Down the Danube** editions bring the current catalog to **13 Journeys and 65
 questions**, ready for a shared date assignment without reshuffling that cycle. Six original packs
 were scrapped; Beyond borders was split into three new packs, and North America
 was replaced by its revised edition. All eight obsolete editions have now been
@@ -78,7 +78,7 @@ session actions. The maintained crafting guide is
 [`journeyRotation.ts`](../src/game/journeyRotation.ts) contains the explicit eleven
 rotation IDs. Unassigned dates repeat these packs by device-local date from
 October 5, 2026. Admin’s shared calendar publishes date assignments for everyone
-and can select any of the twelve bundled editions. Saving uses revision checks
+and can select any of the thirteen current Journeys. Saving uses revision checks
 to prevent concurrent edits overwriting one another. Retained attempts remain
 pinned to their saved edition. The calendar can restore a date to automatic
 rotation; no dates were assigned during this editorial pass.
@@ -96,27 +96,31 @@ synced saves.
 
 ## Supplemental-copy spoiler audit · October 11, 2026
 
-Reviewed every question in all twelve available Journeys: the home-card title and
+Reviewed every question in all thirteen current Journeys: the home-card title and
 introduction, question lead-in, instruction, input label, image alt text, and
 question-help sources. Correct answers and explanatory reveals remain after
 submission. Named destinations in pin prompts are intentional: finding their
 location is the task. Geographic direction is retained as useful context without
 stating hidden answers.
 
-| Journey                  | Audit result                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Beyond the maple leaf    | Removed “Canada” from the introduction before the opening flag question.                               |
-| Around the Mediterranean | Five stops checked; supplemental copy does not state the hidden answers.                               |
-| Shared neighbors         | Five stops checked; the repeated pin premise stays in the introduction.                                |
-| Along the Andes          | Five stops checked; route cues do not name the capitals or requested sets.                             |
-| Not the obvious city     | Five stops checked; country context does not name the requested capitals.                              |
-| Island instincts         | Five stops checked; island direction preserves the map challenge.                                      |
-| North America by name    | Five stops checked; regional context does not list the requested answers.                              |
-| Latitude surprises       | Five stops checked; reference cities define latitude, not the accepted answers.                        |
-| Around the Ring of Fire  | Removed “Japan” from the introduction before the opening flag question.                                |
-| Exceptions to the rule   | Five stops checked; exceptional facts remain in the reveals.                                           |
-| On Russia’s doorstep     | Five stops checked; named destinations are intentional pin tasks.                                      |
-| Chasing the sun          | Five new stops checked; alt text describes visible art without stating month, ray count, or symbolism. |
+| Journey                  | Audit result                                                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Beyond the maple leaf    | Removed “Canada” from the introduction before the opening flag question.                                                        |
+| Around the Mediterranean | Five stops checked; supplemental copy does not state the hidden answers.                                                        |
+| Shared neighbors         | Five stops checked; the repeated pin premise stays in the introduction.                                                         |
+| Along the Andes          | Five stops checked; route cues do not name the capitals or requested sets.                                                      |
+| Not the obvious city     | Five stops checked; country context does not name the requested capitals.                                                       |
+| Island instincts         | Five stops checked; island direction preserves the map challenge.                                                               |
+| North America by name    | Five stops checked; regional context does not list the requested answers.                                                       |
+| Latitude surprises       | Five stops checked; reference cities define latitude, not the accepted answers.                                                 |
+| Around the Ring of Fire  | Removed “Japan” from the introduction before the opening flag question.                                                         |
+| Exceptions to the rule   | Five stops checked; exceptional facts remain in the reveals.                                                                    |
+| On Russia’s doorstep     | Five stops checked; named destinations are intentional pin tasks.                                                               |
+| Chasing the sun          | Revised stops checked; the Sun of May clue doesn’t name its countries, and Philippine alt text doesn’t name the colonial power. |
+| Down the Danube          | Five stops checked; early river clues avoid revealing the final sea, and named Vienna is an intentional pin task.               |
+
+The new Danube stops and revised sun prompts also pass the supplemental-copy
+regression check. Primary sources were reviewed for the new facts.
 
 Source titles revealed several answers (including Sicily, New Brunswick, and
 Abuja). The shared help now withholds source names and links until answering;
@@ -126,20 +130,44 @@ alternative answers and indirect wording that literal matching cannot assess.
 
 ## Chasing the sun
 
-A five-stop route uses history, observation, symbolism, and geographic placement:
-Argentina’s Sun of May → count Uruguay’s sixteen alternating rays → recognize
-Kazakhstan’s grain-shaped rays → place Japan’s red disc on the globe → interpret
-Malawi’s rising sun. Short directional cues connect the stops; insights stay in
-the reveals instead of repeating the correct-answer card.
+A five-stop route uses shared symbols, independence history, symbolism, and
+geographic placement: choose the two Sun of May countries → identify the colonial
+power behind the Philippine sun’s revolutionary rays → recognize Kazakhstan’s
+grain-shaped rays → place Japan’s red disc on the globe → interpret Malawi’s
+rising sun. The original month and ray-count questions were replaced at the
+owner’s request. Short directional cues connect the stops; insights stay in the
+reveals instead of repeating the correct-answer card.
 
 Primary references, reviewed October 11, 2026:
 
-- [Buenos Aires City Government: Sun of May](https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia).
-- [Canelones government: national flag history](https://www.imcanelones.gub.uy/noticias/182o-aniversario-del-primer-pabellon-nacional) and [Argentina government: national flag design](https://www.argentina.gob.ar/pais/simbolos/bandera).
+- [Buenos Aires City Government: the shared Sun of May](https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia).
+- [Philippine Supreme Court: constitutional discussion of the sun’s rays](https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/24/51077).
 - [President of Kazakhstan: flag symbolism](https://www.akorda.kz/en/state_symbols/kazakhstan_flag).
 - [Web Japan: national flag and anthem](https://web-japan.org/factsheet/en/pdf/11NFlagAnthem.pdf).
 - [Embassy of Malawi in Cairo: national flag](https://www.malawiembassycairo.org/about-malawi).
 
-The enlarged Uruguay sun is a viewport crop of the existing attributed flag SVG,
-not a new drawing. The edition is available in Admin’s calendar and playground;
-the eleven-pack automatic cycle is unchanged.
+The enlarged Sun of May is a viewport crop of the existing attributed Uruguay
+flag SVG. The revised edition is `chasing-the-sun-v2`. New attempts use it even
+when a date still has its original-ID assignment; original started attempts
+remain pinned to their original edition. The old definition is compatibility-only,
+absent from Admin choices, practice routes, and the playground.
+
+## Down the Danube
+
+The throughline follows the river downstream, beginning with a disappearing-water
+surprise rather than a source-country quiz. A city pin, a name formed across two
+banks, a shared-border map pick, and the receiving sea complete the route. The
+opening reveal avoids naming the final sea; the finish reconnects to the
+underground detour. Four answer controls support five distinct questions.
+
+Primary references, reviewed October 11, 2026:
+
+- [UNESCO Global Geopark Swabian Alb: Danube seepage](https://www.geopark-alb.de/en/experience-geopark/journey-into-earths-history/detail/the-danube-seepage).
+- [City of Vienna: Danube Island](https://www.wien.gv.at/en/environment/danube-island), with existing GeoNames capital coordinates for the 80 km pin radius.
+- [Óbuda municipality: the 1873 city union](https://obuda.hu/pest-buda-es-obuda-egyesitesenek-150-evfordulojat-unnepeljuk-november-17-budapest-napja/).
+- [ICPDR: restoring fish migration at the Iron Gates](https://www.icpdr.org/tasks-topics/tasks/river-basin-management/sturgeon-conservation/we-pass-facilitating-fish-migration).
+- [ICPDR: the Danube River Basin and delta](https://www.icpdr.org/danube-basin/danube-river-basin).
+
+The new concept is schedulable in Admin and available in the playground. Neither
+new concept changes the eleven-concept automatic cycle. No date assignments were
+published during browser verification.

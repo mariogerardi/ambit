@@ -344,11 +344,71 @@
     ]
   },
   {
-    "id": "chasing-the-sun-v1",
+    "id": "chasing-the-sun-v2",
     "title": "Chasing the sun",
-    "description": "Five flags, one familiar symbol. Cross oceans and continents to discover how differently the same sun can shine.",
+    "supersedes": "chasing-the-sun-v1",
+    "description": "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
     "path": "/journey/chasing-the-sun",
     "module": "./sunFlagsJourney.ts",
+    "rounds": [
+      {
+        "id": "sun-flags-may-pair-v2",
+        "label": "Shared sun"
+      },
+      {
+        "id": "sun-flags-philippines-revolution-v2",
+        "label": "Revolution"
+      },
+      {
+        "id": "sun-flags-kazakhstan-grain-v1",
+        "label": "Symbolism"
+      },
+      {
+        "id": "sun-flags-pacific-pin-v1",
+        "label": "Drop a pin"
+      },
+      {
+        "id": "sun-flags-malawi-dawn-v1",
+        "label": "Meaning"
+      }
+    ]
+  },
+  {
+    "id": "down-the-danube-v1",
+    "title": "Down the Danube",
+    "description": "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
+    "path": "/journey/down-the-danube",
+    "module": "./danubeJourney.ts",
+    "rounds": [
+      {
+        "id": "danube-underground-detour-v1",
+        "label": "Detour"
+      },
+      {
+        "id": "danube-vienna-pin-v1",
+        "label": "Drop a pin"
+      },
+      {
+        "id": "danube-two-banks-city-v1",
+        "label": "Two banks"
+      },
+      {
+        "id": "danube-iron-gates-border-v1",
+        "label": "Gorge"
+      },
+      {
+        "id": "danube-delta-sea-v1",
+        "label": "Delta"
+      }
+    ]
+  },
+  {
+    "id": "chasing-the-sun-v1",
+    "title": "Chasing the sun",
+    "compatibilityOnly": true,
+    "description": "Five flags, one familiar symbol. Cross oceans and continents to discover how differently the same sun can shine.",
+    "path": "/",
+    "module": "./sunFlagsOriginalJourney.ts",
     "rounds": [
       {
         "id": "sun-flags-revolution-month-v1",
