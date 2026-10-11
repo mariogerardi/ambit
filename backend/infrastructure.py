@@ -131,7 +131,7 @@ def template():
         ("ReadChallenges", "GET /account/challenges"), ("CreateChallenge", "POST /account/challenges"),
         ("UpdateChallenge", "PATCH /account/challenges/{id}"),
     ]]
-    for name, route, authenticated in community_routes + [("ReadSaves", "GET /account/saves", True), ("WriteSaves", "POST /account/saves", True), ("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
+    for name, route, authenticated in community_routes + [("ReadJourneySchedule", "GET /journeys/schedule", False), ("WriteJourneySchedule", "PATCH /admin/journeys/schedule", True), ("ReadSaves", "GET /account/saves", True), ("WriteSaves", "POST /account/saves", True), ("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
         properties = {"ApiId": ref("Api"), "RouteKey": route, "Target": sub("integrations/${Integration}"), "AuthorizationType": "JWT" if authenticated else "NONE"}
         if authenticated:
             properties.update(AuthorizerId=ref("Authorizer"), AuthorizationScopes=["openid"])

@@ -39,14 +39,16 @@ Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 | **Journey**                             | Eleven active daily concepts, with 11 loadable five-question editions covering pins, map picks, recall, choices, and geographic reasoning. |
 | **Explore** (`/explore`)                | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.                                |
 | **Study** (`/study`)                    | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions.                            |
-| **Question playground** (`/playground`) | Read-only practice of all 55 bundled questions, with direct selection and retry.                                                           |
+| **Question playground** (`/playground`) | Admin-only practice of all 55 bundled questions, with direct selection and retry.                                                          |
 | **Account** (`/account`)                | Optional verified-email signup, sign-in, recovery, and sign-out.                                                                           |
-| **Admin** (`/admin`)                    | Verified owner only: review player feedback and choose today's Journey locally. This is not shared publication.                            |
+| **Admin** (`/admin`)                    | Verified owner only: review feedback and publish shared date-to-Journey assignments.                                                       |
 
 The daily schedule cycles through the eleven retained Journey concepts from October 5, 2026, using
-device-local dates. Attempts stay attached to their starting date; an unfinished
-attempt can continue after midnight. Each Journey also has a direct practice
-route. See the [Journey catalog](docs/QUESTION_CATALOG.md) for titles and routes.
+device-local dates. Admin’s Journey calendar can override any date for everyone;
+unassigned dates continue that rotation. Started attempts keep their edition and
+progress when an assignment changes. Past attempts remain in saved history but
+cannot be reopened by players after midnight. Direct practice routes and the
+question playground require admin access. See the [Journey catalog](docs/QUESTION_CATALOG.md) for titles and routes.
 The removed editor/AI generator is not part of the current app; legacy locally
 published packs remain readable.
 

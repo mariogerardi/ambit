@@ -150,6 +150,7 @@ vi.mock("../src/services/accounts", () => ({
   }),
 }));
 vi.mock("../src/app/FeedbackReview", () => ({ FeedbackReview: () => null }));
+let scheduleState = { revision: 0, assignments: {} as Record<string, string> };
 let root: Root, host: HTMLDivElement;
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -215,6 +216,7 @@ let panelObservers: {
 }[] = [];
 beforeEach(() => {
   clearProfileCache();
+  scheduleState = { revision: 0, assignments: {} };
   authProbe.admin = true;
   authProbe.subject = undefined;
   authProbe.loading = false;
@@ -269,10 +271,19 @@ beforeEach(() => {
   }));
   vi.stubGlobal(
     "fetch",
-    vi.fn(
-      async (url: string) =>
-        new Response(readFileSync(`public${url.split("?")[0]}`, "utf8")),
-    ),
+    vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/journeys/schedule")) {
+        if (init?.method === "PATCH") {
+          const edit = JSON.parse(init.body as string);
+          if (edit.journeyId)
+            scheduleState.assignments[edit.date] = edit.journeyId;
+          else delete scheduleState.assignments[edit.date];
+          scheduleState.revision++;
+        }
+        return new Response(JSON.stringify(scheduleState));
+      }
+      return new Response(readFileSync(`public${url.split("?")[0]}`, "utf8"));
+    }),
   );
   host = document.createElement("div");
   document.body.append(host);
@@ -313,6 +324,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   it.each([CANADA_JOURNEY, ANDES_JOURNEY])(
     "renders usable third-question choices for $title",
     async (journey) => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 9, 5, 12));
       const date = "2026-10-05";
       localStorage.setItem(
         DAILY_KEY,
@@ -443,7 +456,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelectorAll(".study-history-list li")).toHaveLength(0);
   });
   it("restores cloud progress before creating a Journey on a new device", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
+    vi.setSystemTime(new Date(2026, 9, 11, 12));
     const source = createDailySave(
       journeyRegistry.JOURNEY_INDEX,
       "source-device",
@@ -487,7 +501,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       journeyRegistry.JOURNEY_INDEX,
       "new-device",
     ).load();
-    expect(restored.activeDate).toBe(original.activeDate);
+    expect(restored.activeDate).toBe("2026-10-11");
     expect(restored.attempts["2026-10-10"].runId).toBe(
       original.attempts["2026-10-10"].runId,
     );
@@ -577,6 +591,8 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   )(
     "restricts $phase daily Journey replay to admins (admin: $admin)",
     async ({ phase, admin }) => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 9, 6, 12));
       authProbe.admin = admin;
       const date = "2026-10-06";
       const save = createDailySave(journeyRegistry.JOURNEY_INDEX);
@@ -1275,7 +1291,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "California → Arizona → New Mexico → Oklahoma → Missouri",
     );
     await click("Admin");
-    expect(host.textContent).toContain("Journey 7 is active.");
+    expect(host.textContent).toContain("Journey calendar");
     expect(
       host.querySelector('option[value="north-america-v2"]'),
     ).not.toBeNull();
@@ -1297,10 +1313,12 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await openPlayground();
     expect(probe.mounts).toBe(1);
     expect(host.querySelector("canvas")).toBe(canvas);
-    expect(vi.mocked(fetch).mock.calls.map((c) => c[0])).toEqual([
-      "/geography/manifest.json",
-      "/geography/world.v1.json",
-    ]);
+    expect(
+      vi
+        .mocked(fetch)
+        .mock.calls.map((c) => c[0])
+        .filter((url) => String(url).startsWith("/geography/")),
+    ).toEqual(["/geography/manifest.json", "/geography/world.v1.json"]);
     for (const rendered of probe.renders.filter((r) => r.length === 242))
       expect(rendered).toBe(first);
     expect(host.querySelectorAll(".mode-outgoing").length).toBeLessThanOrEqual(
@@ -1710,7 +1728,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Start new session");
     expect(probe.focus).toHaveLength(count);
   });
-  it("sets the daily through Admin, preserves the globe, and resumes each selected puzzle", async () => {
+  it("publishes an assignment for new attempts without replacing a started Journey", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
     vi.setSystemTime(new Date(2026, 9, 5, 12));
     await mount();
@@ -1718,7 +1736,6 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await act(async () => probe.props!.onSelect(member("wurl:CAN")));
     const canvas = host.querySelector("canvas");
     await click("Admin");
-    expect(location.pathname).toBe("/admin");
     const select = host.querySelector<HTMLSelectElement>(
       ".mode-incoming select",
     )!;
@@ -1726,35 +1743,33 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       select.value = "mediterranean-v1";
       select.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    await click("Set today’s Journey");
-    expect(host.textContent).toContain("Journey 2 is active.");
+    await click("Save date assignment");
+    expect(scheduleState.assignments["2026-10-05"]).toBe("mediterranean-v1");
+    expect(host.textContent).toContain("Saved 2026-10-05 for everyone.");
     expect(host.querySelector("canvas")).toBe(canvas);
-    await click("Home");
-    await click("Play");
-    expect(host.textContent).toContain("official in parts of Spain");
-    expect(
-      JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts["2026-10-05"]
-        .journeyId,
-    ).toBe("mediterranean-v1");
-    await click("Admin");
-    const picker = host.querySelector<HTMLSelectElement>(
-      ".mode-incoming select",
-    )!;
-    await act(async () => {
-      picker.value = "";
-      picker.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    await click("Set today’s Journey");
     await click("Home");
     await click("Resume");
     expect(host.textContent).toContain("Well spotted.");
     expect(
-      JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts["2026-10-05"].game
-        .answers,
-    ).toHaveLength(1);
-    expect(probe.mounts).toBe(1);
+      JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts["2026-10-05"]
+        .journeyId,
+    ).toBe(CANADA_JOURNEY.id);
+    await act(async () => {
+      root.unmount();
+      root = createRoot(host);
+    });
+    localStorage.clear();
+    history.replaceState(null, "", "/");
+    await mount();
+    expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
+      FOURTH_JOURNEY.title,
+    );
+    await click("Play");
+    expect(host.textContent).toContain("official in parts of Spain");
   });
   it("allows six republic picks through the globe's eligibility states before submitting", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 9, 5, 12));
     const date = "2026-10-05";
     localStorage.setItem(
       DAILY_KEY,
@@ -1811,47 +1826,99 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.places.some((p) => p.kind === "city")).toBe(false);
     expect(host.querySelector("canvas")).toBe(canvas);
   });
-  it("retains daily answers and partial input across home, refresh, and midnight", async () => {
+  it("preserves history but expires the playable attempt at midnight and on reload", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
     vi.setSystemTime(new Date(2026, 9, 5, 23, 59, 59));
-    localStorage.setItem(
-      DAILY_KEY,
-      JSON.stringify({
-        version: 1,
-        attempts: {},
-        overrides: {},
-      }),
-    );
+    authProbe.admin = false;
     await mount();
     await click("Play");
     await act(async () => probe.props!.onSelect(member("wurl:CAN")));
     expect(host.textContent).toContain("Well spotted.");
-    const saved = JSON.parse(localStorage.getItem(DAILY_KEY)!);
-    expect(saved.attempts["2026-10-05"].game.answers).toHaveLength(1);
     await act(async () => vi.advanceTimersByTime(1026));
-    expect(JSON.parse(localStorage.getItem(DAILY_KEY)!).activeDate).toBe(
-      "2026-10-05",
-    );
+    await settleLoads();
+    const saved = JSON.parse(localStorage.getItem(DAILY_KEY)!);
+    expect(saved.activeDate).toBe("2026-10-06");
+    expect(saved.attempts["2026-10-05"].game.answers).toHaveLength(1);
+    expect(host.textContent).toContain("official in parts of Spain");
     await click("Home");
-    expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
-      FOURTH_JOURNEY.title,
-    );
-    expect(host.textContent).toContain("Continue 2026-10-05");
-    await click("Continue 2026-10-05");
-    expect(host.textContent).toContain("Well spotted.");
-    await click("Next");
-    expect(probe.props!.showBorders).toBe(true);
-    expect(probe.props!.regionNames).toBe("none");
+    expect(host.textContent).not.toContain("Continue 2026-10-05");
+    await click("Resume");
     await act(async () => {
       root.unmount();
       root = createRoot(host);
     });
     await mount();
-    expect(location.pathname).toBe("/daily");
-    expect(host.textContent).toContain(
-      "Which two languages are official at Canada’s federal level?",
+    expect(host.textContent).toContain("official in parts of Spain");
+    expect(host.textContent).not.toContain("Canada’s federal level");
+  });
+  it("assigns a future calendar date and restores its rotation when cleared", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 9, 5, 12));
+    await mount();
+    await click("Admin");
+    await click("Tue, Oct 6");
+    const picker = host.querySelector<HTMLSelectElement>(
+      ".mode-incoming select",
+    )!;
+    await act(async () => {
+      picker.value = ANDES_JOURNEY.id;
+      picker.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await click("Save date assignment");
+    expect(scheduleState.assignments).toEqual({
+      "2026-10-06": ANDES_JOURNEY.id,
+    });
+    expect(host.textContent).toContain("Saved 2026-10-06 for everyone.");
+    await click("Home");
+    expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
+      CANADA_JOURNEY.title,
     );
-    expect(probe.props!.showBorders).toBe(true);
+    await click("Admin");
+    await click("Tue, Oct 6");
+    const reset = host.querySelector<HTMLSelectElement>(
+      ".mode-incoming select",
+    )!;
+    await act(async () => {
+      reset.value = "";
+      reset.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await click("Save date assignment");
+    expect(scheduleState.assignments).toEqual({});
+    expect(host.textContent).toContain(
+      "2026-10-06: Around the Mediterranean · Rotation",
+    );
+  });
+  it("blocks guessing today's edition when the shared schedule cannot load", async () => {
+    const assets = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) =>
+        url.endsWith("/journeys/schedule")
+          ? Promise.resolve(new Response("unavailable", { status: 503 }))
+          : assets(url, init),
+      ),
+    );
+    await mount();
+    const play = host.querySelector<HTMLButtonElement>(
+      ".daily-menu .primary-button",
+    )!;
+    expect(play.disabled).toBe(true);
+    expect(host.textContent).toContain("Retry schedule");
+    expect(JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts).toEqual({});
+  });
+  it("redirects non-admin practice and playground URLs to Home", async () => {
+    authProbe.admin = false;
+    for (const path of ["/journey/mediterranean", "/playground"]) {
+      history.replaceState(null, "", path);
+      await mount();
+      expect(location.pathname).toBe("/");
+      expect(host.querySelector(".daily-menu")).not.toBeNull();
+      expect(host.textContent).not.toContain("official in parts of Spain");
+      await act(async () => {
+        root.unmount();
+        root = createRoot(host);
+      });
+    }
   });
   it("resumes natural rotation on entering Explore and Home after interaction", async () => {
     await mount();
@@ -2168,6 +2235,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         overrides: { [date]: FIFTEENTH_JOURNEY.id },
       }),
     );
+    scheduleState.assignments[date] = FIFTEENTH_JOURNEY.id;
     await mount();
     const daily = host.querySelector(".daily-menu")!;
     expect(daily.querySelector(".daily-menu-eyebrow")?.textContent).toBe(

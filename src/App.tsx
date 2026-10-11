@@ -86,10 +86,10 @@ import {
   localDateKey,
   millisecondsToMidnight,
   openDaily,
-  setDailyPuzzle,
   unfinished,
   validDaily,
 } from "./app/dailyProgress";
+import { useJourneySchedule } from "./services/journeySchedule";
 import { usePublishedPuzzles } from "./app/publishedPuzzles";
 import { readSave } from "./app/storage";
 import {
@@ -176,6 +176,7 @@ export function PlayerWorkspace() {
 export function App() {
   const account = useAccount();
   const subject = account.user?.profile.sub;
+  const schedule = useJourneySchedule();
   const playerProfile = usePlayerProfile(subject, account.accessToken);
   const [feedback, setFeedback] = useState<FeedbackRequest>();
   const closeFeedback = useCallback(() => setFeedback(undefined), []);
@@ -193,7 +194,17 @@ export function App() {
   );
   const [dailyLoaded, setDailyLoaded] = useState(false);
   const [path, setPath] = useState(location.pathname);
-  const mode = modeForPath(path);
+  const requestedMode = modeForPath(path);
+  const restricted =
+    (requestedMode === "practice" || requestedMode === "playground") &&
+    !account.admin;
+  const mode = restricted ? "home" : requestedMode;
+  useEffect(() => {
+    if (restricted && !account.loading) {
+      history.replaceState(null, "", "/");
+      setPath("/");
+    }
+  }, [restricted, account.loading]);
   useEffect(() => {
     if (!account.loading) trackView(mode);
   }, [mode, account.loading]);
@@ -254,6 +265,7 @@ export function App() {
   );
   const dailyReady =
     dailyLoaded &&
+    schedule.ready &&
     (cloudSave.hydrated || Object.keys(daily.attempts).length > 0);
   const canSave = dailySaveOk && studySaveOk;
   useEffect(() => {
@@ -411,12 +423,11 @@ export function App() {
     () => Object.fromEntries(namedRegions.map((r) => [r.id, "disabled"])),
     [namedRegions],
   );
-  const activeAttempt = daily.activeDate
-    ? daily.attempts[daily.activeDate]
-    : undefined;
+  const activeAttempt =
+    daily.activeDate === today ? daily.attempts[today] : undefined;
   const cameraKey =
     mode === "daily"
-      ? `${path}:${activeAttempt?.date ?? today}:${activeAttempt?.journeyId ?? dailyJourney(today, daily, allJourneys).id}`
+      ? `${path}:${activeAttempt?.date ?? today}:${activeAttempt?.journeyId ?? dailyJourney(today, daily, allJourneys, schedule.schedule?.assignments ?? {}).id}`
       : mode === "study"
         ? `${path}:${studyBrowsingHistory ? "history" : studySetup || !study.session ? "setup" : `session:${study.session.id ?? study.session.seed}`}`
         : path;
@@ -427,7 +438,12 @@ export function App() {
       ? "question-playground-v1"
       : mode === "daily"
         ? (activeAttempt?.journeyId ??
-          dailyJourney(today, daily, allJourneys).id)
+          dailyJourney(
+            today,
+            daily,
+            allJourneys,
+            schedule.schedule?.assignments ?? {},
+          ).id)
         : JOURNEY_INDEX.find((j) => j.path === path)?.id;
   const journey =
     loaded && loaded.journey.id === journeyId ? loaded.journey : emptyJourney;
@@ -506,7 +522,13 @@ export function App() {
     // Its geometry, runtime and question context otherwise wait until navigation.
     const warm = () => {
       const id =
-        activeAttempt?.journeyId ?? dailyJourney(today, daily, allJourneys).id;
+        activeAttempt?.journeyId ??
+        dailyJourney(
+          today,
+          daily,
+          allJourneys,
+          schedule.schedule?.assignments ?? {},
+        ).id;
       const local = published.items.find((p) => p.id === id)?.journey;
       void Promise.all([
         local ? Promise.resolve(local) : loadJourney(id),
@@ -546,6 +568,7 @@ export function App() {
     daily,
     allJourneys,
     published.items,
+    schedule.schedule,
   ]);
   const game =
     mode === "daily"
@@ -1045,9 +1068,11 @@ export function App() {
   }, [studyStore]);
   useEffect(() => {
     if (mode === "daily" && dailyReady && !activeAttempt)
-      setDaily((p) => openDaily(p, today, false, allJourneys));
+      setDaily((p) =>
+        openDaily(p, today, false, allJourneys, schedule.schedule?.assignments),
+      );
     document.title = `ambit — ${mode === "playground" ? "Question Playground" : mode === "home" ? "A world of wonders" : mode === "daily" || mode === "practice" ? "Journey" : mode[0].toUpperCase() + mode.slice(1)}`;
-  }, [mode, activeAttempt, today, dailyReady, allJourneys]);
+  }, [mode, activeAttempt, today, dailyReady, allJourneys, schedule.schedule]);
   useEffect(() => {
     const controller = new AbortController();
     let loader: LayerLoader | undefined;
@@ -1207,7 +1232,8 @@ export function App() {
         setDaily((p) => {
           const date = p.activeDate,
             attempt = date ? p.attempts[date] : undefined;
-          if (!date || !attempt) return p;
+          if (!date || date !== today || date !== localDateKey() || !attempt)
+            return p;
           const selectedJourney =
             journey.id === attempt.journeyId ? journey : undefined;
           if (!selectedJourney) return p;
@@ -1238,7 +1264,7 @@ export function App() {
           ),
         }));
     },
-    [context, mode, journey, allJourneys],
+    [context, mode, journey, allJourneys, today],
   );
   const studyAction = useCallback(
     (action: StudyAction) =>
@@ -1317,22 +1343,27 @@ export function App() {
     ],
   );
   function playDaily(date: string) {
-    setDaily((p) => openDaily(p, date, false, allJourneys));
+    if (date !== today || date !== localDateKey() || !schedule.ready) return;
+    setDaily((p) =>
+      openDaily(p, date, false, allJourneys, schedule.schedule?.assignments),
+    );
     stop();
     navigate("/daily");
   }
   const todayAttempt = daily.attempts[today];
   const todayJourney =
     allJourneys.find((j) => j.id === todayAttempt?.journeyId) ??
-    dailyJourney(today, daily, allJourneys);
+    dailyJourney(
+      today,
+      daily,
+      allJourneys,
+      schedule.schedule?.assignments ?? {},
+    );
   const dailyLabel = !todayAttempt
     ? "Play"
     : unfinished(todayAttempt)
       ? "Resume"
       : "View result";
-  const previousAttempts = Object.values(daily.attempts)
-    .filter((a) => a.date !== today && unfinished(a))
-    .sort((a, b) => b.date.localeCompare(a.date));
   const panels =
     mode === "home" ? (
       <section className="home-story home-menu">
@@ -1364,22 +1395,29 @@ export function App() {
           </div>
           <button
             className="primary-button"
-            disabled={!regions.length || !dailyLoaded || !cloudSave.ready}
+            disabled={
+              !regions.length ||
+              !dailyLoaded ||
+              !cloudSave.ready ||
+              !schedule.ready
+            }
             onClick={() => playDaily(today)}
           >
             {dailyLabel}
             <span>→</span>
           </button>
         </div>
-        {previousAttempts.map((a) => (
-          <button
-            key={a.date}
-            className="previous-attempt"
-            onClick={() => playDaily(a.date)}
-          >
-            Continue {a.date} · {a.game.roundIndex + 1} of 5 <span>→</span>
-          </button>
-        ))}
+        {schedule.error && !schedule.ready && (
+          <p role="alert">
+            {schedule.error}{" "}
+            <button
+              className="quiet-button"
+              onClick={() => void schedule.refresh()}
+            >
+              Retry schedule
+            </button>
+          </p>
+        )}
         <div className="menu-secondary">
           <button onClick={() => navigate("/explore")}>
             <strong>
@@ -1421,20 +1459,7 @@ export function App() {
     ) : mode === "admin" ? (
       <AdminAccess onAccount={() => navigate("/account")}>
         <div className="admin-content">
-          <AdminPanel
-            date={today}
-            progress={daily}
-            catalog={allJourneys}
-            labels={Object.fromEntries(
-              published.items.map((p, i) => [
-                p.id,
-                `Local Journey ${i + 1} · revision ${p.revision}`,
-              ]),
-            )}
-            onSet={(id) =>
-              setDaily((p) => setDailyPuzzle(p, today, id, allJourneys))
-            }
-          />
+          <AdminPanel date={today} schedule={schedule} />
           <FeedbackReview />
         </div>
       </AdminAccess>
@@ -1512,8 +1537,16 @@ export function App() {
       />
     ) : mode === "daily" && !dailyReady ? (
       <section className="info-view" role="status">
-        <p>{cloudSave.message}</p>
-        {cloudSave.ready && (
+        <p>{schedule.error || cloudSave.message}</p>
+        {!schedule.ready && (
+          <button
+            className="quiet-button"
+            onClick={() => void schedule.refresh()}
+          >
+            Retry schedule
+          </button>
+        )}
+        {cloudSave.ready && schedule.ready && (
           <>
             <button
               className="quiet-button tertiary-action"
@@ -1539,6 +1572,7 @@ export function App() {
                 progress.activeDate ?? today,
                 true,
                 allJourneys,
+                schedule.schedule?.assignments,
               ),
             );
           } else dispatch({ type: "start" });
@@ -1836,7 +1870,12 @@ export function App() {
           <AppMenu
             admin={account.admin}
             onJourney={() => playDaily(today)}
-            journeyReady={!!regions.length && dailyLoaded && cloudSave.ready}
+            journeyReady={
+              !!regions.length &&
+              dailyLoaded &&
+              cloudSave.ready &&
+              schedule.ready
+            }
             onFeedback={() =>
               setFeedback({ kind: "experience", context: { view: mode } })
             }

@@ -36,13 +36,17 @@ export function dailyJourney<T extends JourneySummary>(
   date: string,
   progress: DailyProgress | undefined,
   catalog: T[],
+  assignments?: Record<string, string>,
 ): T;
 export function dailyJourney(
   date: string,
   progress?: DailyProgress,
   catalog: JourneySummary[] = JOURNEY_INDEX,
+  assignments?: Record<string, string>,
 ): JourneySummary {
-  const selected = catalog.find((j) => j.id === progress?.overrides?.[date]);
+  const selected = catalog.find(
+    (j) => j.id === (assignments ?? progress?.overrides)?.[date],
+  );
   if (selected) return selected;
   const override = DAILY_SCHEDULE.overrides.find(
     (entry) => entry.date === date,
@@ -208,17 +212,24 @@ export function openDaily(
   date: string,
   replay = false,
   catalog: JourneySummary[] = JOURNEY_INDEX,
+  assignments?: Record<string, string>,
 ): DailyProgress {
   const existing = progress.attempts[date];
   const attempt =
     existing && !replay
-      ? existing
+      ? existing.game.phase === "feedback" && existing.game.answers.length === 5
+        ? {
+            ...existing,
+            game: { ...existing.game, phase: "finished" as const },
+          }
+        : existing
       : {
           runId: crypto.randomUUID(),
           startedAt: Math.max(Date.now(), (existing?.startedAt ?? 0) + 1),
           date,
           journeyId:
-            existing?.journeyId ?? dailyJourney(date, progress, catalog).id,
+            existing?.journeyId ??
+            dailyJourney(date, progress, catalog, assignments).id,
           scheduleVersion: DAILY_VERSION,
           game: { ...initialGame, phase: "playing" as const },
         };
@@ -229,7 +240,8 @@ export function openDaily(
   };
 }
 export const unfinished = (a: DailyAttempt) =>
-  a.game.phase === "playing" || a.game.phase === "feedback";
+  a.game.answers.length < 5 &&
+  (a.game.phase === "playing" || a.game.phase === "feedback");
 
 export function recoverDaily(
   value: unknown,

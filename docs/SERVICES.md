@@ -262,3 +262,22 @@ resources are retained and the user pool has deletion protection.
 Offline tests and builds do not verify hosted signup/email delivery, Datadog
 intake, or real phone/WebGL behavior. Verify those after deployment without
 submitting test feedback into the production review queue unintentionally.
+
+## Shared Journey schedule
+
+`GET /journeys/schedule` returns public date assignments and a revision from the
+community table. `PATCH /admin/journeys/schedule` requires a Cognito admin token
+and accepts `{date, journeyId, revision}`. A null Journey removes an assignment,
+restoring automatic rotation. Only bundled active editions can be published;
+local packs cannot be assigned to other players. Conditional writes reject
+concurrent edits with 409, requiring a refresh before retrying. The calendar
+supports 1,000 assigned dates.
+
+The player refreshes on startup, focus, reconnect, and every minute while visible.
+A first-load scheduling failure blocks starting a daily instead of guessing the
+edition. Once started, an attempt retains its edition even if Admin changes that
+date. Calendar days still use each player’s local midnight. Schedule publication
+does not reset progress or enable past-day play.
+
+The backend deployment archive includes `journey-index.json`; deploy the backend
+when the bundled Journey catalog changes.

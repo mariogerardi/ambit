@@ -10,6 +10,7 @@ import uuid
 
 import saves
 import community
+import journey_schedule
 import boto3
 from botocore.exceptions import ClientError
 
@@ -159,6 +160,8 @@ def handler(event, context):
             result = submit(event, route == "POST /account/feedback")
         elif route in ("GET /admin/feedback", "PATCH /admin/feedback/{id}"):
             result = review(event)
+        elif route in ("GET /journeys/schedule", "PATCH /admin/journeys/schedule"):
+            result = journey_schedule.handle(event, admin(event))
         elif route in ("GET /account/saves", "POST /account/saves"):
             result = saves.handle(event)
         elif route.startswith(("GET /account/", "POST /account/", "PATCH /account/")):
