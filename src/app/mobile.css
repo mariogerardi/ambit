@@ -748,6 +748,9 @@
     padding: 12px 10px;
     font-size: 13px;
   }
+  .experience .finish-actions.result-actions {
+    width: 100%;
+  }
   .experience .study-path h3,
   .experience .study-path-build strong {
     font-size: 21px;
