@@ -48,6 +48,8 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-france-border",
+      leadIn:
+        "First assumption: a European country’s longest border must be in Europe.",
       title: "The long way around.",
       label: "Border",
       prompt:
@@ -90,7 +92,7 @@ export const TWELFTH_JOURNEY: Journey = {
         },
       ],
       explanation:
-        "Brazil. French Guiana is an overseas department of France in South America. Its border with Brazil is longer than any border France shares with a European country; the highlighted department meets Brazil along its southern and eastern edges.",
+        "French Guiana is part of France. Its South American border beats every border France has in Europe.",
       source: source(
         "Presidency of Brazil · France’s longest land border",
         "https://www.gov.br/planalto/en/latest-news/2023/05/presidents-lula-and-macron-meet-at-the-g7-summit-and-seal-resumption-of-brazil-france-relations",
@@ -99,6 +101,8 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-double-landlocked",
+      leadIn:
+        "Next: one border should be enough to escape a landlocked country.",
       title: "No coast in sight.",
       prompt:
         "Besides Liechtenstein, which landlocked country has only landlocked neighbors?",
@@ -121,7 +125,7 @@ export const TWELFTH_JOURNEY: Journey = {
         parentId: id,
       })),
       explanation:
-        "Uzbekistan. Its five neighbors—Kazakhstan, Kyrgyzstan, Tajikistan, Afghanistan, and Turkmenistan—are all landlocked. Shores on the inland Caspian Sea do not count as an open-ocean coastline. Reaching an ocean over land means crossing at least two national borders.",
+        "Every neighboring country is landlocked too. Reaching an ocean over land means crossing at least two borders.",
       source: source(
         "World Bank · Uzbekistan country overview",
         "https://www.worldbank.org/ext/en/country/uzbekistan",
@@ -130,6 +134,7 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-four-hemispheres",
+      leadIn: "Now try fitting one country into just one pair of hemispheres.",
       title: "Every direction at once.",
       label: "Hemispheres",
       prompt: "Which Pacific country has islands in all four hemispheres?",
@@ -161,7 +166,7 @@ export const TWELFTH_JOURNEY: Journey = {
         answerTarget: true,
       })),
       explanation:
-        "Kiribati’s islands straddle both the Equator and the 180° meridian. The three example island markers make this visible: Tarawa is north and east, Kiritimati is north and west, and Kanton is south and west. Eastern and western hemispheres follow longitude, not the zigzagging International Date Line.",
+        "The islands cross both the Equator and the 180° meridian. One country can belong to all four hemispheres.",
       source: source(
         "Kiribati Ministry of Finance · Development Plan 2024–2027",
         "https://mfed.gov.ki/sites/default/files/2025-09/KDP%202024-2027_Launched_17.09.25_3.pdf",
@@ -171,10 +176,11 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-bolivia-coast",
+      leadIn:
+        "A coastline can disappear from a country’s map without moving the sea.",
       title: "A country remembers the sea.",
       label: "History",
-      prompt:
-        "Which country gained Bolivia’s Pacific coastline in the 19th-century War of the Pacific?",
+      prompt: "Which country gained Bolivia’s coast in the War of the Pacific?",
       instruction: "",
       rule: { type: "country-ids", ids: ["wurl:CHL"] },
       contextIds: ["wurl:BOL"],
@@ -206,7 +212,7 @@ export const TWELFTH_JOURNEY: Journey = {
         },
       ],
       explanation:
-        "Chile. Bolivia’s former Pacific territory is now in northern Chile. Chile occupied the coast during the War of the Pacific; the 1904 peace treaty established Chilean sovereignty over that territory. This reveal shows today’s geography, not historical boundaries.",
+        "Bolivia lost its coast in the war. The 1904 treaty confirmed the border, leaving it landlocked.",
       source: source(
         "International Court of Justice · Bolivia v. Chile, historical background",
         "https://www.icj-cij.org/case/153",
@@ -215,17 +221,18 @@ export const TWELFTH_JOURNEY: Journey = {
     {
       ...base,
       id: "exceptions-baku",
+      leadIn: "Last assumption: surely a city on land sits above sea level.",
       title: "How low can a capital go?",
       label: "Capital",
       prompt:
-        "Baku lies about 28 meters below sea level on the Caspian Sea. Which country is it the capital of?",
+        "Baku sits about 28 meters below sea level. Which country is it the capital of?",
       instruction: "",
       rule: { type: "country-ids", ids: ["wurl:AZE"] },
       focus: { lat: 40, lng: 48, altitude: 0.68 },
       feedbackFocus: { lat: 40.4, lng: 48.5, altitude: 0.32 },
       feedbackPlaces: [ANSWER_PLACES.get("place:587084")!],
       explanation:
-        "Azerbaijan. Baku sits on the Absheron Peninsula beside the Caspian Sea, whose surface is below sea level. The capital’s setting breaks the instinct that a city on land must be above the sea.",
+        "The Caspian’s surface is below sea level—and so is this capital. Even land doesn’t always sit above the sea.",
       source: source(
         "Azerbaijan · Baku’s Caspian setting and elevation",
         "https://azerbaijan.az/en/related-information/217",

@@ -40,7 +40,7 @@ Large deferred globe/geometry bundles still produce Vite's chunk-size warning.
 | Static hosting              | Direct-route loading, compression, cache policy, headers, and rollback verified on the chosen host.                                                                       |
 | Browser/device verification | Cold/warm Journey entry, heavy subdivisions, repeated Fidget, close-zoom borders, keyboard, touch, mobile layouts, and WebGL failure inspected on representative devices. |
 | Accessibility               | Focus/dialog navigation, keyboard alternatives, screen-reader feedback, transparency/imagery contrast, and reduced motion verified.                                       |
-| Content policy              | Nine-concept repeat cadence, device-local “today,” verified-owner Admin access, and source conventions accepted.                                                          |
+| Content policy              | Eleven-concept repeat cadence, device-local “today,” verified-owner Admin access, and source conventions accepted.                                                        |
 | Distribution and discovery  | Full attribution shipped, font notices retained, and intentional favicon/social-preview metadata.                                                                         |
 | Error visibility            | A deliberate production reporting/debugging path for failed loads, context loss, and storage failures.                                                                    |
 

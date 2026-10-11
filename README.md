@@ -33,17 +33,17 @@ Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 
 ## What is included
 
-| View                                    | Behavior                                                                                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Home** (`/`)                          | Today's Journey, saved progress, and entry points to Explore and Study.                                                                  |
-| **Journey**                             | Nine active daily concepts, with 16 loadable five-question editions covering pins, map picks, recall, choices, and geographic reasoning. |
-| **Explore** (`/explore`)                | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.                              |
-| **Study** (`/study`)                    | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions.                          |
-| **Question playground** (`/playground`) | Read-only practice of all 80 bundled questions, with direct selection and retry.                                                         |
-| **Account** (`/account`)                | Optional verified-email signup, sign-in, recovery, and sign-out.                                                                         |
-| **Admin** (`/admin`)                    | Verified owner only: review player feedback and choose today's Journey locally. This is not shared publication.                          |
+| View                                    | Behavior                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Home** (`/`)                          | Today's Journey, saved progress, and entry points to Explore and Study.                                                                    |
+| **Journey**                             | Eleven active daily concepts, with 19 loadable five-question editions covering pins, map picks, recall, choices, and geographic reasoning. |
+| **Explore** (`/explore`)                | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.                                |
+| **Study** (`/study`)                    | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions.                            |
+| **Question playground** (`/playground`) | Read-only practice of all 95 bundled questions, with direct selection and retry.                                                           |
+| **Account** (`/account`)                | Optional verified-email signup, sign-in, recovery, and sign-out.                                                                           |
+| **Admin** (`/admin`)                    | Verified owner only: review player feedback and choose today's Journey locally. This is not shared publication.                            |
 
-The daily schedule cycles through the nine retained Journey concepts from October 5, 2026, using
+The daily schedule cycles through the eleven retained Journey concepts from October 5, 2026, using
 device-local dates. Attempts stay attached to their starting date; an unfinished
 attempt can continue after midnight. Each Journey also has a direct practice
 route. See the [Journey catalog](docs/QUESTION_CATALOG.md) for titles and routes.

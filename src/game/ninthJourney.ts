@@ -17,7 +17,7 @@ export const SHARED_NEIGHBOR_CLUES: {
     names: ["Ivory Coast", "Benin"],
     answer: "wurl:BFA",
     explanation:
-      "Burkina Faso is the only country sharing land borders with both Ivory Coast and Benin.",
+      "Both clues meet this landlocked neighbor in West Africa. Finding the shared border is only half the pin challenge.",
     focus: { lat: 6, lng: 0, altitude: 1.05 },
   },
   {
@@ -26,7 +26,7 @@ export const SHARED_NEIGHBOR_CLUES: {
     names: ["Bulgaria", "Georgia"],
     answer: "wurl:TUR",
     explanation:
-      "Türkiye is the only country sharing land borders with both Bulgaria and Georgia.",
+      "Its long east–west footprint connects the Balkans to the Caucasus.",
     focus: { lat: 43, lng: 35, altitude: 0.95 },
   },
   {
@@ -35,7 +35,7 @@ export const SHARED_NEIGHBOR_CLUES: {
     names: ["Norway", "Belarus"],
     answer: "wurl:RUS",
     explanation:
-      "Russia is the only country sharing land borders with both Norway and Belarus. Any pin inside Russia counts, including its exclaves.",
+      "The same country meets both clues, despite how far apart they are. Its exclaves count too.",
     focus: { lat: 58, lng: 20, altitude: 1.1 },
   },
   {
@@ -44,7 +44,7 @@ export const SHARED_NEIGHBOR_CLUES: {
     names: ["Eswatini", "Zambia"],
     answer: "wurl:MOZ",
     explanation:
-      "Mozambique is the only country sharing land borders with both Eswatini and Zambia.",
+      "Its long coastal outline hides a less obvious inland connection to both clues.",
     focus: { lat: -20, lng: 25, altitude: 1.1 },
   },
   {
@@ -53,7 +53,7 @@ export const SHARED_NEIGHBOR_CLUES: {
     names: ["Chile", "Colombia"],
     answer: "wurl:PER",
     explanation:
-      "Peru is the only country sharing land borders with both Chile and Colombia.",
+      "Both clues meet this country at opposite ends of its Andean footprint.",
     focus: { lat: -15, lng: -65, altitude: 1.25 },
   },
 ];
@@ -62,7 +62,7 @@ export const NINTH_JOURNEY: Journey = {
   id: "shared-neighbors-v1",
   title: "Shared neighbors",
   description:
-    "Two neighbors can narrow down a whole world. Borders make unexpected connections.",
+    "Two neighbors name the country; an unfamiliar outline makes pinning it another challenge. Find the shared neighbor five times.",
   rounds: SHARED_NEIGHBOR_CLUES.map(
     (clue): Question => ({
       id: clue.id,

@@ -1,3 +1,6 @@
+import { CANADA_JOURNEY } from "./canadaJourney";
+import { ANDES_JOURNEY } from "./andesJourney";
+import { LATITUDE_JOURNEY } from "./latitudeJourney";
 import { NORTH_AMERICA_JOURNEY } from "./northAmericaJourney";
 import { FIFTEENTH_JOURNEY } from "./fifteenthJourney";
 import { FOURTEENTH_JOURNEY } from "./fourteenthJourney";
@@ -36,6 +39,9 @@ export const QUESTION_CATALOG: Question[] = [
   ...FOURTEENTH_JOURNEY.rounds,
   ...FIFTEENTH_JOURNEY.rounds,
   ...NORTH_AMERICA_JOURNEY.rounds,
+  ...CANADA_JOURNEY.rounds,
+  ...ANDES_JOURNEY.rounds,
+  ...LATITUDE_JOURNEY.rounds,
 ];
 export const PLAYGROUND_JOURNEY: Journey = {
   id: "question-playground-v1",

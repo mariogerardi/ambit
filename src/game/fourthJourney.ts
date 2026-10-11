@@ -43,6 +43,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "spain-regional-languages",
+      leadIn: "Begin in Spain, on the western side of our shared sea.",
       label: "Languages",
       topic: "regional languages",
       title: "Two regions, two languages.",
@@ -62,7 +63,7 @@ export const FOURTH_JOURNEY: Journey = {
       contextIds: ["wurl:ESP"],
       focus: { lat: 40, lng: -3, altitude: 0.75 },
       explanation:
-        "Catalan is co-official with Spanish in Catalonia; Basque (Euskara) is co-official with Spanish in the Basque Country. Spain also has other regional co-official languages.",
+        "Regional languages share official status with Spanish; Catalonia and the Basque Country are two examples.",
       source: {
         name: "Spain Ministry of Territorial Policy · official languages",
         url: "https://mptmd.gob.es/en/portal/politica-territorial/autonomica/lenguas-cooficiales",
@@ -72,6 +73,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "italy-sicily",
+      leadIn: "Sail east to the island just off Italy’s toe.",
       label: "Island",
       topic: "islands",
       title: "Name this island.",
@@ -97,7 +99,7 @@ export const FOURTH_JOURNEY: Journey = {
       ],
       focus: { lat: 37.6, lng: 14, altitude: 0.32 },
       explanation:
-        "Sicily is Italy’s largest island and the largest island in the Mediterranean, just beyond the toe of the Italian peninsula.",
+        "The Mediterranean’s largest island sits just beyond the toe of Italy.",
       feedbackPlaces: [
         {
           id: "clue:sicily",
@@ -117,6 +119,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "libya-capital",
+      leadIn: "Cross to the southern shore for a capital on the coast.",
       label: "Capital",
       topic: "capitals",
       title: "A capital on the coast.",
@@ -129,11 +132,13 @@ export const FOURTH_JOURNEY: Journey = {
       focus: { lat: 27, lng: 17, altitude: 0.9 },
       feedbackPlaces: [tripoli],
       explanation:
-        "Tripoli is the capital of Libya, on its Mediterranean coast.",
+        "On Libya’s Mediterranean coast, this city ties our southern stop back to the same sea.",
     },
     {
       ...base,
       id: "yugoslavia-six",
+      leadIn:
+        "Back on the northern side, the Adriatic leads us into the Balkans.",
       label: "Republics",
       topic: "historical geography",
       title: "Six republics, one former federation.",
@@ -162,7 +167,7 @@ export const FOURTH_JOURNEY: Journey = {
       },
       focus: { lat: 44, lng: 19, altitude: 0.85 },
       explanation:
-        "Bosnia and Herzegovina, Croatia, North Macedonia, Montenegro, Serbia, and Slovenia correspond to the six constituent republics of socialist Yugoslavia. Macedonia is named North Macedonia today. Kosovo was an autonomous province, not a constituent republic.",
+        "These were Yugoslavia’s six constituent republics. Kosovo was an autonomous province, so it isn’t part of this set.",
       source: {
         name: "UN ICTY · the former Yugoslavia",
         url: "https://www.icty.org/en/about/what-former-yugoslavia",
@@ -172,6 +177,7 @@ export const FOURTH_JOURNEY: Journey = {
     {
       ...base,
       id: "mediterranean-shores",
+      leadIn: "Zoom out: our stops belong to one much larger sea.",
       label: "Sea",
       topic: "coastlines",
       title: "How many shores?",
@@ -198,7 +204,7 @@ export const FOURTH_JOURNEY: Journey = {
         },
       ],
       explanation:
-        "This convention counts 21 coastal countries listed by UNEP/MAP plus Palestine’s Gaza coastline. The European Union is not a country; Gibraltar is an overseas dependency, not an additional country.",
+        "One sea connects Europe, Africa, and Asia. This total includes Palestine’s Gaza coast, but not overseas dependencies.",
       source: FEATURES.mediterranean.source,
       sources: [
         FEATURES.mediterranean.source,

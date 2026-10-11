@@ -1055,7 +1055,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts[date].game.pin,
     ).toEqual({ lat: -12.04318, lng: -77.02824 });
     await click("Submit pin");
-    expect(host.textContent).toContain("Less than 1 km from Lima");
+    expect(host.textContent).toContain("Your pin was less than 1 km away.");
     expect(probe.props!.places).toHaveLength(2);
     await click("Next");
     expect(probe.props!.placeInteraction).toBe(true);
@@ -1074,7 +1074,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       ),
     );
     expect(host.querySelector(".round-feedback")!.textContent).toContain(
-      "Your answer: Paris",
+      "Correct answer: Paris",
     );
     expect(
       probe.props!.places.find((p) => p.id === "place:2988507")!.visualState,
@@ -1090,7 +1090,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Submit pin");
     expect(host.querySelector(".round-feedback")!.textContent).toContain(
-      "inside New Mexico",
+      "Correct answer: New Mexico",
     );
     expect(probe.props!.states["wurl:USA-NM"]).toBe("correct");
     expect(probe.mounts).toBe(1);
@@ -2629,12 +2629,12 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     expect(
       host.querySelector(".mode-incoming .round-feedback")!.textContent,
-    ).toContain("Your answer: India");
+    ).toContain("Correct answer: India");
     expect(probe.props!.states["clue-part:wurl:IND"]).toBe("correct");
     await act(async () => probe.props!.onSelect(member("wurl:MMR")));
     expect(
       host.querySelector(".mode-incoming .round-feedback")!.textContent,
-    ).toContain("Your answer: India");
+    ).toContain("Correct answer: India");
     await click("Next");
     expect(
       host.querySelector(".mode-incoming .question-card")!.textContent,
@@ -2647,7 +2647,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await act(async () => answer.click());
     expect(
       host.querySelector(".mode-incoming .round-feedback")!.textContent,
-    ).toContain("Your answer: Equatorial Guinea");
+    ).toContain("Correct answer: Equatorial Guinea");
     expect(probe.props!.states["wurl:GNQ"]).toBe("correct");
     expect(host.querySelector("canvas")).toBe(canvas);
   });

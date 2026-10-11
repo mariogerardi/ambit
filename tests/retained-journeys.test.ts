@@ -22,12 +22,14 @@ const world = JSON.parse(
 ) as RegionFeature[];
 
 describe("retained daily rotation", () => {
-  it("cycles only the nine approved editions, while keeping scrapped saves loadable", async () => {
-    expect(ACTIVE_JOURNEY_IDS).toHaveLength(9);
-    expect(new Set(ACTIVE_JOURNEY_IDS).size).toBe(9);
-    for (let index = 0; index < 18; index++) {
+  it("cycles only the eleven approved editions, while keeping scrapped saves loadable", async () => {
+    expect(ACTIVE_JOURNEY_IDS).toHaveLength(11);
+    expect(new Set(ACTIVE_JOURNEY_IDS).size).toBe(11);
+    for (let index = 0; index < 22; index++) {
       const date = `2026-10-${String(index + 5).padStart(2, "0")}`;
-      expect(dailyJourney(date).id).toBe(ACTIVE_JOURNEY_IDS[index % 9]);
+      expect(dailyJourney(date).id).toBe(
+        ACTIVE_JOURNEY_IDS[index % ACTIVE_JOURNEY_IDS.length],
+      );
     }
     const old = openDaily(
       setDailyPuzzle(emptyDaily, "2026-10-10", "enclosed-territories-v1"),

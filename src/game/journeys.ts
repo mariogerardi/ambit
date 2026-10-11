@@ -1,3 +1,6 @@
+import { CANADA_JOURNEY } from "./canadaJourney";
+import { ANDES_JOURNEY } from "./andesJourney";
+import { LATITUDE_JOURNEY } from "./latitudeJourney";
 import { NORTH_AMERICA_JOURNEY } from "./northAmericaJourney";
 import { FIFTEENTH_JOURNEY } from "./fifteenthJourney";
 import { FOURTEENTH_JOURNEY } from "./fourteenthJourney";
@@ -31,8 +34,14 @@ export const JOURNEYS = [
   FOURTEENTH_JOURNEY,
   FIFTEENTH_JOURNEY,
   NORTH_AMERICA_JOURNEY,
+  CANADA_JOURNEY,
+  ANDES_JOURNEY,
+  LATITUDE_JOURNEY,
 ];
 export function journeyPath(id: string) {
+  if (id === CANADA_JOURNEY.id) return "/journey/beyond-the-maple-leaf";
+  if (id === ANDES_JOURNEY.id) return "/journey/along-the-andes";
+  if (id === LATITUDE_JOURNEY.id) return "/journey/latitude-surprises";
   if (id === NORTH_AMERICA_JOURNEY.id) return "/journey/north-america";
   if (id === FIFTEENTH_JOURNEY.id) return "/journey/try-not-to-click-russia";
   if (id === FOURTEENTH_JOURNEY.id) return "/journey/island-instincts";

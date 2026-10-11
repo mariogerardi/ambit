@@ -1,7 +1,7 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **16 editions and 80 questions**, with nine active daily concepts, reviewed against
-the code on October 10, 2026. Each Journey has five rounds. Admin chooses today's
+The bundled catalog contains **19 editions and 95 questions**, with eleven active daily concepts, reviewed against
+the code on October 11, 2026. Each Journey has five rounds. Admin chooses today's
 Journey on this device; direct practice routes and `/playground` provide access
 to other bundled content. There is no current in-app authoring or AI generator.
 Previously published local packs are read-only compatibility data.
@@ -26,10 +26,13 @@ Previously published local packs are read-only compatibility data.
 | 14  | Island instincts                | `/journey/island-instincts`        | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)     |
 | 15  | On Russia’s doorstep            | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
 | 16  | North America by name (revised) | `/journey/north-america`           | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts) |
+| 17  | Beyond the maple leaf           | `/journey/beyond-the-maple-leaf`   | [canadaJourney.ts](../src/game/canadaJourney.ts)             |
+| 18  | Along the Andes                 | `/journey/along-the-andes`         | [andesJourney.ts](../src/game/andesJourney.ts)               |
+| 19  | Latitude surprises              | `/journey/latitude-surprises`      | [latitudeJourney.ts](../src/game/latitudeJourney.ts)         |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
-cycles the nine retained concepts from October 5, 2026, using the explicit IDs in
+cycles the eleven retained concepts from October 5, 2026, using the explicit IDs in
 [`journeyRotation.ts`](../src/game/journeyRotation.ts). See
 [Journey review](JOURNEY_REVIEW.md) for the keep/scrap decisions. Results use Home/Study as primary exits,
 with daily replay secondary and available only to admins. A results flyover follows answer stops in round order and
@@ -41,24 +44,24 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 80 bundled questions, not every possible engine pairing.
+Counts below refer to the 95 bundled questions, not every possible engine pairing.
 The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                | Control                | Questions |
 | ------------------- | ---------------------- | --------: |
-| `pin`               | Drop a pin             |        15 |
+| `pin`               | Drop a pin             |        16 |
 | `city-single`       | Single city pick       |         3 |
 | `city-multiple`     | Multiple city picks    |         2 |
-| `map-single`        | Single country pick    |        17 |
-| `map-multiple`      | Multiple country picks |         7 |
+| `map-single`        | Single country pick    |        19 |
+| `map-multiple`      | Multiple country picks |         9 |
 | `number`            | Number                 |         7 |
-| `text`              | Free response          |         9 |
+| `text`              | Free response          |        16 |
 | `typed-regions`     | Typed region names     |         7 |
 | `ordered-countries` | Ordered country names  |         1 |
 | `ordered-capitals`  | Ordered capital names  |         1 |
-| `choice-single`     | Single choice          |         9 |
-| `choice-multiple`   | Multiple choices       |         2 |
+| `choice-single`     | Single choice          |        11 |
+| `choice-multiple`   | Multiple choices       |         3 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
 example or playground selector. Multiple-choice questions are capped at six
@@ -131,7 +134,17 @@ repeated across five questions. Do not require varied controls for their own sak
 Shared neighbors uses irregular country footprints, Island instincts repeats
 ownership-versus-location surprises, and On Russia’s doorstep repeats borderless
 pin placement. Establish the premise in the introduction and develop it in the
-reveals; preserve useful difficulty and favorite questions.
+reveals; preserve useful difficulty and favorite questions. Use a short, spoiler-safe
+`leadIn` before the prompt to make geographic movement or the developing idea
+explicit. Most trips should feel like a connected itinerary, without lengthy
+narration or hints that give away the next answer.
+
+Journey feedback uses Study’s answer-card layout, showing the correct answer
+rather than the incorrect guess. For questions accepting multiple valid answers,
+a successful answer is shown canonically; a miss shows one labelled correct
+example or set. Keep the explanation to a short insight beneath that answer.
+Do not begin by repeating the answer, listing all alternatives, or narrating the
+interface. Numeric border questions can show one useful shortest route.
 
 ## Review checklist
 

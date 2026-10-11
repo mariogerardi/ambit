@@ -1,7 +1,7 @@
 import { QuestionSources } from "./QuestionSources";
 import { QuestionHelp } from "../app/QuestionHelp";
 import { ActionIcon } from "../app/ActionIcon";
-import { answerPlace, pinDistance } from "./answerTargets";
+import { pinDistance } from "./answerTargets";
 import { useRef } from "react";
 import type { RegionFeature, Focus } from "../geography/types";
 import type { Journey, QuestionContext } from "./questions";
@@ -11,7 +11,12 @@ import type { GameState, Action } from "./state";
 import { questionMapPresentation } from "./presentation";
 import { AnswerForm } from "./AnswerForm";
 import { PlaygroundControls } from "./PlaygroundControls";
-import { correctAnswerCopy, feedbackLegend, roundIdentity } from "./copy";
+import {
+  correctAnswerCopy,
+  correctAnswerSummary,
+  feedbackLegend,
+  roundIdentity,
+} from "./copy";
 export function GameShell({
   journey,
   playground = false,
@@ -50,12 +55,6 @@ export function GameShell({
   const feedback = game.answers.at(-1),
     correct = feedback?.correct;
   const mapPresentation = questionMapPresentation(round, game.phase, !!correct);
-  const name = (id: string) =>
-    round.choices?.find((c) => c.id === id)?.label ??
-    answerPlace(round, id)?.name ??
-    context.names.get(id) ??
-    context.choiceNames.get(id) ??
-    id;
   const visibleHover =
     hover &&
     mapPresentation.hover &&
@@ -64,21 +63,12 @@ export function GameShell({
       ? hover.name
       : undefined;
   const distance = pinDistance(round, game);
+  const feedbackText = explanation(round, context, game.selectedIds, !!correct);
+  const correctAnswer = correctAnswerSummary(round, context, game);
   const pinFeedback =
     round.rule.type === "pin-distance" && distance !== undefined
-      ? `${distance < 1 ? "Less than 1" : Math.round(distance).toLocaleString()} km from ${answerPlace(round, round.rule.targetId)?.name}. Within ${round.rule.radiusKm.toLocaleString()} km is correct.`
-      : round.rule.type === "pin-inside"
-        ? `Your pin landed ${correct ? "inside" : "outside"} ${round.rule.ids.map(name).join(" or ")}.`
-        : "";
-  const feedbackText = [
-    pinFeedback,
-    explanation(round, context, game.selectedIds, !!correct),
-  ]
-    .filter(Boolean)
-    .join(" ");
-  const submitted = feedback?.ordered.length
-    ? feedback.ordered.join(round.mode === "typed-regions" ? ", " : " → ")
-    : feedback?.text || feedback?.selectedIds.map(name).join(" → ");
+      ? `Your pin was ${distance < 1 ? "less than 1" : Math.round(distance).toLocaleString()} km away.`
+      : "";
   const start = () => (onReplay ? onReplay() : dispatch({ type: "start" }));
   const legend =
     game.phase === "feedback" ? feedbackLegend(round, context, game) : [];
@@ -107,6 +97,7 @@ export function GameShell({
               sources={<QuestionSources question={round} />}
             />
           </div>
+          {round.leadIn && <p className="journey-context">{round.leadIn}</p>}
           <h1 ref={heading} tabIndex={-1}>
             {questionPrompt(round, context)}
           </h1>
@@ -146,10 +137,16 @@ export function GameShell({
                 <span>{correct ? "✳" : "◎"}</span>
                 {correct ? correctAnswerCopy(round) : "Not quite."}
               </div>
-              {submitted && (
-                <p className="submitted-answer">Your answer: {submitted}</p>
+              <p className="study-response study-correction journey-correct-answer">
+                <span>{correctAnswer.label}: </span>
+                <strong>{correctAnswer.value}</strong>
+              </p>
+              {feedbackText && (
+                <p className="journey-explanation">{feedbackText}</p>
               )}
-              <p>{feedbackText}</p>
+              {pinFeedback && (
+                <p className="journey-pin-distance">{pinFeedback}</p>
+              )}
               {legend.length > 0 && (
                 <div className="feedback-map-key" aria-label="Map color key">
                   {legend.map(({ key, label }) => (

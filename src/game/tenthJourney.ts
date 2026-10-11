@@ -41,6 +41,7 @@ export const TENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "pacific-rising-sun",
+      leadIn: "Begin on the western rim of the Pacific.",
       title: "Follow the sun.",
       label: "Flag",
       topic: "flags",
@@ -62,11 +63,12 @@ export const TENTH_JOURNEY: Journey = {
         candidates: "decorative",
       },
       explanation:
-        "Japan’s flag is a red sun on white. First stop: the Japanese islands.",
+        "The red disc represents the sun. Our trip around the Pacific begins here.",
     },
     {
       ...base,
       id: "pacific-hokkaido",
+      leadIn: "Stay in the same archipelago, but head to its northern end.",
       title: "An island apart.",
       label: "Island",
       topic: "islands",
@@ -94,7 +96,7 @@ export const TENTH_JOURNEY: Journey = {
       ],
       focus: { lat: 43.2, lng: 142.7, altitude: 0.48 },
       explanation:
-        "Hokkaido is the northernmost of Japan’s four main islands. The narrow Tsugaru Strait separates it from Honshu.",
+        "The Tsugaru Strait separates this northern island from Honshu.",
       source: {
         name: "Japan National Tourism Organization · Hokkaido",
         url: "https://www.japan.travel/en/destinations/hokkaido/hokkaido/",
@@ -104,6 +106,7 @@ export const TENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "pacific-indonesia-pin",
+      leadIn: "Follow the island chain south toward the Equator.",
       title: "Pick an island.",
       label: "Drop a pin",
       topic: "archipelagos",
@@ -119,11 +122,12 @@ export const TENTH_JOURNEY: Journey = {
         revealOnAnswer: true,
       },
       explanation:
-        "Indonesia spans an archipelago between the Indian and Pacific oceans. Java, Sumatra, and its portions of Borneo and New Guinea all count.",
+        "The archipelago bridges the Indian and Pacific oceans. A pin on any of its land counts.",
     },
     {
       ...base,
       id: "pacific-andes-coast",
+      leadIn: "Cross the Pacific to the mountains on its eastern shore.",
       title: "Mountains meet ocean.",
       label: "Mountains",
       topic: "mountains and coastlines",
@@ -152,13 +156,14 @@ export const TENTH_JOURNEY: Journey = {
         candidates: "highlighted",
       },
       explanation:
-        "Colombia, Ecuador, Peru, and Chile meet both conditions. Bolivia is landlocked; Argentina and Venezuela have Andean mountains but no Pacific coastline.",
+        "Here the Andes meet the Pacific. The other Andean countries either lack a Pacific coast or are landlocked.",
       source: FEATURES.andes.source,
       sources: [FEATURES.andes.source, mapSource],
     },
     {
       ...base,
       id: "pacific-wellington",
+      leadIn: "One last ocean crossing takes us to our southern finish.",
       title: "One last landing.",
       label: "Capital",
       topic: "capitals",
@@ -170,7 +175,7 @@ export const TENTH_JOURNEY: Journey = {
       focus: { lat: -41, lng: 173, altitude: 0.8 },
       feedbackPlaces: [wellington],
       explanation:
-        "Wellington is New Zealand’s capital, at the southern tip of the North Island.",
+        "At the southern tip of the North Island, the capital is our last landing on the Pacific rim.",
       source: capitalSource,
     },
   ],

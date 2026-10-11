@@ -14,6 +14,20 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
   rounds: FIFTH_JOURNEY.rounds.map((question, index) => ({
     ...question,
     id: `${question.id}-v2`,
+    leadIn: [
+      "Begin in Canada’s far north, where territories take the place of provinces.",
+      "Now head south—farther south than Canada’s reputation suggests.",
+      "Keep heading south until the United States meets Mexico.",
+      "Turn inland and find the shortest way across the states.",
+      "Finish by finding the directions written into state names.",
+    ][index],
+    explanation: [
+      "These three territories make up Canada’s north; the other ten subdivisions are provinces.",
+      "The province reaches below Boston’s latitude, including the Point Pelee area.",
+      "Four states meet Mexico along the southern border. Any one qualifies.",
+      "",
+      "No state has East in its name, but the other three directions all appear.",
+    ][index],
     ...(index === 0
       ? {
           prompt: "Name one of Canada’s three northern territories.",
@@ -40,7 +54,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           },
           focus: { lat: 32, lng: -106, altitude: 1.3 },
           explanation:
-            "California, Arizona, New Mexico, and Texas border Mexico. Any one qualifies; postal abbreviations are accepted too.",
+            "Four states meet Mexico along the southern border. Any one qualifies.",
           source: {
             name: "U.S. Customs and Border Protection · Southwest Region",
             url: "https://www.cbp.gov/sites/default/files/2025-07/250728%20AMO%20Southwest%20Region_0.pdf",

@@ -26,7 +26,7 @@ describe("deferred Journey content", () => {
       );
     }
     const progress = openDaily(emptyDaily, "2026-10-07");
-    expect(dailyJourney("2026-10-07").id).toBe("north-america-v2");
+    expect(dailyJourney("2026-10-07").id).toBe("shared-neighbors-v1");
     expect(validDaily(JSON.parse(JSON.stringify(progress)))).toBe(true);
     progress.attempts["2026-10-07"].game.answers.push({
       roundId: "unknown",

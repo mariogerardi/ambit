@@ -2806,3 +2806,21 @@ body
   outline: 2px solid var(--ui-focus);
   outline-offset: 1px;
 }
+
+.experience .question-card .journey-context {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ui-muted);
+}
+.experience .round-feedback .journey-correct-answer {
+  border-left-color: var(--ui-correct);
+}
+.experience .round-feedback .journey-explanation {
+  margin-block: 14px;
+  line-height: 1.6;
+}
+.experience .round-feedback .journey-pin-distance {
+  font-size: 12px;
+  color: var(--ui-muted);
+}

@@ -41,7 +41,7 @@ describe("local daily schedule and persistence", () => {
   it("uses local calendar days and rotates the authored journeys from October 5", () => {
     expect(localDateKey(new Date(2026, 9, 5, 23, 59))).toBe("2026-10-05");
     expect(millisecondsToMidnight(new Date(2026, 9, 5, 23, 59, 59))).toBe(1000);
-    for (let i = 0; i < 9; i++)
+    for (let i = 0; i < ACTIVE_JOURNEY_IDS.length; i++)
       expect(dailyJourney(`2026-10-${String(i + 5).padStart(2, "0")}`).id).toBe(
         ACTIVE_JOURNEY_IDS[i % ACTIVE_JOURNEY_IDS.length],
       );

@@ -107,6 +107,8 @@ export interface Question {
   /** Short authoring label for the question library; the prompt is the player heading. */
   title: string;
   prompt: string;
+  /** Brief, spoiler-safe context connecting this stop to the Journey. */
+  leadIn?: string;
   instruction: string;
   inputLabel?: string;
   mode: AnswerMode;
@@ -696,102 +698,26 @@ export function committedNameVisible(
 export function explanation(
   question: Question,
   context: QuestionContext,
-  selectedIds: string[],
-  correct: boolean,
+  _selectedIds: string[],
+  _correct: boolean,
 ) {
-  if (question.rule.type === "capital-name") {
-    const countryId = question.rule.countryId;
-    const capital = context.capitals.find(
-      (c) => c.countryId === countryId,
-    )?.name;
-    return !capital ||
-      normalizeAnswer(question.explanation).startsWith(
-        normalizeAnswer(capital) + " ",
-      )
-      ? question.explanation
-      : `${capital}. ${question.explanation}`;
+  if (question.rule.type === "shortest-borders") {
+    const path = context.paths.get(question.id) ?? [];
+    return `One shortest route: ${path.map((id) => context.names.get(id)).join(" → ")}.`;
   }
-  if (question.rule.type === "capital-order")
-    return `${solutionIds(question, context)
-      .map((id) => context.capitals.find((c) => c.countryId === id)?.name)
-      .join(" → ")}. ${question.explanation}`;
-  if (question.rule.type === "feature-count")
-    return `${solutionIds(question, context).length} countries: ${solutionIds(
-      question,
-      context,
-    )
-      .map((id) => context.names.get(id))
-      .join(", ")}. ${question.explanation}`;
-  if (question.rule.type === "language-family")
-    return `${question.rule.countryIds
-      .map((id) => {
-        const profile = COUNTRY_LANGUAGE_PROFILES[id];
-        return `${context.names.get(id)}: ${profile.language} (${profile.familyLabel}${profile.branch ? ` · ${profile.branch}` : ""})`;
-      })
-      .join("; ")}. ${question.explanation}`;
-  if (question.rule.type === "official-languages")
-    return `${context.names.get(question.rule.countryId)}: ${solutionIds(
-      question,
-      context,
-    )
-      .map((id) => context.choiceNames.get(id))
-      .join(", ")}. ${question.explanation}`;
-  if (question.rule.type === "physical-feature")
-    return `${FEATURES[question.rule.featureId]?.name}: ${solutionIds(
-      question,
-      context,
-    )
-      .map((id) => context.names.get(id))
-      .join(", ")}. ${question.explanation}`;
+  if (question.explanation.trim()) return question.explanation;
   if (question.rule.type === "capital-coordinate") {
-    const rule = question.rule;
-    const reference = context.capitals.find((c) => c.id === rule.referenceId);
-    return `${reference?.name}: ${reference?.lat.toFixed(2)}° latitude, ${reference?.lng.toFixed(2)}° longitude. Valid capitals: ${matchingCapitals(
-      question,
-      context,
-    )
-      .map((c) => c.name)
-      .join(", ")}.`;
+    const referenceId = question.rule.referenceId;
+    const reference = context.capitals.find(
+      (capital) => capital.id === referenceId,
+    );
+    return `The line follows ${reference?.name}’s latitude. Geography can surprise you when you compare places on the same globe.`;
   }
   if (question.rule.type === "capital-circle")
-    return `${matchingCapitals(question, context).length} primary capitals: ${matchingCapitals(
-      question,
-      context,
-    )
-      .map((c) => c.name)
-      .join(
-        ", ",
-      )}. The boundary counts. We count one primary capital per UN member state.`;
+    return "The circle includes its boundary. Each country contributes one primary capital.";
   if (question.rule.type === "country-circle")
-    return `${solutionIds(question, context).length} countries: ${
-      solutionIds(question, context)
-        .map((id) => context.names.get(id))
-        .join(", ") || "none"
-    }. All of each country’s land must fit inside the circle.`;
-  if (question.rule.type === "shortest-borders") {
-    const path = context.paths.get(question.id)!;
-    const units =
-      context.targets.get(question.rule.from)?.level === "ADM1"
-        ? "states"
-        : "countries";
-    return `${path.length - 1} border crossings, through ${path.length - 2} intermediate ${units}. One shortest route: ${path.map((id) => context.names.get(id)).join(" → ")}. Only shared land borders count; touching at a single point does not count.`;
-  }
-  if (question.rule.type === "great-circle-order")
-    return `${solutionIds(question, context)
-      .map((id) => context.names.get(id))
-      .join(
-        " → ",
-      )}. Ocean intervals do not count. The count includes both endpoint countries.`;
-  if (question.rule.type === "name-length") {
-    const wrong = selectedIds.find(
-      (id) => !solutionIds(question, context).includes(id),
-    );
-    if (wrong)
-      return `${context.names.get(wrong)} has ${context.names.get(wrong)?.length} letters in its common English name. That answer ended this Journey. Your earlier answers are kept.`;
-    if (correct)
-      return `${selectedIds.map((id) => context.names.get(id)).join(", ")}: three distinct four-letter countries, found without name hints.`;
-  }
-  return question.explanation;
+    return "All of each country’s land must fit inside the circle.";
+  return "";
 }
 
 export function capitalForName(context: QuestionContext, value: string) {

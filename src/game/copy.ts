@@ -1,6 +1,13 @@
 import type { VisualState } from "../geography/types";
 import type { Question, QuestionContext } from "./questions";
 import {
+  capitalForName,
+  countryIdForName,
+  matchingCapitals,
+  solutionIds,
+} from "./questions";
+import { answerPlace } from "./answerTargets";
+import {
   questionPlaces,
   questionRegions,
   questionVisualStates,
@@ -42,6 +49,85 @@ export function correctAnswerCopy(question: Question): string {
 
 export const roundIdentity = (question: Question) =>
   question.progressLabel ?? question.label;
+
+/** Canonical answers, independent of the submitted guess and explanatory prose. */
+export function correctAnswerSummary(
+  question: Question,
+  context: QuestionContext,
+  game: GameState,
+) {
+  const rule = question.rule;
+  const expected = solutionIds(question, context);
+  const name = (id: string) =>
+    question.choices?.find((choice) => choice.id === id)?.label ??
+    answerPlace(question, id)?.name ??
+    context.names.get(id) ??
+    context.choiceNames.get(id) ??
+    id;
+  const capital = (countryId: string) =>
+    context.capitals.find((place) => place.countryId === countryId)?.name ?? "";
+  let values: string[];
+  let alternatives = false;
+  if (rule.type === "manual-number") values = [String(rule.value)];
+  else if (rule.type === "manual-text") values = [rule.answers[0]];
+  else if (rule.type === "capital-name") values = [capital(rule.countryId)];
+  else if (rule.type === "text-fact")
+    values = [
+      context.facts.find(
+        (fact) =>
+          fact.countryId === rule.countryId && fact.field === rule.field,
+      )?.value ?? "",
+    ];
+  else if (rule.type === "pin-distance") values = [name(rule.targetId)];
+  else if (rule.type === "capital-order") values = expected.map(capital);
+  else if (rule.type === "shortest-borders" && question.mode === "number")
+    values = [String(expected.length - 1)];
+  else if (rule.type === "feature-count" || rule.type === "country-circle")
+    values = [String(expected.length)];
+  else if (rule.type === "capital-circle")
+    values = [String(matchingCapitals(question, context).length)];
+  else if (rule.type === "capital-coordinate") {
+    const answer = game.answers.at(-1);
+    const accepted = answer?.correct
+      ? capitalForName(context, answer.text)
+      : undefined;
+    values = [
+      accepted?.name ?? matchingCapitals(question, context)[0]?.name ?? "",
+    ];
+    alternatives = !accepted && matchingCapitals(question, context).length > 1;
+  } else {
+    alternatives =
+      ("match" in rule && rule.match === "any") || rule.type === "name-length";
+    const answer = game.answers.at(-1);
+    const ids =
+      alternatives && answer?.correct
+        ? question.mode === "typed-regions"
+          ? answer.ordered
+              .map((value) => countryIdForName(context, value)!)
+              .filter(Boolean)
+          : answer.selectedIds
+        : alternatives
+          ? expected.slice(0, question.count)
+          : expected;
+    values = ids.map(name);
+    alternatives = alternatives && !answer?.correct;
+  }
+  const ordered = [
+    "ordered-countries",
+    "ordered-capitals",
+    "land-path",
+  ].includes(question.mode);
+  return {
+    label: alternatives
+      ? values.length > 1
+        ? "One correct set"
+        : "One correct answer"
+      : values.length > 1
+        ? "Correct answers"
+        : "Correct answer",
+    value: values.join(ordered ? " → " : ", "),
+  };
+}
 
 /** Only explain colors present in the rendered reveal, including city/pin markers. */
 export function feedbackLegend(

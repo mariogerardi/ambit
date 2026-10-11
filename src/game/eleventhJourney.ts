@@ -63,6 +63,8 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-turkey-capital",
+      leadIn:
+        "Start with a country whose biggest city often steals the spotlight.",
       progressLabel: "Türkiye",
       title: "The famous distraction.",
       prompt: "What is the capital of Türkiye?",
@@ -88,11 +90,13 @@ export const ELEVENTH_JOURNEY: Journey = {
       feedbackContextIds: ["wurl:TUR"],
       feedbackPlaces: [place("place:323786"), place("place:745044")],
       explanation:
-        "Ankara is Türkiye’s capital. Istanbul, the metropolis spanning Europe and Asia, is its largest city.",
+        "Istanbul is the largest city, but that doesn’t make it the capital.",
     },
     {
       ...base,
       id: "unexpected-canberra-pin",
+      leadIn:
+        "Across the world, another capital sits away from the famous coast.",
       progressLabel: "Australia",
       title: "Find Canberra.",
       label: "Drop a pin",
@@ -111,11 +115,12 @@ export const ELEVENTH_JOURNEY: Journey = {
       feedbackContextIds: ["wurl:AUS"],
       feedbackPlaces: [place("place:2147714"), place("place:2158177")],
       explanation:
-        "Canberra is inland in southeastern Australia, between Sydney and Melbourne.",
+        "Look inland, between Sydney and Melbourne. The capital isn’t either of the two famous coastal cities.",
     },
     {
       ...base,
       id: "unexpected-abuja",
+      leadIn: "Now look for a capital that deliberately left the coast behind.",
       progressLabel: "Nigeria",
       title: "The capital that moved.",
       prompt:
@@ -127,7 +132,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       focus: { lat: 9, lng: 8, altitude: 0.76 },
       feedbackPlaces: [place("place:2352778"), place("place:2332459")],
       explanation:
-        "Abuja replaced Lagos as Nigeria’s capital in 1991. It was developed inland as a planned federal capital. Lagos remains on the coast.",
+        "The move in 1991 took the federal capital inland. Lagos stayed on the coast.",
       source: source(
         "Federal Capital Development Authority · history of Abuja",
         "https://fcda.gov.ng/the-history-of-abuja/",
@@ -142,6 +147,7 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-brasilia-marker",
+      leadIn: "Cross the Atlantic for another move from coast to interior.",
       progressLabel: "Brazil",
       title: "Find Brasília.",
       label: "City",
@@ -160,7 +166,7 @@ export const ELEVENTH_JOURNEY: Journey = {
         { ...place("place:3451190"), visualState: "hinted", priority: 90 },
       ],
       explanation:
-        "Brasília became Brazil’s capital on April 21, 1960, moving the seat of government from coastal Rio de Janeiro to the interior.",
+        "In 1960, the seat of government moved from coastal Rio de Janeiro to a planned city in the interior.",
       source: source(
         "Presidency of Brazil · Law 3,273, capital transfer date",
         "https://www.planalto.gov.br/ccivil_03/leis/l3273.htm",
@@ -169,6 +175,7 @@ export const ELEVENTH_JOURNEY: Journey = {
     {
       ...base,
       id: "unexpected-south-africa-capitals",
+      leadIn: "For the finale, question the idea that there must be just one.",
       progressLabel: "South Africa",
       title: "One country, three capitals.",
       label: "Cities",
@@ -193,7 +200,7 @@ export const ELEVENTH_JOURNEY: Journey = {
         { ...place("place:1018725"), name: "Bloemfontein · judicial" },
       ],
       explanation:
-        "The South African government identifies Pretoria as the administrative capital, Cape Town as the legislative capital, and Bloemfontein as the judicial capital, home to the Supreme Court of Appeal. Johannesburg, Durban, and Gqeberha are not among the three.",
+        "The three cities serve administrative, legislative, and judicial roles respectively. Our final stop breaks the idea that there must be just one capital.",
       source: source(
         "South African Government · three national capitals",
         "https://www.gov.za/about-sa/south-africas-provinces",
