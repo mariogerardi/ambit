@@ -3,6 +3,7 @@ import type { Dispatch, PointerEvent } from "react";
 import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questions";
 import { canSubmit } from "./questions";
+import { orderedCards } from "./ordering";
 import { lockedOrderSlots } from "./guidance";
 import { QuestionActions } from "./QuestionActions";
 
@@ -26,6 +27,8 @@ export function OrderAnswer({
     { id: string; x: number; y: number; moved: boolean } | undefined
   >(undefined);
   const skipClick = useRef(false);
+  const populated = !!question.orderInitial;
+  const ordered = orderedCards(question, game);
   const fixed = lockedOrderSlots(question, game);
   const spareCount = (question.choices?.length ?? 0) - question.count;
   const spareCopy = spareCount === 1 ? "one card" : `${spareCount} cards`;
@@ -94,14 +97,20 @@ export function OrderAnswer({
       }
     : undefined;
   return (
-    <div className="order-puzzle">
+    <div className={`order-puzzle${populated ? " order-populated" : ""}`}>
       <p className="order-instructions">
-        Drag cards into the slots, or choose a card and then a slot.
-        {spareCount > 0 ? ` Leave ${spareCopy} aside.` : ""}
+        {populated
+          ? "Drag to swap, or select two cards."
+          : `Drag cards into the slots, or choose a card and then a slot.${spareCount > 0 ? ` Leave ${spareCopy} aside.` : ""}`}
       </p>
+      {populated && (
+        <p className="order-group-title">
+          {question.orderGroupLabel ?? "Ordered group"}
+        </p>
+      )}
       <ol className="order-slots" aria-label="Ordered answer slots">
         {Array.from({ length: question.count }, (_, index) => {
-          const id = game.ordered[index];
+          const id = ordered[index];
           const locked = fixed.some((slot) => slot.index === index);
           const label = question.orderLabels?.[index] ?? `Slot ${index + 1}`;
           return (
@@ -132,7 +141,7 @@ export function OrderAnswer({
                 <span>{id ? name(id) : "Place a country"}</span>
                 <i aria-hidden="true">{locked ? "✓" : "⠿"}</i>
               </button>
-              {!!id && !locked && (
+              {!!id && !locked && !populated && (
                 <button
                   type="button"
                   className="order-remove"
@@ -150,10 +159,12 @@ export function OrderAnswer({
         className={`order-bank${over === -1 ? " drop-target" : ""}`}
         data-order-slot={-1}
       >
-        <span className="order-position">Spare cards</span>
+        <span className="order-position">
+          {populated ? "Distractor" : "Spare cards"}
+        </span>
         <div className="order-spares">
           {(question.choices ?? [])
-            .filter((choice) => !game.ordered.includes(choice.id))
+            .filter((choice) => !ordered.includes(choice.id))
             .map((choice) => (
               <button
                 type="button"
@@ -161,13 +172,21 @@ export function OrderAnswer({
                 {...pointer(choice.id)}
                 className={`order-card${picked === choice.id ? " chosen" : ""}${dragging === choice.id ? " dragging" : ""}`}
                 aria-pressed={picked === choice.id}
-                onClick={() => choose(choice.id)}
+                onClick={() => {
+                  if (skipClick.current) {
+                    skipClick.current = false;
+                    return;
+                  }
+                  if (populated && picked && picked !== choice.id)
+                    place(picked, -1);
+                  else choose(choice.id);
+                }}
               >
                 <span>{choice.label}</span>
                 <i aria-hidden="true">⠿</i>
               </button>
             ))}
-          {picked && game.ordered.includes(picked) && (
+          {!populated && picked && ordered.includes(picked) && (
             <button
               type="button"
               className="quiet-button"
@@ -181,7 +200,7 @@ export function OrderAnswer({
       <p className="sr-only" role="status">
         {picked
           ? `${name(picked)} selected. Choose a slot.`
-          : game.ordered.filter(Boolean).length === question.count
+          : ordered.filter(Boolean).length === question.count
             ? `All slots filled.${spareCount > 0 ? ` Leave ${spareCopy} aside.` : ""}`
             : "Fill each slot before submitting."}
       </p>

@@ -1,3 +1,4 @@
+import { orderedCards } from "./ordering";
 import { validateQuestionContract } from "./questionBuilder";
 import type {
   Focus,
@@ -212,6 +213,9 @@ export interface Question {
   choices?: { id: string; label: string }[];
   /** Directional captions for an ordering puzzle's slots. */
   orderLabels?: string[];
+  /** Filled answer slots plus one implicit distractor. Dragging always swaps. */
+  orderInitial?: string[];
+  orderGroupLabel?: string;
   overlays?: MapOverlay[];
   /** Explanatory guides appear only after submission, never as playable clues. */
   feedbackOverlays?: MapOverlay[];
@@ -228,6 +232,8 @@ export interface Journey {
   /** Authored geographic payoff, independent of generic answer-country flyovers. */
   completion?: {
     focus: Focus;
+    /** Explicit country recap uses the same visited style as ordinary Journeys. */
+    regionIds?: string[];
     /** Separate views for widely dispersed destinations; never implies a connecting route. */
     views?: Focus[];
     physicalFeatures: PhysicalFeature[];
@@ -361,7 +367,12 @@ export function createQuestionContext(
             expected[slot.index] !== slot.id,
         ) ||
         fixed.length >= round.count ||
-        (round.orderLabels && round.orderLabels.length !== round.count)
+        (round.orderLabels && round.orderLabels.length !== round.count) ||
+        (round.orderInitial &&
+          (ids.length !== round.count + 1 ||
+            round.orderInitial.length !== round.count ||
+            new Set(round.orderInitial).size !== round.count ||
+            round.orderInitial.some((id) => !ids.includes(id))))
       )
         throw Error(`Invalid ordering puzzle configuration: ${round.id}.`);
     } else if (round.guidance?.assist?.fixedSlots?.length) {
@@ -663,9 +674,9 @@ export function canSubmit(
   if (question.mode === "text") return response.text.trim() !== "";
   if (question.mode === "choice-order")
     return (
-      response.ordered.length === question.count &&
-      new Set(response.ordered).size === question.count &&
-      response.ordered.every((id) =>
+      orderedCards(question, response).length === question.count &&
+      new Set(orderedCards(question, response)).size === question.count &&
+      orderedCards(question, response).every((id) =>
         selectableIds(question, context).includes(id),
       )
     );
@@ -690,7 +701,9 @@ export function isCorrect(
   if (question.mode === "choice-order")
     return (
       canSubmit(question, context, response) &&
-      response.ordered.every((id, index) => id === expected[index])
+      orderedCards(question, response).every(
+        (id, index) => id === expected[index],
+      )
     );
   if (rule.type === "pin-distance") {
     const distance = pinDistance(question, response);

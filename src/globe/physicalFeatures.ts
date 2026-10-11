@@ -1,3 +1,4 @@
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { Group, Mesh, MeshBasicMaterial, DoubleSide } from "three";
 import ConicPolygonGeometry from "three-conic-polygon-geometry";
 import type { PerspectiveCamera } from "three";
@@ -73,40 +74,80 @@ export class PhysicalFeatures {
     for (const { line } of this.lines.values()) line.visible = false;
     for (const surface of this.surfaces.values()) surface.visible = false;
     for (const feature of layer.features) {
-      if (!feature.geometry || feature.relief) continue;
+      if (!feature.geometry && !feature.relief) continue;
       let surface = this.surfaces.get(feature);
       if (!surface) {
         surface = new Group();
-        const material = new MeshBasicMaterial({
-          color: feature.color ?? "#d7b17d",
-          opacity: feature.fillOpacity ?? 0.2,
-          transparent: true,
-          depthWrite: false,
-          side: DoubleSide,
-          polygonOffset: true,
-          polygonOffsetFactor: -1,
-          polygonOffsetUnits: -2,
-        });
-        const polygons =
-          feature.geometry.type === "Polygon"
-            ? [feature.geometry.coordinates]
-            : feature.geometry.coordinates;
-        for (const polygon of polygons) {
-          const mesh = new Mesh(
-            new ConicPolygonGeometry(
-              polygon,
-              0,
-              radius * (1 + physicalSurfaceAltitude),
-              false,
-              true,
-              false,
-              0.25,
-            ),
-            material,
-          );
-          mesh.raycast = () => {};
-          mesh.renderOrder = 4;
-          surface.add(mesh);
+        if (feature.relief) {
+          // Two batched face meshes for the whole chain. Never fill its footprint.
+          for (const [rings, color, opacity] of [
+            [feature.relief.lightFaces ?? [], "#d8c29b", 0.42],
+            [feature.relief.darkFaces ?? [], "#745a40", 0.32],
+          ] as const) {
+            if (!rings.length) continue;
+            const pieces = rings.map(
+              (ring) =>
+                new ConicPolygonGeometry(
+                  [ring],
+                  0,
+                  radius * (1 + physicalSurfaceAltitude),
+                  false,
+                  true,
+                  false,
+                  0.25,
+                ),
+            );
+            const geometry = mergeGeometries(pieces)!;
+            for (const piece of pieces) piece.dispose();
+            const mesh = new Mesh(
+              geometry,
+              new MeshBasicMaterial({
+                color,
+                opacity,
+                transparent: true,
+                depthWrite: false,
+                side: DoubleSide,
+                polygonOffset: true,
+                polygonOffsetFactor: -1,
+                polygonOffsetUnits: -2,
+              }),
+            );
+            mesh.raycast = () => {};
+            mesh.renderOrder = 4;
+            surface.add(mesh);
+          }
+        } else {
+          const material = new MeshBasicMaterial({
+            color: feature.color ?? "#d7b17d",
+            opacity: feature.fillOpacity ?? 0.2,
+            transparent: true,
+            depthWrite: false,
+            side: DoubleSide,
+            polygonOffset: true,
+            polygonOffsetFactor: -1,
+            polygonOffsetUnits: -2,
+          });
+          const polygons =
+            feature.geometry!.type === "Polygon"
+              ? [feature.geometry!.coordinates]
+              : feature.geometry!.coordinates;
+          for (const polygon of polygons) {
+            const mesh = new Mesh(
+              new ConicPolygonGeometry(
+                polygon,
+                0,
+                radius * (1 + physicalSurfaceAltitude),
+                false,
+                true,
+                false,
+                0.25,
+              ),
+              material,
+            );
+            mesh.raycast = () => {};
+            mesh.renderOrder = 4;
+            surface.add(mesh);
+          }
         }
         surface.raycast = () => {};
         this.surfaces.set(feature, surface);
@@ -121,17 +162,17 @@ export class PhysicalFeatures {
               ...feature,
               id: `${feature.id}:ridges`,
               paths: feature.relief.ridges,
-              color: "#745a40",
-              lineWidth: 1.25,
-              lineOpacity: 0.82,
+              color: "#594932",
+              lineWidth: 1.45,
+              lineOpacity: 0.92,
             },
             {
               ...feature,
               id: `${feature.id}:slopes`,
               paths: feature.relief.hachures,
-              color: "#927453",
-              lineWidth: 0.85,
-              lineOpacity: 0.64,
+              color: "#745a40",
+              lineWidth: 1,
+              lineOpacity: 0.78,
             },
             {
               ...feature,
@@ -261,7 +302,7 @@ export class PhysicalFeatures {
     for (const [key, { line, rank, opacity, relief }] of this.lines) {
       if (relief)
         line.material.opacity =
-          opacity * (altitude >= 1.2 ? 0.52 : altitude >= 0.4 ? 0.82 : 1);
+          opacity * (altitude >= 1.2 ? 0.8 : altitude >= 0.4 ? 0.92 : 1);
       line.visible =
         this.activeLines.has(key) &&
         (altitude < 0.4 || rank <= (altitude < 1.2 ? 5 : 3));

@@ -127,6 +127,9 @@ export interface PhysicalFeature {
     ridges: number[][][];
     hachures: number[][][];
     highlights: number[][][];
+    /** Closed pictorial face rings, anchored in reviewed terrain; not range fills. */
+    lightFaces?: number[][][];
+    darkFaces?: number[][][];
   };
   /** Alternate anchors inside a large feature, used to keep its name in regional views. */
   labelAnchors?: number[][];

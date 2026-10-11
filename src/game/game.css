@@ -568,7 +568,7 @@
   gap: 9px;
 }
 .feedback-label > span {
-  font-size: 20px;
+  font-size: 17px;
 }
 .answer-correct .feedback-label {
   color: var(--ui-correct, #a9d3b3);
@@ -1657,4 +1657,21 @@
     text-align: left;
     font-size: 11px;
   }
+}
+
+.order-populated .order-slots li {
+  grid-template-columns: 46px minmax(0, 1fr);
+}
+.order-group-title {
+  font-size: 12px;
+  color: var(--ui-muted);
+  margin: 10px 0;
+}
+.order-populated .order-bank {
+  border-style: solid;
+  background: rgb(var(--ui-line-rgb) / 0.035);
+  padding: 12px;
+}
+.order-populated .order-bank .order-position {
+  font-size: 12px;
 }

@@ -2718,7 +2718,7 @@ body
 }
 
 .experience .round-feedback[role="status"] .feedback-label {
-  font-size: clamp(20px, 1.8vw, 23px);
+  font-size: clamp(17px, 1.5vw, 19px);
   font-weight: 500;
   line-height: 1.3;
 }

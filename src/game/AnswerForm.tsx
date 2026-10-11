@@ -1,4 +1,4 @@
-import { answerPlace } from "./answerTargets";
+import { pointAnswerNoun, answerPlace } from "./answerTargets";
 import type { Dispatch } from "react";
 import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questions";
@@ -45,6 +45,7 @@ export function AnswerForm({
       }
     : undefined;
   const city = question.mode.startsWith("city-");
+  const pointNoun = pointAnswerNoun(question);
   const single =
     question.mode === "map-single" || question.mode === "city-single";
   const regional = question.rule.type === "region-ids";
@@ -211,7 +212,7 @@ export function AnswerForm({
                         ? "Answer final"
                         : "Selected"
                     : city
-                      ? "Your next city"
+                      ? `Your next ${pointNoun}`
                       : regional
                         ? "Your next region"
                         : "Your next country"}
@@ -258,7 +259,7 @@ export function AnswerForm({
               >
                 <label htmlFor="country-guess">
                   {city
-                    ? "City name"
+                    ? `${pointNoun === "summit" ? "Summit" : "City"} name`
                     : regional
                       ? "Region name"
                       : "Country name"}
@@ -274,7 +275,7 @@ export function AnswerForm({
                   }
                   placeholder={
                     city
-                      ? "Type a city’s name"
+                      ? `Type a ${pointNoun}’s name`
                       : regional
                         ? "Type a region’s name"
                         : "Type a country’s name"
@@ -283,7 +284,7 @@ export function AnswerForm({
                 <button className="primary-button" disabled={!game.text.trim()}>
                   {question.commitment === "immediate"
                     ? "Answer now"
-                    : `Add ${city ? "city" : regional ? "region" : "country"}`}{" "}
+                    : `Add ${city ? pointNoun : regional ? "region" : "country"}`}{" "}
                   <span>→</span>
                 </button>
               </form>

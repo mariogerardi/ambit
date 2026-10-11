@@ -175,8 +175,10 @@ Current implementation details that matter:
   globe-only questions, set `allowTyping: false`; retain typing when WebGL is
   unavailable. Do not accidentally inherit a bypass from unrelated content.
 - For card ordering, author explicit slots, direction, candidate cards, and any
-  distractors. Allow spare cards, swapping, removal, touch dragging, and keyboard
-  placement. Validate unique IDs, complete slots, order, and assist locks.
+  distractors. For rearrangement tasks, prefer prefilled ordered and distractor
+  groups: every move swaps cards, and assists preserve occupancy. Use an empty
+  bank only when building a sequence is the intended task. Support touch dragging
+  and keyboard placement. Validate unique IDs, complete slots, order, and locks.
 
 Reuse mechanics through technical defaults or builders, and content through
 deliberate adaptation of the same question. Never spread an unrelated completed
@@ -354,11 +356,19 @@ normal test/build/release checks before publication.
 
 ## Render mountain context from terrain
 
-Mountain hatching must follow reviewed elevation data, not decorative peak stamps
-or a polygon boundary presented as a ridgeline. Derive crest strokes and downhill
-hachures from a generalized elevation grid; record input checksums, sampling,
-clipping, and source attribution. Pale high-elevation strokes do not imply
-permanent snow. Keep lines subordinate to answer markers and borders, and reduce
-detail contrast at distant zooms. Relief is display-only: its geometry never
-changes eligibility or grading. A general mountain footprint may limit rendering
-but should not appear as a hard terrain boundary.
+Mountain context needs recognizable forms at the actual question zoom, not a
+cloud of disconnected strokes. Ground placement in reviewed elevation data.
+Pictorial peaks may simplify it into connected silhouettes, shared saddles,
+shaded faces and attached hatching; record that these are cartographic symbols,
+not exact summit outlines or surveyed ridgelines. Record input checksums,
+sampling, clipping, and attribution. Pale faces do not imply permanent snow.
+Keep relief subordinate to answer markers and reduce detail at distant zooms.
+Relief is display-only: it never changes eligibility or grading. A general
+mountain footprint may limit rendering but must not appear as a hard boundary.
+
+Review map markers round by round: adding selectable summit or city locations to
+one round does not authorize them elsewhere. Anonymous candidates should be
+legible and equally styled; reveal names only when the answer contract permits.
+A custom completion still needs authored camera views and a consistent recap
+palette. Highlight the answer objects, not unrelated countries left over from
+the final question.

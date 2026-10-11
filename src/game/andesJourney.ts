@@ -50,6 +50,37 @@ const chimborazo = summit(
   geography.peaks.Chimborazo,
   "wurl:ECU",
 );
+// Smithsonian GVP coordinates, reviewed 2026-10-11. Anonymous during play.
+const ecuadorPeaks: PlaceFeature[] = [
+  chimborazo,
+  {
+    ...summit(
+      "andes:cotopaxi",
+      "Cotopaxi",
+      { lat: -0.677, lng: -78.436 },
+      "wurl:ECU",
+    ),
+    sourceId: "smithsonian:352050",
+  },
+  {
+    ...summit(
+      "andes:cayambe",
+      "Cayambe",
+      { lat: 0.029, lng: -77.986 },
+      "wurl:ECU",
+    ),
+    sourceId: "smithsonian:352006",
+  },
+  {
+    ...summit(
+      "andes:antisana",
+      "Antisana",
+      { lat: -0.481, lng: -78.141 },
+      "wurl:ECU",
+    ),
+    sourceId: "smithsonian:352030",
+  },
+].map((peak) => ({ ...peak, visualState: "default" }));
 const aconcagua = summit(
   "andes:aconcagua",
   "Aconcagua",
@@ -81,6 +112,7 @@ const names: Record<string, string> = {
   BOL: "Bolivia",
   COL: "Colombia",
   BRA: "Brazil",
+  PRY: "Paraguay",
 };
 const choices = (ids: string[]) =>
   ids.map((id) => ({ id, label: names[id.replace("wurl:", "")] }));
@@ -104,7 +136,7 @@ const borderLabels = [
   countryLabel("PER", "Peru · northern neighbor", -12, -75),
   countryLabel("BOL", "Bolivia · middle neighbor", -18, -64),
   countryLabel("ARG", "Argentina · southern neighbor", -35, -63),
-  countryLabel("BRA", "Brazil · no Chilean border", -14, -52),
+  countryLabel("PRY", "Paraguay · no Chilean border", -23, -58),
 ];
 // Shared presentation only. Every round declares its own answer method and rule.
 const common = definePresentation({
@@ -137,10 +169,23 @@ export const ANDES_JOURNEY: Journey = {
   },
   completion: {
     focus: { lat: -20, lng: -72, altitude: 1.65 },
-    physicalFeatures: [andes, lake, ...frontiers],
+    views: [
+      { lat: 5, lng: -74, altitude: 0.55 },
+      { lat: -1, lng: -78.5, altitude: 0.4 },
+      { lat: -15.8, lng: -69.3, altitude: 0.5 },
+      { lat: -32.65, lng: -70, altitude: 0.55 },
+      { lat: -40, lng: -73, altitude: 0.7 },
+      { lat: -20, lng: -72, altitude: 1.65 },
+    ],
+    regionIds: ["wurl:PER", "wurl:BOL", "wurl:ARG"],
+    physicalFeatures: [
+      andes,
+      lake,
+      ...frontiers.map((feature) => ({ ...feature, color: "#bba5f1" })),
+    ],
     places: [
-      { ...bogota, visualState: "answer", labelFlexible: true, priority: 100 },
-      chimborazo,
+      { ...bogota, visualState: "visited", labelFlexible: true, priority: 100 },
+      { ...chimborazo, visualState: "visited" },
       {
         id: "andes:lake-stop",
         name: "Lake Titicaca",
@@ -151,10 +196,13 @@ export const ANDES_JOURNEY: Journey = {
         markerHidden: true,
         labelFlexible: true,
         priority: 100,
-        visualState: "answer",
+        visualState: "visited",
       },
-      aconcagua,
-      countryLabel("CHL", "Chile · Pacific finish", -40, -73),
+      { ...aconcagua, visualState: "visited" },
+      {
+        ...countryLabel("CHL", "Chile · Pacific finish", -40, -73),
+        visualState: "visited",
+      },
     ],
     caption:
       "From Bogotá’s highlands to Chile’s Pacific edge, one mountain system connects our five stops.",
@@ -241,21 +289,18 @@ export const ANDES_JOURNEY: Journey = {
       leadIn:
         "Head south into Ecuador, where the Andes cross almost directly over the Equator.",
       prompt:
-        "Which Ecuadorian peak is Earth’s farthest point from its center?",
-      mode: "choice-single",
-      rule: { type: "choice-ids", ids: ["peak:chimborazo"] },
-      selection: { type: "none" },
-      choices: [
-        { id: "peak:chimborazo", label: "Chimborazo" },
-        { id: "peak:cotopaxi", label: "Cotopaxi" },
-        { id: "peak:aconcagua", label: "Aconcagua" },
-        { id: "peak:huascaran", label: "Huascarán" },
-      ],
+        "Which marker is Chimborazo, Earth’s farthest summit from its center?",
+      instruction: "Tap a summit marker.",
+      mode: "city-single",
+      rule: { type: "place-ids", ids: [chimborazo.id] },
+      selection: { type: "ids", ids: ecuadorPeaks.map((peak) => peak.id) },
+      places: ecuadorPeaks,
+      allowTyping: false,
       contextIds: ["wurl:ECU"],
       feedbackHintIds: ["wurl:ECU"],
       feedbackContextIds: [],
       map: { ...common.map, feedbackRegions: "neutral" },
-      focus: { lat: -1.5, lng: -78, altitude: 0.38 },
+      focus: { lat: -0.9, lng: -78.4, altitude: 0.12 },
       feedbackFocus: { lat: -1.5, lng: -78.8, altitude: 0.18 },
       feedbackPlaces: [chimborazo],
       explanation:
@@ -265,11 +310,26 @@ export const ANDES_JOURNEY: Journey = {
         "NOAA · Earth’s farthest summit from its center",
         "https://oceanservice.noaa.gov/facts/highestpoint.html",
       ),
+      sources: [
+        ...common.sources!,
+        source(
+          "Smithsonian GVP · Cotopaxi",
+          "https://volcano.si.edu/volcano.cfm?vn=352050",
+        ),
+        source(
+          "Smithsonian GVP · Cayambe",
+          "https://volcano.si.edu/volcano.cfm?vn=352006",
+        ),
+        source(
+          "Smithsonian GVP · Antisana",
+          "https://volcano.si.edu/volcano.cfm?vn=352030",
+        ),
+      ],
       guidance: {
-        hint: "Earth bulges slightly at the Equator, so proximity to 0° latitude matters here.",
+        hint: "Chimborazo stands south of Quito, in Ecuador’s western cordillera.",
         assist: {
-          text: "Aconcagua and Huascarán are ruled out. Both remaining peaks are Ecuadorian volcanoes.",
-          candidateIds: ["peak:chimborazo", "peak:cotopaxi"],
+          text: "Two summit markers remain. Chimborazo is the farther south of the pair.",
+          candidateIds: [chimborazo.id, "andes:cotopaxi"],
         },
       },
     }),
@@ -326,7 +386,7 @@ export const ANDES_JOURNEY: Journey = {
       selection: { type: "ids", ids: southAmerica },
       allowTyping: false,
       map: { ...common.map, hoverFeedback: true, candidates: "neutral" },
-      contextIds: ["wurl:CHL"],
+      contextIds: [],
       feedbackHintIds: ["wurl:CHL"],
       focus: { lat: -29, lng: -68, altitude: 0.65 },
       feedbackFocus: { lat: -32.65, lng: -70, altitude: 0.2 },
@@ -354,10 +414,9 @@ export const ANDES_JOURNEY: Journey = {
       resolvedLabel: "Chile’s neighbors",
       topic: "mountains and borders",
       title: "North to south beside Chile.",
-      leadIn:
-        "Finish along Chile, where the Andes run beside one of the world’s longest north–south countries.",
+      leadIn: "Finish beside Chile.",
       prompt:
-        "Drag Chile’s three land neighbors into north-to-south order. Leave the country that does not border Chile aside.",
+        "Order Chile’s land neighbors north to south, and move the non-neighbor to Distractor.",
       mode: "choice-order",
       count: 3,
       selection: { type: "none" },
@@ -366,22 +425,25 @@ export const ANDES_JOURNEY: Journey = {
         ids: ["wurl:PER", "wurl:BOL", "wurl:ARG"],
         ordered: true,
       },
-      choices: choices(["wurl:BOL", "wurl:BRA", "wurl:ARG", "wurl:PER"]),
+      choices: choices(["wurl:BOL", "wurl:PRY", "wurl:ARG", "wurl:PER"]),
       orderLabels: ["North", "Middle", "South"],
-      contextIds: ["wurl:CHL"],
+      orderInitial: ["wurl:BOL", "wurl:PRY", "wurl:PER"],
+      orderGroupLabel: "North → South",
+      contextIds: [],
+      map: { ...common.map, borders: false },
       feedbackHintIds: ["wurl:CHL"],
       focus: { lat: -29, lng: -68, altitude: 1.35 },
       feedbackFocus: { lat: -27, lng: -64, altitude: 1.35 },
       feedbackPlaces: borderLabels,
       feedbackPhysicalFeatures: frontiers,
       explanation:
-        "Peru meets Chile at its northern tip, Bolivia farther south, and Argentina along the long eastern frontier. Brazil borders all three neighbors, but never Chile.",
+        "Peru meets Chile at its northern tip, Bolivia farther south, and Argentina along the long eastern frontier. Paraguay lies farther east and has no Chilean border.",
       correctFeedback: "Nicely ordered.",
       source: mapSource,
       guidance: {
         hint: "One card belongs farther east and never reaches Chile.",
         assist: {
-          text: "Argentina is placed and locked in the southernmost slot. Any displaced card returns to the spare cards. Resolve the two northern slots and leave the non-neighbor aside.",
+          text: "Argentina is placed and locked in the southernmost slot. The displaced card swaps places with it. Resolve the northern slots and the distractor.",
           fixedSlots: [{ index: 2, id: "wurl:ARG" }],
         },
       },

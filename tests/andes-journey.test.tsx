@@ -62,7 +62,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       expect(map.physicalFeatures[0].relief!.hachures.length).toBeGreaterThan(
         1000,
       );
-      expect(map.places).toEqual([]);
+      if (index !== 1) expect(map.places).toEqual([]);
       expect(journey.rounds[index].guidance?.assist).toBeTruthy();
     }
     const lakeQuestion = journey.rounds[2];
@@ -102,14 +102,43 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       type: "parallel",
       latitude: 0,
     });
-    expect(map.places).toEqual([]);
+    expect(map.places).toHaveLength(4);
+    expect(
+      map.places.every(
+        (place) => place.labelHidden && !place.name && !place.hoverName,
+      ),
+    ).toBe(true);
+    expect(new Set(map.places.map((place) => place.visualState))).toEqual(
+      new Set(["selectable"]),
+    );
+    const answered = reduce(
+      at(1),
+      { type: "select", id: "andes:chimborazo" },
+      { type: "submit" },
+    );
+    expect(answered.answers.at(-1)?.correct).toBe(true);
+    expect(
+      journeyWorld(regions, journey, answered, context).places.find(
+        (place) => place.id === "andes:chimborazo",
+      )?.name,
+    ).toBe("Chimborazo");
+    const fallback = renderToStaticMarkup(
+      <AnswerForm
+        question={journey.rounds[1]}
+        context={context}
+        game={at(1)}
+        dispatch={() => {}}
+        webgl={false}
+      />,
+    );
+    expect(fallback).toContain("Summit name");
   });
   it("makes Aconcagua selectable through the actual map contract and keeps assists neutral", () => {
     const map = journeyWorld(regions, journey, at(3), context);
     expect(map.regionInteraction).toBe(true);
     expect(map.selectDisabled).toBe(true);
     expect(map.showBorders).toBe(true);
-    expect(map.states["wurl:CHL"]).toBe("hinted");
+    expect(map.states["wurl:CHL"]).toBe("disabled");
     expect(map.states["wurl:ARG"]).toBe("disabled");
     const helped = reduce(
       at(3),
@@ -149,7 +178,11 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     }
   });
   it("grades complete, unique card order with a real distractor", () => {
-    expect(canSubmit(order, context, at(4))).toBe(false);
+    expect(canSubmit(order, context, at(4))).toBe(true);
+    expect(isCorrect(order, context, at(4))).toBe(false);
+    expect(reduce(at(4), { type: "jump", index: 4 }).ordered).toEqual(
+      order.orderInitial,
+    );
     const correct = placed();
     expect(canSubmit(order, context, correct)).toBe(true);
     expect(isCorrect(order, context, correct)).toBe(true);
@@ -161,7 +194,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     );
     for (const ordered of [
       ["wurl:BOL", "wurl:PER", "wurl:ARG"],
-      ["wurl:PER", "wurl:BRA", "wurl:ARG"],
+      ["wurl:PER", "wurl:PRY", "wurl:ARG"],
       ["wurl:PER", "wurl:PER", "wurl:ARG"],
       ["wurl:PER", "wurl:BOL"],
     ])
@@ -173,7 +206,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       reduce(correct, { type: "order-card", id: "wurl:PER", index: 3 }),
     ).toBe(correct);
     expect(
-      reduce(correct, { type: "ordered", index: 0, value: "wurl:BRA" }),
+      reduce(correct, { type: "ordered", index: 0, value: "wurl:PRY" }),
     ).toBe(correct);
   });
   it("swaps placed cards, returns displaced cards to spares, and enforces assist locks", () => {
@@ -186,24 +219,30 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     expect(swapped.ordered).toEqual(["wurl:ARG", "wurl:BOL", "wurl:PER"]);
     const displaced = reduce(swapped, {
       type: "order-card",
-      id: "wurl:BRA",
+      id: "wurl:PRY",
       index: 2,
     });
-    expect(displaced.ordered).toEqual(["wurl:ARG", "wurl:BOL", "wurl:BRA"]);
+    expect(displaced.ordered).toEqual(["wurl:ARG", "wurl:BOL", "wurl:PRY"]);
     const helped = reduce(
       displaced,
       { type: "request-hint" },
       { type: "request-assist" },
     );
-    expect(helped.ordered).toEqual(["", "wurl:BOL", "wurl:ARG"]);
+    expect(helped.ordered).toEqual(["wurl:PRY", "wurl:BOL", "wurl:ARG"]);
     expect(helped.help?.[order.id]).toBe("assisted");
     for (const action of [
       { type: "order-card", id: "wurl:ARG", index: -1 },
-      { type: "order-card", id: "wurl:BRA", index: 2 },
+      { type: "order-card", id: "wurl:PRY", index: 2 },
     ] as Action[])
       expect(reduce(helped, action)).toBe(helped);
     const cleared = reduce(helped, { type: "clear" });
-    expect(cleared.ordered).toEqual(["", "", "wurl:ARG"]);
+    expect(cleared.ordered).toEqual(["wurl:BOL", "wurl:PRY", "wurl:ARG"]);
+    const bankSwap = reduce(correct, {
+      type: "order-card",
+      id: "wurl:PER",
+      index: -1,
+    });
+    expect(bankSwap.ordered).toEqual(["wurl:PRY", "wurl:BOL", "wurl:ARG"]);
     expect(
       reduce(
         cleared,
@@ -222,7 +261,7 @@ describe("Along the Andes authored map and ordering puzzle", () => {
               hint: "Hint",
               assist: {
                 text: "Assist",
-                fixedSlots: [{ index: 2, id: "wurl:BRA" }],
+                fixedSlots: [{ index: 2, id: "wurl:PRY" }],
               },
             },
           },
@@ -260,10 +299,13 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       await act(async () => button("Peru").click());
       await act(async () =>
         host
-          .querySelector<HTMLButtonElement>('[aria-label="North: empty"]')!
+          .querySelector<HTMLButtonElement>('[aria-label="North: Bolivia"]')!
           .click(),
       );
       expect(host.querySelector('[aria-label="North: Peru"]')).toBeTruthy();
+      expect(host.querySelectorAll(".order-card")).toHaveLength(4);
+      expect(host.textContent).not.toContain("Spare cards");
+      expect(host.textContent).not.toContain("empty");
       const card = button("Bolivia");
       const middle = host.querySelector<HTMLElement>('[data-order-slot="1"]')!;
       Object.defineProperty(document, "elementFromPoint", {
@@ -304,13 +346,29 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       expect(button("Submit answer").disabled).toBe(false);
       expect(
         host.querySelector('[data-order-slot="-1"]')?.textContent,
-      ).toContain("Brazil");
+      ).toContain("Paraguay");
     } finally {
       await act(async () => root.unmount());
       host.remove();
       vi.unstubAllGlobals();
       delete (document as unknown as Record<string, unknown>).elementFromPoint;
     }
+  });
+  it("hides Chile and borders before ordering, then tours consistently styled resolved stops", () => {
+    const before = journeyWorld(regions, journey, at(4), context);
+    expect(before.showBorders).toBe(false);
+    expect(before.states["wurl:CHL"]).toBe("disabled");
+    const finished = { ...placed(), phase: "finished" as const };
+    const recap = journeyWorld(regions, journey, finished, context);
+    expect(
+      journey.completion!.views!.slice(0, 5).map((view) => view.lat),
+    ).toEqual([5, -1, -15.8, -32.65, -40]);
+    expect(recap.places.every((place) => place.visualState === "visited")).toBe(
+      true,
+    );
+    for (const id of ["wurl:PER", "wurl:BOL", "wurl:ARG"])
+      expect(recap.states[id]).toBe("visited");
+    expect(recap.states["wurl:CHL"]).toBe("disabled");
   });
   it("renders terrain ink instead of the mountain footprint and cleans it up", () => {
     const physical = new PhysicalFeatures();
@@ -322,11 +380,15 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       },
       100,
     );
-    expect(
-      physical.group.children.some(
-        (group) => group.children[0]?.type === "Mesh",
-      ),
-    ).toBe(false);
+    const faces = physical.group.children.find(
+      (group) => group.children[0]?.type === "Mesh",
+    )!;
+    expect(faces.children).toHaveLength(2); // Batched symbols, no range footprint.
+    for (const face of faces.children) {
+      const intersections: unknown[] = [];
+      face.raycast({} as never, intersections as never);
+      expect(intersections).toEqual([]);
+    }
     const lines = physical.group.children.filter(
       (group) => group.type === "LineSegments2",
     );

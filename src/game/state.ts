@@ -1,4 +1,5 @@
-import { validPin } from "./answerTargets";
+import { orderedCards, swapOrderCard } from "./ordering";
+import { pointAnswerNoun, validPin } from "./answerTargets";
 import { candidateAvailable, lockedOrderSlots } from "./guidance";
 import type { HelpUsage } from "./guidance";
 import {
@@ -51,12 +52,22 @@ export function gameReducer(
   journey: Journey,
   context: QuestionContext,
 ): GameState {
-  if (action.type === "start") return { ...initialGame, phase: "playing" };
+  if (action.type === "start")
+    return {
+      ...initialGame,
+      phase: "playing",
+      ordered: [...(journey.rounds[0].orderInitial ?? [])],
+    };
   if (action.type === "jump")
     return Number.isInteger(action.index) &&
       action.index >= 0 &&
       action.index < journey.rounds.length
-      ? { ...initialGame, phase: "playing", roundIndex: action.index }
+      ? {
+          ...initialGame,
+          phase: "playing",
+          roundIndex: action.index,
+          ordered: [...(journey.rounds[action.index].orderInitial ?? [])],
+        }
       : state;
   if (action.type === "home") return { ...initialGame };
   const round = journey.rounds[state.roundIndex];
@@ -91,7 +102,9 @@ export function gameReducer(
           pin: undefined,
           selectedIds: [],
           text: "",
-          ordered: [],
+          ordered: [
+            ...(journey.rounds[state.roundIndex + 1].orderInitial ?? []),
+          ],
           inputError: undefined,
         };
   }
@@ -108,7 +121,16 @@ export function gameReducer(
       help: { ...state.help, [round.id]: "assisted" },
     };
     const fixed = lockedOrderSlots(round, helped);
-    if (fixed.length) {
+    if (fixed.length && round.orderInitial) {
+      helped.ordered = orderedCards(round, state);
+      for (const slot of fixed)
+        helped.ordered = swapOrderCard(
+          round,
+          helped.ordered,
+          slot.id,
+          slot.index,
+        );
+    } else if (fixed.length) {
       helped.ordered = Array.from(
         { length: round.count },
         (_, index) =>
@@ -151,15 +173,9 @@ export function gameReducer(
       fixed.some((slot) => slot.id === action.id || slot.index === action.index)
     )
       return state;
-    const ordered = Array.from(
-      { length: round.count },
-      (_, i) => state.ordered[i] ?? "",
-    );
-    const from = ordered.indexOf(action.id);
-    if (from === action.index) return state;
-    if (from >= 0)
-      ordered[from] = action.index >= 0 ? ordered[action.index] : "";
-    if (action.index >= 0) ordered[action.index] = action.id;
+    const current = orderedCards(round, state);
+    if (current.indexOf(action.id) === action.index) return state;
+    const ordered = swapOrderCard(round, current, action.id, action.index);
     return { ...state, ordered, inputError: undefined };
   }
   if (action.type === "clear")
@@ -170,15 +186,21 @@ export function gameReducer(
           pin: undefined,
           selectedIds: [],
           text: "",
-          ordered: lockedOrderSlots(round, state).length
-            ? Array.from(
-                { length: round.count },
-                (_, index) =>
-                  lockedOrderSlots(round, state).find(
-                    (slot) => slot.index === index,
-                  )?.id ?? "",
+          ordered: round.orderInitial
+            ? lockedOrderSlots(round, state).reduce(
+                (cards, slot) =>
+                  swapOrderCard(round, cards, slot.id, slot.index),
+                [...round.orderInitial],
               )
-            : [],
+            : lockedOrderSlots(round, state).length
+              ? Array.from(
+                  { length: round.count },
+                  (_, index) =>
+                    lockedOrderSlots(round, state).find(
+                      (slot) => slot.index === index,
+                    )?.id ?? "",
+                )
+              : [],
         };
   if (action.type === "select" || action.type === "guess-country") {
     if (
@@ -205,7 +227,7 @@ export function gameReducer(
             ...state,
             inputError:
               (round.mode.startsWith("city-")
-                ? "Choose a marked city or type its name. If cities share a name, choose the marker on the globe."
+                ? `Choose a marked ${pointAnswerNoun(round)} or type its name. If names are ambiguous, choose the marker on the globe.`
                 : round.rule.type === "region-ids"
                   ? "Choose a region allowed by this question. Check the name and spelling."
                   : "Choose a country allowed by this question. Check the name and spelling.") +
@@ -256,7 +278,16 @@ export function gameReducer(
     return { ...state, ...response, inputError: undefined };
   }
   if (action.type === "submit" && canSubmit(round, context, state))
-    return finish(state, isCorrect(round, context, state));
+    return finish(
+      {
+        ...state,
+        ordered:
+          round.mode === "choice-order"
+            ? orderedCards(round, state)
+            : state.ordered,
+      },
+      isCorrect(round, context, state),
+    );
   return state;
 }
 export const journeyScore = (state: GameState) =>

@@ -14,6 +14,14 @@ export const ANSWER_PLACES = new Map<string, PlaceFeature>(
 export function answerPlace(question: Question, id: string) {
   return question.places?.find((p) => p.id === id) ?? ANSWER_PLACES.get(id);
 }
+/** The point-selection control also supports summits and other authored places. */
+export function pointAnswerNoun(question: Question) {
+  const ids = question.selection.type === "ids" ? question.selection.ids : [];
+  return ids.length &&
+    ids.every((id) => answerPlace(question, id)?.kind === "mountain")
+    ? "summit"
+    : "city";
+}
 export function validPin(
   value: unknown,
 ): value is { lat: number; lng: number } {

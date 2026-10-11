@@ -131,7 +131,12 @@ export function journeyWorld(
         : questionRegions(regions, round, game.phase),
     states: completion
       ? Object.fromEntries(
-          allRegions(regions, journey).map((r) => [r.id, "disabled" as const]),
+          allRegions(regions, journey).map((r) => [
+            r.id,
+            completion.regionIds?.includes(r.id)
+              ? ("visited" as const)
+              : ("disabled" as const),
+          ]),
         )
       : game.phase === "finished"
         ? journeyVisitedStates(journey, context, game.answers)

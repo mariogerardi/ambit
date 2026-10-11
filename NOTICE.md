@@ -236,10 +236,16 @@ These U.S. government data are not subject to copyright protection within the
 United States. Attribution and source terms are documented at
 <https://github.com/tilezen/joerd/blob/master/docs/attribution.md>.
 
-`scripts/prepare-mountain-relief.py` generalizes zoom-5 elevation tiles, detects
-cross-slope crests, and traces downhill hachures within the reviewed Andes extent.
-Pale ink denotes high elevation, not permanent snow. This is stylized relief,
-not surveyed ridgelines or navigation data. Source tile URLs, SHA-256 hashes,
+`scripts/prepare-mountain-relief.py` generalizes zoom-5 elevation tiles and uses
+spaced regional high points to anchor joined pictorial mountain forms, shaded
+faces and attached hatching within the reviewed Andes extent. Pale faces do not
+denote permanent snow. These are cartographic symbols, not exact summit outlines,
+surveyed ridgelines or navigation data. Source tile URLs, SHA-256 hashes,
 processing conventions, and the derived asset hash are recorded in
 `sources/andes-relief-manifest.json`. Raw elevation stays in the preparation cache;
 play uses bundled vector ink without live terrain requests.
+
+Ecuador summit markers for Cotopaxi, Cayambe and Antisana use coordinates from
+Smithsonian Institution’s Global Volcanism Program (volcano numbers 352050,
+352006 and 352030), reviewed October 11, 2026. Each round includes source links;
+Chimborazo retains its Natural Earth coordinate.

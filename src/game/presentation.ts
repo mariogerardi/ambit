@@ -55,7 +55,9 @@ export function questionPlaces(
     const reveal = phase === "feedback" || phase === "failed";
     const expected = solutionIds(question, context);
     return [
-      ...(question.places ?? []),
+      ...(question.places ?? []).filter(
+        (place) => !selectableIds(question, context).includes(place.id),
+      ),
       ...selectableIds(question, context).flatMap((id) => {
         if (!reveal && response && !candidateAvailable(question, response, id))
           return [];
