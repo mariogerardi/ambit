@@ -122,12 +122,19 @@ inboxes and concurrent profile/challenge updates.
 
 ## Login branding and local review
 
-The classic Cognito pages retain signup, verification and password recovery.
-[`deployment/cognito/ambit.css`](../deployment/cognito/ambit.css) uses the supported
-classic classes with Ambit's navy, peach, turquoise and light text. The outlined
-wordmark PNG stays below Cognito's 100 KB logo recommendation; no additional
-font service, provider upgrade or authentication flow is required. See
-[AWS's classic branding rules](https://docs.aws.amazon.com/cognito/latest/developerguide/hosted-ui-classic-branding.html).
+Cognito Essentials managed login retains signup, verification and password
+recovery, using the existing app client, authorization-code flow and callbacks.
+[`backend/login_branding.py`](../backend/login_branding.py) defines the full-page
+navy background, subdued account/admin globe, header wordmark and accessible form
+colors. CloudFormation owns the branding style and publishes it before switching
+the domain to managed login version 2. The globe stays vector artwork and needs
+no WebGL or external image service. Classic CSS is retained only for rollback.
+See [AWS's managed login branding rules](https://docs.aws.amazon.com/cognito/latest/developerguide/managed-login-brandingeditor.html).
+
+The owner approved the Lite-to-Essentials change on October 10, 2026. Essentials
+includes 10,000 monthly active direct/social users free per AWS account or
+organization, with higher per-user charges beyond the free tier than Lite.
+See [Cognito pricing](https://aws.amazon.com/cognito/pricing/).
 
 With `npm run dev`, review `/review/accounts.html` for an interactive sample-data
 dashboard/profile/friends flow and `/review/login.html` for the branding
@@ -139,11 +146,17 @@ post-publication check. Validate branding offline with:
 python3 scripts/apply-login-branding.py
 ```
 
-After release approval, deploy the backend routes/table before the frontend and
-apply the reviewed hosted-page assets separately:
+Deploy the backend stack to publish the managed login configuration and assets.
+Templates with embedded artwork use the private artifact bucket because they
+exceed CloudFormation's 51 KB inline template limit:
 
 ```sh
 python3 scripts/deploy-backend.py --profile personal --no-wait
+```
+
+To republish only styling on the existing managed login resource:
+
+```sh
 python3 scripts/apply-login-branding.py --profile personal --apply
 ```
 

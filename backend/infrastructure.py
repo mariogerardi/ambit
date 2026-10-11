@@ -1,5 +1,6 @@
 """CloudFormation definition for Ambit's production account and feedback services."""
 import json
+from login_branding import branding
 
 
 def ref(name):
@@ -66,7 +67,7 @@ def template():
         "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": "production"}],
     })
     r["Users"] = resource("AWS::Cognito::UserPool", {
-        "UserPoolName": "ambit-production-users", "UserPoolTier": "LITE",
+        "UserPoolName": "ambit-production-users", "UserPoolTier": "ESSENTIALS",
         "UsernameAttributes": ["email"], "UsernameConfiguration": {"CaseSensitive": False},
         "AutoVerifiedAttributes": ["email"], "MfaConfiguration": "OFF", "DeletionProtection": "ACTIVE",
         "Schema": [{"Name": "email", "AttributeDataType": "String", "Required": True, "Mutable": False}],
@@ -94,7 +95,10 @@ def template():
         "ExplicitAuthFlows": ["ALLOW_USER_SRP_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"],
         "ReadAttributes": ["email", "email_verified"],
     })
-    r["LoginDomain"] = resource("AWS::Cognito::UserPoolDomain", {"Domain": sub("ambit-${AWS::AccountId}"), "UserPoolId": ref("Users"), "ManagedLoginVersion": 1})
+    r["LoginBranding"] = resource("AWS::Cognito::ManagedLoginBranding", {"UserPoolId": ref("Users"), "ClientId": ref("Client"), **branding()})
+    r["LoginDomain"] = resource("AWS::Cognito::UserPoolDomain", {"Domain": sub("ambit-${AWS::AccountId}"), "UserPoolId": ref("Users"), "ManagedLoginVersion": 2})
+    # Publish the branded pages before switching away from classic login.
+    r["LoginDomain"]["DependsOn"] = "LoginBranding"
     r["ApiRole"] = resource("AWS::IAM::Role", {
         "AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy],
         "Policies": [{"PolicyName": "FeedbackData", "PolicyDocument": {"Version": "2012-10-17", "Statement": [

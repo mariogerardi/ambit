@@ -8,11 +8,34 @@
     <style>
       body {
         margin: 0;
+        min-height: 100dvh;
+        background: #071321;
+        color: #edf4f7;
         font:
           14px/1.5 Arial,
           sans-serif;
       }
+      body::before {
+        content: "";
+        position: fixed;
+        top: 8vh;
+        right: -25vw;
+        width: min(135vw, 1600px);
+        aspect-ratio: 1;
+        background: url("/brand/account-globe.svg") center / contain no-repeat;
+        opacity: 0.18;
+        pointer-events: none;
+      }
+      .page-header {
+        position: relative;
+        padding: 24px 32px;
+      }
+      .page-header img {
+        width: 140px;
+        max-width: 100%;
+      }
       .review-note {
+        position: relative;
         background: #071321;
         color: #a5c6d2;
         padding: 16px 24px;
@@ -22,9 +45,12 @@
         color: #9cd8de;
       }
       .login-preview {
+        position: relative;
         max-width: 400px;
-        margin: 60px auto;
-        padding: 0 24px 28px;
+        margin: clamp(24px, 9vh, 100px) auto;
+        padding: 28px;
+        border-radius: 20px;
+        background: #071321;
         color: #edf4f7;
       }
       .banner-customizable {
@@ -57,22 +83,25 @@
         text-align: center;
         color: #a5c6d2;
       }
+      @media (max-width: 480px) {
+        .login-preview {
+          margin: 24px 16px;
+          padding: 24px;
+        }
+      }
     </style>
   </head>
-  <body class="background-customizable">
+  <body>
     <aside class="review-note">
-      Local branding preview · Cognito’s exact layout stays provider-managed.<br />No
-      credentials are submitted.
+      Managed login branding preview · Cognito’s exact layout stays
+      provider-managed.<br />No credentials are submitted.
       <a href="/review/accounts.html">Account preview</a> · <a href="/">App</a>
     </aside>
+    <header class="page-header">
+      <img src="/deployment/cognito/ambit-logo.png" alt="ambit" />
+    </header>
     <main class="login-preview">
-      <div class="banner-customizable">
-        <img
-          class="logo-customizable"
-          src="/deployment/cognito/ambit-logo.png"
-          alt="ambit"
-        />
-      </div>
+      <h1>Sign in</h1>
       <p class="textDescription-customizable">
         Sign in with your email and password.
       </p>

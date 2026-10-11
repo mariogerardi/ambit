@@ -93,12 +93,20 @@ def main():
     with tempfile.TemporaryDirectory(prefix="ambit-backend-") as directory:
         directory = Path(directory)
         (directory / "backend.zip").write_bytes(content)
-        (directory / "template.json").write_text(json.dumps(template()))
+        template_content = json.dumps(template()).encode()
+        (directory / "template.json").write_bytes(template_content)
         (directory / "parameters.json").write_text(json.dumps(parameters))
         aws("s3api", "put-object", "--bucket", bucket, "--key", key, "--body", str(directory / "backend.zip"))
-        aws("cloudformation", "validate-template", "--template-body", f"file://{directory / 'template.json'}")
+        # Branding embeds vector artwork; CloudFormation's inline limit is 51 KB.
+        if len(template_content) > 51200:
+            template_key = "templates/" + hashlib.sha256(template_content).hexdigest() + ".json"
+            aws("s3api", "put-object", "--bucket", bucket, "--key", template_key, "--body", str(directory / "template.json"))
+            template_argument = ["--template-url", f"https://{bucket}.s3.us-east-1.amazonaws.com/{template_key}"]
+        else:
+            template_argument = ["--template-body", f"file://{directory / 'template.json'}"]
+        aws("cloudformation", "validate-template", *template_argument)
         try:
-            aws("cloudformation", "update-stack" if exists else "create-stack", "--stack-name", stack, "--template-body", f"file://{directory / 'template.json'}", "--parameters", f"file://{directory / 'parameters.json'}", "--capabilities", "CAPABILITY_IAM", "--tags", "Key=project,Value=ambit", "Key=environment,Value=production")
+            aws("cloudformation", "update-stack" if exists else "create-stack", "--stack-name", stack, *template_argument, "--parameters", f"file://{directory / 'parameters.json'}", "--capabilities", "CAPABILITY_IAM", "--tags", "Key=project,Value=ambit", "Key=environment,Value=production")
             if args.no_wait:
                 print(f"Started backend update {revision[:12]}; not waiting for completion.", flush=True)
                 return

@@ -154,6 +154,22 @@ class ServicesTests(unittest.TestCase):
         self.assertNotIn("DD_API_KEY", variables)
         self.assertEqual(variables["DD_CAPTURE_LAMBDA_PAYLOAD"], "false")
 
+    def test_managed_login_is_branded_before_switching_and_preserves_auth_flow(self):
+        import xml.etree.ElementTree as ET
+        resources = template()["Resources"]
+        self.assertEqual(resources["Users"]["Properties"]["UserPoolTier"], "ESSENTIALS")
+        self.assertEqual(resources["LoginDomain"]["Properties"]["ManagedLoginVersion"], 2)
+        self.assertEqual(resources["LoginDomain"]["DependsOn"], "LoginBranding")
+        self.assertEqual(resources["Client"]["Properties"]["AllowedOAuthFlows"], ["code"])
+        self.assertIn("https://playambit.com/auth/callback", resources["Client"]["Properties"]["CallbackURLs"])
+        brand = resources["LoginBranding"]["Properties"]
+        self.assertLess(len(json.dumps(brand).encode()), 2 * 1024 * 1024)
+        background = next(a for a in brand["Assets"] if a["Category"] == "PAGE_BACKGROUND")
+        svg = ET.fromstring(base64.b64decode(background["Bytes"]))
+        self.assertEqual(svg.find("{http://www.w3.org/2000/svg}rect").get("fill"), "#071321")
+        self.assertEqual(svg.find("{http://www.w3.org/2000/svg}svg").get("opacity"), ".18")
+        self.assertFalse(any("href" in a for e in svg.iter() for a in e.attrib))
+
 
 class SaveTests(unittest.TestCase):
     def setUp(self):
