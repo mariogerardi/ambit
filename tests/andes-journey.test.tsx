@@ -160,43 +160,39 @@ describe("Along the Andes authored map and ordering puzzle", () => {
       recap.places.some((place) => place.name.includes("Pacific finish")),
     ).toBe(false);
   });
-  it("shows the equator as free orientation at Chimborazo", () => {
+  it("uses summit choices without answer-bearing markers and reveals Chimborazo afterward", () => {
     const map = journeyWorld(regions, journey, at(1), context);
     expect(map.overlays).toContainEqual({
       id: "andes:equator",
       type: "parallel",
       latitude: 0,
     });
-    expect(map.places).toHaveLength(4);
-    expect(
-      map.places.every(
-        (place) => place.labelHidden && !place.name && !place.hoverName,
-      ),
-    ).toBe(true);
-    expect(new Set(map.places.map((place) => place.visualState))).toEqual(
-      new Set(["selectable"]),
-    );
+    expect(map.places).toEqual([]);
+    for (const webgl of [true, false]) {
+      const html = renderToStaticMarkup(
+        <AnswerForm
+          question={journey.rounds[1]}
+          context={context}
+          game={at(1)}
+          dispatch={() => {}}
+          webgl={webgl}
+        />,
+      );
+      for (const name of ["Chimborazo", "Cotopaxi", "Cayambe", "Antisana"])
+        expect(html).toContain(name);
+      expect(html).not.toContain("Tap a summit marker");
+    }
     const answered = reduce(
       at(1),
-      { type: "select", id: "andes:chimborazo" },
+      { type: "select", id: "peak:chimborazo" },
       { type: "submit" },
     );
     expect(answered.answers.at(-1)?.correct).toBe(true);
     expect(
-      journeyWorld(regions, journey, answered, context).places.find(
-        (place) => place.id === "andes:chimborazo",
-      )?.name,
-    ).toBe("Chimborazo");
-    const fallback = renderToStaticMarkup(
-      <AnswerForm
-        question={journey.rounds[1]}
-        context={context}
-        game={at(1)}
-        dispatch={() => {}}
-        webgl={false}
-      />,
-    );
-    expect(fallback).toContain("Summit name");
+      journeyWorld(regions, journey, answered, context).places.map(
+        (place) => place.name,
+      ),
+    ).toEqual(["Chimborazo"]);
   });
   it("makes Aconcagua selectable through the actual map contract and keeps assists neutral", () => {
     const map = journeyWorld(regions, journey, at(3), context);
@@ -385,29 +381,44 @@ describe("Along the Andes authored map and ordering puzzle", () => {
         configurable: true,
         value: () => middle,
       });
-      await act(async () => {
+      card.getBoundingClientRect = () =>
+        ({ left: 40, top: 60, width: 240, height: 44 }) as DOMRect;
+      await act(async () =>
         card.dispatchEvent(
           new MouseEvent("pointerdown", {
             bubbles: true,
-            clientX: 0,
-            clientY: 0,
+            clientX: 100,
+            clientY: 80,
           }),
-        );
+        ),
+      );
+      await act(async () =>
         card.dispatchEvent(
           new MouseEvent("pointermove", {
             bubbles: true,
-            clientX: 100,
-            clientY: 100,
+            clientX: 300,
+            clientY: 150,
           }),
-        );
+        ),
+      );
+      const preview = document.body.querySelector<HTMLElement>(
+        ".order-drag-preview",
+      )!;
+      expect(host.contains(preview)).toBe(false); // Escape transformed panel ancestors.
+      expect(preview.style.left).toBe("240px");
+      expect(preview.style.top).toBe("130px");
+      expect(preview.style.width).toBe("240px");
+      expect(preview.style.height).toBe("44px");
+      await act(async () =>
         card.dispatchEvent(
           new MouseEvent("pointerup", {
             bubbles: true,
-            clientX: 100,
-            clientY: 100,
+            clientX: 300,
+            clientY: 150,
           }),
-        );
-      });
+        ),
+      );
+      expect(document.body.querySelector(".order-drag-preview")).toBeNull();
       expect(host.querySelector('[aria-label="Middle: Bolivia"]')).toBeTruthy();
       await act(async () => button("Need a hint?").click());
       await act(async () => button("Need an assist?").click());
@@ -482,6 +493,37 @@ describe("Along the Andes authored map and ordering puzzle", () => {
     expect(lines.every((line) => !line.visible)).toBe(true);
     physical.dispose();
     expect(physical.group.children).toEqual([]);
+  });
+  it("replaces cached ink when a same-ID mountain variant clears the lake, then reuses the original safely", () => {
+    const physical = new PhysicalFeatures();
+    const original = journey.rounds[0].physicalFeatures!;
+    const cleared = journey.rounds[2].feedbackPhysicalFeatures!;
+    const layer = (features: typeof original) => ({
+      id: "physical",
+      kind: "physical-features" as const,
+      features,
+    });
+    physical.update(layer(original), 100);
+    const oldInk = physical.group.children.filter(
+      (child) => child.type === "LineSegments2",
+    );
+    physical.update(layer([...original, cleared[1]]), 100);
+    expect(oldInk.every((line) => line.visible)).toBe(true); // Unrelated layers reuse existing ink.
+    physical.update(layer(cleared), 100);
+    expect(oldInk.every((line) => !line.visible)).toBe(true);
+    expect(
+      physical.group.children.filter(
+        (child) => child.type === "LineSegments2" && child.visible,
+      ),
+    ).toHaveLength(4);
+    physical.update(layer(original), 100);
+    expect(oldInk.every((line) => line.visible)).toBe(true);
+    expect(
+      physical.group.children.filter(
+        (child) => child.type === "LineSegments2" && child.visible,
+      ),
+    ).toEqual(oldInk);
+    physical.dispose();
   });
   it("keeps sourced physical surfaces noninteractive, hides inactive ones, and disposes them", () => {
     const physical = new PhysicalFeatures();

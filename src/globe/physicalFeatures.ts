@@ -57,6 +57,8 @@ export class PhysicalFeatures {
   private activeLines = new Set<string>();
   private surfaces = new Map<PhysicalFeature, Group>();
   private data?: PhysicalFeature[];
+  private featureTokens = new WeakMap<PhysicalFeature, number>();
+  private nextFeatureToken = 0;
   private radius = 100;
   private labelLevels: PlaceFeature[][] = [[], [], []];
   private labelLevel = -1;
@@ -155,8 +157,14 @@ export class PhysicalFeatures {
       }
       surface.visible = true;
     }
-    const ink = layer.features.flatMap((feature): PhysicalFeature[] =>
-      feature.relief
+    // An authored variant may retain its ID while changing geometry (lake clearance).
+    // Give immutable feature objects stable identities so cached ink cannot leak back.
+    const ink = layer.features.flatMap((source): PhysicalFeature[] => {
+      let token = this.featureTokens.get(source);
+      if (token === undefined)
+        this.featureTokens.set(source, (token = this.nextFeatureToken++));
+      const feature = { ...source, id: `${source.id}@${token}` };
+      return feature.relief
         ? [
             {
               ...feature,
@@ -183,8 +191,8 @@ export class PhysicalFeatures {
               lineOpacity: 0.86,
             },
           ]
-        : [feature],
-    );
+        : [feature];
+    });
     const groups = [
       ...new Set(
         ink

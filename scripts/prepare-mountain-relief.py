@@ -13,7 +13,8 @@ from urllib.request import urlopen
 import numpy as np
 from PIL import Image
 from scipy.ndimage import gaussian_filter, maximum_filter
-from shapely.geometry import Point, Polygon, shape
+from shapely.geometry import Point, Polygon, LineString, GeometryCollection, shape
+from shapely.ops import unary_union, triangulate
 from shapely.prepared import prep
 
 ZOOM = 5
@@ -77,7 +78,7 @@ for y, x in candidates:
 ridges, highlights, hachures, light_faces, dark_faces = [], [], [], [], []
 collections = {"ridges": ridges, "highlights": highlights, "hachures": hachures,
                "lightFaces": light_faces, "darkFaces": dark_faces}
-clearance = {key: [] for key in collections}
+symbols = []
 for y, x in sorted(anchors):
     # Two joined peaks with a shared saddle, shoulders and attached slope ink.
     # Scale gently with elevation; shadows indicate a drawn face, never snow.
@@ -114,10 +115,60 @@ for y, x in sorted(anchors):
             hachures.append(list(map(loc, [start, mid, end])))
     # Secondary peak shares the first peak's foothills.
     ridges.append(list(map(loc, [second, (y+1*scale,x+4.5*scale), right])))
-    if lake_clearance.intersects(Polygon(light_faces[-1])) or lake_clearance.intersects(Polygon(dark_faces[-1])):
-        # Remove the complete symbol, including attached ink, never chopped peaks.
+    symbols.append({key: paths[starts[key]:] for key, paths in collections.items()})
+
+# Cartographic perspective is north-up: southern (lower-page) symbols are in
+# front. Clip BOTH faces and ink against their silhouettes before batching.
+# This avoids hundreds of meshes and prevents rear hatching showing through.
+for paths in collections.values():
+    paths.clear()
+clearance = {key: [] for key in collections}
+covered = GeometryCollection()
+def components(geometry, kind):
+    if geometry.is_empty:
+        return
+    if geometry.geom_type == kind:
+        yield geometry
+    elif hasattr(geometry, "geoms"):
+        for child in geometry.geoms:
+            yield from components(child, kind)
+def coords(sequence):
+    return [[round(x, 5), round(y, 5)] for x, y in sequence]
+for symbol in reversed(symbols):
+    faces = [Polygon(ring).buffer(0) for key in ["lightFaces", "darkFaces"] for ring in symbol[key]]
+    silhouette = unary_union(faces)
+    touches_lake = lake_clearance.intersects(silhouette) or any(
+        lake_clearance.intersects(LineString(path))
+        for key in ["ridges", "hachures", "highlights"] for path in symbol[key])
+    starts = {key: len(paths) for key, paths in collections.items()}
+    for key, paths in symbol.items():
+        if key in ["lightFaces", "darkFaces"]:
+            for ring in paths:
+                for polygon in components(Polygon(ring).buffer(0).difference(covered), "Polygon"):
+                    pieces = [triangle for triangle in triangulate(polygon) if polygon.covers(triangle)] if polygon.interiors else [polygon]
+                    collections[key].extend(coords(piece.exterior.coords) for piece in pieces)
+        else:
+            for path in paths:
+                collections[key].extend(coords(line.coords) for line in components(
+                    LineString(path).difference(covered.buffer(.0006)), "LineString"))
+    if touches_lake:
         for key, paths in collections.items():
             clearance[key].extend(range(starts[key], len(paths)))
+    covered = unary_union([covered, silhouette])
+# Lake clearance includes whole symbols and every ink fragment, even where a
+# stroke extends beyond its shaded face. Check the prepared variant itself.
+for key, paths in collections.items():
+    excluded = set(clearance[key])
+    for index, path in enumerate(paths):
+        if index in excluded:
+            continue
+        geometry = Polygon(path).buffer(0) if key in ["lightFaces", "darkFaces"] else LineString(path)
+        assert not lake_clearance.intersects(geometry), f"Uncleared lake ink: {key}:{index}"
+# Rounded export coordinates may share tiny edge slivers, but no visible faces
+# should stack. This checks the whole prepared asset, independent of draw order.
+visible_faces = [Polygon(ring).buffer(0) for key in ["lightFaces", "darkFaces"] for ring in collections[key]]
+face_area = sum(face.area for face in visible_faces)
+assert face_area - unary_union(visible_faces).area < face_area * .0001, "Mountain face overlap"
 result = {"ridges": ridges, "hachures": hachures, "highlights": highlights,
           "lightFaces": light_faces, "darkFaces": dark_faces,
           "clearances": {context["lake"]["id"]: clearance}}
@@ -128,6 +179,6 @@ MANIFEST.write_text(json.dumps({
     "attributionUrl": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
     "tiles": {url: digest for _, _, url, digest, _ in tiles},
     "derivedSha256": hashlib.sha256(OUT.read_bytes()).hexdigest(),
-    "processing": "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. Symbols scaled to 85% of the initial pictorial size. All vertices clipped to reviewed Andes extent. Optional whole-symbol lake clearance uses actual Titicaca shoreline plus 0.08 degree display margin. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading."
+    "processing": "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. Symbols scaled to 85% of the initial pictorial size. All vertices clipped to reviewed Andes extent. North-up pictorial occlusion clips rear faces and ink behind southern foreground silhouettes. Optional whole-symbol lake clearance tests faces and ink against actual Titicaca shoreline plus 0.08 degree display margin. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading."
 }, indent=2)+"\n")
 print(f"Prepared {len(ridges)} crest segments, {len(hachures)} slope strokes, {len(highlights)} high-elevation segments; {OUT.stat().st_size} bytes.")

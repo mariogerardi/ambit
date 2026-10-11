@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import type { Dispatch, PointerEvent } from "react";
+import { createPortal } from "react-dom";
+import type { CSSProperties, Dispatch, PointerEvent } from "react";
 import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questions";
 import { canSubmit } from "./questions";
@@ -22,9 +23,18 @@ export function OrderAnswer({
   const [picked, setPicked] = useState<string>();
   const [dragging, setDragging] = useState<string>();
   const [over, setOver] = useState<number>();
-  const [dragPosition, setDragPosition] = useState<{ x: number; y: number }>();
+  const [dragPosition, setDragPosition] = useState<CSSProperties>();
   const drag = useRef<
-    { id: string; x: number; y: number; moved: boolean } | undefined
+    | {
+        id: string;
+        x: number;
+        y: number;
+        offsetX: number;
+        offsetY: number;
+        appearance: CSSProperties;
+        moved: boolean;
+      }
+    | undefined
   >(undefined);
   const skipClick = useRef(false);
   const populated = !!question.orderInitial;
@@ -48,7 +58,28 @@ export function OrderAnswer({
     onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
       if (event.button !== 0) return;
       skipClick.current = false;
-      drag.current = { id, x: event.clientX, y: event.clientY, moved: false };
+      const rect = event.currentTarget.getBoundingClientRect();
+      const style = getComputedStyle(event.currentTarget);
+      drag.current = {
+        id,
+        x: event.clientX,
+        y: event.clientY,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        appearance: {
+          width: rect.width,
+          height: rect.height,
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+          borderRadius: style.borderRadius,
+          fontWeight: style.fontWeight,
+          color: style.color,
+          borderColor: style.borderColor,
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+        },
+        moved: false,
+      };
       event.currentTarget.setPointerCapture?.(event.pointerId);
     },
     onPointerMove: (event: PointerEvent<HTMLButtonElement>) => {
@@ -58,7 +89,11 @@ export function OrderAnswer({
         current.moved = true;
       if (current.moved) {
         setDragging(id);
-        setDragPosition({ x: event.clientX, y: event.clientY });
+        setDragPosition({
+          ...current.appearance,
+          left: event.clientX - current.offsetX,
+          top: event.clientY - current.offsetY,
+        });
         setOver(dropIndex(event));
       }
     },
@@ -209,15 +244,19 @@ export function OrderAnswer({
         disabled={!canSubmit(question, context, game)}
         onSubmit={() => dispatch({ type: "submit" })}
       />
-      {dragging && dragPosition && (
-        <div
-          className="order-drag-preview"
-          style={{ left: dragPosition.x, top: dragPosition.y }}
-          aria-hidden="true"
-        >
-          {name(dragging)}
-        </div>
-      )}
+      {dragging &&
+        dragPosition &&
+        createPortal(
+          <div
+            className="order-card order-drag-preview"
+            style={dragPosition}
+            aria-hidden="true"
+          >
+            <span>{name(dragging)}</span>
+            <i>⠿</i>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -71,7 +71,7 @@ describe("connected Journey drafts and answer feedback", () => {
       ANDES_JOURNEY,
       [
         select("city:bogota"),
-        select("andes:chimborazo"),
+        select("peak:chimborazo"),
         select("wurl:PER", "wurl:BOL"),
         select("wurl:ARG"),
         [

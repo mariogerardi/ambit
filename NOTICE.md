@@ -240,7 +240,9 @@ United States. Attribution and source terms are documented at
 spaced regional high points to anchor joined pictorial mountain forms, shaded
 faces and attached hatching within the reviewed Andes extent. Symbols are scaled
 to 85% of their initial size. An optional whole-symbol clearance around Titicaca
-uses its reviewed shoreline plus a 0.08-degree display margin; it is applied only
+uses its reviewed shoreline plus a 0.08-degree display margin and tests shaded
+faces as well as ink. North-up pictorial occlusion clips rear faces and strokes
+behind southern foreground silhouettes. Lake clearance is applied only
 when the lake is the authored focal feature. Pale faces do not
 denote permanent snow. These are cartographic symbols, not exact summit outlines,
 surveyed ridgelines or navigation data. Source tile URLs, SHA-256 hashes,
@@ -248,7 +250,7 @@ processing conventions, and the derived asset hash are recorded in
 `sources/andes-relief-manifest.json`. Raw elevation stays in the preparation cache;
 play uses bundled vector ink without live terrain requests.
 
-Ecuador summit markers for Cotopaxi, Cayambe and Antisana use coordinates from
+Ecuador summit choices for Cotopaxi, Cayambe and Antisana are supported by
 Smithsonian Institution’s Global Volcanism Program (volcano numbers 352050,
 352006 and 352030), reviewed October 11, 2026. Each round includes source links;
-Chimborazo retains its Natural Earth coordinate.
+Chimborazo’s revealed marker retains its Natural Earth coordinate.

@@ -383,8 +383,11 @@
   padding: 10px 12px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.4);
   border-radius: 8px;
-  background: var(--ui-input);
+  background: var(--ui-surface);
   color: var(--ui-text);
+  box-shadow:
+    0 3px 0 rgb(0 0 0 / 0.22),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
   font-size: 12px;
   text-align: left;
   touch-action: none;
@@ -400,19 +403,20 @@
   background: rgb(var(--ui-accent-rgb) / 0.15);
 }
 .order-card.dragging {
-  opacity: 0.55;
+  opacity: 0.2;
   cursor: grabbing;
 }
 .order-drag-preview {
   position: fixed;
   z-index: 100;
   pointer-events: none;
-  transform: translate(12px, -50%);
-  padding: 12px 16px;
+  transform: none;
+  box-sizing: border-box;
+  padding: 10px 12px;
   border-radius: 8px;
-  background: var(--ui-surface);
-  border: 1px solid var(--ui-accent);
-  color: var(--ui-text);
+  background: var(--ui-surface, #18262a);
+  border: 1px solid var(--ui-accent, #a2d8db);
+  color: var(--ui-text, #eef4ef);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
   font-size: 12px;
 }
@@ -1669,9 +1673,41 @@
 }
 .order-populated .order-bank {
   border-style: solid;
-  background: rgb(var(--ui-line-rgb) / 0.035);
+  border-color: rgb(190 104 100 / 0.32);
+  background: rgb(190 104 100 / 0.065);
   padding: 12px;
 }
 .order-populated .order-bank .order-position {
   font-size: 12px;
+}
+
+.order-populated .order-card {
+  border-radius: 11px;
+  border-color: rgb(var(--ui-line-rgb) / 0.24);
+  font-weight: 500;
+}
+.order-populated .order-card:not(.chosen) {
+  background:
+    linear-gradient(
+      rgb(var(--ui-line-rgb) / 0.075),
+      rgb(var(--ui-line-rgb) / 0.075)
+    ),
+    var(--ui-surface);
+}
+.order-populated .order-bank .order-position {
+  color: var(--ui-muted);
+}
+
+.order-populated .order-card.chosen,
+.order-populated .drop-target .order-card {
+  border-color: var(--ui-accent);
+  background:
+    linear-gradient(
+      rgb(var(--ui-accent-rgb) / 0.15),
+      rgb(var(--ui-accent-rgb) / 0.15)
+    ),
+    var(--ui-surface);
+}
+.order-populated .order-card:disabled {
+  border-color: rgb(var(--ui-accent-rgb) / 0.45);
 }

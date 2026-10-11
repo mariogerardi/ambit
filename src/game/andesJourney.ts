@@ -54,37 +54,6 @@ const chimborazo = summit(
   geography.peaks.Chimborazo,
   "wurl:ECU",
 );
-// Smithsonian GVP coordinates, reviewed 2026-10-11. Anonymous during play.
-const ecuadorPeaks: PlaceFeature[] = [
-  chimborazo,
-  {
-    ...summit(
-      "andes:cotopaxi",
-      "Cotopaxi",
-      { lat: -0.677, lng: -78.436 },
-      "wurl:ECU",
-    ),
-    sourceId: "smithsonian:352050",
-  },
-  {
-    ...summit(
-      "andes:cayambe",
-      "Cayambe",
-      { lat: 0.029, lng: -77.986 },
-      "wurl:ECU",
-    ),
-    sourceId: "smithsonian:352006",
-  },
-  {
-    ...summit(
-      "andes:antisana",
-      "Antisana",
-      { lat: -0.481, lng: -78.141 },
-      "wurl:ECU",
-    ),
-    sourceId: "smithsonian:352030",
-  },
-].map((peak) => ({ ...peak, visualState: "default" }));
 const aconcagua = summit(
   "andes:aconcagua",
   "Aconcagua",
@@ -220,14 +189,14 @@ export const ANDES_JOURNEY: Journey = {
       feedbackPlaces: [
         {
           ...bogota,
-          name: "Bogotá · Eastern Cordillera",
+          name: "Bogotá",
           visualState: "answer",
           labelFlexible: true,
           priority: 100,
         },
         {
           ...caracas,
-          name: "Caracas · Coastal Range",
+          name: "Caracas",
           visualState: "hinted",
           labelFlexible: true,
           priority: 100,
@@ -270,18 +239,21 @@ export const ANDES_JOURNEY: Journey = {
       leadIn:
         "Head south into Ecuador, where the Andes cross almost directly over the Equator.",
       prompt:
-        "Which marker is Chimborazo, Earth’s farthest summit from its center?",
-      instruction: "Tap a summit marker.",
-      mode: "city-single",
-      rule: { type: "place-ids", ids: [chimborazo.id] },
-      selection: { type: "ids", ids: ecuadorPeaks.map((peak) => peak.id) },
-      places: ecuadorPeaks,
-      allowTyping: false,
+        "Which Ecuadorian peak is Earth’s farthest point from its center?",
+      mode: "choice-single",
+      rule: { type: "choice-ids", ids: ["peak:chimborazo"] },
+      selection: { type: "none" },
+      choices: [
+        { id: "peak:chimborazo", label: "Chimborazo" },
+        { id: "peak:cotopaxi", label: "Cotopaxi" },
+        { id: "peak:cayambe", label: "Cayambe" },
+        { id: "peak:antisana", label: "Antisana" },
+      ],
       contextIds: ["wurl:ECU"],
       feedbackHintIds: ["wurl:ECU"],
       feedbackContextIds: [],
       map: { ...common.map, feedbackRegions: "neutral" },
-      focus: { lat: -0.9, lng: -78.4, altitude: 0.12 },
+      focus: { lat: -1.5, lng: -78, altitude: 0.3 },
       feedbackFocus: { lat: -1.5, lng: -78.8, altitude: 0.18 },
       feedbackPlaces: [chimborazo],
       explanation:
@@ -307,10 +279,10 @@ export const ANDES_JOURNEY: Journey = {
         ),
       ],
       guidance: {
-        hint: "Chimborazo stands south of Quito, in Ecuador’s western cordillera.",
+        hint: "Distance from Earth’s center depends on both elevation and latitude: the planet bulges at the Equator.",
         assist: {
-          text: "Two summit markers remain: Chimborazo and Cotopaxi. Choose the marker you think is Chimborazo.",
-          candidateIds: [chimborazo.id, "andes:cotopaxi"],
+          text: "Cotopaxi and Chimborazo remain. Compare their height as well as latitude.",
+          candidateIds: ["peak:chimborazo", "peak:cotopaxi"],
         },
       },
     }),

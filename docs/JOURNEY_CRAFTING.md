@@ -365,7 +365,10 @@ sampling, clipping, and attribution. Pale faces do not imply permanent snow.
 Keep relief subordinate to answer markers and reduce detail at distant zooms.
 When a lake or another physical feature is the reveal’s focal object, author a
 local clearance: remove complete overlapping terrain symbols and their ink.
-Preserve the terrain elsewhere. Use one label per focal feature, and ensure
+Preserve the terrain elsewhere. Foreground silhouettes must hide both rear faces
+and rear ink. Check transitions from earlier rounds as well as isolated states:
+cached geometry must not restore outlines cleared for a reveal.
+Use one label per focal feature, and ensure
 opaque relief does not erase political boundaries needed by the task.
 Relief is display-only: it never changes eligibility or grading. A general
 mountain footprint may limit rendering but must not appear as a hard boundary.
