@@ -85,8 +85,12 @@ scenes: {
 The place variables above stand for reviewed bundled records; the full examples
 resolve concrete IDs. A scene can contain places, regions, overlays, physical
 features or framing appropriate to its stage. `scenes.assist` requires authored
-assist copy in `guidance`; hint copy retains the play scene. Grading changes,
-survivor sets and locked answers belong to the answer/help contract, not scene geometry.
+assist copy in `guidance` and can add physical features and a focus alongside
+places/overlays. Hint copy retains the play scene.
+Assist layers are merged with play geography and removed when feedback begins;
+an assist focus frames the surviving candidates without changing eligibility.
+Grading changes, survivor sets and locked answers belong to the answer/help
+contract, not scene geometry.
 
 `reveal.contextIds` stays context-colored. `reveal.answerIds` identifies answered
 regions; use it only when the region is the answered object. A symbol, history or
@@ -201,7 +205,7 @@ historical truth, screen-space legibility or every form of answer leakage.
 6. Document the supported behavior and current limits in the catalog. Run focused
    checks. Update scheduling metadata only if its authored inputs changed.
 
-All 14 current Journeys (70 questions) now use grouped scenes. Shared presentation
+All 15 current Journeys (75 questions) now use grouped scenes. Shared presentation
 presets can still supply defaults; scene overrides compile into the renderer's
 existing fields. This is one engine and one current catalog, without archived
 runtime definitions. Isolated evaluator fixtures are test data, not playable

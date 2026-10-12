@@ -34,7 +34,9 @@ window.fetch = (input, options) => {
   return readOnlyFetch(input, options);
 };
 applyTheme("ocean");
-history.replaceState(null, "", "/journey/down-the-danube");
+const slug =
+  new URLSearchParams(location.search).get("journey") ?? "down-the-danube";
+history.replaceState(null, "", `/journey/${slug}`);
 createRoot(document.getElementById("root")!).render(
   <AccountContext.Provider value={account}>
     <PlayerWorkspace />

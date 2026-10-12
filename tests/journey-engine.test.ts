@@ -109,7 +109,11 @@ describe("Journey engine authoring boundaries", () => {
       ...legacy,
       scenes: {
         play: { contextIds: [], places: [] },
-        assist: { places: [] },
+        assist: {
+          places: [],
+          focus: { lat: 40, lng: 30, altitude: 0.4 },
+          physicalFeatures: [],
+        },
         reveal: { contextIds: [], answerIds: [], places: [], borders: false },
       },
     });
@@ -117,6 +121,12 @@ describe("Journey engine authoring boundaries", () => {
     expect(compiled.feedbackHintIds).toEqual([]);
     expect(compiled.feedbackContextIds).toEqual([]);
     expect(compiled.guidance!.assist!.places).toEqual([]);
+    expect(compiled.guidance!.assist!.focus).toEqual({
+      lat: 40,
+      lng: 30,
+      altitude: 0.4,
+    });
+    expect(compiled.guidance!.assist!.physicalFeatures).toEqual([]);
     expect(compiled.map!.feedbackBorders).toBe(false);
     expect(JSON.stringify(legacy)).toBe(before);
     const { focus: _focus, ...withoutFocus } = legacy;

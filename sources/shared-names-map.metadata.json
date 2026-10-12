@@ -1,0 +1,40 @@
+{
+  "reviewedOn": "2026-10-12",
+  "generator": "scripts/prepare-shared-names-map.py",
+  "sources": [
+    {
+      "asset": "public/geography/shared-names-thames-source.v1.geojson",
+      "url": "https://api.openstreetmap.org/api/0.6/relation/7666913/full.json",
+      "relationVersion": 23,
+      "license": "ODbL-1.0",
+      "sha256": "f0aa21f0d7f2c6da7718a381ce93fd31053ccf3c0a1662a63e1b15f48695540a"
+    },
+    {
+      "asset": "public/geography/shared-names-falls-source.v1.geojson",
+      "url": "https://api.openstreetmap.org/api/0.6/map?bbox=25.835,-17.93,25.87,-17.91",
+      "license": "ODbL-1.0",
+      "targetReview": "Main Falls waterfall node lies on the mapped Main Falls cliff/lip, on the south side of the upstream river; inspected against OSM way 579843539. Target is one part of the 1.7 km curtain, not its exact midpoint.",
+      "sha256": "605ffd28eccd9c1198e67681e3efc5587389f11deddcc29d09610c388b2dc138"
+    },
+    {
+      "asset": "public/geography/shared-names-lakes-source.v1.geojson",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_lakes.geojson",
+      "license": "Public domain",
+      "sha256": "e0d8f41056d1b8d7a74064794063b12308c99d737831411e6d7d272eb2fda011"
+    },
+    {
+      "asset": "public/geography/physical.v1.json",
+      "url": "https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/",
+      "license": "Public domain",
+      "version": "5.1.2",
+      "sha256": "3b6537ae0c35bd3a5fb8feb18cd14e2609d9645d6efc3f44cb2a2959057e19ea"
+    },
+    {
+      "asset": "src/geography/data/cities.v1.json",
+      "url": "https://www.geonames.org/",
+      "license": "CC BY 4.0",
+      "chatham": "ID 5920457, coordinates from the existing pinned .cache/quiz/cities15000.zip (see sources/quiz.metadata.json)",
+      "sha256": "2554bf60757df6cfc4ac43e34e8c31c99ab8386901e228484c3f41d0fb1e47f2"
+    }
+  ]
+}

@@ -348,7 +348,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "",
       ...journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id),
     ]);
-    expect(options).toHaveLength(15);
+    expect(options).toHaveLength(16);
     const preview = [...host.querySelectorAll<HTMLAnchorElement>("a")].find(
       (link) => link.textContent?.includes("Preview five questions"),
     );

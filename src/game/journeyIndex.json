@@ -461,5 +461,45 @@
         "resolvedLabel": "Vladivostok + Brisbane"
       }
     ]
+  },
+  {
+    "id": "same-name-different-place-v1",
+    "title": "Same Name, Different Place",
+    "saveRevision": 1,
+    "description": "One name can cross borders, borrow a history, or mean something entirely different. Explore five pairs of namesakes around the world.",
+    "path": "/journey/same-name-different-place",
+    "module": "./sharedNamesJourney.ts",
+    "rounds": [
+      {
+        "id": "shared-names-congo",
+        "label": "River",
+        "progressLabel": "Shared river",
+        "resolvedLabel": "Republic of the Congo + DR Congo"
+      },
+      {
+        "id": "shared-names-london",
+        "label": "City",
+        "progressLabel": "The other London",
+        "resolvedLabel": "London, Ontario"
+      },
+      {
+        "id": "shared-names-tripoli",
+        "label": "Place-name",
+        "progressLabel": "Three of something",
+        "resolvedLabel": "Tripoli, Libya + Tripoli, Lebanon"
+      },
+      {
+        "id": "shared-names-georgia",
+        "label": "Namesake",
+        "progressLabel": "Across the Caucasus",
+        "resolvedLabel": "Georgia (country) + Georgia (U.S. state)"
+      },
+      {
+        "id": "shared-names-victoria",
+        "label": "Waterfall",
+        "progressLabel": "Follow the river",
+        "resolvedLabel": "Mosi-oa-Tunya / Victoria Falls"
+      }
+    ]
   }
 ]

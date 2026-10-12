@@ -1,11 +1,11 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **14 current Journeys and 70 questions**, with eleven active
+The bundled catalog contains **15 current Journeys and 75 questions**, with eleven active
 daily concepts, reviewed against the code on October 12, 2026. Each Journey has
 five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
 everyone; unassigned dates use the automatic rotation. Direct practice routes are Admin-only; Admin’s “Preview five questions” opens the selected Journey. Chasing the sun and Down the Danube are ready for date assignments and
 have not been added to the automatic rotation. Same Hour, Different Worlds is also
-available for preview and date assignments without joining the rotation. There is no current in-app authoring
+available for preview and date assignments without joining the rotation. Same Name, Different Place is also available without joining the rotation. There is no current in-app authoring
 or AI generator. Previously published local packs are read-only compatibility data.
 
 ## Bundled Journeys
@@ -26,6 +26,7 @@ or AI generator. Previously published local packs are read-only compatibility da
 | 12  | Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)         |
 | 13  | Down the Danube             | `/journey/down-the-danube`            | [danubeJourney.ts](../src/game/danubeJourney.ts)             |
 | 14  | Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)         |
+| 15  | Same Name, Different Place  | `/journey/same-name-different-place`  | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)   |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
@@ -41,23 +42,23 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 70 current questions, not every possible engine pairing.
+Counts below refer to the 75 current questions, not every possible engine pairing.
 The type and rule contracts live in [`questionContracts.ts`](../src/game/questionContracts.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                | Control                 | Questions |
 | ------------------- | ----------------------- | --------: |
-| `pin`               | Drop a pin              |        15 |
-| `city-single`       | Single city pick        |         3 |
+| `pin`               | Drop a pin              |        16 |
+| `city-single`       | Single city pick        |         4 |
 | `city-multiple`     | Multiple city picks     |         0 |
-| `map-single`        | Single country pick     |        11 |
-| `map-multiple`      | Multiple country picks  |         5 |
+| `map-single`        | Single country pick     |        12 |
+| `map-multiple`      | Multiple country picks  |         6 |
 | `number`            | Number                  |         2 |
 | `text`              | Free response           |        10 |
 | `typed-regions`     | Typed region names      |         3 |
 | `ordered-countries` | Ordered country names   |         0 |
 | `ordered-capitals`  | Ordered capital names   |         0 |
-| `choice-single`     | Single choice           |        17 |
+| `choice-single`     | Single choice           |        18 |
 | `choice-multiple`   | Multiple choices        |         3 |
 | `choice-order`      | Order cards with spares |         0 |
 | `choice-match`      | Match cards to roles    |         1 |
@@ -195,7 +196,7 @@ before publication. Automatic dates show the actual rotation title. Admin can
 navigate months, jump to today, enter a date directly, or restore automatic
 rotation for an assigned day.
 
-All 14 current Journeys (70 questions) author grouped play/assist/reveal scenes.
+All 15 current Journeys (75 questions) author grouped play/assist/reveal scenes.
 There are no archived runtime editions. The revised sun Journey keeps
 `chasing-the-sun-v2` and its `supersedes` alias so previously published original-ID
 assignments resolve to the current edition. The original ID is retired: save

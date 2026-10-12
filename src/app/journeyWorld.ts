@@ -59,6 +59,10 @@ export function journeyWorld(
   const correct = !!game.answers.at(-1)?.correct;
   const map = questionMapPresentation(round, game.phase, correct);
   const completion = game.phase === "finished" ? journey.completion : undefined;
+  const assist =
+    game.phase === "playing" && game.help?.[round.id] === "assisted"
+      ? round.guidance?.assist
+      : undefined;
   const catalog = new Map(
     [...regions, ...(round.importedRegions ?? [])].map((r) => [r.id, r]),
   );
@@ -143,7 +147,7 @@ export function journeyWorld(
           ? { ...selected.focus, altitude: 1.3 }
           : game.phase === "finished"
             ? journey.rounds.at(-1)!.focus
-            : round.focus);
+            : (assist?.focus ?? round.focus));
   return {
     regions:
       game.phase === "finished"
@@ -175,6 +179,7 @@ export function journeyWorld(
             ...new Map(
               [
                 ...(round.physicalFeatures ?? []),
+                ...(assist?.physicalFeatures ?? []),
                 ...(game.phase === "feedback"
                   ? (round.feedbackPhysicalFeatures ?? [])
                   : []),

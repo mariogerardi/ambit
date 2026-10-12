@@ -32,6 +32,7 @@ interface CameraOptions {
     phase: GameState["phase"];
     roundIndex: number;
     answers: GameState["answers"];
+    help?: GameState["help"];
     dailyReady: boolean;
   };
   study: {
@@ -65,8 +66,14 @@ export function useCameraOrchestration({
     phase,
     roundIndex,
     answers,
+    help,
     dailyReady,
   } = journeyCamera;
+  const round = journey.rounds[roundIndex];
+  const assistFraming =
+    phase === "playing" &&
+    help?.[round.id] === "assisted" &&
+    !!round.guidance?.assist?.focus;
   const {
     active: studying,
     session,
@@ -229,13 +236,14 @@ export function useCameraOrchestration({
     } else if (studying && session?.phase === "summary" && studyArea) {
       frame(studyArea);
     }
-    // The current presentation supplies the destination; edits must not reset the orbit.
+    // Authored assist framing changes a stage; display and response edits keep the orbit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     ready,
     cameraKey,
     isJourney,
     !!journeyFocus,
+    assistFraming,
     namedRegions.length,
     phase,
     roundIndex,

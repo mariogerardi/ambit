@@ -116,6 +116,54 @@ it("uses the latest reveal focus on a phase transition without restarting travel
   expect(port.focus).toHaveBeenCalledTimes(1);
 });
 
+it("frames an authored assist once without restarting travel on response rerenders", async () => {
+  const clue = { lat: 43.7, lng: -79.4, altitude: 0.3 };
+  const assisted = { lat: 42.7, lng: -81.65, altitude: 0.15 };
+  const definition = {
+    ...ANDES_JOURNEY,
+    rounds: ANDES_JOURNEY.rounds.map((q, i) =>
+      i === 0
+        ? {
+            ...q,
+            guidance: {
+              hint: "A hint",
+              assist: { text: "River references", focus: assisted },
+            },
+          }
+        : q,
+    ),
+  };
+  await render({
+    mode: "practice",
+    transitionKey: "/journey/assist",
+    journey: { ...options.journey, active: true, definition, focus: clue },
+  });
+  vi.mocked(port.focus).mockClear();
+  await render({
+    journey: {
+      ...options.journey,
+      help: { [definition.rounds[0].id]: "hinted" },
+    },
+  });
+  expect(port.focus).not.toHaveBeenCalled();
+  await render({
+    journey: {
+      ...options.journey,
+      focus: assisted,
+      help: { [definition.rounds[0].id]: "assisted" },
+    },
+  });
+  expect(port.focus).toHaveBeenCalledExactlyOnceWith(assisted);
+  await render({
+    journey: {
+      ...options.journey,
+      focus: { ...assisted },
+      help: { ...options.journey.help },
+    },
+  });
+  expect(port.focus).toHaveBeenCalledTimes(1);
+});
+
 it("starts completion only when saves are ready, cancels animated playback for reduced motion, and cleans up on exit", async () => {
   const destination = { lat: -54, lng: -68, altitude: 1.1 };
   const views = [destination, { lat: -35, lng: -70, altitude: 0.9 }];

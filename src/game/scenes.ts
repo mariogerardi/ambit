@@ -15,8 +15,10 @@ export interface PlayScene {
   map?: Partial<NonNullable<Question["map"]>>;
 }
 export interface AssistScene {
+  focus?: Focus;
   places?: PlaceFeature[];
   overlays?: MapOverlay[];
+  physicalFeatures?: PhysicalFeature[];
 }
 export interface RevealScene {
   focus?: Focus;
@@ -86,6 +88,10 @@ export function compileQuestionScenes(
         ...question.guidance.assist,
         ...(assist.places !== undefined ? { places: assist.places } : {}),
         ...(assist.overlays !== undefined ? { overlays: assist.overlays } : {}),
+        ...(assist.focus !== undefined ? { focus: assist.focus } : {}),
+        ...(assist.physicalFeatures !== undefined
+          ? { physicalFeatures: assist.physicalFeatures }
+          : {}),
       },
     };
   }

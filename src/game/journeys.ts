@@ -1,4 +1,5 @@
 import { DANUBE_JOURNEY } from "./danubeJourney";
+import { SHARED_NAMES_JOURNEY } from "./sharedNamesJourney";
 import { SAME_HOUR_JOURNEY } from "./sameHourJourney";
 import { SUN_FLAGS_JOURNEY } from "./sunFlagsJourney";
 import { CANADA_JOURNEY } from "./canadaJourney";
@@ -27,9 +28,11 @@ export const JOURNEYS = [
   SUN_FLAGS_JOURNEY,
   DANUBE_JOURNEY,
   SAME_HOUR_JOURNEY,
+  SHARED_NAMES_JOURNEY,
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [SHARED_NAMES_JOURNEY.id]: "/journey/same-name-different-place",
     [SAME_HOUR_JOURNEY.id]: "/journey/same-hour-different-worlds",
     [DANUBE_JOURNEY.id]: "/journey/down-the-danube",
     [SUN_FLAGS_JOURNEY.id]: "/journey/chasing-the-sun",

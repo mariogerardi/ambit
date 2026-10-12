@@ -316,3 +316,40 @@ Download provenance and checksum are in `sources/andes-penguins.metadata.json`.
 The colony marker uses the reserve location (53°27′38″S, 69°18′21″W) reported in
 [Vidal et al.'s 2023 reserve flora study](https://www.scielo.cl/article_plus.php?lng=es&pid=S0717-66432023000100001&tlng=es).
 It is a reference location, not a surveyed colony boundary.
+
+## Shared-name Journey map context
+
+`src/game/data/shared-names-context.v1.json` and the identical downloadable
+`public/geography/shared-names-context.v1.json` contain question-local geography.
+Congo and Zambezi centerlines reuse the pinned Natural Earth v5.1.2 public-domain
+physical data. Lake St. Clair, Kariba and Victoria footprints are a subset of
+Natural Earth v5.1.2 1:10m lakes; their original coordinates are retained in
+`public/geography/shared-names-lakes-source.v1.geojson`.
+
+Ontario's Thames River main stream is from OpenStreetMap relation **7666913**,
+attributed to **© OpenStreetMap contributors**, licensed **ODbL 1.0**:
+https://www.openstreetmap.org/copyright and
+https://opendatacommons.org/licenses/odbl/1-0/.
+`public/geography/shared-names-thames-source.v1.geojson` preserves source way
+versions, node identities and coordinates. Member ways are joined only at shared
+node IDs, then simplified by retaining original vertices and the head reach and
+Lake St. Clair outlet. No watershed-map image or traced geometry is used.
+
+The pin target uses OpenStreetMap waterfall node **299131927** at the Main Falls
+lip. Its source snapshot and nearby Main Falls cliff are in
+`public/geography/shared-names-falls-source.v1.geojson`, also ODbL 1.0. This is a
+waterfall location, not the nearby town or the World Heritage property centroid.
+The centerlines are generalized cartography, not surveyed waterfall/gorge relief.
+
+Chatham's canonical GeoNames ID **5920457** and coordinates come from the already
+pinned cities15000 source, CC BY 4.0 (https://www.geonames.org/). Other city markers
+reuse bundled GeoNames city/capital records. No optional photographs ship.
+`sources/shared-names-map.metadata.json` records source URLs, versions, licenses
+and checksums. `python3 scripts/prepare-shared-names-map.py` reproduces only these
+Journey assets from checked-in source subsets; it does not regenerate catalogs.
+
+The U.S. Georgia completion polygon reuses Explore's pinned geoBoundaries gbOpen
+state boundary, documented above and in `sources/usa-adm1.metadata.json`; it is
+hidden during the question.
+Journey lakes use opaque blue surfaces and source shoreline paths, matching the
+Lake Titicaca treatment in Along the Andes.

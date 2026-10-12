@@ -125,6 +125,9 @@ export interface Question {
       overlays?: MapOverlay[];
       /** Named reference places may help locate an unmarked target. */
       places?: PlaceFeature[];
+      /** Display-only geography and framing for the assisted stage. */
+      physicalFeatures?: PhysicalFeature[];
+      focus?: Focus;
       /** A stronger ordering/matching assist may place and lock an authored card. */
       fixedSlots?: { index: number; id: string }[];
       /** A multiple-country assist may select and lock known answers. */

@@ -335,6 +335,7 @@ export function App() {
       phase: game.phase,
       roundIndex: game.roundIndex,
       answers: game.answers,
+      help: game.help,
       dailyReady,
     },
     study: {

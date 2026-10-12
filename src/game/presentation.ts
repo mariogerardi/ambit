@@ -165,7 +165,12 @@ export function questionPlaces(
     );
   }
   return phase === "feedback"
-    ? (question.feedbackPlaces ?? question.places ?? [])
+    ? (question.feedbackPlaces ?? question.places ?? []).map<PlaceFeature>(
+        (place) =>
+          question.mode.startsWith("choice-") && place.answerTarget
+            ? { ...place, visualState: correct ? "correct" : "answer" }
+            : place,
+      )
     : (question.places ?? []);
 }
 
