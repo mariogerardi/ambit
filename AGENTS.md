@@ -48,6 +48,9 @@ These instructions apply to every coding agent working in this repository.
 
 - Ambit uses React, TypeScript, Vite, and one persistent Three.js globe.
   `src/App.tsx` coordinates modes, sessions, camera state, and persistence.
+- Use `docs/JOURNEY_CRAFTING.md` as the single editorial guide. Review a compact
+  five-stop outline before redesigning questions; keep route questions moving
+  forward and reserve recap for completion.
 - Journey content lives in `src/game/*Journey.ts`. Use `defineQuestion` and
   `definePresentation`; declare answer contracts explicitly. Register content in
   `journeys.ts`, regenerate the index only when needed, and preserve saved editions.

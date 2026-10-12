@@ -1,7 +1,9 @@
 # Documentation
 
 Current guides were reviewed against the implementation on **October 10, 2026**.
-The [root README](../README.md) provides setup and a product overview.
+The [root README](../README.md) provides setup and a product overview. Journey
+crafting guidance was consolidated on October 11, 2026; `JOURNEY_CRAFTING.md` is
+the single maintained editorial guide.
 
 ## Current guides
 

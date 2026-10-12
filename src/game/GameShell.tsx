@@ -2,7 +2,7 @@ import { QuestionSources } from "./QuestionSources";
 import { QuestionHelp } from "../app/QuestionHelp";
 import { ActionIcon } from "../app/ActionIcon";
 import { pinDistance, pinDistanceTier } from "./answerTargets";
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { RegionFeature, Focus } from "../geography/types";
 import type { Journey, QuestionContext } from "./questions";
 import { explanation, questionPrompt, committedNameVisible } from "./questions";
@@ -52,6 +52,16 @@ export function GameShell({
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const round = journey.rounds[game.roundIndex];
+  useLayoutEffect(() => {
+    if (game.phase !== "playing") return;
+    // Desktop scrolls the card; mobile scrolls its containing tray.
+    const card = heading.current?.closest<HTMLElement>(".question-card");
+    if (!card || card.closest("[inert]")) return;
+    card.scrollTop = 0;
+    const tray = card?.closest<HTMLElement>(".mode-layer");
+    if (tray) tray.scrollTop = 0;
+    heading.current?.focus({ preventScroll: true });
+  }, [round.id, game.phase]);
   const inGame = game.phase === "playing" || game.phase === "feedback";
   const ended = game.phase === "finished" || game.phase === "failed";
   const helpCounts = helpCountCopy(helpSummary(game));
@@ -116,20 +126,21 @@ export function GameShell({
               {questionPrompt(round, context)}
             </span>
           </h1>
-          {round.image && (
-            <figure className="flag-clue">
-              <img
-                src={round.image.src}
-                alt={
-                  game.phase === "playing"
-                    ? round.image.alt
-                    : round.image.feedbackAlt
-                }
-                width="1200"
-                height="600"
-              />
-            </figure>
-          )}
+          {round.image &&
+            (game.phase === "playing" || !round.feedbackFlags?.length) && (
+              <figure className="flag-clue">
+                <img
+                  src={round.image.src}
+                  alt={
+                    game.phase === "playing"
+                      ? round.image.alt
+                      : round.image.feedbackAlt
+                  }
+                  width="1200"
+                  height="600"
+                />
+              </figure>
+            )}
           {game.phase === "playing" ? (
             <>
               {round.instruction && (
@@ -160,6 +171,20 @@ export function GameShell({
               </p>
               {feedbackText && (
                 <p className="journey-explanation">{feedbackText}</p>
+              )}
+              {!!round.feedbackFlags?.length && (
+                <div
+                  className="flag-comparison"
+                  role="group"
+                  aria-label="Revealed national flags"
+                >
+                  {round.feedbackFlags.map((flag) => (
+                    <figure key={flag.src}>
+                      <img src={flag.src} alt={flag.alt} />
+                      <figcaption>{flag.label}</figcaption>
+                    </figure>
+                  ))}
+                </div>
               )}
               {round.feedbackImage && (
                 <figure className="journey-feedback-image">

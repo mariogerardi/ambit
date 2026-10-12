@@ -65,6 +65,14 @@ example or playground selector. Multiple-choice questions are capped at six
 options. The numeric counter supports nonnegative integers with explicit +/-
 controls and direct typing; a new numeric rule should respect that UI contract.
 
+Map picking is derived from the answer mode; `map.hoverFeedback` controls hover
+presentation, independently of answer eligibility. Muted countries may have a
+disabled visual style while the `selectDisabled` path still permits eligible
+answers. Use disclosure settings to hide names, not hover settings to disable
+the intended control. Author typed recall as `mode: "text"` with an immediately
+visible input. `allowTyping: false` suppresses a globe-only question's typing
+shortcut while retaining the unavailable-WebGL fallback.
+
 `choice-order` stores candidate IDs in `Response.ordered`, with a
 `country-ids` rule marked `ordered: true`. It supports spare/distractor cards,
 mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
@@ -135,9 +143,11 @@ predicate if the question should be computed rather than fixed.
    add its rounds to [`questionCatalog.ts`](../src/game/questionCatalog.ts).
    Runtime lazy discovery covers files ending in `Journey.ts`;
    keep that naming pattern or update discovery deliberately.
-5. Run `npm run prepare:journeys`, then `npm test` and `npm run build`. Add focused
-   checks for new answer behavior, disclosure, ambiguous geography, and metadata.
-   Update this catalog table/counts when adding/removing content.
+5. Regenerate `npm run prepare:journeys` when definitions or registration change
+   index metadata. Run only the relevant tests and TypeScript for typed changes,
+   following [AGENTS.md](../AGENTS.md). Update table/counts when content changes;
+   do not regenerate geography or run a full build for routine copy edits.
+   Authorized releases use the normal CI checks and supported nonblocking deployment.
 
 The month calendar highlights scheduled dates and previews pending selections
 before publication. Automatic dates show the actual rotation title. Admin can
@@ -225,6 +235,19 @@ without making them playable answer targets. A `feedbackDiagram` of type
 urban geometry; `earth-shape` compares center distance with sea-level height using
 an explicitly exaggerated schematic. `correctFeedback` overrides widget-derived praise when needed.
 
+`feedbackFlags` supplies a reveal-only comparison of bundled national flags,
+with `src`, `alt`, and visible country `label` for each flag. It replaces the
+clue image on feedback. Chasing the sun uses it for Argentina and Uruguay;
+its Philippine reveal stays on the Philippines, and its authored completion
+visits the six flag countries across the five stops.
+
+`feedbackImage` supplies reveal-only documentary media with `src`, `alt`,
+`caption`, and `credit` (`name`, source `url`, `license`, `licenseUrl`). It is
+rendered only after submission, including after an incorrect answer. Pre-answer
+`image` is a separate clue contract and remains visible during play and feedback.
+Record asset provenance and license notices; do not put an answer-revealing photo
+in the clue field.
+
 `resolvedLabel` replaces a spoiler-safe step label only in the answered completion
 receipt. `Journey.completion` authors a static focus, physical features, stop
 markers, and optional caption instead of the default answer-country flyover.
@@ -239,7 +262,7 @@ The broader editorial rules are in [Crafting a Journey](JOURNEY_CRAFTING.md).
 Journey and Study answer footers share `QuestionActions`, with help on the left
 and submission on the right. Immediate-answer questions keep their original
 commitment without an extra submit step. Questions without authored help retain
-the disabled placeholder; only **Not the obvious city** currently supplies help.
+the disabled placeholder. Help is authored per round, not inferred from its answer.
 
 `guidance.hint` is an authored semantic clue. An optional `guidance.assist` supplies
 separate copy, surviving `candidateIds`, named reference `places`, and/or broad

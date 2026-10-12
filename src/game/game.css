@@ -1504,6 +1504,27 @@
   height: auto;
   border-radius: 6px;
 }
+.flag-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+.flag-comparison figure {
+  margin: 0;
+  min-width: 0;
+}
+.flag-comparison img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  object-fit: contain;
+}
+.flag-comparison figcaption {
+  margin-top: 8px;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
 .choice-answer .candidate-grid {
   margin-bottom: 20px;
 }

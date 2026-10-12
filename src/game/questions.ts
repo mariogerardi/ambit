@@ -162,6 +162,8 @@ export interface Question {
   explanation: string;
   /** Optional praise matching the knowledge/skill, rather than the input widget. */
   correctFeedback?: string;
+  /** Full flags replace the clue image on reveal, with visible country labels. */
+  feedbackFlags?: { src: string; alt: string; label: string }[];
   /** Documentary image shown only after submission, with visible attribution. */
   feedbackImage?: {
     src: string;

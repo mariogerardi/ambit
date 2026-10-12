@@ -2,21 +2,42 @@ import { defineQuestion, definePresentation } from "./questionBuilder";
 import type { FactSource, Journey } from "./questions";
 import flagCatalog from "./data/flags.v1.json";
 import { mapSource } from "./countryFacts";
-import { CAPITALS } from "./quizData";
-
-const southAmerica = CAPITALS.filter(
-  (capital) => capital.continent === "SA",
-).map((capital) => capital.countryId);
+import { CAPITALS, capitalSource } from "./quizData";
+import type { PlaceFeature } from "../geography/types";
 
 const source = (name: string, url: string): FactSource => ({
   name,
   url,
   reviewedOn: "2026-10-11",
 });
+const flagSrc = (code: string) =>
+  flagCatalog.flags.find((item) => item.countryId === `wurl:${code}`)!.src;
 const flag = (code: string, alt: string) => ({
-  src: flagCatalog.flags.find((item) => item.countryId === `wurl:${code}`)!.src,
+  src: flagSrc(code),
   alt,
   feedbackAlt: `National flag of ${({ ARG: "Argentina", URY: "Uruguay", KAZ: "Kazakhstan", JPN: "Japan", MWI: "Malawi", PHL: "the Philippines" } as Record<string, string>)[code]}`,
+});
+const seoul = CAPITALS.find((capital) => capital.countryId === "wurl:KOR")!;
+const sunCountries = ["ARG", "URY", "PHL", "KAZ", "JPN", "MWI"].map(
+  (code) => `wurl:${code}`,
+);
+const countryLabel = (
+  code: string,
+  name: string,
+  lat: number,
+  lng: number,
+): PlaceFeature => ({
+  id: `sun:visited:${code}`,
+  parentId: `wurl:${code}`,
+  name,
+  lat,
+  lng,
+  kind: "other",
+  sourceId: "natural-earth:5.1.2",
+  markerHidden: true,
+  labelFlexible: true,
+  priority: 90,
+  visualState: "visited",
 });
 const base = definePresentation({
   label: "Flag",
@@ -45,6 +66,29 @@ export const SUN_FLAGS_JOURNEY: Journey = {
   title: "Chasing the sun",
   description:
     "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
+  completion: {
+    focus: { lat: 12, lng: 65, altitude: 1.9 },
+    views: [
+      { lat: -34, lng: -60, altitude: 0.65 },
+      { lat: 11.76, lng: 122.96, altitude: 0.55 },
+      { lat: 48.36, lng: 67.24, altitude: 0.85 },
+      { lat: 37, lng: 138, altitude: 0.85 },
+      { lat: -13.19, lng: 34.27, altitude: 0.55 },
+      { lat: 12, lng: 65, altitude: 1.9 },
+    ],
+    regionIds: sunCountries,
+    physicalFeatures: [],
+    places: [
+      countryLabel("ARG", "Argentina", -34.68424, -64.76533),
+      countryLabel("URY", "Uruguay", -32.7916, -56.0259),
+      countryLabel("PHL", "Philippines", 11.75694, 122.95568),
+      countryLabel("KAZ", "Kazakhstan", 48.36083, 67.24225),
+      countryLabel("JPN", "Japan", 37.56021, 137.81248),
+      countryLabel("MWI", "Malawi", -13.19473, 34.27103),
+    ],
+    caption:
+      "A shared face, revolutionary rays, a harvest, a red disc and a rising dawn: across six countries, the same sun carries different stories.",
+  },
   rounds: [
     defineQuestion({
       commitment: "submit",
@@ -52,6 +96,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ...base,
       id: "sun-flags-may-pair-v2",
       label: "Shared sun",
+      resolvedLabel: "Argentina and Uruguay",
       title: "Two flags, one face.",
       leadIn: "Begin in South America.",
       prompt:
@@ -61,7 +106,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
       selection: { type: "members" },
-      contextIds: southAmerica,
       map: {
         borders: true,
         hoverFeedback: true,
@@ -81,12 +125,31 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       },
       focus: { lat: -22, lng: -62, altitude: 1.05 },
       feedbackFocus: { lat: -34, lng: -60, altitude: 0.6 },
+      feedbackFlags: [
+        {
+          src: flagSrc("ARG"),
+          alt: "Argentina’s blue-white-blue flag, with the Sun of May in the center.",
+          label: "Argentina",
+        },
+        {
+          src: flagSrc("URY"),
+          alt: "Uruguay’s striped blue-and-white flag, with the Sun of May in the upper corner.",
+          label: "Uruguay",
+        },
+      ],
       explanation:
         "This shared face recalls the May Revolution of 1810. The two neighbors draw its rays differently, but carry the same Sun of May.",
       source: source(
         "Buenos Aires City Government · the national flag’s sun",
         "https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia",
       ),
+      guidance: {
+        hint: "The two countries are neighbors on the Atlantic side of South America.",
+        assist: {
+          text: "Argentina, Brazil, Chile and Uruguay remain available. Choose the two whose flags carry this sun.",
+          candidateIds: ["wurl:ARG", "wurl:BRA", "wurl:CHL", "wurl:URY"],
+        },
+      },
     }),
     defineQuestion({
       mode: "choice-single",
@@ -97,6 +160,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ...base,
       id: "sun-flags-philippines-revolution-v2",
       label: "Revolution",
+      resolvedLabel: "Philippines · revolution",
       title: "A revolution in the rays.",
       leadIn: "Cross the Pacific to another revolutionary sun.",
       prompt:
@@ -104,11 +168,9 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       rule: { type: "choice-ids", ids: ["power:spain"] },
       choices: [
         { id: "power:portugal", label: "Portugal" },
-        { id: "power:britain", label: "Britain" },
         { id: "power:netherlands", label: "The Netherlands" },
         { id: "power:spain", label: "Spain" },
         { id: "power:usa", label: "The United States" },
-        { id: "power:france", label: "France" },
       ],
       image: flag(
         "PHL",
@@ -116,14 +178,22 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ),
       contextIds: ["wurl:PHL"],
       focus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
-      feedbackContextIds: ["wurl:ESP"],
-      feedbackFocus: { lat: 40.28, lng: -3.66, altitude: 0.35 },
+      feedbackContextIds: [],
+      feedbackHintIds: ["wurl:PHL"],
+      feedbackFocus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
       explanation:
         "Each ray preserves the memory of a province in the uprising. Like the Sun of May, this sun carries a story of independence rather than a weather forecast.",
       source: source(
         "Philippine Supreme Court · constitutional discussion of the flag",
         "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/24/51077",
       ),
+      guidance: {
+        hint: "Think of the European empire that also ruled much of Central and South America.",
+        assist: {
+          text: "The Netherlands and the United States are ruled out. Choose between Spain and Portugal.",
+          candidateIds: ["power:spain", "power:portugal"],
+        },
+      },
     }),
     defineQuestion({
       mode: "choice-single",
@@ -134,6 +204,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ...base,
       id: "sun-flags-kazakhstan-grain-v1",
       label: "Symbolism",
+      resolvedLabel: "Kazakhstan · abundance",
       title: "Read the rays.",
       leadIn: "Head northwest to the Central Asian steppe.",
       prompt:
@@ -160,6 +231,13 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "President of Kazakhstan · national flag symbolism",
         "https://www.akorda.kz/en/state_symbols/kazakhstan_flag",
       ),
+      guidance: {
+        hint: "The sun symbolizes abundance. Think about how sunlight supports life on the steppe.",
+        assist: {
+          text: "Feathers and arrowheads are ruled out. Choose between grains and flames.",
+          candidateIds: ["rays:grain", "rays:flames"],
+        },
+      },
     }),
     defineQuestion({
       count: 1,
@@ -169,6 +247,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ...base,
       id: "sun-flags-pacific-pin-v1",
       label: "Drop a pin",
+      resolvedLabel: "Japan · sun circle",
       title: "No rays required.",
       leadIn: "Head east to the Pacific.",
       prompt:
@@ -191,7 +270,21 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "Web Japan · national flag and anthem",
         "https://web-japan.org/factsheet/en/pdf/11NFlagAnthem.pdf",
       ),
-      sources: [mapSource],
+      sources: [mapSource, capitalSource],
+      guidance: {
+        hint: "Look for an island country off the eastern coast of mainland Asia.",
+        assist: {
+          text: "Seoul is marked as a reference. Look east across the water for the island chain; place your pin on land.",
+          places: [
+            {
+              ...seoul,
+              visualState: "hinted",
+              labelFlexible: true,
+              priority: 90,
+            },
+          ],
+        },
+      },
     }),
     defineQuestion({
       mode: "choice-single",
@@ -202,6 +295,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ...base,
       id: "sun-flags-malawi-dawn-v1",
       label: "Meaning",
+      resolvedLabel: "Malawi · a new dawn",
       title: "A new day.",
       leadIn: "Finish with a sunrise in Africa.",
       prompt:
@@ -210,8 +304,8 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       choices: [
         { id: "dawn:seasons", label: "The start of the planting season" },
         { id: "dawn:freedom", label: "Hope and freedom for Africa" },
-        { id: "dawn:monarchy", label: "The power of a royal dynasty" },
-        { id: "dawn:equator", label: "The country’s position on the Equator" },
+        { id: "dawn:unity", label: "Unity among Malawi’s communities" },
+        { id: "dawn:energy", label: "The warmth and energy of the sun" },
       ],
       image: flag(
         "MWI",
@@ -228,6 +322,13 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "Embassy of Malawi in Cairo · national flag",
         "https://www.malawiembassycairo.org/about-malawi",
       ),
+      guidance: {
+        hint: "Think of a new political beginning, rather than a daily or seasonal cycle.",
+        assist: {
+          text: "The planting-season and solar-energy options are ruled out. Choose between community unity and hope and freedom for Africa.",
+          candidateIds: ["dawn:unity", "dawn:freedom"],
+        },
+      },
     }),
   ],
 };

@@ -1,4 +1,8 @@
+// @vitest-environment jsdom
 import { readFileSync, existsSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { GameShell } from "../src/game/GameShell";
 import { describe, expect, it } from "vitest";
 import { SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsJourney";
 import { JOURNEYS } from "../src/game/journeys";
@@ -29,6 +33,32 @@ const world = JSON.parse(
 ) as RegionFeature[];
 const context = createQuestionContext(world, COUNTRY_FACTS, SUN_FLAGS_JOURNEY);
 
+const at = (roundIndex: number): GameState => ({
+  ...initialGame,
+  phase: "playing",
+  roundIndex,
+});
+const reduce = (state: GameState, ...actions: Action[]) =>
+  actions.reduce(
+    (game, action) => gameReducer(game, action, SUN_FLAGS_JOURNEY, context),
+    state,
+  );
+const help = (roundIndex: number) =>
+  reduce(at(roundIndex), { type: "request-hint" }, { type: "request-assist" });
+const shell = (game: GameState) =>
+  renderToStaticMarkup(
+    createElement(GameShell, {
+      journey: SUN_FLAGS_JOURNEY,
+      context,
+      game,
+      dispatch: () => {},
+      webgl: true,
+      frame: () => {},
+      onHome: () => {},
+      onStudy: () => {},
+      onPlayground: () => {},
+    }),
+  );
 describe("Chasing the sun", () => {
   it("allows both Sun of May countries to be tapped with names hidden until selection", () => {
     const view = journeyWorld(
@@ -44,11 +74,24 @@ describe("Chasing the sun", () => {
       (capital) => capital.continent === "SA",
     ).map((capital) => capital.countryId);
     expect(countries).toHaveLength(12);
-    for (const id of countries) expect(view.states[id]).toBe("hinted");
+    for (const id of countries) expect(view.states[id]).toBe("disabled");
     expect(view.states["wurl:MEX"]).toBe("disabled");
     expect(new Set(countries.map((id) => view.states[id])).size).toBe(1);
+    expect(view.selectDisabled).toBe(true);
+    const selected = reduce(
+      at(0),
+      { type: "select", id: "wurl:ARG" },
+      { type: "select", id: "wurl:URY" },
+    );
+    const chosen = journeyWorld(world, SUN_FLAGS_JOURNEY, selected, context);
+    expect(chosen.states["wurl:ARG"]).toBe("selected");
+    expect(chosen.states["wurl:URY"]).toBe("selected");
+    expect(chosen.states["wurl:BRA"]).toBe("disabled");
+    expect(reduce(selected, { type: "submit" }).answers.at(-1)?.correct).toBe(
+      true,
+    );
   });
-  it("shows known settings, pivots the colonial reveal to Spain, and keeps the Japan pin blind", () => {
+  it("keeps named settings contextual on reveal and keeps the Japan pin blind", () => {
     const prepared = (
       roundIndex: number,
       phase: GameState["phase"] = "playing",
@@ -87,10 +130,10 @@ describe("Chasing the sun", () => {
       );
     }
     for (const correct of [false, true]) {
-      const spain = prepared(1, "feedback", correct);
-      expect(spain.states["wurl:ESP"]).toBe(correct ? "correct" : "answer");
-      expect(spain.states["wurl:PHL"]).toBe("disabled");
-      expect(spain.focus.lng).toBeCloseTo(-3.66);
+      const philippines = prepared(1, "feedback", correct);
+      expect(philippines.states["wurl:ESP"]).toBe("disabled");
+      expect(philippines.states["wurl:PHL"]).toBe("hinted");
+      expect(philippines.focus).toEqual(SUN_FLAGS_JOURNEY.rounds[1].focus);
       for (const [index, id] of [
         [2, "wurl:KAZ"],
         [4, "wurl:MWI"],
@@ -142,7 +185,7 @@ describe("Chasing the sun", () => {
       [1, { selectedIds: ["power:portugal"] }],
       [2, { selectedIds: ["rays:feathers"] }],
       [3, { pin: { lat: 39.9, lng: 116.4 } }],
-      [4, { selectedIds: ["dawn:equator"] }],
+      [4, { selectedIds: ["dawn:energy"] }],
     ] as [number, Partial<Response>][])
       expect(
         isCorrect(SUN_FLAGS_JOURNEY.rounds[index], context, {
@@ -196,5 +239,172 @@ describe("Chasing the sun", () => {
       ),
     ).toBe(false);
     expect(modeForPath("/")).toBe("home");
+  });
+  it("shows the two complete flags only after correct or incorrect submission", () => {
+    const round = SUN_FLAGS_JOURNEY.rounds[0];
+    for (const state of [
+      at(0),
+      reduce(at(0), { type: "request-hint" }),
+      help(0),
+    ]) {
+      const html = shell(state);
+      expect(html).toContain(round.image!.src);
+      expect(html).not.toContain('class="flag-comparison"');
+      for (const flag of round.feedbackFlags!)
+        expect(html).not.toContain(flag.src);
+    }
+    for (const ids of [
+      ["wurl:ARG", "wurl:URY"],
+      ["wurl:BRA", "wurl:CHL"],
+    ]) {
+      const answered = reduce(
+        at(0),
+        ...ids.map((id): Action => ({ type: "select", id })),
+        { type: "submit" },
+      );
+      const host = document.createElement("div");
+      host.innerHTML = shell(answered);
+      expect(host.querySelector(".flag-clue")).toBeNull();
+      expect(host.querySelectorAll(".flag-comparison img")).toHaveLength(2);
+      expect(
+        [...host.querySelectorAll(".flag-comparison figcaption")].map(
+          (node) => node.textContent,
+        ),
+      ).toEqual(["Argentina", "Uruguay"]);
+      for (const flag of round.feedbackFlags!)
+        expect(existsSync(`public${flag.src}`)).toBe(true);
+    }
+  });
+  it("narrows the map assist to four equal candidates while preserving an earlier pick", () => {
+    const assisted = help(0);
+    const map = journeyWorld(world, SUN_FLAGS_JOURNEY, assisted, context);
+    expect(map.regionInteraction).toBe(true);
+    for (const id of ["wurl:ARG", "wurl:BRA", "wurl:CHL", "wurl:URY"])
+      expect(map.states[id]).toBe("selectable");
+    expect(map.states["wurl:BOL"]).toBe("disabled");
+    expect(
+      reduce(assisted, { type: "select", id: "wurl:BOL" }).selectedIds,
+    ).toEqual([]);
+    const preserved = reduce(
+      at(0),
+      { type: "select", id: "wurl:BOL" },
+      { type: "request-hint" },
+      { type: "request-assist" },
+    );
+    expect(preserved.selectedIds).toEqual(["wurl:BOL"]);
+    expect(
+      reduce(preserved, { type: "select", id: "wurl:BOL" }).selectedIds,
+    ).toEqual([]);
+    const answer = reduce(
+      assisted,
+      { type: "select", id: "wurl:ARG" },
+      { type: "select", id: "wurl:URY" },
+      { type: "submit" },
+    );
+    expect(answer.answers.at(-1)?.correct).toBe(true);
+    expect(journeyScore(answer)).toBe(1);
+  });
+  it("leaves a genuine two-choice decision in each multiple-choice assist", () => {
+    for (const index of [1, 2, 4]) {
+      const round = SUN_FLAGS_JOURNEY.rounds[index];
+      const assisted = help(index);
+      const survivors = round.guidance!.assist!.candidateIds!;
+      const host = document.createElement("div");
+      host.innerHTML = shell(assisted);
+      expect(
+        host.querySelectorAll(".candidate-grid button:not(:disabled)"),
+      ).toHaveLength(2);
+      expect(host.querySelector(".question-guidance")!.textContent).toContain(
+        round.guidance!.hint,
+      );
+      for (const choice of round.choices!) {
+        const selected = reduce(assisted, { type: "select", id: choice.id });
+        if (!survivors.includes(choice.id))
+          expect(selected.selectedIds).toEqual([]);
+        else {
+          expect(selected.selectedIds).toEqual([choice.id]);
+          expect(
+            reduce(selected, { type: "submit" }).answers.at(-1)?.correct,
+          ).toBe(
+            round.rule.type === "choice-ids" &&
+              round.rule.ids.includes(choice.id),
+          );
+        }
+      }
+    }
+    expect(SUN_FLAGS_JOURNEY.rounds[1].choices).toHaveLength(4);
+  });
+  it("adds only an outside reference for the Japan assist without exposing its land boundary", () => {
+    const round = SUN_FLAGS_JOURNEY.rounds[3];
+    const assisted = help(3);
+    const map = journeyWorld(world, SUN_FLAGS_JOURNEY, assisted, context);
+    expect(map.showBorders).toBe(false);
+    expect(map.regionNames).toBe("none");
+    expect(map.states["wurl:JPN"]).toBe("disabled");
+    expect(map.overlays).toEqual([]);
+    expect(map.focus).toEqual(round.focus);
+    expect(map.places.map((place) => place.name)).toEqual(["Seoul"]);
+    const reference = map.places[0];
+    expect(isCorrect(round, context, { ...assisted, pin: reference })).toBe(
+      false,
+    );
+    expect(
+      reduce(
+        assisted,
+        { type: "drop-pin", lat: 35.68, lng: 139.69 },
+        { type: "submit" },
+      ).answers.at(-1)?.correct,
+    ).toBe(true);
+  });
+  it("completes with the six flag countries and an authored five-stop tour, including on misses", () => {
+    let game = at(0);
+    const answers: Action[] = [
+      { type: "select", id: "wurl:BRA" },
+      { type: "select", id: "power:portugal" },
+      { type: "select", id: "rays:flames" },
+      { type: "drop-pin", lat: 39.9, lng: 116.4 },
+      { type: "select", id: "dawn:unity" },
+    ];
+    game = reduce(
+      game,
+      answers[0],
+      { type: "select", id: "wurl:CHL" },
+      { type: "submit" },
+      { type: "next" },
+    );
+    for (const action of answers.slice(1))
+      game = reduce(game, action, { type: "submit" }, { type: "next" });
+    expect(game.phase).toBe("finished");
+    expect(journeyScore(game)).toBe(0);
+    const map = journeyWorld(world, SUN_FLAGS_JOURNEY, game, context);
+    const countries = [
+      "wurl:ARG",
+      "wurl:URY",
+      "wurl:PHL",
+      "wurl:KAZ",
+      "wurl:JPN",
+      "wurl:MWI",
+    ];
+    expect(
+      Object.keys(map.states).filter((id) => map.states[id] === "visited"),
+    ).toEqual(expect.arrayContaining(countries));
+    expect(
+      Object.values(map.states).filter((state) => state === "visited"),
+    ).toHaveLength(6);
+    expect(map.states["wurl:ESP"]).toBe("disabled");
+    expect(map.places).toHaveLength(6);
+    expect(
+      map.places.every(
+        (place) => place.visualState === "visited" && place.markerHidden,
+      ),
+    ).toBe(true);
+    expect(map.routes).toEqual([]);
+    expect(
+      SUN_FLAGS_JOURNEY.completion!.views!.slice(0, 5).map((view) => view.lng),
+    ).toEqual([-60, 122.96, 67.24, 138, 34.27]);
+    const html = shell(game);
+    expect(html).toContain(SUN_FLAGS_JOURNEY.completion!.caption);
+    for (const round of SUN_FLAGS_JOURNEY.rounds)
+      expect(html).toContain(round.resolvedLabel);
   });
 });

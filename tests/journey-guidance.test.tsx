@@ -63,13 +63,15 @@ const shell = (
 );
 
 describe("authored Journey hint and assist stages", () => {
-  it("authors both stages for the reviewed capital and Andes Journeys and validates candidate uncertainty", () => {
+  it("authors both stages for the reviewed capital, Andes and sun Journeys and validates candidate uncertainty", () => {
     for (const pack of JOURNEYS)
       expect(
         pack.rounds.every(
           (round) =>
             !!round.guidance ===
-            [journey.id, "along-the-andes-v1"].includes(pack.id),
+            [journey.id, "along-the-andes-v1", "chasing-the-sun-v2"].includes(
+              pack.id,
+            ),
         ),
       ).toBe(true);
     expect(journey.rounds.every((round) => !!round.guidance?.assist)).toBe(
