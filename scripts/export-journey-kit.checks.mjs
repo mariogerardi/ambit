@@ -1,0 +1,208 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile,
+  rm,
+  symlink,
+  access,
+} from "node:fs/promises";
+import path from "node:path";
+import { createHash } from "node:crypto";
+import {
+  ROOT,
+  parseArgs,
+  summarizeGeometry,
+  featuredEntries,
+  exportDirectory,
+  exportJourneyKit,
+} from "./export-journey-kit.mjs";
+
+test("options and highlighted IDs fail closed on mistakes", () => {
+  assert.throws(() => parseArgs(["--highlight"]), /Missing value/);
+  assert.throws(() => parseArgs(["--include-cdoe"]), /Unknown option/);
+  const entries = [{ id: "test-v1", path: "/journey/test", title: "Test" }];
+  const config = { featured: [{ id: "test-v1", reason: "Good example" }] };
+  assert.equal(
+    featuredEntries(entries, config, ["test"])[0].reason,
+    "Good example",
+  );
+  assert.throws(
+    () => featuredEntries(entries, config, ["missing"]),
+    /Unknown highlighted/,
+  );
+});
+
+test("geometry summaries retain answer points, identity and source without bulky mesh data", () => {
+  const original = {
+    id: "feature:test",
+    name: "Test",
+    lat: -30,
+    lng: 70,
+    sourceId: "reviewed",
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [1, 2],
+          [3, 4],
+          [1, 2],
+        ],
+      ],
+    },
+    relief: {
+      hachures: [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    },
+    paths: [
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    rule: {
+      type: "pin-distance",
+      radiusKm: 450,
+      tiers: [{ radiusKm: 150, feedback: "Close" }],
+    },
+  };
+  const before = JSON.stringify(original);
+  const result = summarizeGeometry(original);
+  assert.equal(result.lat, -30);
+  assert.equal(result.sourceId, "reviewed");
+  assert.equal(result.geometry.type, "Polygon");
+  assert.equal(result.geometry.coordinates, undefined);
+  assert.equal(result.paths.groups, 1);
+  assert.deepEqual(result.rule, original.rule);
+  assert.equal(JSON.stringify(original), before);
+});
+
+test(
+  "complete export reflects real content, selective source review and safe refresh",
+  { timeout: 60000 },
+  async () => {
+    await mkdir(path.join(ROOT, "artifacts"), { recursive: true });
+    const directory = await mkdtemp(
+      path.join(ROOT, "artifacts", "journey-export-test-"),
+    );
+    const options = {
+      out: path.relative(ROOT, directory),
+      highlights: [],
+      includeCode: true,
+    };
+    try {
+      await assert.rejects(
+        exportDirectory(ROOT, "src/game"),
+        /subdirectory of artifacts/,
+      );
+      await assert.rejects(
+        exportDirectory(ROOT, "artifacts/../docs"),
+        /subdirectory of artifacts/,
+      );
+      await symlink(path.join(ROOT, "src"), path.join(directory, "unsafe"));
+      await assert.rejects(
+        exportDirectory(ROOT, `${options.out}/unsafe/kit`),
+        /real directories/,
+      );
+      const report = await exportJourneyKit(options);
+      const manifest = JSON.parse(
+        await readFile(path.join(directory, "manifest.json"), "utf8"),
+      );
+      const index = JSON.parse(
+        await readFile(path.join(ROOT, "src/game/journeyIndex.json"), "utf8"),
+      );
+      assert.equal(report.journeys, index.length);
+      assert.equal(manifest.journeys.length, index.length);
+      assert.deepEqual(manifest.highlightedJourneyIds, [
+        "along-the-andes-v1",
+        "chasing-the-sun-v2",
+        "mediterranean-v1",
+        "not-the-obvious-city-v1",
+      ]);
+      assert.ok(
+        manifest.inputs.some(
+          ({ path: file }) => file === "src/game/data/andes-relief.v1.json",
+        ),
+      );
+      for (const file of manifest.files) {
+        const content = await readFile(path.join(directory, file.path));
+        assert.equal(content.length, file.bytes);
+        assert.equal(
+          createHash("sha256").update(content).digest("hex"),
+          file.sha256,
+        );
+        assert.ok(!file.path.includes(".env"));
+      }
+      const kit = await readFile(
+        path.join(directory, "AUTHORING_KIT.md"),
+        "utf8",
+      );
+      assert.match(kit, /Do not force increasing difficulty/);
+      assert.match(kit, /#ffdb70/);
+      assert.match(kit, /### choice-match/);
+      assert.match(kit, /### choice-order/);
+      assert.match(kit, /city-multiple/);
+      assert.match(kit, /not the only models/);
+      const featured = await readFile(
+        path.join(directory, "FEATURED_EXAMPLES.md"),
+        "utf8",
+      );
+      assert.equal((featured.match(/^### \d\./gm) ?? []).length, 20);
+      assert.match(featured, /"radiusKm":450/);
+      assert.match(featured, /"matchSlots"/);
+      assert.match(featured, /reviewed \d{4}-\d{2}-\d{2}/);
+      assert.ok(!featured.includes('"coordinates":'));
+      const review = await readFile(
+        path.join(directory, "SOURCE_REVIEW.md"),
+        "utf8",
+      );
+      const app = await readFile(path.join(ROOT, "src/App.tsx"), "utf8");
+      assert.ok(review.includes(app));
+      assert.equal(
+        await readFile(
+          path.join(directory, "code/src/game/mechanics.ts"),
+          "utf8",
+        ),
+        await readFile(path.join(ROOT, "src/game/mechanics.ts"), "utf8"),
+      );
+      const northAmerica = await readFile(
+        path.join(directory, "examples/north-america.md"),
+        "utf8",
+      );
+      assert.match(northAmerica, /"acceptedAnswers": \[\s*4\s*\]/);
+      await writeFile(path.join(directory, "my-notes.md"), "Keep my notes");
+      await exportJourneyKit({
+        ...options,
+        includeCode: false,
+        highlights: ["down-the-danube"],
+      });
+      const refreshed = JSON.parse(
+        await readFile(path.join(directory, "manifest.json"), "utf8"),
+      );
+      assert.deepEqual(refreshed.highlightedJourneyIds, ["down-the-danube-v1"]);
+      await assert.rejects(access(path.join(directory, "SOURCE_REVIEW.md")));
+      await assert.rejects(access(path.join(directory, "code/src/App.tsx")));
+      assert.equal(
+        await readFile(path.join(directory, "my-notes.md"), "utf8"),
+        "Keep my notes",
+      );
+      await writeFile(
+        path.join(directory, "SOURCE_REVIEW.md"),
+        "Unrelated user file",
+      );
+      await assert.rejects(exportJourneyKit(options), /unrelated file/);
+      assert.equal(
+        await readFile(path.join(directory, "SOURCE_REVIEW.md"), "utf8"),
+        "Unrelated user file",
+      );
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);

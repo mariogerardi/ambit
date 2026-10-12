@@ -103,6 +103,7 @@ describe("authored Journey hint and assist stages", () => {
               "along-the-andes-v1",
               "chasing-the-sun-v2",
               "mediterranean-v1",
+              "same-hour-different-worlds",
             ].includes(pack.id),
         ),
       ).toBe(true);

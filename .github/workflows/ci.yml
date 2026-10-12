@@ -36,6 +36,8 @@ jobs:
         run: python3 -m unittest discover -s backend -p 'test_*.py'
       - name: Run unit, asset, and DOM tests
         run: npm test
+      - name: Check portable Journey exporter
+        run: npm run test:journey-export
       - name: Type-check and build
         env:
           VITE_DATADOG_APPLICATION_ID: ${{ vars.VITE_DATADOG_APPLICATION_ID }}

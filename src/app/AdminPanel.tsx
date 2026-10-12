@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  JOURNEY_INDEX,
-  AVAILABLE_JOURNEY_INDEX,
-} from "../game/journeyRegistry";
+import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { useAccount } from "../services/accounts";
 import type { useJourneySchedule } from "../services/journeySchedule";
 import { dailyJourney, dateOrdinal } from "./dailyProgress";
@@ -305,7 +302,7 @@ export function AdminPanel({
                 onChange={(event) => chooseJourney(event.target.value)}
               >
                 <option value="">Automatic rotation</option>
-                {AVAILABLE_JOURNEY_INDEX.map((journey) => (
+                {JOURNEY_INDEX.map((journey) => (
                   <option key={journey.id} value={journey.id}>
                     {journey.title}
                   </option>

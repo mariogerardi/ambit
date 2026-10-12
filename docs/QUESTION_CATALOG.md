@@ -1,29 +1,31 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **13 current Journeys and 65 questions**, with eleven active
+The bundled catalog contains **14 current Journeys and 70 questions**, with eleven active
 daily concepts, reviewed against the code on October 12, 2026. Each Journey has
 five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
 everyone; unassigned dates use the automatic rotation. Direct practice routes are Admin-only; Admin’s “Preview five questions” opens the selected Journey. Chasing the sun and Down the Danube are ready for date assignments and
-have not been added to the automatic rotation. There is no current in-app authoring
+have not been added to the automatic rotation. Same Hour, Different Worlds is also
+available for preview and date assignments without joining the rotation. There is no current in-app authoring
 or AI generator. Previously published local packs are read-only compatibility data.
 
 ## Bundled Journeys
 
-| #   | Title                    | Practice route                     | Definition                                                   |
-| --- | ------------------------ | ---------------------------------- | ------------------------------------------------------------ |
-| 1   | Beyond the maple leaf    | `/journey/beyond-the-maple-leaf`   | [canadaJourney.ts](../src/game/canadaJourney.ts)             |
-| 2   | Around the Mediterranean | `/journey/mediterranean`           | [fourthJourney.ts](../src/game/fourthJourney.ts)             |
-| 3   | Shared neighbors         | `/journey/shared-neighbors`        | [ninthJourney.ts](../src/game/ninthJourney.ts)               |
-| 4   | Along the Andes          | `/journey/along-the-andes`         | [andesJourney.ts](../src/game/andesJourney.ts)               |
-| 5   | Not the obvious city     | `/journey/not-the-obvious-city`    | [eleventhJourney.ts](../src/game/eleventhJourney.ts)         |
-| 6   | Island instincts         | `/journey/island-instincts`        | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)     |
-| 7   | North America by name    | `/journey/north-america`           | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts) |
-| 8   | Latitude surprises       | `/journey/latitude-surprises`      | [latitudeJourney.ts](../src/game/latitudeJourney.ts)         |
-| 9   | Around the Ring of Fire  | `/journey/ring-of-fire`            | [tenthJourney.ts](../src/game/tenthJourney.ts)               |
-| 10  | Exceptions to the rule   | `/journey/exceptions-to-the-rule`  | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
-| 11  | On Russia’s doorstep     | `/journey/try-not-to-click-russia` | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
-| 12  | Chasing the sun          | `/journey/chasing-the-sun`         | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)         |
-| 13  | Down the Danube          | `/journey/down-the-danube`         | [danubeJourney.ts](../src/game/danubeJourney.ts)             |
+| #   | Title                       | Practice route                        | Definition                                                   |
+| --- | --------------------------- | ------------------------------------- | ------------------------------------------------------------ |
+| 1   | Beyond the maple leaf       | `/journey/beyond-the-maple-leaf`      | [canadaJourney.ts](../src/game/canadaJourney.ts)             |
+| 2   | Around the Mediterranean    | `/journey/mediterranean`              | [fourthJourney.ts](../src/game/fourthJourney.ts)             |
+| 3   | Shared neighbors            | `/journey/shared-neighbors`           | [ninthJourney.ts](../src/game/ninthJourney.ts)               |
+| 4   | Along the Andes             | `/journey/along-the-andes`            | [andesJourney.ts](../src/game/andesJourney.ts)               |
+| 5   | Not the obvious city        | `/journey/not-the-obvious-city`       | [eleventhJourney.ts](../src/game/eleventhJourney.ts)         |
+| 6   | Island instincts            | `/journey/island-instincts`           | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)     |
+| 7   | North America by name       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts) |
+| 8   | Latitude surprises          | `/journey/latitude-surprises`         | [latitudeJourney.ts](../src/game/latitudeJourney.ts)         |
+| 9   | Around the Ring of Fire     | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)               |
+| 10  | Exceptions to the rule      | `/journey/exceptions-to-the-rule`     | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
+| 11  | On Russia’s doorstep        | `/journey/try-not-to-click-russia`    | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
+| 12  | Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)         |
+| 13  | Down the Danube             | `/journey/down-the-danube`            | [danubeJourney.ts](../src/game/danubeJourney.ts)             |
+| 14  | Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)         |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
@@ -39,23 +41,23 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 65 current questions, not every possible engine pairing.
+Counts below refer to the 70 current questions, not every possible engine pairing.
 The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                | Control                 | Questions |
 | ------------------- | ----------------------- | --------: |
 | `pin`               | Drop a pin              |        15 |
-| `city-single`       | Single city pick        |         1 |
+| `city-single`       | Single city pick        |         3 |
 | `city-multiple`     | Multiple city picks     |         0 |
-| `map-single`        | Single country pick     |        10 |
+| `map-single`        | Single country pick     |        11 |
 | `map-multiple`      | Multiple country picks  |         5 |
 | `number`            | Number                  |         2 |
 | `text`              | Free response           |        10 |
 | `typed-regions`     | Typed region names      |         3 |
 | `ordered-countries` | Ordered country names   |         0 |
 | `ordered-capitals`  | Ordered capital names   |         0 |
-| `choice-single`     | Single choice           |        15 |
+| `choice-single`     | Single choice           |        17 |
 | `choice-multiple`   | Multiple choices        |         3 |
 | `choice-order`      | Order cards with spares |         0 |
 | `choice-match`      | Match cards to roles    |         1 |
@@ -77,7 +79,8 @@ shortcut while retaining the unavailable-WebGL fallback.
 A `slot-matches` rule declares `{ slotId, choiceId }` pairs by stable identity;
 array order in the rule is irrelevant. Each role receives one unique card, with
 optional spare cards. Responses use the existing `ordered` slots, and
-`assist.fixedSlots` can lock a correct pairing. Dragging and button placement share
+`assist.fixedSlots` can lock a correct pairing. `orderAsideLabel` can name the card
+tray (for example, Countries). Dragging and button placement share
 `OrderAnswer` with ordering; matching has its own two-column layout, instructions,
 answer summary, grading contract, and per-role map feedback. It works without WebGL.
 Do not encode city/role matching as ordered `country-ids`.
@@ -187,7 +190,7 @@ before publication. Automatic dates show the actual rotation title. Admin can
 navigate months, jump to today, enter a date directly, or restore automatic
 rotation for an assigned day.
 
-All 13 current Journeys (65 questions) author grouped play/assist/reveal scenes.
+All 14 current Journeys (70 questions) author grouped play/assist/reveal scenes.
 There are no archived runtime editions. The revised sun Journey keeps
 `chasing-the-sun-v2` and its `supersedes` alias so previously published original-ID
 assignments resolve to the current edition. The original ID is retired: save

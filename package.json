@@ -18,6 +18,8 @@
     "prepare:journey-map": "node scripts/prepare-journey-map-context.mjs",
     "prepare:languages": "node scripts/prepare-language-names.mjs",
     "check:journey": "node scripts/check-journey.mjs",
+    "export:journeys": "node scripts/export-journey-kit.mjs",
+    "test:journey-export": "node --test scripts/export-journey-kit.checks.mjs",
     "check:docs": "prettier --check README.md NOTICE.md \"docs/**/*.md\""
   },
   "dependencies": {

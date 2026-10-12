@@ -81,9 +81,10 @@ export function questionPlaces(
     const reveal = phase === "feedback" || phase === "failed";
     const expected = solutionIds(question, context);
     return [
-      ...(question.places ?? []).filter(
-        (place) => !selectableIds(question, context).includes(place.id),
-      ),
+      ...(reveal
+        ? (question.feedbackPlaces ?? question.places ?? [])
+        : (question.places ?? [])
+      ).filter((place) => !selectableIds(question, context).includes(place.id)),
       ...selectableIds(question, context).flatMap((id) => {
         if (!reveal && response && !candidateAvailable(question, response, id))
           return [];
@@ -245,7 +246,9 @@ export function questionRegions(
       question.selection.ids.includes(region.id);
     return question.contextIds?.includes(region.id) || mapTarget;
   });
-  if (!highlights.length && !imported.length) return regions;
+  const displays = Object.entries(question.displayGeometries ?? {});
+  if (!highlights.length && !imported.length && !displays.length)
+    return regions;
   let variants = regionVariants.get(regions);
   const cached = variants?.get(question)?.get(phase);
   if (cached) return cached;
@@ -258,6 +261,12 @@ export function questionRegions(
     ...exploreBoundaries(regions, layers),
     ...imported.filter((r) => !regionalIds.has(r.id)),
   ];
+  for (const [id, displayGeometry] of displays) {
+    const index = result.findIndex((r) => r.id === id);
+    if (index < 0)
+      throw Error(`The display geometry's region is missing: ${id}`);
+    result[index] = { ...result[index], displayGeometry };
+  }
   for (const highlight of highlights) {
     const index = result.findIndex((r) => r.id === highlight.countryId);
     if (index < 0)
@@ -451,8 +460,16 @@ export function questionVisualStates(
       const owner = states[highlight.countryId];
       const namedPartAnswered =
         question.mode === "choice-single" && !!game.answers.at(-1)?.correct;
-      states[highlightedPartId(highlight.countryId)] =
-        owner === "correct" || namedPartAnswered ? "correct" : "answer";
+      const knownContext =
+        question.mode.startsWith("map-") &&
+        question.feedbackHintIds?.includes(highlight.countryId) &&
+        !expected.includes(highlight.countryId) &&
+        !question.feedbackContextIds?.includes(highlight.countryId);
+      states[highlightedPartId(highlight.countryId)] = knownContext
+        ? "hinted"
+        : owner === "correct" || namedPartAnswered
+          ? "correct"
+          : "answer";
       if (highlight.reveal === "part") states[highlight.countryId] = "disabled";
     }
   for (const id of mistakes) states[id] = "incorrect";

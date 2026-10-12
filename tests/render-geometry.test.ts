@@ -26,7 +26,10 @@ describe("actual spherical renderer inputs", () => {
     const first = prepare(world);
     first.forEach((r, i) => Object.assign(r, { __id: `mesh:${i}` }));
     for (const q of QUESTION_CATALOG.filter(
-      (q) => !q.highlightParts?.length && !q.importedRegions?.length,
+      (q) =>
+        !q.highlightParts?.length &&
+        !q.importedRegions?.length &&
+        !Object.keys(q.displayGeometries ?? {}).length,
     ))
       for (const phase of ["playing", "feedback", "finished"] as const) {
         const input = questionRegions(world, q, phase);

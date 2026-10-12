@@ -24,6 +24,11 @@ artifact's commit matches the requested SHA, publishes it, waits for completion,
 and verifies release identity, direct application routes, source notices, and a
 missing geography resource through HTTP. It does not run browser or WebGL tests.
 
+For an authorized local release that should return immediately after upload, use
+`python3 scripts/deploy-production.py --directory dist --expected-commit FULL_COMMIT_SHA --no-wait`.
+This starts the Amplify job and prints its status link without polling or claiming
+deployment completion. Omitting `--no-wait` retains CI's completion checks.
+
 ## Hosting behavior
 
 - [Redirect rules](../deployment/amplify-rules.json) serve `index.html` for

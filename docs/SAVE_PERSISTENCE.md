@@ -114,8 +114,10 @@ renewed; a temporary renewal failure keeps the account cache selected.
 Guest play needs no backend. Account play keeps local progress during outages and
 syncs when connectivity/authentication recover. Theme/default globe preferences
 and the admin's device-local Journey override are not synchronized. Practice
-Journeys outside the daily saved flow remain temporary. Published Journey content
-still uses the existing local publishing system.
+Journeys outside the daily saved flow remain temporary. Previously published
+local Journey packs are read-only compatibility data; the former publishing
+editor and AI generator have been removed. Current bundled Journeys are authored
+in source, and Admin's calendar publishes date assignments rather than new packs.
 
 ## Remaining limits
 

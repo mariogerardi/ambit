@@ -346,15 +346,15 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     ][0].options;
     expect([...options].map((option) => option.value)).toEqual([
       "",
-      ...journeyRegistry.AVAILABLE_JOURNEY_INDEX.map((journey) => journey.id),
+      ...journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id),
     ]);
-    expect(options).toHaveLength(14);
+    expect(options).toHaveLength(15);
     const preview = [...host.querySelectorAll<HTMLAnchorElement>("a")].find(
       (link) => link.textContent?.includes("Preview five questions"),
     );
     expect(preview).toBeDefined();
     expect(
-      journeyRegistry.AVAILABLE_JOURNEY_INDEX.some(
+      journeyRegistry.JOURNEY_INDEX.some(
         (journey) => journey.path === preview!.getAttribute("href"),
       ),
     ).toBe(true);

@@ -211,7 +211,7 @@ export function OrderAnswer({
         {populated
           ? (question.orderAsideLabel ?? "Distractor")
           : matching
-            ? "Cities"
+            ? (question.orderAsideLabel ?? "Cities")
             : "Spare cards"}
       </span>
       <div className="order-spares">

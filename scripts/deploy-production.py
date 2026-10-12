@@ -17,6 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", default="dist", type=Path)
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--no-wait", action="store_true", help="Start deployment and return without polling or HTTP verification")
     args = parser.parse_args()
     config = json.loads(
         (Path(__file__).resolve().parents[1] / "deployment/production.json").read_text()
@@ -100,6 +101,10 @@ def main():
                     raise RuntimeError(f"Artifact upload returned HTTP {response.status}.")
             aws("start-deployment", "--job-id", job_id)
             print(f"Deploying {args.expected_commit} as Amplify job {job_id}.", flush=True)
+            if args.no_wait:
+                print(f"Deployment initiated for {config['url']}; completion has not been verified.")
+                print(f"Status: https://{config['region']}.console.aws.amazon.com/amplify/apps/{config['appId']}/branches/{config['branch']}/deployments/{job_id}")
+                return
             deadline = time.monotonic() + 600
             previous_status = None
             while time.monotonic() < deadline:

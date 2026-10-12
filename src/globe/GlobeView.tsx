@@ -92,7 +92,6 @@ interface Props {
   interactionLabel?: string;
   theme?: GlobeTheme;
   palette?: ThemeId;
-  layout?: "lab" | "game";
   compact?: boolean;
   expanded?: boolean;
   visualScale?: number;
@@ -988,10 +987,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               viewportProjection(size.height, size.frameHeight, size.frameTop)
                 .offsetY,
             ]
-          : props.layout === "game"
-            ? [size.width > 900 ? 155 : 0, size.width < 700 ? -55 : 0]
-            : [size.width > 900 ? 100 : 0, size.width < 700 ? -95 : 0],
-      [size, props.layout, props.compact],
+          : [size.width > 900 ? 155 : 0, size.width < 700 ? -55 : 0],
+      [size, props.compact],
     );
     const hoveredRegion = props.regions.find((r) => r.id === props.hovered);
     const cityHover = props.placeInteraction
@@ -1085,18 +1082,9 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           atmosphereAltitude={0.12}
           polygonsData={countryRegions}
           polygonGeoJsonGeometry="geometry"
-          polygonLabel={(obj) =>
-            // The library caches tooltips until the hovered mesh changes.
-            // Gameplay uses a reactive tooltip and caption, so disclosure changes
-            // cannot leave a previous round's country name on screen.
-            props.layout === "game" ||
-            region(obj).displayBase ||
-            props.regionNames === "none" ||
-            (props.regionNames === "committed" &&
-              !props.namedRegionIds?.includes(region(obj).id))
-              ? ""
-              : region(obj).name
-          }
+          // Use the reactive tooltip below; cached library labels can disclose
+          // a previous round's country name after the clue changes.
+          polygonLabel={() => ""}
           polygonCapColor={capColor}
           polygonSideColor=""
           polygonStrokeColor=""
@@ -1147,16 +1135,14 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           arcDashAnimateTime={props.reduced ? 0 : 2100}
           arcsTransitionDuration={props.reduced ? 0 : 700}
         />
-        {props.layout === "game" && (
-          <div
-            ref={tooltip}
-            hidden={!hoverName}
-            className="country-hover-tooltip"
-            role="tooltip"
-          >
-            {hoverName}
-          </div>
-        )}
+        <div
+          ref={tooltip}
+          hidden={!hoverName}
+          className="country-hover-tooltip"
+          role="tooltip"
+        >
+          {hoverName}
+        </div>
       </div>
     );
   },

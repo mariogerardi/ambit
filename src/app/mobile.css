@@ -36,28 +36,7 @@
   .experience .experience-header-right {
     gap: 12px;
   }
-  .experience .header-mode-label {
-    display: none;
-  }
-  .experience .experience-header .home-link {
-    font-size: 13px;
-    padding: 0 6px;
-  }
-  .experience .experience-header .home-link:not(:last-child) {
-    display: none;
-  }
-  .experience .experience-header button.header-action {
-    min-height: 44px;
-    padding-inline: 10px;
-    transform: translateY(10px);
-  }
-  .experience
-    :is(
-      .experience-header .home-link,
-      .shell-credits > summary,
-      .mobile-map-tools button,
-      .world-tools > summary
-    ) {
+  .experience .mobile-map-tools button {
     text-shadow: var(--ui-text-shadow, 0 2px 4px #000e, 0 0 12px #000c);
   }
   .experience .experience-logo {
@@ -310,16 +289,9 @@
   .experience .country-facts dd {
     overflow-wrap: anywhere;
   }
-  .experience .inline-actions,
-  .experience .study-presets {
+  .experience .inline-actions {
     flex-wrap: wrap;
     gap: 8px 16px;
-  }
-  .experience .setup-row {
-    flex-wrap: wrap;
-  }
-  .experience .setup-row > * {
-    flex-basis: 120px;
   }
   .experience .flag-clue img {
     max-height: 130px;
@@ -466,9 +438,6 @@
     pointer-events: none;
     z-index: 3;
     text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
-  }
-  .experience .study-presets {
-    margin-bottom: 12px;
   }
   .study-session-description {
     margin-block: 8px;

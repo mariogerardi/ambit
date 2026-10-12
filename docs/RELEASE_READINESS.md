@@ -1,6 +1,6 @@
 # Release readiness
 
-Reviewed against the repository on **October 10, 2026**. This guide consolidates
+Persistence and legacy claims reviewed on **October 12, 2026**. This guide consolidates
 the outstanding release work. It is not evidence that a deployment or device
 audit has already passed. Current save behavior is documented in
 [Save persistence](SAVE_PERSISTENCE.md).
@@ -98,10 +98,13 @@ currently established.
 
 ## Known product limits
 
-Saves are browser-origin-local, with no cloud recovery, delete/export interface,
-or automatic retention. Active Study attempts are lost on reload/closure; in-app
-navigation archives submitted answers. History/writer registers grow without
-pruning. See [Save persistence](SAVE_PERSISTENCE.md).
+Guest saves belong to the current browser origin. Signed-in players synchronize
+Journey progress, Study settings, active Study sessions and results to their
+account; active Study sessions survive navigation, refresh and closure. Pending
+offline writes still depend on the local browser cache until uploaded. History
+and writer registers grow without automatic pruning, and there is no player-facing
+history export or general deletion interface. Admin's current-Journey reset is a
+separate, scoped tool. See [Save persistence](SAVE_PERSISTENCE.md).
 
 WebGL context loss disables the globe rather than automatically rebuilding it.
 Study retains an alternate answer input; written controls cannot replace every

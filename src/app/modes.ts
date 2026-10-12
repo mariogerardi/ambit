@@ -1,4 +1,4 @@
-import { AVAILABLE_JOURNEY_INDEX } from "../game/journeyRegistry";
+import { JOURNEY_INDEX } from "../game/journeyRegistry";
 export type AppMode =
   | "account"
   | "admin"
@@ -18,7 +18,7 @@ export function modeForPath(path: string): AppMode {
           ? "explore"
           : path === "/study"
             ? "study"
-            : AVAILABLE_JOURNEY_INDEX.some((j) => j.path === path)
+            : JOURNEY_INDEX.some((j) => j.path === path)
               ? "practice"
               : "home";
 }

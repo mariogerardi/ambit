@@ -417,5 +417,49 @@
         "label": "Delta"
       }
     ]
+  },
+  {
+    "id": "same-hour-different-worlds",
+    "title": "Same Hour, Different Worlds",
+    "saveRevision": 4,
+    "legacyRoundLabels": {
+      "same-hour-q4": "Sri Lanka / Nepal / Bhutan",
+      "same-hour-q5": "Vladivostok + Guam + Brisbane"
+    },
+    "description": "Cross continents and compare distant clocks. Discover why longitude is only part of the story of civil time.",
+    "path": "/journey/same-hour-different-worlds",
+    "module": "./sameHourJourney.ts",
+    "rounds": [
+      {
+        "id": "same-hour-q1",
+        "label": "Shared hour",
+        "progressLabel": "Across the Atlantic",
+        "resolvedLabel": "Reykjavík + Accra"
+      },
+      {
+        "id": "same-hour-q2",
+        "label": "European clocks",
+        "progressLabel": "Europe's mismatch",
+        "resolvedLabel": "Madrid + Warsaw"
+      },
+      {
+        "id": "same-hour-q3",
+        "label": "Official time",
+        "progressLabel": "Across China",
+        "resolvedLabel": "Beijing + Kashgar"
+      },
+      {
+        "id": "same-hour-q4",
+        "label": "Different days",
+        "progressLabel": "Across the date line",
+        "resolvedLabel": "Samoa + American Samoa"
+      },
+      {
+        "id": "same-hour-q5",
+        "label": "The Pacific hour",
+        "progressLabel": "One Pacific hour",
+        "resolvedLabel": "Vladivostok + Guam + Brisbane"
+      }
+    ]
   }
 ]

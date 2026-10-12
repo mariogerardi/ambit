@@ -95,7 +95,6 @@
   font: 12px/1.6 var(--font-ui);
   color: var(--ui-muted);
 }
-.account-columns,
 .profile-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -113,8 +112,7 @@
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.15);
   padding: 16px 0;
 }
-.account-list li > div:first-child,
-.friend-list li > div:first-of-type {
+.account-list li > div:first-child {
   flex: 1;
   min-width: 0;
 }
@@ -131,22 +129,6 @@
   font-size: 11px;
   color: var(--ui-muted);
   margin-top: 5px;
-}
-.account-inline-form {
-  display: flex;
-  align-items: end;
-  gap: 16px;
-  max-width: 650px;
-}
-.account-inline-form .field {
-  flex: 1;
-}
-.account-inline-form .primary-button {
-  width: auto;
-  margin-bottom: 18px;
-}
-.challenge-form {
-  max-width: 760px;
 }
 .profile-form,
 .profile-card {
@@ -357,23 +339,6 @@
 .avatar-picker small {
   text-transform: capitalize;
 }
-.profile-sharing {
-  display: flex;
-  align-items: start;
-  gap: 12px;
-  font-size: 13px;
-  line-height: 1.7;
-  margin: 24px 0;
-}
-.profile-sharing small {
-  display: block;
-  color: var(--ui-muted);
-}
-.friend-list .profile-avatar {
-  width: 48px;
-  height: 48px;
-  font-size: 26px;
-}
 .account-row-actions {
   display: flex;
   flex-wrap: wrap;
@@ -397,10 +362,6 @@
   text-align: left;
   padding: 12px;
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.18);
-}
-.challenge-scores {
-  font-size: 13px;
-  color: var(--ui-accent);
 }
 .account-profile-layout {
   display: grid;
@@ -484,7 +445,6 @@
   .account-stats dd {
     font-size: 32px;
   }
-  .account-columns,
   .profile-fields {
     grid-template-columns: 1fr;
     gap: 0;
@@ -492,23 +452,12 @@
   .experience .profile-form {
     padding: 18px;
   }
-  .account-inline-form {
-    display: block;
-  }
-  .account-inline-form .primary-button {
-    width: 100%;
-    margin: 0 0 16px;
-  }
   .avatar-picker {
     flex-wrap: wrap;
     gap: 6px;
   }
   .avatar-picker label {
     padding: 9px;
-  }
-  .friend-list li,
-  .challenge-list li {
-    flex-wrap: wrap;
   }
   .account-row-actions {
     justify-content: start;

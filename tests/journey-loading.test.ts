@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { JOURNEYS, journeyPath } from "../src/game/journeys";
-import {
-  AVAILABLE_JOURNEY_INDEX,
-  JOURNEY_INDEX,
-  loadJourney,
-} from "../src/game/journeyRegistry";
+import { JOURNEY_INDEX, loadJourney } from "../src/game/journeyRegistry";
 import {
   dailyJourney,
   emptyDaily,
@@ -14,9 +10,6 @@ import {
 
 describe("deferred Journey content", () => {
   it("keeps routing and save-validation metadata aligned with the authored catalog", () => {
-    expect(AVAILABLE_JOURNEY_INDEX.map((j) => j.id)).toEqual(
-      JOURNEYS.map((j) => j.id),
-    );
     expect(JOURNEY_INDEX.map((j) => j.id)).toEqual(JOURNEYS.map((j) => j.id));
     for (const journey of JOURNEYS) {
       const entry = JOURNEY_INDEX.find((j) => j.id === journey.id)!;

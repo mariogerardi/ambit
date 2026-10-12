@@ -5,7 +5,7 @@ import type { Journey, Question } from "./questions";
 /** Enough to route, schedule and validate saves without loading clue geometry. */
 export interface JourneySummary {
   saveRevision?: number;
-  legacyRoundLabels?: Record<string, string>;
+  legacyRoundLabels?: Partial<Record<string, string>>;
   id: string;
   supersedes?: string;
   title: string;
@@ -16,7 +16,6 @@ export const JOURNEY_INDEX: (JourneySummary & {
   path: string;
   module: string;
 })[] = index;
-export const AVAILABLE_JOURNEY_INDEX = JOURNEY_INDEX;
 const modules = import.meta.glob<Record<string, unknown>>(["./*Journey.ts"]);
 const pending = new Map<string, Promise<Journey>>();
 

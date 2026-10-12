@@ -150,6 +150,12 @@ The [architecture map](ARCHITECTURE.md) identifies implementation owners; the
 
 ## Focused Journey authoring review
 
+`npm run export:journeys` creates a portable AI-authoring kit in the git-ignored
+`artifacts/journey-authoring-kit/` directory. Add `-- --include-code` for a fresh
+architecture source review. See [the authoring-kit guide](JOURNEY_AUTHORING_KIT.md)
+for selective uploads, highlighted examples and refresh behavior. This exporter
+does not modify content, call an AI or deploy anything.
+
 Run `npm run check:journey -- <id-or-slug>` to inspect one Journey's contracts,
 help and reveal scenes, cameras, sources and local media. `--recipe <answer-mode>`
 loads a complete control example; `--list` shows current Journeys.

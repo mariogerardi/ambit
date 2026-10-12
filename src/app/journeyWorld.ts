@@ -28,17 +28,23 @@ function allRegions(regions: RegionFeature[], journey: Journey) {
         .map((r) => [r.id, r]),
     ).values(),
   ];
-  const result = additions.length
-    ? questionRegions(
-        regions,
-        {
-          ...journey.rounds[0],
-          importedRegions: additions,
-          highlightParts: [],
-        },
-        "finished",
-      )
-    : regions;
+  const displayGeometries = Object.assign(
+    {},
+    ...journey.rounds.map((q) => q.displayGeometries ?? {}),
+  );
+  const result =
+    additions.length || Object.keys(displayGeometries).length
+      ? questionRegions(
+          regions,
+          {
+            ...journey.rounds[0],
+            importedRegions: additions,
+            displayGeometries,
+            highlightParts: [],
+          },
+          "finished",
+        )
+      : regions;
   cache.set(regions, result);
   return result;
 }

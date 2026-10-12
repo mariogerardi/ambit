@@ -187,3 +187,21 @@ attributed imagery, which ordinary product views do not request.
 Journey-specific authoring and extension boundaries are documented in
 [Journey engine and extension contracts](JOURNEY_ENGINE.md). It distinguishes
 current contracts from proposed next steps as mechanics and scenes grow.
+
+### Retained compatibility and cleanup boundaries
+
+The current catalog has one metadata index, `JOURNEY_INDEX`; the former separate
+availability alias is gone. The globe has one product layout, shared by all modes;
+the prototype lab layout and its unused controls/styles have been removed.
+Global typography, the logo, canvas behavior and accessibility styles live in
+`src/style.css`; mode-specific layouts remain in their existing stylesheets.
+`src/app/ErrorBoundaries.tsx` owns globe/panel failure containment separately from
+the app's navigation and session orchestration.
+
+Compatibility that still protects player data remains intentional: record-save
+migration and recovery, retired Journey IDs, `supersedes` assignment aliases,
+in-place receipt labels and read-only IndexedDB packs. The `studio:` geometry
+source convention still supports those recovered packs. The old crafting filename
+is a redirect to the single maintained guide, not another policy document.
+Test evaluator fixtures are not archived playable Journeys. Trace consumers and
+save recovery before removing any of these paths.

@@ -204,6 +204,8 @@ export interface Question {
   source: FactSource;
   /** Authored regions remain separate from canonical countries and border reasoning. */
   importedRegions?: RegionFeature[];
+  /** Question-local render footprints; canonical geometry still grades answers. */
+  displayGeometries?: Record<string, RegionFeature["geometry"]>;
   contextIds?: string[];
   /** Feedback can reveal a different region from the highlighted clue. */
   feedbackContextIds?: string[];

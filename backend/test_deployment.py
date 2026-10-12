@@ -1,5 +1,6 @@
 """Environment isolation and nonblocking setup, without contacting AWS."""
 import importlib.util
+import io
 import json
 from pathlib import Path
 import sys
@@ -12,10 +13,37 @@ spec = importlib.util.spec_from_file_location("deploy_backend", Path(__file__).r
 deploy = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(deploy)
 
+production_spec = importlib.util.spec_from_file_location("deploy_production", Path(__file__).resolve().parents[1] / "scripts" / "deploy-production.py")
+production = importlib.util.module_from_spec(production_spec)
+production_spec.loader.exec_module(production)
+
 OUTPUTS = {"ApiUrl": "https://staging.example.com", "Authority": "https://cognito.example.com/staging", "ClientId": "staging-client", "LoginUrl": "https://staging-login.example.com"}
 
 
 class DeploymentTests(unittest.TestCase):
+    def test_frontend_no_wait_uploads_and_starts_without_polling_or_verification(self):
+        commit = "a" * 40
+        commands = []
+        def aws(command, **options):
+            commands.append(command)
+            result = {"jobId": "42", "zipUploadUrl": "https://upload.invalid/artifact"} if command[2] == "create-deployment" else {}
+            return type("Result", (), {"returncode": 0, "stdout": json.dumps(result)})()
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            (directory / "index.html").write_text('<div id="root"></div>')
+            (directory / "NOTICE.txt").write_text("Source notices")
+            (directory / "release.json").write_text(json.dumps({"commit": commit}))
+            response = type("Response", (), {"status": 200})()
+            with patch.object(sys, "argv", ["deploy-production.py", "--directory", str(directory), "--expected-commit", commit, "--no-wait"]), patch.object(production.subprocess, "run", side_effect=aws), patch.object(production.urllib.request, "urlopen") as upload, patch.object(production.time, "sleep") as sleep, patch.object(sys, "stdout", new_callable=io.StringIO) as output:
+                upload.return_value.__enter__.return_value = response
+                production.main()
+                self.assertEqual([command[2] for command in commands], ["create-deployment", "start-deployment"])
+                self.assertEqual(upload.call_count, 1)
+                self.assertEqual(upload.call_args.args[0].method, "PUT")
+                sleep.assert_not_called()
+                self.assertIn("completion has not been verified", output.getvalue())
+                self.assertIn("/deployments/42", output.getvalue())
+
     def test_staging_has_separate_data_identity_monitoring_and_local_origins(self):
         production, staging = template()["Resources"], template("staging")["Resources"]
         for logical, field in (("Feedback", "TableName"), ("Saves", "TableName"), ("Community", "TableName"), ("Users", "UserPoolName"), ("ApiFunction", "FunctionName"), ("Confirmation", "FunctionName"), ("AccessLogs", "LogGroupName"), ("ApiLogs", "LogGroupName"), ("ConfirmationLogs", "LogGroupName")):

@@ -1,7 +1,6 @@
 import { supportsWebGL } from "./globe/support";
 import { useProgressSync } from "./app/useProgressSync";
 import {
-  Component,
   Suspense,
   lazy,
   useCallback,
@@ -10,7 +9,8 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CSSProperties, ErrorInfo, ReactNode } from "react";
+import type { CSSProperties } from "react";
+import { BoardBoundary, PanelBoundary } from "./app/ErrorBoundaries";
 import { LayerLoader } from "./geography/loadLayer";
 import type {
   BoundaryLayerManifest,
@@ -42,11 +42,7 @@ import { useAccount } from "./services/accounts";
 import { usePlayerProfile } from "./services/playerProfile";
 import { ProfileAvatar } from "./app/ProfileAvatar";
 import { appRelease } from "./services/config";
-import {
-  trackView,
-  reportFailure,
-  reportReactFailure,
-} from "./services/monitoring";
+import { trackView, reportFailure } from "./services/monitoring";
 import type { FeedbackRequest } from "./services/feedback";
 import { AccountPanel, AdminAccess } from "./app/AccountPanel";
 import { FeedbackDialog } from "./app/FeedbackDialog";
@@ -132,44 +128,6 @@ type GameRuntime = typeof import("./game/runtime");
 type RegionalRuntime = typeof import("./geography/regions");
 const emptyRoutes: [] = [];
 const noAction = () => {};
-class BoardBoundary extends Component<
-  { children: ReactNode; onError(): void },
-  { failed: boolean }
-> {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  componentDidCatch(error: unknown, info: ErrorInfo) {
-    reportReactFailure(error, info);
-    this.props.onError();
-  }
-  render() {
-    return this.state.failed ? null : this.props.children;
-  }
-}
-class PanelBoundary extends Component<
-  { children: ReactNode },
-  { failed: boolean }
-> {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  componentDidCatch(error: unknown, info: ErrorInfo) {
-    reportReactFailure(error, info);
-  }
-  render() {
-    return this.state.failed ? (
-      <section className="info-view" role="alert">
-        <p>This screen could not be loaded.</p>
-        <button onClick={() => location.reload()}>Reload ↻</button>
-      </section>
-    ) : (
-      this.props.children
-    );
-  }
-}
 export function PlayerWorkspace() {
   const account = useAccount();
   if (account.loading) return <p role="status">Checking your account…</p>;
@@ -1710,7 +1668,6 @@ export function App() {
                 initialFocus={initialFocus}
                 theme="play"
                 palette={theme}
-                layout="game"
                 compact={mobile.enabled}
                 expanded={expanded}
                 visualScale={mobile.enabled && mode === "home" ? 1.2 : 1}

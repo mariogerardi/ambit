@@ -28,6 +28,10 @@ requirement. Keep this index focused on maintained guides.
 
 ## Source notices and generated records
 
+For AI-assisted Journey design, use the [portable authoring kit](JOURNEY_AUTHORING_KIT.md).
+It exports current guides, mechanics and complete examples without loading the
+whole repository into a design conversation.
+
 The [layer manifest](../public/geography/manifest.json), `sources/*.metadata.json`,
 checksum files, and ID mappings document the shipped inputs and outputs.
 [The flag source README](../sources/flags-source-README.md) and

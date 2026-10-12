@@ -6,11 +6,7 @@ import { GameShell } from "../src/game/GameShell";
 import { describe, expect, it } from "vitest";
 import { SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsJourney";
 import { JOURNEYS } from "../src/game/journeys";
-import {
-  JOURNEY_INDEX,
-  AVAILABLE_JOURNEY_INDEX,
-  loadJourney,
-} from "../src/game/journeyRegistry";
+import { JOURNEY_INDEX, loadJourney } from "../src/game/journeyRegistry";
 import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
 import { CAPITALS } from "../src/game/quizData";
 import {
@@ -246,9 +242,7 @@ describe("Chasing the sun", () => {
     expect(Object.keys(recovered.archivedAttempts ?? {})).toEqual([]);
     expect(validDaily(recovered, JOURNEY_INDEX)).toBe(true);
     await expect(loadJourney(oldId)).rejects.toThrow("Unknown Journey");
-    expect(
-      AVAILABLE_JOURNEY_INDEX.some((journey) => journey.id === oldId),
-    ).toBe(false);
+    expect(JOURNEY_INDEX.some((journey) => journey.id === oldId)).toBe(false);
     expect(modeForPath("/")).toBe("home");
   });
   it("shows the two complete flags only after correct or incorrect submission", () => {

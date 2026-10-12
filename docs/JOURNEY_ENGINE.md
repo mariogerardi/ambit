@@ -76,6 +76,11 @@ regions; use it only when the region is the answered object. A symbol, history o
 city question can keep its country contextual with `map.feedbackRegions: "neutral"`.
 `reveal.borders: false` can suppress political boundaries for continental context.
 
+Use `displayGeometries` keyed by country or region ID for a sourced, question-local
+coastline replacement. These footprints apply to play, reveal and completion;
+canonical geometry and answer eligibility remain unchanged. Replace the full
+footprint rather than adding an overlapping imported island.
+
 `compileQuestionScenes` merges scene values over presentation defaults without
 mutating the source/preset. Explicit empty arrays clear a layer; omission preserves
 the default. It produces the legacy runtime fields once, and existing records
@@ -172,7 +177,7 @@ historical truth, screen-space legibility or every form of answer leakage.
 6. Document the supported behavior and current limits in the catalog. Run focused
    checks. Update scheduling metadata only if its authored inputs changed.
 
-All 13 current Journeys (65 questions) now use grouped scenes. Shared presentation
+All 14 current Journeys (70 questions) now use grouped scenes. Shared presentation
 presets can still supply defaults; scene overrides compile into the renderer's
 existing fields. This is one engine and one current catalog, without archived
 runtime definitions. Isolated evaluator fixtures are test data, not playable

@@ -1,0 +1,58 @@
+{
+  "featured": [
+    {
+      "id": "along-the-andes-v1",
+      "reason": "A continuous route with terrain context, varied reasoning tasks, distance-pin tiers, purposeful reveals and a wildlife finale that moves forward."
+    },
+    {
+      "id": "chasing-the-sun-v2",
+      "reason": "The flags exemplar: a conceptual throughline across continents, motif clues, reveal-only flag comparisons and an authored completion."
+    },
+    {
+      "id": "mediterranean-v1",
+      "reason": "An itinerary with deliberate candidate sets, five different controls, hidden-feature disclosure, progressive help and a geographic payoff."
+    },
+    {
+      "id": "not-the-obvious-city-v1",
+      "reason": "Unexpected capitals explored through recall, pins, anonymous city markers and matching with a spare card; assists preserve real decisions."
+    }
+  ],
+  "sourceReview": [
+    "src/App.tsx",
+    "src/game/GameShell.tsx",
+    "src/game/AnswerForm.tsx",
+    "src/game/questions.ts",
+    "src/game/questionBuilder.ts",
+    "src/globe/GlobeView.tsx"
+  ],
+  "implementationReferences": [
+    "AGENTS.md",
+    "src/app/ErrorBoundaries.tsx",
+    "src/game/mechanics.ts",
+    "src/game/questionTypes.ts",
+    "src/game/scenes.ts",
+    "src/game/recipes.ts",
+    "src/game/state.ts",
+    "src/game/guidance.ts",
+    "src/game/presentation.ts",
+    "src/game/copy.ts",
+    "src/game/authoredPlaces.ts",
+    "src/game/OrderAnswer.tsx",
+    "src/game/answerTargets.ts",
+    "src/game/quizData.ts",
+    "src/game/countryFacts.ts",
+    "src/game/reasoning.ts",
+    "src/game/spatial.ts",
+    "src/geography/places.ts",
+    "src/geography/relief.ts",
+    "src/game/journeyAudit.ts",
+    "src/app/journeyWorld.ts",
+    "src/geography/types.ts",
+    "src/globe/themes.ts",
+    "src/globe/placeLabels.ts",
+    "src/globe/camera.ts",
+    "src/game/journeys.ts",
+    "src/game/journeyRegistry.ts",
+    "src/game/journeyIndex.json"
+  ]
+}
