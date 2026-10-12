@@ -93,3 +93,10 @@ it("keeps play working if SDK initialization fails", async () => {
   expect(() => trackView("home")).not.toThrow();
   expect(rum.startView).not.toHaveBeenCalled();
 });
+
+it("labels staging telemetry separately from production", async () => {
+  vi.stubEnv("VITE_DATADOG_ENV", "staging");
+  const { startMonitoring } = await import("../src/services/monitoring");
+  startMonitoring();
+  expect(rum.init.mock.calls[0][0].env).toBe("staging");
+});

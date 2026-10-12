@@ -21,7 +21,7 @@ if not AVATAR_CATALOG.exists():
     AVATAR_CATALOG = Path(__file__).resolve().parents[1] / "shared" / "profile-avatars.json"
 AVATARS = set(json.loads(AVATAR_CATALOG.read_text()))
 
-import boto3
+import dynamodb
 from botocore.exceptions import ClientError
 
 
@@ -31,7 +31,7 @@ class Problem(Exception):
 
 
 def table():
-    return boto3.resource("dynamodb").Table(os.environ["COMMUNITY_TABLE"])
+    return dynamodb.Table(os.environ["COMMUNITY_TABLE"])
 
 
 def response(status, body):
@@ -45,6 +45,26 @@ def key(owner, kind):
 def get(owner, kind):
     item = table().get_item(Key=key(owner, kind), ConsistentRead=True).get("Item")
     return json.loads(item["dataJson"]) if item else None
+
+
+def batch_get(addresses):
+    """Strongly consistent community lookups, with bounded partial-result retries."""
+    addresses = list(dict.fromkeys(addresses))
+    if not addresses:
+        return {}
+    name = os.environ["COMMUNITY_TABLE"]
+    pending = {name: {"Keys": [encoded(key(*address)) for address in addresses], "ConsistentRead": True}}
+    result = {}
+    for attempt in range(4):
+        page = dynamodb.client.batch_get_item(RequestItems=pending)
+        for item in page.get("Responses", {}).get(name, []):
+            result[(item["pk"]["S"], item["sk"]["S"])] = json.loads(item["dataJson"]["S"])
+        pending = page.get("UnprocessedKeys", {})
+        if not pending:
+            return result
+        if attempt < 3:
+            time.sleep(0.05 * 2 ** attempt)
+    raise Problem(503, "Couldn’t load friend activity. Please try again.")
 
 
 def packed(owner, kind, value):
@@ -69,7 +89,7 @@ def delete(owner, kind):
 
 def transact(operations):
     try:
-        boto3.client("dynamodb").transact_write_items(TransactItems=operations)
+        dynamodb.client.transact_write_items(TransactItems=operations)
     except ClientError as error:
         if error.response["Error"]["Code"] == "TransactionCanceledException":
             raise Problem(409, "This changed in another session, or that handle is taken. Refresh and try again.") from None
@@ -264,7 +284,7 @@ def friend_action(subject, other, action):
 
 
 def saved_records(subject):
-    db = boto3.resource("dynamodb").Table(os.environ["SAVES_TABLE"])
+    db = dynamodb.Table(os.environ["SAVES_TABLE"])
     values, cursor = {}, None
     # Match private save register semantics; never expose registers or answers.
     for _ in range(10):
@@ -288,8 +308,8 @@ def saved_values(subject, namespace, field=None):
     return [json.loads(item["valueJson"]) for item in saved_records(subject) if item["namespace"] == namespace and (not field or item["field"] == field)]
 
 
-def progress_summary(subject, fresh=False):
-    cached = get("user#" + subject, "activity-v1")
+def progress_summary(subject, fresh=False, cached_records=None):
+    cached = None if fresh else (get("user#" + subject, "activity-v1") if cached_records is None else cached_records.get(("user#" + subject, "activity-v1")))
     now = int(time.time())
     if not fresh and cached and 0 <= now - cached.get("updatedAt", 0) < 60:
         return cached
@@ -371,7 +391,9 @@ def progress_summary(subject, fresh=False):
         complete = (type(length) is int and len(answers) >= length) or (length == "all" and not session.get("remaining") and bool(answers) and isinstance(answers[-1].get("prompt"), dict) and isinstance(session.get("prompt"), dict) and answers[-1]["prompt"].get("ordinal") == session["prompt"].get("ordinal"))
         completed_studies += session.get("phase") == "summary" and complete
     value = {"updatedAt": now, "activity": activity, "studySessions": completed_studies, "studyQuestions": questions, "studyAccuracy": int(100 * correct / questions + 0.5) if questions else None}
-    table().put_item(Item=packed("user#" + subject, "activity-v1", value))
+    if not fresh:
+        # Fresh viewer reads only gate disclosure; avoid rewriting this cache on every GET.
+        table().put_item(Item=packed("user#" + subject, "activity-v1", value))
     return value
 
 
@@ -408,11 +430,18 @@ def shared_activity(summary, viewer, today):
 
 
 def friend_activity(subject, other, viewer, today):
-    require_friend(subject, other)
-    player = public_profile(other)
-    if not player:
+    records = batch_get([(pair(subject, other), "relation"), ("user#" + other, "profile"), ("user#" + other, "activity-v1")])
+    if (records.get((pair(subject, other), "relation")) or {}).get("status") != "accepted":
+        raise Problem(403, "This feature is available to accepted friends.")
+    profile = records.get(("user#" + other, "profile"))
+    if not profile:
         raise Problem(404, "This profile is unavailable.")
-    value = {"player": player, **shared_activity(progress_summary(other), viewer, today)}
+    player = {"id": other, **{k: profile[k] for k in ("displayName", "handle", "avatar", "favoriteRegion", "bio")}}
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        summary = executor.submit(progress_summary, other, cached_records=records)
+        if viewer is None:
+            viewer = progress_summary(subject, fresh=True)
+        value = {"player": player, **shared_activity(summary.result(), viewer, today)}
     require_friend(subject, other)
     return value
 
@@ -424,17 +453,29 @@ def activity_page(subject, params):
         raise Problem(400, "Invalid friends cursor.")
     accepted = sorted((r for r in rows("user#" + subject, "friend#") if r["status"] == "accepted"), key=lambda r: r["id"])
     selected = [r for r in accepted if r["id"] > cursor][:24]
-    viewer = progress_summary(subject, fresh=True)
+    addresses = [(owner, kind) for entry in selected for owner, kind in (
+        (pair(subject, entry["id"]), "relation"),
+        ("user#" + entry["id"], "profile"),
+        ("user#" + entry["id"], "activity-v1"),
+    )]
+    records = batch_get(addresses)
     def read_entry(entry):
-        try:
-            return friend_activity(subject, entry["id"], viewer, today)
-        except Problem as error:
-            if error.status not in (403, 404):
-                raise
+        other = entry["id"]
+        relation = records.get((pair(subject, other), "relation"))
+        profile = records.get(("user#" + other, "profile"))
+        if not relation or relation["status"] != "accepted" or not profile:
             return None
-    # Keep network fan-out bounded rather than making one call per friend in the browser.
+        player = {"id": other, **{k: profile[k] for k in ("displayName", "handle", "avatar", "favoriteRegion", "bio")}}
+        return {"player": player, "summary": progress_summary(other, cached_records=records)}
+    # Viewer and friend save Queries share the pooled client, with at most four workers.
     with ThreadPoolExecutor(max_workers=4) as executor:
-        entries = [entry for entry in executor.map(read_entry, selected) if entry]
+        viewer_future = executor.submit(progress_summary, subject, fresh=True)
+        summaries = [entry for entry in executor.map(read_entry, selected) if entry]
+        viewer = viewer_future.result()
+    # Recheck access after reading private saves so a concurrent block stays private.
+    relations = batch_get([(pair(subject, entry["player"]["id"]), "relation") for entry in summaries])
+    entries = [{"player": entry["player"], **shared_activity(entry["summary"], viewer, today)} for entry in summaries
+               if (relations.get((pair(subject, entry["player"]["id"]), "relation")) or {}).get("status") == "accepted"]
     result = {"date": today, "you": shared_activity(viewer, viewer, today), "friends": entries}
     if selected and any(r["id"] > selected[-1]["id"] for r in accepted):
         result["cursor"] = selected[-1]["id"]
@@ -518,8 +559,7 @@ def handle(event):
             value = activity_page(subject, event.get("queryStringParameters"))
         elif route == "GET /account/friends/{id}/profile":
             other = params.get("id")
-            require_friend(subject, other)
-            value = friend_activity(subject, other, progress_summary(subject, fresh=True), activity_date(event.get("queryStringParameters")))
+            value = friend_activity(subject, other, None, activity_date(event.get("queryStringParameters")))
         elif route == "GET /account/players/{handle}":
             handle = string(params.get("handle"), 24, True).lower()
             reservation = get("handle#" + handle, "owner")

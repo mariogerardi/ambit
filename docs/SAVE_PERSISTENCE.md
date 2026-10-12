@@ -96,8 +96,10 @@ Local registers act as the durable upload queue. Sync pulls all cloud pages
 before uploading pending revisions, restores a new device before automatically
 opening a Journey, merges against React's pre-event baseline,
 and acknowledges only the revisions actually uploaded. Writes during requests
-remain pending. Sync debounces changes, checks every minute while visible, and
-retries on focus/reconnection with bounded backoff after failures. Signing out or
+remain pending. Sync debounces uploads, reuses cloud downloads for five minutes, and checks every
+five minutes while visible. Focus uses the same freshness window; reconnect and
+manual retry force a fresh pull. Failures retry with bounded backoff and a fresh
+pull before sending pending revisions. Signing out or
 switching accounts aborts the old client's requests. Expired credentials can be
 renewed; a temporary renewal failure keeps the account cache selected.
 

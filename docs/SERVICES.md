@@ -101,8 +101,10 @@ help records, clues, eliminated choices, or other answer information.
 24 accepted friends with a continuation cursor. `GET /account/friends/{id}/profile`
 returns one accepted friend's public profile and aggregate activity. Summary reads
 use a 60-second cache in the community table, invalidated by daily and archived
-Study sync. Viewer completion is read fresh for score disclosure. Server fan-out
-is bounded to four concurrent reads; historical comparisons expose at most 30
+Study sync. Viewer completion is read fresh for score disclosure without reading
+or rewriting the summary cache. Profiles, caches and relationships are read in strongly
+consistent batches, with a second relationship check before returning scores.
+Server fan-out is bounded to four concurrent reads; historical comparisons expose at most 30
 results. Projection reads are bounded to 1,000 save registers and fail explicitly
 rather than show incomplete totals when that bound is exceeded.
 
@@ -129,6 +131,43 @@ scope. Writes additionally validate the browser origin, JSON type, payload size,
 field bounds and Study settings. Identity comes from the validated `sub`, never
 a submitted owner ID. Conditional DynamoDB transactions protect reciprocal
 inboxes and concurrent profile/challenge updates.
+
+## Local API isolation
+
+Development uses `http://127.0.0.1:3001` until a staging API is configured. The
+staging stack has its own Cognito user pool, API, tables, login domain and logs;
+production tokens and data are not reused. Its API allows only localhost and
+127.0.0.1 on port 5173. Production API CORS and write-origin checks allow only
+`https://playambit.com`.
+
+Create or update staging without waiting:
+
+```sh
+python3 scripts/deploy-backend.py --profile personal --environment staging --no-wait --write-dev-env
+```
+
+The command prints a CloudFormation status link. After creation finishes, export
+its endpoints and configure local development without deploying again:
+
+```sh
+python3 scripts/deploy-backend.py --profile personal --environment staging --refresh-config --write-dev-env
+npm run dev
+```
+
+This writes ignored `deployment/services.staging.json` and
+`.env.development.local`, preserving unrelated settings. The development file
+contains `VITE_API_URL`, `VITE_AUTH_AUTHORITY`, `VITE_AUTH_CLIENT_ID`,
+`VITE_AUTH_LOGIN_URL` and `VITE_DATADOG_ENV=staging`. Restart Vite after exporting.
+Production builds ignore this development file and keep `deployment/services.json`.
+A general `.env.local` override still applies to builds, so put staging settings
+only in `.env.development.local`.
+
+Create a separate account using **Create account** in the local app and verify
+its email. The verified owner receives staging admin access through the same
+confirmation hook. Existing production accounts, profiles and saves are separate.
+Staging Datadog collection is off unless explicitly configured with the existing
+monitoring flags; it does not copy the production API key. Resource retention and
+Cognito deletion protection apply to staging too.
 
 ## Login branding and local review
 
@@ -185,7 +224,11 @@ optional. Reports pause Study auto-advance while the dialog is open.
 
 Reports use stable UUIDs across retries. Failed/slow requests keep the draft
 available for retry; closing the dialog discards it. The request timeout is 15
-seconds. CORS allows all browser tracing headers, including Datadog's default
+seconds. Feedback and progress-sync failures include route, method, HTTP status
+(0 if no response), failure type, elapsed milliseconds, retry count and online
+state in RUM. Diagnostics exclude request bodies, credentials and query strings;
+account-switch cancellations do not report a failure. CORS allows all browser
+tracing headers, including Datadog's default
 `baggage` header. There is no persistent offline submission queue. The API limits
 submissions to ten per source IP per hour using a salted hash, restricts browser
 origins, and validates context/body limits. DynamoDB records expire after 180
@@ -223,8 +266,13 @@ have a `VITE_` prefix or appear in browser code.
 GitHub CI reads repository variables `VITE_DATADOG_APPLICATION_ID` and
 `VITE_DATADOG_CLIENT_TOKEN` for production builds; it sets the site itself.
 Local `.env.local` values are not available to CI. Configure those public
-variables before publishing an instrumented release. The private API key belongs
-in AWS Secrets Manager, not GitHub's browser-build configuration.
+variables before publishing an instrumented release. The backend API key belongs
+in AWS Secrets Manager. For source maps, configure a
+private GitHub Actions `DATADOG_API_KEY` secret. Main-branch CI uploads hidden maps
+with `service:ambit-web`, the build's Git SHA, and the `https://playambit.com` URL
+prefix, then removes maps from the site artifact. The deployment packager also
+excludes maps for local builds. The upload step skips with a notice when the secret
+is absent; the key is never a Vite variable or bundled in browser code.
 
 ## Backend deployment
 
@@ -240,7 +288,8 @@ python3 scripts/deploy-backend.py --profile personal --no-wait
 ```
 
 This starts the update and preserves the existing public endpoints. It does not
-confirm successful deployment. The first deployment must wait for its endpoints.
+confirm successful deployment. A first deployment can also start without waiting; use `--refresh-config` after
+it finishes to export its endpoints.
 
 Run offline checks before deploying:
 
@@ -259,7 +308,14 @@ python3 scripts/deploy-backend.py --profile personal --with-datadog
 The script stores the private key in `ambit/production/datadog-api-key` in Secrets
 Manager using a private temporary file. It passes the secret ARN to the stack;
 the Lambda role can read that secret, and Datadog's Python/extension layers collect
-API logs and traces. Lambda payload capture is disabled. The key is not printed,
+API logs and traces. The API Lambda uses 1024 MB and one shared low-level DynamoDB
+client with TCP
+keep-alive and eight pooled connections. AWS parameter/payload tagging and Lambda
+payload capture are disabled. Payload tagging is disabled by default in ddtrace;
+these explicit settings do not guarantee removal of its JSONPath import cost.
+Provisioned concurrency is not enabled. Compare warm spans and initialization
+durations after deployment before claiming a latency improvement. The key is not
+printed,
 placed in command arguments, or written to public client configuration.
 
 To use an existing secret, supply `--datadog-secret-arn ARN`. A deployment without

@@ -11,12 +11,12 @@ import uuid
 import saves
 import community
 import journey_schedule
-import boto3
+import dynamodb
 from botocore.exceptions import ClientError
 
 
 def table():
-    return boto3.resource("dynamodb").Table(os.environ["FEEDBACK_TABLE"])
+    return dynamodb.Table(os.environ["FEEDBACK_TABLE"])
 
 
 def response(status, body):
@@ -174,4 +174,4 @@ def handler(event, context):
         print(json.dumps({"event": "request_failed", "error_type": type(error).__name__, "request_id": context.aws_request_id}))
         return response(500, {"error": "Couldn't complete the request. Please try again."})
     finally:
-        print(json.dumps({"event": "api_request", "service": "ambit-api", "env": "production", "version": os.environ.get("RELEASE", "unknown"), "route": route, "status": status, "duration_ms": round((time.monotonic() - started) * 1000, 1), "request_id": context.aws_request_id}))
+        print(json.dumps({"event": "api_request", "service": "ambit-api", "env": os.environ.get("APP_ENV", "production"), "version": os.environ.get("RELEASE", "unknown"), "route": route, "status": status, "duration_ms": round((time.monotonic() - started) * 1000, 1), "request_id": context.aws_request_id}))

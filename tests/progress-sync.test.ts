@@ -308,3 +308,101 @@ it("syncs the distractor preference and a city-answer Study session", async () =
     settings,
   });
 });
+
+it("uploads local edits without repeating cloud downloads and dedupes focus wakes", async () => {
+  vi.useFakeTimers();
+  const remote = cloud(),
+    a = device("cached", remote);
+  a.sync.start();
+  await vi.advanceTimersByTimeAsync(0);
+  const pulls = () =>
+    remote.calls.filter((call) => !call.body && !call.cursor).length;
+  expect(pulls()).toBe(1);
+  a.study.save({ ...emptyStudy, settings: { ...defaultSettings, length: 50 } });
+  await vi.advanceTimersByTimeAsync(1200);
+  expect(pulls()).toBe(1);
+  expect(remote.calls.some((call) => call.body)).toBe(true);
+  dispatchEvent(new Event("focus"));
+  dispatchEvent(new Event("focus"));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(pulls()).toBe(1);
+  await vi.advanceTimersByTimeAsync(300000);
+  expect(pulls()).toBe(2);
+  a.sync.schedule(0);
+  await vi.advanceTimersByTimeAsync(0);
+  expect(pulls()).toBe(3);
+});
+
+it("forces a cloud restore on reconnect even while a downloaded page is cached", async () => {
+  vi.useFakeTimers();
+  const remote = cloud(),
+    a = device("reconnect", remote);
+  a.sync.start();
+  await vi.advanceTimersByTimeAsync(0);
+  remote.records.set("remote", {
+    namespace: "study",
+    version: 2,
+    field: "settings.length",
+    writer: "other",
+    clock: 100,
+    value: 50,
+  });
+  dispatchEvent(new Event("online"));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(a.study.load().settings.length).toBe(50);
+  expect(
+    remote.calls.filter((call) => !call.body && !call.cursor),
+  ).toHaveLength(2);
+});
+
+it("retains HTTP diagnostics without including tokens, cursors or save values", async () => {
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response("private backend body", { status: 503 }),
+  );
+  try {
+    await progressRequest(
+      "private-token",
+      new AbortController().signal,
+      { entries: [{ value: "private-save" }] },
+      "private-cursor",
+    );
+    throw new Error("Expected failure");
+  } catch (error) {
+    expect(error).toMatchObject({
+      context: {
+        route: "/account/saves",
+        method: "POST",
+        httpStatus: 503,
+        errorType: "http",
+        attemptCount: 1,
+        online: true,
+      },
+    });
+    expect(JSON.stringify(error)).not.toContain("private");
+  }
+});
+
+it("keeps network and timeout diagnostics distinct from HTTP failures", async () => {
+  vi.spyOn(globalThis, "fetch").mockRejectedValue(
+    new TypeError("private-network-detail"),
+  );
+  await expect(
+    progressRequest("token", new AbortController().signal),
+  ).rejects.toMatchObject({ context: { httpStatus: 0, errorType: "network" } });
+  const timeout = new AbortController();
+  timeout.abort(new DOMException("Timed out", "TimeoutError"));
+  vi.spyOn(AbortSignal, "timeout").mockReturnValue(timeout.signal);
+  vi.mocked(fetch).mockRejectedValue(timeout.signal.reason);
+  await expect(
+    progressRequest("token", new AbortController().signal),
+  ).rejects.toMatchObject({ context: { httpStatus: 0, errorType: "timeout" } });
+});
+
+it("keeps malformed response contents out of player-facing sync errors", async () => {
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response("private invalid json"),
+  );
+  await expect(
+    progressRequest("token", new AbortController().signal),
+  ).rejects.toThrow("Couldn’t read cloud progress");
+});

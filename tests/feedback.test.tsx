@@ -165,3 +165,54 @@ it("times out slow requests with a retry message", async () => {
   await vi.advanceTimersByTimeAsync(15000);
   await assertion;
 });
+
+it("reports safe HTTP and network diagnostics and ignores cancelled requests", async () => {
+  const monitoring = await import("../src/services/monitoring");
+  const report = vi.spyOn(monitoring, "reportFailure");
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(new Response("private response", { status: 429 })),
+  );
+  await expect(
+    feedbackApi("/feedback?cursor=private-cursor", "private-token", {
+      message: "private feedback",
+    }),
+  ).rejects.toThrow("several reports");
+  expect(report).toHaveBeenLastCalledWith(
+    "feedback request",
+    expect.objectContaining({
+      httpStatus: 429,
+      errorType: "http",
+      method: "POST",
+      route: "/feedback",
+      attemptCount: 1,
+    }),
+  );
+  expect(JSON.stringify(report.mock.calls)).not.toContain("private");
+  vi.mocked(fetch).mockRejectedValue(new TypeError("private error"));
+  await expect(feedbackApi("/feedback")).rejects.toThrow("Couldn’t connect");
+  expect(report).toHaveBeenLastCalledWith(
+    "feedback request",
+    expect.objectContaining({ httpStatus: 0, errorType: "network" }),
+  );
+  report.mockClear();
+  const controller = new AbortController();
+  controller.abort();
+  await expect(
+    feedbackApi("/feedback", undefined, undefined, "POST", controller.signal),
+  ).rejects.toThrow();
+  expect(report).not.toHaveBeenCalled();
+  report.mockRestore();
+});
+
+it("keeps malformed response contents out of player-facing feedback errors", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response("private invalid json")),
+  );
+  await expect(feedbackApi("/feedback")).rejects.toThrow(
+    "Couldn’t complete the request",
+  );
+});

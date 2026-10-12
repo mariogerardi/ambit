@@ -86,7 +86,7 @@ def main():
             for path in sorted(directory.rglob("*")):
                 if path.is_symlink():
                     parser.error("Deployment artifacts must not contain symlinks.")
-                if path.is_file():
+                if path.is_file() and path.suffix != ".map":
                     zipped.write(path, path.relative_to(directory))
         deployment = aws("create-deployment")
         job_id = deployment["jobId"]

@@ -18,6 +18,9 @@ class ClientError(Exception):
 
 # Lambda supplies boto3. Offline tests replace only the external AWS boundary.
 sys.modules["boto3"] = MagicMock()
+sys.modules["boto3.dynamodb"] = types.ModuleType("boto3.dynamodb")
+sys.modules["boto3.dynamodb.types"] = MagicMock()
+sys.modules["botocore.config"] = MagicMock()
 exceptions = types.ModuleType("botocore.exceptions")
 exceptions.ClientError = ClientError
 sys.modules["botocore"] = types.ModuleType("botocore")
@@ -154,6 +157,21 @@ class ServicesTests(unittest.TestCase):
         self.assertNotIn("DD_API_KEY", variables)
         self.assertEqual(variables["DD_CAPTURE_LAMBDA_PAYLOAD"], "false")
 
+    def test_production_api_excludes_local_origins_and_uses_more_cpu_without_payload_capture(self):
+        resources = template()["Resources"]
+        self.assertEqual(resources["Api"]["Properties"]["CorsConfiguration"]["AllowOrigins"], ["https://playambit.com"])
+        self.assertEqual(resources["ApiFunction"]["Properties"]["MemorySize"], 1024)
+        env = resources["ApiFunction"]["Properties"]["Environment"]["Variables"]
+        self.assertEqual(env["DD_TRACE_CLOUD_REQUEST_PAYLOAD_TAGGING"], "")
+        self.assertEqual(env["DD_TRACE_CLOUD_RESPONSE_PAYLOAD_TAGGING"], "")
+        for route in ("ReviewRoute", "UpdateRoute", "WriteJourneyScheduleRoute"):
+            self.assertEqual(resources[route]["Properties"]["AuthorizationType"], "JWT")
+        event = self.event("PATCH /admin/journeys/schedule")
+        self.assertEqual(handler.handler(event, types.SimpleNamespace(aws_request_id="test"))["statusCode"], 403)
+        event = self.event()
+        event["headers"]["origin"] = "http://localhost:5173"
+        self.assertEqual(handler.submit(event)["statusCode"], 403)
+
     def test_managed_login_is_branded_before_switching_and_preserves_auth_flow(self):
         import xml.etree.ElementTree as ET
         resources = template()["Resources"]
@@ -213,14 +231,14 @@ class SaveTests(unittest.TestCase):
         self.db.put_item.assert_not_called()
 
     def test_progress_sync_invalidates_only_the_callers_social_summary(self):
-        with patch.dict(os.environ, {"COMMUNITY_TABLE": "community"}), patch.object(self.saves.boto3, "resource") as resource:
+        with patch.dict(os.environ, {"COMMUNITY_TABLE": "community"}), patch.object(self.saves.dynamodb, "Table") as resource:
             event = self.event()
             body = json.loads(event["body"])
             body["entries"][0].update(namespace="daily", field="run.today")
             event["body"] = json.dumps(body)
             self.assertEqual(self.saves.handle(event)["statusCode"], 200)
-            resource.return_value.Table.assert_called_with("community")
-            resource.return_value.Table.return_value.delete_item.assert_called_once_with(Key={"pk": "user#player-a", "sk": "activity-v1"})
+            resource.assert_called_with("community")
+            resource.return_value.delete_item.assert_called_once_with(Key={"pk": "user#player-a", "sk": "activity-v1"})
 
     def test_paginated_reads_are_private_and_restore_json_types(self):
         item = {"pk": "user#player-a", **self.saves.validate({"namespace": "daily", "version": 2, "clock": 2, "writer": "a", "field": "draft", "value": {"n": 1.25, "b": True}})}

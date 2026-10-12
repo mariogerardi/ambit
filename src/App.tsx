@@ -1,3 +1,4 @@
+import { supportsWebGL } from "./globe/support";
 import { useProgressSync } from "./app/useProgressSync";
 import {
   Component,
@@ -292,7 +293,7 @@ export function App() {
     mode === "explore" ? explore : unrestricted ? defaultLayers : undefined;
   const [motion, setMotion] = useState(mode === "home"),
     [ready, setReady] = useState(false),
-    [webgl, setWebgl] = useState(true);
+    [webgl, setWebgl] = useState(supportsWebGL);
   const [globePresented, setGlobePresented] = useState(false);
   useEffect(() => {
     if (!ready || !regions.length || globePresented) return;
@@ -1702,7 +1703,7 @@ export function App() {
       data-panel-only={panelOnly || undefined}
     >
       <div className="experience-glow" aria-hidden="true" />
-      {(mode === "account" || mode === "admin") && (
+      {(!webgl || mode === "account" || mode === "admin") && (
         <div className="account-earth" aria-hidden="true" />
       )}
       <div

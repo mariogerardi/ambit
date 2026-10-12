@@ -14,3 +14,6 @@ artifacts/
 # Python backend/tooling caches
 __pycache__/
 *.pyc
+
+# Generated staging endpoints; local development uses .env.development.local
+deployment/services.staging.json

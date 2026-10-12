@@ -42,6 +42,19 @@ jobs:
           VITE_DATADOG_CLIENT_TOKEN: ${{ vars.VITE_DATADOG_CLIENT_TOKEN }}
           VITE_DATADOG_SITE: datadoghq.com
         run: npm run build
+      - name: Upload production RUM source maps
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+        run: |
+          if [ -n "$DATADOG_API_KEY" ]; then
+            npx --yes @datadog/datadog-ci@5.25.0 sourcemaps upload dist --service ambit-web --release-version "$GITHUB_SHA" --minified-path-prefix https://playambit.com
+          else
+            echo "::notice::Set DATADOG_API_KEY to enable RUM source map uploads."
+          fi
+      - name: Remove private source maps from the site artifact
+        run: find dist -type f -name '*.map' -delete
       - name: Check dependency advisories
         run: npm audit --audit-level=high
       - name: Retain verified production artifact

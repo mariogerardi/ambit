@@ -24,6 +24,7 @@ import type {
   PhysicalFeature,
 } from "../src/geography/types";
 import { createGlobeRegionPreparer } from "../src/globe/geometry";
+import { supportsWebGL } from "../src/globe/support";
 import { App, PlayerWorkspace } from "../src/App";
 import { createStudySave, createDailySave } from "../src/app/progressSaves";
 const savedStudy = () => createStudySave().load();
@@ -87,6 +88,7 @@ const probe = vi.hoisted(() => ({
   tourCancellations: 0,
   currentView: { lat: 14, lng: 24, altitude: 1.65 } as Focus,
 }));
+vi.mock("../src/globe/support", () => ({ supportsWebGL: vi.fn(() => true) }));
 vi.mock("../src/globe/GlobeView", () => ({
   GlobeView: forwardRef<GlobeHandle, GlobeProps>((props, ref) => {
     const prepare = useMemo(createGlobeRegionPreparer, []);
@@ -216,6 +218,7 @@ let panelObservers: {
   disconnected: boolean;
 }[] = [];
 beforeEach(() => {
+  vi.mocked(supportsWebGL).mockReturnValue(true);
   clearProfileCache();
   scheduleState = { revision: 0, assignments: {} };
   authProbe.admin = true;
@@ -2667,4 +2670,16 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.states["wurl:GNQ"]).toBe("correct");
     expect(host.querySelector("canvas")).toBe(canvas);
   });
+});
+
+it("shows a static globe and written controls without mounting WebGL when unsupported", async () => {
+  vi.mocked(supportsWebGL).mockReturnValue(false);
+  await mount();
+  expect(probe.mounts).toBe(0);
+  expect(host.querySelector(".account-earth")).not.toBeNull();
+  expect(host.textContent).toContain("The globe is unavailable");
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  await click("Study");
+  expect(probe.mounts).toBe(0);
+  expect(host.textContent).toContain("Study");
 });

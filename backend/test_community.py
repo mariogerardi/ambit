@@ -29,6 +29,15 @@ class Database:
             return {"Items": [s for s in self.saves if s["pk"] == values[":owner"]]}
         return {"Items": [copy.deepcopy(v) for (pk, sk), v in sorted(self.items.items(), reverse=True) if pk == values[":owner"] and sk.startswith(values[":prefix"])][:kwargs["Limit"]]}
 
+    def batch_get_item(self, RequestItems):
+        name, request = next(iter(RequestItems.items()))
+        items = []
+        for address in request["Keys"]:
+            item = self.items.get((address["pk"]["S"], address["sk"]["S"]))
+            if item:
+                items.append(community.encoded(copy.deepcopy(item)))
+        return {"Responses": {name: items}}
+
     def transact_write_items(self, TransactItems):
         pending = copy.deepcopy(self.items)
         for operation in TransactItems:
@@ -54,9 +63,9 @@ class CommunityTests(unittest.TestCase):
         self.db = Database()
         self.env = patch.dict(os.environ, {"COMMUNITY_TABLE": "community", "SAVES_TABLE": "saves", "ALLOWED_ORIGINS": "https://playambit.com"})
         self.env.start()
-        self.resource = patch.object(community.boto3, "resource")
-        self.resource.start().return_value.Table.return_value = self.db
-        self.client = patch.object(community.boto3, "client", return_value=self.db)
+        self.resource = patch.object(community.dynamodb, "Table")
+        self.resource.start().return_value = self.db
+        self.client = patch.object(community.dynamodb, "client", self.db)
         self.client.start()
         self.addCleanup(self.env.stop)
         self.addCleanup(self.resource.stop)
@@ -264,6 +273,37 @@ class CommunityTests(unittest.TestCase):
         self.assertEqual(len(second["friends"]), 2)
         self.assertNotIn("cursor", second)
         self.assertEqual(len({entry["player"]["id"] for entry in first["friends"] + second["friends"]}), 26)
+
+    def test_activity_batches_lookups_and_rechecks_a_concurrent_block(self):
+        self.friends()
+        self.db.saves = [self.daily_record("a"), self.daily_record("b")]
+        with patch.object(self.db, "batch_get_item", wraps=self.db.batch_get_item) as batch, patch.object(self.db, "get_item", wraps=self.db.get_item) as get, patch.object(self.db, "put_item", wraps=self.db.put_item) as put:
+            status, page = self.call("GET /account/friends/activity", query={"date": "2026-10-10"})
+            self.assertEqual(status, 200)
+            self.assertEqual(len(page["friends"]), 1)
+            self.assertEqual(batch.call_count, 2)
+            get.assert_not_called()
+            self.assertEqual(put.call_count, 1)  # Friend cache only; fresh viewer has no cache write.
+            def read_then_block(subject):
+                records = original(subject)
+                if subject == "a":
+                    self.db.items[(community.pair("a", "b"), "relation")] = community.packed(community.pair("a", "b"), "relation", {"status": "blocked", "blockedBy": "b"})
+                return records
+            original = community.saved_records
+            with patch.object(community, "saved_records", side_effect=read_then_block):
+                status, page = self.call("GET /account/friends/activity", query={"date": "2026-10-10"})
+            self.assertEqual(status, 200)
+            self.assertEqual(page["friends"], [])
+
+    def test_partial_batches_retry_unprocessed_keys_and_fail_instead_of_omitting_friends(self):
+        pending = {"community": {"Keys": [community.encoded(community.key("user#b", "profile"))], "ConsistentRead": True}}
+        item = community.encoded(community.packed("user#b", "profile", {"handle": "bob"}))
+        with patch.object(community.dynamodb.client, "batch_get_item", side_effect=[{"UnprocessedKeys": pending}, {"Responses": {"community": [item]}}]) as batch, patch.object(community.time, "sleep"):
+            self.assertEqual(community.batch_get([("user#b", "profile")]), {("user#b", "profile"): {"handle": "bob"}})
+            self.assertEqual(batch.call_args.kwargs["RequestItems"], pending)
+        with patch.object(community.dynamodb.client, "batch_get_item", return_value={"UnprocessedKeys": pending}), patch.object(community.time, "sleep"), self.assertRaises(community.Problem) as raised:
+            community.batch_get([("user#b", "profile")])
+        self.assertEqual(raised.exception.status, 503)
 
     def test_challenge_participation_and_results_use_synced_sessions_not_caller_scores(self):
         challenge = self.challenge()

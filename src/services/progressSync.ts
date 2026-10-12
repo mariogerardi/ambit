@@ -1,4 +1,5 @@
 import { serviceConfig } from "./config";
+import { RequestFailure, failureType } from "./requestFailure";
 import { reportFailure } from "./monitoring";
 import type { SaveEntry } from "../app/recordSave";
 
@@ -24,48 +25,80 @@ export async function progressRequest<T>(
 ): Promise<T> {
   const timeout = AbortSignal.timeout(15000);
   const requestSignal = AbortSignal.any([signal, timeout]);
-  for (let attempt = 0; ; attempt++) {
-    const response = await fetch(
-      `${serviceConfig.apiUrl}/account/saves${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
-      {
-        method: body ? "POST" : "GET",
-        signal: requestSignal,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          ...(body ? { "Content-Type": "application/json" } : {}),
+  const started = performance.now();
+  let httpStatus = 0;
+  let attempt = 0;
+  try {
+    for (attempt = 0; ; attempt++) {
+      httpStatus = 0;
+      const response = await fetch(
+        `${serviceConfig.apiUrl}/account/saves${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
+        {
+          method: body ? "POST" : "GET",
+          signal: requestSignal,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            ...(body ? { "Content-Type": "application/json" } : {}),
+          },
+          ...(body ? { body: JSON.stringify(body) } : {}),
         },
-        ...(body ? { body: JSON.stringify(body) } : {}),
+      );
+      httpStatus = response.status;
+      if (response.status === 429 && attempt < 3) {
+        await new Promise<void>((resolve, reject) => {
+          const abort = () => {
+            clearTimeout(timer);
+            reject(requestSignal.reason);
+          };
+          const timer = setTimeout(
+            () => {
+              requestSignal.removeEventListener("abort", abort);
+              resolve();
+            },
+            1000 * 2 ** attempt,
+          );
+          requestSignal.addEventListener("abort", abort, { once: true });
+          if (requestSignal.aborted) abort();
+        });
+        continue;
+      }
+      if (!response.ok)
+        throw new Error(
+          response.status === 401
+            ? "Please sign in again to sync progress."
+            : "Couldn’t sync progress. Please try again.",
+        );
+      return (await response.json()) as T;
+    }
+  } catch (error) {
+    if (signal.aborted) throw error;
+    throw new RequestFailure(
+      httpStatus === 401
+        ? "Please sign in again to sync progress."
+        : httpStatus >= 400
+          ? "Couldn’t sync progress. Please try again."
+          : error instanceof TypeError || error instanceof DOMException
+            ? "Couldn’t connect. Progress is saved on this device; syncing will retry."
+            : "Couldn’t read cloud progress. Please try again.",
+      {
+        route: "/account/saves",
+        method: body ? "POST" : "GET",
+        httpStatus,
+        errorType: timeout.aborted
+          ? "timeout"
+          : httpStatus >= 400
+            ? "http"
+            : failureType(error),
+        elapsedMs: Math.round(performance.now() - started),
+        attemptCount: attempt + 1,
+        online: navigator.onLine,
       },
     );
-    if (response.status === 429 && attempt < 3) {
-      await new Promise<void>((resolve, reject) => {
-        const abort = () => {
-          clearTimeout(timer);
-          reject(requestSignal.reason);
-        };
-        const timer = setTimeout(
-          () => {
-            requestSignal.removeEventListener("abort", abort);
-            resolve();
-          },
-          1000 * 2 ** attempt,
-        );
-        requestSignal.addEventListener("abort", abort, { once: true });
-        if (requestSignal.aborted) abort();
-      });
-      continue;
-    }
-    if (!response.ok)
-      throw new Error(
-        response.status === 401
-          ? "Please sign in again to sync progress."
-          : "Couldn’t sync progress. Please try again.",
-      );
-    return response.json() as Promise<T>;
   }
 }
 
-/** Local registers are the durable outbox. Pull before pushing, and acknowledge
+/** Local registers are the durable outbox. Restore before pushing, reuse recent
+ * pulls for local edits, and acknowledge
  * only the exact revisions sent, so writes during a request remain pending. */
 export class ProgressSync {
   private controller = new AbortController();
@@ -75,6 +108,8 @@ export class ProgressSync {
   private running = false;
   private dirty = false;
   private failures = 0;
+  private lastPull = -Infinity;
+  private pullRequested = true;
   constructor(
     private stores: ProgressStores,
     private accessToken: () => Promise<string | undefined>,
@@ -96,18 +131,19 @@ export class ProgressSync {
       !Object.values(this.stores).some((store) => event.detail === store.prefix)
     )
       return;
-    this.schedule();
+    this.schedule(1200, false);
   };
   private wake = () => {
-    if (document.visibilityState !== "hidden") this.schedule(0);
+    if (document.visibilityState !== "hidden") this.schedule(0, false);
   };
+  private reconnect = () => this.schedule(0);
   start() {
     addEventListener("ambit-save", this.changed);
     addEventListener("storage", this.changed);
-    addEventListener("online", this.wake);
+    addEventListener("online", this.reconnect);
     addEventListener("focus", this.wake);
     document.addEventListener("visibilitychange", this.wake);
-    this.poll = setInterval(this.wake, 60000);
+    this.poll = setInterval(this.wake, 300000);
     this.schedule(0);
   }
   stop() {
@@ -116,11 +152,12 @@ export class ProgressSync {
     clearInterval(this.poll);
     removeEventListener("ambit-save", this.changed);
     removeEventListener("storage", this.changed);
-    removeEventListener("online", this.wake);
+    removeEventListener("online", this.reconnect);
     removeEventListener("focus", this.wake);
     document.removeEventListener("visibilitychange", this.wake);
   }
-  schedule(delay = 1200) {
+  schedule(delay = 1200, pull = true) {
+    this.pullRequested ||= pull;
     if (this.controller.signal.aborted) return;
     this.dirty = true;
     this.status(
@@ -130,7 +167,7 @@ export class ProgressSync {
         : "Offline. Progress is saved on this device and will sync when you reconnect.",
     );
     clearTimeout(this.timer);
-    this.timer = setTimeout(() => void this.flush(), delay);
+    this.timer = setTimeout(() => void this.flush(false), delay);
   }
   private entries(): CloudEntry[] {
     return Object.entries(this.stores).flatMap(([namespace, store]) =>
@@ -143,7 +180,7 @@ export class ProgressSync {
         })),
     );
   }
-  async flush() {
+  async flush(pull = true) {
     if (this.running || this.controller.signal.aborted) return;
     clearTimeout(this.timer);
     this.running = true;
@@ -161,49 +198,57 @@ export class ProgressSync {
       const token = await this.accessToken();
       if (!token) throw new Error("Please sign in again to sync progress.");
       if (signal.aborted) return;
-      const remote: CloudEntry[] = [];
-      let cursor: string | undefined;
-      const cursors = new Set<string>();
-      do {
-        const page = await this.request<{
-          entries: CloudEntry[];
-          cursor?: string;
-        }>(token, signal, undefined, cursor);
-        if (signal.aborted) return;
-        if (
-          !Array.isArray(page.entries) ||
-          page.entries.some(
-            (entry) =>
-              !entry ||
-              !["daily", "study"].includes(entry.namespace) ||
-              entry.version !== 2 ||
-              !Number.isSafeInteger(entry.clock) ||
-              entry.clock < 0 ||
-              typeof entry.field !== "string" ||
-              typeof entry.writer !== "string",
+      if (pull || this.pullRequested || Date.now() - this.lastPull >= 300000) {
+        this.pullRequested = false;
+        const remote: CloudEntry[] = [];
+        let cursor: string | undefined;
+        const cursors = new Set<string>();
+        do {
+          const page = await this.request<{
+            entries: CloudEntry[];
+            cursor?: string;
+          }>(token, signal, undefined, cursor);
+          if (signal.aborted) return;
+          if (
+            !Array.isArray(page.entries) ||
+            page.entries.some(
+              (entry) =>
+                !entry ||
+                !["daily", "study"].includes(entry.namespace) ||
+                entry.version !== 2 ||
+                !Number.isSafeInteger(entry.clock) ||
+                entry.clock < 0 ||
+                typeof entry.field !== "string" ||
+                typeof entry.writer !== "string",
+            )
           )
-        )
-          throw new Error("Couldn’t read cloud progress. Please try again.");
-        remote.push(...page.entries);
-        cursor = page.cursor;
-        if (cursor) {
-          if (typeof cursor !== "string" || cursors.has(cursor))
             throw new Error("Couldn’t read cloud progress. Please try again.");
-          cursors.add(cursor);
+          remote.push(...page.entries);
+          cursor = page.cursor;
+          if (cursor) {
+            if (typeof cursor !== "string" || cursors.has(cursor))
+              throw new Error(
+                "Couldn’t read cloud progress. Please try again.",
+              );
+            cursors.add(cursor);
+          }
+        } while (cursor);
+        for (const namespace of ["daily", "study"] as const) {
+          const store = this.stores[namespace];
+          store.mergeEntries(
+            remote.filter((entry) => entry.namespace === namespace),
+          );
+          dispatchEvent(
+            new CustomEvent("ambit-progress-received", {
+              detail: store.prefix,
+            }),
+          );
         }
-      } while (cursor);
-      for (const namespace of ["daily", "study"] as const) {
-        const store = this.stores[namespace];
-        store.mergeEntries(
-          remote.filter((entry) => entry.namespace === namespace),
-        );
-        dispatchEvent(
-          new CustomEvent("ambit-progress-received", { detail: store.prefix }),
-        );
+        this.restored();
+        for (const entry of remote)
+          this.acknowledged.set(address(entry), entry.clock);
+        this.lastPull = Date.now();
       }
-      this.restored();
-      for (const entry of remote)
-        this.acknowledged.set(address(entry), entry.clock);
       const pending = this.entries().filter(
         (entry) => entry.clock > (this.acknowledged.get(address(entry)) ?? -1),
       );
@@ -243,6 +288,7 @@ export class ProgressSync {
     } catch (error) {
       if (signal.aborted) return;
       this.failures++;
+      this.pullRequested = true;
       this.status(
         navigator.onLine ? "error" : "offline",
         error instanceof TypeError || error instanceof DOMException
@@ -251,14 +297,19 @@ export class ProgressSync {
             ? error.message
             : "Couldn’t sync progress. Please try again.",
       );
-      reportFailure("progress sync");
+      reportFailure(
+        "progress sync",
+        error instanceof RequestFailure
+          ? error.context
+          : { errorType: failureType(error), online: navigator.onLine },
+      );
       this.dirty = true;
     } finally {
       this.running = false;
       if (!signal.aborted && this.dirty) {
         clearTimeout(this.timer);
         this.timer = setTimeout(
-          () => void this.flush(),
+          () => void this.flush(false),
           this.failures
             ? Math.min(60000, 5000 * 2 ** Math.min(this.failures - 1, 4))
             : 1200,

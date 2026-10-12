@@ -27,7 +27,9 @@ export function startMonitoring() {
       clientToken,
       site: import.meta.env.VITE_DATADOG_SITE || "datadoghq.com",
       service: "ambit-web",
-      env: import.meta.env.PROD ? "production" : "development",
+      env:
+        import.meta.env.VITE_DATADOG_ENV ||
+        (import.meta.env.PROD ? "production" : "development"),
       version: appRelease,
       plugins: [reactPlugin()],
       sessionSampleRate: 100,
@@ -80,8 +82,15 @@ export function trackView(name: string) {
     currentView = name;
   }
 }
-export function reportFailure(area: string) {
-  if (enabled) datadogRum.addError(new Error(`Ambit ${area} failed`), { area });
+export function reportFailure(
+  area: string,
+  context: Record<string, string | number | boolean> = {},
+) {
+  if (enabled)
+    datadogRum.addError(new Error(`Ambit ${area} failed`), {
+      area,
+      ...context,
+    });
 }
 export function trackAction(
   name: string,
