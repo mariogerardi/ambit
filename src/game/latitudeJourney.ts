@@ -107,18 +107,22 @@ export const LATITUDE_JOURNEY: Journey = {
         continent: comparison.continent,
         direction: comparison.direction,
       },
-      places: [reference],
-      contextIds: [reference.countryId],
-      focus: comparison.focus,
-      overlays: [
-        {
-          id: `line:${comparison.id}`,
-          type: "parallel",
-          latitude: reference.lat,
-        },
-      ],
       explanation: comparison.explanation,
       source: capitalSource,
+      scenes: {
+        play: {
+          places: [reference],
+          contextIds: [reference.countryId],
+          focus: comparison.focus,
+          overlays: [
+            {
+              id: `line:${comparison.id}`,
+              type: "parallel",
+              latitude: reference.lat,
+            },
+          ],
+        },
+      },
     });
   }),
 };

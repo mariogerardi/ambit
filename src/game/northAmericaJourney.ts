@@ -75,21 +75,26 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         count: 1,
         rule: { type: "region-ids", ids: CANADIAN_TERRITORIES, match: "any" },
         selection: { type: "none" },
-        contextIds: CANADIAN_TERRITORIES,
-        map: {
-          borders: true,
-          hoverFeedback: false,
-          muteOthers: true,
-          revealOnAnswer: true,
-        },
         importedRegions: CANADIAN_SUBDIVISIONS,
-        focus: { lat: 64, lng: -108, altitude: 1.1 },
         explanation:
           "Yukon, Northwest Territories, and Nunavut are Canada’s three territories; its other ten subdivisions are provinces.",
         source: {
           name: "Government of Canada · provinces and territories",
           url: "https://www.canada.ca/en/intergovernmental-affairs/services/provinces-territories.html",
           reviewedOn: "2026-10-05",
+        },
+        scenes: {
+          play: {
+            contextIds: CANADIAN_TERRITORIES,
+            map: {
+              borders: true,
+              hoverFeedback: false,
+              muteOthers: true,
+              revealOnAnswer: true,
+              candidates: undefined,
+            },
+            focus: { lat: 64, lng: -108, altitude: 1.1 },
+          },
         },
       }),
       defineQuestion({
@@ -112,19 +117,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           match: "any",
         },
         selection: { type: "none" },
-        contextIds: provinces.map((r) => r.id),
-        map: {
-          borders: true,
-          hoverFeedback: false,
-          muteOthers: true,
-          revealOnAnswer: true,
-        },
         importedRegions: CANADIAN_SUBDIVISIONS,
-        focus: { lat: 48, lng: -90, altitude: 0.9 },
-        places: [boston],
-        overlays: [
-          { id: "boston-latitude", type: "parallel", latitude: boston.lat },
-        ],
         explanation:
           "Ontario extends south of Boston’s latitude (about 42.36° N), including the Point Pelee area.",
         sources: [
@@ -135,6 +128,23 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
             reviewedOn: "2026-10-05",
           },
         ],
+        scenes: {
+          play: {
+            contextIds: provinces.map((r) => r.id),
+            map: {
+              borders: true,
+              hoverFeedback: false,
+              muteOthers: true,
+              revealOnAnswer: true,
+              candidates: undefined,
+            },
+            focus: { lat: 48, lng: -90, altitude: 0.9 },
+            places: [boston],
+            overlays: [
+              { id: "boston-latitude", type: "parallel", latitude: boston.lat },
+            ],
+          },
+        },
       }),
       defineQuestion({
         commitment: "submit",
@@ -151,19 +161,24 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         rule: { type: "region-ids", ids: MEXICO_BORDER_STATES, match: "any" },
         selection: { type: "none" },
         importedRegions: US_STATES,
-        map: {
-          borders: false,
-          hoverFeedback: false,
-          muteOthers: true,
-          revealOnAnswer: true,
-        },
-        focus: { lat: 32, lng: -106, altitude: 1.3 },
         explanation:
           "Four states meet Mexico along the southern border. Any one qualifies.",
         source: {
           name: "U.S. Customs and Border Protection · Southwest Region",
           url: "https://www.cbp.gov/sites/default/files/2025-07/250728%20AMO%20Southwest%20Region_0.pdf",
           reviewedOn: "2026-10-05",
+        },
+        scenes: {
+          play: {
+            map: {
+              borders: false,
+              hoverFeedback: false,
+              muteOthers: true,
+              revealOnAnswer: true,
+              candidates: undefined,
+            },
+            focus: { lat: 32, lng: -106, altitude: 1.3 },
+          },
         },
       }),
       defineQuestion({
@@ -188,17 +203,22 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           from: "wurl:USA-CA",
           to: "wurl:USA-MO",
         },
-        contextIds: ["wurl:USA-CA", "wurl:USA-MO"],
         importedRegions: US_STATES,
-        map: {
-          borders: false,
-          hoverFeedback: false,
-          muteOthers: true,
-          revealOnAnswer: true,
-        },
-        focus: { lat: 37, lng: -104, altitude: 0.85 },
         explanation:
           "Only shared land borders count; states meeting at a single point are not neighbors.",
+        scenes: {
+          play: {
+            contextIds: ["wurl:USA-CA", "wurl:USA-MO"],
+            map: {
+              borders: false,
+              hoverFeedback: false,
+              muteOthers: true,
+              revealOnAnswer: true,
+              candidates: undefined,
+            },
+            focus: { lat: 37, lng: -104, altitude: 0.85 },
+          },
+        },
       }),
       defineQuestion({
         mode: "map-multiple",
@@ -215,9 +235,9 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         rule: { type: "region-ids", ids: CARDINAL_STATES },
         selection: { type: "ids", ids: US_STATES.map((r) => r.id) },
         importedRegions: US_STATES,
-        focus: { lat: 39, lng: -97, altitude: 0.9 },
         explanation:
           "North Carolina, South Carolina, North Dakota, South Dakota, and West Virginia. No U.S. state has East in its name.",
+        scenes: { play: { focus: { lat: 39, lng: -97, altitude: 0.9 } } },
       }),
     ] as Question[]
   ).map((question, index) => ({

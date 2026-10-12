@@ -1,5 +1,6 @@
 import type { Question } from "./questions";
 import type { GameState } from "./state";
+import { orderedCards, swapOrderCard } from "./ordering";
 
 export type HelpStage = "hinted" | "assisted";
 export type HelpUsage = Record<string, HelpStage>;
@@ -14,7 +15,7 @@ export function lockedSelectionIds(
 }
 
 /** Reapply monotonic help when a resumed or merged draft predates the assist. */
-export function withLockedSelections(
+export function withAssistanceLocks(
   question: Question,
   game: GameState,
 ): GameState {
@@ -22,9 +23,29 @@ export function withLockedSelections(
   const missing = lockedSelectionIds(question, game).filter(
     (id) => !game.selectedIds.includes(id),
   );
-  return missing.length
+  const selected = missing.length
     ? { ...game, selectedIds: [...game.selectedIds, ...missing] }
     : game;
+  const fixed = lockedOrderSlots(question, selected);
+  if (!fixed.length) return selected;
+  let ordered = orderedCards(question, selected);
+  if (question.orderInitial) {
+    for (const slot of fixed)
+      ordered = swapOrderCard(question, ordered, slot.id, slot.index);
+  } else {
+    ordered = Array.from(
+      { length: question.count },
+      (_, index) =>
+        fixed.find((slot) => slot.index === index)?.id ??
+        (fixed.some((slot) => slot.id === ordered[index])
+          ? ""
+          : (ordered[index] ?? "")),
+    );
+  }
+  return ordered.length === selected.ordered.length &&
+    ordered.every((id, index) => id === selected.ordered[index])
+    ? selected
+    : { ...selected, ordered };
 }
 
 export function lockedOrderSlots(

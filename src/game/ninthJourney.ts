@@ -86,17 +86,21 @@ export const NINTH_JOURNEY: Journey = {
           committedNames: false,
           previousVisits: false,
         },
-        contextIds: [...clue.countries],
-        focus: clue.focus,
-        map: {
-          borders: false,
-          borderIds: [...clue.countries],
-          hoverFeedback: false,
-          muteOthers: true,
-          revealOnAnswer: true,
-        },
         explanation: clue.explanation,
         source: { ...mapSource, reviewedOn: "2026-10-06" },
+        scenes: {
+          play: {
+            contextIds: [...clue.countries],
+            focus: clue.focus,
+            map: {
+              borders: false,
+              borderIds: [...clue.countries],
+              hoverFeedback: false,
+              muteOthers: true,
+              revealOnAnswer: true,
+            },
+          },
+        },
       }),
   ),
 };

@@ -13,12 +13,12 @@ import {
 } from "../src/game/journeyRegistry";
 import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
 import { CAPITALS } from "../src/game/quizData";
-import { ORIGINAL_SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsOriginalJourney";
 import {
   dailyJourney,
   openDaily,
   emptyDaily,
   validDaily,
+  recoverDaily,
 } from "../src/app/dailyProgress";
 import { modeForPath } from "../src/app/modes";
 import { COUNTRY_FACTS } from "../src/game/countryFacts";
@@ -207,37 +207,48 @@ describe("Chasing the sun", () => {
     ).toBe("/journey/chasing-the-sun");
     expect(ACTIVE_JOURNEY_IDS).not.toContain(SUN_FLAGS_JOURNEY.id);
   });
-  it("revises new attempts while preserving the original edition for started saves", async () => {
+  it("retires the archived Sun edition while resolving old published assignments", async () => {
     const day = "2026-10-11";
-    const assignments = { [day]: ORIGINAL_SUN_FLAGS_JOURNEY.id };
-    const started = openDaily(
-      emptyDaily,
-      day,
-      false,
-      [ORIGINAL_SUN_FLAGS_JOURNEY],
-      assignments,
-    );
-    expect(started.attempts[day].journeyId).toBe(ORIGINAL_SUN_FLAGS_JOURNEY.id);
+    const oldId = "chasing-the-sun-v1";
+    const assignments = { [day]: oldId };
     expect(dailyJourney(day, undefined, JOURNEY_INDEX, assignments).id).toBe(
       SUN_FLAGS_JOURNEY.id,
     );
+    const current = openDaily(
+      emptyDaily,
+      day,
+      false,
+      JOURNEY_INDEX,
+      assignments,
+    );
+    const legacyDay = "2026-10-10";
+    const saved = {
+      ...current,
+      attempts: {
+        ...current.attempts,
+        [legacyDay]: {
+          ...current.attempts[day],
+          date: legacyDay,
+          journeyId: oldId,
+        },
+      },
+      archivedAttempts: {
+        [`${legacyDay}/${oldId}`]: {
+          ...current.attempts[day],
+          date: legacyDay,
+          journeyId: oldId,
+        },
+      },
+    };
+    expect(validDaily(saved, JOURNEY_INDEX)).toBe(false);
+    const recovered = recoverDaily(saved, JOURNEY_INDEX)!;
+    expect(recovered.attempts[day]).toEqual(current.attempts[day]);
+    expect(recovered.attempts[legacyDay]).toBeUndefined();
+    expect(Object.keys(recovered.archivedAttempts ?? {})).toEqual([]);
+    expect(validDaily(recovered, JOURNEY_INDEX)).toBe(true);
+    await expect(loadJourney(oldId)).rejects.toThrow("Unknown Journey");
     expect(
-      openDaily(emptyDaily, day, false, JOURNEY_INDEX, assignments).attempts[
-        day
-      ].journeyId,
-    ).toBe(SUN_FLAGS_JOURNEY.id);
-    expect(
-      openDaily(started, day, false, JOURNEY_INDEX, assignments).attempts[day]
-        .journeyId,
-    ).toBe(ORIGINAL_SUN_FLAGS_JOURNEY.id);
-    expect(validDaily(started, JOURNEY_INDEX)).toBe(true);
-    expect(
-      (await loadJourney(ORIGINAL_SUN_FLAGS_JOURNEY.id)).rounds[0].id,
-    ).toBe("sun-flags-revolution-month-v1");
-    expect(
-      AVAILABLE_JOURNEY_INDEX.some(
-        (journey) => journey.id === ORIGINAL_SUN_FLAGS_JOURNEY.id,
-      ),
+      AVAILABLE_JOURNEY_INDEX.some((journey) => journey.id === oldId),
     ).toBe(false);
     expect(modeForPath("/")).toBe("home");
   });

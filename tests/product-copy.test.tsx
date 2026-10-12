@@ -173,7 +173,9 @@ describe("product copy follows the answer and visible reveal", () => {
     expect(correctAnswerCopy(JOURNEY.rounds[1])).toBe("Beautifully reasoned.");
     expect(correctAnswerCopy(EIGHTH_JOURNEY.rounds[0])).toBe("Nicely placed.");
     expect(correctAnswerCopy(EIGHTH_JOURNEY.rounds[1])).toBe("Well spotted.");
-    expect(correctAnswerCopy(ELEVENTH_JOURNEY.rounds[0])).toBe("Well spotted.");
+    expect(correctAnswerCopy(ELEVENTH_JOURNEY.rounds[0])).toBe(
+      "Nicely remembered.",
+    );
     expect(
       correctAnswerCopy({
         ...JOURNEY.rounds[1],
@@ -205,16 +207,16 @@ describe("product copy follows the answer and visible reveal", () => {
   });
   it("shows other correct answers only for a multiple-answer reveal", () => {
     const { question, context, game } = play(ELEVENTH_JOURNEY, 4, [
-      { type: "select", id: "place:964137" },
-      { type: "select", id: "place:3369157" },
-      { type: "select", id: "place:993800" },
+      { type: "order-card", id: "place:964137", index: 0 },
+      { type: "order-card", id: "place:3369157", index: 1 },
+      { type: "order-card", id: "place:993800", index: 2 },
       { type: "submit" },
     ]);
     expect(feedbackLegend(question, context, game).map((e) => e.label)).toEqual(
       [
         "Correct",
         "Other correct answers",
-        "Incorrect pick",
+        "Incorrect match",
         "Highlighted context",
         "Other places",
       ],

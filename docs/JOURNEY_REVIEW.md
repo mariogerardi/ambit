@@ -148,9 +148,9 @@ Primary references, reviewed October 11, 2026:
 
 The enlarged Sun of May is a viewport crop of the existing attributed Uruguay
 flag SVG. The revised edition is `chasing-the-sun-v2`. New attempts use it even
-when a date still has its original-ID assignment; original started attempts
-remain pinned to their original edition. The old definition is compatibility-only,
-absent from Admin choices, practice routes, and the playground.
+when a date still has its original-ID assignment. The original definition has
+been removed; its ID is retired and existing save recovery discards its attempts
+without discarding progress on retained Journeys.
 
 ## Down the Danube
 

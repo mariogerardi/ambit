@@ -74,17 +74,21 @@ export const FIFTEENTH_JOURNEY: Journey = {
         commitment: "submit",
         failure: "feedback",
         focus,
-        map: {
-          borders: false,
-          hoverFeedback: false,
-          muteOthers: true,
-          revealOnAnswer: true,
-        },
         explanation,
         source: {
           name: "Natural Earth · country boundaries",
           url: "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/",
           reviewedOn: "2026-10-09",
+        },
+        scenes: {
+          play: {
+            map: {
+              borders: false,
+              hoverFeedback: false,
+              muteOthers: true,
+              revealOnAnswer: true,
+            },
+          },
         },
       }),
   ),

@@ -147,3 +147,11 @@ checks; deploying does not require regenerating committed geography.
 
 The [architecture map](ARCHITECTURE.md) identifies implementation owners; the
 [question guide](QUESTION_CATALOG.md) covers authoring and reviewed facts.
+
+## Focused Journey authoring review
+
+Run `npm run check:journey -- <id-or-slug>` to inspect one Journey's contracts,
+help and reveal scenes, cameras, sources and local media. `--recipe <answer-mode>`
+loads a complete control example; `--list` shows current Journeys.
+See [Journey engine and authoring contracts](JOURNEY_ENGINE.md) for scene authoring,
+registered mechanics, recipes, JSON output and the limits of automated review.

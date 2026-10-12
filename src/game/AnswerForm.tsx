@@ -1,5 +1,7 @@
+import { mechanicFor } from "./mechanics";
 import { pointAnswerNoun, answerPlace } from "./answerTargets";
 import type { Dispatch } from "react";
+import { useMemo } from "react";
 import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questions";
 import { canSubmit, responseCount, selectableIds } from "./questions";
@@ -9,9 +11,10 @@ import { QuestionActions } from "./QuestionActions";
 import {
   candidateAvailable,
   lockedSelectionIds,
-  withLockedSelections,
+  withAssistanceLocks,
 } from "./guidance";
 import { OrderAnswer } from "./OrderAnswer";
+import { isSlotAnswer } from "./ordering";
 
 export function AnswerForm({
   question,
@@ -26,9 +29,18 @@ export function AnswerForm({
   dispatch: Dispatch<Action>;
   webgl: boolean;
 }) {
-  game = withLockedSelections(question, game);
+  const choices = useMemo(() => {
+    const cards = [...(question.choices ?? [])];
+    if (question.shuffleChoices)
+      for (let index = cards.length - 1; index > 0; index--) {
+        const other = Math.floor(Math.random() * (index + 1));
+        [cards[index], cards[other]] = [cards[other], cards[index]];
+      }
+    return cards;
+  }, [question.choices, question.shuffleChoices]);
+  game = withAssistanceLocks(question, game);
   const locked = lockedSelectionIds(question, game);
-  if (question.mode === "choice-order")
+  if (isSlotAnswer(question))
     return (
       <OrderAnswer
         key={question.id}
@@ -50,10 +62,10 @@ export function AnswerForm({
         onAssist: () => dispatch({ type: "request-assist" }),
       }
     : undefined;
-  const city = question.mode.startsWith("city-");
+  const definition = mechanicFor(question);
+  const city = definition.mapSelection === "places";
   const pointNoun = pointAnswerNoun(question);
-  const single =
-    question.mode === "map-single" || question.mode === "city-single";
+  const single = definition.single;
   const regional = question.rule.type === "region-ids";
   const count = responseCount(question, context);
   const unordered = question.mode === "typed-regions";
@@ -64,7 +76,7 @@ export function AnswerForm({
     context.names.get(id) ??
     context.choiceNames.get(id) ??
     id;
-  if (question.mode === "pin")
+  if (definition.control === "pin")
     return (
       <div className="pin-answer">
         {game.pin && (
@@ -145,14 +157,14 @@ export function AnswerForm({
         </details>
       </div>
     );
-  if (question.mode === "choice-single" || question.mode === "choice-multiple")
+  if (definition.control === "choice")
     return (
       <div className="choice-answer">
         {question.commitment === "immediate" && (
           <p className="commit-note">Your first answer is final.</p>
         )}
         <div className="candidate-grid" aria-label="Answer choices">
-          {(question.choices ?? []).map((choice) => (
+          {choices.map((choice) => (
             <button
               key={choice.id}
               className={game.selectedIds.includes(choice.id) ? "chosen" : ""}
@@ -173,12 +185,7 @@ export function AnswerForm({
         />
       </div>
     );
-  if (
-    city ||
-    question.mode === "map-single" ||
-    question.mode === "map-multiple" ||
-    question.mode === "land-path"
-  )
+  if (definition.control === "map")
     return (
       <>
         {question.disclosure.namedChoices && (!city || !webgl) && (
@@ -327,9 +334,7 @@ export function AnswerForm({
         dispatch({ type: "submit" });
       }}
     >
-      {question.mode === "typed-regions" ||
-      question.mode === "ordered-countries" ||
-      question.mode === "ordered-capitals" ? (
+      {definition.control === "text-list" ? (
         <AnswerList
           className={`ordered-answer${unordered ? " unordered-answer" : ""}`}
           aria-label={

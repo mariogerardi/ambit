@@ -1,4 +1,6 @@
-import { orderedCards } from "./ordering";
+import type { QuestionScenes } from "./scenes";
+import { mechanicFor, usesChoiceCards } from "./mechanics";
+import { isSlotAnswer } from "./ordering";
 import { validateQuestionContract } from "./questionBuilder";
 import type {
   Focus,
@@ -45,6 +47,7 @@ export type AnswerMode =
   | "land-path"
   | "choice-single"
   | "choice-order"
+  | "choice-match"
   | "choice-multiple";
 export interface FactSource {
   name: string;
@@ -80,6 +83,7 @@ export type KnowledgeRule =
   | { type: "manual-number"; value: number }
   | { type: "region-ids"; ids: string[]; match?: "all" | "any" }
   | { type: "choice-ids"; ids: string[] }
+  | { type: "slot-matches"; matches: { slotId: string; choiceId: string }[] }
   | { type: "capital-name"; countryId: string }
   | { type: "country-fact"; field: string; value: string }
   | { type: "text-fact"; countryId: string; field: string }
@@ -117,6 +121,8 @@ export type KnowledgeRule =
   | { type: "shortest-borders"; from: string; to: string }
   | { type: "great-circle-order"; from: Coordinate; to: Coordinate };
 export interface Question {
+  /** Authored map states compiled by defineQuestion; legacy fields remain readable. */
+  scenes?: QuestionScenes;
   id: string;
   label: string;
   /** Short, spoiler-free identity for Journey progress and recaps. */
@@ -140,7 +146,7 @@ export interface Question {
       overlays?: MapOverlay[];
       /** Named reference places may help locate an unmarked target. */
       places?: PlaceFeature[];
-      /** A stronger ordering assist may place and lock an authored card. */
+      /** A stronger ordering/matching assist may place and lock an authored card. */
       fixedSlots?: { index: number; id: string }[];
       /** A multiple-country assist may select and lock known answers. */
       fixedSelections?: string[];
@@ -251,8 +257,12 @@ export interface Question {
     context?: { src: string; alt: string };
   };
   choices?: { id: string; label: string }[];
+  /** Shuffle choice-button positions once per mounted question; IDs still grade. */
+  shuffleChoices?: boolean;
   /** Directional captions for an ordering puzzle's slots. */
   orderLabels?: string[];
+  /** Stable role identities; matching answers refer to IDs, not display order. */
+  matchSlots?: { id: string; label: string; description?: string }[];
   /** Filled answer slots plus one implicit distractor. Dragging always swaps. */
   orderInitial?: string[];
   orderGroupLabel?: string;
@@ -264,8 +274,6 @@ export interface Question {
 export interface Journey {
   /** A revised edition replaces this ID for new attempts, while started saves keep it. */
   supersedes?: string;
-  /** Saved-attempt compatibility only; exclude from Admin choices and practice routes. */
-  compatibilityOnly?: boolean;
   id: string;
   title: string;
   description: string;
@@ -367,7 +375,7 @@ export function createQuestionContext(
       context.targets.set(target.id, target);
       context.names.set(target.id, target.name);
     }
-    if (round.mode.startsWith("choice-") && (round.choices?.length ?? 0) > 6)
+    if (usesChoiceCards(round) && (round.choices?.length ?? 0) > 6)
       throw Error(
         `Multiple-choice questions may have at most six choices: ${round.id}.`,
       );
@@ -389,7 +397,7 @@ export function createQuestionContext(
         throw Error(`Invalid fixed selection assist: ${round.id}.`);
     }
     if (survivors) {
-      const eligible = round.mode.startsWith("choice-")
+      const eligible = usesChoiceCards(round)
         ? (round.choices ?? []).map((choice) => choice.id)
         : selectableIds(round, context);
       const expected = solutionIds(round, context);
@@ -403,40 +411,15 @@ export function createQuestionContext(
           `Assist must preserve answers and plausible alternatives: ${round.id}.`,
         );
     }
-    if (round.mode === "choice-order") {
-      const ids = (round.choices ?? []).map((choice) => choice.id);
-      const expected = solutionIds(round, context);
-      const fixed = round.guidance?.assist?.fixedSlots ?? [];
-      if (
-        round.rule.type !== "country-ids" ||
-        !round.rule.ordered ||
-        round.commitment !== "submit" ||
-        round.selection.type !== "none" ||
-        new Set(ids).size !== ids.length ||
-        ids.length < round.count ||
-        expected.length !== round.count ||
-        new Set(expected).size !== expected.length ||
-        expected.some((id) => !ids.includes(id)) ||
-        new Set(fixed.map((slot) => slot.index)).size !== fixed.length ||
-        fixed.some(
-          (slot) =>
-            !Number.isInteger(slot.index) ||
-            slot.index < 0 ||
-            slot.index >= round.count ||
-            expected[slot.index] !== slot.id,
-        ) ||
-        fixed.length >= round.count ||
-        (round.orderLabels && round.orderLabels.length !== round.count) ||
-        (round.orderInitial &&
-          (ids.length !== round.count + 1 ||
-            round.orderInitial.length !== round.count ||
-            new Set(round.orderInitial).size !== round.count ||
-            round.orderInitial.some((id) => !ids.includes(id))))
-      )
-        throw Error(`Invalid ordering puzzle configuration: ${round.id}.`);
-    } else if (round.guidance?.assist?.fixedSlots?.length) {
-      throw Error(`Fixed slots require an ordering puzzle: ${round.id}.`);
-    }
+    mechanicFor(round).validateContext?.(
+      round,
+      solutionIds(round, context),
+      (message) => {
+        throw Error(message);
+      },
+    );
+    if (!isSlotAnswer(round) && round.guidance?.assist?.fixedSlots?.length)
+      throw Error(`Fixed slots require a card-slot puzzle: ${round.id}.`);
     if (
       round.disclosure.namedChoices &&
       selectableIds(round, context).length > 6
@@ -582,7 +565,7 @@ export function createQuestionContext(
     if (
       round.mode.startsWith("map-") ||
       round.mode.startsWith("city-") ||
-      round.mode.startsWith("choice-")
+      usesChoiceCards(round)
     ) {
       const eligible = new Set(selectableIds(round, context));
       if (
@@ -623,7 +606,7 @@ export function selectableIds(
   context: QuestionContext,
 ): string[] {
   const selection = question.selection;
-  if (question.mode.startsWith("choice-"))
+  if (usesChoiceCards(question))
     return (question.choices ?? []).map((c) => c.id);
   if (selection.type === "none") return [];
   if (selection.type === "ids") return selection.ids;
@@ -645,6 +628,11 @@ export function solutionIds(
   context: QuestionContext,
 ): string[] {
   const rule = question.rule;
+  if (rule.type === "slot-matches")
+    return (question.matchSlots ?? []).map(
+      (slot) =>
+        rule.matches.find((match) => match.slotId === slot.id)?.choiceId ?? "",
+    );
   if (rule.type === "pin-distance") return [rule.targetId];
   if (rule.type === "pin-inside" || rule.type === "place-ids") return rule.ids;
   const cached = context.solutions.get(question);
@@ -737,32 +725,10 @@ export function canSubmit(
   context: QuestionContext,
   response: Response,
 ) {
-  if (question.mode === "pin") return validPin(response.pin);
-  if (question.mode === "number")
-    return (
-      response.text.trim() !== "" &&
-      Number.isInteger(Number(response.text)) &&
-      Number(response.text) >= 0
-    );
-  if (question.mode === "text") return response.text.trim() !== "";
-  if (question.mode === "choice-order")
-    return (
-      orderedCards(question, response).length === question.count &&
-      new Set(orderedCards(question, response)).size === question.count &&
-      orderedCards(question, response).every((id) =>
-        selectableIds(question, context).includes(id),
-      )
-    );
-  if (
-    question.mode === "typed-regions" ||
-    question.mode === "ordered-countries" ||
-    question.mode === "ordered-capitals"
-  )
-    return (
-      response.ordered.length === responseCount(question, context) &&
-      response.ordered.every((v) => v.trim() !== "")
-    );
-  return response.selectedIds.length === responseCount(question, context);
+  return mechanicFor(question).canSubmit(question, response, {
+    count: responseCount(question, context),
+    eligible: selectableIds(question, context),
+  });
 }
 export function isCorrect(
   question: Question,
@@ -771,13 +737,12 @@ export function isCorrect(
 ) {
   const rule = question.rule,
     expected = solutionIds(question, context);
-  if (question.mode === "choice-order")
-    return (
-      canSubmit(question, context, response) &&
-      orderedCards(question, response).every(
-        (id, index) => id === expected[index],
-      )
-    );
+  const controlGrade = mechanicFor(question).grade;
+  if (controlGrade)
+    return controlGrade(question, context, response, expected, {
+      count: responseCount(question, context),
+      eligible: selectableIds(question, context),
+    });
   if (rule.type === "pin-distance") {
     const distance = pinDistance(question, response);
     return distance !== undefined && distance <= rule.radiusKm + 1e-7;
@@ -861,6 +826,19 @@ export function isCorrect(
       new Set(ids).size === ids.length &&
       (rule.match === "any" || ids.length === expected.length) &&
       ids.every((id) => id !== undefined && expected.includes(id))
+    );
+  }
+  if (
+    question.mode === "ordered-countries" &&
+    rule.type === "country-ids" &&
+    rule.ordered
+  ) {
+    const ids = response.ordered.map((value) =>
+      countryIdForName(context, value),
+    );
+    return (
+      ids.length === expected.length &&
+      ids.every((id, index) => id === expected[index])
     );
   }
   if (

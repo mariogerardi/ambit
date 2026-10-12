@@ -1,20 +1,12 @@
+import { MECHANICS } from "./mechanics";
 import type { AnswerMode, Question } from "./questions";
 
-export const ANSWER_TYPES: Partial<Record<AnswerMode, string>> = {
-  pin: "Drop a pin",
-  "city-single": "Single city pick",
-  "city-multiple": "Multiple city picks",
-  "map-single": "Single country pick",
-  "map-multiple": "Multiple country picks",
-  number: "Number",
-  text: "Free response",
-  "typed-regions": "Typed region names",
-  "ordered-countries": "Ordered country names",
-  "ordered-capitals": "Ordered capital names",
-  "choice-single": "Single choice",
-  "choice-multiple": "Multiple choices",
-  "choice-order": "Order cards",
-};
+export const ANSWER_TYPES: Partial<Record<AnswerMode, string>> =
+  Object.fromEntries(
+    Object.entries(MECHANICS)
+      .filter(([, mechanic]) => mechanic.visible)
+      .map(([mode, mechanic]) => [mode, mechanic.label]),
+  );
 export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
   "pin-distance": "Place a pin near a local place",
   "pin-inside": "Place a pin inside a territory",
@@ -23,6 +15,7 @@ export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
   "manual-number": "Authored number",
   "region-ids": "Authored region set",
   "choice-ids": "Reviewed choice set",
+  "slot-matches": "Reviewed card-to-role matches",
   "capital-name": "Recall a country’s capital",
   "country-fact": "Find a country from a fact",
   "text-fact": "Recall a country fact",

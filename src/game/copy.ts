@@ -72,7 +72,11 @@ export function correctAnswerSummary(
     context.capitals.find((place) => place.countryId === countryId)?.name ?? "";
   let values: string[];
   let alternatives = false;
-  if (rule.type === "manual-number") values = [String(rule.value)];
+  if (rule.type === "slot-matches")
+    values = (question.matchSlots ?? []).map(
+      (slot, index) => `${slot.label}: ${name(expected[index])}`,
+    );
+  else if (rule.type === "manual-number") values = [String(rule.value)];
   else if (rule.type === "manual-text") values = [rule.answers[0]];
   else if (rule.type === "capital-name") values = [capital(rule.countryId)];
   else if (rule.type === "text-fact")
@@ -173,7 +177,12 @@ export function feedbackLegend(
   if (visible.has("incorrect"))
     entries.push({
       key: "incorrect",
-      label: question.mode === "pin" ? "Your pin" : "Incorrect pick",
+      label:
+        question.mode === "pin"
+          ? "Your pin"
+          : question.mode === "choice-match"
+            ? "Incorrect match"
+            : "Incorrect pick",
     });
   if (
     visible.has("hinted") ||
@@ -184,9 +193,10 @@ export function feedbackLegend(
   if (visible.has("disabled") || visible.has("default"))
     entries.push({
       key: "neutral",
-      label: question.mode.startsWith("city-")
-        ? "Other places"
-        : "Other countries",
+      label:
+        question.mode.startsWith("city-") || question.mode === "choice-match"
+          ? "Other places"
+          : "Other countries",
     });
   return entries;
 }

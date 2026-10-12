@@ -50,14 +50,18 @@ export const TENTH_JOURNEY: Journey = {
         alt: "Flag clue: a red circle centered on a white field.",
         feedbackAlt: "National flag of Japan",
       },
-      map: {
-        borders: true,
-        hoverFeedback: true,
-        muteOthers: false,
-        candidates: "decorative",
-      },
       explanation:
         "The red disc represents the sun. Our trip around the Pacific begins here.",
+      scenes: {
+        play: {
+          map: {
+            borders: true,
+            hoverFeedback: true,
+            muteOthers: false,
+            candidates: "decorative",
+          },
+        },
+      },
     }),
     defineQuestion({
       count: 1,
@@ -83,7 +87,6 @@ export const TENTH_JOURNEY: Journey = {
         { id: "island:sakhalin", label: "Sakhalin" },
         { id: "island:taiwan", label: "Taiwan" },
       ],
-      contextIds: ["wurl:JPN"],
       highlightParts: [
         {
           countryId: "wurl:JPN",
@@ -92,13 +95,18 @@ export const TENTH_JOURNEY: Journey = {
           reveal: "part",
         },
       ],
-      focus: { lat: 43.2, lng: 142.7, altitude: 0.48 },
       explanation:
         "The Tsugaru Strait separates this northern island from Honshu.",
       source: {
         name: "Japan National Tourism Organization · Hokkaido",
         url: "https://www.japan.travel/en/destinations/hokkaido/hokkaido/",
         reviewedOn: "2026-10-06",
+      },
+      scenes: {
+        play: {
+          contextIds: ["wurl:JPN"],
+          focus: { lat: 43.2, lng: 142.7, altitude: 0.48 },
+        },
       },
     }),
     defineQuestion({
@@ -116,15 +124,19 @@ export const TENTH_JOURNEY: Journey = {
       instruction: "",
       mode: "pin",
       rule: { type: "pin-inside", ids: ["wurl:IDN"] },
-      focus: { lat: -5, lng: 118, altitude: 1.15 },
-      map: {
-        borders: false,
-        hoverFeedback: false,
-        muteOthers: true,
-        revealOnAnswer: true,
-      },
       explanation:
         "The archipelago bridges the Indian and Pacific oceans. A pin on any of its land counts.",
+      scenes: {
+        play: {
+          focus: { lat: -5, lng: 118, altitude: 1.15 },
+          map: {
+            borders: false,
+            hoverFeedback: false,
+            muteOthers: true,
+            revealOnAnswer: true,
+          },
+        },
+      },
     }),
     defineQuestion({
       commitment: "submit",
@@ -152,17 +164,21 @@ export const TENTH_JOURNEY: Journey = {
         hoverNames: true,
         committedNames: true,
       },
-      focus: { lat: -17, lng: -65, altitude: 1.3 },
-      map: {
-        borders: true,
-        hoverFeedback: true,
-        muteOthers: true,
-        candidates: "highlighted",
-      },
       explanation:
         "Here the Andes meet the Pacific. The other Andean countries either lack a Pacific coast or are landlocked.",
       source: FEATURES.andes.source,
       sources: [FEATURES.andes.source, mapSource],
+      scenes: {
+        play: {
+          focus: { lat: -17, lng: -65, altitude: 1.3 },
+          map: {
+            borders: true,
+            hoverFeedback: true,
+            muteOthers: true,
+            candidates: "highlighted",
+          },
+        },
+      },
     }),
     defineQuestion({
       mode: "text",
@@ -180,12 +196,16 @@ export const TENTH_JOURNEY: Journey = {
       instruction: "",
       inputLabel: "Capital city",
       rule: { type: "capital-name", countryId: "wurl:NZL" },
-      contextIds: ["wurl:NZL"],
-      focus: { lat: -41, lng: 173, altitude: 0.8 },
-      feedbackPlaces: [wellington],
       explanation:
         "At the southern tip of the North Island, the capital is our last landing on the Pacific rim.",
       source: capitalSource,
+      scenes: {
+        play: {
+          contextIds: ["wurl:NZL"],
+          focus: { lat: -41, lng: 173, altitude: 0.8 },
+        },
+        reveal: { places: [wellington] },
+      },
     }),
   ],
 };

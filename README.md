@@ -45,7 +45,7 @@ Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 
 The daily schedule cycles through the eleven retained Journey concepts from October 5, 2026, using
 device-local dates. Admin’s Journey calendar can override any date for everyone;
-unassigned dates continue that rotation. Chasing the sun and Down the Danube are additional concepts ready for Admin date assignments. The original sun edition remains only for started-save compatibility; new attempts use its revised edition. Started attempts keep their edition and
+unassigned dates continue that rotation. Chasing the sun and Down the Danube are additional concepts ready for Admin date assignments. Archived Journey definitions have been removed; new Sun attempts use its revised edition. Started attempts keep their edition and
 progress when an assignment changes. Past attempts remain in saved history but
 cannot be reopened by players after midnight. Direct practice routes and the
 question playground require admin access. See the [Journey catalog](docs/QUESTION_CATALOG.md) for titles and routes.
@@ -99,6 +99,7 @@ Start with the [documentation index](docs/README.md).
 - [Architecture](docs/ARCHITECTURE.md): module responsibilities and globe state.
 - [Development](docs/DEVELOPMENT.md): commands, data preparation, and maintenance.
 - [Question catalog and authoring](docs/QUESTION_CATALOG.md): Journeys, rules, and content review.
+- [Journey engine and extension contracts](docs/JOURNEY_ENGINE.md): reusable mechanics, matching, and extension boundaries.
 - [Journey crafting](docs/JOURNEY_CRAFTING.md): Throughlines, difficulty, globe interaction, and meaningful reveals.
 - [Geographic catalog policy](docs/CATALOG_POLICY.md) and [Explore data](docs/EXPLORE_DATA.md): identities, source conventions, and display limits.
 - [Save persistence](docs/SAVE_PERSISTENCE.md): migration, recovery, and conflicts.

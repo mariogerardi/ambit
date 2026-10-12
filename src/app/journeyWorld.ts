@@ -1,6 +1,6 @@
 import { isRegionAnswer } from "../game/questionBuilder";
 import { answerPlace } from "../game/answerTargets";
-import { withLockedSelections } from "../game/guidance";
+import { withAssistanceLocks } from "../game/guidance";
 import type { RegionFeature, RouteFeature } from "../geography/types";
 import type { GameState } from "../game/state";
 import type { Journey, QuestionContext } from "../game/questions";
@@ -49,7 +49,7 @@ export function journeyWorld(
   context: QuestionContext,
 ) {
   const round = journey.rounds[game.roundIndex];
-  game = withLockedSelections(round, game);
+  game = withAssistanceLocks(round, game);
   const correct = !!game.answers.at(-1)?.correct;
   const map = questionMapPresentation(round, game.phase, correct);
   const completion = game.phase === "finished" ? journey.completion : undefined;

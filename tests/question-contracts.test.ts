@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { JOURNEYS, COMPATIBILITY_JOURNEYS } from "../src/game/journeys";
+import { JOURNEYS } from "../src/game/journeys";
 import {
   defineQuestion,
   definePresentation,
@@ -19,7 +19,7 @@ import type { RegionFeature } from "../src/geography/types";
 
 describe("safe question authoring contracts", () => {
   it("validates every published and compatibility Journey", () => {
-    for (const journey of [...JOURNEYS, ...COMPATIBILITY_JOURNEYS])
+    for (const journey of JOURNEYS)
       expect(() => validateJourneyContracts(journey)).not.toThrow();
   });
   it("rejects mismatched grading, inherited selection, stale choices and invalid cardinality", () => {

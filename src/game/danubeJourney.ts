@@ -112,14 +112,7 @@ export const DANUBE_JOURNEY: Journey = {
         { id: "river:rhine", label: "Rhine" },
         { id: "river:oder", label: "Oder" },
       ],
-      contextIds: ["wurl:DEU"],
-      feedbackContextIds: [],
-      physicalFeatures: segments.upper,
-      feedbackPhysicalFeatures: segments.rhine,
       feedbackMapCaption: "Danube route so far · local Rhine context",
-      feedbackPlaces: [landmark("seepage", "Danube seepage", 47.936, 8.76635)],
-      focus: { lat: 48, lng: 9.4, altitude: 0.28 },
-      feedbackFocus: { lat: 47.9, lng: 8.7, altitude: 0.14 },
       explanation:
         "Limestone caves carry it to the Aach spring, then toward Lake Constance and a different drainage basin. We stay with the Danube above ground.",
       source: source(
@@ -133,6 +126,19 @@ export const DANUBE_JOURNEY: Journey = {
           "https://www.aach.de/de/Unsere-Stadt/Aachquelle",
         ),
       ],
+      scenes: {
+        play: {
+          contextIds: ["wurl:DEU"],
+          physicalFeatures: segments.upper,
+          focus: { lat: 48, lng: 9.4, altitude: 0.28 },
+        },
+        reveal: {
+          answerIds: [],
+          physicalFeatures: segments.rhine,
+          places: [landmark("seepage", "Danube seepage", 47.936, 8.76635)],
+          focus: { lat: 47.9, lng: 8.7, altitude: 0.14 },
+        },
+      },
     }),
     defineQuestion({
       count: 1,
@@ -150,16 +156,6 @@ export const DANUBE_JOURNEY: Journey = {
       mode: "pin",
       rule: { type: "pin-distance", targetId: vienna.id, radiusKm: 50 },
       disclosure: { ...base.disclosure, namedChoices: false },
-      focus: { lat: 48.3, lng: 14.5, altitude: 0.26 },
-      feedbackFocus: { lat: vienna.lat, lng: vienna.lng, altitude: 0.16 },
-      physicalFeatures: route("upper"),
-      feedbackPhysicalFeatures: segments.vienna,
-      map: {
-        borders: true,
-        hoverFeedback: false,
-        muteOthers: true,
-        revealOnAnswer: true,
-      },
       explanation:
         "The river runs through the eastern side of the city. Continue downstream: this is only the first capital on our route.",
       source: source(
@@ -167,6 +163,22 @@ export const DANUBE_JOURNEY: Journey = {
         "https://www.wien.gv.at/en/environment/danube-island",
       ),
       sources: [capitalSource, riverSource],
+      scenes: {
+        play: {
+          focus: { lat: 48.3, lng: 14.5, altitude: 0.26 },
+          physicalFeatures: route("upper"),
+          map: {
+            borders: true,
+            hoverFeedback: false,
+            muteOthers: true,
+            revealOnAnswer: true,
+          },
+        },
+        reveal: {
+          focus: { lat: vienna.lat, lng: vienna.lng, altitude: 0.16 },
+          physicalFeatures: segments.vienna,
+        },
+      },
     }),
     defineQuestion({
       count: 1,
@@ -183,25 +195,12 @@ export const DANUBE_JOURNEY: Journey = {
       mode: "text",
       inputLabel: "Capital city",
       rule: { type: "capital-name", countryId: "wurl:HUN" },
-      focus: { lat: 47.4, lng: 18, altitude: 0.26 },
-      physicalFeatures: route("vienna"),
-      feedbackPlaces: [
-        {
-          ...budapest,
-          visualState: "answer",
-          labelFlexible: true,
-          priority: 1000,
-        },
-      ],
-      feedbackPhysicalFeatures: segments.budapest,
-      feedbackFocus: { lat: budapest.lat, lng: budapest.lng, altitude: 0.16 },
       feedbackDiagram: {
         type: "river-banks",
         river: "Danube",
         westBank: "Buda",
         eastBank: "Pest",
       },
-      map: { ...base.map!, feedbackRegions: "neutral" },
       explanation:
         "The river separates Buda on the west bank from Pest on the east. Their 1873 union also included Óbuda: the familiar name leaves one founding town out.",
       source: source(
@@ -216,6 +215,25 @@ export const DANUBE_JOURNEY: Journey = {
           "https://www.budapestinfo.hu/en/top-sights",
         ),
       ],
+      scenes: {
+        play: {
+          focus: { lat: 47.4, lng: 18, altitude: 0.26 },
+          physicalFeatures: route("vienna"),
+          map: { ...base.map!, feedbackRegions: "neutral" },
+        },
+        reveal: {
+          places: [
+            {
+              ...budapest,
+              visualState: "answer",
+              labelFlexible: true,
+              priority: 1000,
+            },
+          ],
+          physicalFeatures: segments.budapest,
+          focus: { lat: budapest.lat, lng: budapest.lng, altitude: 0.16 },
+        },
+      },
     }),
     defineQuestion({
       selection: { type: "none" },
@@ -240,11 +258,7 @@ export const DANUBE_JOURNEY: Journey = {
         { id: "wurl:CRO", label: "Croatia" },
         { id: "wurl:SVK", label: "Slovakia" },
       ],
-      physicalFeatures: route("gorge"),
       rule: { type: "country-ids", ids: ["wurl:SRB", "wurl:ROU"] },
-      focus: { lat: 44.9, lng: 21.1, altitude: 0.23 },
-      feedbackFocus: { lat: 44.8, lng: 22, altitude: 0.18 },
-      feedbackPlaces: [landmark("iron-gates", "Iron Gates", 44.65, 22.3)],
       explanation:
         "Dams at the gorge generate power, but block an ancient upstream route for sturgeon. The river is a border for people and a corridor for fish.",
       source: source(
@@ -252,6 +266,16 @@ export const DANUBE_JOURNEY: Journey = {
         "https://www.icpdr.org/tasks-topics/tasks/river-basin-management/sturgeon-conservation/we-pass-facilitating-fish-migration",
       ),
       sources: [mapSource, riverSource],
+      scenes: {
+        play: {
+          physicalFeatures: route("gorge"),
+          focus: { lat: 44.9, lng: 21.1, altitude: 0.23 },
+        },
+        reveal: {
+          focus: { lat: 44.8, lng: 22, altitude: 0.18 },
+          places: [landmark("iron-gates", "Iron Gates", 44.65, 22.3)],
+        },
+      },
     }),
     defineQuestion({
       mode: "choice-single",
@@ -276,28 +300,34 @@ export const DANUBE_JOURNEY: Journey = {
         { id: "sea:aegean", label: "Aegean Sea" },
         { id: "sea:north", label: "North Sea" },
       ],
-      focus: { lat: 45, lng: 26.1, altitude: 0.24 },
-      physicalFeatures: route("lower"),
-      feedbackPhysicalFeatures: [
-        ...segments.delta,
-        ...segments.branches,
-        ...segments.sea,
-      ],
       feedbackMapCaption: "Danube · full route to the sea",
-      feedbackPlaces: [
-        {
-          id: "danube:delta",
-          name: "Danube Delta",
-          kind: "other",
-          lat: 45.2,
-          lng: 29.5,
-          sourceId: "icpdr:river-basin",
-        },
-      ],
-      feedbackFocus: { lat: 44.9, lng: 30.3, altitude: 0.22 },
       explanation:
         "Three main branches spread into a maze of channels, lakes, and wetlands. Our above-ground route ends here; the opening detour eventually reaches the North Sea instead.",
       sources: [riverSource],
+      scenes: {
+        play: {
+          focus: { lat: 45, lng: 26.1, altitude: 0.24 },
+          physicalFeatures: route("lower"),
+        },
+        reveal: {
+          physicalFeatures: [
+            ...segments.delta,
+            ...segments.branches,
+            ...segments.sea,
+          ],
+          places: [
+            {
+              id: "danube:delta",
+              name: "Danube Delta",
+              kind: "other",
+              lat: 45.2,
+              lng: 29.5,
+              sourceId: "icpdr:river-basin",
+            },
+          ],
+          focus: { lat: 44.9, lng: 30.3, altitude: 0.22 },
+        },
+      },
     }),
   ],
 };

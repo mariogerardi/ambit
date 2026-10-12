@@ -194,30 +194,6 @@ export const ANDES_JOURNEY: Journey = {
         { id: "city:paramaribo", label: "Paramaribo" },
         { id: "city:medellin", label: "Medellín" },
       ],
-      contextIds: ["wurl:COL", "wurl:VEN"],
-      feedbackHintIds: ["wurl:COL", "wurl:VEN"],
-      feedbackContextIds: [],
-      map: { ...common.map, feedbackRegions: "neutral" },
-      focus: { lat: 6, lng: -72, altitude: 0.6 },
-      feedbackFocus: { lat: 5.5, lng: -73, altitude: 0.32 },
-      feedbackPlaces: [
-        {
-          ...bogota,
-          name: "Bogotá",
-          markerSize: 30,
-          visualState: "answer",
-          labelFlexible: true,
-          priority: 100,
-        },
-        {
-          ...caracas,
-          name: "Caracas",
-          markerSize: 30,
-          visualState: "hinted",
-          labelFlexible: true,
-          priority: 100,
-        },
-      ],
       explanation:
         "The capital sits high in Colombia’s Eastern Cordillera. Caracas lies farther east, in Venezuela’s separate Coastal Range.",
       correctFeedback: "Nice connection.",
@@ -244,6 +220,36 @@ export const ANDES_JOURNEY: Journey = {
           candidateIds: ["city:bogota", "city:caracas"],
         },
       },
+      scenes: {
+        play: {
+          contextIds: ["wurl:COL", "wurl:VEN"],
+          map: { ...common.map, feedbackRegions: "neutral" },
+          focus: { lat: 6, lng: -72, altitude: 0.6 },
+        },
+        reveal: {
+          contextIds: ["wurl:COL", "wurl:VEN"],
+          answerIds: [],
+          focus: { lat: 5.5, lng: -73, altitude: 0.32 },
+          places: [
+            {
+              ...bogota,
+              name: "Bogotá",
+              markerSize: 30,
+              visualState: "answer",
+              labelFlexible: true,
+              priority: 100,
+            },
+            {
+              ...caracas,
+              name: "Caracas",
+              markerSize: 30,
+              visualState: "hinted",
+              labelFlexible: true,
+              priority: 100,
+            },
+          ],
+        },
+      },
     }),
     defineQuestion({
       count: 1,
@@ -251,7 +257,6 @@ export const ANDES_JOURNEY: Journey = {
 
       ...common,
       id: "andes-chimborazo-v2",
-      overlays: [{ id: "andes:equator", type: "parallel", latitude: 0 }],
       label: "Equator",
       resolvedLabel: "Chimborazo",
       topic: "mountains and Earth’s shape",
@@ -278,13 +283,6 @@ export const ANDES_JOURNEY: Journey = {
           label: "Everest’s height is measured from its base.",
         },
       ],
-      contextIds: ["wurl:ECU"],
-      feedbackHintIds: ["wurl:ECU"],
-      feedbackContextIds: [],
-      map: { ...common.map, feedbackRegions: "neutral" },
-      focus: { lat: -1.5, lng: -78, altitude: 0.3 },
-      feedbackFocus: { lat: -1.5, lng: -78.8, altitude: 0.18 },
-      feedbackPlaces: [chimborazo],
       feedbackDiagram: { type: "earth-shape" },
       explanation:
         "Earth bulges around the Equator. Chimborazo sits near that bulge, so its summit is farther from Earth’s center. Everest is higher above sea level; these are two different measurements.",
@@ -299,6 +297,20 @@ export const ANDES_JOURNEY: Journey = {
         assist: {
           text: "The two height-measurement options are ruled out. Where is Earth wider?",
           candidateIds: ["earth:equatorial-bulge", "earth:polar-bulge"],
+        },
+      },
+      scenes: {
+        play: {
+          overlays: [{ id: "andes:equator", type: "parallel", latitude: 0 }],
+          contextIds: ["wurl:ECU"],
+          map: { ...common.map, feedbackRegions: "neutral" },
+          focus: { lat: -1.5, lng: -78, altitude: 0.3 },
+        },
+        reveal: {
+          contextIds: ["wurl:ECU"],
+          answerIds: [],
+          focus: { lat: -1.5, lng: -78.8, altitude: 0.18 },
+          places: [chimborazo],
         },
       },
     }),
@@ -318,17 +330,12 @@ export const ANDES_JOURNEY: Journey = {
       rule: { type: "country-ids", ids: ["wurl:PER", "wurl:BOL"] },
       selection: { type: "ids", ids: lakeCandidates },
       choices: choices(lakeCandidates),
-      contextIds: [],
       disclosure: {
         ...common.disclosure,
         hoverNames: true,
         namedChoices: true,
         committedNames: true,
       },
-      map: { ...common.map, hoverFeedback: true, candidates: "highlighted" },
-      focus: { lat: -13.5, lng: -72, altitude: 0.8 },
-      feedbackFocus: { lat: -15.8, lng: -69.3, altitude: 0.2 },
-      feedbackPhysicalFeatures: [andesAtLake, lake],
       explanation:
         "The lake spans their border high on the Altiplano, between Andean ranges.",
       source: source(
@@ -340,6 +347,21 @@ export const ANDES_JOURNEY: Journey = {
         assist: {
           text: "Colombia, Ecuador and Argentina are ruled out. Choose two of the three remaining countries.",
           candidateIds: ["wurl:CHL", "wurl:PER", "wurl:BOL"],
+        },
+      },
+      scenes: {
+        play: {
+          contextIds: [],
+          map: {
+            ...common.map,
+            hoverFeedback: true,
+            candidates: "highlighted",
+          },
+          focus: { lat: -13.5, lng: -72, altitude: 0.8 },
+        },
+        reveal: {
+          focus: { lat: -15.8, lng: -69.3, altitude: 0.2 },
+          physicalFeatures: [andesAtLake, lake],
         },
       },
     }),
@@ -370,20 +392,6 @@ export const ANDES_JOURNEY: Journey = {
         ],
       },
       selection: { type: "none" },
-      map: {
-        ...common.map,
-        feedbackRegions: "neutral",
-        borderIds: ["wurl:ARG", "wurl:CHL"],
-      },
-      contextIds: ["wurl:ARG", "wurl:CHL"],
-      focus: { lat: -34, lng: -68.5, altitude: 0.4 },
-      feedbackFocus: { lat: -32.65, lng: -70, altitude: 0.2 },
-      places: [
-        aconcagua,
-        countryLabel("ARG", "Argentina", -33.5, -66.5),
-        countryLabel("CHL", "Chile", -34.5, -71.5),
-      ],
-      feedbackPlaces: [aconcagua],
       explanation:
         "The summit rises in Mendoza province, about 15 km east of the Chilean frontier. The highest point is on the Argentine side.",
       source: source(
@@ -401,6 +409,24 @@ export const ANDES_JOURNEY: Journey = {
         hint: "Look in western Mendoza province, just east of the Chilean border.",
         assist: {
           text: "Córdoba is marked as a reference. Look southwest of it, along Argentina’s border with Chile. The summit stays unmarked.",
+        },
+      },
+      scenes: {
+        play: {
+          map: {
+            ...common.map,
+            feedbackRegions: "neutral",
+            borderIds: ["wurl:ARG", "wurl:CHL"],
+          },
+          contextIds: ["wurl:ARG", "wurl:CHL"],
+          focus: { lat: -34, lng: -68.5, altitude: 0.4 },
+          places: [
+            aconcagua,
+            countryLabel("ARG", "Argentina", -33.5, -66.5),
+            countryLabel("CHL", "Chile", -34.5, -71.5),
+          ],
+        },
+        assist: {
           places: [
             {
               ...cordoba,
@@ -409,6 +435,10 @@ export const ANDES_JOURNEY: Journey = {
               priority: 100,
             },
           ],
+        },
+        reveal: {
+          focus: { lat: -32.65, lng: -70, altitude: 0.2 },
+          places: [aconcagua],
         },
       },
     }),
@@ -433,20 +463,6 @@ export const ANDES_JOURNEY: Journey = {
         { id: "animal:walruses", label: "Walruses" },
         { id: "animal:polar-bears", label: "Polar bears" },
       ],
-      contextIds: ["wurl:CHL", "wurl:ARG"],
-      map: {
-        ...common.map,
-        feedbackRegions: "neutral",
-        borderIds: ["wurl:CHL", "wurl:ARG"],
-      },
-      focus: { lat: -53.6, lng: -69.5, altitude: 0.45 },
-      feedbackFocus: { lat: colony.lat, lng: colony.lng, altitude: 0.22 },
-      physicalFeatures: [],
-      places: [
-        countryLabel("bahia-inutil", "Bahía Inútil", -53.35, -69.65),
-        countryLabel("tierra-del-fuego", "Tierra del Fuego", -54.05, -68.4),
-      ],
-      feedbackPlaces: [colony],
       explanation:
         "King penguins breed here on a South American shore, as well as on subantarctic islands. Penguins’ breeding grounds extend far beyond Antarctica.",
       correctFeedback: "A wild discovery.",
@@ -469,6 +485,26 @@ export const ANDES_JOURNEY: Journey = {
         assist: {
           text: "Walruses and polar bears are ruled out. Choose between penguins and puffins.",
           candidateIds: ["animal:penguins", "animal:puffins"],
+        },
+      },
+      scenes: {
+        play: {
+          contextIds: ["wurl:CHL", "wurl:ARG"],
+          map: {
+            ...common.map,
+            feedbackRegions: "neutral",
+            borderIds: ["wurl:CHL", "wurl:ARG"],
+          },
+          focus: { lat: -53.6, lng: -69.5, altitude: 0.45 },
+          physicalFeatures: [],
+          places: [
+            countryLabel("bahia-inutil", "Bahía Inútil", -53.35, -69.65),
+            countryLabel("tierra-del-fuego", "Tierra del Fuego", -54.05, -68.4),
+          ],
+        },
+        reveal: {
+          focus: { lat: colony.lat, lng: colony.lng, altitude: 0.22 },
+          places: [colony],
         },
       },
     }),

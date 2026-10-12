@@ -55,14 +55,18 @@ export const FOURTH_JOURNEY: Journey = {
         { id: "language:nld", label: "Dutch" },
         { id: "language:pol", label: "Polish" },
       ],
-      contextIds: ["wurl:ESP"],
-      focus: { lat: 40, lng: -3, altitude: 0.75 },
       explanation:
         "Regional languages share official status with Spanish; Catalonia and the Basque Country are two examples.",
       source: {
         name: "Spain Ministry of Territorial Policy · official languages",
         url: "https://mptmd.gob.es/en/portal/politica-territorial/autonomica/lenguas-cooficiales",
         reviewedOn: "2026-10-05",
+      },
+      scenes: {
+        play: {
+          contextIds: ["wurl:ESP"],
+          focus: { lat: 40, lng: -3, altitude: 0.75 },
+        },
       },
     }),
     defineQuestion({
@@ -88,7 +92,6 @@ export const FOURTH_JOURNEY: Journey = {
         { id: "island:cyprus", label: "Cyprus" },
         { id: "island:malta", label: "Malta" },
       ],
-      contextIds: ["wurl:ITA"],
       highlightParts: [
         {
           countryId: "wurl:ITA",
@@ -97,23 +100,30 @@ export const FOURTH_JOURNEY: Journey = {
           reveal: "part",
         },
       ],
-      focus: { lat: 37.6, lng: 14, altitude: 0.32 },
       explanation:
         "The Mediterranean’s largest island sits just beyond the toe of Italy.",
-      feedbackPlaces: [
-        {
-          id: "clue:sicily",
-          name: "Sicily",
-          kind: "other",
-          lat: 37.6,
-          lng: 14,
-          sourceId: "curated:sicily-v1",
-        },
-      ],
       source: {
         name: "Visit Sicily · official regional tourism brochure",
         url: "https://www.visitsicily.info/wp-content/uploads/2024/11/SR_Brochure-Sicilia_20241102_Inglese_Maggiore-risoluzione.pdf",
         reviewedOn: "2026-10-05",
+      },
+      scenes: {
+        play: {
+          contextIds: ["wurl:ITA"],
+          focus: { lat: 37.6, lng: 14, altitude: 0.32 },
+        },
+        reveal: {
+          places: [
+            {
+              id: "clue:sicily",
+              name: "Sicily",
+              kind: "other",
+              lat: 37.6,
+              lng: 14,
+              sourceId: "curated:sicily-v1",
+            },
+          ],
+        },
       },
     }),
     defineQuestion({
@@ -132,11 +142,15 @@ export const FOURTH_JOURNEY: Journey = {
       mode: "text",
       inputLabel: "Capital city",
       rule: { type: "capital-name", countryId: "wurl:LBY" },
-      contextIds: ["wurl:LBY"],
-      focus: { lat: 27, lng: 17, altitude: 0.9 },
-      feedbackPlaces: [tripoli],
       explanation:
         "On Libya’s Mediterranean coast, this city ties our southern stop back to the same sea.",
+      scenes: {
+        play: {
+          contextIds: ["wurl:LBY"],
+          focus: { lat: 27, lng: 17, altitude: 0.9 },
+        },
+        reveal: { places: [tripoli] },
+      },
     }),
     defineQuestion({
       commitment: "submit",
@@ -164,19 +178,23 @@ export const FOURTH_JOURNEY: Journey = {
         hoverNames: true,
         committedNames: true,
       },
-      map: {
-        borders: true,
-        hoverFeedback: true,
-        muteOthers: true,
-        candidates: "highlighted",
-      },
-      focus: { lat: 44, lng: 19, altitude: 0.85 },
       explanation:
         "These were Yugoslavia’s six constituent republics. Kosovo was an autonomous province, so it isn’t part of this set.",
       source: {
         name: "UN ICTY · the former Yugoslavia",
         url: "https://www.icty.org/en/about/what-former-yugoslavia",
         reviewedOn: "2026-10-05",
+      },
+      scenes: {
+        play: {
+          map: {
+            borders: true,
+            hoverFeedback: true,
+            muteOthers: true,
+            candidates: "highlighted",
+          },
+          focus: { lat: 44, lng: 19, altitude: 0.85 },
+        },
       },
     }),
     defineQuestion({
@@ -196,22 +214,6 @@ export const FOURTH_JOURNEY: Journey = {
       mode: "number",
       inputLabel: "Number of coastal countries",
       rule: { type: "feature-count", featureId: "mediterranean" },
-      map: {
-        borders: false,
-        hoverFeedback: false,
-        muteOthers: true,
-        revealOnAnswer: true,
-      },
-      places: [
-        {
-          id: "clue:mediterranean-sea",
-          name: "Mediterranean Sea",
-          kind: "other",
-          lat: 35,
-          lng: 18,
-          sourceId: "curated:mediterranean-v1",
-        },
-      ],
       explanation:
         "One sea connects Europe, Africa, and Asia. This total includes Palestine’s Gaza coast, but not overseas dependencies.",
       source: FEATURES.mediterranean.source,
@@ -223,6 +225,26 @@ export const FOURTH_JOURNEY: Journey = {
           reviewedOn: "2026-10-05",
         },
       ],
+      scenes: {
+        play: {
+          map: {
+            borders: false,
+            hoverFeedback: false,
+            muteOthers: true,
+            revealOnAnswer: true,
+          },
+          places: [
+            {
+              id: "clue:mediterranean-sea",
+              name: "Mediterranean Sea",
+              kind: "other",
+              lat: 35,
+              lng: 18,
+              sourceId: "curated:mediterranean-v1",
+            },
+          ],
+        },
+      },
     }),
   ],
 };

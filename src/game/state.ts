@@ -1,10 +1,11 @@
-import { orderedCards, swapOrderCard } from "./ordering";
+import { mechanicFor, usesChoiceCards } from "./mechanics";
+import { orderedCards, swapOrderCard, isSlotAnswer } from "./ordering";
 import { pointAnswerNoun, validPin } from "./answerTargets";
 import {
   candidateAvailable,
   lockedOrderSlots,
   lockedSelectionIds,
-  withLockedSelections,
+  withAssistanceLocks,
 } from "./guidance";
 import type { HelpUsage } from "./guidance";
 import {
@@ -114,7 +115,7 @@ export function gameReducer(
         };
   }
   if (state.phase !== "playing") return state;
-  state = withLockedSelections(round, state);
+  state = withAssistanceLocks(round, state);
   if (action.type === "request-hint")
     return round.guidance && !state.help?.[round.id]
       ? { ...state, help: { ...state.help, [round.id]: "hinted" } }
@@ -126,27 +127,7 @@ export function gameReducer(
       ...state,
       help: { ...state.help, [round.id]: "assisted" },
     };
-    const fixed = lockedOrderSlots(round, helped);
-    if (fixed.length && round.orderInitial) {
-      helped.ordered = orderedCards(round, state);
-      for (const slot of fixed)
-        helped.ordered = swapOrderCard(
-          round,
-          helped.ordered,
-          slot.id,
-          slot.index,
-        );
-    } else if (fixed.length) {
-      helped.ordered = Array.from(
-        { length: round.count },
-        (_, index) =>
-          fixed.find((slot) => slot.index === index)?.id ??
-          (fixed.some((slot) => slot.id === state.ordered[index])
-            ? ""
-            : (state.ordered[index] ?? "")),
-      );
-    }
-    return withLockedSelections(round, helped);
+    return withAssistanceLocks(round, helped);
   }
   if (action.type === "drop-pin")
     return round.mode === "pin" && validPin(action)
@@ -159,7 +140,7 @@ export function gameReducer(
   if (action.type === "text")
     return { ...state, text: action.value, inputError: undefined };
   if (action.type === "ordered") {
-    if (round.mode === "choice-order") return state;
+    if (isSlotAnswer(round)) return state;
     if (action.index < 0 || action.index >= responseCount(round, context))
       return state;
     const ordered = Array.from(
@@ -171,7 +152,7 @@ export function gameReducer(
   if (action.type === "order-card") {
     const fixed = lockedOrderSlots(round, state);
     if (
-      round.mode !== "choice-order" ||
+      !isSlotAnswer(round) ||
       !Number.isInteger(action.index) ||
       action.index < -1 ||
       action.index >= round.count ||
@@ -209,22 +190,13 @@ export function gameReducer(
               : [],
         };
   if (action.type === "select" || action.type === "guess-country") {
-    if (
-      round.mode !== "city-single" &&
-      round.mode !== "city-multiple" &&
-      round.mode !== "map-single" &&
-      round.mode !== "map-multiple" &&
-      round.mode !== "land-path" &&
-      round.mode !== "choice-single" &&
-      round.mode !== "choice-multiple"
-    )
-      return state;
-    if (action.type === "guess-country" && round.mode.startsWith("choice-"))
-      return state;
+    const mechanic = mechanicFor(round);
+    if (mechanic.response !== "selected") return state;
+    if (action.type === "guess-country" && usesChoiceCards(round)) return state;
     const id =
       action.type === "select"
         ? action.id
-        : round.mode.startsWith("city-")
+        : mechanic.mapSelection === "places"
           ? cityIdForName(round, state.text)
           : countryIdForName(context, state.text);
     if (!id || !canSelect(round, context, id))
@@ -232,7 +204,7 @@ export function gameReducer(
         ? {
             ...state,
             inputError:
-              (round.mode.startsWith("city-")
+              (mechanic.mapSelection === "places"
                 ? `Choose a marked ${pointAnswerNoun(round)} or type its name. If names are ambiguous, choose the marker on the globe.`
                 : round.rule.type === "region-ids"
                   ? "Choose a region allowed by this question. Check the name and spelling."
@@ -261,18 +233,11 @@ export function gameReducer(
           };
     if (
       state.selectedIds.length >= responseCount(round, context) &&
-      round.mode !== "map-single" &&
-      round.mode !== "city-single" &&
-      round.mode !== "choice-single"
+      !mechanic.single
     )
       return state;
     const response: Response = {
-      selectedIds:
-        round.mode === "map-single" ||
-        round.mode === "city-single" ||
-        round.mode === "choice-single"
-          ? [id]
-          : [...state.selectedIds, id],
+      selectedIds: mechanic.single ? [id] : [...state.selectedIds, id],
       text: "",
       ordered: state.ordered,
     };
@@ -288,10 +253,9 @@ export function gameReducer(
     return finish(
       {
         ...state,
-        ordered:
-          round.mode === "choice-order"
-            ? orderedCards(round, state)
-            : state.ordered,
+        ordered: isSlotAnswer(round)
+          ? orderedCards(round, state)
+          : state.ordered,
       },
       isCorrect(round, context, state),
     );

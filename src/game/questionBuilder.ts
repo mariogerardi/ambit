@@ -1,3 +1,6 @@
+import { compileQuestionScenes } from "./scenes";
+import type { QuestionScenes, PlayScene } from "./scenes";
+import { MECHANICS, mechanicFor, usesChoiceCards } from "./mechanics";
 import type { AnswerMode, Journey, KnowledgeRule, Question } from "./questions";
 
 /** Shared styling/context only. A completed round is never an interaction template. */
@@ -17,6 +20,9 @@ export type QuestionPresentation = Partial<
     | "choices"
     | "inputLabel"
     | "orderLabels"
+    | "matchSlots"
+    | "orderInitial"
+    | "shuffleChoices"
     | "guidance"
   >
 >;
@@ -38,6 +44,9 @@ export function definePresentation<T extends QuestionPresentation>(
     "choices",
     "inputLabel",
     "orderLabels",
+    "matchSlots",
+    "orderInitial",
+    "shuffleChoices",
     "guidance",
   ];
   if (forbidden.some((key) => key in presentation))
@@ -49,7 +58,7 @@ export function definePresentation<T extends QuestionPresentation>(
 
 type Rule<M extends AnswerMode> = Extract<
   KnowledgeRule,
-  { type: (typeof rules)[M][number] }
+  { type: (typeof MECHANICS)[M]["rules"][number] }
 >;
 type NoMapSelection = { selection: { type: "none" }; commitment: "submit" };
 type MapSelection = {
@@ -104,6 +113,13 @@ export type QuestionContract =
     } & NoMapSelection &
       Choices)
   | ({
+      mode: "choice-match";
+      rule: Rule<"choice-match">;
+      matchSlots: NonNullable<Question["matchSlots"]>;
+      count: number;
+    } & NoMapSelection &
+      Choices)
+  | ({
       mode: "text";
       rule: Rule<"text">;
       inputLabel: string;
@@ -139,100 +155,36 @@ export type QuestionContract =
     } & MapSelection);
 export type AuthoredQuestion = Omit<
   Question,
-  "mode" | "rule" | "selection" | "commitment" | "count"
+  "mode" | "rule" | "selection" | "commitment" | "count" | "focus"
 > &
-  QuestionContract;
+  QuestionContract &
+  (
+    | { focus: Question["focus"] }
+    | {
+        focus?: never;
+        scenes: QuestionScenes & {
+          play: PlayScene & { focus: Question["focus"] };
+        };
+      }
+  );
 
-const rules = {
-  pin: ["pin-distance", "pin-inside"],
-  "city-single": ["place-ids"],
-  "city-multiple": ["place-ids"],
-  "map-single": [
-    "country-ids",
-    "region-ids",
-    "flag-country",
-    "territory-owner",
-    "physical-feature",
-    "country-circle",
-    "name-length",
-    "country-fact",
-    "language-family",
-  ],
-  "map-multiple": [
-    "country-ids",
-    "region-ids",
-    "flag-country",
-    "territory-owner",
-    "physical-feature",
-    "country-circle",
-    "name-length",
-    "country-fact",
-    "language-family",
-  ],
-  "choice-single": [
-    "choice-ids",
-    "country-ids",
-    "official-languages",
-    "territory-owner",
-    "region-ids",
-    "flag-country",
-    "physical-feature",
-    "language-family",
-  ],
-  "choice-multiple": [
-    "choice-ids",
-    "country-ids",
-    "official-languages",
-    "territory-owner",
-    "region-ids",
-    "flag-country",
-    "physical-feature",
-    "language-family",
-  ],
-  "choice-order": ["country-ids"],
-  text: [
-    "manual-text",
-    "capital-name",
-    "capital-coordinate",
-    "capital-circle",
-    "text-fact",
-  ],
-  number: [
-    "manual-number",
-    "feature-count",
-    "shortest-borders",
-    "capital-circle",
-  ],
-  "typed-regions": ["region-ids"],
-  "ordered-countries": ["country-ids", "great-circle-order"],
-  "ordered-capitals": ["capital-order"],
-  "land-path": ["shortest-borders"],
-} as const satisfies Record<AnswerMode, readonly KnowledgeRule["type"][]>;
 export const isRegionAnswer = (question: Pick<Question, "mode">) =>
-  question.mode === "map-single" ||
-  question.mode === "map-multiple" ||
-  question.mode === "land-path";
+  mechanicFor(question).mapSelection === "regions";
 
 /** Fail during authoring/build and lazy loading, before a player reaches broken controls. */
 export function validateQuestionContract(q: Question): void {
   const fail = (message: string): never => {
     throw Error(`Invalid question contract (${q.id}): ${message}`);
   };
-  const allowed: readonly KnowledgeRule["type"][] = rules[q.mode];
+  const definition = mechanicFor(q);
+  const allowed = definition?.rules;
   if (!allowed?.includes(q.rule.type))
     fail("answer mode and grading rule disagree");
   if (!Number.isInteger(q.count) || q.count < 1)
     fail("count must be a positive integer");
-  const single = [
-    "pin",
-    "city-single",
-    "map-single",
-    "choice-single",
-    "text",
-    "number",
-  ].includes(q.mode);
-  if (single && q.count !== 1) fail("single answers require count 1");
-  const city = q.mode.startsWith("city-");
+  if (definition.single && q.count !== 1)
+    fail("single answers require count 1");
+  const city = definition.mapSelection === "places";
   if (isRegionAnswer(q) || city) {
     if (q.selection.type === "none")
       fail("map answers require selectable candidates");
@@ -240,14 +192,9 @@ export function validateQuestionContract(q: Question): void {
       fail("city answers require explicit place candidates");
   } else if (q.selection.type !== "none")
     fail("non-map answers cannot inherit map selection");
-  if (
-    !["map-single", "map-multiple", "city-single", "city-multiple"].includes(
-      q.mode,
-    ) &&
-    q.commitment !== "submit"
-  )
+  if (!definition.editableCommitment && q.commitment !== "submit")
     fail("this mode requires explicit submission");
-  if (q.mode.startsWith("choice-")) {
+  if (usesChoiceCards(q)) {
     const choices = q.choices ?? [];
     if (
       choices.length < 2 ||
@@ -267,15 +214,14 @@ export function validateQuestionContract(q: Question): void {
     !q.inputLabel?.trim()
   )
     fail("typed answers require a field label");
-  if (
-    q.mode === "choice-order" &&
-    (q.rule.type !== "country-ids" || !q.rule.ordered)
-  )
-    fail("card ordering requires ordered grading");
+  definition.validate?.(q, fail);
+  if (q.mode !== "choice-match" && q.matchSlots)
+    fail("matching slots require a matching answer mode");
 }
 export function defineQuestion(question: AuthoredQuestion): Question {
-  validateQuestionContract(question);
-  return question;
+  const compiled = compileQuestionScenes(question);
+  validateQuestionContract(compiled);
+  return compiled;
 }
 export function validateJourneyContracts(journey: Journey): void {
   const ids = new Set<string>();

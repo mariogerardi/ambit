@@ -48,7 +48,7 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | ------------------- | ----------------------- | --------: |
 | `pin`               | Drop a pin              |        15 |
 | `city-single`       | Single city pick        |         1 |
-| `city-multiple`     | Multiple city picks     |         1 |
+| `city-multiple`     | Multiple city picks     |         0 |
 | `map-single`        | Single country pick     |        10 |
 | `map-multiple`      | Multiple country picks  |         5 |
 | `number`            | Number                  |         2 |
@@ -59,6 +59,7 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `choice-single`     | Single choice           |        15 |
 | `choice-multiple`   | Multiple choices        |         3 |
 | `choice-order`      | Order cards with spares |         0 |
+| `choice-match`      | Match cards to roles    |         1 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
 example or playground selector. Multiple-choice questions are capped at six
@@ -72,6 +73,19 @@ answers. Use disclosure settings to hide names, not hover settings to disable
 the intended control. Author typed recall as `mode: "text"` with an immediately
 visible input. `allowTyping: false` suppresses a globe-only question's typing
 shortcut while retaining the unavailable-WebGL fallback.
+
+`choice-match` pairs distinct `choices` cards with labelled `matchSlots` roles.
+A `slot-matches` rule declares `{ slotId, choiceId }` pairs by stable identity;
+array order in the rule is irrelevant. Each role receives one unique card, with
+optional spare cards. Responses use the existing `ordered` slots, and
+`assist.fixedSlots` can lock a correct pairing. Dragging and button placement share
+`OrderAnswer` with ordering; matching has its own two-column layout, instructions,
+answer summary, grading contract, and per-role map feedback. It works without WebGL.
+Do not encode city/role matching as ordered `country-ids`.
+
+`shuffleChoices: true` randomizes ordinary choice-button positions once while a
+question is mounted. Hint/assist rerenders preserve those positions; grading uses
+IDs. Do not infer answers from visual card order.
 
 `choice-order` stores candidate IDs in `Response.ordered`, with a
 `country-ids` rule marked `ordered: true`. It supports spare/distractor cards,
@@ -94,17 +108,17 @@ The finale hides prior landmarks; the full results tour includes the colony.
 
 A rule describes correctness independently of its answer control:
 
-| Family                 | Rule IDs                                                                                        | Authority/limits                                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `country-ids`, `region-ids`, `place-ids`          | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
-| Pin placement          | `pin-inside`, `pin-distance`                                                                    | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
-| Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                      | Sourced fact context or the explicit common-English-name UN roster.                                     |
-| Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                 | Bundled capital/flag records; capital-order checks the specified route.                                 |
-| Geographic reasoning   | `shortest-borders`, `great-circle-order`                                                        | Shared-edge canonical topology and spherical route intersections, not roads or travel permissions.      |
-| Reviewed relationships | `territory-owner`, `feature-count`, `language-family`, `official-languages`, `physical-feature` | Curated sets/profiles, not universal relationships inferred from display metadata.                      |
-| Spatial predicates     | `capital-coordinate`, `capital-circle`, `country-circle`                                        | Pinned coordinates, geodesic disks, and full country geometry. `country-circle` has no bundled example. |
+| Family                 | Rule IDs                                                                                               | Authority/limits                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `slot-matches`, `country-ids`, `region-ids`, `place-ids` | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
+| Pin placement          | `pin-inside`, `pin-distance`                                                                           | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
+| Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                             | Sourced fact context or the explicit common-English-name UN roster.                                     |
+| Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                        | Bundled capital/flag records; capital-order checks the specified route.                                 |
+| Geographic reasoning   | `shortest-borders`, `great-circle-order`                                                               | Shared-edge canonical topology and spherical route intersections, not roads or travel permissions.      |
+| Reviewed relationships | `territory-owner`, `feature-count`, `language-family`, `official-languages`, `physical-feature`        | Curated sets/profiles, not universal relationships inferred from display metadata.                      |
+| Spatial predicates     | `capital-coordinate`, `capital-circle`, `country-circle`                                               | Pinned coordinates, geodesic disks, and full country geometry. `country-circle` has no bundled example. |
 
-There are 24 declared knowledge-rule variants. Support for a rule does not imply
+There are 25 declared knowledge-rule variants. Support for a rule does not imply
 complete factual coverage or that every mode/rule combination is valid.
 [`createQuestionContext`](../src/game/questions.ts) prepares and validates the
 required targets/answers. Inspect an existing question with the same rule before
@@ -121,6 +135,26 @@ rule or reviewed time-series dataset. Explore's undated population estimates are
 not safe evidence for a current-year ranking. Supply a dated source, population
 measure, units, rounding/tolerance, and tie policy; add a versioned dataset and
 predicate if the question should be computed rather than fixed.
+
+Not the obvious city develops five capital decisions: typed recall in Türkiye,
+a Canberra pin, interpreting Abuja's relocation, anonymous Brasília markers, and
+South Africa's three traditional capital roles. Türkiye's assist marks Ankara,
+Konya and Kayseri with identical city styling. Nigeria's known locations are
+visible before answering the explanation question. Matching labels the judicial
+role with the Supreme Court of Appeal so Johannesburg's Constitutional Court
+remains a fair, explicitly explained distractor. Completion compares capitals
+with famous, rival and former cities through closer authored views.
+
+See [Journey engine and extension contracts](JOURNEY_ENGINE.md) for the code paths,
+a matching example, and the checklist for adding reusable mechanics.
+
+New questions can group state-specific geography in `scenes.play`, `scenes.assist`
+and `scenes.reveal`. `defineQuestion` compiles those records into the existing
+runtime fields; older Journeys remain compatible. The mechanic registry in
+`mechanics.ts` owns rule compatibility, control/response capabilities, validation
+hooks and submission. Complete executable examples live in `recipes.ts` and are
+excluded from the published catalog. Use `npm run check:journey -- <id-or-slug>`
+for focused local review, or `--recipe <answer-mode>` to inspect a control example.
 
 ## Add or change a Journey
 
@@ -154,13 +188,12 @@ before publication. Automatic dates show the actual rotation title. Admin can
 navigate months, jump to today, enter a date directly, or restore automatic
 rotation for an assigned day.
 
-The revised sun Journey uses `chasing-the-sun-v2`, with `supersedes` pointing to
-its original ID. New attempts resolve published original-ID assignments to the
-revised edition; started attempts keep their saved ID, questions, and scores.
-A compatibility-only original definition remains loadable for those saves, but
-has no practice route and is excluded from Admin choices and the playground.
-The index generator includes both current and compatibility metadata; the current
-question catalog contains only 65 questions.
+All 13 current Journeys (65 questions) author grouped play/assist/reveal scenes.
+There are no archived runtime editions. The revised sun Journey keeps
+`chasing-the-sun-v2` and its `supersedes` alias so previously published original-ID
+assignments resolve to the current edition. The original ID is retired: save
+recovery drops its old attempts while preserving progress on retained Journeys.
+The index generator includes only current definitions.
 
 Adding a bundled edition does not change the active rotation. Editing the explicit
 rotation list does change which editions subsequent dates select.

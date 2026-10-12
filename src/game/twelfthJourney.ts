@@ -63,8 +63,6 @@ export const TWELFTH_JOURNEY: Journey = {
           "Suriname",
         ][i],
       })),
-      map: { borders: true, hoverFeedback: false, muteOthers: true },
-      focus: { lat: 28, lng: -25, altitude: 1.7 },
       highlightParts: [
         {
           countryId: "wurl:FRA",
@@ -73,24 +71,32 @@ export const TWELFTH_JOURNEY: Journey = {
         },
       ],
       importedRegions: geography.regions as RegionFeature[],
-      feedbackContextIds: ["wurl:FRA-GF"],
-      feedbackFocus: { lat: 4, lng: -53, altitude: 0.35 },
-      feedbackPlaces: [
-        {
-          id: "reveal:french-guiana",
-          name: "French Guiana · France",
-          kind: "other",
-          lat: 4.2,
-          lng: -53.3,
-          sourceId: "naturalearth:1159311355",
-        },
-      ],
       explanation:
         "French Guiana is part of France. Its South American border beats every border France has in Europe.",
       source: source(
         "Presidency of Brazil · France’s longest land border",
         "https://www.gov.br/planalto/en/latest-news/2023/05/presidents-lula-and-macron-meet-at-the-g7-summit-and-seal-resumption-of-brazil-france-relations",
       ),
+      scenes: {
+        play: {
+          map: { borders: true, hoverFeedback: false, muteOthers: true },
+          focus: { lat: 28, lng: -25, altitude: 1.7 },
+        },
+        reveal: {
+          answerIds: ["wurl:FRA-GF"],
+          focus: { lat: 4, lng: -53, altitude: 0.35 },
+          places: [
+            {
+              id: "reveal:french-guiana",
+              name: "French Guiana · France",
+              kind: "other",
+              lat: 4.2,
+              lng: -53.3,
+              sourceId: "naturalearth:1159311355",
+            },
+          ],
+        },
+      },
     }),
     defineQuestion({
       mode: "map-single",
@@ -111,23 +117,27 @@ export const TWELFTH_JOURNEY: Journey = {
         hoverNames: true,
         committedNames: true,
       },
-      focus: { lat: 43, lng: 58, altitude: 1.45 },
-      feedbackFocus: { lat: 40, lng: 66, altitude: 0.6 },
-      feedbackPlaces: neighbors.map(([id, name, lat, lng]) => ({
-        id: `reveal:${id}`,
-        name,
-        lat,
-        lng,
-        kind: "other",
-        sourceId: "naturalearth",
-        parentId: id,
-      })),
       explanation:
         "Every neighboring country is landlocked too. Reaching an ocean over land means crossing at least two borders.",
       source: source(
         "World Bank · Uzbekistan country overview",
         "https://www.worldbank.org/ext/en/country/uzbekistan",
       ),
+      scenes: {
+        play: { focus: { lat: 43, lng: 58, altitude: 1.45 } },
+        reveal: {
+          focus: { lat: 40, lng: 66, altitude: 0.6 },
+          places: neighbors.map(([id, name, lat, lng]) => ({
+            id: `reveal:${id}`,
+            name,
+            lat,
+            lng,
+            kind: "other",
+            sourceId: "naturalearth",
+            parentId: id,
+          })),
+        },
+      },
     }),
     defineQuestion({
       count: 1,
@@ -154,18 +164,6 @@ export const TWELFTH_JOURNEY: Journey = {
           "Marshall Islands",
         ][i],
       })),
-      map: { borders: false, hoverFeedback: false, muteOthers: true },
-      focus: { lat: -3, lng: -173, altitude: 1.25 },
-      feedbackFocus: { lat: 0, lng: -173, altitude: 0.85 },
-      feedbackOverlays: [
-        { id: "kiribati-equator", type: "parallel", latitude: 0 },
-        { id: "kiribati-antimeridian", type: "meridian", longitude: 180 },
-      ],
-      feedbackPlaces: (geography.islands as PlaceFeature[]).map((p) => ({
-        ...p,
-        visualState: "answer",
-        answerTarget: true,
-      })),
       explanation:
         "The islands cross both the Equator and the 180° meridian. One country can belong to all four hemispheres.",
       source: source(
@@ -173,6 +171,24 @@ export const TWELFTH_JOURNEY: Journey = {
         "https://mfed.gov.ki/sites/default/files/2025-09/KDP%202024-2027_Launched_17.09.25_3.pdf",
       ),
       sources: [geography.islandSource],
+      scenes: {
+        play: {
+          map: { borders: false, hoverFeedback: false, muteOthers: true },
+          focus: { lat: -3, lng: -173, altitude: 1.25 },
+        },
+        reveal: {
+          focus: { lat: 0, lng: -173, altitude: 0.85 },
+          overlays: [
+            { id: "kiribati-equator", type: "parallel", latitude: 0 },
+            { id: "kiribati-antimeridian", type: "meridian", longitude: 180 },
+          ],
+          places: (geography.islands as PlaceFeature[]).map((p) => ({
+            ...p,
+            visualState: "answer",
+            answerTarget: true,
+          })),
+        },
+      },
     }),
     defineQuestion({
       mode: "map-single",
@@ -188,40 +204,46 @@ export const TWELFTH_JOURNEY: Journey = {
       prompt: "Which country gained Bolivia’s coast in the War of the Pacific?",
       instruction: "",
       rule: { type: "country-ids", ids: ["wurl:CHL"] },
-      contextIds: ["wurl:BOL"],
-      map: {
-        borders: false,
-        borderIds: ["wurl:BOL"],
-        hoverFeedback: true,
-        muteOthers: true,
-        candidates: "neutral",
-      },
-      focus: { lat: -20, lng: -65, altitude: 0.95 },
-      feedbackFocus: { lat: -23, lng: -68, altitude: 0.62 },
-      feedbackPlaces: [
-        {
-          id: "reveal:bolivia",
-          name: "Bolivia",
-          lat: -17,
-          lng: -64,
-          kind: "other",
-          sourceId: "naturalearth",
-        },
-        {
-          id: "reveal:chile",
-          name: "Chile",
-          lat: -25,
-          lng: -69,
-          kind: "other",
-          sourceId: "naturalearth",
-        },
-      ],
       explanation:
         "Bolivia lost its coast in the war. The 1904 treaty confirmed the border, leaving it landlocked.",
       source: source(
         "International Court of Justice · Bolivia v. Chile, historical background",
         "https://www.icj-cij.org/case/153",
       ),
+      scenes: {
+        play: {
+          contextIds: ["wurl:BOL"],
+          map: {
+            borders: false,
+            borderIds: ["wurl:BOL"],
+            hoverFeedback: true,
+            muteOthers: true,
+            candidates: "neutral",
+          },
+          focus: { lat: -20, lng: -65, altitude: 0.95 },
+        },
+        reveal: {
+          focus: { lat: -23, lng: -68, altitude: 0.62 },
+          places: [
+            {
+              id: "reveal:bolivia",
+              name: "Bolivia",
+              lat: -17,
+              lng: -64,
+              kind: "other",
+              sourceId: "naturalearth",
+            },
+            {
+              id: "reveal:chile",
+              name: "Chile",
+              lat: -25,
+              lng: -69,
+              kind: "other",
+              sourceId: "naturalearth",
+            },
+          ],
+        },
+      },
     }),
     defineQuestion({
       mode: "map-single",
@@ -238,15 +260,19 @@ export const TWELFTH_JOURNEY: Journey = {
         "Baku sits about 28 meters below sea level. Which country is it the capital of?",
       instruction: "",
       rule: { type: "country-ids", ids: ["wurl:AZE"] },
-      focus: { lat: 40, lng: 48, altitude: 0.68 },
-      feedbackFocus: { lat: 40.4, lng: 48.5, altitude: 0.32 },
-      feedbackPlaces: [ANSWER_PLACES.get("place:587084")!],
       explanation:
         "The Caspian’s surface is below sea level—and so is this capital. Even land doesn’t always sit above the sea.",
       source: source(
         "Azerbaijan · Baku’s Caspian setting and elevation",
         "https://azerbaijan.az/en/related-information/217",
       ),
+      scenes: {
+        play: { focus: { lat: 40, lng: 48, altitude: 0.68 } },
+        reveal: {
+          focus: { lat: 40.4, lng: 48.5, altitude: 0.32 },
+          places: [ANSWER_PLACES.get("place:587084")!],
+        },
+      },
     }),
   ],
 };

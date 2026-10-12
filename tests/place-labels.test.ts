@@ -13,6 +13,7 @@ import {
 } from "../src/globe/placeLabels";
 import { ANSWER_PLACES } from "../src/game/answerTargets";
 import { PLAY_HIGHLIGHTS } from "../src/globe/themes";
+import { cityReference } from "../src/game/authoredPlaces";
 import type { PlaceFeature } from "../src/geography/types";
 import {
   PhysicalFeatures,
@@ -67,6 +68,101 @@ const camera = () => {
 };
 afterEach(() => vi.unstubAllGlobals());
 describe("cached readable place labels", () => {
+  it.each([0.42, 0.85, 1.35])(
+    "keeps Pretoria and Johannesburg labels clear of both reference dots at altitude %s",
+    (altitude) => {
+      canvasFactory();
+      const labels = new PlaceLabels();
+      const references = ["place:964137", "place:993800"].map((id) =>
+        cityReference(ANSWER_PLACES.get(id)!),
+      );
+      labels.update(
+        {
+          id: "nearby-references",
+          kind: "place-labels",
+          visible: true,
+          markers: true,
+          places: references,
+        },
+        100,
+      );
+      const c = camera();
+      c.aspect = 1.5;
+      c.updateProjectionMatrix();
+      const phi = (-28.5 * Math.PI) / 180,
+        theta = (25 * Math.PI) / 180,
+        distance = 100 * (1 + altitude);
+      c.position.set(
+        Math.cos(phi) * Math.sin(theta) * distance,
+        Math.sin(phi) * distance,
+        Math.cos(phi) * Math.cos(theta) * distance,
+      );
+      c.lookAt(0, 0, 0);
+      c.updateMatrixWorld();
+      labels.view(c, 1200, 800);
+      const shown = labels.group.children.filter(
+        (sprite) => sprite.visible && sprite.userData.role === "label",
+      );
+      expect(shown.map((sprite) => sprite.userData.labelName).sort()).toEqual([
+        "Johannesburg",
+        "Pretoria",
+      ]);
+      const dots = labels.group.children
+        .filter((sprite) => sprite.visible && sprite.userData.role === "marker")
+        .map((sprite) => {
+          const position = sprite.position.clone().project(c);
+          return { x: (position.x + 1) * 600, y: (1 - position.y) * 400 };
+        });
+      for (const box of labels.labelBoxes())
+        for (const dot of dots)
+          expect(
+            box.left < dot.x + 8 &&
+              box.right > dot.x - 8 &&
+              box.top < dot.y + 8 &&
+              box.bottom > dot.y - 8,
+          ).toBe(false);
+      const boxes = labels.labelBoxes().map((box) => ({ ...box }));
+      labels.view(c, 1200, 800);
+      expect(labels.labelBoxes()).toEqual(boxes);
+      labels.dispose();
+    },
+  );
+  it("outlines contextual city dots so they remain visible on the same-colored land", () => {
+    const context = {
+      beginPath: vi.fn(),
+      arc: vi.fn(),
+      fill: vi.fn(),
+      stroke: vi.fn(),
+      fillStyle: "",
+      strokeStyle: "",
+    };
+    vi.stubGlobal("document", {
+      createElement: () => ({ width: 0, height: 0, getContext: () => context }),
+    });
+    const labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "context",
+        kind: "place-labels",
+        visible: false,
+        markers: true,
+        places: [
+          { ...places[0], kind: "city", visualState: "hinted", markerSize: 24 },
+        ],
+      },
+      100,
+    );
+    labels.view(camera(), 800, 800);
+    expect(context.fillStyle).toBe(PLAY_HIGHLIGHTS.context);
+    expect(context.strokeStyle).toBe("#071524");
+    expect(context.stroke).toHaveBeenCalledOnce();
+    expect(
+      labels.group.children.filter(
+        (sprite) => sprite.visible && sprite.userData.role === "marker",
+      ),
+    ).toHaveLength(1);
+    labels.dispose();
+  });
   it("shows country and capital names together without giving label-only countries a marker", () => {
     canvasFactory();
     const labels = new PlaceLabels();

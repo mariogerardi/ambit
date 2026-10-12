@@ -160,13 +160,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
       selection: { type: "ids", ids: southAmerica },
-      map: {
-        borders: true,
-        hoverFeedback: true,
-        muteOthers: true,
-        candidates: "highlighted",
-        revealOnAnswer: true,
-      },
       disclosure: {
         ...base.disclosure,
         namedChoices: false,
@@ -177,8 +170,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         alt: "A golden sun with a human face and alternating straight and wavy rays.",
         feedbackAlt: "The Sun of May, shown here in Uruguay’s flag design",
       },
-      focus: { lat: -22, lng: -62, altitude: 1.05 },
-      feedbackFocus: { lat: -34, lng: -60, altitude: 0.6 },
       feedbackFlags: sunFlags.slice(0, 2),
       explanation:
         "This shared face recalls the May Revolution of 1810. Compare the suns: one has 32 rays, the other 16, alternating straight and wavy in both designs.",
@@ -202,6 +193,19 @@ export const SUN_FLAGS_JOURNEY: Journey = {
           text: "Argentina, Brazil, Chile and Uruguay remain available. Choose the two whose flags carry this sun.",
           candidateIds: ["wurl:ARG", "wurl:BRA", "wurl:CHL", "wurl:URY"],
         },
+      },
+      scenes: {
+        play: {
+          map: {
+            borders: true,
+            hoverFeedback: true,
+            muteOthers: true,
+            candidates: "highlighted",
+            revealOnAnswer: true,
+          },
+          focus: { lat: -22, lng: -62, altitude: 1.05 },
+        },
+        reveal: { focus: { lat: -34, lng: -60, altitude: 0.6 } },
       },
     }),
     defineQuestion({
@@ -229,11 +233,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "PHL",
         "Blue and red bands beside a white triangle containing a golden sun and three stars.",
       ),
-      contextIds: ["wurl:PHL"],
-      focus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
-      feedbackContextIds: [],
-      feedbackHintIds: ["wurl:PHL"],
-      feedbackFocus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
       feedbackFlags: [sunFlags[2]],
       explanation:
         "Each of the eight rays preserves the memory of a province in the 1896 uprising. The sun carries that struggle for independence into the national flag.",
@@ -246,6 +245,17 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         assist: {
           text: "The Netherlands and the United States are ruled out. Choose between Spain and Portugal.",
           candidateIds: ["power:spain", "power:portugal"],
+        },
+      },
+      scenes: {
+        play: {
+          contextIds: ["wurl:PHL"],
+          focus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
+        },
+        reveal: {
+          answerIds: [],
+          contextIds: ["wurl:PHL"],
+          focus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
         },
       },
     }),
@@ -288,11 +298,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
           },
         },
       ],
-      contextIds: ["wurl:KAZ"],
-      focus: { lat: 48.36, lng: 67.24, altitude: 0.65 },
-      feedbackContextIds: [],
-      feedbackHintIds: ["wurl:KAZ"],
-      feedbackFocus: { lat: 48.36, lng: 67.24, altitude: 0.65 },
       explanation:
         "The sun represents life and abundance. Its rays connect that idea to the harvest; the eagle below stands for independence.",
       source: source(
@@ -304,6 +309,17 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         assist: {
           text: "Feathers and arrowheads are ruled out. Choose between grains and flames.",
           candidateIds: ["rays:grain", "rays:flames"],
+        },
+      },
+      scenes: {
+        play: {
+          contextIds: ["wurl:KAZ"],
+          focus: { lat: 48.36, lng: 67.24, altitude: 0.65 },
+        },
+        reveal: {
+          answerIds: [],
+          contextIds: ["wurl:KAZ"],
+          focus: { lat: 48.36, lng: 67.24, altitude: 0.65 },
         },
       },
     }),
@@ -324,14 +340,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       rule: { type: "pin-inside", ids: ["wurl:JPN"] },
       disclosure: { ...base.disclosure, namedChoices: false },
       image: flag("JPN", "A red disc centered on a white field."),
-      focus: { lat: 25, lng: 132, altitude: 1.5 },
-      feedbackFocus: { lat: 37, lng: 138, altitude: 0.85 },
-      map: {
-        borders: false,
-        hoverFeedback: false,
-        muteOthers: true,
-        revealOnAnswer: true,
-      },
       explanation:
         "The flag’s name, Hinomaru, means ‘sun circle.’ A face, rays, and a horizon disappear; the sun is still unmistakable.",
       source: source(
@@ -343,6 +351,19 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         hint: "Look for an island country off the eastern coast of mainland Asia.",
         assist: {
           text: "Seoul is marked as a reference. Look east across the water for the island chain; place your pin on land.",
+        },
+      },
+      scenes: {
+        play: {
+          focus: { lat: 25, lng: 132, altitude: 1.5 },
+          map: {
+            borders: false,
+            hoverFeedback: false,
+            muteOthers: true,
+            revealOnAnswer: true,
+          },
+        },
+        assist: {
           places: [
             {
               ...seoul,
@@ -352,6 +373,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
             },
           ],
         },
+        reveal: { focus: { lat: 37, lng: 138, altitude: 0.85 } },
       },
     }),
     defineQuestion({
@@ -362,7 +384,6 @@ export const SUN_FLAGS_JOURNEY: Journey = {
 
       ...base,
       id: "sun-flags-malawi-dawn-v1",
-      map: { ...base.map!, feedbackBorders: false },
       label: "Meaning",
       resolvedLabel: "Malawi · a new dawn",
       title: "A new day.",
@@ -380,25 +401,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         "MWI",
         "Black, red, and green horizontal stripes, with a red sun rising within the black stripe.",
       ),
-      contextIds: ["wurl:MWI"],
-      focus: { lat: -13.19, lng: 34.27, altitude: 0.24 },
-      feedbackContextIds: [],
-      feedbackHintIds: africa,
-      feedbackFocus: { lat: 2, lng: 20, altitude: 1.35 },
       feedbackFlags: [sunFlags[5]],
-      feedbackPlaces: [
-        {
-          id: "sun:africa",
-          name: "Africa",
-          kind: "other",
-          lat: 2,
-          lng: 20,
-          sourceId: "natural-earth:5.1.2",
-          markerHidden: true,
-          labelFlexible: true,
-          priority: 100,
-        },
-      ],
       explanation:
         "The rising sun looks beyond Malawi to a whole continent: a dawn of freedom and hope across Africa. Our final view places that promise in its wider setting.",
       source: source(
@@ -410,6 +413,31 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         assist: {
           text: "The planting-season and solar-energy options are ruled out. Choose between community unity and hope and freedom for Africa.",
           candidateIds: ["dawn:unity", "dawn:freedom"],
+        },
+      },
+      scenes: {
+        play: {
+          map: { ...base.map!, feedbackBorders: false },
+          contextIds: ["wurl:MWI"],
+          focus: { lat: -13.19, lng: 34.27, altitude: 0.24 },
+        },
+        reveal: {
+          answerIds: [],
+          contextIds: africa,
+          focus: { lat: 2, lng: 20, altitude: 1.35 },
+          places: [
+            {
+              id: "sun:africa",
+              name: "Africa",
+              kind: "other",
+              lat: 2,
+              lng: 20,
+              sourceId: "natural-earth:5.1.2",
+              markerHidden: true,
+              labelFlexible: true,
+              priority: 100,
+            },
+          ],
         },
       },
     }),

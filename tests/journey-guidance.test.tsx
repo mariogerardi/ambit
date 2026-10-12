@@ -63,6 +63,36 @@ const shell = (
 );
 
 describe("authored Journey hint and assist stages", () => {
+  it("keeps shuffled choice positions stable through help and selection changes", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    let game = at(2);
+    const render = async () => act(async () => root.render(shell(game)));
+    const labels = () =>
+      [...host.querySelectorAll(".candidate-grid button span")].map(
+        (node) => node.textContent,
+      );
+    try {
+      await render();
+      const before = labels();
+      expect(before).not.toEqual(
+        journey.rounds[2].choices!.map((choice) => choice.label),
+      );
+      game = reduce(
+        game,
+        { type: "select", id: "abuja:rivalry" },
+        { type: "request-hint" },
+        { type: "request-assist" },
+      );
+      await render();
+      expect(labels()).toEqual(before);
+      expect(
+        host.querySelectorAll(".candidate-grid button:not(:disabled)"),
+      ).toHaveLength(2);
+      expect(game.selectedIds).toEqual(["abuja:rivalry"]);
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
   it("authors both stages for the reviewed capital, Andes and sun Journeys and validates candidate uncertainty", () => {
     for (const pack of JOURNEYS)
       expect(
@@ -81,10 +111,10 @@ describe("authored Journey hint and assist stages", () => {
       ...journey,
       rounds: [
         {
-          ...journey.rounds[0],
+          ...journey.rounds[2],
           guidance: {
             hint: "A clue",
-            assist: { text: "Too easy", candidateIds: ["city:ankara"] },
+            assist: { text: "Too easy", candidateIds: ["abuja:access"] },
           },
         },
       ],
@@ -93,8 +123,8 @@ describe("authored Journey hint and assist stages", () => {
       "plausible alternatives",
     );
     invalid.rounds[0].guidance!.assist!.candidateIds = [
-      "city:izmir",
-      "city:bursa",
+      "abuja:oil",
+      "abuja:infrastructure",
     ];
     expect(() => createQuestionContext(regions, [], invalid)).toThrow(
       "preserve answers",
@@ -148,9 +178,10 @@ describe("authored Journey hint and assist stages", () => {
     expect(
       host.querySelector<HTMLButtonElement>(".answer-assist-button")!.disabled,
     ).toBe(true);
-    expect(
-      host.querySelectorAll(".candidate-grid button:disabled"),
-    ).toHaveLength(3);
+    expect(journeyWorld(regions, journey, game, context).places).toHaveLength(
+      3,
+    );
+    expect(host.querySelector(".candidate-grid")).toBeNull();
     expect(game.answers).toHaveLength(0);
     const restored = JSON.parse(JSON.stringify(game)) as GameState;
     await act(async () => root.render(shell(restored)));
@@ -161,7 +192,7 @@ describe("authored Journey hint and assist stages", () => {
 
   it("enforces stage order, phase, idempotence and preserves selections and typed drafts", () => {
     expect(reduce(at(), { type: "request-assist" })).toEqual(at());
-    const selected = reduce(at(), { type: "select", id: "city:izmir" });
+    const selected = reduce(at(2), { type: "select", id: "abuja:oil" });
     const assist = reduce(
       selected,
       { type: "request-hint" },
@@ -174,18 +205,18 @@ describe("authored Journey hint and assist stages", () => {
     expect(
       reduce(assist, { type: "request-hint" }, { type: "request-assist" }),
     ).toBe(assist);
-    const removed = reduce(assist, { type: "select", id: "city:izmir" });
+    const removed = reduce(assist, { type: "select", id: "abuja:oil" });
     expect(removed.selectedIds).toEqual([]);
-    expect(reduce(removed, { type: "select", id: "city:izmir" })).toBe(removed);
+    expect(reduce(removed, { type: "select", id: "abuja:oil" })).toBe(removed);
     const wrong = reduce(assist, { type: "submit" });
     expect(wrong.answers[0].correct).toBe(false);
     expect(reduce(wrong, { type: "request-hint" })).toBe(wrong);
     const next = reduce(wrong, { type: "next" });
     expect(next.help).toEqual(assist.help);
-    expect(next.help?.[journey.rounds[1].id]).toBeUndefined();
+    expect(next.help?.[journey.rounds[3].id]).toBeUndefined();
     expect(reduce(assist, { type: "start" }).help).toBeUndefined();
     const typed = reduce(
-      at(2),
+      at(0),
       { type: "text", value: "my draft" },
       { type: "request-hint" },
       { type: "request-assist" },
@@ -220,7 +251,11 @@ describe("authored Journey hint and assist stages", () => {
     expect(rejected.phase).toBe("playing");
     expect(rejected.selectedIds).toEqual([]);
     expect(rejected.inputError).toContain("removed by the assist");
-    const feedback = reduce(game, { type: "select", id: "place:3469058" });
+    const feedback = reduce(
+      game,
+      { type: "select", id: "place:3469058" },
+      { type: "submit" },
+    );
     expect(feedback.phase).toBe("feedback");
     expect(feedback.answers[0].correct).toBe(true);
     expect(
@@ -230,7 +265,7 @@ describe("authored Journey hint and assist stages", () => {
     expect(southAfrica.places).toHaveLength(4);
     expect(
       southAfrica.places.every(
-        (place) => !!place.name && place.visualState === "selectable",
+        (place) => !!place.name && place.visualState === "hinted",
       ),
     ).toBe(true);
   });
@@ -274,11 +309,7 @@ describe("authored Journey hint and assist stages", () => {
 
   it("keeps correctness and completion intact, annotates help and validates persisted usage", () => {
     let game = helped(0);
-    game = reduce(
-      game,
-      { type: "select", id: "city:ankara" },
-      { type: "submit" },
-    );
+    game = reduce(game, { type: "text", value: "Ankara" }, { type: "submit" });
     expect(journeyScore(game)).toBe(1);
     expect(helpSummary(game)).toEqual({
       hints: 1,

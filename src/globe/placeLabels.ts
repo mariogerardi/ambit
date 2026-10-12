@@ -161,10 +161,10 @@ export function placeLabelPlacement(
     ? [
         [0.5, -0.5],
         [0.5, 1.5],
-        [-12 / w, 0.5],
-        [1 + 12 / w, 0.5],
-        [-12 / w, -0.5],
-        [1 + 12 / w, -0.5],
+        [-14 / w, 0.5],
+        [1 + 14 / w, 0.5],
+        [-14 / w, -0.5],
+        [1 + 14 / w, -0.5],
       ]
     : [[0.5, -0.32]];
   for (const [cx, cy] of centers) {
@@ -338,7 +338,8 @@ export class PlaceLabels {
       ctx.strokeStyle = "#071524";
       ctx.fillStyle = color;
       ctx.fill();
-      if (style.shape !== "circle" || place.answerTarget) ctx.stroke();
+      // Context dots can share their country’s fill; a dark outline keeps them visible.
+      ctx.stroke();
       if (style.shape === "pin") {
         ctx.beginPath();
         ctx.arc(32, 23, 6, 0, Math.PI * 2);
@@ -519,19 +520,21 @@ export class PlaceLabels {
     const separation = wide ? 26 : regional ? 18 : 12;
     const shown: { x: number; y: number }[] = [];
     const countryCities = new Map<string, number>();
-    const occupied: LabelBox[] = [
-      ...reserved,
-      ...(this.showMarkers
-        ? candidates
-            .filter((p) => p.entry.place.answerTarget)
-            .map(({ x, y }) => ({
-              left: x - 8,
-              right: x + 8,
-              top: y - 8,
-              bottom: y + 8,
-            }))
-        : []),
-    ];
+    // Authored reference dots need the same protection as playable city targets.
+    // Otherwise a moved label can cover a neighbor’s dot and appear to name it.
+    const markerBoxes = this.showMarkers
+      ? candidates
+          .filter(
+            ({ entry }) =>
+              !entry.place.markerHidden &&
+              (entry.place.answerTarget || !this.contextual),
+          )
+          .map(({ entry, x, y }) => ({
+            id: entry.place.id,
+            box: { left: x - 8, right: x + 8, top: y - 8, bottom: y + 8 },
+          }))
+      : [];
+    const occupied: LabelBox[] = [...reserved];
     const named = new Set<string>();
     const nameCounts = new Map<string, number>();
     for (const { entry, x, y, scale } of candidates) {
@@ -601,7 +604,17 @@ export class PlaceLabels {
         h,
         width,
         height,
-        occupied,
+        [
+          ...occupied,
+          ...markerBoxes
+            .filter(
+              (marker) =>
+                marker.id !== place.id ||
+                place.answerTarget ||
+                place.labelFlexible,
+            )
+            .map((marker) => marker.box),
+        ],
         !!place.answerTarget || !!place.labelFlexible,
       );
       if (!placement) continue;

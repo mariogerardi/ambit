@@ -49,7 +49,6 @@ export const CANADA_JOURNEY: Journey = {
         previousVisits: false,
       },
       failure: "feedback",
-      focus: { lat: 14, lng: 24, altitude: 1.65 },
       source: {
         name: "Government of Canada · national flag",
         url: "https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html",
@@ -64,6 +63,7 @@ export const CANADA_JOURNEY: Journey = {
       leadIn: "Start with a familiar flag.",
       explanation:
         "The maple leaf is the national symbol at the heart of this flag.",
+      scenes: { play: { focus: { lat: 14, lng: 24, altitude: 1.65 } } },
     }),
     defineQuestion({
       mode: "choice-multiple",
@@ -84,15 +84,19 @@ export const CANADA_JOURNEY: Journey = {
         previousVisits: false,
       },
       failure: "feedback",
-      focus: { lat: 55, lng: -95, altitude: 1.5 },
       source: languageSource,
       choices: LANGUAGES,
-      contextIds: ["wurl:CAN"],
-      map: { borders: true, hoverFeedback: false, muteOthers: true },
       id: "canada-federal-languages-v1",
       leadIn: "Stay here for two official voices.",
       explanation:
         "Both have equal status in federal institutions. Provincial language policies differ.",
+      scenes: {
+        play: {
+          focus: { lat: 55, lng: -95, altitude: 1.5 },
+          contextIds: ["wurl:CAN"],
+          map: { borders: true, hoverFeedback: false, muteOthers: true },
+        },
+      },
     }),
     defineQuestion({
       mode: "choice-single",
@@ -118,22 +122,29 @@ export const CANADA_JOURNEY: Journey = {
         { id: "province:nl", label: "Newfoundland and Labrador" },
       ],
       importedRegions: CANADIAN_PROVINCES,
-      feedbackContextIds: ["wurl:CAN-NB"],
-      contextIds: CANADIAN_PROVINCES.map((province) => province.id),
-      map: {
-        borders: true,
-        hoverFeedback: false,
-        muteOthers: true,
-        revealOnAnswer: true,
-      },
-      focus: { lat: 54, lng: -96, altitude: 1.1 },
-      feedbackFocus: { lat: 46.5, lng: -66.5, altitude: 0.45 },
       explanation:
         "It’s the only province with both as official languages, rather than simply a bilingual population.",
       source: {
         name: "Government of New Brunswick · basic facts",
         url: "https://www.gnb.ca/en/admin/about-nb/basic-facts.html",
         reviewedOn: "2026-10-11",
+      },
+      scenes: {
+        play: {
+          contextIds: CANADIAN_PROVINCES.map((province) => province.id),
+          map: {
+            borders: true,
+            hoverFeedback: false,
+            muteOthers: true,
+            revealOnAnswer: true,
+            candidates: undefined,
+          },
+          focus: { lat: 54, lng: -96, altitude: 1.1 },
+        },
+        reveal: {
+          answerIds: ["wurl:CAN-NB"],
+          focus: { lat: 46.5, lng: -66.5, altitude: 0.45 },
+        },
       },
     }),
     defineQuestion({
@@ -152,13 +163,17 @@ export const CANADA_JOURNEY: Journey = {
       inputLabel: "Capital city",
       rule: { type: "capital-name", countryId: "wurl:CAN" },
       choices: undefined,
-      focus: { lat: 53, lng: -96, altitude: 1.1 },
-      feedbackPlaces: [
-        CAPITALS.find((capital) => capital.countryId === "wurl:CAN")!,
-      ],
       explanation:
         "The federal capital sits in Ontario, beside Quebec—not in Toronto or Montreal.",
       source: regionsSource,
+      scenes: {
+        play: { focus: { lat: 53, lng: -96, altitude: 1.1 } },
+        reveal: {
+          places: [
+            CAPITALS.find((capital) => capital.countryId === "wurl:CAN")!,
+          ],
+        },
+      },
     }),
     defineQuestion({
       mode: "choice-single",
@@ -181,10 +196,10 @@ export const CANADA_JOURNEY: Journey = {
         { id: "ocean:indian", label: "Indian Ocean" },
         { id: "ocean:southern", label: "Southern Ocean" },
       ],
-      focus: { lat: 73, lng: -105, altitude: 1.05 },
       explanation:
         "Canada reaches three oceans: this northern shore completes the trio with the Atlantic and Pacific.",
       source: regionsSource,
+      scenes: { play: { focus: { lat: 73, lng: -105, altitude: 1.05 } } },
     }),
   ],
 };

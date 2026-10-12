@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  COMPATIBILITY_JOURNEYS,
-  JOURNEYS,
-  journeyPath,
-} from "../src/game/journeys";
+import { JOURNEYS, journeyPath } from "../src/game/journeys";
 import {
   AVAILABLE_JOURNEY_INDEX,
   JOURNEY_INDEX,
@@ -21,10 +17,8 @@ describe("deferred Journey content", () => {
     expect(AVAILABLE_JOURNEY_INDEX.map((j) => j.id)).toEqual(
       JOURNEYS.map((j) => j.id),
     );
-    expect(JOURNEY_INDEX.map((j) => j.id)).toEqual(
-      [...JOURNEYS, ...COMPATIBILITY_JOURNEYS].map((j) => j.id),
-    );
-    for (const journey of [...JOURNEYS, ...COMPATIBILITY_JOURNEYS]) {
+    expect(JOURNEY_INDEX.map((j) => j.id)).toEqual(JOURNEYS.map((j) => j.id));
+    for (const journey of JOURNEYS) {
       const entry = JOURNEY_INDEX.find((j) => j.id === journey.id)!;
       expect(entry.path).toBe(journeyPath(journey.id));
       expect(entry.title).toBe(journey.title);
@@ -52,7 +46,7 @@ describe("deferred Journey content", () => {
   });
 
   it("loads every Journey with its canonical question and geometry identities", async () => {
-    for (const journey of [...JOURNEYS, ...COMPATIBILITY_JOURNEYS]) {
+    for (const journey of JOURNEYS) {
       const first = loadJourney(journey.id);
       expect(loadJourney(journey.id)).toBe(first);
       expect(await first).toBe(journey);

@@ -1,4 +1,3 @@
-import { ORIGINAL_SUN_FLAGS_JOURNEY } from "./sunFlagsOriginalJourney";
 import { DANUBE_JOURNEY } from "./danubeJourney";
 import { SUN_FLAGS_JOURNEY } from "./sunFlagsJourney";
 import { CANADA_JOURNEY } from "./canadaJourney";
@@ -27,7 +26,6 @@ export const JOURNEYS = [
   SUN_FLAGS_JOURNEY,
   DANUBE_JOURNEY,
 ];
-export const COMPATIBILITY_JOURNEYS = [ORIGINAL_SUN_FLAGS_JOURNEY];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
     [DANUBE_JOURNEY.id]: "/journey/down-the-danube",

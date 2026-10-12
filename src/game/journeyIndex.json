@@ -123,7 +123,7 @@
   {
     "id": "not-the-obvious-city-v1",
     "title": "Not the obvious city",
-    "description": "Leave the famous cities behind: discover where capitals moved, why expectations mislead, and when one capital is not enough.",
+    "description": "Fame, compromise, relocation and divided government: discover the decisions behind five unexpected capitals.",
     "path": "/journey/not-the-obvious-city",
     "module": "./eleventhJourney.ts",
     "rounds": [
@@ -399,36 +399,6 @@
       {
         "id": "danube-delta-sea-v1",
         "label": "Delta"
-      }
-    ]
-  },
-  {
-    "id": "chasing-the-sun-v1",
-    "title": "Chasing the sun",
-    "compatibilityOnly": true,
-    "description": "Five flags, one familiar symbol. Cross oceans and continents to discover how differently the same sun can shine.",
-    "path": "/",
-    "module": "./sunFlagsOriginalJourney.ts",
-    "rounds": [
-      {
-        "id": "sun-flags-revolution-month-v1",
-        "label": "History"
-      },
-      {
-        "id": "sun-flags-uruguay-rays-v1",
-        "label": "Look closely"
-      },
-      {
-        "id": "sun-flags-kazakhstan-grain-v1",
-        "label": "Symbolism"
-      },
-      {
-        "id": "sun-flags-pacific-pin-v1",
-        "label": "Drop a pin"
-      },
-      {
-        "id": "sun-flags-malawi-dawn-v1",
-        "label": "Meaning"
       }
     ]
   }

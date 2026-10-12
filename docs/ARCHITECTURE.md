@@ -183,3 +183,7 @@ published IndexedDB packs with a bounded fallback. There is no active editor,
 AI generation service, or draft-publication workflow. Product modes render
 decorative geography. The shared renderer retains optional texture support and
 attributed imagery, which ordinary product views do not request.
+
+Journey-specific authoring and extension boundaries are documented in
+[Journey engine and extension contracts](JOURNEY_ENGINE.md). It distinguishes
+current contracts from proposed next steps as mechanics and scenes grow.

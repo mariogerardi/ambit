@@ -24,6 +24,27 @@ export function questionPlaces(
   response?: GameState,
 ): PlaceFeature[] {
   if (phase === "home" || phase === "finished") return [];
+  if (
+    question.mode === "choice-match" &&
+    context &&
+    (phase === "feedback" || phase === "failed")
+  ) {
+    const expected = solutionIds(question, context);
+    return (question.feedbackPlaces ?? question.places ?? []).map((place) => {
+      const assigned = response?.ordered.indexOf(place.id) ?? -1;
+      return {
+        ...place,
+        visualState:
+          assigned >= 0
+            ? expected[assigned] === place.id
+              ? "correct"
+              : "incorrect"
+            : expected.includes(place.id)
+              ? "answer"
+              : (place.visualState ?? "hinted"),
+      };
+    });
+  }
   if (question.mode === "pin") {
     const reveal = phase === "feedback" || phase === "failed";
     const result: PlaceFeature[] = (question.places ?? []).filter(

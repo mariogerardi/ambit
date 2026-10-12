@@ -383,7 +383,7 @@
   padding: 10px 12px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.4);
   border-radius: 8px;
-  background: var(--ui-surface);
+  background: rgb(var(--ui-surface-rgb));
   color: var(--ui-text);
   box-shadow:
     0 3px 0 rgb(0 0 0 / 0.22),
@@ -400,7 +400,12 @@
 .order-card.chosen,
 .drop-target .order-card {
   border-color: var(--ui-accent);
-  background: rgb(var(--ui-accent-rgb) / 0.15);
+  background:
+    linear-gradient(
+      rgb(var(--ui-accent-rgb) / 0.15),
+      rgb(var(--ui-accent-rgb) / 0.15)
+    ),
+    rgb(var(--ui-surface-rgb));
 }
 .order-card.dragging {
   opacity: 0.2;
@@ -414,7 +419,7 @@
   box-sizing: border-box;
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--ui-surface, #18262a);
+  background: rgb(var(--ui-surface-rgb));
   border: 1px solid var(--ui-accent, #a2d8db);
   color: var(--ui-text, #eef4ef);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
@@ -450,6 +455,57 @@
 }
 .order-spares .order-card {
   flex: 1 1 40%;
+}
+.match-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 16px 0 20px;
+}
+.match-columns .order-bank {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  align-self: start;
+}
+.match-columns .order-spares {
+  flex-direction: column;
+}
+.match-columns .order-slots {
+  grid-column: 2;
+  grid-row: 1;
+  align-content: start;
+  gap: 14px;
+}
+.match-columns .order-slots li {
+  grid-template-columns: minmax(0, 1fr);
+  position: relative;
+}
+.match-columns .order-remove {
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+}
+.match-slot:not(.empty) {
+  padding-right: 44px;
+}
+.match-columns .order-position {
+  font-size: 12px;
+  grid-column: 1 / -1;
+}
+.match-columns .order-position small {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+}
+@media (max-width: 560px) {
+  .match-columns {
+    grid-template-columns: 1fr;
+  }
+  .match-columns .order-slots {
+    grid-column: 1;
+    grid-row: 2;
+  }
 }
 .order-card:focus-visible,
 .order-remove:focus-visible {
@@ -1828,7 +1884,7 @@
       rgb(var(--ui-line-rgb) / 0.075),
       rgb(var(--ui-line-rgb) / 0.075)
     ),
-    var(--ui-surface);
+    rgb(var(--ui-surface-rgb));
 }
 .order-populated .order-bank .order-position {
   color: var(--ui-muted);
@@ -1842,8 +1898,27 @@
       rgb(var(--ui-accent-rgb) / 0.15),
       rgb(var(--ui-accent-rgb) / 0.15)
     ),
-    var(--ui-surface);
+    rgb(var(--ui-surface-rgb));
 }
 .order-populated .order-card:disabled {
   border-color: rgb(var(--ui-accent-rgb) / 0.45);
+}
+
+.match-slot {
+  min-height: 60px;
+  width: 100%;
+}
+.match-slot.empty {
+  border-style: dashed;
+  color: var(--ui-muted);
+  box-shadow: none;
+}
+.match-slot-copy {
+  min-width: 0;
+}
+.match-slot-copy small {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ui-muted);
+  font-size: 10px;
 }

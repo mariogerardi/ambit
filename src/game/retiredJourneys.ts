@@ -1,5 +1,6 @@
 /** Removed editions must not reappear through saved attempts or overrides. */
 export const RETIRED_JOURNEY_IDS = new Set([
+  "chasing-the-sun-v1",
   "long-way-home-v2",
   "beyond-borders-v1",
   "silk-roads-v1",

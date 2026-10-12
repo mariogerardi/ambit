@@ -4,12 +4,13 @@ import { readdir, writeFile } from "node:fs/promises";
 // Home copy, routing and progress metadata; clue geometry stays deferred.
 const server = await createServer({ server: { middlewareMode: true } });
 try {
-  const { JOURNEYS, COMPATIBILITY_JOURNEYS, journeyPath } =
-    await server.ssrLoadModule("/src/game/journeys.ts");
+  const { JOURNEYS, journeyPath } = await server.ssrLoadModule(
+    "/src/game/journeys.ts",
+  );
   const { validateJourneyContracts } = await server.ssrLoadModule(
     "/src/game/questionBuilder.ts",
   );
-  const editions = [...JOURNEYS, ...COMPATIBILITY_JOURNEYS];
+  const editions = JOURNEYS;
   const files = (await readdir("src/game")).filter(
     (name) => name === "journey.ts" || name.endsWith("Journey.ts"),
   );
@@ -27,7 +28,6 @@ try {
       id: journey.id,
       title: journey.title,
       ...(journey.supersedes ? { supersedes: journey.supersedes } : {}),
-      ...(journey.compatibilityOnly ? { compatibilityOnly: true } : {}),
       description: journey.description,
       path: journeyPath(journey.id),
       module: modules.get(journey.id),

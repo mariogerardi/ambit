@@ -51,9 +51,13 @@ These instructions apply to every coding agent working in this repository.
 - Use `docs/JOURNEY_CRAFTING.md` as the single editorial guide. Review a compact
   five-stop outline before redesigning questions; keep route questions moving
   forward and reserve recap for completion.
+- Before extending a Journey mechanic, read `docs/JOURNEY_ENGINE.md`, inspect
+  `src/game/mechanics.ts` and the corresponding `src/game/recipes.ts` example.
+  Prefer grouped scene authoring; use `npm run check:journey -- <id-or-slug>` for
+  focused local validation. This command does not publish or deploy.
 - Journey content lives in `src/game/*Journey.ts`. Use `defineQuestion` and
   `definePresentation`; declare answer contracts explicitly. Register content in
-  `journeys.ts`, regenerate the index only when needed, and preserve saved editions.
+  `journeys.ts`, regenerate the index only when needed, and use retired IDs/save recovery when deliberately removing an edition.
 - Keep eligibility, clue disclosure, grading, and camera framing separate.
   Canonical geometry grades answers; display geometry and relief only render them.
 - Admin access is checked in the UI and protected APIs. Shared date assignments

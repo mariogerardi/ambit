@@ -162,8 +162,6 @@ export const FOURTEENTH_JOURNEY: Journey = {
       },
       commitment: "immediate",
       failure: "feedback",
-      focus: definition.focus,
-      feedbackFocus: definition.feedbackFocus,
       highlightParts: [
         {
           countryId: island.countryId,
@@ -175,16 +173,22 @@ export const FOURTEENTH_JOURNEY: Journey = {
           reveal: "part-and-owner",
         },
       ],
-      map: {
-        borders: false,
-        borderIds: [...candidates, `clue-part:${island.countryId}`],
-        hoverFeedback: true,
-        muteOthers: true,
-        candidates: "highlighted",
-      },
       explanation: definition.explanation,
       source: definition.source,
       sources: [source(islands.source, islands.sourceUrl)],
+      scenes: {
+        play: {
+          focus: definition.focus,
+          map: {
+            borders: false,
+            borderIds: [...candidates, `clue-part:${island.countryId}`],
+            hoverFeedback: true,
+            muteOthers: true,
+            candidates: "highlighted",
+          },
+        },
+        reveal: { focus: definition.feedbackFocus },
+      },
     });
   }),
 };

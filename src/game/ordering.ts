@@ -1,4 +1,9 @@
+import { mechanicFor } from "./mechanics";
 import type { Question, Response } from "./questions";
+
+/** Ordering and matching share card movement; their grading contracts stay separate. */
+export const isSlotAnswer = (question: Pick<Question, "mode">) =>
+  mechanicFor(question).control === "cards";
 
 /** Populated puzzles keep the remaining card in their single distractor group. */
 export function orderedCards(
