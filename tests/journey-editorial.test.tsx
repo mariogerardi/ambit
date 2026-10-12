@@ -77,15 +77,7 @@ describe("connected Journey drafts and answer feedback", () => {
           { type: "drop-pin", ...ANDES_JOURNEY.rounds[3].places![0] },
           { type: "submit" },
         ],
-        select(
-          "wurl:VEN",
-          "wurl:COL",
-          "wurl:ECU",
-          "wurl:PER",
-          "wurl:BOL",
-          "wurl:CHL",
-          "wurl:ARG",
-        ),
+        select("animal:penguins"),
       ],
     ],
     [

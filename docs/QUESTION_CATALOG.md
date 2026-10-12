@@ -50,13 +50,13 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `city-single`       | Single city pick        |         1 |
 | `city-multiple`     | Multiple city picks     |         1 |
 | `map-single`        | Single country pick     |        10 |
-| `map-multiple`      | Multiple country picks  |         6 |
+| `map-multiple`      | Multiple country picks  |         5 |
 | `number`            | Number                  |         2 |
 | `text`              | Free response           |        10 |
 | `typed-regions`     | Typed region names      |         3 |
 | `ordered-countries` | Ordered country names   |         0 |
 | `ordered-capitals`  | Ordered capital names   |         0 |
-| `choice-single`     | Single choice           |        14 |
+| `choice-single`     | Single choice           |        15 |
 | `choice-multiple`   | Multiple choices        |         3 |
 | `choice-order`      | Order cards with spares |         0 |
 
@@ -69,15 +69,18 @@ controls and direct typing; a new numeric rule should respect that UI contract.
 `country-ids` rule marked `ordered: true`. It supports spare/distractor cards,
 mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
 There is no current catalog example; focused ordering-control tests retain coverage.
-The Andes finale instead asks for all seven Andean countries in any order. Its
-`assist.fixedSelections` locks Venezuela and Chile, preserves existing picks, and
-keeps the anchors selected after clearing. More than seven picks disables submission
-until the player removes extras. The Aconcagua round accepts pins within 450 km of
+`assist.fixedSelections` can lock correct unordered picks, preserve existing picks,
+and keep the anchors selected after clearing. Focused tests retain coverage of
+this supported behavior. The Andes finale continues south to Bahía Inútil in
+Tierra del Fuego and asks which animal breeds there in the wild. The hint points
+to differences between Arctic and southern wildlife; assist leaves penguins and
+puffins. A documentary colony photograph and the king-penguin marker appear only
+after submission. The Aconcagua round accepts pins within 450 km of
 the summit by distance alone, with inclusive tiers at 150, 300 and 450 km. All tiers
 earn one correct answer; tier-specific praise and concentric rings appear on reveal.
 `pin-distance.tiers` is optional, ordered from smallest to largest radius, and must
 end at the rule's `radiusKm`. Questions without tiers keep their single-radius behavior.
-The finale hides prior landmarks; the full results scene retains the Journey tour.
+The finale hides prior landmarks; the full results tour includes the colony.
 
 ## Knowledge rules and data scope
 

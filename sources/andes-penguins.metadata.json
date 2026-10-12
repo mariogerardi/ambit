@@ -1,0 +1,19 @@
+{
+  "asset": "public/journeys/andes/king-penguin-colony.v1.jpg",
+  "author": "Gillermo Adolfo",
+  "dateTaken": "2016-04-24",
+  "accessedOn": "2026-10-11",
+  "source": "https://commons.wikimedia.org/wiki/File:Pinguinos_Rey,_Parque_del_mismo_nombre,_bahia_inutil_,Tierra_del_Fuego_-_panoramio.jpg",
+  "download": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Pinguinos_Rey%2C_Parque_del_mismo_nombre%2C_bahia_inutil_%2CTierra_del_Fuego_-_panoramio.jpg/960px-Pinguinos_Rey%2C_Parque_del_mismo_nombre%2C_bahia_inutil_%2CTierra_del_Fuego_-_panoramio.jpg",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+  "width": 960,
+  "height": 478,
+  "changes": "Existing Wikimedia Commons crop, resized by Wikimedia to 960 pixels wide; no further image edits.",
+  "sha256": "19bac2635e8dbe67c72da8c1a4cbca0bbc8bb76e7809ffd59aaefa9c332c8b17",
+  "colonyCoordinates": {
+    "lat": -53.460556,
+    "lng": -69.305833,
+    "source": "https://www.scielo.cl/article_plus.php?lng=es&pid=S0717-66432023000100001&tlng=es"
+  }
+}

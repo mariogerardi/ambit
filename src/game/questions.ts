@@ -162,6 +162,18 @@ export interface Question {
   explanation: string;
   /** Optional praise matching the knowledge/skill, rather than the input widget. */
   correctFeedback?: string;
+  /** Documentary image shown only after submission, with visible attribution. */
+  feedbackImage?: {
+    src: string;
+    alt: string;
+    caption: string;
+    credit: {
+      name: string;
+      url: string;
+      license: string;
+      licenseUrl: string;
+    };
+  };
   /** A clearly schematic explanation; never used as playable geography. */
   feedbackDiagram?:
     | {

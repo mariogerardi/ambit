@@ -94,7 +94,7 @@
   {
     "id": "along-the-andes-v1",
     "title": "Along the Andes",
-    "description": "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and a seven-country recap.",
+    "description": "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and coastal wildlife in Tierra del Fuego.",
     "path": "/journey/along-the-andes",
     "module": "./andesJourney.ts",
     "rounds": [
@@ -116,7 +116,7 @@
       },
       {
         "id": "andes-chile-neighbors-v2",
-        "label": "Recap"
+        "label": "Wildlife"
       }
     ]
   },

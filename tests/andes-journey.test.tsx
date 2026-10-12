@@ -36,7 +36,21 @@ const reduce = (state: GameState, ...actions: Action[]) =>
     (game, action) => gameReducer(game, action, journey, context),
     state,
   );
-describe("Along the Andes authored map and recap", () => {
+const shell = (game: GameState) =>
+  renderToStaticMarkup(
+    <GameShell
+      journey={journey}
+      context={context}
+      game={game}
+      dispatch={() => {}}
+      webgl
+      frame={() => {}}
+      onHome={() => {}}
+      onStudy={() => {}}
+      onPlayground={() => {}}
+    />,
+  );
+describe("Along the Andes authored map and finale", () => {
   it("provides the physical spine throughout, without leaking exact targets", () => {
     const footprint = journey.rounds[0].physicalFeatures![0].geometry!;
     expect(geoContains(sphericalGeometry(footprint), [-74.0818, 4.6097])).toBe(
@@ -232,11 +246,19 @@ describe("Along the Andes authored map and recap", () => {
     expect(assistMap.places.map((place) => place.name)).toEqual([
       "Argentina",
       "Chile",
-      "Santiago",
+      "Córdoba",
     ]);
     expect(assistMap.places.some((place) => place.id === target.id)).toBe(
       false,
     );
+    for (const reference of round.guidance!.assist!.places!) {
+      const onReference = {
+        ...helped,
+        pin: { lat: reference.lat, lng: reference.lng },
+      };
+      expect(isCorrect(round, context, onReference)).toBe(false);
+      expect(pinDistanceTier(round, onReference)).toBeUndefined();
+    }
     const answer = reduce(
       helped,
       { type: "drop-pin", lat: target.lat, lng: target.lng },
@@ -362,131 +384,99 @@ describe("Along the Andes authored map and recap", () => {
       ).toThrow("Invalid pin distance tiers");
     }
   });
-  it("accepts the seven Andean countries in any order and rejects a distractor", () => {
+  it("grades the wildlife choices and narrows assist to the two birds", () => {
     const round = journey.rounds[4];
-    const ids = [
-      "wurl:ARG",
-      "wurl:CHL",
-      "wurl:BOL",
-      "wurl:PER",
-      "wurl:ECU",
-      "wurl:COL",
-      "wurl:VEN",
-    ];
-    const selected = reduce(
-      at(4),
-      ...ids.map((id): Action => ({ type: "select", id })),
-    );
-    expect(canSubmit(round, context, selected)).toBe(true);
-    expect(reduce(selected, { type: "submit" }).answers.at(-1)?.correct).toBe(
-      true,
-    );
-    expect(
-      isCorrect(round, context, {
-        ...selected,
-        selectedIds: [...ids.slice(0, 6), "wurl:BRA"],
-      }),
-    ).toBe(false);
-    expect(
-      canSubmit(round, context, { ...selected, selectedIds: ids.slice(0, 6) }),
-    ).toBe(false);
-    expect(reduce(selected, { type: "select", id: "wurl:BRA" })).toBe(selected);
-    expect(reduce(at(4), { type: "select", id: "wurl:USA" })).toEqual(at(4));
-  });
-  it("locks Venezuela and Chile through map taps, typing, clearing and resumed help", () => {
-    const round = journey.rounds[4];
+    expect(canSubmit(round, context, at(4))).toBe(false);
+    for (const choice of round.choices!) {
+      const selected = reduce(at(4), { type: "select", id: choice.id });
+      expect(canSubmit(round, context, selected)).toBe(true);
+      expect(reduce(selected, { type: "submit" }).answers.at(-1)?.correct).toBe(
+        choice.id === "animal:penguins",
+      );
+    }
     const helped = reduce(
       at(4),
       { type: "request-hint" },
       { type: "request-assist" },
     );
-    expect(helped.selectedIds).toEqual(["wurl:VEN", "wurl:CHL"]);
-    expect(round.guidance?.hint).toBe(
-      "We've mentioned every country at least once this Journey!",
-    );
-    for (const id of helped.selectedIds)
+    const html = shell(helped);
+    const host = document.createElement("div");
+    host.innerHTML = html;
+    expect(
+      [...host.querySelectorAll(".candidate-grid button:disabled")].map(
+        (button) => button.textContent,
+      ),
+    ).toEqual(["Walruses·", "Polar bears·"]);
+    for (const id of ["animal:walruses", "animal:polar-bears"])
       expect(reduce(helped, { type: "select", id })).toBe(helped);
-    expect(
-      reduce(
-        helped,
-        { type: "text", value: "Chile" },
-        { type: "guess-country" },
-      ).selectedIds,
-    ).toEqual(helped.selectedIds);
-    expect(
-      reduce(helped, { type: "select", id: "wurl:BRA" }, { type: "clear" })
-        .selectedIds,
-    ).toEqual(helped.selectedIds);
-    const stale = { ...helped, selectedIds: [] };
-    expect(reduce(stale, { type: "clear" }).selectedIds).toEqual(
-      helped.selectedIds,
-    );
-    const map = journeyWorld(regions, journey, stale, context);
-    expect(map.states["wurl:VEN"]).toBe("selected");
-    expect(map.states["wurl:CHL"]).toBe("selected");
-    const html = renderToStaticMarkup(
-      <AnswerForm
-        question={round}
-        context={context}
-        game={stale}
-        dispatch={() => {}}
-        webgl
-      />,
-    );
-    expect(html.match(/Locked/g)).toHaveLength(2);
-    const full = {
-      ...at(4),
-      selectedIds: [
-        "wurl:COL",
-        "wurl:ECU",
-        "wurl:PER",
-        "wurl:BOL",
-        "wurl:ARG",
-        "wurl:BRA",
-        "wurl:PRY",
-      ],
-    };
+    for (const id of ["animal:penguins", "animal:puffins"])
+      expect(reduce(helped, { type: "select", id }).selectedIds).toEqual([id]);
+    // Requesting assist preserves an existing pick, even if it is ruled out.
     const preserved = reduce(
-      full,
+      at(4),
+      { type: "select", id: "animal:walruses" },
       { type: "request-hint" },
       { type: "request-assist" },
     );
-    expect(preserved.selectedIds).toHaveLength(9);
-    expect(canSubmit(round, context, preserved)).toBe(false);
-    expect(
-      renderToStaticMarkup(
-        <AnswerForm
-          question={round}
-          context={context}
-          game={preserved}
-          dispatch={() => {}}
-          webgl
-        />,
-      ),
-    ).toContain("Paraguay");
-    expect(
-      reduce(
-        preserved,
-        { type: "select", id: "wurl:BRA" },
-        { type: "select", id: "wurl:PRY" },
+    expect(preserved.selectedIds).toEqual(["animal:walruses"]);
+    expect(reduce(preserved, { type: "submit" }).answers.at(-1)?.correct).toBe(
+      false,
+    );
+    // Editing the current edition must still allow an old in-progress Q5 to finish.
+    const resumed = {
+      ...helped,
+      selectedIds: ["wurl:VEN", "wurl:CHL", "wurl:PER"],
+    };
+    expect(canSubmit(round, context, resumed)).toBe(false);
+    const replaced = reduce(resumed, { type: "select", id: "animal:penguins" });
+    expect(replaced.selectedIds).toEqual(["animal:penguins"]);
+    expect(reduce(replaced, { type: "submit" }).answers.at(-1)?.correct).toBe(
+      true,
+    );
+  });
+  it("keeps the documentary photo and animal marker hidden until any answer is submitted", () => {
+    const round = journey.rounds[4];
+    for (const state of [
+      at(4),
+      reduce(at(4), { type: "request-hint" }),
+      reduce(at(4), { type: "request-hint" }, { type: "request-assist" }),
+    ]) {
+      const html = shell(state);
+      expect(html).not.toContain(round.feedbackImage!.src);
+      expect(html).not.toContain("King penguin colony");
+      expect(html).not.toContain("Gillermo Adolfo");
+      const map = journeyWorld(regions, journey, state, context);
+      expect(map.regionInteraction).toBe(false);
+      expect(map.places.every((place) => place.markerHidden)).toBe(true);
+      expect(map.places.map((place) => place.name)).toEqual([
+        "Bahía Inútil",
+        "Tierra del Fuego",
+      ]);
+      expect(map.physicalFeatures).toEqual([]);
+    }
+    for (const id of ["animal:penguins", "animal:puffins"]) {
+      const answered = reduce(
+        at(4),
+        { type: "select", id },
         { type: "submit" },
-      ).answers.at(-1)?.correct,
-    ).toBe(true);
-    for (const fixedSelections of [["wurl:BRA"], ["wurl:VEN", "wurl:VEN"]])
-      expect(() =>
-        createQuestionContext(regions, [], {
-          ...journey,
-          rounds: [
-            {
-              ...round,
-              guidance: {
-                hint: "Hint",
-                assist: { text: "Assist", fixedSelections },
-              },
-            },
-          ],
+      );
+      const html = shell(answered);
+      expect(html).toContain(round.feedbackImage!.src);
+      expect(html).toContain("Gillermo Adolfo");
+      expect(html).toContain("CC BY 3.0");
+      expect(html).toContain("breeding grounds extend far beyond Antarctica");
+      const map = journeyWorld(regions, journey, answered, context);
+      expect(map.places).toContainEqual(
+        expect.objectContaining({
+          name: "King penguin colony",
         }),
-      ).toThrow("Invalid fixed selection assist");
+      );
+      expect(map.places[0].markerHidden).not.toBe(true);
+      expect(map.focus).toEqual(round.feedbackFocus);
+    }
+    expect(
+      readFileSync(`public${round.feedbackImage!.src}`).byteLength,
+    ).toBeGreaterThan(1000);
   });
   it("highlights Q3 selections using the existing chosen-button class and offsets its initial camera", () => {
     const round = journey.rounds[2];
@@ -519,6 +509,20 @@ describe("Along the Andes authored map and recap", () => {
       lng: -69.3,
       altitude: 0.2,
     });
+    const shell = renderToStaticMarkup(
+      <GameShell
+        journey={journey}
+        context={context}
+        game={selected}
+        dispatch={() => {}}
+        webgl
+        frame={() => {}}
+        onHome={() => {}}
+        onStudy={() => {}}
+        onPlayground={() => {}}
+      />,
+    );
+    expect(shell).not.toContain('class="question-instruction"');
   });
   it("enlarges Q1 reveal stars without changing ordinary map capital sizes", () => {
     const answer = reduce(
@@ -531,43 +535,35 @@ describe("Along the Andes authored map and recap", () => {
     expect(places.every((place) => place.kind === "capital")).toBe(true);
     expect(placeMarkerSize(ANSWER_PLACES.get(places[0].id)!)).toBe(18);
   });
-  it("hides the mountain trace during the recap, then reveals all seven countries", () => {
-    const before = journeyWorld(regions, journey, at(4), context);
-    expect(before.showBorders).toBe(true);
-    expect(before.regionNames).toBe("all");
-    expect(before.physicalFeatures).toEqual([]);
-    expect(before.places).toEqual([]);
-    const answered = reduce(
-      at(4),
-      ...["VEN", "COL", "ECU", "PER", "BOL", "CHL", "ARG"].map(
-        (id): Action => ({ type: "select", id: `wurl:${id}` }),
-      ),
-      { type: "submit" },
+  it("ends the completion tour at the colony and keeps the full Journey discoveries", () => {
+    const recap = journeyWorld(
+      regions,
+      journey,
+      { ...at(4), phase: "finished" },
+      context,
     );
-    const reveal = journeyWorld(regions, journey, answered, context);
-    expect(reveal.physicalFeatures.map((feature) => feature.id)).toEqual([
-      "andes:range",
-    ]);
-    expect(reveal.places).toEqual([]);
-    expect(before.states["wurl:CHL"]).toBe("selectable");
-    const finished = { ...at(4), phase: "finished" as const };
-    const recap = journeyWorld(regions, journey, finished, context);
+    const colony = journey.rounds[4].feedbackPlaces![0];
     expect(
-      journey.completion!.views!.slice(0, 5).map((view) => view.lat),
-    ).toEqual([4.6, -1, -15.8, -32.65, -40]);
+      journey.completion!.views!.slice(0, 4).map((view) => view.lat),
+    ).toEqual([4.6, -1, -15.8, -32.65]);
+    expect(journey.completion!.views![4]).toMatchObject({
+      lat: colony.lat,
+      lng: colony.lng,
+    });
     expect(recap.places.every((place) => place.visualState === "visited")).toBe(
       true,
     );
-    for (const id of [
-      "wurl:VEN",
-      "wurl:COL",
-      "wurl:ECU",
-      "wurl:PER",
-      "wurl:BOL",
-      "wurl:CHL",
-      "wurl:ARG",
-    ])
-      expect(recap.states[id]).toBe("visited");
+    expect(recap.places.map((place) => place.name)).toEqual([
+      "Bogota",
+      "Chimborazo",
+      "Aconcagua",
+      "King penguin colony",
+    ]);
+    expect(journey.completion!.caption).toContain(
+      "king penguins of Tierra del Fuego",
+    );
+    for (const id of ["VEN", "COL", "ECU", "PER", "BOL", "CHL", "ARG"])
+      expect(recap.states[`wurl:${id}`]).toBe("visited");
     expect(recap.states["wurl:BRA"]).toBe("disabled");
   });
   it("renders terrain ink instead of the mountain footprint and cleans it up", () => {

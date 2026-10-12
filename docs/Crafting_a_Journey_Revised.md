@@ -135,6 +135,12 @@ Use **Question → Hint → Assist → Answer/reveal**. Not every question needs
 
 In a pin question, **never enlarge the acceptance radius** as an assist. That silently changes the answer contract. Likewise, revealing the exact grading boundary, city coordinate, or answer-bearing line is not appropriate assistance. An assist should leave real work to do, not turn a difficult task into following a visible outline.
 
+Audit reference markers against every distance tier, especially after changing the
+acceptance radius. A player must not earn a correct answer or the strongest
+accuracy feedback merely by pinning a supplied reference marker. Keep reference
+points outside the outer acceptance zone and verify this against the authored
+coordinates; visual separation on the globe is not sufficient.
+
 Keep the hint on screen after the assist. Preserve prior selections and explain when eliminated choices conflict with them. Store the strongest help stage per round and reflect it in the receipt. **Correctness and completion stay unchanged**; assistance is reported separately (unassisted, hinted, assisted), not scored as a penalty.
 
 Help controls should be visually secondary to the normal answer/submit action and clearly progress from “Need a hint?” to “Need an assist?”. Question information/sources/reporting is separate from gameplay help.

@@ -1,6 +1,7 @@
 import { withReliefClearance } from "../geography/relief";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { CAPITALS, capitalSource } from "./quizData";
+import { ANSWER_PLACES } from "./answerTargets";
 import type { FactSource, Journey } from "./questions";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
 import relief from "./data/andes-relief.v1.json";
@@ -92,20 +93,26 @@ const countryLabel = (
 const andeanCountries = ["VEN", "COL", "ECU", "PER", "BOL", "CHL", "ARG"].map(
   (id) => `wurl:${id}`,
 );
-const southAmerica = [
-  "VEN",
-  "COL",
-  "ECU",
-  "PER",
-  "BOL",
-  "CHL",
-  "ARG",
-  "BRA",
-  "GUY",
-  "SUR",
-  "PRY",
-  "URY",
-].map((id) => `wurl:${id}`);
+const colony: PlaceFeature = {
+  id: "andes:king-penguin-colony",
+  name: "King penguin colony",
+  kind: "other",
+  lat: -53.460556,
+  lng: -69.305833,
+  parentId: "wurl:CHL",
+  sourceId: "vidal-2023:king-penguin-reserve",
+  visualState: "answer",
+  labelFlexible: true,
+  priority: 100,
+};
+const colonySource = source(
+  "Reserva Natural Pingüino Rey · wild breeding colony",
+  "https://www.pinguinorey.com/conoce-al-pinguino-rey/",
+);
+const colonyLocationSource = source(
+  "Vidal et al. · reserve location and coordinates",
+  "https://www.scielo.cl/article_plus.php?lng=es&pid=S0717-66432023000100001&tlng=es",
+);
 const discoveries: PlaceFeature[] = [
   {
     ...bogota,
@@ -116,8 +123,9 @@ const discoveries: PlaceFeature[] = [
   },
   { ...chimborazo, visualState: "visited" },
   { ...aconcagua, visualState: "visited" },
+  { ...colony, visualState: "visited" },
 ];
-const santiago = CAPITALS.find((city) => city.countryId === "wurl:CHL")!;
+const cordoba = ANSWER_PLACES.get("place:3860259")!;
 // Shared presentation only. Every round declares its own answer method and rule.
 const common = definePresentation({
   instruction: "",
@@ -142,7 +150,7 @@ export const ANDES_JOURNEY: Journey = {
   id: "along-the-andes-v1",
   title: "Along the Andes",
   description:
-    "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and a seven-country recap.",
+    "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and coastal wildlife in Tierra del Fuego.",
   mapAttribution: {
     label: "Terrain · USGS / NOAA via Mapzen",
     url: "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
@@ -154,14 +162,14 @@ export const ANDES_JOURNEY: Journey = {
       { lat: -1, lng: -78.5, altitude: 0.4 },
       { lat: -15.8, lng: -69.3, altitude: 0.5 },
       { lat: -32.65, lng: -70, altitude: 0.55 },
-      { lat: -40, lng: -73, altitude: 0.7 },
+      { lat: colony.lat, lng: colony.lng, altitude: 0.45 },
       { lat: -20, lng: -72, altitude: 1.65 },
     ],
     regionIds: andeanCountries,
     physicalFeatures: [andesAtLake, lake],
     places: discoveries,
     caption:
-      "From the Caribbean to Patagonia, the Andes pass through Venezuela, Colombia, Ecuador, Peru, Bolivia, Chile and Argentina.",
+      "From Bogotá’s highlands to the king penguins of Tierra del Fuego, this Journey connects cities, summits, a shared lake and a living southern coast.",
   },
   rounds: [
     defineQuestion({
@@ -221,12 +229,16 @@ export const ANDES_JOURNEY: Journey = {
         ...common.sources!,
         capitalSource,
         source(
+          "Bogotá · city location and elevation",
+          "https://bogota.gov.co/en/node/78",
+        ),
+        source(
           "Inparques · Waraira Repano and the Coastal Range",
           "https://www.inparques.gob.ve/cms/main/verCalendarioV/1808",
         ),
       ],
       guidance: {
-        hint: "The Andes reach both Colombia and Venezuela, but only one of their capitals lies within the range.",
+        hint: "One candidate sits on a plateau more than 2,000 meters above sea level.",
         assist: {
           text: "Medellín and Paramaribo are ruled out. Choose between Bogotá and Caracas.",
           candidateIds: ["city:bogota", "city:caracas"],
@@ -314,7 +326,6 @@ export const ANDES_JOURNEY: Journey = {
         committedNames: true,
       },
       map: { ...common.map, hoverFeedback: true, candidates: "highlighted" },
-      instruction: "Choose two countries on the globe or below.",
       focus: { lat: -13.5, lng: -72, altitude: 0.8 },
       feedbackFocus: { lat: -15.8, lng: -69.3, altitude: 0.2 },
       feedbackPhysicalFeatures: [andesAtLake, lake],
@@ -379,14 +390,20 @@ export const ANDES_JOURNEY: Journey = {
         "Argentina’s space agency · Aconcagua beside the Chilean frontier",
         "https://www.argentina.gob.ar/ciencia/conae/educacion-y-formacion-masiva/materiales-educativos/cerro-aconcagua-mendoza-sentinel-2a-msi-28-de-febrero-de-2017",
       ),
-      sources: [...common.sources!, capitalSource],
+      sources: [
+        ...common.sources!,
+        source(
+          "GeoNames · Córdoba reference coordinates",
+          "https://www.geonames.org/3860259/cordoba.html",
+        ),
+      ],
       guidance: {
         hint: "Look in western Mendoza province, just east of the Chilean border.",
         assist: {
-          text: "Santiago is marked as a reference. Search north of it, on the Argentine side of the border.",
+          text: "Córdoba is marked as a reference. Look southwest of it, along Argentina’s border with Chile. The summit stays unmarked.",
           places: [
             {
-              ...santiago,
+              ...cordoba,
               visualState: "hinted",
               labelFlexible: true,
               priority: 100,
@@ -400,49 +417,58 @@ export const ANDES_JOURNEY: Journey = {
 
       ...common,
       id: "andes-chile-neighbors-v2",
-      label: "Recap",
-      resolvedLabel: "Seven Andean countries",
-      topic: "mountains and countries",
-      title: "Rebuild the mountain spine.",
-      leadIn: "Bring together the countries from all four stops.",
-      prompt:
-        "From the Caribbean to Patagonia, which seven countries do the Andes pass through?",
-      instruction:
-        "Choose seven countries on the globe, in any order. Tap a selected country again to remove it.",
-      mode: "map-multiple",
-      count: 7,
-      selection: { type: "ids", ids: southAmerica },
-      rule: { type: "country-ids", ids: andeanCountries },
-      contextIds: [],
-      disclosure: {
-        ...common.disclosure,
-        hoverNames: true,
-        committedNames: true,
-      },
+      count: 1,
+      label: "Wildlife",
+      resolvedLabel: "King penguins · Tierra del Fuego",
+      topic: "southern coastal wildlife",
+      title: "A wild southern shore.",
+      leadIn: "Finish on the shores of Bahía Inútil in Tierra del Fuego.",
+      prompt: "Which of these animals breeds here in the wild?",
+      mode: "choice-single",
+      selection: { type: "none" },
+      rule: { type: "choice-ids", ids: ["animal:penguins"] },
+      choices: [
+        { id: "animal:penguins", label: "Penguins" },
+        { id: "animal:puffins", label: "Puffins" },
+        { id: "animal:walruses", label: "Walruses" },
+        { id: "animal:polar-bears", label: "Polar bears" },
+      ],
+      contextIds: ["wurl:CHL", "wurl:ARG"],
       map: {
         ...common.map,
-        hoverFeedback: true,
-        candidates: "highlighted",
-        borderIds: southAmerica,
+        feedbackRegions: "neutral",
+        borderIds: ["wurl:CHL", "wurl:ARG"],
       },
-      focus: { lat: -20, lng: -72, altitude: 1.65 },
-      feedbackFocus: { lat: -20, lng: -72, altitude: 1.65 },
+      focus: { lat: -53.6, lng: -69.5, altitude: 0.45 },
+      feedbackFocus: { lat: colony.lat, lng: colony.lng, altitude: 0.22 },
       physicalFeatures: [],
-      places: [],
-      feedbackPlaces: [],
-      feedbackPhysicalFeatures: [andes],
+      places: [
+        countryLabel("bahia-inutil", "Bahía Inútil", -53.35, -69.65),
+        countryLabel("tierra-del-fuego", "Tierra del Fuego", -54.05, -68.4),
+      ],
+      feedbackPlaces: [colony],
       explanation:
-        "Seven countries share the Andes: Venezuela, Colombia, Ecuador, Peru, Bolivia, Chile and Argentina. They connect this Journey’s highland capital, equatorial summit, shared lake and highest peak.",
-      correctFeedback: "Journey rebuilt.",
-      source: source(
-        "Andean Mountain Initiative · seven Andean countries",
-        "https://iam-andes.org/?lang=en",
-      ),
+        "King penguins breed here on a South American shore, as well as on subantarctic islands. Penguins’ breeding grounds extend far beyond Antarctica.",
+      correctFeedback: "A wild discovery.",
+      source: colonySource,
+      sources: [colonyLocationSource],
+      feedbackImage: {
+        src: "/journeys/andes/king-penguin-colony.v1.jpg",
+        alt: "Wild king penguins beside the water at Bahía Inútil, Tierra del Fuego.",
+        caption:
+          "The wild colony at Bahía Inútil, on Isla Grande de Tierra del Fuego.",
+        credit: {
+          name: "Gillermo Adolfo",
+          url: "https://commons.wikimedia.org/wiki/File:Pinguinos_Rey,_Parque_del_mismo_nombre,_bahia_inutil_,Tierra_del_Fuego_-_panoramio.jpg",
+          license: "CC BY 3.0",
+          licenseUrl: "https://creativecommons.org/licenses/by/3.0/",
+        },
+      },
       guidance: {
-        hint: "We've mentioned every country at least once this Journey!",
+        hint: "Cold coastal wildlife differs between the Arctic and the far south.",
         assist: {
-          text: "Venezuela and Chile are locked in. Fill in the gaps along the Pacific. If you have more than seven selected, remove the extra picks.",
-          fixedSelections: ["wurl:VEN", "wurl:CHL"],
+          text: "Walruses and polar bears are ruled out. Choose between penguins and puffins.",
+          candidateIds: ["animal:penguins", "animal:puffins"],
         },
       },
     }),

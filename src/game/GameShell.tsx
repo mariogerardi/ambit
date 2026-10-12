@@ -161,6 +161,32 @@ export function GameShell({
               {feedbackText && (
                 <p className="journey-explanation">{feedbackText}</p>
               )}
+              {round.feedbackImage && (
+                <figure className="journey-feedback-image">
+                  <img
+                    src={round.feedbackImage.src}
+                    alt={round.feedbackImage.alt}
+                  />
+                  <figcaption>
+                    {round.feedbackImage.caption}{" "}
+                    <a
+                      href={round.feedbackImage.credit.url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {round.feedbackImage.credit.name}
+                    </a>
+                    {" · "}
+                    <a
+                      href={round.feedbackImage.credit.licenseUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {round.feedbackImage.credit.license}
+                    </a>
+                  </figcaption>
+                </figure>
+              )}
               {round.feedbackDiagram?.type === "river-banks" && (
                 <figure className="river-banks-diagram">
                   <svg

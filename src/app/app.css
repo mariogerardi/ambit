@@ -2829,24 +2829,26 @@ body
 .journey-question-copy .journey-prompt {
   color: color-mix(in srgb, var(--ui-text) 90%, #f4ecd8);
 }
-/* This short selection instruction needs no extra gaps around it. */
-.experience
-  .question-card[data-question-id="andes-titicaca-v1"]
-  h1.journey-question-copy {
-  margin-bottom: 0;
-}
-.experience
-  .question-card[data-question-id="andes-titicaca-v1"]
-  .question-instruction {
-  margin: 0 0 8px;
-}
-.experience
-  .question-card[data-question-id="andes-titicaca-v1"]
-  .candidate-grid {
-  margin-top: 0;
-}
 .experience .round-feedback .journey-correct-answer {
   border-left-color: var(--ui-correct);
+}
+.journey-feedback-image {
+  margin: 16px 0;
+}
+.journey-feedback-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+.journey-feedback-image figcaption {
+  margin-top: 8px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.journey-feedback-image a {
+  color: inherit;
 }
 .experience .round-feedback .journey-explanation {
   margin-block: 14px;

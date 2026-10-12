@@ -254,3 +254,18 @@ Ecuador summit choices for Cotopaxi, Cayambe and Antisana are supported by
 Smithsonian Institution’s Global Volcanism Program (volcano numbers 352050,
 352006 and 352030), reviewed October 11, 2026. Each round includes source links;
 Chimborazo’s revealed marker retains its Natural Earth coordinate.
+
+## Tierra del Fuego colony photograph
+
+`public/journeys/andes/king-penguin-colony.v1.jpg` is **Gillermo Adolfo**'s
+photograph of the wild king-penguin colony at Bahía Inútil, taken April 24, 2016,
+licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+The image uses Wikimedia Commons' existing crop and 960-pixel thumbnail; Ambit
+makes no further image edits. The reveal displays the photographer, source and
+license links. Source:
+[Wikimedia Commons file page](https://commons.wikimedia.org/wiki/File:Pinguinos_Rey,_Parque_del_mismo_nombre,_bahia_inutil_,Tierra_del_Fuego_-_panoramio.jpg).
+Download provenance and checksum are in `sources/andes-penguins.metadata.json`.
+
+The colony marker uses the reserve location (53°27′38″S, 69°18′21″W) reported in
+[Vidal et al.'s 2023 reserve flora study](https://www.scielo.cl/article_plus.php?lng=es&pid=S0717-66432023000100001&tlng=es).
+It is a reference location, not a surveyed colony boundary.
