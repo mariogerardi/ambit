@@ -32,6 +32,34 @@ Exact input: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1
 
 Transformations: Mapshaper topology-aware weighted simplification retaining 16% of vertices with `keep-shapes`; coordinate rounding to 0.00001°; source properties extracted to the canonical mapping; source geometry converted into WURL region records; camera focus derived with curated demo centers. All 242 map units remain present.
 
+## Journey time-zone map
+
+The transparent completion map in `public/geography/time-zones.v1.png` is a
+Produced Work derived from **Timezone Boundary Builder 2026e**, using
+**© OpenStreetMap contributors** boundary data under the **Open Database License
+(ODbL) 1.0**: https://opendatacommons.org/licenses/odbl/1-0/.
+Source archive:
+https://github.com/evansiroky/timezone-boundary-builder/releases/download/2026e/timezones-with-oceans-now.geojson.zip.
+Original source data is available at that link; a copy of the database license
+ships in `public/geography/time-zones.LICENSE.txt`.
+
+Standard UTC offsets use the public-domain **IANA tzdb 2026e** rules:
+https://data.iana.org/time-zones/releases/tzdata2026e.tar.gz. The map subtracts
+seasonal DST from offsets at 2026-10-12T12:00:00Z; it is an illustrative standard-time
+overview, not a live clock or a legal boundary service. China's official UTC+8
+footprint takes precedence over the source's overlapping unofficial Xinjiang time.
+
+Transformations: repair invalid source polygons; simplify at 0.035° with topology
+preserved; dissolve by standard UTC offset on a 0.001° precision grid; rasterize translucent fills and thin
+outlines to a 4096×2048 equirectangular PNG. Source and asset checksums, size,
+offset checks and transformations are in `public/geography/time-zones.metadata.json`.
+`scripts/prepare-time-zone-map.py` reproduces the map offline using Pillow and
+Shapely with the pinned archive and compiled IANA zones. It does not modify the
+canonical country or grading data. Samoa's reveal-only boundary is extracted from
+the same source's shared UTC+13/UTC−11 boundary, retaining the eastern arc near the
+islands. Its derivative coordinates and attribution ship under ODbL 1.0 in
+`public/geography/samoa-time-zone-line.v1.json`.
+
 ## U.S. boundaries
 
 **geoBoundaries gbOpen**, William & Mary GeoLab and community contributors. https://www.geoboundaries.org/. geoBoundaries distributes its database under **CC BY 4.0**: https://creativecommons.org/licenses/by/4.0/. The underlying U.S. Census Bureau MAF/TIGER inputs are **public domain**, as recorded by the dataset metadata. These are distinct source and distribution licenses.

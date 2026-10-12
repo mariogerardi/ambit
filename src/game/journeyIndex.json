@@ -421,7 +421,7 @@
   {
     "id": "same-hour-different-worlds",
     "title": "Same Hour, Different Worlds",
-    "saveRevision": 4,
+    "saveRevision": 5,
     "legacyRoundLabels": {
       "same-hour-q4": "Sri Lanka / Nepal / Bhutan",
       "same-hour-q5": "Vladivostok + Guam + Brisbane"
@@ -458,7 +458,7 @@
         "id": "same-hour-q5",
         "label": "The Pacific hour",
         "progressLabel": "One Pacific hour",
-        "resolvedLabel": "Vladivostok + Guam + Brisbane"
+        "resolvedLabel": "Vladivostok + Brisbane"
       }
     ]
   }

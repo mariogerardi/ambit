@@ -88,7 +88,21 @@ export type MapOverlay =
       shade?: boolean;
     }
   | { id: string; type: "parallel"; latitude: number }
-  | { id: string; type: "meridian"; longitude: number };
+  | { id: string; type: "meridian"; longitude: number }
+  | {
+      id: string;
+      type: "path";
+      coordinates: number[][];
+      dashed?: boolean;
+      opacity?: number;
+    }
+  | {
+      id: string;
+      type: "texture";
+      /** Transparent equirectangular image: west/east −180°/+180°, north at top. */
+      assetUrl: string;
+      opacity: number;
+    };
 export interface BoundaryLayerManifest {
   key: string;
   level: AdminLevel;

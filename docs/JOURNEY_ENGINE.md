@@ -81,6 +81,12 @@ coastline replacement. These footprints apply to play, reveal and completion;
 canonical geometry and answer eligibility remain unchanged. Replace the full
 footprint rather than adding an overlapping imported island.
 
+Completion can author `overlays`, `borders`, `mapCaption` and `mapAttribution` separately from
+the last round. A `texture` overlay is a transparent equirectangular image covering
+the globe (−180° at the left edge, north at the top); `opacity` controls its strength.
+It never participates in picking or grading. A `path` overlay supports a sourced
+or explicitly schematic geographic guide, with optional dashes and opacity.
+
 `compileQuestionScenes` merges scene values over presentation defaults without
 mutating the source/preset. Explicit empty arrays clear a layer; omission preserves
 the default. It produces the legacy runtime fields once, and existing records

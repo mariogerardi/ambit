@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -128,12 +129,6 @@ describe("Same Hour, Different Worlds", () => {
       expect(view(help(at(index))).focus).toEqual(scene.focus);
     }
     const q5 = journey.rounds[4];
-    expect(answerPlace(q5, "place:4044012")).toMatchObject({
-      sourceId: "geonames:4044012",
-      parentId: "wurl:GUM",
-      lat: 13.47567,
-      lng: 144.74886,
-    });
     expect(cityIdForName(q5, "Guam")).toBeUndefined();
     expect(cityIdForName(q5, "Hagatna")).toBeUndefined();
     expect(answerPlace(q5, "place:2073124")?.sourceId).toBe("geonames:2073124");
@@ -142,7 +137,7 @@ describe("Same Hour, Different Worlds", () => {
   it("highlights all four European candidates, narrows equally, and keeps only mainland Spain contextual", () => {
     const question = journey.rounds[1];
     const scene = view(at(1));
-    for (const id of ["wurl:FIN", "wurl:POL", "wurl:GBR", "wurl:GRC"]) {
+    for (const id of ["wurl:PRT", "wurl:POL", "wurl:GBR", "wurl:GRC"]) {
       expect(scene.states[id]).toBe("selectable");
       expect(
         scene.regions.find((r) => r.id === id)?.geometry.coordinates.length,
@@ -158,11 +153,11 @@ describe("Same Hour, Different Worlds", () => {
     expect(scene.states[mainland.id]).toBe("hinted");
     expect(scene.states["wurl:ESP"]).toBe("disabled");
     const narrowed = view(help(at(1)));
-    expect(narrowed.states["wurl:FIN"]).toBe("disabled");
+    expect(narrowed.states["wurl:PRT"]).toBe("disabled");
     expect(narrowed.states["wurl:GBR"]).toBe("disabled");
     expect(narrowed.states["wurl:POL"]).toBe("selectable");
     expect(narrowed.states["wurl:GRC"]).toBe("selectable");
-    for (const id of ["wurl:POL", "wurl:FIN"]) {
+    for (const id of ["wurl:POL", "wurl:PRT"]) {
       const reveal = view(
         reduce(at(1), { type: "select", id }, { type: "submit" }),
       );
@@ -234,6 +229,28 @@ describe("Same Hour, Different Worlds", () => {
       "American Samoa · Sun 12:00",
       "Savai‘i",
     ]);
+    expect(scene.overlays).toEqual([]);
+    expect(reveal.overlays).toHaveLength(1);
+    expect(reveal.overlays![0].type).toBe("path");
+    const boundary = JSON.parse(
+      readFileSync("public/geography/samoa-time-zone-line.v1.json", "utf8"),
+    );
+    const bundledBoundary = JSON.parse(
+      readFileSync("src/game/data/samoa-time-zone-line.v1.json", "utf8"),
+    );
+    expect(bundledBoundary).toEqual(boundary);
+    expect(boundary.sourceVersion).toBe("2026e");
+    expect(boundary.geometry.coordinates.length).toBeGreaterThan(2);
+    expect(reveal.overlays![0]).toMatchObject({
+      coordinates: boundary.geometry.coordinates,
+    });
+    const western = scene.places.find((p) => p.name === "Samoa")!;
+    const eastern = scene.places.find((p) => p.name === "American Samoa")!;
+    expect(
+      boundary.geometry.coordinates.every(
+        ([lng]: number[]) => lng > western.lng && lng < eastern.lng,
+      ),
+    ).toBe(true);
     expect(Object.values(reveal.states)).not.toContain("correct");
     expect(reveal.routes).toEqual([]);
     expect(question.explanation).toContain("Sunday—at noon, too");
@@ -275,8 +292,18 @@ describe("Same Hour, Different Worlds", () => {
     expect(view(at(0)).regions).toBe(world);
   });
 
-  it("makes the finale one Australian pick, preserves edits and help in saves, and keeps Guam contextual", () => {
+  it("makes the finale one Australian pick, preserves edits and help in saves, and omits Guam", () => {
     const question = journey.rounds[4];
+    for (const state of [
+      at(4),
+      help(at(4)),
+      reduce(at(4), ...actions[4], { type: "submit" }),
+    ])
+      expect(view(state).places.some((p) => p.parentId === "wurl:GUM")).toBe(
+        false,
+      );
+    expect(question.leadIn).not.toContain("Guam");
+    expect(question.explanation).not.toContain("Guam");
     expect(question.mode).toBe("city-single");
     expect(question.selection).toEqual({
       type: "ids",
@@ -345,7 +372,7 @@ describe("Same Hour, Different Worlds", () => {
       },
     };
     const upgraded = upgradeDailyAttempt(old, JOURNEY_INDEX);
-    expect(upgraded.contentRevision).toBe(4);
+    expect(upgraded.contentRevision).toBe(5);
     expect(upgraded.game.selectedIds).toEqual([]);
     expect(upgraded.game.answers.every((a) => a.correct)).toBe(true);
     expect(upgraded.game.answers[3].receiptLabel).toBe(
@@ -364,9 +391,35 @@ describe("Same Hour, Different Worlds", () => {
       },
       JOURNEY_INDEX,
     );
-    expect(priorCityDraft.contentRevision).toBe(4);
+    expect(priorCityDraft.contentRevision).toBe(5);
     expect(priorCityDraft.game.selectedIds).toEqual([]);
     expect(priorCityDraft.game.help).toBeUndefined();
+    const priorCountryDraft = upgradeDailyAttempt(
+      {
+        ...progress.attempts[day],
+        contentRevision: 4,
+        game: {
+          ...at(1),
+          selectedIds: ["wurl:FIN"],
+          answers: [
+            {
+              ...initialGame,
+              roundId: "same-hour-q1",
+              correct: true,
+              receiptLabel: "Reykjavík + Accra",
+            },
+          ],
+        },
+      },
+      JOURNEY_INDEX,
+    );
+    expect(priorCountryDraft.contentRevision).toBe(5);
+    expect(priorCountryDraft.game.roundIndex).toBe(1);
+    expect(priorCountryDraft.game.selectedIds).toEqual([]);
+    expect(priorCountryDraft.game.answers[0]).toMatchObject({
+      correct: true,
+      receiptLabel: "Reykjavík + Accra",
+    });
     const completed = upgradeDailyAttempt(
       {
         ...old,
@@ -419,13 +472,89 @@ describe("Same Hour, Different Worlds", () => {
       visualState: "incorrect",
     });
     const completion = view({ ...at(4), phase: "finished" });
-    expect(completion.places).toHaveLength(11);
+    expect(completion.places).toHaveLength(10);
     expect(completion.places.every((p) => p.visualState === "visited")).toBe(
       true,
     );
     expect(Object.values(completion.states)).not.toContain("visited");
     expect(completion.routes).toEqual([]);
     expect(journey.completion!.views).toHaveLength(5);
+  });
+
+  it("shows the sourced time-zone texture only on completion and preserves country grading", () => {
+    for (const i of [0, 1, 2, 3, 4]) {
+      expect(view(at(i)).overlays?.some((o) => o.type === "texture")).toBe(
+        false,
+      );
+      expect(
+        view(reduce(at(i), ...actions[i], { type: "submit" })).overlays?.some(
+          (o) => o.type === "texture",
+        ),
+      ).toBe(false);
+    }
+    const completed = view({ ...at(4), phase: "finished" });
+    expect(completed.showBorders).toBe(false);
+    expect(completed.overlays).toBe(journey.completion!.overlays);
+    expect(completed.overlays).toEqual([
+      {
+        id: "same-hour:time-zone-map",
+        type: "texture",
+        assetUrl: "/geography/time-zones.v1.png",
+        opacity: 0.85,
+      },
+    ]);
+    const image = readFileSync("public/geography/time-zones.v1.png");
+    const metadata = JSON.parse(
+      readFileSync("public/geography/time-zones.metadata.json", "utf8"),
+    );
+    expect(image.subarray(1, 4).toString()).toBe("PNG");
+    expect(image.readUInt32BE(16)).toBe(4096);
+    expect(image.readUInt32BE(20)).toBe(2048);
+    expect(image[25]).toBe(6); // RGBA keeps the underlying globe visible.
+    expect(createHash("sha256").update(image).digest("hex")).toBe(
+      metadata.assetSha256,
+    );
+    expect(metadata.checkedOffsetsMinutes).toMatchObject({
+      Accra: 0,
+      Praia: -60,
+      Oran: 60,
+      Kashgar: 480,
+      Apia: 780,
+      "Pago Pago": -660,
+      Brisbane: 600,
+      Vladivostok: 600,
+    });
+    expect(metadata.sourceVersion).toBe("2026e");
+    const markup = renderToStaticMarkup(
+      createElement(GameShell, {
+        journey,
+        context,
+        game: { ...at(4), phase: "finished" },
+        dispatch: () => {},
+        webgl: true,
+        frame: () => {},
+        onHome: () => {},
+        onStudy: () => {},
+      }),
+    );
+    expect(markup).toContain("Standard-time zones");
+    expect(markup).toContain("OpenStreetMap contributors");
+    const playing = renderToStaticMarkup(
+      createElement(GameShell, {
+        journey,
+        context,
+        game: at(4),
+        dispatch: () => {},
+        webgl: true,
+        frame: () => {},
+        onHome: () => {},
+        onStudy: () => {},
+      }),
+    );
+    expect(playing).not.toContain("OpenStreetMap contributors");
+    expect(auditJourney(journey, world, () => false).errors).toContain(
+      "Missing local asset: /geography/time-zones.v1.png",
+    );
   });
 
   it("keeps city markers primary, offers a fallback without WebGL, and shows simple day choices", async () => {

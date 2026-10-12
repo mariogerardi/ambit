@@ -292,6 +292,10 @@ export interface Journey {
     /** Separate views for widely dispersed destinations; never implies a connecting route. */
     views?: Focus[];
     physicalFeatures: PhysicalFeature[];
+    overlays?: MapOverlay[];
+    mapCaption?: string;
+    mapAttribution?: { label: string; url: string };
+    borders?: boolean;
     places: PlaceFeature[];
     caption?: string;
     /** Reviewed flag/motif comparison, shown only after the Journey ends. */

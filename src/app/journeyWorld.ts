@@ -183,7 +183,8 @@ export function journeyWorld(
           ]
         : []),
     overlays:
-      game.phase === "playing" || game.phase === "feedback"
+      completion?.overlays ??
+      (game.phase === "playing" || game.phase === "feedback"
         ? [
             ...(round.overlays ?? []),
             ...(game.phase === "playing" && game.help?.[round.id] === "assisted"
@@ -194,8 +195,8 @@ export function journeyWorld(
               : []),
             ...pinRings,
           ]
-        : undefined,
-    showBorders: map.borders,
+        : undefined),
+    showBorders: completion?.borders ?? map.borders,
     borderRegionIds:
       game.phase === "home" || game.phase === "finished"
         ? undefined

@@ -5,6 +5,7 @@ import { capitalSource } from "./quizData";
 import type { FactSource, Journey } from "./questions";
 import type { Focus, PlaceFeature, RegionFeature } from "../geography/types";
 import mapData from "./data/same-hour-map.v1.json";
+import samoaTimeZoneLine from "./data/samoa-time-zone-line.v1.json";
 
 const source = (name: string, url: string): FactSource => ({
   name,
@@ -47,16 +48,6 @@ const savaii: PlaceFeature = {
 };
 // Reviewed GeoNames records absent from the bundled city pool. Keep them local:
 // answerPlace resolves authored candidates without regenerating geography.
-const hagatna = cityReference({
-  id: "place:4044012",
-  name: "Hagåtña (Guam)",
-  aliases: ["Hagåtña", "Hagatna", "Guam", "Agana"],
-  kind: "city",
-  parentId: "wurl:GUM",
-  lat: 13.47567,
-  lng: 144.74886,
-  sourceId: "geonames:4044012",
-});
 const darwin = cityReference({
   id: "place:2073124",
   name: "Darwin",
@@ -113,7 +104,7 @@ const base = definePresentation({
 
 export const SAME_HOUR_JOURNEY: Journey = {
   id: "same-hour-different-worlds",
-  saveRevision: 4,
+  saveRevision: 5,
   legacyRoundLabels: {
     "same-hour-q4": "Sri Lanka / Nepal / Bhutan",
     "same-hour-q5": "Vladivostok + Guam + Brisbane",
@@ -146,7 +137,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Accra. Reykjavík and Accra both keep UTC+0 through the year. They sit on different continents, but the clocks agree.",
+        "Accra. Reykjavík and Accra both keep UTC+0 through the year. Praia is an hour behind; Algiers and Oran are an hour ahead. Nearby longitudes can still keep different clocks.",
       source: zone("Reykjavík", "iceland/reykjavik"),
       sources: [
         zone("Accra", "ghana/accra"),
@@ -163,7 +154,13 @@ export const SAME_HOUR_JOURNEY: Journey = {
         assist: {},
         reveal: {
           focus: atlanticView,
-          places: [context(clock(reykjavik, "UTC+0")), clock(accra, "UTC+0")],
+          places: [
+            context(clock(reykjavik, "UTC+0")),
+            clock(accra, "UTC+0"),
+            { ...clock(praia, "UTC−1"), visualState: "disabled" },
+            { ...clock(algiers, "UTC+1"), visualState: "disabled" },
+            { ...clock(oran, "UTC+1"), visualState: "disabled" },
+          ],
         },
       },
     }),
@@ -173,7 +170,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       label: "European clocks",
       progressLabel: "Europe's mismatch",
       resolvedLabel: "Madrid + Warsaw",
-      title: "The neighbor that doesn't match.",
+      title: "Europe’s shared clocks.",
       leadIn: "Now compare Madrid's clock with the rest of Europe.",
       prompt:
         "Which of these countries keeps the same time as Madrid in both winter and summer?",
@@ -183,7 +180,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       commitment: "submit",
       selection: {
         type: "ids",
-        ids: ["wurl:FIN", "wurl:POL", "wurl:GBR", "wurl:GRC"],
+        ids: ["wurl:PRT", "wurl:POL", "wurl:GBR", "wurl:GRC"],
       },
       rule: { type: "country-ids", ids: ["wurl:POL"] },
       map: {
@@ -202,9 +199,9 @@ export const SAME_HOUR_JOURNEY: Journey = {
         },
       ],
       guidance: {
-        hint: "Matching in winter isn't enough—the summer clock change must agree too.",
+        hint: "Mainland Spain follows Central European Time. Think about which countries share that clock.",
         assist: {
-          text: "Finland and the United Kingdom are ruled out. Compare Poland with Greece.",
+          text: "Portugal and the United Kingdom are ruled out. Compare Poland with Greece.",
           candidateIds: ["wurl:POL", "wurl:GRC"],
         },
       },
@@ -215,7 +212,6 @@ export const SAME_HOUR_JOURNEY: Journey = {
         zone("Warsaw", "poland/warsaw"),
         zone("Lisbon", "portugal/lisbon"),
         zone("Athens", "greece/athens"),
-        zone("Helsinki", "finland/helsinki"),
         zone("United Kingdom", "uk"),
         capitalSource,
       ],
@@ -331,7 +327,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       mapCaption:
         "Savai‘i and Upolu form Samoa’s two main islands; American Samoa lies to the east.",
       feedbackMapCaption:
-        "Example readings: Samoa UTC+13; American Samoa UTC−11. Same hour, different day.",
+        "Samoa UTC+13 · American Samoa UTC−11 · boundary © OpenStreetMap contributors.",
       source: zone("Apia, Samoa", "samoa/apia"),
       sources: [
         zone("Pago Pago, American Samoa", "usa/pago-pago"),
@@ -346,6 +342,10 @@ export const SAME_HOUR_JOURNEY: Journey = {
         capitalSource,
         source(mapData.source.name, mapData.source.url),
         source(
+          "Timezone Boundary Builder · Samoa boundary",
+          samoaTimeZoneLine.sourceUrl,
+        ),
+        source(
           "Samoa Tourism · the islands of Samoa",
           "https://www.samoa.travel/discover/the-islands-of-samoa/",
         ),
@@ -358,6 +358,14 @@ export const SAME_HOUR_JOURNEY: Journey = {
         assist: {},
         reveal: {
           focus: samoaView,
+          overlays: [
+            {
+              id: "same-hour:date-line",
+              type: "path",
+              opacity: 0.65,
+              coordinates: samoaTimeZoneLine.geometry.coordinates,
+            },
+          ],
           places: [
             context(clock(samoa, "Mon 12:00")),
             context(clock(americanSamoa, "Sun 12:00")),
@@ -371,11 +379,11 @@ export const SAME_HOUR_JOURNEY: Journey = {
       id: "same-hour-q5",
       label: "The Pacific hour",
       progressLabel: "One Pacific hour",
-      resolvedLabel: "Vladivostok + Guam + Brisbane",
+      resolvedLabel: "Vladivostok + Brisbane",
       title: "A clock across the Pacific.",
-      leadIn: "Vladivostok and Guam keep UTC+10 all year.",
+      leadIn: "Vladivostok keeps UTC+10 all year.",
       prompt:
-        "Which marked Australian city shares their clock throughout the year?",
+        "Which marked Australian city shares its clock throughout the year?",
       instruction: "Choose one city marker on the globe.",
       mode: "city-single",
       count: 1,
@@ -391,21 +399,12 @@ export const SAME_HOUR_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Brisbane. Russia's Vladivostok, the US territory of Guam, and Queensland's largest city share UTC+10 all year. Darwin is just 30 minutes behind; Perth is two hours behind. One country can keep several clocks.",
+        "Brisbane. Russia’s Vladivostok and Queensland’s largest city share UTC+10 all year, despite the distance between them. Darwin is just 30 minutes behind; Perth is two hours behind. One country can keep several clocks.",
       source: zone("Vladivostok", "russia/vladivostok"),
       sources: [
-        zone("Guam", "guam"),
         zone("Brisbane", "australia/brisbane"),
         zone("Darwin", "australia/darwin"),
         zone("Perth", "australia/perth"),
-        source(
-          "US Department of the Interior · Guam's territorial status",
-          "https://www.doi.gov/oia/islands/guam",
-        ),
-        source(
-          "GeoNames · Hagåtña coordinates",
-          "https://www.geonames.org/4044012/hagatna.html",
-        ),
         source(
           "GeoNames · Darwin coordinates",
           "https://www.geonames.org/2073124/darwin.html",
@@ -415,18 +414,13 @@ export const SAME_HOUR_JOURNEY: Journey = {
       scenes: {
         play: {
           focus: pacificView,
-          places: [
-            context(clock(vladivostok, "UTC+10")),
-            context(clock(hagatna, "UTC+10")),
-            ...australianCities,
-          ],
+          places: [context(clock(vladivostok, "UTC+10")), ...australianCities],
         },
         assist: {},
         reveal: {
           focus: pacificView,
           places: [
             context(clock(vladivostok, "UTC+10")),
-            context(clock(hagatna, "UTC+10")),
             clock(brisbane, "UTC+10"),
             { ...clock(darwin, "UTC+9:30"), visualState: "disabled" },
           ],
@@ -436,9 +430,29 @@ export const SAME_HOUR_JOURNEY: Journey = {
   ],
   completion: {
     focus: pacificView,
-    views: [atlanticView, europeView, chinaView, samoaView, pacificView],
+    views: [
+      atlanticView,
+      europeView,
+      chinaView,
+      { ...samoaView, altitude: 1.6 },
+      pacificView,
+    ],
     regionIds: [],
     physicalFeatures: [],
+    borders: false,
+    overlays: [
+      {
+        id: "same-hour:time-zone-map",
+        type: "texture",
+        assetUrl: "/geography/time-zones.v1.png",
+        opacity: 0.85,
+      },
+    ],
+    mapCaption: "Standard-time zones · seasonal clock changes vary.",
+    mapAttribution: {
+      label: "Time-zone map © OpenStreetMap contributors",
+      url: "https://www.openstreetmap.org/copyright",
+    },
     places: [
       clock(reykjavik, "UTC+0"),
       clock(accra, "UTC+0"),
@@ -449,16 +463,13 @@ export const SAME_HOUR_JOURNEY: Journey = {
       clock(samoa, "UTC+13"),
       clock(americanSamoa, "UTC−11"),
       clock(vladivostok, "UTC+10"),
-      clock(hagatna, "UTC+10"),
       clock(brisbane, "UTC+10"),
     ].map((p) => ({
       ...p,
       visualState: "visited",
-      priority: [vladivostok.id, hagatna.id, brisbane.id].includes(p.id)
-        ? 100
-        : 90,
+      priority: [vladivostok.id, brisbane.id].includes(p.id) ? 100 : 90,
     })),
     caption:
-      "Reykjavík meets Accra; Madrid keeps pace with Warsaw; Beijing and Kashgar share one official standard. Samoa and American Samoa share a clock reading but a different day. Vladivostok, Guam and Brisbane finish together at UTC+10. Clocks tell a political story as well as a geographic one.",
+      "Reykjavík meets Accra; Madrid keeps pace with Warsaw; Beijing and Kashgar share one official standard. Samoa and American Samoa share a clock reading but a different day. Vladivostok and Brisbane finish together at UTC+10. Clocks tell a political story as well as a geographic one.",
   },
 };

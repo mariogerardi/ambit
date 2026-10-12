@@ -29,7 +29,7 @@ import type {
   MapOverlay,
   PhysicalFeature,
 } from "../geography/types";
-import { makeMapOverlay } from "./overlays";
+import { MapOverlays } from "./overlays";
 import {
   CameraTravel,
   CameraFlyover,
@@ -177,6 +177,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     current.current = props;
     const placeLabels = useMemo(() => new PlaceLabels(), []);
     const physical = useMemo(() => new PhysicalFeatures(), []);
+    const mapOverlays = useMemo(() => new MapOverlays(), []);
+    useEffect(() => () => mapOverlays.dispose(), [mapOverlays]);
     const labelFrame = useRef(0);
     const countryPoints = useRef<
       (PlaceFeature & { __threeObjPoint?: Object3D })[]
@@ -782,7 +784,9 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         labelLayer,
         physicalLayer,
         ...(props.surfaceRoutes ? props.routes : []),
-        ...(props.overlays ?? []),
+        // The library stamps renderer bookkeeping onto custom data objects.
+        // Keep the authored overlay records independent of those mutations.
+        ...(props.overlays ?? []).map((overlay) => ({ ...overlay })),
       ],
       [
         renderRegions,
@@ -879,7 +883,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           return placeLabels.group;
         }
         if ("type" in obj)
-          return makeMapOverlay(
+          return mapOverlays.get(
             obj as MapOverlay,
             globe.current?.getGlobeRadius() ?? 100,
           );
@@ -924,7 +928,14 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         updateOutline(cap ?? line, r);
         return cap ?? line;
       },
-      [updateOutline, placeLabels, physical, refreshLabels, regionalSurfaces],
+      [
+        updateOutline,
+        placeLabels,
+        physical,
+        refreshLabels,
+        regionalSurfaces,
+        mapOverlays,
+      ],
     );
     useEffect(() => {
       const activeObjects = new Map(customData.map((r) => [r.id, r]));

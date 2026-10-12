@@ -101,6 +101,18 @@ export function GameShell({
   const feedback = game.answers.at(-1),
     correct = feedback?.correct;
   const mapPresentation = questionMapPresentation(round, game.phase, !!correct);
+  const mapCaption =
+    game.phase === "finished"
+      ? (journey.completion?.mapCaption ??
+        round.feedbackMapCaption ??
+        round.mapCaption)
+      : game.phase === "feedback"
+        ? (round.feedbackMapCaption ?? round.mapCaption)
+        : round.mapCaption;
+  const mapAttribution =
+    game.phase === "finished"
+      ? (journey.completion?.mapAttribution ?? journey.mapAttribution)
+      : journey.mapAttribution;
   const visibleHover =
     hover &&
     mapPresentation.hover &&
@@ -451,24 +463,12 @@ export function GameShell({
           )}
         </section>
       )}
-      {(journey.mapAttribution || round.mapCaption) && (
+      {(mapAttribution || mapCaption) && (
         <aside className="journey-map-notes" aria-label="Map notes">
-          {round.mapCaption && (
-            <span>
-              {game.phase === "finished"
-                ? (round.feedbackMapCaption ?? round.mapCaption)
-                : game.phase === "feedback"
-                  ? (round.feedbackMapCaption ?? round.mapCaption)
-                  : round.mapCaption}
-            </span>
-          )}
-          {journey.mapAttribution && (
-            <a
-              href={journey.mapAttribution.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {journey.mapAttribution.label}
+          {mapCaption && <span>{mapCaption}</span>}
+          {mapAttribution && (
+            <a href={mapAttribution.url} target="_blank" rel="noreferrer">
+              {mapAttribution.label}
             </a>
           )}
         </aside>

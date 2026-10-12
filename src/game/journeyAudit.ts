@@ -65,6 +65,14 @@ export function auditJourney(
     assets: [
       ...new Set([
         ...journey.rounds.flatMap(mediaPaths),
+        ...journey.rounds
+          .flatMap((q) => [
+            ...(q.overlays ?? []),
+            ...(q.feedbackOverlays ?? []),
+            ...(q.guidance?.assist?.overlays ?? []),
+          ])
+          .concat(journey.completion?.overlays ?? [])
+          .flatMap((o) => (o.type === "texture" ? [o.assetUrl] : [])),
         ...(journey.completion?.flags ?? [])
           .flatMap((flag) => [flag.src, flag.detail?.src])
           .filter((value): value is string => !!value),
