@@ -226,6 +226,8 @@ not automatically accumulated. Use stable, distinct IDs for fixed geometry.
 retains context-colored geography on reveal; `feedbackContextIds` identifies
 answer-colored regions. Explicitly separate these when the answer is a symbol or
 historical fact rather than the country whose flag is shown.
+`map.feedbackBorders: false` suppresses political outlines on reveal when the
+subject is a whole continent, without changing borders during the question.
 
 `map.feedbackRegions: "neutral"` keeps land neutral when the answer is a city or
 physical feature; supply its answer marker separately in `feedbackPlaces`.
@@ -237,9 +239,13 @@ an explicitly exaggerated schematic. `correctFeedback` overrides widget-derived 
 
 `feedbackFlags` supplies a reveal-only comparison of bundled national flags,
 with `src`, `alt`, and visible country `label` for each flag. It replaces the
-clue image on feedback. Chasing the sun uses it for Argentina and Uruguay;
+clue image on feedback. An optional `detail` (`src`, `alt`) enlarges a reviewed
+motif; `caption` explains its meaning. `image.context` retains the full flag as
+secondary context when the clue itself is a motif crop. Chasing the sun uses it for Argentina and Uruguay;
 its Philippine reveal stays on the Philippines, and its authored completion
-visits the six flag countries across the five stops.
+visits the six flag countries across the five stops. `completion.flags` uses the
+same comparison contract after the Journey ends. `scripts/prepare-sun-details.py`
+crops only the already-reviewed local flag vectors; it does not refresh the flag catalog.
 
 `feedbackImage` supplies reveal-only documentary media with `src`, `alt`,
 `caption`, and `credit` (`name`, source `url`, `license`, `licenseUrl`). It is

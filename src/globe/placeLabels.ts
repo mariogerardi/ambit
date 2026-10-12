@@ -8,6 +8,7 @@ import {
 } from "three";
 import type { PerspectiveCamera } from "three";
 import type { PlaceFeature } from "../geography/types";
+import { PLAY_HIGHLIGHTS } from "./themes";
 export interface PlaceLabelLayer {
   id: string;
   kind: "place-labels";
@@ -296,15 +297,15 @@ export class PlaceLabels {
       ? {
           default: "#849899",
           hover: "#ffe391",
-          selectable: "#e7c673",
-          selected: "#ffce4f",
+          selectable: PLAY_HIGHLIGHTS.selectable,
+          selected: PLAY_HIGHLIGHTS.selected,
           correct: "#66c590",
           answer: "#a5d9ae",
           incorrect: "#ee776b",
           visited: "#b89de0",
           disabled: "#849899",
-          hinted: "#e7c673",
-          clue: "#e7c673",
+          hinted: PLAY_HIGHLIGHTS.context,
+          clue: PLAY_HIGHLIGHTS.context,
         }[place.visualState]
       : style.marker;
     const key = `${style.shape}:${color}:${!!place.answerTarget}`;

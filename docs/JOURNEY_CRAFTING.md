@@ -122,9 +122,10 @@ When a round asks for _some_ members of a larger valid set, author the acceptanc
 
 The globe is an active part of the question, not decorative background. An endless field of gray countries is often a sign that the author has not deliberately specified the **given** geography.
 
-- **Context highlight (typically yellow):** Geography already named or established by the prompt, such as Ecuador in an Ecuadorian mountain question, or Chile as a fixed reference for an ordering task. Yellow is **not** a decoration requirement on every round.
+- **Context (amber):** Geography already named or established by the prompt. Yellow is **not** a decoration requirement on every round.
+- **Available candidates (pale yellow):** An equally styled eligible candidate field; distinct from known context.
 - **Neutral/muted:** Background, undisclosed answers, and nonprivileged candidates. These may still need to be selectable.
-- **Selected/committed:** What the player has chosen, distinctly different from contextual yellow.
+- **Selected/committed (brighter yellow):** What the player has chosen, with an emphasized outline and a different fill from both context and available candidates. These shared globe colors are defined in `PLAY_HIGHLIGHTS` in `src/globe/themes.ts` and used for country fills and place markers.
 - **Correct/incorrect:** Feedback states for the **answered object**, not arbitrary neighboring land.
 
 If a question names a country and asks for its mountain, capital, language, or history, highlighting that named country is **free orientation**, not a hint. Do not make players rediscover information already in the copy.
@@ -212,6 +213,12 @@ Review feedback colors and legends: if `contextIds` becomes answer-green in a pa
 ## 9. Make completion resolve the premise
 
 The completion screen is an **authored sixth visual state**, not merely “5/5 correct.” It should make the five answers intelligible together. Q5 earns an ending through a new task; completion then gathers the discoveries without asking another question.
+
+A Journey about visual symbolism needs visual clues and visual explanations.
+Give the relevant motif enough room to inspect, retain its full visual context,
+and keep answer-bearing comparisons after submission. At completion, compare the
+resolved designs themselves alongside their locations; a constellation of colored
+countries alone does not resolve an iconographic premise.
 
 - **Route/physical-feature Journey:** show the honest full geographic feature or traveled route with resolved stops and useful labels. Do not use an unrelated generic flyover when a continuous map is the payoff.
 - **Conceptual Journey:** show the common pattern or a constellation of resolved locations. Do not pretend distant stops form a meaningful route merely to draw lines.

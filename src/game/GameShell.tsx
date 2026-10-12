@@ -4,7 +4,7 @@ import { ActionIcon } from "../app/ActionIcon";
 import { pinDistance, pinDistanceTier } from "./answerTargets";
 import { useLayoutEffect, useRef } from "react";
 import type { RegionFeature, Focus } from "../geography/types";
-import type { Journey, QuestionContext } from "./questions";
+import type { FlagDisplay, Journey, QuestionContext } from "./questions";
 import { explanation, questionPrompt, committedNameVisible } from "./questions";
 import { journeyScore } from "./state";
 import { helpSummary, helpCountCopy } from "./guidance";
@@ -19,6 +19,42 @@ import {
   roundIdentity,
   resolvedRoundIdentity,
 } from "./copy";
+function FlagComparison({
+  flags,
+  label = "Revealed national flags",
+}: {
+  flags: FlagDisplay[];
+  label?: string;
+}) {
+  return (
+    <div
+      className={`flag-comparison${flags.length === 1 ? " flag-comparison-single" : flags.length > 2 ? " flag-collection" : ""}`}
+      role="group"
+      aria-label={label}
+    >
+      {flags.map((flag) => (
+        <figure key={flag.src}>
+          <div className="flag-media">
+            {flag.detail && (
+              <img
+                className="flag-detail"
+                src={flag.detail.src}
+                alt={flag.detail.alt}
+              />
+            )}
+            <img className="flag-full" src={flag.src} alt={flag.alt} />
+          </div>
+          {flags.length > 1 && (
+            <figcaption>
+              <strong>{flag.label}</strong>
+              {flag.caption && <span>{flag.caption}</span>}
+            </figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+  );
+}
 export function GameShell({
   journey,
   playground = false,
@@ -128,7 +164,9 @@ export function GameShell({
           </h1>
           {round.image &&
             (game.phase === "playing" || !round.feedbackFlags?.length) && (
-              <figure className="flag-clue">
+              <figure
+                className={`flag-clue${round.image.context ? " flag-clue-with-context" : ""}`}
+              >
                 <img
                   src={round.image.src}
                   alt={
@@ -136,9 +174,15 @@ export function GameShell({
                       ? round.image.alt
                       : round.image.feedbackAlt
                   }
-                  width="1200"
-                  height="600"
                 />
+                {round.image.context && (
+                  <div className="flag-context">
+                    <img
+                      src={round.image.context.src}
+                      alt={round.image.context.alt}
+                    />
+                  </div>
+                )}
               </figure>
             )}
           {game.phase === "playing" ? (
@@ -173,18 +217,7 @@ export function GameShell({
                 <p className="journey-explanation">{feedbackText}</p>
               )}
               {!!round.feedbackFlags?.length && (
-                <div
-                  className="flag-comparison"
-                  role="group"
-                  aria-label="Revealed national flags"
-                >
-                  {round.feedbackFlags.map((flag) => (
-                    <figure key={flag.src}>
-                      <img src={flag.src} alt={flag.alt} />
-                      <figcaption>{flag.label}</figcaption>
-                    </figure>
-                  ))}
-                </div>
+                <FlagComparison flags={round.feedbackFlags} />
               )}
               {round.feedbackImage && (
                 <figure className="journey-feedback-image">
@@ -395,6 +428,12 @@ export function GameShell({
               );
             })}
           </ol>
+          {game.phase === "finished" && !!journey.completion?.flags?.length && (
+            <FlagComparison
+              flags={journey.completion.flags}
+              label="Journey flag comparison"
+            />
+          )}
           {game.phase === "finished" && journey.completion?.caption && (
             <p className="journey-route-caption">
               {journey.completion.caption}

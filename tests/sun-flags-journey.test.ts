@@ -28,6 +28,7 @@ import type { Response } from "../src/game/questions";
 import type { Action, GameState } from "../src/game/state";
 import type { RegionFeature } from "../src/geography/types";
 import { journeyWorld } from "../src/app/journeyWorld";
+import { playRegionStyle, PLAY_HIGHLIGHTS } from "../src/globe/themes";
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
@@ -74,7 +75,7 @@ describe("Chasing the sun", () => {
       (capital) => capital.continent === "SA",
     ).map((capital) => capital.countryId);
     expect(countries).toHaveLength(12);
-    for (const id of countries) expect(view.states[id]).toBe("disabled");
+    for (const id of countries) expect(view.states[id]).toBe("selectable");
     expect(view.states["wurl:MEX"]).toBe("disabled");
     expect(new Set(countries.map((id) => view.states[id])).size).toBe(1);
     expect(view.selectDisabled).toBe(true);
@@ -86,7 +87,7 @@ describe("Chasing the sun", () => {
     const chosen = journeyWorld(world, SUN_FLAGS_JOURNEY, selected, context);
     expect(chosen.states["wurl:ARG"]).toBe("selected");
     expect(chosen.states["wurl:URY"]).toBe("selected");
-    expect(chosen.states["wurl:BRA"]).toBe("disabled");
+    expect(chosen.states["wurl:BRA"]).toBe("selectable");
     expect(reduce(selected, { type: "submit" }).answers.at(-1)?.correct).toBe(
       true,
     );
@@ -265,9 +266,14 @@ describe("Chasing the sun", () => {
       const host = document.createElement("div");
       host.innerHTML = shell(answered);
       expect(host.querySelector(".flag-clue")).toBeNull();
-      expect(host.querySelectorAll(".flag-comparison img")).toHaveLength(2);
+      expect(host.querySelectorAll(".flag-comparison .flag-full")).toHaveLength(
+        2,
+      );
       expect(
-        [...host.querySelectorAll(".flag-comparison figcaption")].map(
+        host.querySelectorAll(".flag-comparison .flag-detail"),
+      ).toHaveLength(2);
+      expect(
+        [...host.querySelectorAll(".flag-comparison figcaption strong")].map(
           (node) => node.textContent,
         ),
       ).toEqual(["Argentina", "Uruguay"]);
@@ -406,5 +412,111 @@ describe("Chasing the sun", () => {
     expect(html).toContain(SUN_FLAGS_JOURNEY.completion!.caption);
     for (const round of SUN_FLAGS_JOURNEY.rounds)
       expect(html).toContain(round.resolvedLabel);
+  });
+  it("makes the Kazakhstan motif inspectable without naming its meaning before submission", () => {
+    const before = document.createElement("div");
+    before.innerHTML = shell(at(2));
+    expect(before.querySelector(".flag-clue img")!.getAttribute("src")).toBe(
+      "/flags/clues/sun-detail-kaz.v1.svg",
+    );
+    expect(before.querySelector(".flag-context img")).not.toBeNull();
+    expect(before.querySelector(".flag-comparison")).toBeNull();
+    expect(
+      before.querySelector(".flag-clue img")!.getAttribute("alt"),
+    ).not.toContain("grain");
+    const after = document.createElement("div");
+    after.innerHTML = shell(
+      reduce(at(2), { type: "select", id: "rays:flames" }, { type: "submit" }),
+    );
+    expect(after.querySelector(".flag-detail")!.getAttribute("src")).toBe(
+      "/flags/clues/sun-ray-kaz.v1.svg",
+    );
+    expect(after.querySelector(".flag-full")).not.toBeNull();
+  });
+  it("keeps Philippine detail and the six-design comparison behind submission and completion", () => {
+    expect(shell(at(1))).not.toContain("sun-detail-phl.v1.svg");
+    const answered = reduce(
+      at(1),
+      { type: "select", id: "power:portugal" },
+      { type: "submit" },
+    );
+    expect(shell(answered)).toContain("sun-detail-phl.v1.svg");
+    expect(shell(answered)).not.toContain(
+      'aria-label="Journey flag comparison"',
+    );
+    const finished = document.createElement("div");
+    finished.innerHTML = shell({ ...at(4), phase: "finished" });
+    const flags = finished.querySelector(
+      '[aria-label="Journey flag comparison"]',
+    )!;
+    expect(flags.querySelectorAll(".flag-full")).toHaveLength(6);
+    expect(flags.querySelectorAll(".flag-detail")).toHaveLength(6);
+    expect(
+      [...flags.querySelectorAll("figcaption strong")].map(
+        (node) => node.textContent,
+      ),
+    ).toEqual([
+      "Argentina",
+      "Uruguay",
+      "Philippines",
+      "Kazakhstan",
+      "Japan",
+      "Malawi",
+    ]);
+    for (const flag of SUN_FLAGS_JOURNEY.completion!.flags!) {
+      expect(existsSync(`public${flag.src}`)).toBe(true);
+      expect(existsSync(`public${flag.detail!.src}`)).toBe(true);
+    }
+  });
+  it("pulls out from Malawi to explain the continental meaning after any answer", () => {
+    const round = SUN_FLAGS_JOURNEY.rounds[4];
+    const before = journeyWorld(world, SUN_FLAGS_JOURNEY, at(4), context);
+    expect(before.states["wurl:KEN"]).toBe("disabled");
+    expect(before.showBorders).toBe(true);
+    for (const id of ["dawn:freedom", "dawn:unity"]) {
+      const answered = reduce(
+        at(4),
+        { type: "select", id },
+        { type: "submit" },
+      );
+      const view = journeyWorld(world, SUN_FLAGS_JOURNEY, answered, context);
+      expect(view.focus.altitude!).toBeGreaterThan(before.focus.altitude!);
+      expect(view.showBorders).toBe(false);
+      for (const country of [
+        "wurl:MWI",
+        "wurl:KEN",
+        "wurl:ZAF",
+        "wurl:EGY",
+        "wurl:ESH",
+        "wurl:NE-SOL",
+      ]) {
+        expect(view.states[country]).toBe("hinted");
+        expect(playRegionStyle(country, view.states[country]).fill).toBe(
+          PLAY_HIGHLIGHTS.context,
+        );
+      }
+      expect(view.states["wurl:KAZ"]).toBe("disabled");
+      expect(view.places.map((place) => place.name)).toEqual(["Africa"]);
+      expect(shell(answered)).toContain(round.feedbackFlags![0].detail!.src);
+      expect(shell(answered)).not.toContain("Rising sun · freedom");
+    }
+  });
+  it("accepts all four main Japanese islands, matching the stated pin task", () => {
+    for (const pin of [
+      { lat: 35.68, lng: 139.69 }, // Honshu
+      { lat: 43.06, lng: 141.35 }, // Hokkaido
+      { lat: 33.59, lng: 130.4 }, // Kyushu
+      { lat: 33.84, lng: 132.77 }, // Shikoku
+    ])
+      expect(
+        isCorrect(SUN_FLAGS_JOURNEY.rounds[3], context, { ...at(3), pin }),
+      ).toBe(true);
+    expect(SUN_FLAGS_JOURNEY.rounds[3].prompt).toContain("four main islands");
+    expect(
+      isCorrect(SUN_FLAGS_JOURNEY.rounds[3], context, {
+        ...at(3),
+        pin: { lat: 26.22, lng: 127.69 },
+      }),
+    ).toBe(false);
   });
 });

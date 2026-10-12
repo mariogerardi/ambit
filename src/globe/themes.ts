@@ -3,6 +3,12 @@ import { regionStyle } from "./visualStates";
 import { THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
 export type GlobeTheme = "natural" | "play";
+/** Available countries, player selections, and known context have distinct tones. */
+export const PLAY_HIGHLIGHTS = {
+  selectable: "#efd88e",
+  selected: "#ffdb70",
+  context: "#efb75b",
+} as const;
 export function playRegionStyle(
   id: string,
   state: VisualState = "default",
@@ -14,15 +20,15 @@ export function playRegionStyle(
   for (const character of id)
     hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   const colors: Partial<Record<VisualState, string>> = {
-    selectable: "#efd88e",
-    selected: "#ffdb70",
+    selectable: PLAY_HIGHLIGHTS.selectable,
+    selected: PLAY_HIGHLIGHTS.selected,
     correct: "#78dfaa",
     answer: "#439d78",
     incorrect: "#ed6d68",
     visited: "#b79ae3",
     disabled,
-    hinted: "#efb75b",
-    clue: "#efb75b",
+    hinted: PLAY_HIGHLIGHTS.context,
+    clue: PLAY_HIGHLIGHTS.context,
   };
   return {
     fill: colors[state] ?? land[hash % land.length],

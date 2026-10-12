@@ -10,7 +10,11 @@ import {
   THEME_KEY,
   THEMES,
 } from "../src/theme/themes";
-import { playRegionStyle, themedRegionStyle } from "../src/globe/themes";
+import {
+  PLAY_HIGHLIGHTS,
+  playRegionStyle,
+  themedRegionStyle,
+} from "../src/globe/themes";
 
 beforeEach(() => {
   const store = new Map<string, string>();
@@ -130,6 +134,27 @@ describe("application themes", () => {
       meta.remove();
     },
   );
+
+  it("keeps available, selected, and known-context yellows distinct across themes", () => {
+    expect(PLAY_HIGHLIGHTS).toEqual({
+      selectable: "#efd88e",
+      selected: "#ffdb70",
+      context: "#efb75b",
+    });
+    expect(new Set(Object.values(PLAY_HIGHLIGHTS)).size).toBe(3);
+    for (const theme of THEME_IDS) {
+      expect(playRegionStyle("wurl:ARG", "selectable", false, theme).fill).toBe(
+        PLAY_HIGHLIGHTS.selectable,
+      );
+      expect(playRegionStyle("wurl:ARG", "selected", false, theme).fill).toBe(
+        PLAY_HIGHLIGHTS.selected,
+      );
+      for (const state of ["hinted", "clue"] as const)
+        expect(playRegionStyle("wurl:ARG", state, false, theme).fill).toBe(
+          PLAY_HIGHLIGHTS.context,
+        );
+    }
+  });
 
   it("changes geography appearance without changing the meaning of answers and selections", () => {
     expect(

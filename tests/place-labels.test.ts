@@ -12,6 +12,7 @@ import {
   placeLabelStyle,
 } from "../src/globe/placeLabels";
 import { ANSWER_PLACES } from "../src/game/answerTargets";
+import { PLAY_HIGHLIGHTS } from "../src/globe/themes";
 import type { PlaceFeature } from "../src/geography/types";
 import {
   PhysicalFeatures,
@@ -235,12 +236,17 @@ describe("cached readable place labels", () => {
     const marker = labels.group.children.find(
       (p) => p.userData.placeId === "a",
     )!;
-    expect(marker.userData.markerStyle).toContain("#e7c673");
+    expect(marker.userData.markerStyle).toContain(PLAY_HIGHLIGHTS.selectable);
     expect(
       labels.group.children.find(
         (p) => p.userData.placeId === "pin" && p.userData.role === "marker",
       )!.userData.markerStyle,
     ).toContain("pin:");
+    expect(
+      labels.group.children.find(
+        (p) => p.userData.placeId === "pin" && p.userData.role === "marker",
+      )!.userData.markerStyle,
+    ).toContain(PLAY_HIGHLIGHTS.selected);
     const before = factory.mock.calls.length;
     labels.update(
       {

@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="850.4716 190 460 460" width="460" height="460" overflow="hidden"><rect x="850.4716" y="190" width="460" height="460" fill="#00afca" /><g id="sun" fill="#fec50c" transform="translate(1080.4716,420)">
+<circle r="134.5497" />
+<g id="r16">
+<g id="r4">
+<path id="r" d="m0,-152.9c8,-0.1 11,-5.1 11,-11.1c0,-8 -11,-46.1 -11,-46.1s-11,38.1 -11,46.1c0,6 3,11.1 11,11.1z" />
+<use xlink:href="#r" transform="rotate(90)" />
+<use xlink:href="#r" transform="rotate(180)" />
+<use xlink:href="#r" transform="rotate(270)" />
+</g>
+<use xlink:href="#r4" transform="rotate(22.5)" />
+<use xlink:href="#r4" transform="rotate(45)" />
+<use xlink:href="#r4" transform="rotate(67.5)" />
+</g>
+<use xlink:href="#r16" transform="rotate(11.25)" />
+</g>
+</svg>

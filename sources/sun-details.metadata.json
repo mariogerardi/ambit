@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "license": "Public domain per source README; originals from Wikimedia Commons",
+  "sourceCommit": "c09927e63705529bbf59ca6684cd9b23225dddad",
+  "crops": [
+    {
+      "asset": "public/flags/clues/sun-detail-arg.v1.svg",
+      "countryId": "wurl:ARG",
+      "sourceAsset": "public/flags/study/flag-007.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/ar.svg",
+      "sourceSha256": "3b9546255e1e782698fc4c94a64706897e4c6e75dd324d256b84c3d249ca3bb2",
+      "sha256": "e4ea3672973353c42e1eca19b01158f6fab9e647b48eec517d841b9e8ef44572",
+      "viewBox": [322, 172, 156, 156],
+      "selection": "symbol",
+      "background": "white",
+      "changes": "Source SVG motif geometry retained; viewport cropped. Non-motif artwork omitted where specified."
+    },
+    {
+      "asset": "public/flags/clues/sun-detail-ury.v1.svg",
+      "countryId": "wurl:URY",
+      "sourceAsset": "public/flags/study/flag-186.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/uy.svg",
+      "sourceSha256": "bfbdc170fd69d5dd4d4f0b9b5056a719e853194eac166b95bd1c918c6ec9edba",
+      "sha256": "6f70219868a14708712aa395a1d984059d3c11c14ef3d85fe4dbfc742fe9e24a",
+      "viewBox": [22, 22, 296, 296],
+      "selection": "symbol",
+      "background": "white",
+      "changes": "Source SVG motif geometry retained; viewport cropped. Non-motif artwork omitted where specified."
+    },
+    {
+      "asset": "public/flags/clues/sun-detail-phl.v1.svg",
+      "countryId": "wurl:PHL",
+      "sourceAsset": "public/flags/study/flag-136.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/ph.svg",
+      "sourceSha256": "9fc5fd13f47cd820919702a33083af9cd027547ec2192971883fd09e116c2845",
+      "sha256": "db91d22b1a4af3997428b70e0ab8e3b0c227cdff0bdbed8889ae3d30ff0086a7",
+      "viewBox": [7, 24, 42, 42],
+      "selection": "symbol",
+      "background": "white",
+      "changes": "Source SVG motif geometry retained; viewport cropped. Non-motif artwork omitted where specified."
+    },
+    {
+      "asset": "public/flags/clues/sun-detail-kaz.v1.svg",
+      "countryId": "wurl:KAZ",
+      "sourceAsset": "public/flags/study/flag-087.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/kz.svg",
+      "sourceSha256": "714d9e539683b541766cb3b2063ee5cd23b022f79051f72222632179d556ae70",
+      "sha256": "bbd259cf38aa30c45884ca1052f04e1eacf77a4950fa22cb6feca37d8b9c6149",
+      "viewBox": [850.4716, 190, 460, 460],
+      "selection": "sun",
+      "background": "#00afca",
+      "changes": "Source SVG motif geometry retained; viewport cropped. Non-motif artwork omitted where specified."
+    },
+    {
+      "asset": "public/flags/clues/sun-ray-kaz.v1.svg",
+      "countryId": "wurl:KAZ",
+      "sourceAsset": "public/flags/study/flag-087.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/kz.svg",
+      "sourceSha256": "714d9e539683b541766cb3b2063ee5cd23b022f79051f72222632179d556ae70",
+      "sha256": "f62bd28592744f4ee1a27661b0c8908709f0eb036da804e4f51899b42772f294",
+      "viewBox": [1065.4716, 200, 30, 78],
+      "selection": "ray",
+      "background": "#00afca",
+      "changes": "Source SVG motif geometry retained; viewport cropped. Non-motif artwork omitted where specified."
+    },
+    {
+      "asset": "public/flags/clues/sun-detail-jpn.v1.svg",
+      "countryId": "wurl:JPN",
+      "sourceAsset": "public/flags/study/flag-085.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/jp.svg",
+      "sourceSha256": "5f868d0971b561656c19658eef0eec29411ee3e2d3559a707179f3dbae804989",
+      "sha256": "09cb1fa722692c821523bd959dde9620ec61e12ad4b7bd23fa7a2535d09c96d1",
+      "viewBox": [250, 100, 400, 400],
+      "selection": "whole",
+      "background": null,
+      "changes": "Source SVG motif geometry retained; viewport cropped. Non-motif artwork omitted where specified."
+    },
+    {
+      "asset": "public/flags/clues/sun-detail-mwi.v1.svg",
+      "countryId": "wurl:MWI",
+      "sourceAsset": "public/flags/study/flag-102.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/mw.svg",
+      "sourceSha256": "4e0f9603183b2e03be4560dfa39fa7a8b5a30af483d9975df66ec183b436b8e9",
+      "sha256": "803569e9a4289592bdebfc5f109406ec9c96411b7cd34a4d3915af2070c729f8",
+      "viewBox": [-112, -112, 224, 98],
+      "selection": "whole",
+      "background": null,
+      "changes": "Source SVG motif geometry retained; viewport cropped. Non-motif artwork omitted where specified."
+    }
+  ]
+}

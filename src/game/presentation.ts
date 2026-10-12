@@ -141,7 +141,10 @@ export function questionMapPresentation(
     (question.map?.revealOnAnswer ||
       (correct && question.map?.revealOnCorrect));
   return {
-    borders: recap || !!reveal || question.map?.borders !== false,
+    borders:
+      phase === "feedback" && question.map?.feedbackBorders !== undefined
+        ? question.map.feedbackBorders
+        : recap || !!reveal || question.map?.borders !== false,
     hover: recap || !!reveal || question.map?.hoverFeedback !== false,
     muteOthers:
       !recap &&

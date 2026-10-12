@@ -187,6 +187,16 @@ The enlarged sun detail in `public/flags/clues/sun-detail-01.svg` uses the same
 Uruguay flag artwork as `public/flags/study/flag-186.svg`, cropped by its SVG
 view box. The original flag artwork’s attribution and license also apply.
 
+The Chasing the sun motif comparisons in `public/flags/clues/sun-*.v1.svg` retain
+the reviewed flag artwork's paths and internal references. Source view boxes
+isolate the suns or a single Kazakhstan ray; unrelated stripes/ornaments are
+omitted where appropriate, with plain source-colored backgrounds. Malawi's crop
+retains the original rising-sun horizon. These are detail views, not alternative
+national flag designs. `scripts/prepare-sun-details.py` prepares them locally;
+`sources/sun-details.metadata.json` records source/output hashes, crop bounds,
+transformations, and the source public-domain notice. The full flags remain
+available alongside the detail views.
+
 ## Danube Journey river route
 
 **© OpenStreetMap contributors**, licensed under the **Open Database License

@@ -51,6 +51,14 @@ export interface FactSource {
   url: string;
   reviewedOn: string;
 }
+export interface FlagDisplay {
+  src: string;
+  alt: string;
+  label: string;
+  caption?: string;
+  /** A sourced motif crop, kept distinct from the full flag. */
+  detail?: { src: string; alt: string };
+}
 export interface CountryFact {
   countryId: string;
   field: string;
@@ -163,7 +171,7 @@ export interface Question {
   /** Optional praise matching the knowledge/skill, rather than the input widget. */
   correctFeedback?: string;
   /** Full flags replace the clue image on reveal, with visible country labels. */
-  feedbackFlags?: { src: string; alt: string; label: string }[];
+  feedbackFlags?: FlagDisplay[];
   /** Documentary image shown only after submission, with visible attribution. */
   feedbackImage?: {
     src: string;
@@ -198,6 +206,8 @@ export interface Question {
   sources?: FactSource[];
   map?: {
     borders: boolean;
+    /** Override reveal outlines, e.g. a single continent without internal borders. */
+    feedbackBorders?: boolean;
     /** When present, only these regions receive outlines, including on feedback. */
     borderIds?: string[];
     /** Hover styling/inspection only; answering is derived from the answer mode. */
@@ -233,7 +243,13 @@ export interface Question {
   /** Reviewed physical context; omit answer-bearing features until feedback. */
   physicalFeatures?: PhysicalFeature[];
   feedbackPhysicalFeatures?: PhysicalFeature[];
-  image?: { src: string; alt: string; feedbackAlt: string };
+  image?: {
+    src: string;
+    alt: string;
+    feedbackAlt: string;
+    /** Full visual context displayed alongside an enlarged clue. */
+    context?: { src: string; alt: string };
+  };
   choices?: { id: string; label: string }[];
   /** Directional captions for an ordering puzzle's slots. */
   orderLabels?: string[];
@@ -264,6 +280,8 @@ export interface Journey {
     physicalFeatures: PhysicalFeature[];
     places: PlaceFeature[];
     caption?: string;
+    /** Reviewed flag/motif comparison, shown only after the Journey ends. */
+    flags?: FlagDisplay[];
   };
   mapAttribution?: { label: string; url: string };
 }

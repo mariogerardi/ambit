@@ -1517,13 +1517,81 @@
 .flag-comparison img {
   display: block;
   width: 100%;
-  aspect-ratio: 8 / 5;
+  height: auto;
   object-fit: contain;
+}
+.flag-media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 .flag-comparison figcaption {
   margin-top: 8px;
   color: var(--ui-muted);
   font-size: 13px;
+}
+.flag-comparison figcaption strong,
+.flag-comparison figcaption span {
+  display: block;
+}
+.flag-comparison figcaption span {
+  margin-top: 4px;
+  font-size: 12px;
+}
+.flag-comparison .flag-detail {
+  width: 160px;
+  max-width: 100%;
+  height: 160px;
+  aspect-ratio: 1;
+}
+.flag-comparison .flag-full {
+  width: auto;
+  max-width: 100%;
+  height: 80px;
+}
+.flag-comparison-single {
+  grid-template-columns: 1fr;
+}
+.flag-comparison-single .flag-media,
+.flag-clue-with-context {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.flag-comparison-single .flag-detail,
+.flag-comparison-single .flag-full {
+  width: min(44%, 180px);
+  height: auto;
+  max-height: 180px;
+}
+.flag-clue-with-context > img {
+  width: min(48%, 200px);
+}
+.flag-context {
+  width: min(44%, 180px);
+  flex-shrink: 0;
+}
+.flag-context img {
+  width: 100%;
+  height: auto;
+}
+.flag-collection {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.flag-collection .flag-detail {
+  width: 100px;
+  height: 100px;
+}
+.flag-collection .flag-full {
+  height: 60px;
+}
+@media (max-width: 560px) {
+  .flag-collection {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .choice-answer .candidate-grid {
   margin-bottom: 20px;
@@ -1559,7 +1627,7 @@
   background: #788f91;
 }
 .key-hint {
-  background: #e7c673;
+  background: #efb75b;
 }
 .candidate-grid button.chosen {
   border-color: var(--ui-accent, #efd18f);

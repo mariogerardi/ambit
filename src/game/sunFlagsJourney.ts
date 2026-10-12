@@ -1,5 +1,5 @@
 import { defineQuestion, definePresentation } from "./questionBuilder";
-import type { FactSource, Journey } from "./questions";
+import type { FactSource, FlagDisplay, Journey } from "./questions";
 import flagCatalog from "./data/flags.v1.json";
 import { mapSource } from "./countryFacts";
 import { CAPITALS, capitalSource } from "./quizData";
@@ -18,6 +18,59 @@ const flag = (code: string, alt: string) => ({
   feedbackAlt: `National flag of ${({ ARG: "Argentina", URY: "Uruguay", KAZ: "Kazakhstan", JPN: "Japan", MWI: "Malawi", PHL: "the Philippines" } as Record<string, string>)[code]}`,
 });
 const seoul = CAPITALS.find((capital) => capital.countryId === "wurl:KOR")!;
+const southAmerica = CAPITALS.filter(
+  (capital) => capital.continent === "SA",
+).map((capital) => capital.countryId);
+// Continental context includes map units outside the sovereign-capital catalog.
+const africa = [
+  ...CAPITALS.filter((capital) => capital.continent === "AF").map(
+    (capital) => capital.countryId,
+  ),
+  "wurl:ESH",
+  "wurl:NE-SOL",
+  "wurl:SHN",
+];
+const flagDisplay = (
+  code: string,
+  label: string,
+  detailAlt: string,
+): FlagDisplay => ({
+  src: flagSrc(code),
+  alt: `National flag of ${label}`,
+  label,
+  detail: {
+    src: `/flags/clues/sun-detail-${code.toLowerCase()}.v1.svg`,
+    alt: detailAlt,
+  },
+});
+const sunFlags = [
+  flagDisplay(
+    "ARG",
+    "Argentina",
+    "Argentina’s Sun of May with 32 alternating straight and wavy rays.",
+  ),
+  flagDisplay(
+    "URY",
+    "Uruguay",
+    "Uruguay’s Sun of May with 16 alternating straight and wavy rays.",
+  ),
+  flagDisplay(
+    "PHL",
+    "Philippines",
+    "The eight-rayed sun from the Philippine flag.",
+  ),
+  flagDisplay(
+    "KAZ",
+    "Kazakhstan",
+    "Kazakhstan’s golden sun with grain-shaped rays.",
+  ),
+  flagDisplay("JPN", "Japan", "The simple red sun disc from Japan’s flag."),
+  flagDisplay(
+    "MWI",
+    "Malawi",
+    "The red rising sun on the black stripe of Malawi’s flag.",
+  ),
+];
 const sunCountries = ["ARG", "URY", "PHL", "KAZ", "JPN", "MWI"].map(
   (code) => `wurl:${code}`,
 );
@@ -67,6 +120,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
   description:
     "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
   completion: {
+    flags: sunFlags,
     focus: { lat: 12, lng: 65, altitude: 1.9 },
     views: [
       { lat: -34, lng: -60, altitude: 0.65 },
@@ -105,12 +159,12 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       mode: "map-multiple",
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
-      selection: { type: "members" },
+      selection: { type: "ids", ids: southAmerica },
       map: {
         borders: true,
         hoverFeedback: true,
         muteOthers: true,
-        candidates: "neutral",
+        candidates: "highlighted",
         revealOnAnswer: true,
       },
       disclosure: {
@@ -125,26 +179,25 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       },
       focus: { lat: -22, lng: -62, altitude: 1.05 },
       feedbackFocus: { lat: -34, lng: -60, altitude: 0.6 },
-      feedbackFlags: [
-        {
-          src: flagSrc("ARG"),
-          alt: "Argentina’s blue-white-blue flag, with the Sun of May in the center.",
-          label: "Argentina",
-        },
-        {
-          src: flagSrc("URY"),
-          alt: "Uruguay’s striped blue-and-white flag, with the Sun of May in the upper corner.",
-          label: "Uruguay",
-        },
-      ],
+      feedbackFlags: sunFlags.slice(0, 2),
       explanation:
-        "This shared face recalls the May Revolution of 1810. The two neighbors draw its rays differently, but carry the same Sun of May.",
+        "This shared face recalls the May Revolution of 1810. Compare the suns: one has 32 rays, the other 16, alternating straight and wavy in both designs.",
       source: source(
         "Buenos Aires City Government · the national flag’s sun",
         "https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia",
       ),
+      sources: [
+        source(
+          "Argentina · national flag design",
+          "https://www.argentina.gob.ar/pais/simbolos/bandera",
+        ),
+        source(
+          "Uruguay · national flag design",
+          "https://www.impo.com.uy/bases/decretos-reglamento/339-2003",
+        ),
+      ],
       guidance: {
-        hint: "The two countries are neighbors on the Atlantic side of South America.",
+        hint: "The symbol appears on two flags from the Río de la Plata region.",
         assist: {
           text: "Argentina, Brazil, Chile and Uruguay remain available. Choose the two whose flags carry this sun.",
           candidateIds: ["wurl:ARG", "wurl:BRA", "wurl:CHL", "wurl:URY"],
@@ -181,8 +234,9 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       feedbackContextIds: [],
       feedbackHintIds: ["wurl:PHL"],
       feedbackFocus: { lat: 11.76, lng: 122.96, altitude: 0.36 },
+      feedbackFlags: [sunFlags[2]],
       explanation:
-        "Each ray preserves the memory of a province in the uprising. Like the Sun of May, this sun carries a story of independence rather than a weather forecast.",
+        "Each of the eight rays preserves the memory of a province in the 1896 uprising. The sun carries that struggle for independence into the national flag.",
       source: source(
         "Philippine Supreme Court · constitutional discussion of the flag",
         "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/24/51077",
@@ -216,10 +270,24 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         { id: "rays:flames", label: "Flames" },
         { id: "rays:arrows", label: "Arrowheads" },
       ],
-      image: flag(
-        "KAZ",
-        "A golden sun with tapered rays above a soaring bird, on a blue field with a vertical ornamental band.",
-      ),
+      image: {
+        src: "/flags/clues/sun-detail-kaz.v1.svg",
+        alt: "A golden sun surrounded by repeated tapered rays on a blue field.",
+        feedbackAlt: "Sun detail from Kazakhstan’s national flag",
+        context: {
+          src: flagSrc("KAZ"),
+          alt: "Kazakhstan’s complete flag: a golden sun and eagle on blue, with an ornamental band.",
+        },
+      },
+      feedbackFlags: [
+        {
+          ...sunFlags[3],
+          detail: {
+            src: "/flags/clues/sun-ray-kaz.v1.svg",
+            alt: "A single grain-shaped ray from Kazakhstan’s sun.",
+          },
+        },
+      ],
       contextIds: ["wurl:KAZ"],
       focus: { lat: 48.36, lng: 67.24, altitude: 0.65 },
       feedbackContextIds: [],
@@ -251,7 +319,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       title: "No rays required.",
       leadIn: "Head east to the Pacific.",
       prompt:
-        "Here the sun becomes a simple red disc. Drop a pin on any land belonging to the country that flies this flag.",
+        "Here the sun becomes a simple red disc. Drop a pin on one of the four main islands of the country that flies this flag.",
       mode: "pin",
       rule: { type: "pin-inside", ids: ["wurl:JPN"] },
       disclosure: { ...base.disclosure, namedChoices: false },
@@ -294,6 +362,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
 
       ...base,
       id: "sun-flags-malawi-dawn-v1",
+      map: { ...base.map!, feedbackBorders: false },
       label: "Meaning",
       resolvedLabel: "Malawi · a new dawn",
       title: "A new day.",
@@ -314,10 +383,24 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       contextIds: ["wurl:MWI"],
       focus: { lat: -13.19, lng: 34.27, altitude: 0.24 },
       feedbackContextIds: [],
-      feedbackHintIds: ["wurl:MWI"],
-      feedbackFocus: { lat: -13.19, lng: 34.27, altitude: 0.24 },
+      feedbackHintIds: africa,
+      feedbackFocus: { lat: 2, lng: 20, altitude: 1.35 },
+      feedbackFlags: [sunFlags[5]],
+      feedbackPlaces: [
+        {
+          id: "sun:africa",
+          name: "Africa",
+          kind: "other",
+          lat: 2,
+          lng: 20,
+          sourceId: "natural-earth:5.1.2",
+          markerHidden: true,
+          labelFlexible: true,
+          priority: 100,
+        },
+      ],
       explanation:
-        "This dawn looks beyond one country to a whole continent. Our route ends with the sun as a promise of a new beginning.",
+        "The rising sun looks beyond Malawi to a whole continent: a dawn of freedom and hope across Africa. Our final view places that promise in its wider setting.",
       source: source(
         "Embassy of Malawi in Cairo · national flag",
         "https://www.malawiembassycairo.org/about-malawi",

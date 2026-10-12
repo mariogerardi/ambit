@@ -225,6 +225,7 @@ describe("connected Journey drafts and answer feedback", () => {
           question.instruction,
           question.inputLabel,
           question.image?.alt,
+          question.image?.context?.alt,
         ]
           .filter(Boolean)
           .join(" ");
