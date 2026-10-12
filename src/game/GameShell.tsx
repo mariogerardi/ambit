@@ -10,8 +10,8 @@ import { journeyScore } from "./state";
 import { helpSummary, helpCountCopy } from "./guidance";
 import type { GameState, Action } from "./state";
 import { questionMapPresentation } from "./presentation";
+import { PLAY_FEEDBACK, PLAY_HIGHLIGHTS } from "../globe/themes";
 import { AnswerForm } from "./AnswerForm";
-import { PlaygroundControls } from "./PlaygroundControls";
 import {
   correctAnswerCopy,
   correctAnswerSummary,
@@ -57,7 +57,6 @@ function FlagComparison({
 }
 export function GameShell({
   journey,
-  playground = false,
   context,
   game,
   dispatch,
@@ -74,7 +73,6 @@ export function GameShell({
   onReplay?(): void;
   canReplay?: boolean;
   journey: Journey;
-  playground?: boolean;
   compact?: boolean;
   context: QuestionContext;
   game: GameState;
@@ -84,7 +82,6 @@ export function GameShell({
   frame(focus: Focus): void;
   onHome(): void;
   onStudy(): void;
-  onPlayground(): void;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const round = journey.rounds[game.roundIndex];
@@ -124,13 +121,6 @@ export function GameShell({
     game.phase === "feedback" ? feedbackLegend(round, context, game) : [];
   return (
     <>
-      {playground && (
-        <PlaygroundControls
-          journey={journey}
-          index={game.roundIndex}
-          dispatch={dispatch}
-        />
-      )}
       {inGame && context && (
         <section
           className="question-card"
@@ -320,7 +310,17 @@ export function GameShell({
                 <div className="feedback-map-key" aria-label="Map color key">
                   {legend.map(({ key, label }) => (
                     <span key={key}>
-                      <i className={`key-${key}`} />
+                      <i
+                        className={`key-${key}`}
+                        style={{
+                          background:
+                            key === "hint"
+                              ? PLAY_HIGHLIGHTS.context
+                              : PLAY_FEEDBACK[
+                                  key as keyof typeof PLAY_FEEDBACK
+                                ],
+                        }}
+                      />
                       {label}
                     </span>
                   ))}
@@ -341,11 +341,9 @@ export function GameShell({
       )}
       {ended && (
         <section className="finish-story">
-          {(playground || game.phase === "failed") && (
+          {game.phase === "failed" && (
             <div className="round-overline">
-              <span className="overline">
-                {playground ? "QUESTION PLAYGROUND" : "ONE WRONG TURN"}
-              </span>
+              <span className="overline">ONE WRONG TURN</span>
               {game.phase === "failed" && (
                 <QuestionHelp
                   key={round.id}
@@ -374,13 +372,7 @@ export function GameShell({
             <span>correct answers</span>
           </div>
           {helpCounts && <p className="journey-help-summary">{helpCounts}</p>}
-          {(playground || game.phase === "failed") && (
-            <p>
-              {playground
-                ? "Use the type selector to revisit an example or try a fresh attempt."
-                : feedbackText}
-            </p>
-          )}
+          {game.phase === "failed" && <p>{feedbackText}</p>}
 
           <ol className="journey-receipt">
             {journey.rounds.map((question, i) => {
@@ -393,7 +385,7 @@ export function GameShell({
                   <span>{String(i + 1).padStart(2, "0")}</span>
                   <strong>
                     {answer
-                      ? resolvedRoundIdentity(question)
+                      ? (answer.receiptLabel ?? resolvedRoundIdentity(question))
                       : roundIdentity(question)}
                   </strong>
                   <span className="journey-round-result">

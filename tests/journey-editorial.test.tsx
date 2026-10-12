@@ -48,7 +48,6 @@ function render(journey: Journey, index: number, actions: Action[]) {
       frame={() => {}}
       onHome={() => {}}
       onStudy={() => {}}
-      onPlayground={() => {}}
     />,
   );
 }

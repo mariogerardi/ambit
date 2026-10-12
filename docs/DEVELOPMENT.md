@@ -30,8 +30,8 @@ dashboard with an in-memory client and sample accounts; requests never reach AWS
 The preview supports profile edits, friend acceptance and Journey comparisons. `/review/login.html` previews the supported
 Cognito branding assets; it submits no credentials. For Journey map review, open `/review/journeys.html`. It renders the real App and
 WebGL globe with an in-memory Admin permission for local practice, no signed-in
-user, and no access token. It starts Down the Danube; use the playground for other
-questions. Non-read API requests are blocked, and the fixture grants no server
+user, and no access token. It starts Down the Danube; use Admin’s “Preview five questions” for other
+Journeys. Non-read API requests are blocked, and the fixture grants no server
 permissions. Review entry points stay
 outside the production bundle. See [Services](SERVICES.md) for release steps.
 

@@ -197,9 +197,7 @@ export function App() {
   const [dailyLoaded, setDailyLoaded] = useState(false);
   const [path, setPath] = useState(location.pathname);
   const requestedMode = modeForPath(path);
-  const restricted =
-    (requestedMode === "practice" || requestedMode === "playground") &&
-    !account.admin;
+  const restricted = requestedMode === "practice" && !account.admin;
   const mode = restricted ? "home" : requestedMode;
   useEffect(() => {
     if (restricted && !account.loading) {
@@ -433,20 +431,17 @@ export function App() {
       : mode === "study"
         ? `${path}:${studyBrowsingHistory ? "history" : studySetup || !study.session ? "setup" : `session:${study.session.id ?? study.session.seed}`}`
         : path;
-  const wantsJourney =
-    mode === "daily" || mode === "practice" || mode === "playground";
+  const wantsJourney = mode === "daily" || mode === "practice";
   const journeyId =
-    mode === "playground"
-      ? "question-playground-v1"
-      : mode === "daily"
-        ? (activeAttempt?.journeyId ??
-          dailyJourney(
-            today,
-            daily,
-            allJourneys,
-            schedule.schedule?.assignments ?? {},
-          ).id)
-        : JOURNEY_INDEX.find((j) => j.path === path)?.id;
+    mode === "daily"
+      ? (activeAttempt?.journeyId ??
+        dailyJourney(
+          today,
+          daily,
+          allJourneys,
+          schedule.schedule?.assignments ?? {},
+        ).id)
+      : JOURNEY_INDEX.find((j) => j.path === path)?.id;
   const journey =
     loaded && loaded.journey.id === journeyId ? loaded.journey : emptyJourney;
   const isJourney = wantsJourney && journey !== emptyJourney;
@@ -455,11 +450,7 @@ export function App() {
     let live = true;
     setJourneyError("");
     const local = published.items.find((p) => p.id === journeyId)?.journey;
-    const content = local
-      ? Promise.resolve(local)
-      : mode === "playground"
-        ? import("./game/questionCatalog").then((m) => m.PLAYGROUND_JOURNEY)
-        : loadJourney(journeyId);
+    const content = local ? Promise.resolve(local) : loadJourney(journeyId);
     void Promise.all([content, import("./game/runtime")])
       .then(([journey, runtime]) => {
         if (live) setLoaded({ journey, runtime });
@@ -1073,7 +1064,7 @@ export function App() {
       setDaily((p) =>
         openDaily(p, today, false, allJourneys, schedule.schedule?.assignments),
       );
-    document.title = `ambit — ${mode === "playground" ? "Question Playground" : mode === "home" ? "A world of wonders" : mode === "daily" || mode === "practice" ? "Journey" : mode[0].toUpperCase() + mode.slice(1)}`;
+    document.title = `ambit — ${mode === "home" ? "A world of wonders" : mode === "daily" || mode === "practice" ? "Journey" : mode[0].toUpperCase() + mode.slice(1)}`;
   }, [mode, activeAttempt, today, dailyReady, allJourneys, schedule.schedule]);
   useEffect(() => {
     const controller = new AbortController();
@@ -1116,11 +1107,7 @@ export function App() {
   useEffect(() => {
     if (!ready) return;
     const old = previous.current;
-    if (
-      isJourney &&
-      mode !== "playground" &&
-      (game.phase === "finished" || game.phase === "failed")
-    ) {
+    if (isJourney && (game.phase === "finished" || game.phase === "failed")) {
       previous.current = cameraKey;
       return;
     }
@@ -1193,7 +1180,6 @@ export function App() {
       !isJourney ||
       !context ||
       (mode === "daily" && !dailyReady) ||
-      mode === "playground" ||
       (game.phase !== "finished" && game.phase !== "failed")
     )
       return;
@@ -1632,7 +1618,6 @@ export function App() {
         }
         compact={mobile.enabled}
         journey={journey}
-        playground={mode === "playground"}
         context={context}
         game={game}
         dispatch={dispatch}
@@ -1641,7 +1626,6 @@ export function App() {
         frame={frame}
         onHome={() => navigate("/")}
         onStudy={() => navigate("/study")}
-        onPlayground={() => navigate("/playground")}
       />
     ) : wantsJourney ? (
       <section className="info-view" role="status">
@@ -1689,7 +1673,7 @@ export function App() {
   );
   return (
     <main
-      className={`experience mode-${mode} phase-${phase} ${mode === "playground" ? "is-playground" : ""} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
+      className={`experience mode-${mode} phase-${phase} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
       style={
         mobile.enabled
           ? ({

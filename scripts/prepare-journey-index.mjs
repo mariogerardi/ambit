@@ -28,14 +28,23 @@ try {
       id: journey.id,
       title: journey.title,
       ...(journey.supersedes ? { supersedes: journey.supersedes } : {}),
+      ...(journey.saveRevision
+        ? {
+            saveRevision: journey.saveRevision,
+            legacyRoundLabels: journey.legacyRoundLabels,
+          }
+        : {}),
       description: journey.description,
       path: journeyPath(journey.id),
       module: modules.get(journey.id),
-      rounds: journey.rounds.map(({ id, label, progressLabel }) => ({
-        id,
-        label,
-        ...(progressLabel ? { progressLabel } : {}),
-      })),
+      rounds: journey.rounds.map(
+        ({ id, label, progressLabel, resolvedLabel }) => ({
+          id,
+          label,
+          ...(progressLabel ? { progressLabel } : {}),
+          ...(journey.saveRevision && resolvedLabel ? { resolvedLabel } : {}),
+        }),
+      ),
     };
   });
   await writeFile(

@@ -146,6 +146,24 @@ export function questionPlaces(
       ).values(),
     ];
   }
+  if (
+    phase === "feedback" &&
+    context &&
+    question.rule.type === "capital-name"
+  ) {
+    const countryId = question.rule.countryId;
+    const targetId = context.capitals.find(
+      (capital) => capital.countryId === countryId,
+    )?.id;
+    return (question.feedbackPlaces ?? question.places ?? []).map((place) =>
+      place.id === targetId
+        ? {
+            ...place,
+            visualState: correct ? ("correct" as const) : ("answer" as const),
+          }
+        : place,
+    );
+  }
   return phase === "feedback"
     ? (question.feedbackPlaces ?? question.places ?? [])
     : (question.places ?? []);
@@ -431,8 +449,10 @@ export function questionVisualStates(
   for (const highlight of question.highlightParts ?? [])
     if (highlight.reveal) {
       const owner = states[highlight.countryId];
+      const namedPartAnswered =
+        question.mode === "choice-single" && !!game.answers.at(-1)?.correct;
       states[highlightedPartId(highlight.countryId)] =
-        owner === "correct" ? "correct" : "answer";
+        owner === "correct" || namedPartAnswered ? "correct" : "answer";
       if (highlight.reveal === "part") states[highlight.countryId] = "disabled";
     }
   for (const id of mistakes) states[id] = "incorrect";

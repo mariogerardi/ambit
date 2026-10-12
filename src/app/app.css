@@ -5,14 +5,7 @@
   pointer-events: none;
   z-index: 2;
 }
-.mode-layer
-  :is(
-    section,
-    .playground-controls,
-    .playground-toolbar,
-    .board-tools,
-    .game-credits
-  ) {
+.mode-layer :is(section, .board-tools, .game-credits) {
   pointer-events: auto;
 }
 .mode-incoming {
@@ -2389,15 +2382,6 @@
 .experience .study-editor {
   height: calc(100dvh - var(--page-content-top) - var(--page-content-bottom));
   overflow: hidden;
-}
-.experience.is-playground .playground-toolbar {
-  top: var(--page-content-top);
-}
-.experience.is-playground :is(.question-card, .finish-story) {
-  top: calc(var(--page-content-top) + 82px);
-  max-height: calc(
-    100dvh - var(--page-content-top) - 82px - var(--page-content-bottom)
-  );
 }
 
 .account-actions {

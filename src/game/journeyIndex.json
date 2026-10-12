@@ -31,29 +31,45 @@
   {
     "id": "mediterranean-v1",
     "title": "Around the Mediterranean",
-    "description": "Follow the Mediterranean from Spain to an Italian island, across to Libya, and back to the Balkans. Five stops, one shared sea.",
+    "saveRevision": 2,
+    "legacyRoundLabels": {
+      "spain-regional-languages": "Catalan and Basque",
+      "yugoslavia-six": "Six Yugoslav republics",
+      "mediterranean-shores": "22 Mediterranean coastal countries"
+    },
+    "description": "Follow a western sea passage, an island, a coastal capital and the Adriatic–Ionian shores to a hidden gateway in Egypt.",
     "path": "/journey/mediterranean",
     "module": "./fourthJourney.ts",
     "rounds": [
       {
         "id": "spain-regional-languages",
-        "label": "Languages"
+        "label": "Gateway",
+        "progressLabel": "Western gateway",
+        "resolvedLabel": "Morocco"
       },
       {
         "id": "italy-sicily",
-        "label": "Island"
+        "label": "Island",
+        "progressLabel": "Island",
+        "resolvedLabel": "Sicily"
       },
       {
         "id": "libya-capital",
-        "label": "Capital"
+        "label": "Capital",
+        "progressLabel": "Libya",
+        "resolvedLabel": "Tripoli"
       },
       {
         "id": "yugoslavia-six",
-        "label": "Republics"
+        "label": "Republics",
+        "progressLabel": "Adriatic–Ionian",
+        "resolvedLabel": "Four Adriatic republics"
       },
       {
         "id": "mediterranean-shores",
-        "label": "Sea"
+        "label": "Canal",
+        "progressLabel": "Egypt",
+        "resolvedLabel": "Port Said"
       }
     ]
   },

@@ -12,7 +12,11 @@ import {
   placeLabelStyle,
 } from "../src/globe/placeLabels";
 import { ANSWER_PLACES } from "../src/game/answerTargets";
-import { PLAY_HIGHLIGHTS } from "../src/globe/themes";
+import {
+  PLAY_HIGHLIGHTS,
+  PLAY_FEEDBACK,
+  playRegionStyle,
+} from "../src/globe/themes";
 import { cityReference } from "../src/game/authoredPlaces";
 import type { PlaceFeature } from "../src/geography/types";
 import {
@@ -358,10 +362,42 @@ describe("cached readable place labels", () => {
     expect(labels.group.children.find((p) => p.userData.placeId === "a")).toBe(
       marker,
     );
-    expect(marker.userData.markerStyle).toContain("#66c590");
+    expect(marker.userData.markerStyle).toContain(PLAY_FEEDBACK.correct);
     expect(factory.mock.calls.length).toBe(before + 1); // one shared color texture, no blank-name textures
     labels.dispose();
   });
+  it.each([
+    "selectable",
+    "selected",
+    "correct",
+    "answer",
+    "incorrect",
+    "visited",
+    "hinted",
+  ] as const)(
+    "renders %s place markers in the same palette as regions",
+    (state) => {
+      canvasFactory();
+      const labels = new PlaceLabels();
+      labels.update(
+        {
+          id: "palette",
+          kind: "place-labels",
+          places: [{ ...places[0], visualState: state }],
+          visible: true,
+          markers: true,
+        },
+        100,
+      );
+      const marker = labels.group.children.find(
+        (p) => p.userData.role === "marker",
+      )!;
+      expect(marker.userData.markerStyle).toContain(
+        playRegionStyle("wurl:TEST", state).fill,
+      );
+      labels.dispose();
+    },
+  );
   it("keeps terrain names ahead of overlapping rivers and cities and uses a visible regional anchor", () => {
     canvasFactory();
     const physical = new PhysicalFeatures();

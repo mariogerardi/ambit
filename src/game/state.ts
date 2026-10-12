@@ -20,6 +20,8 @@ import {
 import type { Journey, QuestionContext, Response } from "./questions";
 export interface Answer extends Response {
   roundId: string;
+  /** Captured at submission so a later facelift cannot rename earned results. */
+  receiptLabel?: string;
   correct: boolean;
 }
 export interface GameState extends Response {
@@ -31,7 +33,6 @@ export interface GameState extends Response {
 }
 export type Action =
   | { type: "start" }
-  | { type: "jump"; index: number }
   | { type: "home" }
   | { type: "select"; id: string }
   | { type: "drop-pin"; lat: number; lng: number }
@@ -64,17 +65,6 @@ export function gameReducer(
       phase: "playing",
       ordered: [...(journey.rounds[0].orderInitial ?? [])],
     };
-  if (action.type === "jump")
-    return Number.isInteger(action.index) &&
-      action.index >= 0 &&
-      action.index < journey.rounds.length
-      ? {
-          ...initialGame,
-          phase: "playing",
-          roundIndex: action.index,
-          ordered: [...(journey.rounds[action.index].orderInitial ?? [])],
-        }
-      : state;
   if (action.type === "home") return { ...initialGame };
   const round = journey.rounds[state.roundIndex];
   const finish = (response: Response, correct: boolean): GameState => ({
@@ -89,6 +79,9 @@ export function gameReducer(
       ...state.answers,
       {
         roundId: round.id,
+        ...(journey.saveRevision
+          ? { receiptLabel: round.resolvedLabel ?? round.label }
+          : {}),
         selectedIds: [...response.selectedIds],
         text: response.text,
         ordered: [...response.ordered],

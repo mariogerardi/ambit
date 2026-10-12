@@ -61,7 +61,6 @@ describe("product copy follows the answer and visible reveal", () => {
           frame={() => {}}
           onHome={() => {}}
           onStudy={() => {}}
-          onPlayground={() => {}}
         />,
       );
     const progress = (html: string) =>
@@ -107,7 +106,6 @@ describe("product copy follows the answer and visible reveal", () => {
             frame={() => {}}
             onHome={() => {}}
             onStudy={() => {}}
-            onPlayground={() => {}}
           />,
         );
         expect(html).toContain(
@@ -146,7 +144,6 @@ describe("product copy follows the answer and visible reveal", () => {
           frame={() => {}}
           onHome={() => {}}
           onStudy={() => {}}
-          onPlayground={() => {}}
         />,
       );
     const territories = render(FIFTH_JOURNEY, 0);
@@ -270,7 +267,6 @@ describe("product copy follows the answer and visible reveal", () => {
       frame: () => {},
       onHome: () => {},
       onStudy: () => {},
-      onPlayground: () => {},
     };
     const reveal = renderToStaticMarkup(<GameShell {...props} />);
     expect(reveal).not.toContain("round-of");

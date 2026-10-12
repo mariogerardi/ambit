@@ -39,7 +39,7 @@ import {
   worldAltitude,
   focusAltitude,
 } from "./camera";
-import { themedRegionStyle } from "./themes";
+import { themedRegionStyle, PLAY_FEEDBACK } from "./themes";
 import type { GlobeTheme } from "./themes";
 import { THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
@@ -838,9 +838,9 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         if ("from" in obj) {
           line.material.color.set(
             route(obj).visualState === "incorrect"
-              ? "#ee776b"
+              ? PLAY_FEEDBACK.incorrect
               : route(obj).visualState === "correct"
-                ? "#66c590"
+                ? PLAY_FEEDBACK.correct
                 : "#efd18f",
           );
           line.material.opacity = 1;

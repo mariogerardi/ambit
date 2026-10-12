@@ -55,6 +55,13 @@ same Journey run, answered rounds/advanced phases take precedence over stale dra
 edits. Replays receive a new run ID and monotonically increasing start time, so a
 late edit from an old run cannot replace a fresh replay. Daily Journey replay is
 available only to admins; ordinary players can still view their completed result.
+
+In-place Journey facelifts can declare a `saveRevision` and prior receipt names.
+Daily save decoding and opening preserve submitted grades, stamp their original
+receipt labels, clear obsolete unsubmitted drafts/help, and skip already graded
+feedback. Completed results are not regraded. New runs capture receipt names
+and the current content revision. Synced register merges apply the same upgrade.
+
 The Journey's **Play again**
 action creates that new run rather than resetting the old run's forward-only state;
 it keeps the played Journey even when the admin's local override is absent on a

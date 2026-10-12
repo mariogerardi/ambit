@@ -57,7 +57,6 @@ const shell = (game: GameState) =>
       frame: () => {},
       onHome: () => {},
       onStudy: () => {},
-      onPlayground: () => {},
     }),
   );
 describe("Chasing the sun", () => {

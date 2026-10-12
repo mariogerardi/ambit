@@ -37,7 +37,7 @@ provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
 `src/app/daily.ts` and `src/game/journeys.ts` provide synchronous full-catalog APIs
 for tooling/tests. Runtime scheduling uses the small generated
 [`journeyIndex.json`](../src/game/journeyIndex.json), keeping clue geometry deferred.
-The read-only playground intentionally imports the whole question catalog.
+Admin’s “Preview five questions” loads only the selected Journey through its practice route.
 
 ## Loading and transitions
 

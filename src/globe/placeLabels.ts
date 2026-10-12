@@ -8,7 +8,7 @@ import {
 } from "three";
 import type { PerspectiveCamera } from "three";
 import type { PlaceFeature } from "../geography/types";
-import { PLAY_HIGHLIGHTS } from "./themes";
+import { playStateColor } from "./themes";
 export interface PlaceLabelLayer {
   id: string;
   kind: "place-labels";
@@ -294,19 +294,8 @@ export class PlaceLabels {
       ? { ...placeStyle(place.kind), shape: "circle" }
       : placeStyle(place.kind);
     const color = place.visualState
-      ? {
-          default: "#849899",
-          hover: "#ffe391",
-          selectable: PLAY_HIGHLIGHTS.selectable,
-          selected: PLAY_HIGHLIGHTS.selected,
-          correct: "#66c590",
-          answer: "#a5d9ae",
-          incorrect: "#ee776b",
-          visited: "#b89de0",
-          disabled: "#849899",
-          hinted: PLAY_HIGHLIGHTS.context,
-          clue: PLAY_HIGHLIGHTS.context,
-        }[place.visualState]
+      ? (playStateColor(place.visualState) ??
+        (place.visualState === "hover" ? "#ffe391" : "#849899"))
       : style.marker;
     const key = `${style.shape}:${color}:${!!place.answerTarget}`;
     if (sprite && sprite.userData.markerStyle === key) return sprite;

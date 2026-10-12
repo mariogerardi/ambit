@@ -6,7 +6,7 @@ contains **eleven five-question Journeys and 55 questions**. The additional
 questions**, ready for a shared date assignment without reshuffling that cycle. Six original packs
 were scrapped; Beyond borders was split into three new packs, and North America
 was replaced by its revised edition. All eight obsolete editions have now been
-removed from the runtime catalog, Admin, practice routes, and the playground.
+removed from the runtime catalog, Admin, and practice routes.
 Saved attempts and overrides for those editions are discarded without disturbing
 retained progress. They cannot be resumed or loaded again.
 
@@ -17,7 +17,7 @@ retained progress. They cannot be resumed or loaded again.
 | 1   | The long way home        | Scrap; save the four-letter idea for another daily.                                                                                                                                     |
 | 2   | Beyond borders           | Split: Canadian flag/languages seed Beyond the maple leaf; the Andes question seeds Along the Andes; the Amman latitude question seeds Latitude surprises. Each now has five questions. |
 | 3   | Across the Silk Roads    | Scrap from daily rotation.                                                                                                                                                              |
-| 4   | Around the Mediterranean | Keep the challenge; copy now follows Spain, Italy, Libya, the Adriatic, then the whole sea.                                                                                             |
+| 4   | Around the Mediterranean | Reworked October 12: An Atlantic–Mediterranean passage, Sicily, Tripoli, four former republics among coastal neighbors, and the hidden Suez gateway; all five have authored help.       |
 | 5   | North America by name    | Revised edition asks for one Canadian territory and one U.S. state bordering Mexico. Context connects north, south, a border route, and directional names.                              |
 | 6   | Worlds within worlds     | Scrap; too demanding for this daily rotation.                                                                                                                                           |
 | 7   | Borrowed names           | Scrap from daily rotation.                                                                                                                                                              |
@@ -189,6 +189,43 @@ Primary references, reviewed October 11, 2026:
 - [ICPDR: restoring fish migration at the Iron Gates](https://www.icpdr.org/tasks-topics/tasks/river-basin-management/sturgeon-conservation/we-pass-facilitating-fish-migration).
 - [ICPDR: the Danube River Basin and delta](https://www.icpdr.org/danube-basin/danube-river-basin).
 
-The new concept is schedulable in Admin and available in the playground. Neither
+The new concept is schedulable in Admin and available through “Preview five questions”. Neither
 new concept changes the eleven-concept automatic cycle. No date assignments were
 published during browser verification.
+
+## Around the Mediterranean facelift — October 12, 2026
+
+The route now enters at Gibraltar, identifies Sicily, crosses to Tripoli, follows
+the Adriatic coast and finishes with a pin at the Mediterranean entrance to Suez.
+The language question and whole-sea count are replaced. The opening asks which
+country faces Spain across the Atlantic–Mediterranean passage, with Morocco,
+Algeria, Italy, France, Malta and Portugal available. Its name is withheld until
+reveal, and the camera starts broadly across the western Mediterranean. The
+former-republic task offers four correct coastal countries alongside Albania and
+Greece, framing the Adriatic and Ionian shores. Help retains uncertainty: three
+country survivors, two island survivors, three equally styled Libyan cities,
+a Croatia lock with five remaining countries, and Egyptian reference cities
+outside the pin radius. The 50/100/150 km pin tiers all earn one correct answer.
+
+Reveal-only Suez geometry reuses the pinned Natural Earth 1:10m centerlines;
+original segments are preserved without invented connectors. Completion has
+six authored views and a caption connecting the Atlantic and Red Sea gateways.
+The current Journey ID and round IDs stay stable. An explicit save revision
+preserves earned grades and receipt names, clears obsolete unsubmitted drafts,
+and advances past already submitted old feedback without regrading it.
+
+Verification uses focused unit/DOM tests and the local Journey audit. Canonical
+geometry includes the Neum coastal opening; actual browser/GPU legibility has
+not been verified in this pass.
+
+The follow-up color audit makes Q1’s six eligible countries visible as panel
+buttons and pale yellow map candidates before help. Sicily uses bright green
+for a correct response and the darker revealed-answer green after a miss; Tripoli
+uses the corresponding graded city marker. Recap city dots use purple. Shared
+region, marker, distance-line and legend palettes now use the same color values.
+
+The final copy pass explicitly tells players that the Suez Canal is hidden before
+they place a pin. Q3 now simply crosses to Libya, asks for its capital, and reveals
+Tripoli’s northwestern coastal position; the Sahara comparison is removed. Q4’s
+hint identifies one former republic through its Italy/Austria borders, matching
+the historical-membership task instead of the former coastline-only question.

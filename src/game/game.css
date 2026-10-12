@@ -1440,95 +1440,6 @@
   font-size: 12px;
   white-space: nowrap;
 }
-.playground-toolbar {
-  position: absolute;
-  top: 90px;
-  left: 48px;
-  right: 48px;
-  z-index: 4;
-  display: flex;
-  align-items: end;
-  gap: 14px;
-}
-.playground-toolbar label {
-  display: grid;
-  gap: 5px;
-  font-size: 9px;
-  color: var(--ui-muted, #aac1b6);
-}
-.playground-toolbar select {
-  max-width: 280px;
-  height: 38px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.267);
-  border-radius: 8px;
-  background: var(--ui-input, #142e34);
-  color: var(--ui-text, #e9e3c7);
-  padding: 0 30px 0 10px;
-  font: inherit;
-  font-size: 12px;
-}
-.playground-toolbar select:focus-visible {
-  outline: 2px solid var(--ui-accent, #e6d093);
-  outline-offset: 3px;
-}
-.playground-navigation {
-  display: flex;
-  gap: 5px;
-}
-.playground-navigation button {
-  height: 38px;
-  padding: 0 13px;
-  background: rgb(var(--ui-surface-rgb) / 1);
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.267);
-  border-radius: 8px;
-  color: var(--ui-accent, #ddcf9a);
-  font-size: 12px;
-}
-.playground-navigation button:disabled {
-  opacity: 0.35;
-}
-.question-type-details {
-  position: relative;
-  font-size: 11px;
-  color: var(--ui-text, #c3d1b9);
-}
-.question-type-details summary {
-  cursor: pointer;
-  padding: 12px 0;
-}
-.question-type-details > div {
-  position: absolute;
-  top: 44px;
-  right: 0;
-  width: 270px;
-  padding: 18px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.267);
-  border-radius: 10px;
-  background: rgb(var(--ui-surface-rgb) / 1);
-  line-height: 1.65;
-  box-shadow: 0 10px 35px
-    rgb(var(--ui-shadow-rgb) / calc(0.333 * var(--ui-shadow-strength)));
-}
-.question-type-details p {
-  color: var(--ui-muted, #a5c1b7);
-  margin: 10px 0;
-}
-.question-type-details small {
-  color: var(--ui-muted, #89a69e);
-}
-.is-playground .question-card,
-.is-playground .finish-story {
-  top: 172px;
-  max-height: calc(100dvh - 255px);
-  overflow-y: auto;
-}
-.is-playground .journey-progress {
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.is-playground .journey-progress li > span {
-  display: none;
-}
 .journey-selector {
   display: flex;
   flex-direction: column;
@@ -1670,85 +1581,13 @@
   height: 7px;
   border-radius: 50%;
 }
-.key-correct {
-  background: #78dfaa;
-}
-.key-answer {
-  background: #439d78;
-}
-.key-incorrect {
-  background: #ed6d68;
-}
 .key-neutral {
-  background: #788f91;
-}
-.key-hint {
-  background: #efb75b;
+  background: var(--map-neutral, #788f91);
 }
 .candidate-grid button.chosen {
   border-color: var(--ui-accent, #efd18f);
   background: rgb(var(--ui-accent-rgb) / 0.16);
   color: var(--ui-accent, #fff1c6);
-}
-@media (max-width: 1000px) and (min-width: 701px) {
-  .playground-toolbar {
-    left: 28px;
-    right: 28px;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .playground-toolbar select {
-    max-width: 225px;
-  }
-  .is-playground .question-card,
-  .is-playground .finish-story {
-    top: 210px;
-    max-height: calc(100dvh - 285px);
-  }
-}
-@media (max-width: 700px) {
-  .playground-toolbar {
-    position: relative;
-    top: auto;
-    left: auto;
-    right: auto;
-    margin-top: 82px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .playground-toolbar > label {
-    flex: 1 1 45%;
-    min-width: 0;
-  }
-  .playground-toolbar select {
-    width: 100%;
-    max-width: none;
-    font-size: 11px;
-  }
-  .question-type-details {
-    margin-left: auto;
-  }
-  .is-playground .game-scene {
-    top: 210px;
-  }
-  .is-playground .board-tools {
-    top: 250px;
-  }
-  .is-playground .question-card,
-  .is-playground .finish-story {
-    top: auto;
-    max-height: none;
-    margin-top: calc(min(69dvh, 540px) + 20px);
-  }
-  .is-playground .experience-footer {
-    flex-wrap: wrap;
-  }
-  .is-playground .journey-progress {
-    width: 100%;
-    justify-content: space-between;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
 }
 
 /* Authored geographic explanations stay distinct from playable map geometry. */

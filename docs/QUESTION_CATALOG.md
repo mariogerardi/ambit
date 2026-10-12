@@ -1,10 +1,9 @@
 # Journey catalog and question authoring
 
 The bundled catalog contains **13 current Journeys and 65 questions**, with eleven active
-daily concepts, reviewed against the code on October 11, 2026. Each Journey has
+daily concepts, reviewed against the code on October 12, 2026. Each Journey has
 five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
-everyone; unassigned dates use the automatic rotation. Direct practice routes and
-`/playground` are Admin-only. Chasing the sun and Down the Danube are ready for date assignments and
+everyone; unassigned dates use the automatic rotation. Direct practice routes are Admin-only; Admin’s “Preview five questions” opens the selected Journey. Chasing the sun and Down the Danube are ready for date assignments and
 have not been added to the automatic rotation. There is no current in-app authoring
 or AI generator. Previously published local packs are read-only compatibility data.
 
@@ -62,7 +61,7 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `choice-match`      | Match cards to roles    |         1 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
-example or playground selector. Multiple-choice questions are capped at six
+example or supported authoring recipe. Multiple-choice questions are capped at six
 options. The numeric counter supports nonnegative integers with explicit +/-
 controls and direct typing; a new numeric rule should respect that UI contract.
 
@@ -198,7 +197,7 @@ The index generator includes only current definitions.
 Adding a bundled edition does not change the active rotation. Editing the explicit
 rotation list does change which editions subsequent dates select.
 Retained attempts remain pinned to their stored Journey. Removed editions are
-absent from Admin, practice routes, and the playground. Their IDs are recorded
+absent from Admin and practice routes. Their IDs are recorded
 only for save recovery: discard their attempts and overrides, while preserving
 retained progress and protecting unavailable custom packs. Evaluator fixtures in
 `tests/fixtures/engine` provide isolated rule coverage and are never runtime
@@ -316,3 +315,14 @@ buttons, or typing; existing selections are preserved and can still be removed.
 Older saves can omit it. The daily save codec validates round IDs and stages,
 merges help monotonically within the same run, and keeps new replays independent.
 Results show help counts and per-round annotations without subtracting points.
+
+Around the Mediterranean now follows Gibraltar → Sicily → Tripoli → the Adriatic
+→ the hidden Suez entrance, using map-single, choice-single, text, map-multiple and pin controls.
+All five rounds have authored hints and assists. The Suez pin uses a 150 km
+acceptance radius and inclusive 50/100/150 km accuracy bands, all worth one correct
+answer. Completion and canal geometry are authored separately from grading.
+
+The Mediterranean opening now has six equally styled, named country candidates
+across Africa and Europe, keeping the gateway name until reveal. Q4’s six
+candidates are Slovenia, Croatia, Bosnia and Herzegovina, Montenegro, Albania
+and Greece; the deciding condition is former Yugoslav republic membership.

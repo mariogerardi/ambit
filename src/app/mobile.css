@@ -245,7 +245,7 @@
     padding: 12px;
   }
   .experience
-    :is(.info-view, .question-card, .playground-toolbar)
+    :is(.info-view, .question-card)
     :is(
       input:not([type="checkbox"], [type="radio"], [type="range"]),
       select,
@@ -420,21 +420,6 @@
   }
   .experience .mode-layer .board-tools {
     display: none;
-  }
-  .experience .playground-toolbar {
-    position: relative;
-    inset: auto;
-    margin: 0 0 12px;
-    padding: 12px;
-    width: 100%;
-    flex-wrap: wrap;
-  }
-  .experience .playground-controls {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    max-height: none;
-    margin-top: 12px;
   }
   .experience .mobile-map-tools {
     position: absolute;
@@ -795,13 +780,6 @@
   .experience.experience .study-editor {
     height: 100%;
     overflow: hidden;
-  }
-  .experience.experience.is-playground .playground-toolbar {
-    top: auto;
-  }
-  .experience.experience.is-playground :is(.question-card, .finish-story) {
-    top: auto;
-    max-height: none;
   }
 }
 

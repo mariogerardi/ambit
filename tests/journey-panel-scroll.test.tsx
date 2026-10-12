@@ -40,7 +40,6 @@ async function render(game: GameState, hidden = false) {
           frame={() => {}}
           onHome={() => {}}
           onStudy={() => {}}
-          onPlayground={() => {}}
         />
       </ModePanels>,
     ),

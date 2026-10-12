@@ -51,7 +51,6 @@ async function render(roundIndex = 0, answered = false) {
         frame={() => {}}
         onHome={() => {}}
         onStudy={() => {}}
-        onPlayground={() => {}}
         onReport={report}
       />,
     ),

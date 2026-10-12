@@ -28,7 +28,7 @@ published catalog, scheduling index and runtime discovery.
 | Responsibility                                                   | Owner                                                    | Boundary                                                                                          |
 | ---------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | Premise, five stops, copy, help, reveal, completion              | `src/game/*Journey.ts`                                   | Content records; no custom React or reducer per Journey.                                          |
-| Mode capabilities, allowed rules, submission and control grading | `mechanics.ts`                                           | Single registry; TypeScript rule compatibility and playground names derive from it.               |
+| Mode capabilities, allowed rules, submission and control grading | `mechanics.ts`                                           | Single registry; TypeScript rule compatibility and answer type names derive from it.              |
 | Authoring contracts and common validation                        | `questionBuilder.ts`                                     | `defineQuestion` compiles scenes and validates; `definePresentation` accepts presentation only.   |
 | Scene contracts and runtime compiler                             | `scenes.ts`                                              | Group authored state; compile once into existing runtime fields.                                  |
 | Local facts, solutions and knowledge predicates                  | `questions.ts`, `answerTargets.ts`, `reasoning.ts`       | Canonical data grades answers independently of presentation.                                      |
@@ -183,3 +183,21 @@ removed, delete its definition and index entry, record its ID in
 `retiredJourneys.ts`, and verify save recovery preserves retained progress.
 A `supersedes` alias may remain to resolve previously published assignments to
 the current edition; it does not require keeping the old questions loadable.
+
+For an in-place change to answer contracts, increment `Journey.saveRevision` and
+provide `legacyRoundLabels` for changed answers, keeping stored round IDs stable.
+New submissions capture their receipt label. Save decoding/opening upgrades old
+attempts once: submitted grades remain intact, obsolete unsubmitted drafts and
+unused help are cleared, and already graded feedback advances to the next stop.
+Completed results retain their original receipt names; replay starts the current
+revision. The same upgrade runs for synced and archived attempt registers, so a
+stale device cannot restore an obsolete draft. This metadata stores receipt
+names only, not archived questions or old grading rules.
+
+Globe color roles come from `src/globe/themes.ts`: `PLAY_HIGHLIGHTS` for eligible
+choices, selections and context, and `PLAY_FEEDBACK` for correct, revealed,
+incorrect and visited objects. Region fills, authored place markers, pin-distance
+lines and feedback legends share these values. Named map choices require
+`disclosure.namedChoices`; use `map.candidates: "highlighted"` when eligibility
+should be visible from the start. Do not rely on assistance to introduce the
+initial candidate field.

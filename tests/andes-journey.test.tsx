@@ -47,7 +47,6 @@ const shell = (game: GameState) =>
       frame={() => {}}
       onHome={() => {}}
       onStudy={() => {}}
-      onPlayground={() => {}}
     />,
   );
 describe("Along the Andes authored map and finale", () => {
@@ -210,7 +209,6 @@ describe("Along the Andes authored map and finale", () => {
         frame={() => {}}
         onHome={() => {}}
         onStudy={() => {}}
-        onPlayground={() => {}}
       />,
     );
     expect(html).toContain('class="earth-shape-diagram"');
@@ -342,7 +340,6 @@ describe("Along the Andes authored map and finale", () => {
           frame={() => {}}
           onHome={() => {}}
           onStudy={() => {}}
-          onPlayground={() => {}}
         />,
       );
       expect(html).toContain(expectedFeedback ?? "Not quite.");
@@ -519,7 +516,6 @@ describe("Along the Andes authored map and finale", () => {
         frame={() => {}}
         onHome={() => {}}
         onStudy={() => {}}
-        onPlayground={() => {}}
       />,
     );
     expect(shell).not.toContain('class="question-instruction"');

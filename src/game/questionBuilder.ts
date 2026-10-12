@@ -224,6 +224,22 @@ export function defineQuestion(question: AuthoredQuestion): Question {
   return compiled;
 }
 export function validateJourneyContracts(journey: Journey): void {
+  if (
+    journey.saveRevision !== undefined &&
+    (!Number.isSafeInteger(journey.saveRevision) || journey.saveRevision < 1)
+  )
+    throw Error(`Invalid Journey save revision: ${journey.id}`);
+  if (
+    journey.legacyRoundLabels &&
+    (!journey.saveRevision ||
+      Object.entries(journey.legacyRoundLabels).some(
+        ([id, label]) =>
+          !journey.rounds.some((round) => round.id === id) ||
+          typeof label !== "string" ||
+          !label.trim(),
+      ))
+  )
+    throw Error(`Invalid legacy receipt labels: ${journey.id}`);
   const ids = new Set<string>();
   for (const question of journey.rounds) {
     if (ids.has(question.id))

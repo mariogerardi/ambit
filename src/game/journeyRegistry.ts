@@ -4,11 +4,13 @@ import type { Journey, Question } from "./questions";
 
 /** Enough to route, schedule and validate saves without loading clue geometry. */
 export interface JourneySummary {
+  saveRevision?: number;
+  legacyRoundLabels?: Record<string, string>;
   id: string;
   supersedes?: string;
   title: string;
   description: string;
-  rounds: Pick<Question, "id" | "label" | "progressLabel">[];
+  rounds: Pick<Question, "id" | "label" | "progressLabel" | "resolvedLabel">[];
 }
 export const JOURNEY_INDEX: (JourneySummary & {
   path: string;

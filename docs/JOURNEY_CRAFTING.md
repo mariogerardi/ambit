@@ -116,6 +116,22 @@ Technical tier requirements live in the [question catalog](QUESTION_CATALOG.md#a
 
 For every candidate set, ask: _Can someone win solely by choosing the odd-looking item, the only inland dot, the only small country, or the only option matching a grammatical cue?_ If so, either the observation is the intended skill or the set needs redesign.
 
+**Design around the deciding condition.** Identify the geographic, historical or
+conceptual distinction the player must apply. Give plausible distractors some of
+the same traits as the answer, so a secondary clue cannot bypass that distinction.
+For example, a question about former Yugoslav republics can offer coastal Albania
+and Greece alongside the correct coastal countries: coastline alone then cannot
+settle historical membership. A question about an Atlantic–Mediterranean strait
+can include countries sharing one coast, both coasts, proximity to Spain, or other
+Mediterranean passages. Observation may still be the intended skill; decide this
+deliberately rather than letting the easiest visual shortcut decide the task.
+
+**Changing candidates can change the skill.** Revisit the prompt, given geography,
+camera, hint and assist together whenever the candidate pool changes. A coastline
+hint may stop being useful when the deciding condition becomes former federal
+membership. Broader candidates may require a wider camera; do not leave the
+correct location privileged at the center or hide all plausible alternatives.
+
 When a round asks for _some_ members of a larger valid set, author the acceptance rule and reveal carefully. A set of three arbitrary countries out of seven may be technically easy to grade but too broad to make an engaging question. Prefer a specific spatial or conceptual relationship over “any three” when the narrower task offers a clearer learning payoff.
 
 ## 5. Give the globe purposeful question-state information
@@ -126,7 +142,7 @@ The globe is an active part of the question, not decorative background. An endle
 - **Available candidates (pale yellow):** An equally styled eligible candidate field; distinct from known context.
 - **Neutral/muted:** Background, undisclosed answers, and nonprivileged candidates. These may still need to be selectable.
 - **Selected/committed (brighter yellow):** What the player has chosen, with an emphasized outline and a different fill from both context and available candidates. These shared globe colors are defined in `PLAY_HIGHLIGHTS` in `src/globe/themes.ts` and used for country fills and place markers.
-- **Correct/incorrect:** Feedback states for the **answered object**, not arbitrary neighboring land.
+- **Correct/incorrect:** Feedback states for the **answered object**, not arbitrary neighboring land. `PLAY_FEEDBACK` in `src/globe/themes.ts` shares the bright correct green, darker revealed-answer green, red mistakes, and purple recap across regions, place markers, distance lines and legend swatches. A correctly named highlighted island uses the correct green; a missed island uses the revealed-answer green.
 
 If a question names a country and asks for its mountain, capital, language, or history, highlighting that named country is **free orientation**, not a hint. Do not make players rediscover information already in the copy.
 
@@ -139,6 +155,13 @@ If an explicit candidate region is provided, give its eligible members equivalen
 3. **Reveal state:** what becomes visible to explain the answer and its geographic significance.
 
 A map line or marker can betray an answer just as easily as a label. Run the **naive-inspection test**: could a player with none of the intended knowledge solve the task by tracing geometry, clicking adjacent polygons, comparing candidate dots, exploiting color, or following the camera center? If yes, either observation is intentionally being assessed, or change the map, clue, or answer method. Hide names only when that actually preserves the skill.
+
+**Explain deliberate omissions when they affect the task.** If a feature players
+might expect to inspect is hidden, tell them to estimate its location: “We’ve
+hidden the Suez Canal on this map. Drop a pin at its Mediterranean entrance.”
+This explains the intended action without revealing the target coordinate. Give
+that explanation before help; players should not mistake intentional withholding
+for missing geography. Use accurate feature terms, such as canal versus strait.
 
 Audit the _entire_ information surface: lead-in, prompt, instructions, options, image and alt text, overline, hover names, map labels, earlier feedback, hint, assist, and source titles. Sources remain locked until after submission because they can spoil an answer.
 
@@ -168,7 +191,7 @@ Use **Question → Hint → Assist → Answer/reveal**. Not every question needs
 | Country/map tap          | Neighbor, direction, region, or reason                 | Uniformly narrow the candidate field, without marking the answer polygon                                |
 | City pin                 | Directional or relational clue                         | Show useful reference cities or a broad search region whose center is **not** the target                |
 | Pin inside territory     | Geographic relationship                                | Broad candidate region/indirect reference geography; **never the answer boundary itself**               |
-| Typed name               | Historical/cultural/spatial clue                       | First letter, length, or another meaningful constraint                                                  |
+| Typed name               | Historical/cultural/spatial clue                       | Meaningful reference geography or a plausible candidate set that leaves a decision                      |
 | Number                   | Comparison, scale, or method for reasoning             | Narrow numerical interval with several plausible values                                                 |
 | Ordering with distractor | One partial relationship                               | Fix **one** position or identify a nonfinal relationship while leaving ordering **and exclusion** to do |
 
@@ -297,6 +320,9 @@ completion genuinely depends on it.
 - [ ] Cognitive targets are deliberate, with no repetitive filler or implausibly wide questions.
 - [ ] Each lead-in contributes context; each prompt is one task; instructions are nonredundant.
 - [ ] Distractors are intentionally misleading **without becoming impossible or spoiled**.
+- [ ] Plausible candidates preserve the deciding distinction; secondary clues cannot bypass the intended knowledge.
+- [ ] Candidate changes trigger a joint review of prompt, camera, hint and assist.
+- [ ] Deliberately hidden features are explained when players might otherwise expect to inspect them.
 - [ ] The requested input is obvious and actually usable—no required hidden typing panel.
 - [ ] Given geography is visibly contextualized when helpful; answers are **not** pre-colored.
 - [ ] Question, hint, assist, and reveal all pass the naive-inspection/fairness tests.

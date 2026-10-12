@@ -40,7 +40,7 @@ import {
   archiveStudy,
 } from "../src/study/engine";
 import { initialGame } from "../src/game/state";
-import { FOURTH_JOURNEY, YUGOSLAV_REPUBLICS } from "../src/game/fourthJourney";
+import { FOURTH_JOURNEY, ADRIATIC_REPUBLICS } from "../src/game/fourthJourney";
 import { NORTH_AMERICA_JOURNEY as FIFTH_JOURNEY } from "../src/game/northAmericaJourney";
 import { CANADA_JOURNEY } from "../src/game/canadaJourney";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
@@ -199,13 +199,6 @@ async function settleLoads() {
     await vi.dynamicImportSettled();
   });
 }
-async function openPlayground() {
-  await act(async () => {
-    history.pushState(null, "", "/playground");
-    dispatchEvent(new PopStateEvent("popstate"));
-  });
-  await settleLoads();
-}
 async function mount() {
   await act(async () => {
     root.render(<App />);
@@ -356,6 +349,15 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       ...journeyRegistry.AVAILABLE_JOURNEY_INDEX.map((journey) => journey.id),
     ]);
     expect(options).toHaveLength(14);
+    const preview = [...host.querySelectorAll<HTMLAnchorElement>("a")].find(
+      (link) => link.textContent?.includes("Preview five questions"),
+    );
+    expect(preview).toBeDefined();
+    expect(
+      journeyRegistry.AVAILABLE_JOURNEY_INDEX.some(
+        (journey) => journey.path === preview!.getAttribute("href"),
+      ),
+    ).toBe(true);
     for (const id of [
       "long-way-home-v2",
       "beyond-borders-v1",
@@ -1362,7 +1364,11 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Home");
     await click("Play");
     await click("Home");
-    await openPlayground();
+    await act(async () => {
+      history.pushState(null, "", "/journey/down-the-danube");
+      dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await settleLoads();
     expect(probe.mounts).toBe(1);
     expect(host.querySelector("canvas")).toBe(canvas);
     expect(
@@ -1819,7 +1825,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       FOURTH_JOURNEY.title,
     );
     await click("Play");
-    expect(host.textContent).toContain("official in parts of Spain");
+    expect(host.textContent).toContain("Which country faces Spain across it?");
   });
   it("plays the Danube through visible controls and supplies progressive river geography and an authored completion", async () => {
     history.replaceState(null, "", "/journey/down-the-danube");
@@ -1927,7 +1933,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       probe.props!.physicalFeatures?.some((f) => f.name === "Black Sea"),
     ).toBe(true);
   });
-  it("allows six republic picks through the globe's eligibility states before submitting", async () => {
+  it("allows four coastal republic picks through the globe's eligibility states before submitting", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date(2026, 9, 5, 12));
     const date = "2026-10-05";
@@ -1948,7 +1954,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     history.replaceState(null, "", "/daily");
     await mount();
-    for (const id of YUGOSLAV_REPUBLICS) {
+    for (const id of ADRIATIC_REPUBLICS) {
       expect(probe.props!.states[id]).not.toBe("disabled");
       await act(async () => probe.props!.onSelect(member(id)));
       expect(probe.props!.states[id]).toBe("selected");
@@ -1956,7 +1962,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(
       JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts[date].game
         .selectedIds,
-    ).toHaveLength(6);
+    ).toHaveLength(4);
     await click("Submit answer");
     expect(host.textContent).toContain("Well spotted.");
   });
@@ -1999,7 +2005,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     const saved = JSON.parse(localStorage.getItem(DAILY_KEY)!);
     expect(saved.activeDate).toBe("2026-10-06");
     expect(saved.attempts["2026-10-05"].game.answers).toHaveLength(1);
-    expect(host.textContent).toContain("official in parts of Spain");
+    expect(host.textContent).toContain("Which country faces Spain across it?");
     await click("Home");
     expect(host.textContent).not.toContain("Continue 2026-10-05");
     await click("Resume");
@@ -2008,7 +2014,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       root = createRoot(host);
     });
     await mount();
-    expect(host.textContent).toContain("official in parts of Spain");
+    expect(host.textContent).toContain("Which country faces Spain across it?");
     expect(host.textContent).not.toContain("Canada’s federal level");
   });
   it("assigns a future calendar date and restores its rotation when cleared", async () => {
@@ -2068,14 +2074,16 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.textContent).toContain("Retry schedule");
     expect(JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts).toEqual({});
   });
-  it("redirects non-admin practice and playground URLs to Home", async () => {
+  it("redirects non-admin practice URLs to Home", async () => {
     authProbe.admin = false;
-    for (const path of ["/journey/mediterranean", "/playground"]) {
+    for (const path of ["/journey/mediterranean"]) {
       history.replaceState(null, "", path);
       await mount();
       expect(location.pathname).toBe("/");
       expect(host.querySelector(".daily-menu")).not.toBeNull();
-      expect(host.textContent).not.toContain("official in parts of Spain");
+      expect(host.textContent).not.toContain(
+        "Which country faces Spain across it?",
+      );
       await act(async () => {
         root.unmount();
         root = createRoot(host);

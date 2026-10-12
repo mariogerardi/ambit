@@ -172,16 +172,25 @@ of the pinned Natural Earth regional assets, preserving attribution, canonical
 geometry, and their reconciled display footprints. Regional preparation refreshes
 this subset through `scripts/enclosed-territories.mjs`.
 
-## Fourth daily puzzle facts
+## Mediterranean Journey facts and canal geometry
 
-Reviewed local fact relationships and source links are stored in
-`src/game/fourthJourney.ts` and `src/game/quizData.ts`: Spain’s Ministry of
-Territorial Policy for regional languages, Sicily’s official tourism brochure
-for the island, the existing pinned GeoNames capital record for Tripoli, the
-UN ICTY legacy page for Yugoslavia’s six constituent republics, and UNEP/MAP’s
-coastal-country list plus UNRWA’s Gaza coastline description for the explicit
-22-country Mediterranean convention. Facts are authored locally; source pages
-are linked after answering and are not fetched at runtime.
+Reviewed sources in `src/game/fourthJourney.ts` include Visit Gibraltar, Sicily’s
+official tourism brochure, pinned GeoNames city records, the UN ICTY six-republic
+reference, the European Commission’s Adriatic–Ionian regional reference, Neum’s tourism board, and the
+Suez Canal Authority. Sources appear after submission and are not fetched at runtime.
+
+`src/game/data/mediterranean-map.v1.json` preserves the three existing Suez Canal
+centerline segments from Natural Earth **v5.1.2** 1:10m rivers/lake centerlines
+(public domain). It records the input URL and SHA-256 from
+`sources/explore-checksums.json`; no artificial segment connects gaps. The data
+is display-only and is withheld until the pin reveal. Pin grading uses the
+pinned GeoNames Port Said gateway coordinate, not the drawn canal geometry.
+Neum’s label uses reviewed GeoNames coordinates (42.923333, 17.615556); source
+names and city display styling do not alter country grading geometry.
+
+Earlier regional-language and Mediterranean-country-count facts in
+`src/game/quizData.ts` retain their Spain ministry, UNEP/MAP and UNRWA source
+references, but are no longer questions in this Journey.
 
 The enlarged sun detail in `public/flags/clues/sun-detail-01.svg` uses the same
 Uruguay flag artwork as `public/flags/study/flag-186.svg`, cropped by its SVG

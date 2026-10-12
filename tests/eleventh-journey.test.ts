@@ -62,7 +62,7 @@ describe("not the obvious city", () => {
     expect(after.states["wurl:TUR"]).toBe("hinted");
     expect(after.places.map((p) => p.name)).toEqual(["Ankara", "Istanbul"]);
     expect(after.places.map((p) => p.visualState)).toEqual([
-      "answer",
+      "correct",
       "hinted",
     ]);
     expect(after.focus.altitude).toBeLessThan(before.focus.altitude!);

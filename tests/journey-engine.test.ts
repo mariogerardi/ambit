@@ -84,7 +84,7 @@ describe("Journey engine authoring boundaries", () => {
       }),
     ).toBe(false);
   });
-  it("registers every authored mode and exposes only supported playground types", () => {
+  it("registers every authored mode and exposes only supported answer types", () => {
     for (const journey of JOURNEYS)
       for (const question of journey.rounds) {
         expect(question.scenes).toBeDefined();

@@ -74,9 +74,9 @@ describe("card ordering controls", () => {
   it("grades complete, unique card order with a real distractor", () => {
     expect(canSubmit(order, context, at(4))).toBe(true);
     expect(isCorrect(order, context, at(4))).toBe(false);
-    expect(reduce(at(4), { type: "jump", index: 4 }).ordered).toEqual(
-      order.orderInitial,
-    );
+    expect(
+      reduce({ ...at(3), phase: "feedback" }, { type: "next" }).ordered,
+    ).toEqual(order.orderInitial);
     const correct = placed();
     expect(canSubmit(order, context, correct)).toBe(true);
     expect(isCorrect(order, context, correct)).toBe(true);

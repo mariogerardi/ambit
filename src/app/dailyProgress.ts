@@ -70,6 +70,7 @@ export function millisecondsToMidnight(now = new Date()): number {
   );
 }
 export interface DailyAttempt {
+  contentRevision?: number;
   runId?: string;
   startedAt?: number;
   date: string;
@@ -126,7 +127,8 @@ export function validGame(
       strings(a.selectedIds) &&
       strings(a.ordered) &&
       typeof a.text === "string" &&
-      typeof a.correct === "boolean",
+      typeof a.correct === "boolean" &&
+      (a.receiptLabel === undefined || typeof a.receiptLabel === "string"),
   );
 }
 function validAttempt(
@@ -143,6 +145,9 @@ function validAttempt(
     !isRecord(value) ||
     value.date !== date ||
     value.scheduleVersion !== DAILY_VERSION ||
+    (value.contentRevision !== undefined &&
+      (!Number.isSafeInteger(value.contentRevision) ||
+        Number(value.contentRevision) < 1)) ||
     (value.runId !== undefined && typeof value.runId !== "string") ||
     (value.startedAt !== undefined &&
       (typeof value.startedAt !== "number" ||
@@ -270,6 +275,56 @@ export function setDailyPuzzle(
   else delete attempts[date];
   return { ...next, attempts, archivedAttempts };
 }
+/** Preserve earned grades; clear only an obsolete unsubmitted question/help draft. */
+export function upgradeDailyAttempt(
+  attempt: DailyAttempt,
+  catalog: JourneySummary[],
+): DailyAttempt {
+  const journey = catalog.find((journey) => journey.id === attempt.journeyId);
+  const revision = journey?.saveRevision ?? 1;
+  if (!journey || (attempt.contentRevision ?? 1) >= revision) return attempt;
+  const answers = attempt.game.answers.map((answer) => ({
+    ...answer,
+    receiptLabel:
+      answer.receiptLabel ??
+      journey.legacyRoundLabels?.[answer.roundId] ??
+      journey.rounds.find((round) => round.id === answer.roundId)
+        ?.resolvedLabel ??
+      journey.rounds.find((round) => round.id === answer.roundId)?.label,
+  }));
+  const complete = answers.length === journey.rounds.length;
+  const ended =
+    complete ||
+    attempt.game.phase === "finished" ||
+    attempt.game.phase === "failed";
+  const roundIndex =
+    !ended && attempt.game.phase === "feedback"
+      ? Math.min(attempt.game.roundIndex + 1, journey.rounds.length - 1)
+      : attempt.game.roundIndex;
+  const help = Object.fromEntries(
+    Object.entries(attempt.game.help ?? {}).filter(([id]) =>
+      answers.some((answer) => answer.roundId === id),
+    ),
+  );
+  return {
+    ...attempt,
+    contentRevision: revision,
+    game: ended
+      ? {
+          ...attempt.game,
+          answers,
+          ...(complete ? { phase: "finished" as const } : {}),
+        }
+      : {
+          ...initialGame,
+          phase: "playing",
+          roundIndex,
+          answers,
+          ...(Object.keys(help).length ? { help } : {}),
+        },
+  };
+}
+
 export function openDaily(
   progress: DailyProgress,
   date: string,
@@ -277,7 +332,8 @@ export function openDaily(
   catalog: JourneySummary[] = JOURNEY_INDEX,
   assignments?: Record<string, string>,
 ): DailyProgress {
-  const existing = progress.attempts[date];
+  const saved = progress.attempts[date];
+  const existing = saved && upgradeDailyAttempt(saved, catalog);
   const journeyId =
     existing?.journeyId ??
     dailyJourney(date, progress, catalog, assignments).id;
@@ -290,6 +346,13 @@ export function openDaily(
           }
         : existing
       : {
+          ...(catalog.find((journey) => journey.id === journeyId)?.saveRevision
+            ? {
+                contentRevision: catalog.find(
+                  (journey) => journey.id === journeyId,
+                )!.saveRevision,
+              }
+            : {}),
           runId: crypto.randomUUID(),
           startedAt: Math.max(
             Date.now(),

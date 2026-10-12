@@ -6,7 +6,6 @@ export type AppMode =
   | "daily"
   | "explore"
   | "study"
-  | "playground"
   | "practice";
 export function modeForPath(path: string): AppMode {
   return path === "/account" || path === "/auth/callback"
@@ -19,9 +18,7 @@ export function modeForPath(path: string): AppMode {
           ? "explore"
           : path === "/study"
             ? "study"
-            : path === "/playground"
-              ? "playground"
-              : AVAILABLE_JOURNEY_INDEX.some((j) => j.path === path)
-                ? "practice"
-                : "home";
+            : AVAILABLE_JOURNEY_INDEX.some((j) => j.path === path)
+              ? "practice"
+              : "home";
 }

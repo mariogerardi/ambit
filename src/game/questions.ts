@@ -272,6 +272,10 @@ export interface Question {
   feedbackOverlays?: MapOverlay[];
 }
 export interface Journey {
+  /** In-place answer-contract revision; no archived question definitions required. */
+  saveRevision?: number;
+  /** Receipt names for pre-revision answers, without restoring their grading rules. */
+  legacyRoundLabels?: Record<string, string>;
   /** A revised edition replaces this ID for new attempts, while started saves keep it. */
   supersedes?: string;
   id: string;

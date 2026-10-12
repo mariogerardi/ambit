@@ -8,6 +8,7 @@ import {
   validDaily,
   recoverDaily,
   dateOrdinal,
+  upgradeDailyAttempt,
 } from "./dailyProgress";
 import type { DailyProgress, DailyAttempt } from "./dailyProgress";
 import type { JourneySummary } from "../game/journeyRegistry";
@@ -177,6 +178,8 @@ export function dailySaveCodec(
     attempt: Pick<DailyAttempt, "date" | "journeyId" | "runId">,
   ) => `run.${attempt.date}/${attempt.journeyId}/${attempt.runId ?? "legacy"}`;
   const preferAttempt = (a: DailyAttempt, b: DailyAttempt) => {
+    a = upgradeDailyAttempt(a, catalog);
+    b = upgradeDailyAttempt(b, catalog);
     if (a.runId !== b.runId || a.journeyId !== b.journeyId)
       return (a.startedAt ?? 0) > (b.startedAt ?? 0) ? a : b;
     const rank = (attempt: DailyAttempt) =>
@@ -268,14 +271,17 @@ export function dailySaveCodec(
       // progress submitted to a run after it was archived by another tab.
       for (const [date, attempt] of Object.entries(save.attempts)) {
         const latest = fields[runField(attempt)] as DailyAttempt | undefined;
-        if (latest) save.attempts[date] = preferAttempt(attempt, latest);
+        save.attempts[date] = latest
+          ? preferAttempt(attempt, latest)
+          : upgradeDailyAttempt(attempt, catalog);
       }
       for (const [key, attempt] of Object.entries(
         save.archivedAttempts ?? {},
       )) {
         const latest = fields[runField(attempt)] as DailyAttempt | undefined;
-        if (latest)
-          save.archivedAttempts![key] = preferAttempt(attempt, latest);
+        save.archivedAttempts![key] = latest
+          ? preferAttempt(attempt, latest)
+          : upgradeDailyAttempt(attempt, catalog);
       }
       const cleared = (attempt: DailyAttempt) => {
         const cutoff = save.resets?.[`${attempt.date}/${attempt.journeyId}`];

@@ -18,9 +18,21 @@ import { ANDES_JOURNEY } from "../src/game/andesJourney";
 import type { RegionFeature } from "../src/geography/types";
 
 describe("safe question authoring contracts", () => {
-  it("validates every published and compatibility Journey", () => {
+  it("validates every current Journey", () => {
     for (const journey of JOURNEYS)
       expect(() => validateJourneyContracts(journey)).not.toThrow();
+  });
+  it("rejects invalid in-place revisions and unrelated legacy receipt labels", () => {
+    expect(() =>
+      validateJourneyContracts({ ...ANDES_JOURNEY, saveRevision: 0 }),
+    ).toThrow("Invalid Journey save revision");
+    expect(() =>
+      validateJourneyContracts({
+        ...ANDES_JOURNEY,
+        saveRevision: 2,
+        legacyRoundLabels: { unknown: "Old answer" },
+      }),
+    ).toThrow("Invalid legacy receipt labels");
   });
   it("rejects mismatched grading, inherited selection, stale choices and invalid cardinality", () => {
     const question = ANDES_JOURNEY.rounds[0];

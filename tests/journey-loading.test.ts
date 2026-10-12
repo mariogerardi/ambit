@@ -25,10 +25,11 @@ describe("deferred Journey content", () => {
       expect(journey.title.trim()).not.toBe("");
       expect(entry.description).toBe(journey.description);
       expect(entry.rounds).toEqual(
-        journey.rounds.map(({ id, label, progressLabel }) => ({
+        journey.rounds.map(({ id, label, progressLabel, resolvedLabel }) => ({
           id,
           label,
           ...(progressLabel ? { progressLabel } : {}),
+          ...(journey.saveRevision && resolvedLabel ? { resolvedLabel } : {}),
         })),
       );
     }
