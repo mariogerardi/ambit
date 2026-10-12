@@ -17,9 +17,10 @@ const reference = (id: string, name?: string): PlaceFeature => {
   return { ...cityReference(place), ...(name ? { name } : {}) };
 };
 const chatham = cityReference(geography.chatham as PlaceFeature);
+const kingston = cityReference(geography.kingston as PlaceFeature);
 const london = reference("place:6058560");
 const londonCandidates = [
-  reference("place:5110629"),
+  kingston,
   reference("place:6094817"),
   london,
   chatham,
@@ -91,7 +92,7 @@ const base = definePresentation({
 
 export const SHARED_NAMES_JOURNEY: Journey = {
   id: "same-name-different-place-v1",
-  saveRevision: 1,
+  saveRevision: 2,
   title: "Same Name, Different Place",
   description:
     "One name can cross borders, borrow a history, or mean something entirely different. Explore five pairs of namesakes around the world.",
@@ -367,7 +368,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
           places: [reference("place:909137"), reference("place:894701")],
         },
         reveal: {
-          focus: { lat: -17.6, lng: 26.5, altitude: 0.23 },
+          focus: { lat: -9, lng: 29.5, altitude: 0.85 },
           contextIds: ["wurl:ZMB", "wurl:ZWE"],
           places: [falls],
           physicalFeatures: [

@@ -34,6 +34,7 @@
       "url": "https://www.geonames.org/",
       "license": "CC BY 4.0",
       "chatham": "ID 5920457, coordinates from the existing pinned .cache/quiz/cities15000.zip (see sources/quiz.metadata.json)",
+      "kingston": "ID 5992500, coordinates from the same pinned cities15000 source; question-local record, not a regenerated display catalog",
       "sha256": "2554bf60757df6cfc4ac43e34e8c31c99ab8386901e228484c3f41d0fb1e47f2"
     }
   ]

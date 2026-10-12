@@ -341,7 +341,8 @@ lip. Its source snapshot and nearby Main Falls cliff are in
 waterfall location, not the nearby town or the World Heritage property centroid.
 The centerlines are generalized cartography, not surveyed waterfall/gorge relief.
 
-Chatham's canonical GeoNames ID **5920457** and coordinates come from the already
+Chatham's canonical GeoNames ID **5920457**, Kingston's **5992500**, and their
+coordinates come from the already
 pinned cities15000 source, CC BY 4.0 (https://www.geonames.org/). Other city markers
 reuse bundled GeoNames city/capital records. No optional photographs ship.
 `sources/shared-names-map.metadata.json` records source URLs, versions, licenses

@@ -15,6 +15,8 @@ The development-only read-only review entry also accepts
 - Focused Journey, registration, guidance, scene and camera tests pass.
 - Anonymous city markers use equal styling; assists preserve both Thames
   candidates and show the actual connected Thames and Lake St. Clair geometry.
+  The initial candidates are Kingston, Ottawa, London and Chatham; revision 2
+  clears obsolete Buffalo drafts while preserving earned results and receipts.
 - The Caucasus question has no answer name in its visible or accessible
   pre-answer content, including hint, assist and pending selection.
 - Zambia and Zimbabwe are contextual, and Zambezi linework is present from play.
@@ -33,6 +35,9 @@ The development-only read-only review entry also accepts
 - The Caucasus assist reduces the candidate field without identifying a
   coastline or named neighbor.
 - Lakes use the Andes treatment: opaque blue surfaces and shoreline paths.
+- The final reveal frames Victoria Falls and the whole of Lake Victoria together.
+  Desktop and narrow viewport projection checks cover both; these are automated
+  camera checks, not a rendered browser inspection.
 
 ## Remaining rendered acceptance checks
 

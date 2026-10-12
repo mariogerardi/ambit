@@ -465,7 +465,7 @@
   {
     "id": "same-name-different-place-v1",
     "title": "Same Name, Different Place",
-    "saveRevision": 1,
+    "saveRevision": 2,
     "description": "One name can cross borders, borrow a history, or mean something entirely different. Explore five pairs of namesakes around the world.",
     "path": "/journey/same-name-different-place",
     "module": "./sharedNamesJourney.ts",

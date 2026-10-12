@@ -17,6 +17,10 @@ import { journeyWorld } from "../src/app/journeyWorld";
 import { GameShell } from "../src/game/GameShell";
 import geography from "../src/game/data/shared-names-context.v1.json";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
+import { PerspectiveCamera, Vector3 } from "three";
+import { focusAltitude } from "../src/globe/camera";
+import { upgradeDailyAttempt } from "../src/app/dailyProgress";
+import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -124,6 +128,25 @@ describe("Same Name, Different Place", () => {
     expect(initial.places).toHaveLength(6);
     const candidates = initial.places.filter((p) => p.answerTarget);
     expect(candidates).toHaveLength(4);
+    expect(candidates.map((p) => p.id)).toEqual([
+      "place:5992500",
+      "place:6094817",
+      "place:6058560",
+      "place:5920457",
+    ]);
+    expect(geography.kingston).toMatchObject({
+      name: "Kingston",
+      sourceId: "geonames:5992500",
+      parentId: "wurl:CAN",
+      lat: 44.22976,
+      lng: -76.48098,
+    });
+    expect(
+      isCorrect(journey.rounds[1], context, {
+        ...at(1),
+        selectedIds: ["place:5992500"],
+      }),
+    ).toBe(false);
     expect(
       candidates.every((p) => !p.name && p.labelHidden && !p.hoverName),
     ).toBe(true);
@@ -174,6 +197,100 @@ describe("Same Name, Different Place", () => {
     ).toBe("incorrect");
     expect(reveal.states["wurl:CAN"]).toBe("hinted");
   });
+
+  it("clears a retired Buffalo draft while preserving the attempt and earned receipt", () => {
+    const earned = reduce(
+      at(0),
+      ...select("wurl:COG", "wurl:COD"),
+      { type: "submit" },
+      { type: "next" },
+    );
+    const old = {
+      date: "2026-10-12",
+      journeyId: journey.id,
+      scheduleVersion: 1,
+      runId: "existing-run",
+      startedAt: 100,
+      contentRevision: 1,
+      game: {
+        ...earned,
+        selectedIds: ["place:5110629"],
+        help: { "shared-names-london": "assisted" as const },
+      },
+    };
+    const current = upgradeDailyAttempt(old, JOURNEY_INDEX);
+    expect(current).toMatchObject({
+      runId: old.runId,
+      startedAt: old.startedAt,
+      contentRevision: 2,
+      game: { phase: "playing", roundIndex: 1, selectedIds: [] },
+    });
+    expect(current.game.answers).toEqual(earned.answers);
+    expect(journeyScore(current.game)).toBe(1);
+    expect(current.game.help?.["shared-names-london"]).toBeUndefined();
+    expect(old.game.selectedIds).toEqual(["place:5110629"]);
+  });
+
+  it.each([
+    [1280, 800],
+    [390, 450],
+  ])(
+    "frames both Victoria namesakes within a %s × %s reveal viewport",
+    (width, height) => {
+      const feedback = view(
+        reduce(
+          at(4),
+          { type: "drop-pin", ...geography.falls },
+          { type: "submit" },
+        ),
+      );
+      const focus = feedback.focus;
+      const point = (lng: number, lat: number, radius = 1) => {
+        const phi = (lat * Math.PI) / 180,
+          theta = (lng * Math.PI) / 180;
+        return new Vector3(
+          radius * Math.cos(phi) * Math.sin(theta),
+          radius * Math.sin(phi),
+          radius * Math.cos(phi) * Math.cos(theta),
+        );
+      };
+      const camera = new PerspectiveCamera(50, width / height, 0.005, 12);
+      camera.position.copy(
+        point(
+          focus.lng,
+          focus.lat,
+          1 +
+            focusAltitude(
+              focus.altitude!,
+              { width, frameHeight: height },
+              width < 700,
+            ),
+        ),
+      );
+      camera.lookAt(0, 0, 0);
+      camera.updateMatrixWorld();
+      const lake = feedback.physicalFeatures.find(
+        (f) => f.name === "Lake Victoria",
+      )!;
+      const shoreline =
+        lake.geometry!.type === "Polygon"
+          ? lake.geometry!.coordinates.flat()
+          : lake.geometry!.coordinates.flat(2);
+      for (const [lng, lat] of [
+        [geography.falls.lng, geography.falls.lat],
+        ...shoreline,
+      ]) {
+        const position = point(lng, lat);
+        expect(position.dot(camera.position)).toBeGreaterThan(1); // In front of the globe's horizon.
+        const projected = position.project(camera);
+        expect(Math.abs(projected.x)).toBeLessThan(0.8);
+        expect(Math.abs(projected.y)).toBeLessThan(0.8);
+      }
+      expect(
+        view(at(4)).physicalFeatures.some((f) => f.name === "Lake Victoria"),
+      ).toBe(false);
+    },
+  );
 
   it("retains the cities/islands breather and withholds the unnamed country across all help stages", () => {
     const semantic = journey.rounds[2];

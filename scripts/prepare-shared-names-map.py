@@ -75,6 +75,8 @@ context = {
     "lakes": lakes,
     "chatham": dict(id="place:5920457", name="Chatham", kind="city", parentId="wurl:CAN",
                     lat=42.41224, lng=-82.18494, sourceId="geonames:5920457"),
+    "kingston": dict(id="place:5992500", name="Kingston", kind="city", parentId="wurl:CAN",
+                     lat=44.22976, lng=-76.48098, sourceId="geonames:5992500"),
     "falls": dict(id=point["properties"]["id"], name="Mosi-oa-Tunya / Victoria Falls", kind="landmark",
                   parentId="wurl:ZWE", lat=point["geometry"]["coordinates"][1],
                   lng=point["geometry"]["coordinates"][0], sourceId="osm:node:299131927"),
@@ -91,7 +93,7 @@ metadata = {
         {"asset": "public/geography/shared-names-falls-source.v1.geojson", "url": "https://api.openstreetmap.org/api/0.6/map?bbox=25.835,-17.93,25.87,-17.91", "license": "ODbL-1.0", "targetReview": "Main Falls waterfall node lies on the mapped Main Falls cliff/lip, on the south side of the upstream river; inspected against OSM way 579843539. Target is one part of the 1.7 km curtain, not its exact midpoint."},
         {"asset": "public/geography/shared-names-lakes-source.v1.geojson", "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_lakes.geojson", "license": "Public domain"},
         {"asset": "public/geography/physical.v1.json", "url": "https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/", "license": "Public domain", "version": "5.1.2"},
-        {"asset": "src/geography/data/cities.v1.json", "url": "https://www.geonames.org/", "license": "CC BY 4.0", "chatham": "ID 5920457, coordinates from the existing pinned .cache/quiz/cities15000.zip (see sources/quiz.metadata.json)"},
+        {"asset": "src/geography/data/cities.v1.json", "url": "https://www.geonames.org/", "license": "CC BY 4.0", "chatham": "ID 5920457, coordinates from the existing pinned .cache/quiz/cities15000.zip (see sources/quiz.metadata.json)", "kingston": "ID 5992500, coordinates from the same pinned cities15000 source; question-local record, not a regenerated display catalog"},
     ],
 }
 for s in metadata["sources"]:
