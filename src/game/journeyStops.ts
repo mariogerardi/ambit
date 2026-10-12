@@ -1,6 +1,6 @@
 import { answerPlace } from "./answerTargets";
-import { solutionIds } from "./questions";
-import type { Journey, QuestionContext } from "./questions";
+import { solutionIds } from "./questionPreparation";
+import type { Journey, QuestionContext } from "./questionContracts";
 import type { Answer } from "./state";
 import type { Focus } from "../geography/types";
 

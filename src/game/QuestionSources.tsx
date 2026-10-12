@@ -1,4 +1,4 @@
-import type { Question } from "./questions";
+import type { Question } from "./questionContracts";
 
 export function QuestionSources({ question }: { question: Question }) {
   return (

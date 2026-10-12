@@ -16,7 +16,7 @@ import { languageName } from "../geography/languages";
 import { OFFICIAL_LANGUAGES, LANGUAGES } from "../game/quizData";
 import { PanelActive } from "./ModePanels";
 import { InfoTooltip } from "./InfoTooltip";
-import { normalizeAnswer, countryIdForName } from "../game/questions";
+import { normalizeAnswer, countryIdForName } from "../game/answerNames";
 export type { GlobeLayers as ExploreSettings } from "./worldPreferences";
 export function ExplorePanel({
   regions,

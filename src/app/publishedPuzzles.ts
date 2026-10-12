@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { isRecord } from "./storage";
-import type { Journey } from "../game/questions";
+import type { Journey } from "../game/questionContracts";
 
 export interface PublishedPuzzle {
   id: string;

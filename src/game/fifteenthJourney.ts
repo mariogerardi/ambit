@@ -1,5 +1,5 @@
 import { defineQuestion } from "./questionBuilder";
-import type { Journey, Question } from "./questions";
+import type { Journey, Question } from "./questionContracts";
 
 const destinations = [
   {

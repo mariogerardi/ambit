@@ -1,6 +1,6 @@
 import { defineQuestion } from "./questionBuilder";
 import type { Focus } from "../geography/types";
-import type { Journey, Question } from "./questions";
+import type { Journey, Question } from "./questionContracts";
 import { mapSource } from "./countryFacts";
 
 /** Each answer is the unique intersection of the two countries' land neighbors. */

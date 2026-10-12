@@ -9,7 +9,7 @@ import type { CapitalDistractors } from "./distractors";
 import roster from "../game/data/un-members.v1.json";
 import flagCatalog from "../game/data/flags.v1.json";
 import { CAPITALS } from "../game/quizData";
-import { countryIdForName, normalizeAnswer } from "../game/questions";
+import { countryIdForName, normalizeAnswer } from "../game/answerNames";
 import { isRecord, strings } from "../app/storage";
 import type { VisualState } from "../geography/types";
 export const COUNTRIES = roster.members;

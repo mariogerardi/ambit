@@ -10,8 +10,8 @@ import {
 import type {
   QuestionContract,
   QuestionPresentation,
-} from "../src/game/questionBuilder";
-import { createQuestionContext } from "../src/game/questions";
+} from "../src/game/questionContracts";
+import { createQuestionContext } from "../src/game/questionPreparation";
 import { journeyWorld } from "../src/app/journeyWorld";
 import { initialGame } from "../src/game/state";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";

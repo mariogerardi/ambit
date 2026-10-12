@@ -45,8 +45,13 @@ npm run export:journeys -- --include-code
 ```
 
 This adds `SOURCE_REVIEW.md`, containing fresh `App.tsx`, `GameShell.tsx`,
-`AnswerForm.tsx`, `questions.ts`, `questionBuilder.ts` and `GlobeView.tsx`.
+`AnswerForm.tsx`, `questions.ts`, its separate contracts/preparation/evaluation
+modules, `questionBuilder.ts` and `GlobeView.tsx`.
+It also includes the app's extracted Journey/geography loading, player-progress,
+Study presentation, camera orchestration and Home-panel modules, so reviewing the shell does not hide
+its delegated behavior.
 The `code/` tree includes those files, engine/scene/help/control references,
+the app's Journey/geography loading, player-progress, Study presentation and camera hooks,
 executable recipes and all current Journey definitions. `questionSeeds.ts` no
 longer exists; presentation presets and explicit contracts are the current pattern.
 The source review is intentionally separate from the compact editorial kit.
@@ -71,6 +76,16 @@ using `npm run prepare:journeys`, then retry. It never regenerates source data i
 refreshes only files owned by a previous export, removes stale owned files and
 refuses to overwrite unrelated files or follow output symlinks. Artifacts are local
 snapshots; commit the exporter and maintained docs rather than its generated output.
+
+## What to upload after a refresh
+
+Replace the previous uploaded copies of `AUTHORING_KIT.md` and
+`FEATURED_EXAMPLES.md` with the new files. Paste the refreshed
+`PROJECT_INSTRUCTIONS.md` into the project's instructions. Keep
+`JOURNEY_SPEC_TEMPLATE.md` available for recording approved designs, and add
+individual `examples/*.md` or references only when relevant. `SOURCE_REVIEW.md`
+is optional for engine/architecture work; ordinary puzzle design does not need it.
+The folder includes all current examples so you can consult more than the highlights.
 
 Run the scoped exporter checks with:
 

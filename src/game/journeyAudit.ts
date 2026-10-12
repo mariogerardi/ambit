@@ -1,6 +1,6 @@
 import type { RegionFeature, PlaceFeature } from "../geography/types";
-import type { Journey, Question } from "./questions";
-import { createQuestionContext, solutionIds } from "./questions";
+import type { Journey, Question } from "./questionContracts";
+import { createQuestionContext, solutionIds } from "./questionPreparation";
 import { COUNTRY_FACTS } from "./countryFacts";
 import { mechanicFor } from "./mechanics";
 import { initialGame } from "./state";

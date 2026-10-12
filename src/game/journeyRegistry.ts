@@ -1,6 +1,6 @@
 import { validateJourneyContracts } from "./questionBuilder";
 import index from "./journeyIndex.json";
-import type { Journey, Question } from "./questions";
+import type { Journey, Question } from "./questionContracts";
 
 /** Enough to route, schedule and validate saves without loading clue geometry. */
 export interface JourneySummary {

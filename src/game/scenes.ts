@@ -4,7 +4,7 @@ import type {
   PhysicalFeature,
   PlaceFeature,
 } from "../geography/types";
-import type { Question } from "./questions";
+import type { Question } from "./questionContracts";
 
 export interface PlayScene {
   focus?: Focus;

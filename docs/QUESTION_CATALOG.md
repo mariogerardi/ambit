@@ -42,7 +42,7 @@ the answer; borders, names, and markers remain hidden until submission.
 ## Answer modes
 
 Counts below refer to the 70 current questions, not every possible engine pairing.
-The type and rule contracts live in [`questions.ts`](../src/game/questions.ts);
+The type and rule contracts live in [`questionContracts.ts`](../src/game/questionContracts.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                | Control                 | Questions |
@@ -122,7 +122,7 @@ A rule describes correctness independently of its answer control:
 
 There are 25 declared knowledge-rule variants. Support for a rule does not imply
 complete factual coverage or that every mode/rule combination is valid.
-[`createQuestionContext`](../src/game/questions.ts) prepares and validates the
+[`createQuestionContext`](../src/game/questionPreparation.ts) prepares and validates the
 required targets/answers. Inspect an existing question with the same rule before
 adding a new combination.
 
@@ -157,6 +157,11 @@ runtime fields; older Journeys remain compatible. The mechanic registry in
 hooks and submission. Complete executable examples live in `recipes.ts` and are
 excluded from the published catalog. Use `npm run check:journey -- <id-or-slug>`
 for focused local review, or `--recipe <answer-mode>` to inspect a control example.
+
+Current Journeys and recipes import their types from `questionContracts.ts`.
+Keep authored content in the builder/scenes pattern; answer resolution belongs to
+`questionPreparation.ts`, grading to `questionEvaluation.ts`, and player-facing
+text to `questionText.ts`. `questions.ts` remains a compatibility import surface.
 
 ## Add or change a Journey
 

@@ -1,6 +1,6 @@
 import { defineQuestion } from "./questionBuilder";
 import { CAPITALS, capitalSource } from "./quizData";
-import type { Journey, Question } from "./questions";
+import type { Journey, Question } from "./questionContracts";
 
 const comparisons = [
   {

@@ -1,31 +1,17 @@
 import { compileQuestionScenes } from "./scenes";
-import type { QuestionScenes, PlayScene } from "./scenes";
-import { MECHANICS, mechanicFor, usesChoiceCards } from "./mechanics";
-import type { AnswerMode, Journey, KnowledgeRule, Question } from "./questions";
+import { mechanicFor, usesChoiceCards } from "./mechanics";
+import type {
+  Journey,
+  Question,
+  QuestionPresentation,
+  AuthoredQuestion,
+} from "./questionContracts";
+export type {
+  QuestionPresentation,
+  QuestionContract,
+  AuthoredQuestion,
+} from "./questionContracts";
 
-/** Shared styling/context only. A completed round is never an interaction template. */
-export type QuestionPresentation = Partial<
-  Omit<
-    Question,
-    | "id"
-    | "title"
-    | "prompt"
-    | "explanation"
-    | "qualification"
-    | "mode"
-    | "rule"
-    | "count"
-    | "selection"
-    | "commitment"
-    | "choices"
-    | "inputLabel"
-    | "orderLabels"
-    | "matchSlots"
-    | "orderInitial"
-    | "shuffleChoices"
-    | "guidance"
-  >
->;
 /** Exact keys also reject a completed question hidden behind an object spread. */
 export function definePresentation<T extends QuestionPresentation>(
   presentation: T & Record<Exclude<keyof T, keyof QuestionPresentation>, never>,
@@ -55,118 +41,6 @@ export function definePresentation<T extends QuestionPresentation>(
     );
   return presentation;
 }
-
-type Rule<M extends AnswerMode> = Extract<
-  KnowledgeRule,
-  { type: (typeof MECHANICS)[M]["rules"][number] }
->;
-type NoMapSelection = { selection: { type: "none" }; commitment: "submit" };
-type MapSelection = {
-  selection: Exclude<Question["selection"], { type: "none" }>;
-};
-type Single = { count: 1 };
-type Choices = { choices: NonNullable<Question["choices"]> };
-/** Discriminated authoring contracts; the engine's read model stays stable. */
-export type QuestionContract =
-  | ({ mode: "pin"; rule: Rule<"pin"> } & Single & NoMapSelection)
-  | ({
-      mode: "city-single";
-      rule: Rule<"city-single">;
-      selection: { type: "ids"; ids: string[] };
-      commitment: Question["commitment"];
-    } & Single)
-  | {
-      mode: "city-multiple";
-      rule: Rule<"city-multiple">;
-      selection: { type: "ids"; ids: string[] };
-      commitment: "submit";
-      count: number;
-    }
-  | ({
-      mode: "map-single";
-      rule: Rule<"map-single">;
-      commitment: Question["commitment"];
-    } & Single &
-      MapSelection)
-  | ({
-      mode: "map-multiple";
-      rule: Rule<"map-multiple">;
-      commitment: "submit";
-      count: number;
-    } & MapSelection)
-  | ({
-      mode: "choice-single";
-      rule: Rule<"choice-single">;
-    } & Single &
-      NoMapSelection &
-      Choices)
-  | ({
-      mode: "choice-multiple";
-      rule: Rule<"choice-multiple">;
-      count: number;
-    } & NoMapSelection &
-      Choices)
-  | ({
-      mode: "choice-order";
-      rule: Rule<"choice-order"> & { ordered: true };
-      count: number;
-    } & NoMapSelection &
-      Choices)
-  | ({
-      mode: "choice-match";
-      rule: Rule<"choice-match">;
-      matchSlots: NonNullable<Question["matchSlots"]>;
-      count: number;
-    } & NoMapSelection &
-      Choices)
-  | ({
-      mode: "text";
-      rule: Rule<"text">;
-      inputLabel: string;
-    } & Single &
-      NoMapSelection)
-  | ({
-      mode: "number";
-      rule: Rule<"number">;
-      inputLabel: string;
-    } & Single &
-      NoMapSelection)
-  | ({
-      mode: "typed-regions";
-      rule: Rule<"typed-regions">;
-      inputLabel: string;
-      count: number;
-    } & NoMapSelection)
-  | ({
-      mode: "ordered-countries";
-      rule: Rule<"ordered-countries">;
-      count: number;
-    } & NoMapSelection)
-  | ({
-      mode: "ordered-capitals";
-      rule: Rule<"ordered-capitals">;
-      count: number;
-    } & NoMapSelection)
-  | ({
-      mode: "land-path";
-      rule: Rule<"land-path">;
-      count: number;
-      commitment: "submit";
-    } & MapSelection);
-export type AuthoredQuestion = Omit<
-  Question,
-  "mode" | "rule" | "selection" | "commitment" | "count" | "focus"
-> &
-  QuestionContract &
-  (
-    | { focus: Question["focus"] }
-    | {
-        focus?: never;
-        scenes: QuestionScenes & {
-          play: PlayScene & { focus: Question["focus"] };
-        };
-      }
-  );
 
 export const isRegionAnswer = (question: Pick<Question, "mode">) =>
   mechanicFor(question).mapSelection === "regions";

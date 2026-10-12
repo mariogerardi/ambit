@@ -25,24 +25,41 @@ published catalog, scheduling index and runtime discovery.
 
 ## Responsibilities
 
-| Responsibility                                                   | Owner                                                    | Boundary                                                                                          |
-| ---------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Premise, five stops, copy, help, reveal, completion              | `src/game/*Journey.ts`                                   | Content records; no custom React or reducer per Journey.                                          |
-| Mode capabilities, allowed rules, submission and control grading | `mechanics.ts`                                           | Single registry; TypeScript rule compatibility and answer type names derive from it.              |
-| Authoring contracts and common validation                        | `questionBuilder.ts`                                     | `defineQuestion` compiles scenes and validates; `definePresentation` accepts presentation only.   |
-| Scene contracts and runtime compiler                             | `scenes.ts`                                              | Group authored state; compile once into existing runtime fields.                                  |
-| Local facts, solutions and knowledge predicates                  | `questions.ts`, `answerTargets.ts`, `reasoning.ts`       | Canonical data grades answers independently of presentation.                                      |
-| Pending responses, edits and transitions                         | `state.ts`                                               | Consume registered response capabilities; preserve shared save shape.                             |
-| Help and immutable assist locks                                  | `guidance.ts`                                            | `withAssistanceLocks` reapplies locks after clearing and stale draft restoration.                 |
-| Controls                                                         | `AnswerForm.tsx`, `OrderAnswer.tsx`                      | Route by registered control capability; pointer dragging has button/keyboard alternatives.        |
-| Effective map and feedback                                       | `presentation.ts`, `src/app/journeyWorld.ts`, `copy.ts`  | Resolve authored geography and canonical answers into semantic renderer props.                    |
-| Equal city references                                            | `authoredPlaces.ts`                                      | Preserve source identity/coordinates while suppressing capital-specific shape, size and priority. |
-| Local review                                                     | `journeyAudit.ts`, `scripts/check-journey.mjs`           | Review one Journey's contracts, cameras, visible objects, sources and local media.                |
-| Discovery, scheduling and retirement                             | `journeys.ts`, `journeyRegistry.ts`, `journeyIndex.json` | Keep definitions deferred; regenerate metadata only when its inputs change.                       |
+| Responsibility                                                   | Owner                                                       | Boundary                                                                                                     |
+| ---------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Premise, five stops, copy, help, reveal, completion              | `src/game/*Journey.ts`                                      | Content records; no custom React or reducer per Journey.                                                     |
+| Mode capabilities, allowed rules, submission and control grading | `mechanics.ts`                                              | Single registry; TypeScript rule compatibility and answer type names derive from it.                         |
+| Authored and runtime data contracts                              | `questionContracts.ts`                                      | Type-only question/rule/response/context shapes, presentation presets and discriminated authoring contracts. |
+| Authoring entry point and common validation                      | `questionBuilder.ts`                                        | `defineQuestion` compiles scenes and validates; `definePresentation` accepts presentation only.              |
+| Scene contracts and runtime compiler                             | `scenes.ts`                                                 | Group authored state; compile once into existing runtime fields.                                             |
+| Canonical preparation and answer resolution                      | `questionPreparation.ts`                                    | Validate local data/help, resolve candidates and solutions, prepare paths and own context caches.            |
+| Submission readiness and knowledge predicates                    | `questionEvaluation.ts`, `answerTargets.ts`, `reasoning.ts` | Consume canonical answers and registered control grading independently of presentation.                      |
+| Pending responses, edits and transitions                         | `state.ts`                                                  | Consume registered response capabilities; preserve shared save shape.                                        |
+| Help and immutable assist locks                                  | `guidance.ts`                                               | `withAssistanceLocks` reapplies locks after clearing and stale draft restoration.                            |
+| Controls                                                         | `AnswerForm.tsx`, `OrderAnswer.tsx`                         | Route by registered control capability; pointer dragging has button/keyboard alternatives.                   |
+| Effective map and feedback                                       | `presentation.ts`, `src/app/journeyWorld.ts`, `copy.ts`     | Resolve authored geography and canonical answers into semantic renderer props.                               |
+| Equal city references                                            | `authoredPlaces.ts`                                         | Preserve source identity/coordinates while suppressing capital-specific shape, size and priority.            |
+| Local review                                                     | `journeyAudit.ts`, `scripts/check-journey.mjs`              | Review one Journey's contracts, cameras, visible objects, sources and local media.                           |
+| Discovery, scheduling and retirement                             | `journeys.ts`, `journeyRegistry.ts`, `journeyIndex.json`    | Keep definitions deferred; regenerate metadata only when its inputs change.                                  |
 
 The globe remains shared with Explore and Study. Display emphasis cannot change
 grading. New controls reuse saved `Response` data when its semantics fit; do not
 encode a new task under an unrelated knowledge rule just to avoid a proper contract.
+
+`questions.ts` preserves existing type/function imports as a compatibility facade.
+Current Journeys, recipes, controls and runtime modules import their actual owner
+directly. Prompt/disclosure/feedback text belongs to `questionText.ts`; shared name
+and alias matching belongs to the lightweight `answerNames.ts`. Contracts have no
+runtime dependencies; preparation does not import evaluation. Evaluation uses the
+prepared context and preparation's answer/name resolvers, never camera positions,
+colors or display footprints. `questionBuilder.ts` also preserves its authoring
+type exports, so existing Journey definitions do not need an import migration.
+
+Structural checks (mode/rule agreement, cardinality, commitment and selection
+shape) run in the builder, including when preparation receives a raw record.
+Preparation adds data checks: target availability, canonical geometry, radius/tier
+bounds, valid routes, complete solutions and honest help. Keep these checks in
+their respective owners rather than repeating structural validation in both.
 
 ## Explicit scenes
 
@@ -175,9 +192,10 @@ historical truth, screen-space legibility or every form of answer leakage.
 3. For a new mechanic, add a typed mode contract and one `MECHANICS` entry. Register
    its allowed rules, control, response, eligibility capability, validation,
    submission and any control-specific grading. Add a UI control only if required.
-4. For a new knowledge rule, add its discriminated rule type, solution calculation
-   and predicate. Geometry/fact rules still live in `questions.ts` / domain helpers;
-   their extraction into rule-family modules is a possible later improvement.
+4. For a new knowledge rule, add its discriminated rule type in
+   `questionContracts.ts`, its answer calculation in `questionPreparation.ts`
+   and its predicate in `questionEvaluation.ts` / domain helpers. Rule-family
+   extraction is a possible later improvement; do not combine preparation and grading.
 5. Add a complete recipe and regression checks for incomplete answers, distractors,
    edits, assistance, restored drafts, feedback and non-WebGL input.
 6. Document the supported behavior and current limits in the catalog. Run focused

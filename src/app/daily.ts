@@ -1,7 +1,7 @@
 // Synchronous full-catalog API for authored-content checks and tooling.
 // The browser shell uses dailyProgress to avoid eager Journey imports.
 import { JOURNEYS } from "../game/journeys";
-import type { Journey } from "../game/questions";
+import type { Journey } from "../game/questionContracts";
 import * as daily from "./dailyProgress";
 export * from "./dailyProgress";
 export const dailyJourney = (

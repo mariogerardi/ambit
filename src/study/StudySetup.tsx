@@ -1,7 +1,7 @@
 import { StudyBack } from "./StudyBack";
 import { CAPITAL_DISTRACTORS } from "./distractors";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { normalizeAnswer, countryIdForName } from "../game/questions";
+import { normalizeAnswer, countryIdForName } from "../game/answerNames";
 import {
   COUNTRIES,
   TOPICS,

@@ -1,5 +1,5 @@
 import { ActionIcon } from "../app/ActionIcon";
-import type { Question } from "./questions";
+import type { Question } from "./questionContracts";
 import type { HelpStage } from "./guidance";
 
 /** Shared footer; help is authored per question and never changes submission rules. */

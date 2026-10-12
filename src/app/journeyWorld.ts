@@ -3,8 +3,8 @@ import { answerPlace } from "../game/answerTargets";
 import { withAssistanceLocks } from "../game/guidance";
 import type { RegionFeature, RouteFeature } from "../geography/types";
 import type { GameState } from "../game/state";
-import type { Journey, QuestionContext } from "../game/questions";
-import { solutionIds } from "../game/questions";
+import type { Journey, QuestionContext } from "../game/questionContracts";
+import { solutionIds } from "../game/questionPreparation";
 import {
   journeyVisitedStates,
   questionMapPresentation,

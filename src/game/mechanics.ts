@@ -4,7 +4,7 @@ import type {
   Question,
   QuestionContext,
   Response,
-} from "./questions";
+} from "./questionContracts";
 import { validPin } from "./answerTargets";
 import { orderedCards } from "./ordering";
 

@@ -1,7 +1,7 @@
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { cityReference } from "./authoredPlaces";
 import { ANSWER_PLACES } from "./answerTargets";
-import type { Journey, FactSource } from "./questions";
+import type { Journey, FactSource } from "./questionContracts";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
 import { capitalSource } from "./quizData";
 import mapData from "./data/mediterranean-map.v1.json";

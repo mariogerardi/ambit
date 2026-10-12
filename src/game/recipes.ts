@@ -3,7 +3,7 @@ import { ANSWER_PLACES } from "./answerTargets";
 import { capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
 import { cityReference } from "./authoredPlaces";
-import type { Question } from "./questions";
+import type { Question } from "./questionContracts";
 const reference = (id: string) => cityReference(ANSWER_PLACES.get(id)!);
 const base = definePresentation({
   label: "Recipe",

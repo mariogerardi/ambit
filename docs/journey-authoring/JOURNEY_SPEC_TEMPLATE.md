@@ -55,6 +55,9 @@ Journey being created or edited (title, ID, source file):
 
 - **Approved scope / material decisions:**
 - **Existing mechanic recipes and examples to consult:**
+- **Implementation owners:** contracts/builder for authored content; preparation
+  for canonical answer resolution; evaluation for grading. List engine changes only
+  when required; presentation and camera edits do not change answer acceptance.
 - **Affected Journey registration / metadata:**
 - **Save strategy:** edit current Journey; identify changes to answer contracts and
   required save-revision handling. Preserve completed receipts as agreed.

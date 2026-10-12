@@ -1,5 +1,5 @@
 import { defineQuestion, definePresentation } from "./questionBuilder";
-import type { FactSource, FlagDisplay, Journey } from "./questions";
+import type { FactSource, FlagDisplay, Journey } from "./questionContracts";
 import flagCatalog from "./data/flags.v1.json";
 import { mapSource } from "./countryFacts";
 import { CAPITALS, capitalSource } from "./quizData";

@@ -1,11 +1,7 @@
+import { capitalForName, countryIdForName } from "./answerNames";
 import type { VisualState } from "../geography/types";
-import type { Question, QuestionContext } from "./questions";
-import {
-  capitalForName,
-  countryIdForName,
-  matchingCapitals,
-  solutionIds,
-} from "./questions";
+import type { Question, QuestionContext } from "./questionContracts";
+import { matchingCapitals, solutionIds } from "./questionPreparation";
 import { answerPlace } from "./answerTargets";
 import {
   questionPlaces,

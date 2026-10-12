@@ -1,5 +1,5 @@
 import { defineQuestion, definePresentation } from "./questionBuilder";
-import type { FactSource, Journey } from "./questions";
+import type { FactSource, Journey } from "./questionContracts";
 import { CAPITALS, capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";

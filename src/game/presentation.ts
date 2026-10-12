@@ -1,14 +1,13 @@
+import { capitalForName, countryIdForName } from "./answerNames";
 import { answerPlace, pinInside } from "./answerTargets";
 import { REGIONAL_INDEX, exploreBoundaries } from "../geography/regions";
 import type { VisualState } from "../geography/types";
-import type { Journey, Question, QuestionContext } from "./questions";
+import type { Journey, Question, QuestionContext } from "./questionContracts";
 import {
   solutionIds,
-  capitalForName,
   matchingCapitals,
   selectableIds,
-  countryIdForName,
-} from "./questions";
+} from "./questionPreparation";
 import type { PlaceFeature, RegionFeature } from "../geography/types";
 import { geoContains } from "d3-geo";
 import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";

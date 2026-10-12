@@ -3,6 +3,8 @@
 Journey progress and Study settings, active sessions, and results use LocalStorage record registers in
 `src/app/recordSave.ts`, with domain codecs in `src/app/progressSaves.ts`. This
 replaces shared whole-save writes that could discard another tab's results.
+`src/app/usePlayerProgress.ts` coordinates these stores and their incoming events
+for the account-keyed workspace; `useProgressSync.ts` owns the cloud-client lifetime.
 
 Scope: Journey progress and Study saves. Themes and default views use their own
 small device-local preference stores. Guest saves belong to the current browser

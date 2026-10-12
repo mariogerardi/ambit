@@ -1,6 +1,6 @@
 import { cityReference } from "./authoredPlaces";
 import { defineQuestion, definePresentation } from "./questionBuilder";
-import type { Journey, FactSource } from "./questions";
+import type { Journey, FactSource } from "./questionContracts";
 import { ANSWER_PLACES } from "./answerTargets";
 import { capitalSource } from "./quizData";
 import type { PlaceFeature } from "../geography/types";

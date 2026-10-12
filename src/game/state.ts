@@ -1,3 +1,4 @@
+import { countryIdForName } from "./answerNames";
 import { mechanicFor, usesChoiceCards } from "./mechanics";
 import { orderedCards, swapOrderCard, isSlotAnswer } from "./ordering";
 import { pointAnswerNoun, validPin } from "./answerTargets";
@@ -8,16 +9,10 @@ import {
   withAssistanceLocks,
 } from "./guidance";
 import type { HelpUsage } from "./guidance";
-import {
-  canSelect,
-  canSubmit,
-  countryIdForName,
-  cityIdForName,
-  isCorrect,
-  responseCount,
-  solutionIds,
-} from "./questions";
-import type { Journey, QuestionContext, Response } from "./questions";
+import { canSelect, responseCount, solutionIds } from "./questionPreparation";
+import type { Journey, QuestionContext, Response } from "./questionContracts";
+import { canSubmit, isCorrect } from "./questionEvaluation";
+import { cityIdForName } from "./answerTargets";
 export interface Answer extends Response {
   roundId: string;
   /** Captured at submission so a later facelift cannot rename earned results. */

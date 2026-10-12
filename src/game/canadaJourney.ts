@@ -1,7 +1,7 @@
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { CANADIAN_PROVINCES } from "./canadianRegions";
 import { CAPITALS, LANGUAGES, capitalSource, languageSource } from "./quizData";
-import type { Journey } from "./questions";
+import type { Journey } from "./questionContracts";
 
 const base = definePresentation({
   label: "Languages",

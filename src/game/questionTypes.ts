@@ -1,5 +1,5 @@
 import { MECHANICS } from "./mechanics";
-import type { AnswerMode, Question } from "./questions";
+import type { AnswerMode, Question } from "./questionContracts";
 
 export const ANSWER_TYPES: Partial<Record<AnswerMode, string>> =
   Object.fromEntries(

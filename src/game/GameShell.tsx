@@ -4,8 +4,16 @@ import { ActionIcon } from "../app/ActionIcon";
 import { pinDistance, pinDistanceTier } from "./answerTargets";
 import { useLayoutEffect, useRef } from "react";
 import type { RegionFeature, Focus } from "../geography/types";
-import type { FlagDisplay, Journey, QuestionContext } from "./questions";
-import { explanation, questionPrompt, committedNameVisible } from "./questions";
+import type {
+  FlagDisplay,
+  Journey,
+  QuestionContext,
+} from "./questionContracts";
+import {
+  explanation,
+  questionPrompt,
+  committedNameVisible,
+} from "./questionText";
 import { journeyScore } from "./state";
 import { helpSummary, helpCountCopy } from "./guidance";
 import type { GameState, Action } from "./state";

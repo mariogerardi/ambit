@@ -14,30 +14,85 @@ provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
 
 ## Module map
 
-| Owner                                                                                                                          | Responsibility                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| [`src/App.tsx`](../src/App.tsx)                                                                                                | Navigation, shared data, continuous camera state, view orchestration, and sessions. |
-| [`src/app/modes.ts`](../src/app/modes.ts), [`ModePanels.tsx`](../src/app/ModePanels.tsx)                                       | Route-to-mode mapping and overlapping panel transitions.                            |
-| [`src/app/dailyProgress.ts`](../src/app/dailyProgress.ts)                                                                      | Device-local scheduling and date-pinned Journey progress.                           |
-| [`src/app/recordSave.ts`](../src/app/recordSave.ts), [`progressSaves.ts`](../src/app/progressSaves.ts)                         | Independent save registers and domain-specific merges.                              |
-| [`src/game/journeyRegistry.ts`](../src/game/journeyRegistry.ts)                                                                | Lightweight Journey metadata and lazy module loading.                               |
-| [`src/game/questions.ts`](../src/game/questions.ts), [`state.ts`](../src/game/state.ts)                                        | Question contract, prepared answers, scoring, and round transitions.                |
-| [`src/game/presentation.ts`](../src/game/presentation.ts)                                                                      | Clue, selection, feedback, and disclosure states.                                   |
-| [`src/game/reasoning.ts`](../src/game/reasoning.ts), [`spatial.ts`](../src/game/spatial.ts)                                    | Shared-edge adjacency, shortest paths, routes, and spatial predicates.              |
-| [`src/study/engine.ts`](../src/study/engine.ts)                                                                                | Study pools, decks, methods, review pairs, completion, and history models.          |
-| [`src/study/StudySetup.tsx`](../src/study/StudySetup.tsx), [`scopeFocus.ts`](../src/study/scopeFocus.ts)                       | Builder configuration and geographic scope framing.                                 |
-| [`src/app/ExplorePanel.tsx`](../src/app/ExplorePanel.tsx)                                                                      | Search, country/subdivision details, and display settings.                          |
-| [`src/app/AccountDashboard.tsx`](../src/app/AccountDashboard.tsx), [`src/services/community.ts`](../src/services/community.ts) | Profiles, compact progress dashboard and friends.                                   |
-| [`src/geography/types.ts`](../src/geography/types.ts), [`loadLayer.ts`](../src/geography/loadLayer.ts)                         | Canonical geometry contracts and cancellable, cached layer loading.                 |
-| [`src/globe/GlobeView.tsx`](../src/globe/GlobeView.tsx)                                                                        | Sole product renderer adapter: regions, places, routes, and overlays.               |
-| [`src/globe/camera.ts`](../src/globe/camera.ts)                                                                                | Interruptible camera travel, fitting, and looping flyovers.                         |
-| [`src/globe/regionSurfaces.ts`](../src/globe/regionSurfaces.ts), [`outlines.ts`](../src/globe/outlines.ts)                     | Cached regional surfaces and border draw order.                                     |
-| [`src/theme/themes.ts`](../src/theme/themes.ts), [`themes.css`](../src/theme/themes.css)                                       | Palette registry and semantic UI properties.                                        |
+| Owner                                                                                                                          | Responsibility                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| [`src/App.tsx`](../src/App.tsx)                                                                                                | Navigation, shared data, presentation composition, player actions and sessions.         |
+| [`src/app/modes.ts`](../src/app/modes.ts), [`ModePanels.tsx`](../src/app/ModePanels.tsx)                                       | Route-to-mode mapping and overlapping panel transitions.                                |
+| [`src/app/dailyProgress.ts`](../src/app/dailyProgress.ts)                                                                      | Device-local scheduling and date-pinned Journey progress.                               |
+| [`src/app/recordSave.ts`](../src/app/recordSave.ts), [`progressSaves.ts`](../src/app/progressSaves.ts)                         | Independent save registers and domain-specific merges.                                  |
+| [`src/game/journeyRegistry.ts`](../src/game/journeyRegistry.ts)                                                                | Lightweight Journey metadata and lazy module loading.                                   |
+| [`src/game/questionContracts.ts`](../src/game/questionContracts.ts), [`questionBuilder.ts`](../src/game/questionBuilder.ts)    | Type-only schemas, authoring entry point and structural validation.                     |
+| [`src/game/questionPreparation.ts`](../src/game/questionPreparation.ts)                                                        | Canonical data validation, eligibility, answer resolution, topology and context caches. |
+| [`src/game/questionEvaluation.ts`](../src/game/questionEvaluation.ts), [`state.ts`](../src/game/state.ts)                      | Submission readiness, grading and round transitions.                                    |
+| [`src/game/presentation.ts`](../src/game/presentation.ts)                                                                      | Clue, selection, feedback, and disclosure states.                                       |
+| [`src/game/reasoning.ts`](../src/game/reasoning.ts), [`spatial.ts`](../src/game/spatial.ts)                                    | Shared-edge adjacency, shortest paths, routes, and spatial predicates.                  |
+| [`src/study/engine.ts`](../src/study/engine.ts)                                                                                | Study pools, decks, methods, review pairs, completion, and history models.              |
+| [`src/study/useStudyPresentation.ts`](../src/study/useStudyPresentation.ts)                                                    | Study globe colors, scoped labels and borders, capital disclosure and clue focus.       |
+| [`src/study/StudySetup.tsx`](../src/study/StudySetup.tsx), [`scopeFocus.ts`](../src/study/scopeFocus.ts)                       | Builder configuration and geographic scope framing.                                     |
+| [`src/app/ExplorePanel.tsx`](../src/app/ExplorePanel.tsx)                                                                      | Search, country/subdivision details, and display settings.                              |
+| [`src/app/AccountDashboard.tsx`](../src/app/AccountDashboard.tsx), [`src/services/community.ts`](../src/services/community.ts) | Profiles, compact progress dashboard and friends.                                       |
+| [`src/geography/types.ts`](../src/geography/types.ts), [`loadLayer.ts`](../src/geography/loadLayer.ts)                         | Canonical geometry contracts and cancellable, cached layer loading.                     |
+| [`src/globe/GlobeView.tsx`](../src/globe/GlobeView.tsx)                                                                        | Sole product renderer adapter: regions, places, routes, and overlays.                   |
+| [`src/globe/camera.ts`](../src/globe/camera.ts)                                                                                | Interruptible camera travel, fitting, and looping flyovers.                             |
+| [`src/globe/regionSurfaces.ts`](../src/globe/regionSurfaces.ts), [`outlines.ts`](../src/globe/outlines.ts)                     | Cached regional surfaces and border draw order.                                         |
+| [`src/theme/themes.ts`](../src/theme/themes.ts), [`themes.css`](../src/theme/themes.css)                                       | Palette registry and semantic UI properties.                                            |
 
 `src/app/daily.ts` and `src/game/journeys.ts` provide synchronous full-catalog APIs
 for tooling/tests. Runtime scheduling uses the small generated
 [`journeyIndex.json`](../src/game/journeyIndex.json), keeping clue geometry deferred.
 Admin’s “Preview five questions” loads only the selected Journey through its practice route.
+
+`src/game/questions.ts` remains a compatibility facade for tools and existing clients.
+Current source imports contracts, preparation, evaluation or text helpers directly.
+Contracts are type-only. Preparation can validate structure through the builder,
+but does not import the evaluator; evaluation consumes the prepared context and
+answer resolvers. Shared name matching in `answerNames.ts` serves Journey, Study
+and Explore without importing preparation/grading; `questionText.ts` owns prompt,
+disclosure and feedback text. Registered control grading stays in `mechanics.ts`.
+
+### App shell boundaries
+
+`App.tsx` connects navigation, the persistent globe, presentation and player actions.
+The following modules own their own lifetimes and can be read independently:
+
+- [`useJourneyContent.ts`](../src/app/useJourneyContent.ts): deferred Journey/runtime
+  loading, local-pack resolution, idle Home preparation, canonical context caching
+  and render-only region warming. The shell supplies the active/offered Journey IDs.
+- [`useWorldGeography.ts`](../src/app/useWorldGeography.ts): parallel world/manifest
+  loading, deferred regional helpers, subdivision chains and versioned physical
+  layers. It owns cancellation, errors and caches; the shell owns selection and cameras.
+- [`usePlayerProgress.ts`](../src/app/usePlayerProgress.ts): account-scoped save
+  instances, catalog-ready hydration, durable writes, incoming register merges,
+  sync status, save retry and current-day reset. It delegates cloud transport to
+  `useProgressSync`; the shell retains Admin authorization and gameplay decisions.
+- [`useCameraOrchestration.ts`](../src/app/useCameraOrchestration.ts): mode/session
+  entry, question and feedback framing, Study scope/preview/review cameras,
+  recentering, rotation controls, reduced motion and completion flyovers. It receives
+  the mounted globe/scene refs and current presentation destinations. The globe's
+  `camera.ts` still owns animation, cancellation and live viewport fitting.
+- [`HomePanel.tsx`](../src/app/HomePanel.tsx): today's Journey title, progress,
+  Play/Resume/View result action and navigation; readiness is supplied by the shell.
+- [`useStudyPresentation.ts`](../src/study/useStudyPresentation.ts): declarative
+  Study globe state for the builder preview, visible session and summary review.
+  It returns colors, places, border/name scope, disclosure flags and visible clue
+  focus points. The shell supplies only the session being shown and composes the
+  result with Journey/Explore/global layers. Saved sessions and previews cannot
+  override other modes. Unchanged place and scope arrays survive answer typing.
+
+`PlayerWorkspace` still remounts the entire workspace when the account subject
+changes. Do not reset a save store merely because the catalog or route changed.
+Journey contexts are invalidated when the canonical world array is replaced;
+navigation reuses prepared contexts. A cancelled load or idle callback must not
+publish late data into the active view. The shell owns the shared renderer and
+supplies route/session identity to camera orchestration; navigation does not replace Earth.
+Study presentation does not access the globe, measure the viewport or start a
+camera flight. Scope fitting remains in `scopeFocus.ts`; camera orchestration
+decides when to travel, retains the live orbit and keeps hidden map answers out
+of the camera. Travel is triggered by entry, question identity/phase or an explicit
+player action, not arbitrary presentation-object changes. Hint/display edits and
+answer typing must not restart a flight. Home-country entry intent is captured
+before effects consume its queued focus, so Explore retains the tapped selection.
+Completion effects cancel their flyover on exit or reduced-motion changes.
 
 ## Loading and transitions
 

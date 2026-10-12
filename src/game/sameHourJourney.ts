@@ -2,7 +2,7 @@ import { ANSWER_PLACES } from "./answerTargets";
 import { cityReference } from "./authoredPlaces";
 import { definePresentation, defineQuestion } from "./questionBuilder";
 import { capitalSource } from "./quizData";
-import type { FactSource, Journey } from "./questions";
+import type { FactSource, Journey } from "./questionContracts";
 import type { Focus, PlaceFeature, RegionFeature } from "../geography/types";
 import mapData from "./data/same-hour-map.v1.json";
 import samoaTimeZoneLine from "./data/samoa-time-zone-line.v1.json";

@@ -1,5 +1,5 @@
 import { defineQuestion } from "./questionBuilder";
-import type { FactSource, Journey, Question } from "./questions";
+import type { FactSource, Journey, Question } from "./questionContracts";
 import type { RegionFeature } from "../geography/types";
 import islands from "./data/island-clues.v1.json";
 

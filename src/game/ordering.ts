@@ -1,5 +1,5 @@
 import { mechanicFor } from "./mechanics";
-import type { Question, Response } from "./questions";
+import type { Question, Response } from "./questionContracts";
 
 /** Ordering and matching share card movement; their grading contracts stay separate. */
 export const isSlotAnswer = (question: Pick<Question, "mode">) =>

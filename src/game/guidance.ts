@@ -1,4 +1,4 @@
-import type { Question } from "./questions";
+import type { Question } from "./questionContracts";
 import type { GameState } from "./state";
 import { orderedCards, swapOrderCard } from "./ordering";
 

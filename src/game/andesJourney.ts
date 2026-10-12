@@ -2,7 +2,7 @@ import { withReliefClearance } from "../geography/relief";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { CAPITALS, capitalSource } from "./quizData";
 import { ANSWER_PLACES } from "./answerTargets";
-import type { FactSource, Journey } from "./questions";
+import type { FactSource, Journey } from "./questionContracts";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
 import relief from "./data/andes-relief.v1.json";
 import geography from "./data/andes-context.v1.json";

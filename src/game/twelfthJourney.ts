@@ -1,5 +1,5 @@
 import { defineQuestion, definePresentation } from "./questionBuilder";
-import type { FactSource, Journey } from "./questions";
+import type { FactSource, Journey } from "./questionContracts";
 import type { PlaceFeature, RegionFeature } from "../geography/types";
 import geography from "./data/exceptions-geography.v1.json";
 import { ANSWER_PLACES } from "./answerTargets";

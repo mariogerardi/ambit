@@ -1,6 +1,6 @@
 import snapshot from "./data/capitals.v1.json";
 import type { PlaceFeature } from "../geography/types";
-import type { FactSource } from "./questions";
+import type { FactSource } from "./questionContracts";
 export interface Capital extends PlaceFeature {
   countryId: string;
   continent: string;

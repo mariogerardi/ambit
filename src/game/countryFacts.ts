@@ -1,4 +1,4 @@
-import type { CountryFact, FactSource } from "./questions";
+import type { CountryFact, FactSource } from "./questionContracts";
 export const mapSource: FactSource = {
   name: "Natural Earth · map data",
   url: "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/",

@@ -2,7 +2,7 @@ import { defineQuestion, definePresentation } from "./questionBuilder";
 import { geoBounds } from "d3-geo";
 import { US_STATES } from "../geography/usStates";
 import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
-import type { FactSource, Journey, Question } from "./questions";
+import type { FactSource, Journey, Question } from "./questionContracts";
 
 export { US_STATES } from "../geography/usStates";
 import {

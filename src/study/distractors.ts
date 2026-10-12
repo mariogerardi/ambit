@@ -1,5 +1,5 @@
 import { CAPITALS } from "../game/quizData";
-import { normalizeAnswer } from "../game/questions";
+import { normalizeAnswer } from "../game/answerNames";
 import { MAJOR_CITIES } from "../geography/places";
 import type { StudySettings } from "./engine";
 
