@@ -1,0 +1,230 @@
+import type {
+  CommunityClient,
+  Friendship,
+  JourneyScore,
+  PlayerProfile,
+} from "../services/community";
+import { useEffect, useRef } from "react";
+import type { ComparisonTarget } from "./accountNavigation";
+import {
+  ComparisonStatus,
+  comparisonScore,
+  ScoreSummary,
+  SyncComparisonNote,
+} from "./FriendComparison";
+import { useFriendActivity } from "./useFriendActivity";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { JOURNEY_INDEX } from "../game/journeyRegistry";
+
+export function FriendJourneyComparison({
+  api,
+  target,
+  friends,
+  localScore,
+  player,
+  sync,
+  disabled,
+  onProfile,
+  onInvite,
+  canInvite = true,
+  focus = false,
+  focusReady = true,
+  onFocused,
+}: {
+  focus?: boolean;
+  focusReady?: boolean;
+  onFocused?(): void;
+  api: CommunityClient;
+  target: ComparisonTarget;
+  friends: Friendship[];
+  localScore?: JourneyScore;
+  player: PlayerProfile | null;
+  sync?: { status: string; retry(): void };
+  disabled: boolean;
+  onProfile(id: string): void;
+  onInvite(): void;
+  canInvite?: boolean;
+}) {
+  const activity = useFriendActivity(
+    api,
+    target.date,
+    !disabled,
+    sync?.status,
+    friends,
+  );
+  const page = activity.page;
+  const section = useRef<HTMLElement>(null);
+  const focusedTarget = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!focus) {
+      focusedTarget.current = undefined;
+      return;
+    }
+    if (disabled || !focusReady) return;
+    const key = `${target.date}/${target.journeyId}/${target.version}`;
+    if (focusedTarget.current === key) return;
+    // Wait for the page layout and its parent scroll reset to settle first.
+    const frame = requestAnimationFrame(() => {
+      const element = section.current;
+      if (!element) return;
+      focusedTarget.current = key;
+      if (element.closest(".page-layout")) {
+        // Account uses the document scrollbar. Nested info panels can otherwise
+        // absorb scrollIntoView without moving the visible page.
+        window.scrollTo({
+          top: Math.max(
+            0,
+            window.scrollY + element.getBoundingClientRect().top - 100,
+          ),
+          behavior: "auto",
+        });
+      } else element.scrollIntoView?.({ block: "start", behavior: "auto" });
+      element.focus({ preventScroll: true });
+      onFocused?.();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [
+    focus,
+    focusReady,
+    onFocused,
+    disabled,
+    target.date,
+    target.journeyId,
+    target.version,
+  ]);
+  const entries = friends
+    .filter((friend) => friend.status === "accepted")
+    .map((friend) => {
+      const value = page?.friends.find(
+        (activity) => activity.player.id === friend.id,
+      );
+      return {
+        activity: value,
+        player: value?.player ??
+          friend.player ?? {
+            id: friend.id,
+            displayName: "Player",
+            handle: "unavailable",
+            avatar: "globe" as const,
+            bio: "",
+            favoriteRegion: "",
+          },
+      };
+    })
+    .sort(
+      (a, b) =>
+        Number(b.activity?.today.status === "completed") -
+          Number(a.activity?.today.status === "completed") ||
+        a.player.displayName.localeCompare(b.player.displayName) ||
+        a.player.handle.localeCompare(b.player.handle),
+    );
+  const mine = page && comparisonScore(page.you, target);
+  return (
+    <section
+      id="journey-comparison"
+      ref={section}
+      tabIndex={-1}
+      className="friend-journey-comparison"
+      aria-label="Journey comparison"
+    >
+      <header>
+        <div>
+          <h3>
+            Today’s Journey —{" "}
+            <em>
+              {JOURNEY_INDEX.find((journey) => journey.id === target.journeyId)
+                ?.title ?? "Explore the world"}
+            </em>
+          </h3>
+          <p className="muted">
+            Scores only unlock after you both finish the same Journey.
+          </p>
+        </div>
+      </header>
+      <SyncComparisonNote status={sync?.status} onRetry={sync?.retry} />
+      <ul className="friend-comparison-list">
+        <li className="comparison-you">
+          <div className="friend-comparison-row">
+            <span className="friend-comparison-identity">
+              <ProfileAvatar
+                avatar={player?.avatar ?? "globe"}
+                label="Your avatar"
+              />
+              <span className="friend-comparison-name">
+                <strong>{player?.displayName ?? "You"}</strong>
+                <small className="comparison-you-label">You</small>
+              </span>
+            </span>
+            <span className="friend-comparison-result">
+              {mine || localScore ? (
+                <ScoreSummary score={(mine ?? localScore)!} />
+              ) : page ? (
+                <ComparisonStatus activity={page.you} target={target} />
+              ) : (
+                "Opening your result…"
+              )}
+            </span>
+          </div>
+          {!mine && localScore && (
+            <small className="comparison-sync-pending">
+              Waiting for synced comparison
+            </small>
+          )}
+        </li>
+        {entries.map((friend) => (
+          <li key={friend.player.id}>
+            <button
+              className="friend-comparison-row"
+              onClick={() => onProfile(friend.player.id)}
+            >
+              <span className="friend-comparison-identity">
+                <ProfileAvatar
+                  avatar={friend.player.avatar}
+                  label={`${friend.player.displayName} avatar`}
+                />
+                <strong>{friend.player.displayName}</strong>
+              </span>
+              <span className="friend-comparison-result">
+                {friend.activity ? (
+                  <ComparisonStatus
+                    activity={friend.activity}
+                    target={target}
+                  />
+                ) : (
+                  <span>
+                    {activity.failure
+                      ? "Activity unavailable"
+                      : "Loading activity…"}
+                  </span>
+                )}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      {activity.loading && !page && (
+        <p role="status">Opening friend activity…</p>
+      )}
+      {activity.failure && (
+        <p role="alert">
+          {activity.failure}{" "}
+          <button className="quiet-button" onClick={activity.refresh}>
+            Retry comparisons
+          </button>
+        </p>
+      )}
+      {page && !friends.some((friend) => friend.status === "accepted") && (
+        <p>
+          Invite someone to play alongside you.{" "}
+          <button
+            className="quiet-button"
+            disabled={!canInvite || disabled}
+            onClick={onInvite}
+          >
+            Invite a friend →
+          </button>
+        </p>
+      )}
+    </section>
+  );
+}

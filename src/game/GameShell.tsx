@@ -3,6 +3,7 @@ import { QuestionHelp } from "../app/QuestionHelp";
 import { ActionIcon } from "../app/ActionIcon";
 import { pinDistance, pinDistanceTier } from "./answerTargets";
 import { useLayoutEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import type { RegionFeature, Focus } from "../geography/types";
 import type {
   FlagDisplay,
@@ -76,7 +77,9 @@ export function GameShell({
   onReport,
   onReplay,
   canReplay = false,
+  social,
 }: {
+  social?: ReactNode;
   onReport?(questionId: string): void;
   onReplay?(): void;
   canReplay?: boolean;
@@ -105,6 +108,21 @@ export function GameShell({
   }, [round.id, game.phase]);
   const inGame = game.phase === "playing" || game.phase === "feedback";
   const ended = game.phase === "finished" || game.phase === "failed";
+  const navigation = (
+    <div className="finish-actions result-actions completion-navigation">
+      <button
+        className={social ? "study-repeat-button" : "primary-button"}
+        onClick={onHome}
+      >
+        <ActionIcon name="home" />
+        <span>Home</span>
+      </button>
+      <button className="study-repeat-button" onClick={onStudy}>
+        <ActionIcon name="study" />
+        <span>Study</span>
+      </button>
+    </div>
+  );
   const helpCounts = helpCountCopy(helpSummary(game));
   const feedback = game.answers.at(-1),
     correct = feedback?.correct;
@@ -451,16 +469,7 @@ export function GameShell({
               {journey.completion.caption}
             </p>
           )}
-          <div className="finish-actions result-actions">
-            <button className="primary-button" onClick={onHome}>
-              <ActionIcon name="home" />
-              <span>Home</span>
-            </button>
-            <button className="study-repeat-button" onClick={onStudy}>
-              <ActionIcon name="study" />
-              <span>Study</span>
-            </button>
-          </div>
+          {social ?? navigation}
           {canReplay && (
             <button
               className="quiet-button tertiary-action journey-replay"

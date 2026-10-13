@@ -1994,7 +1994,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   });
   it("preserves history but expires the playable attempt at midnight and on reload", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
-    vi.setSystemTime(new Date(2026, 9, 5, 23, 59, 59));
+    vi.setSystemTime(new Date("2026-10-06T03:59:59Z"));
     authProbe.admin = false;
     await mount();
     await click("Play");
@@ -2690,4 +2690,23 @@ it("shows a static globe and written controls without mounting WebGL when unsupp
   await click("Study");
   expect(probe.mounts).toBe(0);
   expect(host.textContent).toContain("Study");
+});
+
+it("routes comparison links on entry and updates query intent on browser history changes", async () => {
+  const comparison =
+    "/account?tab=friends&view=compare&date=2026-10-13&journey=beyond-the-maple-leaf-v1&version=1";
+  history.replaceState(null, "", comparison);
+  await mount();
+  expect(host.textContent).toContain("Compare your Journey with friends.");
+  await act(async () => {
+    history.replaceState(null, "", "/account?friend=bob");
+    dispatchEvent(new PopStateEvent("popstate"));
+  });
+  expect(host.textContent).toContain("Connect with @bob");
+  await act(async () => {
+    history.replaceState(null, "", comparison);
+    dispatchEvent(new PopStateEvent("popstate"));
+  });
+  expect(host.textContent).toContain("Compare your Journey with friends.");
+  expect(probe.mounts).toBe(1);
 });

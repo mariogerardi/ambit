@@ -77,6 +77,36 @@ links. Clicking a friend opens their profile, streak, completed Journey count,
 Study completion/accuracy stats and recent shared results. Study stats are
 informational; sessions with different settings are not ranked.
 
+Daily Journey completion offers **Share result** and **Compare with friends**.
+Friends shows a wider search column beside friend cards, above Journey comparisons. Comparisons show you first, then all accepted
+friends with completed players first; ties are alphabetical. The comparison is
+for today's New York Journey; older comparison links open today's section.
+Unlocked scores show hint/assist icons with counts and accessible summaries,
+without rankings or point penalties. Different Journey editions
+are excluded from the selected comparison. Comparison links preserve the attempt's
+Journey context through sign-in and scroll to the comparison section once after the
+directory loads. Switching account tabs does not replay that arrival scroll. Friend activity updates automatically; regular section refresh controls
+are omitted. Progress must sync before
+the server unlocks friend scores; local completion never overrides that rule.
+
+**Invite a friend** uses native sharing or copies an invitation link. Signed-out
+recipients see the handle and sign-in/signup actions. The invitation survives
+profile creation and automatically opens the player's card with the appropriate
+request action. Adding or accepting a friend always requires an explicit click.
+
+Result sharing works for guests and signed-in players, including ended-early daily
+attempts. A locally generated 1200 × 940 PNG contains the title, date,
+score, five outcome marks, aggregate help use and a link to today's Journey.
+A single sharing action sends the image with a short invitation caption; the
+caption avoids repeating the result and keeps its invitation and link on one line.
+Unsupported devices save the image and copy the caption together.
+The PNG uses decorative Ambit artwork rather than revealed-answer geography.
+Shared play links always use `https://playambit.com/daily`, including local and
+staging builds. Daily completion keeps Share and Compare in one action group.
+Answers, round labels, coordinates and player/friend identities are omitted.
+Image generation can be retried;
+there are no public result pages or new public profile endpoints.
+
 `GET /account/handles/{handle}` checks case-insensitive availability and suggests
 up to three alternatives. An availability check does not reserve a handle:
 `PATCH /account/profile` atomically claims it, releases the old claim on rename,
@@ -133,6 +163,30 @@ a submitted owner ID. Conditional DynamoDB transactions protect reciprocal
 inboxes and concurrent profile/challenge updates.
 
 ## Local API isolation
+
+Staging demo friends and synthetic daily runs can be refreshed without deployment:
+
+```sh
+python3 scripts/seed-staging-friends.py --profile personal --handle mars_staging
+```
+
+The utility is restricted to `ambit-staging-services`. It creates five labeled demo
+profiles, reciprocal friendships, and ordinary private save registers for three
+completed runs, one in-progress run, and one not-started player. It follows the
+target player's retained edition and uses the current New York date. `--dry-run` previews without writing;
+existing blocks and real player progress remain intact. Demo profiles cannot sign in.
+
+The shared generator is `backend/staging_demo.py`. The staging template includes
+`ambit-staging-demo-activity`, invoked daily at **00:01 America/New_York** by an
+EventBridge Scheduler cron (including daylight-saving changes). Deploying the
+staging backend activates this schedule; adding the code alone does not create
+AWS resources. The Lambda only refreshes marked demo saves and their activity
+cache, never the real player's saves or friendships. Removed/blocked demos stay
+removed/blocked. A retry overwrites the same daily registers. It uses the bundled
+Journey rotation or published date assignment, preserving the target's started
+edition when one exists. Production has no demo function or schedule, and the
+Lambda's IAM write permissions are limited to demo partition keys. The manual
+script remains available for initial provisioning or an immediate refresh.
 
 Development uses `http://127.0.0.1:3001` until a staging API is configured. The
 staging stack has its own Cognito user pool, API, tables, login domain and logs;
@@ -342,7 +396,7 @@ supports 1,000 assigned dates.
 The player refreshes on startup, focus, reconnect, and every minute while visible.
 A first-load scheduling failure blocks starting a daily instead of guessing the
 edition. Once started, an attempt retains its edition even if Admin changes that
-date. Calendar days still use each player’s local midnight. Schedule publication
+date. Calendar days use midnight in `America/New_York`, including daylight-saving changes. Schedule publication
 does not reset progress or enable past-day play.
 
 The backend deployment archive includes `journey-index.json`; deploy the backend

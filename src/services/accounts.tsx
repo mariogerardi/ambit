@@ -5,6 +5,7 @@ import type { User } from "oidc-client-ts";
 import { serviceConfig } from "./config";
 import { reportFailure } from "./monitoring";
 import { clearProfileCache } from "./playerProfileCache";
+import { accountIntent, comparisonLink } from "../app/accountNavigation";
 
 export function isAdmin(user: User | null) {
   const groups = user?.profile["cognito:groups"];
@@ -18,6 +19,18 @@ export function isAdmin(user: User | null) {
   );
 }
 export function safeReturnPath(value: unknown) {
+  if (typeof value === "string" && value.startsWith("/account?")) {
+    const parsed = new URL(value, "https://ambit.invalid");
+    const allowed = ["tab", "view", "date", "journey", "version"];
+    const intent = accountIntent(value);
+    if (
+      intent.comparison &&
+      (parsed.hash === "" || parsed.hash === "#journey-comparison") &&
+      [...parsed.searchParams.keys()].every((key) => allowed.includes(key)) &&
+      [...parsed.searchParams.keys()].length === allowed.length
+    )
+      return comparisonLink(intent.comparison);
+  }
   if (
     typeof value === "string" &&
     /^\/account\?friend=[a-zA-Z][a-zA-Z0-9_]{2,23}$/.test(value)

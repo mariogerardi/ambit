@@ -4,6 +4,8 @@ import { useWorldGeography } from "./app/useWorldGeography";
 import { useCameraOrchestration } from "./app/useCameraOrchestration";
 import { usePlayerProgress } from "./app/usePlayerProgress";
 import { HomePanel } from "./app/HomePanel";
+import { JourneySocial } from "./app/JourneySocial";
+import { accountIntent } from "./app/accountNavigation";
 import {
   Suspense,
   lazy,
@@ -61,6 +63,7 @@ import { ExplorePanel } from "./app/ExplorePanel";
 import type { ExploreSettings } from "./app/ExplorePanel";
 import {
   dailyJourney,
+  DAILY_SCHEDULE,
   localDateKey,
   millisecondsToMidnight,
   openDaily,
@@ -132,7 +135,9 @@ export function App() {
     dailyLoaded &&
     schedule.ready &&
     (cloudSave.hydrated || Object.keys(daily.attempts).length > 0);
-  const [path, setPath] = useState(location.pathname);
+  const [path, setPath] = useState(location.pathname + location.search);
+  const pathname = path.split(/[?#]/)[0];
+  const accountNavigation = useMemo(() => accountIntent(path), [path]);
   const requestedMode = modeForPath(path);
   const restricted = requestedMode === "practice" && !account.admin;
   const mode = restricted ? "home" : requestedMode;
@@ -238,7 +243,7 @@ export function App() {
           allJourneys,
           schedule.schedule?.assignments ?? {},
         ).id)
-      : JOURNEY_INDEX.find((j) => j.path === path)?.id;
+      : JOURNEY_INDEX.find((j) => j.path === pathname)?.id;
   const {
     journey,
     loaded,
@@ -481,7 +486,7 @@ export function App() {
     setPath(url);
   }
   useEffect(() => {
-    const change = () => setPath(location.pathname);
+    const change = () => setPath(location.pathname + location.search);
     addEventListener("popstate", change);
     return () => removeEventListener("popstate", change);
   }, []);
@@ -668,6 +673,25 @@ export function App() {
       />
     ) : mode === "account" ? (
       <AccountPanel
+        defaultComparison={
+          schedule.ready
+            ? {
+                date: today,
+                journeyId:
+                  daily.attempts[today]?.journeyId ??
+                  dailyJourney(
+                    today,
+                    daily,
+                    allJourneys,
+                    schedule.schedule?.assignments ?? {},
+                  ).id,
+                version:
+                  daily.attempts[today]?.scheduleVersion ??
+                  DAILY_SCHEDULE.version,
+              }
+            : null
+        }
+        intent={accountNavigation}
         daily={daily}
         study={study}
         sync={
@@ -825,6 +849,18 @@ export function App() {
         journey={journey}
         context={context}
         game={game}
+        social={
+          mode === "daily" && activeAttempt ? (
+            <JourneySocial
+              journey={journey}
+              attempt={activeAttempt}
+              sync={
+                canSave ? cloudSave : { status: "error", retry: retrySaving }
+              }
+              onNavigate={navigate}
+            />
+          ) : undefined
+        }
         dispatch={dispatch}
         hover={hover}
         webgl={webgl}

@@ -13,8 +13,19 @@ export const DAILY_SCHEDULE = {
   begins: "2026-10-05",
   overrides: [] as { date: string; journeyId: string }[],
 };
+export const DAILY_TIME_ZONE = "America/New_York";
+const dailyDateFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: DAILY_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+/** Retained name for save callers; daily dates are shared New York dates. */
 export function localDateKey(date = new Date()): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const parts = dailyDateFormatter.formatToParts(date);
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)!.value;
+  return `${value("year")}-${value("month")}-${value("day")}`;
 }
 export function dateOrdinal(key: string): number {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) throw Error("Invalid Journey date");
@@ -64,10 +75,17 @@ export function dailyJourney(
   return bundled[((offset % bundled.length) + bundled.length) % bundled.length];
 }
 export function millisecondsToMidnight(now = new Date()): number {
-  return (
-    new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() -
-    now.getTime()
-  );
+  const today = localDateKey(now),
+    start = now.getTime();
+  let low = start,
+    high = start + 26 * 60 * 60 * 1000;
+  // Locate the calendar boundary rather than assuming a 24-hour DST day.
+  while (high - low > 1) {
+    const middle = Math.floor((low + high) / 2);
+    if (localDateKey(new Date(middle)) === today) low = middle;
+    else high = middle;
+  }
+  return high - start;
 }
 export interface DailyAttempt {
   contentRevision?: number;

@@ -47,6 +47,8 @@ let onAction: ReturnType<
 >;
 let onRequest: ReturnType<typeof vi.fn<(handle: string) => Promise<boolean>>>;
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-10T16:00:00Z"));
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   history.replaceState(null, "", "/account");
   host = document.createElement("div");
@@ -83,8 +85,9 @@ afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
-async function mount() {
+async function mount(props: Partial<Parameters<typeof FriendsPanel>[0]> = {}) {
   await act(async () =>
     root.render(
       <FriendsPanel
@@ -95,6 +98,7 @@ async function mount() {
         error=""
         onAction={onAction}
         onRequest={onRequest}
+        {...props}
       />,
     ),
   );
@@ -110,18 +114,14 @@ async function click(label: string) {
 }
 it("shows completion without leaking a locked daily score and opens a friend’s stats", async () => {
   await mount();
-  expect(host.querySelector(".friend-card")?.textContent).toContain(
-    "Completed",
-  );
+  expect(host.querySelector(".friend-card")?.textContent).toContain("@bob");
   expect(host.querySelector(".friend-standings")).toBeNull();
   expect(host.querySelector(".friend-today")).toBeNull();
-  expect(host.querySelector(".friends-search-column input")).not.toBeNull();
+  expect(host.querySelector(".friend-add input")).not.toBeNull();
   expect(
     host.querySelector(".friends-grid-column .friend-card"),
   ).not.toBeNull();
-  expect(
-    host.querySelector('[aria-label="Refresh friends"] svg'),
-  ).not.toBeNull();
+  expect(host.querySelector('[aria-label="Refresh friends"]')).toBeNull();
   expect(host.textContent).not.toContain("Find your people.");
   expect(host.textContent).not.toContain("Friendships start when");
   await click("View Bob’s profile");
@@ -237,7 +237,7 @@ it("loads another page without duplicating friend cards and keeps request errors
   await click("Load more activity →");
   expect(host.querySelectorAll(".friend-card")).toHaveLength(2);
   request.mockRejectedValue(new Error("Offline"));
-  await click("Refresh friends");
+  await act(async () => dispatchEvent(new Event("focus")));
   expect(host.querySelector('[role="alert"]')?.textContent).toContain(
     "Offline",
   );
@@ -257,4 +257,344 @@ it("shows all accepted friends before their paged activity arrives", async () =>
   expect(
     host.querySelector('[aria-label="View Cathy’s profile"]')?.textContent,
   ).not.toContain("Not started");
+});
+
+it("compares you first and friends alphabetically, excluding other Journey editions", async () => {
+  const target = { date: score.date, journeyId: score.journeyId, version: 1 };
+  page.you.journeys = [{ ...score, correct: 3 }];
+  page.friends[0].journeys = [{ ...score, correct: 4 }];
+  page.friends[0].today = {
+    date: score.date,
+    journeyId: score.journeyId,
+    status: "completed",
+    scoreLocked: false,
+    score: { ...score, correct: 4 },
+  };
+  const amy = { ...bob, id: "c", displayName: "Amy", handle: "amy" };
+  friends.push({ id: "c", status: "accepted", player: amy });
+  page.friends.push({
+    ...page.friends[0],
+    player: amy,
+    journeys: [{ ...score, gameVersion: 2, correct: 5 }],
+    today: {
+      ...page.friends[0].today,
+      score: { ...score, gameVersion: 2, correct: 5 },
+    },
+  });
+  await mount({ intent: { tab: "friends", comparison: target } });
+  const rows = [...host.querySelectorAll(".friend-comparison-list li")];
+  expect(rows.map((row) => row.querySelector("strong")?.textContent)).toEqual([
+    "Alice",
+    "Amy",
+    "Bob",
+  ]);
+  expect(rows[0].textContent).toContain("3/5");
+  expect(rows[1].textContent).toContain("Different Journey");
+  expect(rows[1].textContent).not.toContain("5/5");
+  expect(rows[2].textContent).toContain("4/5");
+  expect(host.querySelector('[aria-label="Friends views"]')).toBeNull();
+  expect(host.querySelectorAll(".friend-card")).toHaveLength(2);
+});
+it.each(["incoming", "outgoing", "accepted"] as const)(
+  "opens an invitation automatically with the %s relationship action",
+  async (status) => {
+    friends[0].status = status;
+    await mount({ intent: { tab: "friends", friend: "bob" } });
+    expect(request).toHaveBeenCalledWith(
+      "players/bob",
+      "GET",
+      undefined,
+      expect.any(AbortSignal),
+    );
+    expect(host.querySelector(".friend-find-form")).toBeNull();
+    expect(host.textContent).toContain("Connect with @bob");
+    expect(onAction).not.toHaveBeenCalled();
+    expect(onRequest).not.toHaveBeenCalled();
+    if (status === "incoming") {
+      await click("Accept request");
+      expect(onAction).toHaveBeenCalledWith("b", "accept");
+    }
+    if (status === "outgoing")
+      expect(host.textContent).toContain("Request sent");
+    if (status === "accepted")
+      expect(host.textContent).toContain("Already friends");
+  },
+);
+it("requires an explicit click to add an invited player and identifies a self invitation", async () => {
+  friends = [];
+  await mount({ intent: { tab: "friends", friend: "bob" } });
+  expect(onRequest).not.toHaveBeenCalled();
+  await click("Add friend");
+  expect(onRequest).toHaveBeenCalledWith("bob");
+  request.mockImplementation(async (path: string) =>
+    path.startsWith("players/") ? alice : page,
+  );
+  await mount({ intent: { tab: "friends", friend: "alice" } });
+  expect(host.textContent).toContain("That’s you.");
+  expect(
+    [...host.querySelectorAll("button")].some(
+      (button) => button.textContent === "Add friend",
+    ),
+  ).toBe(false);
+});
+it("handles an unavailable invitation with retry and returns to ordinary search", async () => {
+  request.mockImplementation(async (path: string) => {
+    if (path.startsWith("players/"))
+      throw new Error("That player is unavailable.");
+    return page;
+  });
+  await mount({ intent: { tab: "friends", friend: "bob" } });
+  expect(host.textContent).toContain("That player is unavailable.");
+  request.mockImplementation(async (path: string) =>
+    path.startsWith("players/") ? bob : page,
+  );
+  await click("Retry invitation");
+  expect(host.textContent).toContain("@bob");
+  await click("Search another player");
+  expect(host.querySelector(".friend-find-form")).not.toBeNull();
+});
+it("refreshes comparisons after a relationship is removed and clears private rows on errors", async () => {
+  await mount({
+    intent: {
+      comparison: { date: score.date, journeyId: score.journeyId, version: 1 },
+    },
+  });
+  expect(host.querySelectorAll(".friend-comparison-list li")).toHaveLength(2);
+  friends = [];
+  await mount({
+    intent: {
+      comparison: { date: score.date, journeyId: score.journeyId, version: 1 },
+    },
+  });
+  expect(host.querySelectorAll(".friend-comparison-list li")).toHaveLength(1);
+  request.mockRejectedValue(new Error("Offline"));
+  await act(async () => dispatchEvent(new Event("focus")));
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain(
+    "Offline",
+  );
+});
+
+it("shows every accepted friend with completed players first and unfinished progress visible", async () => {
+  const statuses = [
+    ["Aaron", "in_progress"],
+    ["Zoe", "completed"],
+    ["Amy", "not_started"],
+  ] as const;
+  for (const [name, status] of statuses) {
+    const player = {
+      ...bob,
+      id: name,
+      displayName: name,
+      handle: name.toLowerCase(),
+    };
+    friends.push({ id: name, status: "accepted", player });
+    page.friends.push({
+      player,
+      stats,
+      journeys: [],
+      today: {
+        date: score.date,
+        journeyId: score.journeyId,
+        status,
+        scoreLocked: status === "completed",
+      },
+    });
+  }
+  await mount({
+    intent: {
+      tab: "friends",
+      comparison: { date: score.date, journeyId: score.journeyId, version: 1 },
+    },
+  });
+  const rows = [...host.querySelectorAll(".friend-comparison-list li")];
+  expect(rows.map((row) => row.querySelector("strong")?.textContent)).toEqual([
+    "Alice",
+    "Bob",
+    "Zoe",
+    "Aaron",
+    "Amy",
+  ]);
+  expect(rows[3].textContent).toContain("In progress");
+  expect(rows[4].textContent).toContain("Not started");
+  expect(host.querySelector('[aria-label="Refresh friends"]')).toBeNull();
+  expect(host.textContent).not.toContain("Refresh comparisons");
+  const directory = host.querySelector(".friends-directory")!;
+  const comparison = host.querySelector("#journey-comparison")!;
+  expect(
+    directory.compareDocumentPosition(comparison) &
+      Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+});
+it("focuses and scrolls to the comparison section when reached from a result link", async () => {
+  const scroll = vi.fn();
+  const previous = HTMLElement.prototype.scrollIntoView;
+  HTMLElement.prototype.scrollIntoView = scroll;
+  await mount({
+    intent: {
+      tab: "friends",
+      comparison: { date: score.date, journeyId: score.journeyId, version: 1 },
+    },
+  });
+  await act(
+    async () =>
+      new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
+  expect(scroll).toHaveBeenCalledWith({ block: "start", behavior: "auto" });
+  expect(document.activeElement).toBe(
+    host.querySelector("#journey-comparison"),
+  );
+  const intent = {
+    tab: "friends" as const,
+    comparison: { date: score.date, journeyId: score.journeyId, version: 1 },
+  };
+  await mount({ intent, disabled: true });
+  await mount({ intent, disabled: false });
+  expect(scroll).toHaveBeenCalledTimes(1);
+  HTMLElement.prototype.scrollIntoView = previous;
+});
+
+it("waits for the directory then scrolls the document to the comparison on the account page", async () => {
+  host.classList.add("page-layout");
+  const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  const intent = {
+    tab: "friends" as const,
+    comparison: { date: score.date, journeyId: score.journeyId, version: 1 },
+  };
+  await mount({ intent, relationshipsLoaded: false });
+  await act(
+    async () =>
+      new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
+  expect(scroll).not.toHaveBeenCalled();
+  const section = host.querySelector<HTMLElement>("#journey-comparison")!;
+  vi.spyOn(section, "getBoundingClientRect").mockReturnValue({
+    top: 640,
+  } as DOMRect);
+  await mount({ intent, relationshipsLoaded: true });
+  await act(
+    async () =>
+      new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
+  expect(scroll).toHaveBeenCalledWith({ top: 540, behavior: "auto" });
+  expect(document.activeElement).toBe(section);
+  scroll.mockRestore();
+});
+it("uses the same comparison row and avatar for you and friends, and puts search on the left", async () => {
+  await mount();
+  const self = host.querySelector(".comparison-you")!;
+  expect(self.querySelector(".friend-comparison-row")).not.toBeNull();
+  expect(self.querySelector(".profile-avatar")).not.toBeNull();
+  expect(self.textContent).toContain("Alice");
+  expect(self.querySelector(".comparison-you-label")?.textContent).toBe("You");
+  expect(
+    host.querySelector(".friends-search-column .friend-add"),
+  ).not.toBeNull();
+  expect(
+    host.querySelector(".friends-grid-column .friend-cards"),
+  ).not.toBeNull();
+});
+
+it("labels the comparison as today's Journey and follows today's date for an old link", async () => {
+  await mount({
+    intent: {
+      comparison: {
+        date: "2026-10-09",
+        journeyId: score.journeyId,
+        version: 1,
+      },
+    },
+    defaultComparison: {
+      date: score.date,
+      journeyId: "exceptions-to-the-rule-v1",
+      version: 1,
+    },
+  });
+  const section = host.querySelector("#journey-comparison")!;
+  expect(section.querySelector("h3")?.textContent).toContain(
+    "Today’s Journey — Exceptions to the rule",
+  );
+  expect(section.querySelector("h3 em")).not.toBeNull();
+  expect(section.textContent).not.toContain("2026-10-10 ·");
+  expect(request).toHaveBeenCalledWith(
+    "friends/activity?date=2026-10-10",
+    "GET",
+    undefined,
+    expect.any(AbortSignal),
+  );
+  expect(host.textContent).not.toContain("Invite a friend ↗");
+  expect(host.textContent).toContain("invite them to play.");
+});
+
+it("drops yesterday's local score when today's comparison date changes", async () => {
+  const day = score.date;
+  const attempt = {
+    date: day,
+    journeyId: score.journeyId,
+    scheduleVersion: 1,
+    game: {
+      phase: "finished" as const,
+      roundIndex: 4,
+      answers: [],
+      selectedIds: [],
+      ordered: [],
+      text: "",
+    },
+  };
+  const daily = { version: 1 as const, attempts: { [day]: attempt } };
+  await mount({
+    daily,
+    defaultComparison: { date: day, journeyId: score.journeyId, version: 1 },
+  });
+  vi.setSystemTime(new Date("2026-10-11T16:00:00Z"));
+  await mount({
+    daily,
+    defaultComparison: {
+      date: "2026-10-11",
+      journeyId: score.journeyId,
+      version: 1,
+    },
+  });
+  expect(host.querySelector(".comparison-you")?.textContent).not.toContain(
+    "0/5",
+  );
+  expect(request).toHaveBeenCalledWith(
+    "friends/activity?date=2026-10-11",
+    "GET",
+    undefined,
+    expect.any(AbortSignal),
+  );
+});
+
+it("shows unlocked help as icons with counts and accessible summaries while retaining score locks", async () => {
+  page.friends[0].journeys = [
+    { ...score, help: { hints: 3, assists: 2, status: "assisted" } },
+  ];
+  await mount({
+    defaultComparison: {
+      date: score.date,
+      journeyId: score.journeyId,
+      version: 1,
+    },
+  });
+  const result = host.querySelector(".friend-comparison-list li:last-child")!;
+  expect(result.querySelector(".comparison-score")?.textContent).toBe("4/5");
+  const help = result.querySelector('.comparison-help[role="img"]')!;
+  expect(help.getAttribute("aria-label")).toBe(
+    "Assisted · 3 hints · 2 assists",
+  );
+  expect(help.querySelectorAll(".action-icon")).toHaveLength(2);
+  expect(help.textContent).toBe("32");
+  const summary = result.querySelector(".comparison-score-summary")!;
+  expect(summary.lastElementChild?.classList.contains("comparison-score")).toBe(
+    true,
+  );
+  expect(
+    help.compareDocumentPosition(summary.lastElementChild!) &
+      Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  page.friends[0].journeys = [];
+  await act(async () => dispatchEvent(new Event("focus")));
+  expect(result.textContent).toContain("Score locked");
+  expect(result.querySelector(".comparison-score")).toBeNull();
+  expect(result.querySelector(".comparison-help")).toBeNull();
 });

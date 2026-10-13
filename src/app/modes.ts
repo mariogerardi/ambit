@@ -8,6 +8,7 @@ export type AppMode =
   | "study"
   | "practice";
 export function modeForPath(path: string): AppMode {
+  path = path.split(/[?#]/)[0];
   return path === "/account" || path === "/auth/callback"
     ? "account"
     : path === "/admin"

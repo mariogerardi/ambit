@@ -30,7 +30,7 @@ or AI generator. Previously published local packs are read-only compatibility da
 | 16  | Missing Borders             | `/journey/missing-borders`            | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts) |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
-Play/Resume/View result action. The daily rotation uses device-local midnight and
+Play/Resume/View result action. The daily rotation uses midnight in New York and
 cycles the eleven retained concepts from October 5, 2026, using the explicit IDs in
 [`journeyRotation.ts`](../src/game/journeyRotation.ts). See
 [Journey review](JOURNEY_REVIEW.md) for the keep/scrap decisions. Results use Home/Study as primary exits,

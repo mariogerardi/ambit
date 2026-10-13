@@ -3,11 +3,16 @@ import { useAccount } from "../services/accounts";
 import { AccountDashboard } from "./AccountDashboard";
 import type { DailyProgress } from "./dailyProgress";
 import type { StudySave } from "../study/engine";
+import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
 export function AccountPanel({
   sync,
   daily,
   study,
+  intent,
+  defaultComparison,
 }: {
+  defaultComparison?: ComparisonTarget | null;
+  intent?: AccountIntent;
   daily?: DailyProgress;
   study?: StudySave;
   sync?: { status: string; message: string; retry(): void };
@@ -17,6 +22,8 @@ export function AccountPanel({
     return (
       <>
         <AccountDashboard
+          defaultComparison={defaultComparison}
+          intent={intent}
           subject={account.user.profile.sub}
           email={account.user.profile.email}
           daily={daily}
@@ -44,7 +51,15 @@ export function AccountPanel({
   return (
     <section className="info-view account-panel" aria-label="Account">
       <span className="overline">YOUR ACCOUNT</span>
-      <h1>{account.user ? "You’re signed in." : "Welcome to Ambit."}</h1>
+      <h1>
+        {intent?.friend
+          ? `Connect with @${intent.friend}`
+          : intent?.comparison
+            ? "Compare your Journey with friends."
+            : account.user
+              ? "You’re signed in."
+              : "Welcome to Ambit."}
+      </h1>
       {account.loading ? (
         <p role="status">Checking your account…</p>
       ) : (

@@ -62,6 +62,19 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             template("typo")
 
+    def test_daily_demo_schedule_and_write_permissions_are_staging_only(self):
+        production, staging = template()["Resources"], template("staging")["Resources"]
+        self.assertFalse(any(key.startswith("Demo") for key in production))
+        schedule = staging["DemoSchedule"]["Properties"]
+        self.assertEqual(schedule["ScheduleExpression"], "cron(1 0 * * ? *)")
+        self.assertEqual(schedule["ScheduleExpressionTimezone"], "America/New_York")
+        self.assertEqual(schedule["Target"]["Arn"], {"Fn::GetAtt": ["DemoFunction", "Arn"]})
+        statements = staging["DemoRole"]["Properties"]["Policies"][0]["PolicyDocument"]["Statement"]
+        writes = [value for value in statements if value["Action"] in ("dynamodb:PutItem", "dynamodb:DeleteItem")]
+        self.assertEqual(len(writes), 2)
+        for value in writes:
+            self.assertEqual(value["Condition"]["ForAllValues:StringLike"]["dynamodb:LeadingKeys"], ["user#staging-demo-*"])
+
     def test_staging_export_preserves_production_and_unrelated_local_settings(self):
         with tempfile.TemporaryDirectory() as temporary, patch.object(deploy, "ROOT", Path(temporary)):
             root = Path(temporary)

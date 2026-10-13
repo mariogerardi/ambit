@@ -43,7 +43,7 @@ Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 | **Admin** (`/admin`)     | Verified owner only: review feedback and publish shared date-to-Journey assignments.                                                      |
 
 The daily schedule cycles through the eleven retained Journey concepts from October 5, 2026, using
-device-local dates. Admin’s Journey calendar can override any date for everyone;
+New York calendar dates. Admin’s Journey calendar can override any date for everyone;
 unassigned dates continue that rotation. Chasing the sun and Down the Danube are additional concepts ready for Admin date assignments. Archived Journey definitions have been removed; new Sun attempts use its revised edition. Started attempts keep their edition and
 progress when an assignment changes. Past attempts remain in saved history but
 cannot be reopened by players after midnight. Direct practice routes require admin access; use Admin’s “Preview five questions” button. See the [Journey catalog](docs/QUESTION_CATALOG.md) for titles and routes.

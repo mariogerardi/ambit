@@ -1463,3 +1463,99 @@
   color: var(--ui-muted);
   font-size: 10px;
 }
+
+/* Completion sharing stays beneath the receipt, separate from answer geography. */
+.journey-social {
+  margin-block: 24px;
+}
+.journey-social-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.journey-social h3 {
+  margin-top: 24px;
+  font-size: 18px;
+}
+.journey-friend-preview,
+.friend-comparison-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.journey-friend-preview button,
+.friend-comparison-list li > button,
+.comparison-you {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+  padding: 14px 0;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+}
+.journey-friend-preview button {
+  background: none;
+  border-radius: 0;
+}
+.journey-friend-preview button > span,
+.friend-comparison-list li > span,
+.friend-comparison-list button > span:last-child {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.journey-share-dialog {
+  max-width: 580px;
+}
+.journey-share-preview {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin-block: 12px;
+}
+.journey-share-dialog textarea {
+  width: 100%;
+  min-height: 180px;
+}
+.journey-share-caption {
+  white-space: pre-line;
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.journey-share-dialog .journey-social-actions > .primary-button {
+  width: 100%;
+  justify-content: center;
+}
+.journey-share-dialog .journey-social-actions > button {
+  min-height: 44px;
+}
+
+.journey-completion-actions {
+  padding: 10px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.24);
+  border-radius: 16px;
+  background: rgb(var(--ui-surface-rgb) / 0.5);
+}
+.journey-completion-actions .study-repeat-button {
+  border-color: transparent;
+  background: transparent;
+}
+.journey-completion-actions .study-repeat-button:hover {
+  background: rgb(var(--ui-raised-rgb) / 0.7);
+}
+.journey-completion-actions .completion-navigation {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.18);
+}
+.journey-completion-actions .completion-navigation > button {
+  min-height: 44px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}

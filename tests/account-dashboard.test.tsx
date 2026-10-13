@@ -179,9 +179,7 @@ it("loads private account data and accepts an incoming request for the displayed
     action: "accept",
   });
   expect(host.textContent).toContain("@bob");
-  expect(host.querySelector(".friend-card")?.textContent).toContain(
-    "Completed",
-  );
+  expect(host.querySelector(".friend-card")?.textContent).toContain("@bob");
 });
 it("keeps email and sign-out beside the profile card and off Dashboard and Friends", async () => {
   const onSignOut = vi.fn();
@@ -489,4 +487,118 @@ it("counts a streak by calendar days and avoids duplicate Journey totals", () =>
   expect(metrics.streak).toBe(2);
   expect(metrics.journeys).toHaveLength(2);
   expect(metrics.accuracy).toBeUndefined();
+});
+
+it("keeps an invitation through profile creation and returns to its actionable card", async () => {
+  const baseRequest = request.getMockImplementation()! as (
+    path: string,
+    method?: string,
+    body?: unknown,
+    signal?: AbortSignal,
+  ) => Promise<unknown>;
+  let created = false;
+  friends = [];
+  request.mockImplementation(
+    async (
+      path: string,
+      method = "GET",
+      body?: unknown,
+      signal?: AbortSignal,
+    ) => {
+      if (path === "profile" && method === "GET" && !created) return null;
+      if (path === "profile" && method === "PATCH") created = true;
+      if (path === "players/bob") return player;
+      return baseRequest(path, method, body, signal);
+    },
+  );
+  const client = { request } as CommunityClient;
+  await mount({ client, intent: { tab: "friends", friend: "bob" } });
+  expect(host.textContent).toContain("Connect with @bob");
+  await click("Create your profile →");
+  await input('input[autocomplete="nickname"]', "Alice");
+  await input('input[aria-label="Handle"]', "alice");
+  await act(async () =>
+    host
+      .querySelector("form.profile-form")!
+      .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+  );
+  expect(host.textContent).toContain("Connect with @bob");
+  expect(
+    [...host.querySelectorAll<HTMLButtonElement>("button")].find(
+      (button) => button.textContent === "Add friend",
+    )?.disabled,
+  ).toBe(false);
+  expect(
+    request.mock.calls.some(
+      ([path, method]) => path === "friends" && method === "POST",
+    ),
+  ).toBe(false);
+});
+it("applies new navigation intent while Account remains mounted", async () => {
+  const client = { request } as CommunityClient;
+  await mount({ client });
+  await click("Profile");
+  await mount({
+    client,
+    intent: {
+      tab: "friends",
+      comparison: {
+        date: "2026-10-10",
+        journeyId: "beyond-the-maple-leaf-v1",
+        version: 1,
+      },
+    },
+  });
+  expect(
+    host.querySelector('[aria-label="Journey comparison"]'),
+  ).not.toBeNull();
+  await mount({ client, intent: {} });
+  expect(host.querySelector(".account-stats")).not.toBeNull();
+});
+
+it("consumes comparison arrival so switching account tabs does not scroll there again", async () => {
+  const scroll = vi.fn();
+  const previous = HTMLElement.prototype.scrollIntoView;
+  HTMLElement.prototype.scrollIntoView = scroll;
+  friends = [{ id: "b", status: "accepted", player }];
+  const client = { request } as CommunityClient;
+  const intent = {
+    tab: "friends" as const,
+    comparison: {
+      date: "2026-10-10",
+      journeyId: "beyond-the-maple-leaf-v1",
+      version: 1,
+    },
+  };
+  try {
+    await mount({ client, intent });
+    await act(
+      async () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+    );
+    expect(scroll).toHaveBeenCalledTimes(1);
+    await click("Dashboard");
+    await click("Friends");
+    await act(
+      async () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+    );
+    expect(scroll).toHaveBeenCalledTimes(1);
+    await click("Profile");
+    await click("Friends");
+    await act(
+      async () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+    );
+    expect(scroll).toHaveBeenCalledTimes(1);
+    // A new external navigation remains actionable, even for the same Journey.
+    await mount({ client, intent: { ...intent } });
+    await act(
+      async () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+    );
+    expect(scroll).toHaveBeenCalledTimes(2);
+  } finally {
+    HTMLElement.prototype.scrollIntoView = previous;
+  }
 });

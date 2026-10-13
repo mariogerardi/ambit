@@ -125,6 +125,34 @@ def template(environment="production"):
         "Layers": {"Fn::If": ["UseDatadog", [sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python313:127"), sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension:99")], ref("AWS::NoValue")]},
         "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": environment}, {"Key": "service", "Value": "ambit-api"}],
     })
+    if environment == "staging":
+        # No public endpoint or production resources: only private demo saves.
+        r["DemoRole"] = resource("AWS::IAM::Role", {
+            "AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy],
+            "Policies": [{"PolicyName": "StagingDemoActivity", "PolicyDocument": {"Version": "2012-10-17", "Statement": [
+                {"Effect": "Allow", "Action": "dynamodb:GetItem", "Resource": arn("Community")},
+                {"Effect": "Allow", "Action": "dynamodb:Query", "Resource": arn("Saves")},
+                {"Effect": "Allow", "Action": "dynamodb:PutItem", "Resource": arn("Saves"), "Condition": {"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["user#staging-demo-*"]}}},
+                {"Effect": "Allow", "Action": "dynamodb:DeleteItem", "Resource": arn("Community"), "Condition": {"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["user#staging-demo-*"]}}},
+            ]}}],
+        })
+        r["DemoFunction"] = resource("AWS::Lambda::Function", {
+            "FunctionName": prefix + "-demo-activity", "Runtime": "python3.13", "Handler": "staging_demo.handler",
+            "Role": arn("DemoRole"), "Code": code, "Timeout": 60, "MemorySize": 128, "ReservedConcurrentExecutions": 1,
+            "Environment": {"Variables": {"APP_ENV": "staging", "COMMUNITY_TABLE": ref("Community"), "SAVES_TABLE": ref("Saves"), "DEMO_HANDLE": "mars_staging"}},
+            "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": "staging"}],
+        })
+        r["DemoLogs"] = resource("AWS::Logs::LogGroup", {"LogGroupName": "/aws/lambda/" + prefix + "-demo-activity", "RetentionInDays": 14})
+        r["DemoScheduleRole"] = resource("AWS::IAM::Role", {
+            "AssumeRolePolicyDocument": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Principal": {"Service": "scheduler.amazonaws.com"}, "Action": "sts:AssumeRole", "Condition": {"StringEquals": {"aws:SourceAccount": ref("AWS::AccountId")}, "ArnEquals": {"aws:SourceArn": sub("arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule-group/default")}}}]},
+            "Policies": [{"PolicyName": "InvokeStagingDemo", "PolicyDocument": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "lambda:InvokeFunction", "Resource": arn("DemoFunction")}]}}],
+        })
+        r["DemoSchedule"] = resource("AWS::Scheduler::Schedule", {
+            "Name": prefix + "-daily-demo-activity", "Description": "Refresh synthetic friends just after New York midnight",
+            "ScheduleExpression": "cron(1 0 * * ? *)", "ScheduleExpressionTimezone": "America/New_York",
+            "FlexibleTimeWindow": {"Mode": "OFF"}, "State": "ENABLED",
+            "Target": {"Arn": arn("DemoFunction"), "RoleArn": arn("DemoScheduleRole"), "Input": "{}", "RetryPolicy": {"MaximumEventAgeInSeconds": 3600, "MaximumRetryAttempts": 2}},
+        })
     r["Api"] = resource("AWS::ApiGatewayV2::Api", {"Name": prefix, "ProtocolType": "HTTP", "CorsConfiguration": {"AllowOrigins": origins, "AllowMethods": ["POST", "GET", "PATCH", "OPTIONS"], "AllowHeaders": ["content-type", "authorization", "x-datadog-origin", "x-datadog-parent-id", "x-datadog-trace-id", "x-datadog-sampling-priority", "traceparent", "tracestate", "baggage", "x-datadog-tags"], "MaxAge": 3600}})
     r["Integration"] = resource("AWS::ApiGatewayV2::Integration", {"ApiId": ref("Api"), "IntegrationType": "AWS_PROXY", "IntegrationUri": arn("ApiFunction"), "PayloadFormatVersion": "2.0", "TimeoutInMillis": 15000})
     r["Authorizer"] = resource("AWS::ApiGatewayV2::Authorizer", {"ApiId": ref("Api"), "Name": "accounts", "AuthorizerType": "JWT", "IdentitySource": ["$request.header.Authorization"], "JwtConfiguration": {"Audience": [ref("Client")], "Issuer": sub("https://cognito-idp.${AWS::Region}.amazonaws.com/${Users}")}})

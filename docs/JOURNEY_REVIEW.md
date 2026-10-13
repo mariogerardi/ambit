@@ -83,7 +83,7 @@ to prevent concurrent edits overwriting one another. Retained attempts remain
 pinned to their saved edition. The calendar can restore a date to automatic
 rotation; no dates were assigned during this editorial pass.
 
-Current behavior uses local midnight, one scored attempt, five questions, score
+Current behavior uses New York midnight, one scored attempt, five questions, score
 out of five, and completion-gated friend totals. Players cannot start old dates;
 Admin can preview bundled content through practice routes. A synchronized global
 reset remains a future decision.

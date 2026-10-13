@@ -11,6 +11,13 @@ import { ProfileAvatar } from "./ProfileAvatar";
 import { localDateKey } from "./dailyProgress";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { helpCountCopy } from "../game/guidance";
+import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
+import { invitationLink } from "./accountNavigation";
+import { copyShareText, shareCancelled } from "./journeySharing";
+import { FriendJourneyComparison } from "./FriendJourneyComparison";
+import { dailyJourney, DAILY_SCHEDULE } from "./dailyProgress";
+import type { DailyProgress } from "./dailyProgress";
+import { helpSummary } from "../game/guidance";
 
 function ScoreHelp({ score }: { score: JourneyScore }) {
   const status = score.help?.status ?? "unassisted";
@@ -76,15 +83,29 @@ function Stats({ value }: { value: FriendActivity["stats"] }) {
 export function FriendsPanel({
   api,
   friends,
+  relationshipsLoaded = true,
   player,
   disabled,
   error,
   onAction,
   onRequest,
   onRefresh,
+  intent,
+  focusComparison,
+  onComparisonFocused,
+  daily,
+  sync,
+  defaultComparison,
 }: {
+  defaultComparison?: ComparisonTarget | null;
+  intent?: AccountIntent;
+  focusComparison?: boolean;
+  onComparisonFocused?(): void;
+  daily?: DailyProgress;
+  sync?: { status: string; retry(): void };
   api: CommunityClient;
   friends: Friendship[];
+  relationshipsLoaded?: boolean;
   player: PlayerProfile | null;
   disabled: boolean;
   error: string;
@@ -93,11 +114,15 @@ export function FriendsPanel({
   onRefresh?(): Promise<void>;
 }) {
   const [page, setPage] = useState<FriendActivityPage>();
+  const [invitationActive, setInvitationActive] = useState(!!intent?.friend);
   const [selected, setSelected] = useState<FriendActivity>();
   const [loading, setLoading] = useState(false);
   const [failure, setFailure] = useState("");
   const [handle, setHandle] = useState(
-    () => new URLSearchParams(location.search).get("friend") ?? "",
+    () =>
+      intent?.friend ??
+      new URLSearchParams(location.search).get("friend") ??
+      "",
   );
   const [found, setFound] = useState<PlayerProfile>();
   const [lookupBusy, setLookupBusy] = useState(false);
@@ -105,16 +130,31 @@ export function FriendsPanel({
   const [notice, setNotice] = useState("");
   const [revision, setRevision] = useState(0);
   const [today, setToday] = useState(localDateKey);
+  useEffect(() => {
+    setToday(localDateKey());
+  }, [defaultComparison?.date]);
   const refreshRelationships = useRef(onRefresh);
   refreshRelationships.current = onRefresh;
   const lifetime = useRef<AbortController | undefined>(undefined);
   const activityRequest = useRef(0);
   const profileRequest = useRef(0);
   const lookupRequest = useRef(0);
+  const openedIntent = useRef<string | undefined>(undefined);
   const accepted = useMemo(
     () => friends.filter((friend) => friend.status === "accepted"),
     [friends],
   );
+  useEffect(() => {
+    setInvitationActive(!!intent?.friend);
+    setSelected(undefined);
+    setFound(undefined);
+    setHandle(intent?.friend ?? "");
+    setLookupError("");
+    setLookupBusy(false);
+    lookupRequest.current++;
+    profileRequest.current++;
+    openedIntent.current = undefined;
+  }, [intent]);
   useEffect(() => {
     const abort = new AbortController();
     lifetime.current = abort;
@@ -139,6 +179,27 @@ export function FriendsPanel({
       document.removeEventListener("visibilitychange", visible);
     };
   }, []);
+  useEffect(() => {
+    if (!intent?.friend || !invitationActive || disabled || error) return;
+    setHandle(intent.friend);
+    void lookup(intent.friend);
+    // The invitation is resolved again after profile creation or account refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intent?.friend, invitationActive, disabled, error, player]);
+  useEffect(() => {
+    if (
+      !intent?.player ||
+      disabled ||
+      error ||
+      openedIntent.current === intent.player
+    )
+      return;
+    openedIntent.current = intent.player;
+    if (accepted.some((friend) => friend.id === intent.player))
+      void viewProfile(intent.player);
+    else setFailure("This profile is available to accepted friends.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intent?.player, disabled, error, accepted]);
   useEffect(() => {
     if (
       selected &&
@@ -184,7 +245,61 @@ export function FriendsPanel({
           setLoading(false);
       });
     return () => abort.abort();
-  }, [api, friends, disabled, error, revision, today]);
+  }, [api, friends, disabled, error, revision, today, sync?.status]);
+  async function lookup(value: string) {
+    const request = ++lookupRequest.current;
+    setLookupBusy(true);
+    setLookupError("");
+    setFound(undefined);
+    try {
+      const valueFound = await api.request<PlayerProfile>(
+        `players/${encodeURIComponent(value.trim().replace(/^@/, "").toLowerCase())}`,
+        "GET",
+        undefined,
+        lifetime.current?.signal,
+      );
+      if (
+        !lifetime.current?.signal.aborted &&
+        request === lookupRequest.current
+      )
+        setFound(valueFound);
+    } catch (error) {
+      if (
+        !lifetime.current?.signal.aborted &&
+        request === lookupRequest.current
+      )
+        setLookupError(
+          error instanceof Error ? error.message : "Couldn’t find this player.",
+        );
+    } finally {
+      if (
+        !lifetime.current?.signal.aborted &&
+        request === lookupRequest.current
+      )
+        setLookupBusy(false);
+    }
+  }
+  async function invite() {
+    if (!player) return;
+    const link = `${location.origin}${invitationLink(player.handle)}`;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: "Play Ambit with me",
+          text: `Connect with @${player.handle} on Ambit.`,
+          url: link,
+        });
+        return;
+      } catch (error) {
+        if (shareCancelled(error)) return;
+      }
+    }
+    setNotice(
+      (await copyShareText(link))
+        ? "Your invitation link is copied."
+        : `Your invitation link: ${link}`,
+    );
+  }
   async function viewProfile(id: string) {
     const request = ++profileRequest.current;
     setFailure("");
@@ -270,6 +385,31 @@ export function FriendsPanel({
       )}
     </>
   );
+  const attempt = daily?.attempts[today];
+  const target = (intent?.comparison?.date === today
+    ? intent.comparison
+    : undefined) ??
+    defaultComparison ?? {
+      date: today,
+      journeyId: attempt?.journeyId ?? dailyJourney(today, daily).id,
+      version: attempt?.scheduleVersion ?? DAILY_SCHEDULE.version,
+    };
+  const localScore =
+    attempt &&
+    attempt.date === target.date &&
+    attempt.journeyId === target.journeyId &&
+    attempt.scheduleVersion === target.version &&
+    ["finished", "failed"].includes(attempt.game.phase)
+      ? {
+          date: attempt.date,
+          journeyId: attempt.journeyId,
+          gameVersion: attempt.scheduleVersion,
+          correct: attempt.game.answers.filter((answer) => answer.correct)
+            .length,
+          total: 5,
+          help: helpSummary(attempt.game),
+        }
+      : undefined;
   if (selected)
     return (
       <div className="friends-panel">
@@ -385,331 +525,321 @@ export function FriendsPanel({
     );
   return (
     <div className="friends-panel">
-      <header className="friends-heading">
-        <button
-          className="quiet-button friend-refresh"
-          aria-label="Refresh friends"
-          title="Refresh friends"
-          disabled={disabled || loading}
-          onClick={() => {
-            setToday(localDateKey());
-            if (onRefresh)
-              void onRefresh().catch(() => {
-                /* Parent shows the retry message. */
-              });
-            else setRevision((v) => v + 1);
-          }}
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M20 7v5h-5M4 17v-5h5" />
-            <path d="M6.1 7a7 7 0 0 1 11.7-1L20 9M4 15l2.2 3A7 7 0 0 0 17.9 17" />
-          </svg>
-        </button>
-      </header>
       {notices}
-      <div className="friends-workspace">
-        <aside className="friends-search-column">
-          <section className="friend-add" aria-label="Find a friend">
-            <form
-              className="friend-find-form"
-              onSubmit={(event) => {
-                event.preventDefault();
-                const request = ++lookupRequest.current;
-                setLookupBusy(true);
-                setLookupError("");
-                setFound(undefined);
-                void api
-                  .request<PlayerProfile>(
-                    `players/${encodeURIComponent(handle.trim().replace(/^@/, "").toLowerCase())}`,
-                    "GET",
-                    undefined,
-                    lifetime.current?.signal,
-                  )
-                  .then((value) => {
-                    if (
-                      !lifetime.current?.signal.aborted &&
-                      request === lookupRequest.current
-                    )
-                      setFound(value);
-                  })
-                  .catch((e: unknown) => {
-                    if (
-                      !lifetime.current?.signal.aborted &&
-                      request === lookupRequest.current
-                    )
-                      setLookupError(
-                        e instanceof Error
-                          ? e.message
-                          : "Couldn’t find this player.",
-                      );
-                  })
-                  .finally(() => {
-                    if (
-                      !lifetime.current?.signal.aborted &&
-                      request === lookupRequest.current
-                    )
-                      setLookupBusy(false);
-                  });
-              }}
-            >
-              <label className="field">
-                <span>Search players</span>
-                <input
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  maxLength={25}
-                  required
-                  value={handle}
-                  onChange={(event) => {
-                    lookupRequest.current++;
-                    setLookupBusy(false);
-                    setHandle(event.target.value);
-                    setFound(undefined);
-                    setLookupError("");
+      <section className="friends-directory" aria-label="Friend directory">
+        <div className="friends-workspace">
+          <aside className="friends-search-column">
+            <section className="friend-add" aria-label="Find a friend">
+              {invitationActive && (
+                <>
+                  <h3>Connect with @{intent?.friend}</h3>
+                  {lookupBusy && <p role="status">Opening the invitation…</p>}
+                </>
+              )}
+              {!invitationActive && (
+                <form
+                  className="friend-find-form"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void lookup(handle);
                   }}
-                  placeholder="Search by handle"
-                />
-              </label>
-              <button
-                className="friend-action-button friend-search-button"
-                aria-label="Find player"
-                title="Find player"
-                disabled={disabled || lookupBusy || !handle.trim()}
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  aria-hidden="true"
                 >
-                  <circle cx="10.5" cy="10.5" r="6.5" />
-                  <path d="m16 16 5 5" />
-                </svg>
-              </button>
-            </form>
-            {lookupError && <p role="alert">{lookupError}</p>}
-            {found && (
-              <div className="friend-found">
-                <Identity player={found} />
-                {found.id === player?.id ? (
-                  <span className="muted">That’s you.</span>
-                ) : friends.some((friend) => friend.id === found.id) ? (
-                  <span className="muted">
-                    {friends.find((friend) => friend.id === found.id)
-                      ?.status === "accepted"
-                      ? "Already friends"
-                      : "Request already pending"}
-                  </span>
-                ) : (
+                  <label className="field">
+                    <span>Search players</span>
+                    <input
+                      autoComplete="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      maxLength={25}
+                      required
+                      value={handle}
+                      onChange={(event) => {
+                        lookupRequest.current++;
+                        setLookupBusy(false);
+                        setHandle(event.target.value);
+                        setFound(undefined);
+                        setLookupError("");
+                      }}
+                      placeholder="Search by handle"
+                    />
+                  </label>
                   <button
-                    className="friend-action-button"
-                    disabled={disabled || !player}
-                    onClick={() => {
-                      void onRequest(found.handle).then((saved) => {
-                        if (saved && !lifetime.current?.signal.aborted) {
-                          setFound(undefined);
-                          setHandle("");
-                        }
-                      });
-                    }}
+                    className="friend-action-button friend-search-button"
+                    aria-label="Find player"
+                    title="Find player"
+                    disabled={disabled || lookupBusy || !handle.trim()}
                   >
-                    Send request
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="10.5" cy="10.5" r="6.5" />
+                      <path d="m16 16 5 5" />
+                    </svg>
                   </button>
-                )}
-              </div>
-            )}
-            {player && (
-              <div className="friend-share">
+                </form>
+              )}
+              {lookupError && <p role="alert">{lookupError}</p>}
+              {found && (
+                <div className="friend-found">
+                  <Identity player={found} />
+                  {invitationActive && found.bio && <p>{found.bio}</p>}
+                  {found.id === player?.id ? (
+                    <span className="muted">That’s you.</span>
+                  ) : friends.find((friend) => friend.id === found.id)
+                      ?.status === "accepted" ? (
+                    <>
+                      <span className="muted">Already friends</span>
+                      <button
+                        className="friend-action-button"
+                        onClick={() => void viewProfile(found.id)}
+                      >
+                        View profile
+                      </button>
+                    </>
+                  ) : friends.find((friend) => friend.id === found.id)
+                      ?.status === "incoming" ? (
+                    <button
+                      className="friend-action-button"
+                      disabled={disabled}
+                      onClick={() => void onAction(found.id, "accept")}
+                    >
+                      Accept request
+                    </button>
+                  ) : friends.find((friend) => friend.id === found.id)
+                      ?.status === "outgoing" ? (
+                    <span className="muted">Request sent</span>
+                  ) : friends.find((friend) => friend.id === found.id)
+                      ?.status === "blocked" ? (
+                    <span className="muted">This player is unavailable.</span>
+                  ) : (
+                    <button
+                      className="friend-action-button"
+                      disabled={disabled || !player}
+                      onClick={() => {
+                        void onRequest(found.handle).then((saved) => {
+                          if (
+                            saved &&
+                            !lifetime.current?.signal.aborted &&
+                            !intent?.friend
+                          ) {
+                            setFound(undefined);
+                            setHandle("");
+                          }
+                        });
+                      }}
+                    >
+                      {invitationActive ? "Add friend" : "Send request"}
+                    </button>
+                  )}
+                </div>
+              )}
+              {invitationActive && (
                 <button
                   className="quiet-button tertiary-action"
                   onClick={() => {
-                    const link = `${location.origin}/account?friend=${encodeURIComponent(player.handle)}`;
-                    if (!navigator.clipboard?.writeText) {
-                      setNotice(`Your profile link: ${link}`);
-                      return;
-                    }
-                    void navigator.clipboard
-                      .writeText(link)
-                      .then(() => {
-                        if (!lifetime.current?.signal.aborted)
-                          setNotice("Your profile link is copied.");
-                      })
-                      .catch(() => {
-                        if (!lifetime.current?.signal.aborted)
-                          setNotice(`Your profile link: ${link}`);
-                      });
+                    setInvitationActive(false);
+                    setFound(undefined);
+                    setLookupError("");
+                    setHandle("");
+                    lookupRequest.current++;
                   }}
                 >
-                  Copy your profile link ↗
+                  Search another player
                 </button>
-              </div>
+              )}
+              {lookupError && invitationActive && (
+                <button
+                  className="quiet-button"
+                  disabled={lookupBusy || disabled}
+                  onClick={() => intent?.friend && void lookup(intent.friend)}
+                >
+                  Retry invitation
+                </button>
+              )}
+              {!error && (
+                <p className="muted">
+                  Find a player by handle to start your circle, or{" "}
+                  <button
+                    className="quiet-button tertiary-action"
+                    disabled={disabled || !player}
+                    onClick={() => void invite()}
+                  >
+                    <em>invite them to play.</em>
+                  </button>
+                </p>
+              )}
+            </section>
+            {!!friends.filter(
+              (item) =>
+                item.status === "incoming" || item.status === "outgoing",
+            ).length && (
+              <section className="friend-requests">
+                <h3>Requests</h3>
+                <ul className="account-list">
+                  {friends
+                    .filter(
+                      (item) =>
+                        item.status === "incoming" ||
+                        item.status === "outgoing",
+                    )
+                    .map((friend) => (
+                      <li key={friend.id}>
+                        <Identity
+                          player={
+                            friend.player ?? {
+                              id: friend.id,
+                              avatar: "globe",
+                              displayName: "Player",
+                              handle: "unavailable",
+                              bio: "",
+                              favoriteRegion: "",
+                            }
+                          }
+                        />
+                        <div className="account-row-actions">
+                          {friend.status === "incoming" ? (
+                            <>
+                              <button
+                                disabled={disabled}
+                                onClick={() =>
+                                  void onAction(friend.id, "accept")
+                                }
+                              >
+                                Accept
+                              </button>
+                              <button
+                                disabled={disabled}
+                                onClick={() =>
+                                  void onAction(friend.id, "decline")
+                                }
+                              >
+                                Decline
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="muted">Request sent</span>
+                              <button
+                                disabled={disabled}
+                                onClick={() =>
+                                  void onAction(friend.id, "cancel")
+                                }
+                              >
+                                Cancel request
+                              </button>
+                            </>
+                          )}
+                          <button
+                            disabled={disabled}
+                            onClick={() => void onAction(friend.id, "block")}
+                          >
+                            Block
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            )}
+            {!!friends.filter((item) => item.status === "blocked").length && (
+              <details className="friend-blocked">
+                <summary>Blocked players</summary>
+                <ul className="account-list">
+                  {friends
+                    .filter((item) => item.status === "blocked")
+                    .map((friend) => (
+                      <li key={friend.id}>
+                        <span>{friend.player?.displayName ?? "Player"}</span>
+                        <button
+                          className="quiet-button tertiary-action"
+                          disabled={disabled}
+                          onClick={() => void onAction(friend.id, "unblock")}
+                        >
+                          Unblock
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              </details>
+            )}
+          </aside>
+          <section className="friends-grid-column" aria-label="Your friends">
+            <header className="friends-directory-heading">
+              <h3>
+                Your friends{" "}
+                <span className="friend-count">{accepted.length}</span>
+              </h3>
+            </header>
+            {loading && !page && accepted.length > 0 && (
+              <p role="status" className="muted">
+                Opening your friends…
+              </p>
+            )}
+            <div className="friend-cards">
+              {accepted.map((relationship) => {
+                const friend = activity.find(
+                  (item) => item.player.id === relationship.id,
+                );
+                const identity = friend?.player ?? relationship.player;
+                if (!identity) return null;
+                return (
+                  <button
+                    key={identity.id}
+                    className="friend-card"
+                    aria-label={`View ${identity.displayName}’s profile`}
+                    onClick={() => void viewProfile(identity.id)}
+                  >
+                    <span className="friend-card-heading">
+                      <Identity player={identity} />
+                    </span>
+                    {friend && friend.stats.journeyStreak > 0 && (
+                      <span className="friend-directory-streak">
+                        {friend.stats.journeyStreak} day streak
+                      </span>
+                    )}
+                    <span className="friend-card-arrow" aria-hidden="true">
+                      →
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {page?.cursor && (
+              <button
+                className="quiet-button tertiary-action"
+                disabled={loading}
+                onClick={() => void more()}
+              >
+                Load more activity →
+              </button>
             )}
           </section>
-          {!!friends.filter(
-            (item) => item.status === "incoming" || item.status === "outgoing",
-          ).length && (
-            <section className="friend-requests">
-              <h3>Requests</h3>
-              <ul className="account-list">
-                {friends
-                  .filter(
-                    (item) =>
-                      item.status === "incoming" || item.status === "outgoing",
-                  )
-                  .map((friend) => (
-                    <li key={friend.id}>
-                      <Identity
-                        player={
-                          friend.player ?? {
-                            id: friend.id,
-                            avatar: "globe",
-                            displayName: "Player",
-                            handle: "unavailable",
-                            bio: "",
-                            favoriteRegion: "",
-                          }
-                        }
-                      />
-                      <div className="account-row-actions">
-                        {friend.status === "incoming" ? (
-                          <>
-                            <button
-                              disabled={disabled}
-                              onClick={() => void onAction(friend.id, "accept")}
-                            >
-                              Accept
-                            </button>
-                            <button
-                              disabled={disabled}
-                              onClick={() =>
-                                void onAction(friend.id, "decline")
-                              }
-                            >
-                              Decline
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <span className="muted">Request sent</span>
-                            <button
-                              disabled={disabled}
-                              onClick={() => void onAction(friend.id, "cancel")}
-                            >
-                              Cancel request
-                            </button>
-                          </>
-                        )}
-                        <button
-                          disabled={disabled}
-                          onClick={() => void onAction(friend.id, "block")}
-                        >
-                          Block
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-              </ul>
-            </section>
-          )}
-          {!!friends.filter((item) => item.status === "blocked").length && (
-            <details className="friend-blocked">
-              <summary>Blocked players</summary>
-              <ul className="account-list">
-                {friends
-                  .filter((item) => item.status === "blocked")
-                  .map((friend) => (
-                    <li key={friend.id}>
-                      <span>{friend.player?.displayName ?? "Player"}</span>
-                      <button
-                        className="quiet-button tertiary-action"
-                        disabled={disabled}
-                        onClick={() => void onAction(friend.id, "unblock")}
-                      >
-                        Unblock
-                      </button>
-                    </li>
-                  ))}
-              </ul>
-            </details>
-          )}
-        </aside>
-        <section className="friends-grid-column" aria-label="Your friends">
-          <h3>
-            Your friends <span className="friend-count">{accepted.length}</span>
-          </h3>
-          {loading && !page && accepted.length > 0 && (
-            <p role="status" className="muted">
-              Opening your friends…
-            </p>
-          )}
-          <div className="friend-cards">
-            {accepted.map((relationship) => {
-              const friend = activity.find(
-                (item) => item.player.id === relationship.id,
-              );
-              const identity = friend?.player ?? relationship.player;
-              if (!identity) return null;
-              return (
-                <button
-                  key={identity.id}
-                  className="friend-card"
-                  aria-label={`View ${identity.displayName}’s profile`}
-                  onClick={() => void viewProfile(identity.id)}
-                >
-                  <span className="friend-card-heading">
-                    <Identity player={identity} />
-                    <span aria-hidden="true">→</span>
-                  </span>
-                  {friend && (
-                    <>
-                      <span
-                        className={`friend-daily-status status-${friend.today.status}`}
-                      >
-                        {statusLabel[friend.today.status]}
-                        {friend.today.score &&
-                          ` · ${friend.today.score.correct}/${friend.today.score.total}`}
-                      </span>
-                      <span className="friend-card-streak">
-                        {friend.stats.journeyStreak} day streak ·{" "}
-                        {friend.stats.journeysCompleted} Journeys
-                      </span>
-                    </>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {!accepted.length && !error && (
-            <p className="muted">
-              Find a player by handle to start your circle.
-            </p>
-          )}
-          {page?.cursor && (
-            <button
-              className="quiet-button tertiary-action"
-              disabled={loading}
-              onClick={() => void more()}
-            >
-              Load more activity →
-            </button>
-          )}
-        </section>
-      </div>
+        </div>
+      </section>
+      {(defaultComparison !== null || intent?.comparison) && (
+        <FriendJourneyComparison
+          focus={focusComparison ?? !!intent?.comparison}
+          onFocused={onComparisonFocused}
+          focusReady={relationshipsLoaded && !loading && (!!page || !!failure)}
+          api={api}
+          target={target}
+          friends={friends}
+          player={player}
+          localScore={localScore}
+          sync={sync}
+          disabled={disabled || !!error}
+          onProfile={(id) => void viewProfile(id)}
+          canInvite={!!player}
+          onInvite={() => void invite()}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { CommunityError, createCommunityClient } from "../services/community";
 import { AVATARS, FLAG_AVATARS, ProfileAvatar } from "./ProfileAvatar";
@@ -21,6 +21,8 @@ import type { StudySave } from "../study/engine";
 import { accountProgress } from "./accountProgress";
 import { useHandleAvailability } from "../services/useHandleAvailability";
 import { FriendsPanel } from "./FriendsPanel";
+import { accountIntent } from "./accountNavigation";
+import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
 import "./account.css";
 
 const newProfile = (id: string): AccountProfile => ({
@@ -55,7 +57,11 @@ export function AccountDashboard({
   sync,
   onSignOut,
   busy = false,
+  intent: suppliedIntent,
+  defaultComparison,
 }: {
+  defaultComparison?: ComparisonTarget | null;
+  intent?: AccountIntent;
   subject: string;
   email?: string;
   daily?: DailyProgress;
@@ -65,6 +71,10 @@ export function AccountDashboard({
   onSignOut?(): void;
   busy?: boolean;
 }) {
+  const intent = useMemo(
+    () => suppliedIntent ?? accountIntent(location.pathname + location.search),
+    [suppliedIntent],
+  );
   const account = useAccount(),
     token = useRef(account.accessToken);
   token.current = account.accessToken;
@@ -82,12 +92,14 @@ export function AccountDashboard({
   const [editingProfile, setEditingProfile] = useState(false);
   const dirty = useRef(false);
   const [friends, setFriends] = useState<Friendship[]>([]);
+  const [comparisonFocus, setComparisonFocus] = useState(!!intent.comparison);
+  const consumeComparisonFocus = useCallback(
+    () => setComparisonFocus(false),
+    [],
+  );
+  const [relationshipsLoaded, setRelationshipsLoaded] = useState(false);
   const [friendsError, setFriendsError] = useState("");
-  const [tab, setTab] = useState(() =>
-      new URLSearchParams(location.search).has("friend")
-        ? "friends"
-        : "dashboard",
-    ),
+  const [tab, setTab] = useState(() => intent.tab ?? "dashboard"),
     [loading, setLoading] = useState(!initialProfile),
     [working, setWorking] = useState(false);
   const [error, setError] = useState(""),
@@ -99,6 +111,10 @@ export function AccountDashboard({
   }>();
   const controller = useRef<AbortController | undefined>(undefined);
   const metrics = accountProgress(daily, study);
+  useEffect(() => {
+    setTab(intent.tab ?? "dashboard");
+    setComparisonFocus(!!intent.comparison);
+  }, [intent]);
   async function load(signal?: AbortSignal, force = true) {
     const value = suppliedClient
       ? await api.request<AccountProfile | null>(
@@ -127,6 +143,8 @@ export function AccountDashboard({
         setFriendsError(
           "Couldn’t load your friends. Please refresh your account.",
         );
+    } finally {
+      if (!signal?.aborted) setRelationshipsLoaded(true);
     }
   }
   useEffect(() => {
@@ -202,6 +220,7 @@ export function AccountDashboard({
         dirty.current = false;
         if (!suppliedClient) publishProfile(subject, saved);
         setEditingProfile(false);
+        if (intent.friend) setTab("friends");
       },
       "Your profile is saved.",
       false,
@@ -254,6 +273,7 @@ export function AccountDashboard({
             className={tab === value ? "selected" : ""}
             aria-current={tab === value ? "page" : undefined}
             onClick={() => {
+              setComparisonFocus(false);
               setTab(value);
               if (available) setError("");
               setNotice("");
@@ -612,8 +632,15 @@ export function AccountDashboard({
       )}
       {tab === "friends" && (
         <FriendsPanel
+          defaultComparison={defaultComparison}
+          intent={intent}
+          focusComparison={comparisonFocus}
+          onComparisonFocused={consumeComparisonFocus}
+          daily={daily}
+          sync={sync}
           api={api}
           friends={friends}
+          relationshipsLoaded={relationshipsLoaded}
           player={profile}
           disabled={disabled}
           error={friendsError}

@@ -364,8 +364,8 @@ export function AdminPanel({
           </form>
         </div>
         <p className="schedule-footnote">
-          Unassigned days use the automatic rotation. Dates change at each
-          player’s local midnight; players who have started keep their Journey.
+          Unassigned days use the automatic rotation. Dates change at midnight
+          in New York; players who have started keep their Journey.
         </p>
       </div>
     </section>

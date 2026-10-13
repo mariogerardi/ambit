@@ -259,3 +259,20 @@ it("refreshes expired access credentials and retains the account cache after an 
   expect(account.user?.profile.email).toBe(owner.profile.email);
   expect(auth.remove).not.toHaveBeenCalled();
 });
+
+it("preserves only valid comparison parameters through authentication", () => {
+  const link =
+    "/account?tab=friends&view=compare&date=2026-10-13&journey=beyond-the-maple-leaf-v1&version=1";
+  expect(safeReturnPath(link)).toBe(link + "#journey-comparison");
+  expect(safeReturnPath(link + "#journey-comparison")).toBe(
+    link + "#journey-comparison",
+  );
+  expect(safeReturnPath(link + "#unrecognized")).toBe("/account");
+  for (const invalid of [
+    link + "&token=secret",
+    link.replace("2026-10-13", "2026-02-30"),
+    link.replace("version=1", "version=-1"),
+    link + "&view=compare",
+  ])
+    expect(safeReturnPath(invalid)).toBe("/account");
+});

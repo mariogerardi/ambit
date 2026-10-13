@@ -37,10 +37,10 @@ import type {
 import metadata from "../sources/flags.metadata.json";
 import { SurfaceGesture } from "../src/globe/gesture";
 afterEach(() => vi.unstubAllGlobals());
-describe("local daily schedule and persistence", () => {
-  it("uses local calendar days and rotates the authored journeys from October 5", () => {
-    expect(localDateKey(new Date(2026, 9, 5, 23, 59))).toBe("2026-10-05");
-    expect(millisecondsToMidnight(new Date(2026, 9, 5, 23, 59, 59))).toBe(1000);
+describe("New York daily schedule and persistence", () => {
+  it("uses New York calendar days and rotates the authored journeys from October 5", () => {
+    expect(localDateKey(new Date("2026-10-06T03:59:00Z"))).toBe("2026-10-05");
+    expect(millisecondsToMidnight(new Date("2026-10-06T03:59:59Z"))).toBe(1000);
     for (let i = 0; i < ACTIVE_JOURNEY_IDS.length; i++)
       expect(dailyJourney(`2026-10-${String(i + 5).padStart(2, "0")}`).id).toBe(
         ACTIVE_JOURNEY_IDS[i % ACTIVE_JOURNEY_IDS.length],
@@ -339,4 +339,28 @@ describe("home surface activation guard", () => {
     gesture.cancel();
     expect(gesture.consume()).toBe(false);
   });
+});
+
+it.each([
+  ["2026-03-08T05:00:00Z", "2026-03-09T04:00:00Z", 23],
+  ["2026-11-01T04:00:00Z", "2026-11-02T05:00:00Z", 25],
+  ["2026-10-14T04:00:00Z", "2026-10-15T04:00:00Z", 24],
+] as const)("handles New York DST at %s", (start, end, hours) => {
+  expect(millisecondsToMidnight(new Date(start))).toBe(hours * 3600000);
+  const boundary = new Date(end);
+  expect(localDateKey(new Date(boundary.getTime() - 1))).not.toBe(
+    localDateKey(boundary),
+  );
+  expect(millisecondsToMidnight(new Date(boundary.getTime() - 1))).toBe(1);
+});
+it("uses the same daily date across device offsets", () => {
+  expect(localDateKey(new Date("2026-10-14T05:59:59+02:00"))).toBe(
+    "2026-10-13",
+  );
+  expect(localDateKey(new Date("2026-10-14T00:00:00-04:00"))).toBe(
+    "2026-10-14",
+  );
+  expect(localDateKey(new Date("2026-10-14T13:00:00+09:00"))).toBe(
+    "2026-10-14",
+  );
 });
