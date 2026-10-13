@@ -849,7 +849,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         [...host.querySelectorAll(".finish-actions button")].map(
           (button) => button.textContent,
         ),
-      ).toEqual(["Home", "Study"]);
+      ).toEqual(["Share result", "Sign in to compare with friends →"]);
+      expect(
+        host.querySelector(".finish-story .completion-navigation"),
+      ).toBeNull();
       expect(host.textContent).not.toContain(
         "The same Journey, with a fresh start.",
       );
