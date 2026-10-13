@@ -12,6 +12,7 @@ import type { PlaceFeature, RegionFeature } from "../geography/types";
 import { geoContains } from "d3-geo";
 import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
 import type { Answer, GameState } from "./state";
+import { compositeRegion } from "./compositeRegions";
 import { candidateAvailable } from "./guidance";
 
 export function questionPlaces(
@@ -41,6 +42,23 @@ export function questionPlaces(
             : expected.includes(place.id)
               ? "answer"
               : (place.visualState ?? "hinted"),
+      };
+    });
+  }
+  if (question.rule.type === "merged-region" && context) {
+    if (phase !== "feedback" && phase !== "failed") return [];
+    if (question.feedbackPlaces) return question.feedbackPlaces;
+    return question.rule.memberIds.map((id): PlaceFeature => {
+      const region = context.targets.get(id)!;
+      return {
+        id: `territory-label:${id}`,
+        name: context.names.get(id)!,
+        kind: "other",
+        sourceId: "journey",
+        markerHidden: true,
+        lat: region.focus.lat,
+        lng: region.focus.lng,
+        visualState: correct ? "correct" : "answer",
       };
     });
   }
@@ -206,6 +224,11 @@ export function regionAnswerId(
   question: Question,
   region: RegionFeature,
 ): string | undefined {
+  if (
+    question.rule.type === "merged-region" &&
+    question.rule.memberIds.includes(region.id)
+  )
+    return question.rule.targetId;
   if (!region.id.startsWith("clue-part:")) return region.id;
   if (
     question.highlightParts?.some(
@@ -226,6 +249,19 @@ export function questionRegions(
   question: Question,
   phase: GameState["phase"],
 ) {
+  if (question.rule.type === "merged-region" && phase === "playing") {
+    let variants = regionVariants.get(regions);
+    const cached = variants?.get(question)?.get(phase);
+    if (cached) return cached;
+    const memberIds = question.rule.memberIds;
+    const result = [
+      ...regions.filter((region) => !memberIds.includes(region.id)),
+      compositeRegion(regions, question),
+    ];
+    if (!variants) regionVariants.set(regions, (variants = new WeakMap()));
+    variants.set(question, new Map([[phase, result]]));
+    return result;
+  }
   const highlights = (question.highlightParts ?? []).filter(
     (highlight) =>
       phase === "playing" || (phase === "feedback" && !!highlight.reveal),
@@ -343,6 +379,21 @@ export function questionVisualStates(
     ]),
   );
   if (game.phase === "home") return {};
+  if (question.rule.type === "merged-region") {
+    if (game.phase === "playing") {
+      for (const id of selectableIds(question, context))
+        states[id] = candidateAvailable(question, game, id)
+          ? "selectable"
+          : "disabled";
+      for (const id of game.selectedIds) states[id] = "selected";
+    } else {
+      for (const id of question.rule.memberIds)
+        states[id] = game.answers.at(-1)?.correct ? "correct" : "answer";
+      for (const id of game.selectedIds)
+        if (id !== question.rule.targetId) states[id] = "incorrect";
+    }
+    return states;
+  }
   const blindFeedback =
     game.phase === "feedback" &&
     question.map?.revealOnCorrect &&
@@ -492,6 +543,10 @@ export function journeyVisitedStates(
   for (const answer of answers) {
     const question = journey.rounds.find((q) => q.id === answer.roundId);
     if (!question) continue;
+    if (question.rule.type === "merged-region") {
+      for (const id of question.rule.memberIds) states[id] = "visited";
+      continue;
+    }
     if (
       question.mode.startsWith("city-") ||
       question.rule.type === "pin-distance"

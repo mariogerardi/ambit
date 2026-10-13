@@ -57,6 +57,11 @@ export function isCorrect(
     return response.text.trim() !== "" && Number(response.text) === rule.value;
   if (rule.type === "capital-name")
     return capitalForName(context, response.text)?.countryId === rule.countryId;
+  if (rule.type === "merged-region")
+    return (
+      response.selectedIds.length === 1 &&
+      response.selectedIds[0] === rule.targetId
+    );
   if (rule.type === "capital-order")
     return (
       response.ordered.length === expected.length &&

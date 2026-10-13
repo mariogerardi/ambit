@@ -31,6 +31,58 @@ const africaSource = {
 export const MECHANIC_RECIPES: Question[] = [
   defineQuestion({
     ...base,
+    id: "recipe:merged-region-single",
+    title: "merged-region-single example",
+    prompt: "Tap the apparent territory containing two countries.",
+    explanation:
+      "This example dissolves the canonical Spain–Portugal border and restores both countries after submission.",
+    mode: "merged-region-single",
+    count: 1,
+    commitment: "submit",
+    selection: {
+      type: "ids",
+      ids: [
+        "wurl:FRA",
+        "composite:recipe:iberia",
+        "wurl:ITA",
+        "wurl:MAR",
+        "wurl:DZA",
+      ],
+    },
+    rule: {
+      type: "merged-region",
+      targetId: "composite:recipe:iberia",
+      memberIds: ["wurl:ESP", "wurl:PRT"],
+      hiddenAdjacencies: [["wurl:ESP", "wurl:PRT"]],
+    },
+    guidance: {
+      hint: "A peninsula may contain more than one country.",
+      assist: {
+        text: "Four territories remain.",
+        candidateIds: [
+          "wurl:FRA",
+          "composite:recipe:iberia",
+          "wurl:ITA",
+          "wurl:MAR",
+        ],
+      },
+    },
+    scenes: {
+      play: {
+        focus: { lat: 38, lng: 3, altitude: 0.65 },
+        map: {
+          borders: true,
+          hoverFeedback: false,
+          muteOthers: true,
+          candidates: "highlighted",
+        },
+      },
+      reveal: { focus: { lat: 39.5, lng: -5.5, altitude: 0.34 } },
+    },
+    source: mapSource,
+  }),
+  defineQuestion({
+    ...base,
     id: "recipe:pin",
     title: "pin example",
     prompt: "Drop a pin within 150 km of Canberra.",

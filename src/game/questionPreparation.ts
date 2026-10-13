@@ -7,6 +7,7 @@ import type {
 } from "./questionContracts";
 import type { RegionFeature } from "../geography/types";
 import { mechanicFor, usesChoiceCards } from "./mechanics";
+import { compositeRegion } from "./compositeRegions";
 import { isSlotAnswer } from "./ordering";
 import { validateQuestionContract } from "./questionBuilder";
 import {
@@ -61,6 +62,49 @@ export function createQuestionContext(
     for (const target of round.importedRegions ?? []) {
       context.targets.set(target.id, target);
       context.names.set(target.id, target.name);
+    }
+    if (round.rule.type === "merged-region") {
+      const rule = round.rule;
+      if (context.targets.has(rule.targetId))
+        throw Error(`Duplicate composite target: ${rule.targetId}`);
+      const actual = rule.memberIds
+        .flatMap((a, index) =>
+          rule.memberIds
+            .slice(index + 1)
+            .filter((b) => context.graph.get(a)?.has(b))
+            .map((b) => [a, b].sort().join("|")),
+        )
+        .sort();
+      const authored = rule.hiddenAdjacencies
+        .map((pair) => [...pair].sort().join("|"))
+        .sort();
+      const reached = new Set([rule.memberIds[0]]);
+      for (let pass = 0; pass < rule.memberIds.length; pass++)
+        for (const [a, b] of rule.hiddenAdjacencies)
+          if (reached.has(a) || reached.has(b)) {
+            reached.add(a);
+            reached.add(b);
+          }
+      if (
+        actual.join() !== authored.join() ||
+        reached.size !== rule.memberIds.length ||
+        round.selection.type !== "ids" ||
+        round.selection.ids.some(
+          (id) =>
+            id !== rule.targetId &&
+            !regions.some(
+              (region) => region.id === id && region.level === "ADM0",
+            ),
+        )
+      )
+        throw Error(
+          `Invalid canonical composite adjacency or candidates: ${round.id}`,
+        );
+      context.targets.set(rule.targetId, compositeRegion(regions, round));
+      context.names.set(
+        rule.targetId,
+        rule.memberIds.map((id) => context.names.get(id)).join(" + "),
+      );
     }
     const survivors = round.guidance?.assist?.candidateIds;
     const fixedSelections = round.guidance?.assist?.fixedSelections;
@@ -231,6 +275,7 @@ export function createQuestionContext(
         `The local typed region answer data is incomplete for ${round.id}.`,
       );
     if (
+      round.mode === "merged-region-single" ||
       round.mode.startsWith("map-") ||
       round.mode.startsWith("city-") ||
       usesChoiceCards(round)
@@ -355,6 +400,7 @@ export function solutionIds(
           normalizeAnswer(f.value) === normalizeAnswer(rule.value),
       )
       .map((f) => f.countryId);
+  if (rule.type === "merged-region") return [rule.targetId];
   if (rule.type === "text-fact") return [rule.countryId];
   if (rule.type === "manual-text" || rule.type === "manual-number") return [];
   if (

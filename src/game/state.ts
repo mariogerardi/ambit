@@ -180,7 +180,11 @@ export function gameReducer(
   if (action.type === "select" || action.type === "guess-country") {
     const mechanic = mechanicFor(round);
     if (mechanic.response !== "selected") return state;
-    if (action.type === "guess-country" && usesChoiceCards(round)) return state;
+    if (
+      action.type === "guess-country" &&
+      (usesChoiceCards(round) || round.mode === "merged-region-single")
+    )
+      return state;
     const id =
       action.type === "select"
         ? action.id

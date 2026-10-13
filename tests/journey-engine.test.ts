@@ -31,6 +31,7 @@ describe("Journey engine authoring boundaries", () => {
       "city-multiple": {
         selectedIds: ["place:964137", "place:3369157", "place:1018725"],
       },
+      "merged-region-single": { selectedIds: ["composite:recipe:iberia"] },
       "map-single": { selectedIds: ["wurl:CAN"] },
       "map-multiple": { selectedIds: ["wurl:CAN", "wurl:MEX"] },
       number: { text: "3" },

@@ -501,5 +501,45 @@
         "resolvedLabel": "Mosi-oa-Tunya / Victoria Falls"
       }
     ]
+  },
+  {
+    "id": "missing-borders-v1",
+    "title": "Missing Borders",
+    "saveRevision": 1,
+    "description": "Five maps have been altered. Spot the territories hiding two—or three—countries, then watch their real boundaries return.",
+    "path": "/journey/missing-borders",
+    "module": "./missingBordersJourney.ts",
+    "rounds": [
+      {
+        "id": "missing-borders-01-iberia",
+        "label": "Missing border",
+        "progressLabel": "Iberia",
+        "resolvedLabel": "Spain + Portugal"
+      },
+      {
+        "id": "missing-borders-02-hispaniola",
+        "label": "Missing border",
+        "progressLabel": "Caribbean",
+        "resolvedLabel": "Haiti + Dominican Republic"
+      },
+      {
+        "id": "missing-borders-03-korea",
+        "label": "Missing border",
+        "progressLabel": "East Asia",
+        "resolvedLabel": "North Korea + South Korea"
+      },
+      {
+        "id": "missing-borders-04-senegambia",
+        "label": "Missing border",
+        "progressLabel": "West Africa",
+        "resolvedLabel": "Senegal + The Gambia"
+      },
+      {
+        "id": "missing-borders-05-baltics",
+        "label": "Missing border",
+        "progressLabel": "Baltic region",
+        "resolvedLabel": "Estonia + Latvia + Lithuania"
+      }
+    ]
   }
 ]

@@ -219,6 +219,66 @@ export const MECHANICS = {
     "places",
     false,
   ),
+  "merged-region-single": defineMechanic(
+    ["merged-region"],
+    "Single territory pick",
+    "map",
+    "selected",
+    "regions",
+    true,
+    {
+      editableCommitment: false,
+      canSubmit: (question, response, { eligible }) =>
+        response.selectedIds.length === 1 &&
+        eligible.includes(response.selectedIds[0]) &&
+        question.selection.type === "ids",
+      validate: (question, fail) => {
+        const rule = question.rule;
+        if (rule.type !== "merged-region" || question.selection.type !== "ids")
+          return fail("composites require explicit targets and members");
+        const ids = question.selection.ids;
+        if (
+          !rule.targetId.startsWith("composite:") ||
+          rule.memberIds.length < 2 ||
+          new Set(rule.memberIds).size !== rule.memberIds.length ||
+          ids.length < 2 ||
+          new Set(ids).size !== ids.length ||
+          !ids.includes(rule.targetId) ||
+          rule.memberIds.some((id) => ids.includes(id)) ||
+          question.disclosure.hoverNames ||
+          question.disclosure.namedChoices ||
+          question.disclosure.committedNames ||
+          question.disclosure.previousVisits ||
+          question.choices?.length ||
+          question.highlightParts?.length ||
+          question.displayGeometries ||
+          question.importedRegions?.length ||
+          question.places?.length ||
+          question.contextIds?.length ||
+          question.map?.borders === false ||
+          question.map?.borderIds ||
+          question.map?.candidates !== "highlighted"
+        )
+          fail(
+            "composites require distinct anonymous candidates and canonical member geometry",
+          );
+        const pairs = rule.hiddenAdjacencies.map(([a, b]) =>
+          [a, b].sort().join("|"),
+        );
+        if (
+          !pairs.length ||
+          new Set(pairs).size !== pairs.length ||
+          rule.hiddenAdjacencies.some(
+            ([a, b]) =>
+              a === b ||
+              !rule.memberIds.includes(a) ||
+              !rule.memberIds.includes(b),
+          )
+        )
+          fail("hidden adjacencies must be distinct internal member pairs");
+      },
+    },
+  ),
   "map-single": defineMechanic(
     countryRules,
     "Single country pick",

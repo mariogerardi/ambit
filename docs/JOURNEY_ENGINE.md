@@ -167,6 +167,24 @@ The Supreme Court of Appeal wording makes Johannesburg a fair distractor despite
 its Constitutional Court. Keep that nuance in the reveal, not extra map-label copy.
 See the current South Africa question for reviewed primary sources.
 
+## Composite territory example
+
+`merged-region-single` has a distinct `merged-region` rule and reuses the shared
+selected-ID response and map control. See its executable recipe and
+[Missing Borders](../src/game/missingBordersJourney.ts). Canonical preparation
+validates member connectivity, the complete internal adjacency set, candidate
+availability and meaningful assist survivors. `compositeRegions.ts` dissolves
+exact directed shared edges in the bundled country topology and caches the
+result; this is not a general union for arbitrary overlapping/imported polygons.
+No geography is regenerated. Presentation replaces member surfaces with one
+anonymous composite during play and restores the original polygons on reveal.
+Globe picking selects one synthetic ID; grading never uses the dissolved geometry.
+The current control requires WebGL and pointer/touch input, without letter labels
+or silhouette button alternatives. Names, original member outlines and typing remain
+unavailable before submission. The current reveal is immediate, with identical
+reduced-motion behavior. Completion uses the existing automatic flyover; reduced
+motion shows the authored completion focus.
+
 ## Focused review commands
 
 ```sh
@@ -205,7 +223,7 @@ historical truth, screen-space legibility or every form of answer leakage.
 6. Document the supported behavior and current limits in the catalog. Run focused
    checks. Update scheduling metadata only if its authored inputs changed.
 
-All 15 current Journeys (75 questions) now use grouped scenes. Shared presentation
+All 16 current Journeys (80 questions) now use grouped scenes. Shared presentation
 presets can still supply defaults; scene overrides compile into the renderer's
 existing fields. This is one engine and one current catalog, without archived
 runtime definitions. Isolated evaluator fixtures are test data, not playable

@@ -30,6 +30,8 @@ const MODE_NOTES = {
     "Pick one place marker. Named or anonymous candidates are controlled separately; use equal city-reference styling when capital status must not reveal the answer.",
   "city-multiple":
     "Pick the required number of place markers, then submit. Author explicit place IDs and deliberate label disclosure.",
+  "merged-region-single":
+    "Tap one anonymous composite territory, then submit. Declare a synthetic target ID, connected canonical member countries, and every hidden internal adjacency. All members share one fill and hit target; reveals restore canonical polygons. Assist retains meaningful alternatives. Requires WebGL and pointer/touch input.",
   "map-single":
     "Pick one eligible country or region. Immediate or explicit submission is supported. Eligibility, visible context and names are independent; named alternatives are limited to six.",
   "map-multiple":

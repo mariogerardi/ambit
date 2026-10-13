@@ -105,6 +105,7 @@ describe("authored Journey hint and assist stages", () => {
               "mediterranean-v1",
               "same-hour-different-worlds",
               "same-name-different-place-v1",
+              "missing-borders-v1",
             ].includes(pack.id),
         ),
       ).toBe(true);

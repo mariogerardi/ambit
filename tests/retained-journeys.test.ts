@@ -93,6 +93,7 @@ describe("retained daily rotation", () => {
       "down-the-danube-v1",
       "same-hour-different-worlds",
       "same-name-different-place-v1",
+      "missing-borders-v1",
     ]);
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === NORTH_AMERICA_JOURNEY.id)

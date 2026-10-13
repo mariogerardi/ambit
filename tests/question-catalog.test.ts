@@ -33,7 +33,7 @@ describe("current question catalog", () => {
   it("catalogs Journey questions only, with distinct IDs", () => {
     const rounds = QUESTION_CATALOG;
     expect(rounds.every((q) => Object.hasOwn(ANSWER_TYPES, q.mode))).toBe(true);
-    expect(rounds).toHaveLength(75);
+    expect(rounds).toHaveLength(80);
     expect(new Set(rounds.map((q) => q.id)).size).toBe(rounds.length);
     expect(rounds.slice(0, 5)).toEqual(JOURNEY.rounds);
   });

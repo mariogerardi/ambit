@@ -16,6 +16,7 @@ export type AnswerMode =
   | "pin"
   | "city-single"
   | "city-multiple"
+  | "merged-region-single"
   | "map-single"
   | "map-multiple"
   | "number"
@@ -49,6 +50,12 @@ export interface CountryFact {
   source: FactSource;
 }
 export type KnowledgeRule =
+  | {
+      type: "merged-region";
+      targetId: string;
+      memberIds: string[];
+      hiddenAdjacencies: [string, string][];
+    }
   | {
       type: "pin-distance";
       targetId: string;
@@ -343,6 +350,12 @@ type Single = { count: 1 };
 type Choices = { choices: NonNullable<Question["choices"]> };
 /** Discriminated authoring contracts; the engine's read model stays stable. */
 export type QuestionContract =
+  | ({
+      mode: "merged-region-single";
+      rule: Rule<"merged-region-single">;
+      selection: { type: "ids"; ids: string[] };
+      commitment: "submit";
+    } & Single)
   | ({ mode: "pin"; rule: Rule<"pin"> } & Single & NoMapSelection)
   | ({
       mode: "city-single";

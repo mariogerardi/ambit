@@ -27,6 +27,7 @@ describe("actual spherical renderer inputs", () => {
     first.forEach((r, i) => Object.assign(r, { __id: `mesh:${i}` }));
     for (const q of QUESTION_CATALOG.filter(
       (q) =>
+        q.rule.type !== "merged-region" &&
         !q.highlightParts?.length &&
         !q.importedRegions?.length &&
         !Object.keys(q.displayGeometries ?? {}).length,
@@ -44,6 +45,35 @@ describe("actual spherical renderer inputs", () => {
     expect(world.every((r) => !("__id" in r))).toBe(true);
     // Each renderer still gets independent library bookkeeping bindings.
     expect(createGlobeRegionPreparer()(world)[0]).not.toBe(first[0]);
+  });
+  it("reuses composite render objects during play and restores cached country meshes on reveal", () => {
+    const prepare = createGlobeRegionPreparer();
+    const baseline = prepare(world);
+    for (const question of QUESTION_CATALOG) {
+      if (question.rule.type !== "merged-region") continue;
+      const rule = question.rule;
+      const input = questionRegions(world, question, "playing");
+      const rendered = prepare(input);
+      expect(questionRegions(world, question, "playing")).toBe(input);
+      expect(prepare(input)).toBe(rendered);
+      const byId = new Map(rendered.map((region) => [region.id, region]));
+      expect(byId.has(rule.targetId)).toBe(true);
+      for (const region of baseline) {
+        if (rule.memberIds.includes(region.id))
+          expect(byId.has(region.id)).toBe(false);
+        else expect(byId.get(region.id)).toBe(region);
+      }
+      expect(prepare(questionRegions(world, question, "feedback"))).toBe(
+        baseline,
+      );
+      expect(prepare(questionRegions(world, question, "finished"))).toBe(
+        baseline,
+      );
+      expect(prepare(questionRegions(world, question, "playing"))).toBe(
+        rendered,
+      );
+    }
+    expect(world.every((region) => !("__id" in region))).toBe(true);
   });
   it("changes only the owning country's render objects for an exclave and restores cached originals", () => {
     const q = THIRD_JOURNEY.rounds.find((q) => q.id === "nakhchivan-owner")!;

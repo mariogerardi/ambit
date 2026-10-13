@@ -1,32 +1,33 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **15 current Journeys and 75 questions**, with eleven active
+The bundled catalog contains **16 current Journeys and 80 questions**, with eleven active
 daily concepts, reviewed against the code on October 12, 2026. Each Journey has
 five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
 everyone; unassigned dates use the automatic rotation. Direct practice routes are Admin-only; Admin’s “Preview five questions” opens the selected Journey. Chasing the sun and Down the Danube are ready for date assignments and
 have not been added to the automatic rotation. Same Hour, Different Worlds is also
-available for preview and date assignments without joining the rotation. Same Name, Different Place is also available without joining the rotation. There is no current in-app authoring
+available for preview and date assignments without joining the rotation. Same Name, Different Place is also available without joining the rotation. Missing Borders is available for preview and date assignments without joining the rotation. There is no current in-app authoring
 or AI generator. Previously published local packs are read-only compatibility data.
 
 ## Bundled Journeys
 
-| #   | Title                       | Practice route                        | Definition                                                   |
-| --- | --------------------------- | ------------------------------------- | ------------------------------------------------------------ |
-| 1   | Beyond the maple leaf       | `/journey/beyond-the-maple-leaf`      | [canadaJourney.ts](../src/game/canadaJourney.ts)             |
-| 2   | Around the Mediterranean    | `/journey/mediterranean`              | [fourthJourney.ts](../src/game/fourthJourney.ts)             |
-| 3   | Shared neighbors            | `/journey/shared-neighbors`           | [ninthJourney.ts](../src/game/ninthJourney.ts)               |
-| 4   | Along the Andes             | `/journey/along-the-andes`            | [andesJourney.ts](../src/game/andesJourney.ts)               |
-| 5   | Not the obvious city        | `/journey/not-the-obvious-city`       | [eleventhJourney.ts](../src/game/eleventhJourney.ts)         |
-| 6   | Island instincts            | `/journey/island-instincts`           | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)     |
-| 7   | North America by name       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts) |
-| 8   | Latitude surprises          | `/journey/latitude-surprises`         | [latitudeJourney.ts](../src/game/latitudeJourney.ts)         |
-| 9   | Around the Ring of Fire     | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)               |
-| 10  | Exceptions to the rule      | `/journey/exceptions-to-the-rule`     | [twelfthJourney.ts](../src/game/twelfthJourney.ts)           |
-| 11  | On Russia’s doorstep        | `/journey/try-not-to-click-russia`    | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)       |
-| 12  | Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)         |
-| 13  | Down the Danube             | `/journey/down-the-danube`            | [danubeJourney.ts](../src/game/danubeJourney.ts)             |
-| 14  | Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)         |
-| 15  | Same Name, Different Place  | `/journey/same-name-different-place`  | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)   |
+| #   | Title                       | Practice route                        | Definition                                                       |
+| --- | --------------------------- | ------------------------------------- | ---------------------------------------------------------------- |
+| 1   | Beyond the maple leaf       | `/journey/beyond-the-maple-leaf`      | [canadaJourney.ts](../src/game/canadaJourney.ts)                 |
+| 2   | Around the Mediterranean    | `/journey/mediterranean`              | [fourthJourney.ts](../src/game/fourthJourney.ts)                 |
+| 3   | Shared neighbors            | `/journey/shared-neighbors`           | [ninthJourney.ts](../src/game/ninthJourney.ts)                   |
+| 4   | Along the Andes             | `/journey/along-the-andes`            | [andesJourney.ts](../src/game/andesJourney.ts)                   |
+| 5   | Not the obvious city        | `/journey/not-the-obvious-city`       | [eleventhJourney.ts](../src/game/eleventhJourney.ts)             |
+| 6   | Island instincts            | `/journey/island-instincts`           | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)         |
+| 7   | North America by name       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)     |
+| 8   | Latitude surprises          | `/journey/latitude-surprises`         | [latitudeJourney.ts](../src/game/latitudeJourney.ts)             |
+| 9   | Around the Ring of Fire     | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)                   |
+| 10  | Exceptions to the rule      | `/journey/exceptions-to-the-rule`     | [twelfthJourney.ts](../src/game/twelfthJourney.ts)               |
+| 11  | On Russia’s doorstep        | `/journey/try-not-to-click-russia`    | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)           |
+| 12  | Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)             |
+| 13  | Down the Danube             | `/journey/down-the-danube`            | [danubeJourney.ts](../src/game/danubeJourney.ts)                 |
+| 14  | Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)             |
+| 15  | Same Name, Different Place  | `/journey/same-name-different-place`  | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)       |
+| 16  | Missing Borders             | `/journey/missing-borders`            | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts) |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses device-local midnight and
@@ -42,26 +43,27 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 75 current questions, not every possible engine pairing.
+Counts below refer to the 80 current questions, not every possible engine pairing.
 The type and rule contracts live in [`questionContracts.ts`](../src/game/questionContracts.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
-| Mode                | Control                 | Questions |
-| ------------------- | ----------------------- | --------: |
-| `pin`               | Drop a pin              |        16 |
-| `city-single`       | Single city pick        |         4 |
-| `city-multiple`     | Multiple city picks     |         0 |
-| `map-single`        | Single country pick     |        12 |
-| `map-multiple`      | Multiple country picks  |         6 |
-| `number`            | Number                  |         2 |
-| `text`              | Free response           |        10 |
-| `typed-regions`     | Typed region names      |         3 |
-| `ordered-countries` | Ordered country names   |         0 |
-| `ordered-capitals`  | Ordered capital names   |         0 |
-| `choice-single`     | Single choice           |        18 |
-| `choice-multiple`   | Multiple choices        |         3 |
-| `choice-order`      | Order cards with spares |         0 |
-| `choice-match`      | Match cards to roles    |         1 |
+| Mode                   | Control                    | Questions |
+| ---------------------- | -------------------------- | --------: |
+| `pin`                  | Drop a pin                 |        16 |
+| `city-single`          | Single city pick           |         4 |
+| `city-multiple`        | Multiple city picks        |         0 |
+| `merged-region-single` | Single anonymous territory |         5 |
+| `map-single`           | Single country pick        |        12 |
+| `map-multiple`         | Multiple country picks     |         6 |
+| `number`               | Number                     |         2 |
+| `text`                 | Free response              |        10 |
+| `typed-regions`        | Typed region names         |         3 |
+| `ordered-countries`    | Ordered country names      |         0 |
+| `ordered-capitals`     | Ordered capital names      |         0 |
+| `choice-single`        | Single choice              |        18 |
+| `choice-multiple`      | Multiple choices           |         3 |
+| `choice-order`         | Order cards with spares    |         0 |
+| `choice-match`         | Match cards to roles       |         1 |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
 example or supported authoring recipe. Multiple-choice questions are capped at six
@@ -75,6 +77,23 @@ answers. Use disclosure settings to hide names, not hover settings to disable
 the intended control. Author typed recall as `mode: "text"` with an immediately
 visible input. `allowTyping: false` suppresses a globe-only question's typing
 shortcut while retaining the unavailable-WebGL fallback.
+
+`merged-region-single` asks for one apparent territory with hidden internal
+country boundaries. A `merged-region` rule declares a Journey-scoped synthetic
+`targetId`, canonical `memberIds`, and every internal `hiddenAdjacencies` pair.
+Use explicit candidates excluding the individual members, explicit submission,
+anonymous disclosure and equally highlighted candidate fills. Preparation checks
+canonical land adjacency and connectivity. The bundled shared-edge polygons are
+dissolved into one fill, outline and hit target during play; grading uses only the
+submitted target ID. Outer edges, mapped islands and enclave holes are preserved.
+Reveal restores canonical polygons and their names immediately, including with
+reduced motion. No extra boundary dataset, sovereignty change or DMZ overlay is
+introduced. Selection happens directly on the globe, without letters, country
+names or silhouette buttons during play. This mechanic currently requires WebGL
+and pointer/touch input. Assist preserves existing selections and otherwise
+narrows to four targets. Completion restores all eleven solution countries,
+uses five views without route lines in the existing flyover. Actual WebGL/mobile fidelity remains distinct from automated
+geometry and DOM checks.
 
 `choice-match` pairs distinct `choices` cards with labelled `matchSlots` roles.
 A `slot-matches` rule declares `{ slotId, choiceId }` pairs by stable identity;
@@ -111,17 +130,17 @@ The finale hides prior landmarks; the full results tour includes the colony.
 
 A rule describes correctness independently of its answer control:
 
-| Family                 | Rule IDs                                                                                               | Authority/limits                                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `slot-matches`, `country-ids`, `region-ids`, `place-ids` | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
-| Pin placement          | `pin-inside`, `pin-distance`                                                                           | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
-| Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                             | Sourced fact context or the explicit common-English-name UN roster.                                     |
-| Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                        | Bundled capital/flag records; capital-order checks the specified route.                                 |
-| Geographic reasoning   | `shortest-borders`, `great-circle-order`                                                               | Shared-edge canonical topology and spherical route intersections, not roads or travel permissions.      |
-| Reviewed relationships | `territory-owner`, `feature-count`, `language-family`, `official-languages`, `physical-feature`        | Curated sets/profiles, not universal relationships inferred from display metadata.                      |
-| Spatial predicates     | `capital-coordinate`, `capital-circle`, `country-circle`                                               | Pinned coordinates, geodesic disks, and full country geometry. `country-circle` has no bundled example. |
+| Family                 | Rule IDs                                                                                                                | Authority/limits                                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `slot-matches`, `country-ids`, `region-ids`, `place-ids`, `merged-region` | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
+| Pin placement          | `pin-inside`, `pin-distance`                                                                                            | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
+| Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                                              | Sourced fact context or the explicit common-English-name UN roster.                                     |
+| Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                                         | Bundled capital/flag records; capital-order checks the specified route.                                 |
+| Geographic reasoning   | `shortest-borders`, `great-circle-order`                                                                                | Shared-edge canonical topology and spherical route intersections, not roads or travel permissions.      |
+| Reviewed relationships | `territory-owner`, `feature-count`, `language-family`, `official-languages`, `physical-feature`                         | Curated sets/profiles, not universal relationships inferred from display metadata.                      |
+| Spatial predicates     | `capital-coordinate`, `capital-circle`, `country-circle`                                                                | Pinned coordinates, geodesic disks, and full country geometry. `country-circle` has no bundled example. |
 
-There are 25 declared knowledge-rule variants. Support for a rule does not imply
+There are 26 declared knowledge-rule variants. Support for a rule does not imply
 complete factual coverage or that every mode/rule combination is valid.
 [`createQuestionContext`](../src/game/questionPreparation.ts) prepares and validates the
 required targets/answers. Inspect an existing question with the same rule before
@@ -196,7 +215,7 @@ before publication. Automatic dates show the actual rotation title. Admin can
 navigate months, jump to today, enter a date directly, or restore automatic
 rotation for an assigned day.
 
-All 15 current Journeys (75 questions) author grouped play/assist/reveal scenes.
+All 16 current Journeys (80 questions) author grouped play/assist/reveal scenes.
 There are no archived runtime editions. The revised sun Journey keeps
 `chasing-the-sun-v2` and its `supersedes` alias so previously published original-ID
 assignments resolve to the current edition. The original ID is retired: save

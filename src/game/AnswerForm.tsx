@@ -265,7 +265,8 @@ export function AnswerForm({
         {question.commitment === "immediate" && (
           <QuestionActions guidance={guidance} showSubmit={false} />
         )}
-        {!question.disclosure.namedChoices &&
+        {question.mode !== "merged-region-single" &&
+          !question.disclosure.namedChoices &&
           ((!city && question.allowTyping !== false) ||
             question.allowTyping === true ||
             !webgl) && (
