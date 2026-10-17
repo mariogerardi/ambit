@@ -317,6 +317,18 @@ The colony marker uses the reserve location (53°27′38″S, 69°18′21″W) r
 [Vidal et al.'s 2023 reserve flora study](https://www.scielo.cl/article_plus.php?lng=es&pid=S0717-66432023000100001&tlng=es).
 It is a reference location, not a surveyed colony boundary.
 
+## Across the Divide bridge photographs
+
+The Journey credits the following photographs after each question is answered. Source and license details are recorded in the Journey content.
+
+| Photo                               | Creator                  | Source                                                                                                    | License                                                         |
+| ----------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Golden Gate Bridge (`01.v1.jpg`)    | ThomasLendt              | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Golden_Gate_Bridge_with_Fort_Point.jpg)       | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Sydney Harbour Bridge (`02.v1.jpg`) | JJ Harrison              | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sydney_Harbour_Bridge_from_Circular_Quay.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Tower Bridge (`03.v1.jpg`)          | Helen Ilus               | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Tower_Bridge_from_South_Bank.jpg)             | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Øresund Bridge (`04.v1.jpg`)        | Philaweb / Paul Bischoff | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Oresund_Bridge.JPG)                           | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)       |
+| Qiansimen Bridge (`05.v1.jpg`)      | DvTor8303                | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Qiansimen_Bridge_at_night_20251027.jpg)       | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)   |
+
 ## Shared-name Journey map context
 
 `src/game/data/shared-names-context.v1.json` and the identical downloadable

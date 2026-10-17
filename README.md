@@ -117,9 +117,10 @@ additional product mode. The npm package is named `ambit`.
 
 ## Repository and licensing
 
-This is a private project; no open-source license is granted for the application
-code. The package is marked `private` and `UNLICENSED`. Third-party dependencies,
-fonts, and geographic assets retain their own notices in [NOTICE.md](NOTICE.md).
+No open-source license is granted for the application code. The package is marked
+`private` and `UNLICENSED`; repository visibility does not change those terms.
+Third-party dependencies, fonts, photographs, and geographic assets retain their
+own notices in [NOTICE.md](NOTICE.md).
 
 [CI](.github/workflows/ci.yml) runs on main pushes, pull requests, and manual
 requests using the pinned Node version. It installs locked dependencies, checks

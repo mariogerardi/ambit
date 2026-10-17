@@ -1,8 +1,8 @@
 # Production hosting
 
 Ambit is hosted by AWS Amplify Hosting in `us-east-1`. The canonical address is
-**https://playambit.com**; `www.playambit.com` redirects to it. The repository
-remains private. Domain registration and DNS are managed through Route 53.
+**https://playambit.com**; `www.playambit.com` redirects to it. Domain registration
+and DNS are managed through Route 53.
 
 ## Deployments
 
