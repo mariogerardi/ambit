@@ -18,7 +18,7 @@ legacy data, and isolates invalid records. Study completion, targeted replay, an
 keyboard/no-WebGL map answers have regression coverage. These fixes do not supply
 history retention/export or browser/device performance verification.
 
-The project is version-controlled as the private `mariogerardi/ambit` repository,
+The project is version-controlled as the public `mariogerardi/ambit` repository,
 with Node 24.21.0 pinned and a [CI workflow](../.github/workflows/ci.yml)
 for locked installs, documentation formatting, tests, builds, and dependency
 advisories. Successful main-branch builds deploy the verified artifact to Amplify
