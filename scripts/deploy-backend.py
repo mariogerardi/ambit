@@ -10,11 +10,50 @@ import secrets
 import subprocess
 import sys
 import tempfile
+import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from infrastructure import template
+
+
+def datadog_api_key():
+    api_key = os.environ.get("DATADOG_API_KEY", "")
+    if api_key:
+        return api_key
+    try:
+        lines = (ROOT / ".env.local").read_text().splitlines()
+    except (OSError, UnicodeError):
+        return ""
+    for line in lines:
+        match = re.match(r"^\s*DATADOG_API_KEY\s*=\s*(.*)$", line)
+        if match:
+            api_key = match.group(1).strip().strip("\"'")
+    return api_key
+
+
+def send_deploy_event(args, api_key, status, detail):
+    if not api_key:
+        return
+    # Event delivery must never change the deployment outcome or expose the key.
+    try:
+        event = {
+            "title": f"Ambit backend deployment {status} ({args.environment})",
+            "text": f"Stack: ambit-{args.environment}-services\n{detail}".replace(api_key, "[redacted]"),
+            "tags": ["project:ambit", "service:ambit-api", f"env:{args.environment}", f"environment:{args.environment}", f"status:{status}"],
+            "alert_type": {"failed": "error", "succeeded": "success", "started": "info"}[status],
+        }
+        request = urllib.request.Request(
+            f"https://api.{args.datadog_site}/api/v1/events",
+            data=json.dumps(event).encode(),
+            headers={"Content-Type": "application/json", "DD-API-KEY": api_key},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=5):
+            pass
+    except Exception:
+        print("Warning: could not send Datadog deploy event.", file=sys.stderr)
 
 
 def write_client_configuration(outputs, environment, write_dev_env=False):
@@ -51,8 +90,8 @@ def main():
     if args.write_dev_env and args.environment != "staging":
         parser.error("--write-dev-env requires --environment staging")
     stack = f"ambit-{args.environment}-services"
-    def aws(*arguments, raw=False):
-        result = subprocess.run(["aws", *arguments, "--profile", args.profile, "--region", "us-east-1"], capture_output=True, text=True)
+    def aws(*arguments, raw=False, env=None):
+        result = subprocess.run(["aws", *arguments, "--profile", args.profile, "--region", "us-east-1"], capture_output=True, text=True, env=env)
         if result.returncode:
             raise RuntimeError(result.stderr.strip())
         return result.stdout if raw else json.loads(result.stdout or "{}")
@@ -66,8 +105,29 @@ def main():
         if args.write_dev_env:
             print("Updated .env.development.local; restart Vite to use staging.")
         return
+    api_key = datadog_api_key()
+    try:
+        status, revision = deploy_backend(args, aws, api_key)
+    except Exception as error:
+        send_deploy_event(args, api_key, "failed", f"{type(error).__name__}: {error}")
+        raise
+    detail = f"Release: {revision[:12]}. " + ("CloudFormation started; completion has not been verified." if status == "started" else "Deployment completed.")
+    send_deploy_event(args, api_key, status, detail)
+
+
+def deploy_backend(args, aws, api_key):
+    stack = f"ambit-{args.environment}-services"
     account = aws("sts", "get-caller-identity")["Account"]
     bucket = f"ambit-backend-artifacts-{account}-us-east-1"
+
+    def upload(source, key):
+        destination = f"s3://{bucket}/{key}"
+        try:
+            aws("s3", "cp", str(source), destination, "--only-show-errors", "--no-progress", raw=True,
+                env={**os.environ, "AWS_RETRY_MODE": "adaptive", "AWS_MAX_ATTEMPTS": "5"})
+        except (RuntimeError, OSError) as error:
+            raise RuntimeError(f"Failed to upload {destination}: {error}") from None
+
     try:
         aws("s3api", "head-bucket", "--bucket", bucket)
     except RuntimeError as error:
@@ -105,12 +165,6 @@ def main():
             raise
     datadog_secret = args.datadog_secret_arn
     if args.with_datadog:
-        api_key = os.environ.get("DATADOG_API_KEY", "")
-        if not api_key:
-            for line in (ROOT / ".env.local").read_text().splitlines():
-                match = re.match(r"^\s*DATADOG_API_KEY\s*=\s*(.*)$", line)
-                if match:
-                    api_key = match.group(1).strip().strip("\"'")
         if not re.fullmatch(r"[a-fA-F0-9]{32}", api_key):
             raise RuntimeError("DATADOG_API_KEY must contain a valid API key; its value will not be printed")
         name = f"ambit/{args.environment}/datadog-api-key"
@@ -137,11 +191,11 @@ def main():
         template_content = json.dumps(template(args.environment)).encode()
         (directory / "template.json").write_bytes(template_content)
         (directory / "parameters.json").write_text(json.dumps(parameters))
-        aws("s3api", "put-object", "--bucket", bucket, "--key", key, "--body", str(directory / "backend.zip"))
+        upload(directory / "backend.zip", key)
         # Branding embeds vector artwork; CloudFormation's inline limit is 51 KB.
         if len(template_content) > 51200:
             template_key = "templates/" + hashlib.sha256(template_content).hexdigest() + ".json"
-            aws("s3api", "put-object", "--bucket", bucket, "--key", template_key, "--body", str(directory / "template.json"))
+            upload(directory / "template.json", template_key)
             template_argument = ["--template-url", f"https://{bucket}.s3.us-east-1.amazonaws.com/{template_key}"]
         else:
             template_argument = ["--template-body", f"file://{directory / 'template.json'}"]
@@ -153,7 +207,7 @@ def main():
                 print(f"Started {stack} {action}, release {revision[:12]}; not waiting for completion.", flush=True)
                 print(f"Stack: https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId={stack}")
                 print(f"Refresh endpoints later: python3 scripts/deploy-backend.py --profile {args.profile} --environment {args.environment} --refresh-config" + (" --write-dev-env" if args.write_dev_env else ""))
-                return
+                return "started", revision
             print("Waiting for CloudFormation…", flush=True)
             aws("cloudformation", "wait", "stack-update-complete" if exists else "stack-create-complete", "--stack-name", stack, raw=True)
         except RuntimeError as error:
@@ -164,6 +218,7 @@ def main():
     print(f"Deployed {args.environment} {revision[:12]}. Public client configuration: {destination}", flush=True)
     if args.write_dev_env:
         print("Updated .env.development.local; restart Vite to use staging.")
+    return "succeeded", revision
 
 
 
