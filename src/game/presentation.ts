@@ -250,10 +250,10 @@ export function questionRegions(
   phase: GameState["phase"],
   helpStage?: "hinted" | "assisted",
 ) {
-  const cacheKey = `${phase}:${helpStage ?? ""}`;
   if (question.rule.type === "merged-region" && phase === "playing") {
+    // Help changes candidate states, not the composite boundary geometry.
     let variants = regionVariants.get(regions);
-    const cached = variants?.get(question)?.get(cacheKey);
+    const cached = variants?.get(question)?.get(phase);
     if (cached) return cached;
     const memberIds = question.rule.memberIds;
     const result = [
@@ -261,9 +261,10 @@ export function questionRegions(
       compositeRegion(regions, question),
     ];
     if (!variants) regionVariants.set(regions, (variants = new WeakMap()));
-    variants.set(question, new Map([[cacheKey, result]]));
+    variants.set(question, new Map([[phase, result]]));
     return result;
   }
+  const cacheKey = `${phase}:${helpStage ?? ""}`;
   const highlights = (question.highlightParts ?? []).filter(
     (highlight) =>
       phase === "playing" || (phase === "feedback" && !!highlight.reveal),

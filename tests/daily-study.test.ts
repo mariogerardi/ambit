@@ -14,7 +14,9 @@ import {
   validDaily,
 } from "../src/app/daily";
 import { readSave, writeSave } from "../src/app/storage";
-import { JOURNEYS } from "../src/game/journeys";
+import { CANADA_JOURNEY } from "../src/game/canadaJourney";
+import { FOURTH_JOURNEY } from "../src/game/fourthJourney";
+import { ACROSS_DIVIDE_JOURNEY } from "../src/game/acrossDivideJourney";
 import {
   COUNTRIES,
   FLAGS,
@@ -51,16 +53,16 @@ describe("New York daily schedule and persistence", () => {
   it("persists admin choices, archives progress, restores it when switching back, and resets the choice at midnight", () => {
     const date = "2026-10-05";
     const started = openDaily(
-      setDailyPuzzle(emptyDaily, date, JOURNEYS[0].id),
+      setDailyPuzzle(emptyDaily, date, CANADA_JOURNEY.id),
       date,
     );
     started.attempts[date].game.text = "saved input";
-    const switched = setDailyPuzzle(started, date, JOURNEYS[3].id);
-    expect(dailyJourney(date, switched)).toBe(JOURNEYS[3]);
-    const fourth = openDaily(switched, date);
-    expect(fourth.attempts[date].journeyId).toBe(JOURNEYS[3].id);
-    expect(dailyJourney("2026-10-06", fourth)).toBe(JOURNEYS[1]);
-    const restored = setDailyPuzzle(fourth, date, JOURNEYS[0].id);
+    const switched = setDailyPuzzle(started, date, ACROSS_DIVIDE_JOURNEY.id);
+    expect(dailyJourney(date, switched)).toBe(ACROSS_DIVIDE_JOURNEY);
+    const selected = openDaily(switched, date);
+    expect(selected.attempts[date].journeyId).toBe(ACROSS_DIVIDE_JOURNEY.id);
+    expect(dailyJourney("2026-10-06", selected)).toBe(FOURTH_JOURNEY);
+    const restored = setDailyPuzzle(selected, date, CANADA_JOURNEY.id);
     expect(restored.attempts[date].game.text).toBe("saved input");
     expect(validDaily(JSON.parse(JSON.stringify(restored)))).toBe(true);
     expect(validDaily({ ...restored, overrides: { [date]: "unknown" } })).toBe(
@@ -68,16 +70,19 @@ describe("New York daily schedule and persistence", () => {
     );
     expect(() => setDailyPuzzle(restored, date, "unknown")).toThrow();
     expect(
-      validDaily({ ...restored, overrides: { "2026-02-30": JOURNEYS[0].id } }),
+      validDaily({
+        ...restored,
+        overrides: { "2026-02-30": CANADA_JOURNEY.id },
+      }),
     ).toBe(false);
   });
   it("supports future curated overrides without changing the repeating baseline", () => {
     DAILY_SCHEDULE.overrides.push({
       date: "2026-11-10",
-      journeyId: JOURNEYS[0].id,
+      journeyId: ACROSS_DIVIDE_JOURNEY.id,
     });
     try {
-      expect(dailyJourney("2026-11-10")).toBe(JOURNEYS[0]);
+      expect(dailyJourney("2026-11-10")).toBe(ACROSS_DIVIDE_JOURNEY);
     } finally {
       DAILY_SCHEDULE.overrides.pop();
     }
@@ -86,7 +91,7 @@ describe("New York daily schedule and persistence", () => {
     const started = openDaily(emptyDaily, "2026-10-05");
     const persisted = JSON.parse(JSON.stringify(started));
     expect(validDaily(persisted)).toBe(true);
-    expect(dailyJourney("2026-10-06")).toBe(JOURNEYS[1]);
+    expect(dailyJourney("2026-10-06")).toBe(FOURTH_JOURNEY);
     expect(persisted.activeDate).toBe("2026-10-05");
     const nextDay = openDaily(persisted, "2026-10-06");
     expect(Object.keys(nextDay.attempts)).toHaveLength(2);

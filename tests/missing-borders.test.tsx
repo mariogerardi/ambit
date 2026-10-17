@@ -99,18 +99,19 @@ describe("Missing Borders composite mechanic", () => {
       ).toBe(merged);
       expect(rendered.regionNames).toBe("none");
       expect(rendered.places).toEqual([]);
-      for (const stage of ["hinted", "assisted"] as const)
-        expect(
-          journeyWorld(
-            regions,
-            journey,
-            {
-              ...playing(index),
-              help: { [question.id]: stage },
-            },
-            context,
-          ).places,
-        ).toEqual([]);
+      for (const stage of ["hinted", "assisted"] as const) {
+        const helped = journeyWorld(
+          regions,
+          journey,
+          {
+            ...playing(index),
+            help: { [question.id]: stage },
+          },
+          context,
+        );
+        expect(helped.regions).toBe(rendered.regions);
+        expect(helped.places).toEqual([]);
+      }
       const neighbor =
         question.selection.type === "ids"
           ? question.selection.ids.find((id) => id !== rule.targetId)!

@@ -1,12 +1,15 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **16 current Journeys and 80 questions**, with eleven active
-daily concepts, reviewed against the code on October 12, 2026. Each Journey has
+The bundled catalog contains **17 current Journeys and 85 questions**, with eleven active
+daily concepts, reviewed against the code on October 17, 2026. Each Journey has
 five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
 everyone; unassigned dates use the automatic rotation. Direct practice routes are Admin-only; Admin’s “Preview five questions” opens the selected Journey. Chasing the sun and Down the Danube are ready for date assignments and
 have not been added to the automatic rotation. Same Hour, Different Worlds is also
 available for preview and date assignments without joining the rotation. Same Name, Different Place is also available without joining the rotation. Missing Borders is available for preview and date assignments without joining the rotation. There is no current in-app authoring
 or AI generator. Previously published local packs are read-only compatibility data.
+
+Across the Divide is available for preview and date assignments without joining
+the automatic rotation.
 
 ## Bundled Journeys
 
@@ -28,6 +31,7 @@ or AI generator. Previously published local packs are read-only compatibility da
 | 14  | Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)             |
 | 15  | Same Name, Different Place  | `/journey/same-name-different-place`  | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)       |
 | 16  | Missing Borders             | `/journey/missing-borders`            | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts) |
+| 17  | Across the Divide           | `/journey/across-the-divide`          | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)     |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses midnight in New York and
@@ -43,13 +47,13 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 80 current questions, not every possible engine pairing.
+Counts below refer to the 85 current questions, not every possible engine pairing.
 The type and rule contracts live in [`questionContracts.ts`](../src/game/questionContracts.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
 | Mode                   | Control                    | Questions |
 | ---------------------- | -------------------------- | --------: |
-| `pin`                  | Drop a pin                 |        16 |
+| `pin`                  | Drop a pin                 |        21 |
 | `city-single`          | Single city pick           |         4 |
 | `city-multiple`        | Multiple city picks        |         0 |
 | `merged-region-single` | Single anonymous territory |         5 |
@@ -215,7 +219,7 @@ before publication. Automatic dates show the actual rotation title. Admin can
 navigate months, jump to today, enter a date directly, or restore automatic
 rotation for an assigned day.
 
-All 16 current Journeys (80 questions) author grouped play/assist/reveal scenes.
+All 17 current Journeys (85 questions) author grouped play/assist/reveal scenes.
 There are no archived runtime editions. The revised sun Journey keeps
 `chasing-the-sun-v2` and its `supersedes` alias so previously published original-ID
 assignments resolve to the current edition. The original ID is retired: save

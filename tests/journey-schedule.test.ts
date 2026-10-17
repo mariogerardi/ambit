@@ -11,17 +11,19 @@ import { initialGame } from "../src/game/state";
 
 describe("shared Journey dates", () => {
   const day = "2026-10-05";
-  const edition = JOURNEY_INDEX[3];
+  const edition = JOURNEY_INDEX.find(
+    (journey) => journey.id === "across-the-divide-v1",
+  )!;
   it("uses published dates before legacy device overrides and falls back to rotation", () => {
     const progress = {
       ...emptyDaily,
-      overrides: { [day]: JOURNEY_INDEX[2].id },
+      overrides: { [day]: "mediterranean-v1" },
     };
     expect(
       dailyJourney(day, progress, JOURNEY_INDEX, { [day]: edition.id }).id,
     ).toBe(edition.id);
     expect(dailyJourney(day, progress, JOURNEY_INDEX, {}).id).toBe(
-      JOURNEY_INDEX[0].id,
+      "beyond-the-maple-leaf-v1",
     );
     const started = openDaily(progress, day, false, JOURNEY_INDEX, {
       [day]: edition.id,

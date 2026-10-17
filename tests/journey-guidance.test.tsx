@@ -92,7 +92,7 @@ describe("authored Journey hint and assist stages", () => {
       vi.restoreAllMocks();
     }
   });
-  it("authors both stages for the reviewed capital, Andes, sun and Mediterranean Journeys and validates candidate uncertainty", () => {
+  it("authors both stages for the reviewed Journeys and validates candidate uncertainty", () => {
     for (const pack of JOURNEYS)
       expect(
         pack.rounds.every(
@@ -106,6 +106,7 @@ describe("authored Journey hint and assist stages", () => {
               "same-hour-different-worlds",
               "same-name-different-place-v1",
               "missing-borders-v1",
+              "across-the-divide-v1",
             ].includes(pack.id),
         ),
       ).toBe(true);
