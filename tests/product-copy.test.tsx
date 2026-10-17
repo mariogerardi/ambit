@@ -94,11 +94,23 @@ describe("product copy follows the answer and visible reveal", () => {
   it.each(JOURNEYS.map((journey) => [journey.id, journey] as const))(
     "%s makes each question the heading and omits duplicate headlines and interface narration",
     (_, journey) => {
-      const context = createQuestionContext(regions, COUNTRY_FACTS, journey);
-      journey.rounds.forEach((question, roundIndex) => {
+      // Distinct internal titles let valid progress labels share the real title.
+      const authoredJourney = {
+        ...journey,
+        rounds: journey.rounds.map((question, index) => ({
+          ...question,
+          title: `Internal authoring title ${index + 1}`,
+        })),
+      };
+      const context = createQuestionContext(
+        regions,
+        COUNTRY_FACTS,
+        authoredJourney,
+      );
+      authoredJourney.rounds.forEach((question, roundIndex) => {
         const html = renderToStaticMarkup(
           <GameShell
-            journey={journey}
+            journey={authoredJourney}
             context={context}
             game={{ ...initialGame, phase: "playing", roundIndex }}
             dispatch={() => {}}
@@ -126,6 +138,7 @@ describe("product copy follows the answer and visible reveal", () => {
         );
         expect(html).not.toContain("question-prompt");
         expect(html).not.toContain(question.title);
+        expect(html.match(/<h[1-6]\b/g)).toHaveLength(1);
         expect(question.instruction).not.toMatch(
           /names are hidden|borders are hidden|any order|when you hover|until you (?:submit|answer)/i,
         );

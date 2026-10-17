@@ -73,7 +73,19 @@ describe("retained daily rotation", () => {
     ).toBeUndefined();
   });
   it("cycles only the eleven approved editions, and permanently rejects removed editions", async () => {
-    expect(ACTIVE_JOURNEY_IDS).toHaveLength(11);
+    expect(ACTIVE_JOURNEY_IDS).toEqual([
+      "beyond-the-maple-leaf-v1",
+      "mediterranean-v1",
+      "shared-neighbors-v1",
+      "along-the-andes-v1",
+      "not-the-obvious-city-v1",
+      "island-instincts-v1",
+      "north-america-v2",
+      "latitude-surprises-v1",
+      "ring-of-fire-v1",
+      "exceptions-to-the-rule-v1",
+      "try-not-to-click-russia-v1",
+    ]);
     expect(new Set(ACTIVE_JOURNEY_IDS).size).toBe(11);
     for (let index = 0; index < 22; index++) {
       const date = `2026-10-${String(index + 5).padStart(2, "0")}`;
@@ -87,14 +99,17 @@ describe("retained daily rotation", () => {
     expect(() =>
       setDailyPuzzle(emptyDaily, "2026-10-10", "enclosed-territories-v1"),
     ).toThrow("Unknown Journey");
-    expect(JOURNEY_INDEX.map((entry) => entry.id)).toEqual([
-      ...ACTIVE_JOURNEY_IDS,
-      "chasing-the-sun-v2",
-      "down-the-danube-v1",
-      "same-hour-different-worlds",
-      "same-name-different-place-v1",
-      "missing-borders-v1",
-    ]);
+    expect(JOURNEY_INDEX.map((entry) => entry.id).sort()).toEqual(
+      [
+        ...ACTIVE_JOURNEY_IDS,
+        "across-the-divide-v1",
+        "chasing-the-sun-v2",
+        "down-the-danube-v1",
+        "same-hour-different-worlds",
+        "same-name-different-place-v1",
+        "missing-borders-v1",
+      ].sort(),
+    );
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === NORTH_AMERICA_JOURNEY.id)
         ?.path,
