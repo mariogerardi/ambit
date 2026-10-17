@@ -17,6 +17,7 @@ import {
 } from "react";
 import type { CSSProperties } from "react";
 import { BoardBoundary, PanelBoundary } from "./app/ErrorBoundaries";
+import { clearGlobeChunkReload } from "./app/globeChunkRecovery";
 import type {
   RegionFeature,
   VisualState,
@@ -415,9 +416,15 @@ export function App() {
     (displayLayers?.names ? "all" : "none");
   const fail = useCallback(() => {
       setWebgl(false);
-      reportFailure("globe loading");
     }, []),
-    onReady = useCallback(() => setReady(true), []);
+    contextLost = useCallback(() => {
+      setWebgl(false);
+      reportFailure("globe rendering", { failureType: "webglcontextlost" });
+    }, []),
+    onReady = useCallback(() => {
+      clearGlobeChunkReload();
+      setReady(true);
+    }, []);
   const selectExplore = useCallback(
     (id?: string) => {
       stop();
@@ -1039,7 +1046,7 @@ export function App() {
                 }
                 onReady={onReady}
                 onInteraction={stop}
-                onFailure={fail}
+                onFailure={contextLost}
                 onTextureFallback={noAction}
                 onSurfaceTap={
                   mode === "home"

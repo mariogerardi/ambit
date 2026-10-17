@@ -54,7 +54,12 @@ export function HomePanel({
             </span>
           ))}
         </div>
-        <button className="primary-button" disabled={!ready} onClick={onPlay}>
+        <button
+          className="primary-button"
+          data-dd-action-name="Home Journey"
+          disabled={!ready}
+          onClick={onPlay}
+        >
           {label}
           <span>→</span>
         </button>
@@ -68,13 +73,13 @@ export function HomePanel({
         </p>
       )}
       <div className="menu-secondary">
-        <button onClick={onExplore}>
+        <button data-dd-action-name="Home Explore" onClick={onExplore}>
           <strong>
             Explore <span>→</span>
           </strong>
           <small>Follow your curiosity.</small>
         </button>
-        <button onClick={onStudy}>
+        <button data-dd-action-name="Home Study" onClick={onStudy}>
           <strong>
             Study <span>→</span>
           </strong>

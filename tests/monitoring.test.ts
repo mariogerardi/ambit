@@ -23,7 +23,7 @@ beforeEach(() => {
   history.replaceState(null, "", "/study");
 });
 afterEach(() => vi.unstubAllEnvs());
-it("initializes React RUM once with manual views, masked privacy, and no session recording", async () => {
+it("initializes React RUM with masked click names and no session recording", async () => {
   const { trackView } = await import("../src/services/monitoring");
   trackView("study");
   trackView("study");
@@ -35,12 +35,25 @@ it("initializes React RUM once with manual views, masked privacy, and no session
     sessionReplaySampleRate: 0,
     defaultPrivacyLevel: "mask",
     trackViewsManually: true,
-    trackUserInteractions: false,
+    trackUserInteractions: true,
+    enablePrivacyForActionName: true,
   });
   expect(rum.startView.mock.calls).toEqual([
     [{ name: "study" }],
     [{ name: "explore" }],
   ]);
+});
+it("reports a supplied safe error with its original stack and context", async () => {
+  const { startMonitoring, reportFailure } = await import(
+    "../src/services/monitoring"
+  );
+  startMonitoring();
+  const cause = new Error("Feedback response was invalid");
+  reportFailure("feedback request", { httpStatus: 200 }, cause);
+  expect(rum.addError).toHaveBeenCalledWith(cause, {
+    area: "feedback request",
+    httpStatus: 200,
+  });
 });
 it("excludes auth callbacks and waits until their parameters are removed", async () => {
   history.replaceState(null, "", "/auth/callback?code=private");

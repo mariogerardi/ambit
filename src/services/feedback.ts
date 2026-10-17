@@ -79,7 +79,11 @@ export async function feedbackApi<T>(
       reportFailure("feedback timeout", context);
       throw new Error("The request took too long. Please try again.");
     }
-    reportFailure("feedback request", context);
+    reportFailure(
+      "feedback request",
+      context,
+      httpStatus >= 400 && error instanceof Error ? error : undefined,
+    );
     if (error instanceof TypeError)
       throw new Error("Couldn’t connect. Check your connection and try again.");
     if (error instanceof SyntaxError)

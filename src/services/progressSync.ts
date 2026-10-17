@@ -302,6 +302,7 @@ export class ProgressSync {
         error instanceof RequestFailure
           ? error.context
           : { errorType: failureType(error), online: navigator.onLine },
+        error instanceof RequestFailure ? error : undefined,
       );
       this.dirty = true;
     } finally {

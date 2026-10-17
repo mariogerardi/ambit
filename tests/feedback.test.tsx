@@ -189,6 +189,7 @@ it("reports safe HTTP and network diagnostics and ignores cancelled requests", a
       route: "/feedback",
       attemptCount: 1,
     }),
+    expect.any(Error),
   );
   expect(JSON.stringify(report.mock.calls)).not.toContain("private");
   vi.mocked(fetch).mockRejectedValue(new TypeError("private error"));
@@ -196,6 +197,7 @@ it("reports safe HTTP and network diagnostics and ignores cancelled requests", a
   expect(report).toHaveBeenLastCalledWith(
     "feedback request",
     expect.objectContaining({ httpStatus: 0, errorType: "network" }),
+    undefined,
   );
   report.mockClear();
   const controller = new AbortController();

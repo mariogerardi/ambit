@@ -38,7 +38,8 @@ export function startMonitoring() {
       trackViewsManually: true,
       trackResources: true,
       trackLongTasks: true,
-      trackUserInteractions: false,
+      trackUserInteractions: true,
+      enablePrivacyForActionName: true,
       allowedTracingUrls: [
         {
           match: serviceConfig.apiUrl,
@@ -85,9 +86,10 @@ export function trackView(name: string) {
 export function reportFailure(
   area: string,
   context: Record<string, string | number | boolean> = {},
+  error?: Error,
 ) {
   if (enabled)
-    datadogRum.addError(new Error(`Ambit ${area} failed`), {
+    datadogRum.addError(error ?? new Error(`Ambit ${area} failed`), {
       area,
       ...context,
     });

@@ -1,6 +1,7 @@
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import { reportReactFailure } from "../services/monitoring";
+import { reloadGlobeChunkOnce } from "./globeChunkRecovery";
 
 /** A failed globe leaves the app's written controls and navigation available. */
 export class BoardBoundary extends Component<
@@ -13,6 +14,7 @@ export class BoardBoundary extends Component<
   }
   componentDidCatch(error: unknown, info: ErrorInfo) {
     reportReactFailure(error, info);
+    reloadGlobeChunkOnce(error);
     this.props.onError();
   }
   render() {
