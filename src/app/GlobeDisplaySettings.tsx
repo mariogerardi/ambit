@@ -112,6 +112,7 @@ export function GlobeDisplaySettings({
         <div className="explore-settings-heading">
           <h2>Globe settings</h2>
           <button
+            data-dd-action-name="Globe Close Settings"
             aria-label="Close globe settings"
             onClick={() => {
               setOpen(false);
@@ -152,9 +153,10 @@ export function GlobeDisplaySettings({
               "oceans",
             ] as const
           ).map((key) => (
-            <label key={key}>
+            <label key={key} data-dd-action-name="Globe Toggle Layer">
               <input
                 type="checkbox"
+                data-dd-action-name="Globe Toggle Layer"
                 checked={settings[key]}
                 onChange={(e) =>
                   onSettings({ ...settings, [key]: e.target.checked })
@@ -179,6 +181,7 @@ export function GlobeDisplaySettings({
           <label className="globe-settings-speed">
             Rotation speed
             <select
+              data-dd-action-name="Globe Rotation Speed"
               aria-label="Rotation speed"
               value={speed}
               disabled={motionDisabled}
@@ -199,6 +202,7 @@ export function GlobeDisplaySettings({
     <>
       <button
         ref={settingsButton}
+        data-dd-action-name="Globe Open Settings"
         className="settings-button globe-display-settings"
         aria-label="Globe settings"
         title="Globe display settings"

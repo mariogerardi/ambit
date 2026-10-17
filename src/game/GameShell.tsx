@@ -112,12 +112,17 @@ export function GameShell({
     <div className="finish-actions result-actions completion-navigation">
       <button
         className={social ? "study-repeat-button" : "primary-button"}
+        data-dd-action-name="Journey Home"
         onClick={onHome}
       >
         <ActionIcon name="home" />
         <span>Home</span>
       </button>
-      <button className="study-repeat-button" onClick={onStudy}>
+      <button
+        className="study-repeat-button"
+        data-dd-action-name="Journey Study"
+        onClick={onStudy}
+      >
         <ActionIcon name="study" />
         <span>Study</span>
       </button>
@@ -366,6 +371,7 @@ export function GameShell({
               )}
               <button
                 className="primary-button"
+                data-dd-action-name="Journey Next Round"
                 onClick={() => dispatch({ type: "next" })}
               >
                 {game.roundIndex === journey.rounds.length - 1
@@ -473,6 +479,7 @@ export function GameShell({
           {canReplay && (
             <button
               className="quiet-button tertiary-action journey-replay"
+              data-dd-action-name="Journey Play Again"
               onClick={start}
             >
               <ActionIcon name="repeat" /> Play again
@@ -484,7 +491,12 @@ export function GameShell({
         <aside className="journey-map-notes" aria-label="Map notes">
           {mapCaption && <span>{mapCaption}</span>}
           {mapAttribution && (
-            <a href={mapAttribution.url} target="_blank" rel="noreferrer">
+            <a
+              data-dd-action-name="Journey Map Source"
+              href={mapAttribution.url}
+              target="_blank"
+              rel="noreferrer"
+            >
               {mapAttribution.label}
             </a>
           )}
@@ -496,7 +508,12 @@ export function GameShell({
             <span className="hover-place" aria-live="polite">
               {visibleHover ?? "Drag to rotate"}
             </span>
-            <button onClick={() => frame(round.focus)}>◎ Recenter</button>
+            <button
+              data-dd-action-name="Journey Recenter"
+              onClick={() => frame(round.focus)}
+            >
+              ◎ Recenter
+            </button>
           </>
         )}
       </div>

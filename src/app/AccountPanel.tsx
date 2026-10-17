@@ -40,6 +40,7 @@ export function AccountPanel({
         {account.user.expired && (
           <button
             className="quiet-button tertiary-action"
+            data-dd-action-name="Account Sign In Again"
             disabled={account.busy}
             onClick={() => void account.signIn()}
           >
@@ -74,6 +75,7 @@ export function AccountPanel({
           <div className="account-actions">
             <button
               className="primary-button"
+              data-dd-action-name="Account Sign In"
               disabled={account.busy}
               onClick={() => void account.signIn()}
             >
@@ -81,6 +83,7 @@ export function AccountPanel({
             </button>
             <button
               className="quiet-button tertiary-action"
+              data-dd-action-name="Account Create Account"
               disabled={account.busy}
               onClick={() => void account.signIn(true)}
             >
@@ -113,7 +116,11 @@ export function AdminAccess({
     <section className="info-view" aria-label="Admin access">
       <h1>Admin access required.</h1>
       <p>Sign in with the administrator account to continue.</p>
-      <button className="primary-button" onClick={onAccount}>
+      <button
+        className="primary-button"
+        data-dd-action-name="Account Open Account"
+        onClick={onAccount}
+      >
         Go to account
       </button>
     </section>

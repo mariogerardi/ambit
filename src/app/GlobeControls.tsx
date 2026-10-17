@@ -39,6 +39,7 @@ export function GlobeControls({
     >
       <div className="globe-playback" role="group" aria-label="Earth rotation">
         <button
+          data-dd-action-name="Globe Toggle Rotation"
           aria-label={rotationLabel}
           title={compact ? undefined : rotationLabel}
           aria-pressed={motion && !reduced}
@@ -70,6 +71,7 @@ export function GlobeControls({
               <circle cx="12" cy="12" r="1.5" />
             </svg>
             <select
+              data-dd-action-name="Globe Rotation Speed"
               aria-label="Rotation speed"
               value={speed}
               disabled={reduced || !ready}
@@ -86,6 +88,7 @@ export function GlobeControls({
       </div>
       <span className="globe-motion-divider" aria-hidden="true" />
       <button
+        data-dd-action-name="Globe Fidget"
         aria-label="Fidget"
         title={compact ? undefined : "Fidget"}
         disabled={reduced || !ready}

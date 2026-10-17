@@ -61,6 +61,7 @@ export function QuestionActions({
       <div className="question-answer-actions">
         <button
           type="button"
+          data-dd-action-name={assist ? "Answer Assist" : "Answer Hint"}
           className={`primary-button answer-hint-button${assist ? " answer-assist-button" : ""}`}
           disabled={!guidance || exhausted}
           title={
@@ -81,6 +82,7 @@ export function QuestionActions({
         {showSubmit && (
           <button
             type={submitType}
+            data-dd-action-name="Answer Submit"
             className="primary-button answer-submit-button"
             disabled={disabled}
             onClick={onSubmit}

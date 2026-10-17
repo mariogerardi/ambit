@@ -14,9 +14,10 @@ export function StudyPreferences({
         {(
           ["borders", "countryNames", "capitalMarkers", "capitalNames"] as const
         ).map((key) => (
-          <label key={key}>
+          <label key={key} data-dd-action-name="Study Toggle Globe Hint">
             <input
               type="checkbox"
+              data-dd-action-name="Study Toggle Globe Hint"
               checked={settings[key]}
               onChange={(event) =>
                 onSettings({ ...settings, [key]: event.target.checked })
@@ -39,9 +40,10 @@ export function StudyPreferences({
       </fieldset>
       <fieldset className="display-settings">
         <legend>Pacing</legend>
-        <label>
+        <label data-dd-action-name="Study Toggle Auto Advance">
           <input
             type="checkbox"
+            data-dd-action-name="Study Toggle Auto Advance"
             checked={settings.autoAdvance}
             onChange={(event) =>
               onSettings({ ...settings, autoAdvance: event.target.checked })
@@ -49,9 +51,10 @@ export function StudyPreferences({
           />
           Move on after a correct answer
         </label>
-        <label>
+        <label data-dd-action-name="Study Toggle Missed Review">
           <input
             type="checkbox"
+            data-dd-action-name="Study Toggle Missed Review"
             checked={settings.revisitMissed ?? false}
             onChange={(event) =>
               onSettings({ ...settings, revisitMissed: event.target.checked })

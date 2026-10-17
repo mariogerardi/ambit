@@ -93,6 +93,7 @@ export function StudyResults({
                 <li key={key}>
                   <button
                     className="study-review-place"
+                    data-dd-action-name="Study Locate Missed Place"
                     aria-expanded={expanded}
                     aria-controls={`review-${key.replaceAll("/", "-")}`}
                     onClick={() => {
@@ -139,7 +140,11 @@ export function StudyResults({
         className={`study-result-actions result-actions${missed.length ? "" : " study-result-actions-perfect"}`}
       >
         {missed.length > 0 && (
-          <button className="primary-button" onClick={review}>
+          <button
+            className="primary-button"
+            data-dd-action-name="Study Review Missed"
+            onClick={review}
+          >
             <ActionIcon name="review" />
             <span>
               Review {missedIds.length}{" "}
@@ -149,17 +154,26 @@ export function StudyResults({
         )}
         <button
           className={missed.length ? "study-repeat-button" : "primary-button"}
+          data-dd-action-name="Study Repeat Session"
           onClick={() => onStart(session.settings, studyReplayTargets(session))}
         >
           <ActionIcon name="repeat" />
           <span>Repeat this session</span>
         </button>
-        <button className="study-repeat-button" onClick={onSetup}>
+        <button
+          className="study-repeat-button"
+          data-dd-action-name="Study Build Custom Session"
+          onClick={onSetup}
+        >
           <ActionIcon name="custom" />
           <span>Build a custom session</span>
         </button>
         {onHome && (
-          <button className="study-repeat-button" onClick={onHome}>
+          <button
+            className="study-repeat-button"
+            data-dd-action-name="Study Home"
+            onClick={onHome}
+          >
             <ActionIcon name="home" />
             <span>Home</span>
           </button>
@@ -168,6 +182,7 @@ export function StudyResults({
       {onHistory && (
         <button
           className="quiet-button tertiary-action study-history-link"
+          data-dd-action-name="Study Past Sessions"
           onClick={onHistory}
         >
           Past study sessions

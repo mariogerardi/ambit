@@ -123,6 +123,7 @@ export function FeedbackDialog({
           </h2>
           <button
             className="study-options-close"
+            data-dd-action-name="Feedback Close"
             aria-label="Close feedback"
             onClick={onClose}
           >
@@ -143,7 +144,11 @@ export function FeedbackDialog({
         {saved ? (
           <>
             <p role="status">Thanks—your feedback was sent.</p>
-            <button className="primary-button" onClick={onClose}>
+            <button
+              className="primary-button"
+              data-dd-action-name="Feedback Done"
+              onClick={onClose}
+            >
               Done
             </button>
           </>
@@ -157,6 +162,7 @@ export function FeedbackDialog({
             <label className="field">
               Category
               <select
+                data-dd-action-name="Feedback Select Category"
                 value={category}
                 disabled={busy}
                 onChange={(event) => setCategory(event.target.value)}
@@ -196,6 +202,7 @@ export function FeedbackDialog({
             {error && <p role="alert">{error}</p>}
             <button
               className="primary-button"
+              data-dd-action-name="Feedback Submit"
               disabled={
                 busy || (request.kind === "experience" && !message.trim())
               }

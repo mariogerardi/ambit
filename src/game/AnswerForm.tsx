@@ -95,6 +95,7 @@ export function AnswerForm({
           {game.pin && (
             <button
               className="quiet-button tertiary-action"
+              data-dd-action-name="Answer Remove Pin"
               onClick={() => dispatch({ type: "clear" })}
             >
               Remove pin
@@ -102,7 +103,9 @@ export function AnswerForm({
           )}
         </div>
         <details className="typed-country-guess" open={!webgl || undefined}>
-          <summary>Enter coordinates</summary>
+          <summary data-dd-action-name="Answer Enter Coordinates">
+            Enter coordinates
+          </summary>
           <form
             autoComplete="off"
             key={question.id}
@@ -151,7 +154,10 @@ export function AnswerForm({
               required
               placeholder="−180 to 180"
             />
-            <button className="primary-button">
+            <button
+              className="primary-button"
+              data-dd-action-name="Answer Place Pin"
+            >
               Place pin <span>→</span>
             </button>
           </form>
@@ -168,6 +174,7 @@ export function AnswerForm({
           {choices.map((choice) => (
             <button
               key={choice.id}
+              data-dd-action-name="Answer Select Choice"
               className={game.selectedIds.includes(choice.id) ? "chosen" : ""}
               aria-pressed={game.selectedIds.includes(choice.id)}
               disabled={!candidateAvailable(question, game, choice.id)}
@@ -194,6 +201,7 @@ export function AnswerForm({
             {selectableIds(question, context).map((id) => (
               <button
                 key={id}
+                data-dd-action-name="Answer Select Map Choice"
                 className={game.selectedIds.includes(id) ? "chosen" : ""}
                 onClick={() => dispatch({ type: "select", id })}
                 disabled={!candidateAvailable(question, game, id)}
@@ -271,7 +279,9 @@ export function AnswerForm({
             question.allowTyping === true ||
             !webgl) && (
             <details className="typed-country-guess" open={!webgl || undefined}>
-              <summary>Answer by typing</summary>
+              <summary data-dd-action-name="Answer Type Instead">
+                Answer by typing
+              </summary>
               <form
                 autoComplete="off"
                 onSubmit={(event) => {
@@ -303,7 +313,11 @@ export function AnswerForm({
                         : "Type a country’s name"
                   }
                 />
-                <button className="primary-button" disabled={!game.text.trim()}>
+                <button
+                  className="primary-button"
+                  data-dd-action-name="Answer Add Typed Choice"
+                  disabled={!game.text.trim()}
+                >
                   {question.commitment === "immediate"
                     ? "Answer now"
                     : `Add ${city ? pointNoun : regional ? "region" : "country"}`}{" "}
@@ -315,6 +329,7 @@ export function AnswerForm({
         {question.commitment === "submit" && game.selectedIds.length > 0 && (
           <button
             className="quiet-button tertiary-action"
+            data-dd-action-name="Answer Clear Selection"
             onClick={() => dispatch({ type: "clear" })}
           >
             Clear selection

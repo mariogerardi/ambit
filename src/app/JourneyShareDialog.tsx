@@ -165,7 +165,11 @@ export function JourneyShareDialog({
       >
         <div className="study-options-heading">
           <h2 id={id}>Share your Journey</h2>
-          <button aria-label="Close sharing" onClick={onClose}>
+          <button
+            data-dd-action-name="Journey Share Close"
+            aria-label="Close sharing"
+            onClick={onClose}
+          >
             ×
           </button>
         </div>
@@ -183,6 +187,7 @@ export function JourneyShareDialog({
             {error}{" "}
             <button
               className="quiet-button"
+              data-dd-action-name="Journey Share Retry Image"
               onClick={() => setRevision((value) => value + 1)}
             >
               Retry image
@@ -193,6 +198,7 @@ export function JourneyShareDialog({
         <div className="journey-social-actions">
           <button
             className="primary-button"
+            data-dd-action-name="Journey Share Submit"
             disabled={busy || !image}
             onClick={() => void share()}
           >

@@ -67,7 +67,11 @@ export function HomePanel({
       {scheduleError && (
         <p role="alert">
           {scheduleError}{" "}
-          <button className="quiet-button" onClick={onRetrySchedule}>
+          <button
+            className="quiet-button"
+            data-dd-action-name="Home Retry Schedule"
+            onClick={onRetrySchedule}
+          >
             Retry schedule
           </button>
         </p>

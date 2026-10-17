@@ -456,13 +456,16 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector(".game-scene")!.getAttribute("aria-busy")).toBe(
       "true",
     );
+    expect(document.body.querySelector(".ambit-loading-screen")).not.toBeNull();
     expect(host.textContent).not.toMatch(
       /Unfolding your world|Gathering the world/,
     );
     await paint();
     expect(host.querySelector(".game-scene.globe-presented")).toBeNull();
+    expect(document.body.querySelector(".ambit-loading-screen")).not.toBeNull();
     await paint();
     expect(host.querySelector(".game-scene.globe-presented")).not.toBeNull();
+    expect(document.body.querySelector(".ambit-loading-screen")).toBeNull();
     await click("Explore");
     await click("Study");
     await click("Home");
@@ -472,7 +475,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   it("remounts progress when accounts change and waits for account discovery", async () => {
     authProbe.loading = true;
     await act(async () => root.render(<PlayerWorkspace />));
-    expect(host.textContent).toContain("Checking your account");
+    expect(
+      document.body.querySelector(".ambit-loading-screen")?.textContent,
+    ).toContain("Loading your world…");
     expect(localStorage.length).toBe(0);
     const record = (id: string) => {
       const session = { ...startStudy(defaultSettings, 42), id };

@@ -160,6 +160,7 @@ export function OrderAnswer({
             </span>
             <button
               type="button"
+              data-dd-action-name="Answer Select Order Slot"
               className={`order-card${matching ? ` match-slot${id ? "" : " empty"}` : ""}${picked === id && id ? " chosen" : ""}${dragging === id && id ? " dragging" : ""}`}
               disabled={locked}
               aria-pressed={!locked && !!id ? picked === id : undefined}
@@ -190,6 +191,7 @@ export function OrderAnswer({
             {!!id && !locked && !populated && (
               <button
                 type="button"
+                data-dd-action-name="Answer Remove Order Card"
                 className="order-remove"
                 aria-label={`Return ${name(id)} to spare cards`}
                 onClick={() => place(id, -1)}
@@ -220,6 +222,7 @@ export function OrderAnswer({
           .map((choice) => (
             <button
               type="button"
+              data-dd-action-name="Answer Select Order Card"
               key={choice.id}
               {...pointer(choice.id)}
               className={`order-card${picked === choice.id ? " chosen" : ""}${dragging === choice.id ? " dragging" : ""}`}
@@ -241,6 +244,7 @@ export function OrderAnswer({
         {!populated && picked && ordered.includes(picked) && (
           <button
             type="button"
+            data-dd-action-name="Answer Leave Card Aside"
             className="quiet-button"
             onClick={() => place(picked, -1)}
           >

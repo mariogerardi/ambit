@@ -264,6 +264,7 @@ export function StudyPanel({
           />
           <button
             ref={settingsButton}
+            data-dd-action-name="Study Open Session Settings"
             className="settings-button"
             aria-label="Session settings"
             title="Session settings"
@@ -301,7 +302,9 @@ export function StudyPanel({
                   className="typed-country-guess"
                   open={!webgl || undefined}
                 >
-                  <summary>Answer by name</summary>
+                  <summary data-dd-action-name="Study Answer By Name">
+                    Answer by name
+                  </summary>
                   <form
                     autoComplete="off"
                     onSubmit={(event) => {
@@ -407,6 +410,7 @@ export function StudyPanel({
             )}
             <button
               className="primary-button"
+              data-dd-action-name="Study Next Question"
               onClick={() => onAction({ type: "next" })}
             >
               {studyComplete(session) ? "See results" : "Next"} <span>→</span>

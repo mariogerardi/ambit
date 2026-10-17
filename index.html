@@ -13,14 +13,73 @@
       type="font/woff2"
       crossorigin
     />
-    <link
-      rel="preload"
-      href="/fonts/Newsreader-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
     <meta name="theme-color" content="#07151b" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #07151b;
+      }
+      .ambit-loading-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        min-height: 100vh;
+        min-height: 100dvh;
+        box-sizing: border-box;
+        background: #07151b;
+        color: #edf2e8;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      .ambit-loading-globe {
+        width: min(45vw, 220px);
+        height: auto;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 0 28px #2a697455);
+      }
+      .ambit-loading-turn {
+        transform-origin: 110px 110px;
+        animation: ambit-loading-turn 10s linear infinite;
+      }
+      .ambit-loading-title {
+        font-size: clamp(44px, 9vw, 60px);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.075em;
+      }
+      .ambit-loading-copy {
+        color: #a9c0b4;
+        font-size: 13px;
+        letter-spacing: 0.045em;
+      }
+      .ambit-loading-dots {
+        animation: ambit-loading-fade 1.7s ease-in-out infinite;
+      }
+      @keyframes ambit-loading-turn {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes ambit-loading-fade {
+        50% {
+          opacity: 0.35;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ambit-loading-turn {
+          animation-duration: 50s;
+        }
+        .ambit-loading-dots {
+          animation-duration: 4s;
+        }
+      }
+    </style>
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
@@ -67,7 +126,57 @@
     />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="ambit-loading-screen" role="status" aria-live="polite">
+        <svg
+          class="ambit-loading-globe"
+          viewBox="0 0 220 220"
+          aria-hidden="true"
+        >
+          <defs>
+            <clipPath id="ambit-loading-clip">
+              <circle cx="110" cy="110" r="90" />
+            </clipPath>
+          </defs>
+          <circle cx="110" cy="110" r="90" fill="#10333c" />
+          <g clip-path="url(#ambit-loading-clip)">
+            <g class="ambit-loading-turn">
+              <g
+                fill="none"
+                stroke="#7ca99e"
+                stroke-opacity=".4"
+                stroke-width="1.5"
+              >
+                <ellipse cx="110" cy="110" rx="39" ry="90" />
+                <ellipse cx="110" cy="110" rx="73" ry="90" />
+                <path d="M20 78q90 30 180 0M20 142q90-30 180 0M20 110h180" />
+              </g>
+              <g fill="#6c9b82" opacity=".86">
+                <path
+                  d="M53 51l25-8 16 11 3 19-17 7-8 19-20 4-13-16 5-19zM84 115l18 4 8 21-12 33-16 18-9-22 5-20-11-15z"
+                />
+                <path
+                  d="M130 50l27-10 28 15-6 19-22 2-11 16-16-5-12-20zM133 107l21-12 27 8 8 20-16 17-8 30-21-6-4-23-17-15z"
+                />
+              </g>
+            </g>
+          </g>
+          <circle
+            cx="110"
+            cy="110"
+            r="90"
+            fill="none"
+            stroke="#aad3c2"
+            stroke-opacity=".85"
+            stroke-width="2"
+          />
+        </svg>
+        <strong class="ambit-loading-title">ambit</strong>
+        <span class="ambit-loading-copy"
+          >Loading your world<span class="ambit-loading-dots">…</span></span
+        >
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

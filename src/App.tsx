@@ -4,6 +4,7 @@ import { useWorldGeography } from "./app/useWorldGeography";
 import { useCameraOrchestration } from "./app/useCameraOrchestration";
 import { usePlayerProgress } from "./app/usePlayerProgress";
 import { HomePanel } from "./app/HomePanel";
+import { LoadingScreen } from "./app/LoadingScreen";
 import { JourneySocial } from "./app/JourneySocial";
 import { accountIntent } from "./app/accountNavigation";
 import {
@@ -96,7 +97,7 @@ const emptyRoutes: [] = [];
 const noAction = () => {};
 export function PlayerWorkspace() {
   const account = useAccount();
-  if (account.loading) return <p role="status">Checking your account…</p>;
+  if (account.loading) return <LoadingScreen />;
   return <App key={account.user?.profile.sub ?? "guest"} />;
 }
 export function App() {
@@ -935,6 +936,9 @@ export function App() {
       )}
       <div
         className={`game-scene${globePresented ? " globe-presented" : ""}`}
+        data-dd-action-name={
+          mode === "explore" ? "Explore Select Region" : undefined
+        }
         aria-busy={!globePresented && webgl && !error}
         id="mobile-map"
         inert={panelOnly}
@@ -946,7 +950,7 @@ export function App() {
       >
         {webgl && (
           <BoardBoundary onError={fail}>
-            <Suspense fallback={null}>
+            <Suspense fallback={<LoadingScreen />}>
               <GlobeView
                 active={!panelOnly}
                 ref={globe}
@@ -1062,6 +1066,7 @@ export function App() {
                     : undefined
                 }
               />
+              {!globePresented && !error && <LoadingScreen />}
             </Suspense>
           </BoardBoundary>
         )}
@@ -1069,6 +1074,7 @@ export function App() {
       <header className="experience-header">
         <button
           className="experience-logo"
+          data-dd-action-name="Menu Home Logo"
           aria-label="ambit home"
           onClick={() => navigate("/")}
         >
@@ -1077,6 +1083,7 @@ export function App() {
         <div className="experience-header-right">
           <button
             className="profile-toggle"
+            data-dd-action-name="Menu Account"
             aria-label="Account"
             aria-current={mode === "account" ? "page" : undefined}
             title={
@@ -1138,6 +1145,7 @@ export function App() {
       {mobile.enabled && (
         <div className="mobile-map-tools" aria-label="Globe controls">
           <button
+            data-dd-action-name="Globe Recenter"
             disabled={!ready || !webgl}
             onClick={() =>
               recenter(
@@ -1149,6 +1157,7 @@ export function App() {
           </button>
           {motionControls}
           <button
+            data-dd-action-name="Globe Toggle Size"
             aria-expanded={expanded}
             aria-controls="mobile-map"
             disabled={!webgl}

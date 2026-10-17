@@ -107,6 +107,7 @@ export function StudyEditor({
             <div className="study-where-controls">
               <select
                 id={`${id}-where`}
+                data-dd-action-name="Study Select Area"
                 value={settings.scope}
                 onChange={(event) =>
                   update({
@@ -121,6 +122,7 @@ export function StudyEditor({
               {settings.scope === "continent" && (
                 <select
                   aria-label="Continent"
+                  data-dd-action-name="Study Select Continent"
                   value={settings.continent}
                   onChange={(event) =>
                     update({ continent: event.target.value })
@@ -135,12 +137,15 @@ export function StudyEditor({
               )}
               {settings.scope === "custom" && (
                 <details className="study-country-picker" open>
-                  <summary>{pool.length} selected · Edit countries</summary>
+                  <summary data-dd-action-name="Study Edit Countries">
+                    {pool.length} selected · Edit countries
+                  </summary>
                   <p className="muted study-country-help">
                     Select countries on the globe or by name.
                   </p>
                   <input
                     type="search"
+                    data-dd-action-name="Study Search Countries"
                     aria-label="Find countries to include"
                     placeholder="Find a country…"
                     value={search}
@@ -162,9 +167,13 @@ export function StudyEditor({
                             search,
                           ),
                     ).map((country) => (
-                      <label key={country.id}>
+                      <label
+                        key={country.id}
+                        data-dd-action-name="Study Toggle Country"
+                      >
                         <input
                           type="checkbox"
+                          data-dd-action-name="Study Toggle Country"
                           checked={settings.countryIds.includes(country.id)}
                           onChange={(event) =>
                             update({
@@ -194,6 +203,7 @@ export function StudyEditor({
               {TOPICS.map((topic) => (
                 <button
                   key={topic}
+                  data-dd-action-name={`Study Toggle ${topicNames[topic]}`}
                   aria-pressed={settings.topics.includes(topic)}
                   onClick={() => toggleTopic(topic)}
                 >
@@ -207,6 +217,7 @@ export function StudyEditor({
               <label htmlFor={`${id}-method`}>Answer method</label>
               <select
                 id={`${id}-method`}
+                data-dd-action-name="Study Select Answer Method"
                 value={method}
                 onChange={(event) =>
                   setMethod(event.target.value as StudyStyle)
@@ -220,9 +231,13 @@ export function StudyEditor({
               </select>
             </div>
           )}
-          <label className="study-method-toggle">
+          <label
+            className="study-method-toggle"
+            data-dd-action-name="Study Toggle Topic Methods"
+          >
             <input
               type="checkbox"
+              data-dd-action-name="Study Toggle Topic Methods"
               checked={perTopic}
               onChange={(event) =>
                 update({
@@ -248,6 +263,7 @@ export function StudyEditor({
                   <span>{topicNames[topic]}</span>
                   <select
                     aria-label={`${topicNames[topic]} answer method`}
+                    data-dd-action-name={`Study Select ${topicNames[topic]} Method`}
                     value={settings.styles[topic]}
                     onChange={(event) =>
                       update({
@@ -275,6 +291,7 @@ export function StudyEditor({
                   <span>Capital distractors</span>
                   <select
                     aria-label="Capital distractors"
+                    data-dd-action-name="Study Select Capital Distractors"
                     value={settings.capitalDistractors ?? "study"}
                     onChange={(event) =>
                       update({
@@ -308,6 +325,7 @@ export function StudyEditor({
               <span>Number of options</span>
               <select
                 aria-label="Number of options"
+                data-dd-action-name="Study Select Option Count"
                 value={settings.choiceCount ?? 6}
                 onChange={(event) =>
                   update({
@@ -329,6 +347,7 @@ export function StudyEditor({
             <label htmlFor={`${id}-length`}>Session length</label>
             <select
               id={`${id}-length`}
+              data-dd-action-name="Study Select Length"
               value={settings.length}
               onChange={(event) =>
                 update({
@@ -358,7 +377,9 @@ export function StudyEditor({
           )}
         </div>
         <details className="study-advanced">
-          <summary>Hints &amp; pacing</summary>
+          <summary data-dd-action-name="Study Open Hints And Pacing">
+            Hints &amp; pacing
+          </summary>
           <StudyPreferences settings={settings} onSettings={onSettings} />
         </details>
       </div>
@@ -380,6 +401,7 @@ export function StudyEditor({
         )}
         <button
           className="primary-button"
+          data-dd-action-name="Study Start Session"
           disabled={!!error}
           onClick={() => onStart(settings)}
         >
@@ -388,7 +410,11 @@ export function StudyEditor({
         {onResume && (
           <aside className="study-replacement-note">
             <p>Starting a new session replaces your current session.</p>
-            <button className="quiet-button tertiary-action" onClick={onResume}>
+            <button
+              className="quiet-button tertiary-action"
+              data-dd-action-name="Study Resume Session"
+              onClick={onResume}
+            >
               {resumeLabel ?? "Resume session"}{" "}
               <span aria-hidden="true">→</span>
             </button>
@@ -444,6 +470,7 @@ export function StudySetup(props: {
       {props.onResume && (
         <button
           className="primary-button study-resume-button"
+          data-dd-action-name="Study Resume Session"
           onClick={props.onResume}
         >
           {props.resumeLabel ?? "Resume session"}{" "}
@@ -455,6 +482,7 @@ export function StudySetup(props: {
           <article className="study-path" key={path.id}>
             <button
               className="study-path-start"
+              data-dd-action-name="Study Start Path"
               aria-label={`Start ${path.title}`}
               onClick={() => props.onStart(structuredClone(path.settings))}
             >
@@ -476,6 +504,7 @@ export function StudySetup(props: {
             <div className="inline-actions">
               <button
                 className="quiet-button study-path-customize"
+                data-dd-action-name="Study Customize Path"
                 aria-label={`Customize ${path.title}`}
                 onClick={() => {
                   props.onSettings(structuredClone(path.settings));
@@ -498,6 +527,7 @@ export function StudySetup(props: {
         ))}
         <button
           className="study-path study-path-build"
+          data-dd-action-name="Study Build Custom Session"
           aria-label="Custom"
           onClick={() => setEditing(true)}
         >
@@ -519,6 +549,7 @@ export function StudySetup(props: {
       {props.onHistory && (
         <button
           className="quiet-button tertiary-action study-history-link"
+          data-dd-action-name="Study Past Sessions"
           onClick={props.onHistory}
         >
           Past study sessions

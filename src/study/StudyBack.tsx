@@ -8,6 +8,7 @@ export function StudyBack({
   return (
     <button
       className="quiet-button tertiary-action study-back"
+      data-dd-action-name="Study Back To Paths"
       aria-label={label}
       onClick={onClick}
     >

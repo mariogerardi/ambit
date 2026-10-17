@@ -270,6 +270,7 @@ export function AccountDashboard({
         {["dashboard", "profile", "friends"].map((value) => (
           <button
             key={value}
+            data-dd-action-name={`Account Open ${value[0].toUpperCase() + value.slice(1)}`}
             className={tab === value ? "selected" : ""}
             aria-current={tab === value ? "page" : undefined}
             onClick={() => {
@@ -292,6 +293,7 @@ export function AccountDashboard({
           <p>{error}</p>
           <button
             className="quiet-button tertiary-action"
+            data-dd-action-name="Account Refresh"
             disabled={working}
             onClick={() =>
               void perform(
@@ -318,6 +320,7 @@ export function AccountDashboard({
           </p>
           <button
             className="quiet-button tertiary-action"
+            data-dd-action-name="Account Create Profile"
             onClick={() => setTab("profile")}
           >
             Create your profile →
@@ -369,6 +372,7 @@ export function AccountDashboard({
                 </div>
                 <button
                   className="quiet-button profile-edit-button"
+                  data-dd-action-name="Account Edit Profile"
                   aria-label="Edit profile"
                   title="Edit profile"
                   onClick={() => {
@@ -421,6 +425,7 @@ export function AccountDashboard({
                   <button
                     type="button"
                     className="quiet-button profile-edit-cancel"
+                    data-dd-action-name="Account Cancel Profile Edit"
                     onClick={() => {
                       setDraft(profile);
                       dirty.current = false;
@@ -482,6 +487,7 @@ export function AccountDashboard({
                             <button
                               type="button"
                               key={suggestion}
+                              data-dd-action-name="Account Choose Handle Suggestion"
                               onClick={() =>
                                 setDraft({ ...draft, handle: suggestion })
                               }
@@ -509,10 +515,12 @@ export function AccountDashboard({
                     .map(([value, preset]) => (
                       <label
                         key={value}
+                        data-dd-action-name="Account Choose Avatar"
                         className={`${draft.avatar === value ? "chosen" : ""} ${preset.image && !__AVATAR_IMAGES__.includes(preset.image) ? "avatar-pending" : ""}`}
                       >
                         <input
                           type="radio"
+                          data-dd-action-name="Account Choose Avatar"
                           name="avatar"
                           value={value}
                           checked={draft.avatar === value}
@@ -553,6 +561,7 @@ export function AccountDashboard({
                     <ProfileAvatar avatar={draft.avatar} />
                     <select
                       aria-label="Country flag avatar"
+                      data-dd-action-name="Account Choose Flag Avatar"
                       value={
                         draft.avatar.startsWith("flag:") ? draft.avatar : ""
                       }
@@ -602,6 +611,7 @@ export function AccountDashboard({
               </label>
               <button
                 className="primary-button"
+                data-dd-action-name="Account Save Profile"
                 disabled={disabled || !!takenHandle}
               >
                 Save profile
@@ -620,6 +630,7 @@ export function AccountDashboard({
               {onSignOut && (
                 <button
                   className="quiet-button tertiary-action"
+                  data-dd-action-name="Account Sign Out"
                   disabled={busy}
                   onClick={onSignOut}
                 >
@@ -678,7 +689,11 @@ export function AccountDashboard({
           <p role="status" className="muted">
             {sync.message}
           </p>
-          <button className="quiet-button tertiary-action" onClick={sync.retry}>
+          <button
+            className="quiet-button tertiary-action"
+            data-dd-action-name="Account Retry Sync"
+            onClick={sync.retry}
+          >
             Retry sync
           </button>
         </div>

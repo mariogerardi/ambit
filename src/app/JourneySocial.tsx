@@ -43,11 +43,16 @@ export function JourneySocial({
         aria-label="Journey actions"
       >
         <div className="journey-social-actions finish-actions result-actions">
-          <button className="primary-button" onClick={() => setSharing(true)}>
+          <button
+            className="primary-button"
+            data-dd-action-name="Journey Share Result"
+            onClick={() => setSharing(true)}
+          >
             Share result
           </button>
           <button
             className="study-repeat-button"
+            data-dd-action-name="Journey Compare Friends"
             onClick={() => onNavigate(compare)}
           >
             {account.user

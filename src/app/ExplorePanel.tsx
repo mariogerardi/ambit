@@ -188,6 +188,7 @@ export function ExplorePanel({
         <span className="sr-only">Find a country</span>
         <input
           ref={input}
+          data-dd-action-name="Explore Search Field"
           type="search"
           autoComplete="off"
           spellCheck={false}
@@ -207,6 +208,7 @@ export function ExplorePanel({
       </label>
       <button
         className="explore-search-close"
+        data-dd-action-name="Explore Close Search"
         aria-label="Close search"
         title="Close search"
         onClick={() => closeSearch(true)}
@@ -261,6 +263,7 @@ export function ExplorePanel({
             Tap a country to see its flag, capital, and more.{" "}
             <button
               ref={searchButton}
+              data-dd-action-name="Explore Open Search"
               className="explore-search-link"
               aria-label="Search countries"
               aria-expanded={open}
@@ -300,6 +303,7 @@ export function ExplorePanel({
               results.map((c) => (
                 <button
                   key={c.id}
+                  data-dd-action-name="Explore Select Country"
                   className={selected === c.id ? "chosen" : ""}
                   onClick={() => {
                     onSelect(c.id);
@@ -389,6 +393,7 @@ export function ExplorePanel({
             >
               <button
                 className="quiet-button explore-tool-button"
+                data-dd-action-name="Explore Zoom Country"
                 aria-label="Zoom to country"
                 title="Zoom to country"
                 disabled={!region}
@@ -398,6 +403,7 @@ export function ExplorePanel({
               </button>
               <button
                 ref={searchButton}
+                data-dd-action-name="Explore Search Another Country"
                 className="quiet-button explore-tool-button explore-country-search-trigger"
                 aria-label="Search another country"
                 title="Search another country"
@@ -409,6 +415,7 @@ export function ExplorePanel({
               </button>
               <button
                 className="quiet-button explore-tool-button explore-clear-selection"
+                data-dd-action-name="Explore Clear Selection"
                 aria-label="Clear selection"
                 title="Clear selection"
                 onClick={() => onSelect()}
@@ -417,9 +424,13 @@ export function ExplorePanel({
               </button>
             </div>
             {layer && (
-              <label className="regional-toggle">
+              <label
+                className="regional-toggle"
+                data-dd-action-name="Explore Toggle Regions"
+              >
                 <input
                   type="checkbox"
+                  data-dd-action-name="Explore Toggle Regions"
                   checked={!!breakdown}
                   onChange={(e) =>
                     onBreakdown(e.target.checked ? selected : undefined)
@@ -438,6 +449,7 @@ export function ExplorePanel({
               <div className="inline-actions">
                 <button
                   className="quiet-button tertiary-action"
+                  data-dd-action-name="Explore Zoom Region"
                   onClick={() => onFocus(selectedRegion)}
                 >
                   ◎ Zoom to region
@@ -445,6 +457,7 @@ export function ExplorePanel({
                 {childLayer && (
                   <button
                     className="quiet-button tertiary-action"
+                    data-dd-action-name="Explore Show Subregions"
                     onClick={() => onBreakdown(selectedRegion.id)}
                   >
                     Show {childLayer.label.toLowerCase()} →
@@ -453,6 +466,7 @@ export function ExplorePanel({
                 {breakdown !== selected && (
                   <button
                     className="quiet-button tertiary-action"
+                    data-dd-action-name="Explore Back To Regions"
                     onClick={() => onBreakdown(selected)}
                   >
                     Back to {layer?.label.toLowerCase()}

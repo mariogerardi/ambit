@@ -59,6 +59,7 @@ export function AppMenu({
       <button
         ref={trigger}
         className="app-menu-toggle"
+        data-dd-action-name="Menu Toggle"
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls="app-navigation"
@@ -88,6 +89,7 @@ export function AppMenu({
           <span className="app-menu-heading">Ambit</span>
           <div className="app-menu-primary">
             <button
+              data-dd-action-name="Menu Home"
               aria-current={path === "/" ? "page" : undefined}
               onClick={() => navigate("/")}
             >
@@ -95,6 +97,7 @@ export function AppMenu({
               <span>Home</span>
             </button>
             <button
+              data-dd-action-name="Menu Journey"
               aria-current={path === "/daily" ? "page" : undefined}
               disabled={!journeyReady}
               onClick={() => {
@@ -106,6 +109,7 @@ export function AppMenu({
               <span>Journey</span>
             </button>
             <button
+              data-dd-action-name="Menu Explore"
               aria-current={path === "/explore" ? "page" : undefined}
               onClick={() => navigate("/explore")}
             >
@@ -113,6 +117,7 @@ export function AppMenu({
               <span>Explore</span>
             </button>
             <button
+              data-dd-action-name="Menu Study"
               aria-current={path === "/study" ? "page" : undefined}
               onClick={() => navigate("/study")}
             >
@@ -123,6 +128,7 @@ export function AppMenu({
           <div className="app-menu-secondary">
             {onFeedback && (
               <button
+                data-dd-action-name="Menu Send Feedback"
                 onClick={() => {
                   setOpen(false);
                   trigger.current?.focus();
@@ -134,6 +140,7 @@ export function AppMenu({
             )}
             {admin && (
               <button
+                data-dd-action-name="Menu Admin"
                 aria-current={path === "/admin" ? "page" : undefined}
                 onClick={() => navigate("/admin")}
               >
@@ -141,7 +148,9 @@ export function AppMenu({
               </button>
             )}
             <details className="app-menu-credits">
-              <summary>World credits</summary>
+              <summary data-dd-action-name="Menu World Credits">
+                World credits
+              </summary>
               <p>
                 Decorative geography: Natural Earth (public domain). Capitals,
                 cities &amp; continent membership: GeoNames (CC BY 4.0). Flags:
@@ -150,10 +159,16 @@ export function AppMenu({
                 assets are served locally. Danube route: OpenStreetMap
                 contributors (ODbL). Question sources appear after answering.
               </p>
-              <a href="/NOTICE.txt" target="_blank" rel="noreferrer">
+              <a
+                data-dd-action-name="Menu Source Notices"
+                href="/NOTICE.txt"
+                target="_blank"
+                rel="noreferrer"
+              >
                 Full source and license notices
               </a>
               <a
+                data-dd-action-name="Menu Danube Data"
                 href="/geography/danube-context.v1.json"
                 target="_blank"
                 rel="noreferrer"
