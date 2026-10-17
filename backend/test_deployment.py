@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 from infrastructure import template
@@ -98,8 +99,9 @@ class DeploymentTests(unittest.TestCase):
         def aws(command, **options):
             commands.append(command)
             return type("Result", (), {"returncode": 0, "stdout": json.dumps({"Stacks": [{"StackStatus": "CREATE_COMPLETE", "Outputs": [{"OutputKey": k, "OutputValue": v} for k, v in OUTPUTS.items()]}]})})()
-        with patch.object(sys, "argv", ["deploy-backend.py", "--environment", "staging", "--refresh-config", "--write-dev-env"]), patch.object(deploy.subprocess, "run", side_effect=aws), patch.object(deploy, "write_client_configuration") as write:
+        with patch.object(sys, "argv", ["deploy-backend.py", "--environment", "staging", "--refresh-config", "--write-dev-env"]), patch.object(deploy.subprocess, "run", side_effect=aws), patch.object(deploy, "write_client_configuration") as write, patch.object(deploy, "send_deploy_event") as event:
             deploy.main()
+        event.assert_not_called()
         self.assertEqual(len(commands), 1)
         self.assertIn("ambit-staging-services", commands[0])
         self.assertIn("describe-stacks", commands[0])
@@ -113,9 +115,187 @@ class DeploymentTests(unittest.TestCase):
                 return type("Result", (), {"returncode": 1, "stderr": "Stack does not exist"})()
             result = {"Account": "123"} if "get-caller-identity" in command else {}
             return type("Result", (), {"returncode": 0, "stdout": json.dumps(result)})()
-        with patch.object(sys, "argv", ["deploy-backend.py", "--environment", "staging", "--no-wait", "--write-dev-env"]), patch.object(deploy.subprocess, "run", side_effect=aws), patch.object(deploy, "write_client_configuration") as write:
+        with patch.object(sys, "argv", ["deploy-backend.py", "--environment", "staging", "--no-wait", "--write-dev-env"]), patch.object(deploy.subprocess, "run", side_effect=aws), patch.object(deploy, "write_client_configuration") as write, patch.object(deploy, "datadog_api_key", return_value=""):
             deploy.main()
         create = next(command for command in commands if "create-stack" in command)
         self.assertIn("ambit-staging-services", create)
         self.assertFalse(any("wait" in command for command in commands))
         write.assert_not_called()
+
+
+class BackendDeployTests(unittest.TestCase):
+    def setUp(self):
+        self.commands = []
+        self.stack_exists = False
+        self.failures = {}
+        self.failed_upload = None
+        self.api_key = "a" * 32
+        self.enterContext(patch.dict(deploy.os.environ, {"AWS_RETRY_MODE": "legacy", "AWS_MAX_ATTEMPTS": "1", "AWS_PROFILE": "inherited"}, clear=True))
+        self.lookup = self.enterContext(patch.object(deploy, "datadog_api_key", return_value=self.api_key))
+        self.http = self.enterContext(patch.object(deploy.urllib.request, "urlopen"))
+        self.write = self.enterContext(patch.object(deploy, "write_client_configuration", return_value="deployment/services.staging.json"))
+        self.enterContext(patch.object(deploy.subprocess, "run", side_effect=self.aws))
+        self.template = self.enterContext(patch.object(deploy, "template", return_value={"artwork": "x" * 51201}))
+        self.output = self.enterContext(patch.object(sys, "stdout", new_callable=io.StringIO))
+        self.errors = self.enterContext(patch.object(sys, "stderr", new_callable=io.StringIO))
+
+    def aws(self, command, **options):
+        self.commands.append((command, options))
+        operation = tuple(command[1:3])
+        error = self.failures.get(operation)
+        if operation == ("s3", "cp") and Path(command[3]).name == self.failed_upload:
+            error = "An error occurred (RequestTimeout): socket timed out"
+        if operation == ("cloudformation", "describe-stacks") and not self.stack_exists:
+            error = "Stack does not exist"
+        if error:
+            return SimpleNamespace(returncode=1, stdout="", stderr=error)
+        result = {}
+        if operation == ("sts", "get-caller-identity"):
+            result = {"Account": "123"}
+        elif operation == ("cloudformation", "describe-stacks"):
+            result = {"Stacks": [{"Outputs": [{"OutputKey": k, "OutputValue": v} for k, v in OUTPUTS.items()]}]}
+        elif operation in (("cloudformation", "create-stack"), ("cloudformation", "update-stack")):
+            self.stack_exists = True
+        elif operation == ("secretsmanager", "describe-secret"):
+            result = {"ARN": "arn:aws:secretsmanager:us-east-1:123:secret:datadog"}
+        elif operation == ("secretsmanager", "put-secret-value"):
+            secret = Path(command[command.index("--secret-string") + 1].removeprefix("file://"))
+            self.assertEqual(secret.read_text(), self.api_key)
+            self.assertEqual(secret.stat().st_mode & 0o777, 0o600)
+        return SimpleNamespace(returncode=0, stdout=json.dumps(result), stderr="")
+
+    def run_deploy(self, *flags):
+        with patch.object(sys, "argv", ["deploy-backend.py", "--environment", "staging", *flags]):
+            deploy.main()
+
+    def event(self):
+        self.http.assert_called_once()
+        return json.loads(self.http.call_args.args[0].data)
+
+    def test_both_uploads_use_adaptive_retries_and_completed_deploy_emits_success(self):
+        self.run_deploy("--profile", "work", "--write-dev-env", "--datadog-site", "datadoghq.eu")
+        uploads = [(command, options) for command, options in self.commands if command[1:3] == ["s3", "cp"]]
+        self.assertEqual([Path(command[3]).name for command, _ in uploads], ["backend.zip", "template.json"])
+        for command, options in uploads:
+            self.assertIn("--only-show-errors", command)
+            self.assertIn("--no-progress", command)
+            self.assertEqual(command[command.index("--profile") + 1], "work")
+            self.assertEqual(options["env"]["AWS_RETRY_MODE"], "adaptive")
+            self.assertEqual(options["env"]["AWS_MAX_ATTEMPTS"], "5")
+            self.assertEqual(options["env"]["AWS_PROFILE"], "inherited")
+        self.assertEqual(deploy.os.environ["AWS_RETRY_MODE"], "legacy")
+        self.assertTrue(all(options["env"] is None for command, options in self.commands if command[1] != "s3"))
+        self.assertTrue(any(command[1:3] == ["cloudformation", "wait"] for command, _ in self.commands))
+        self.write.assert_called_once_with(OUTPUTS, "staging", True)
+        event = self.event()
+        self.assertEqual(event["alert_type"], "success")
+        self.assertTrue({"project:ambit", "service:ambit-api", "env:staging", "environment:staging", "status:succeeded"}.issubset(event["tags"]))
+        self.assertIn("Release:", event["text"])
+        request = self.http.call_args.args[0]
+        self.assertEqual(request.full_url, "https://api.datadoghq.eu/api/v1/events")
+        self.assertEqual(request.get_header("Dd-api-key"), self.api_key)
+
+    def test_upload_failures_name_the_key_and_emit_error_before_cloudformation(self):
+        for source in ("backend.zip", "template.json"):
+            with self.subTest(source=source):
+                self.commands.clear()
+                self.http.reset_mock()
+                self.failed_upload = source
+                with self.assertRaises(RuntimeError) as raised:
+                    self.run_deploy()
+                destination = self.commands[-1][0][4]
+                self.assertIn(destination, str(raised.exception))
+                self.assertIn("RequestTimeout", str(raised.exception))
+                self.assertFalse(any(command[2] in ("validate-template", "create-stack", "update-stack", "wait") for command, _ in self.commands))
+                self.write.assert_not_called()
+                event = self.event()
+                self.assertEqual(event["alert_type"], "error")
+                self.assertIn(destination, event["text"])
+                self.assertIn("RequestTimeout", event["text"])
+                self.assertIn("status:failed", event["tags"])
+
+    def test_failure_before_uploads_is_reported(self):
+        self.failures[("sts", "get-caller-identity")] = "ExpiredToken"
+        with self.assertRaisesRegex(RuntimeError, "ExpiredToken"):
+            self.run_deploy()
+        self.assertIn("ExpiredToken", self.event()["text"])
+
+    def test_cloudformation_failure_is_reported(self):
+        self.failures[("cloudformation", "wait")] = "Waiter failed: UPDATE_ROLLBACK_COMPLETE"
+        with self.assertRaisesRegex(RuntimeError, "UPDATE_ROLLBACK_COMPLETE"):
+            self.run_deploy()
+        self.assertEqual(self.event()["alert_type"], "error")
+        self.write.assert_not_called()
+
+    def test_no_wait_emits_started_without_claiming_completion(self):
+        self.stack_exists = True
+        self.run_deploy("--no-wait")
+        self.assertTrue(any(command[2] == "update-stack" for command, _ in self.commands))
+        self.assertFalse(any(command[2] == "wait" for command, _ in self.commands))
+        self.write.assert_not_called()
+        event = self.event()
+        self.assertEqual(event["alert_type"], "info")
+        self.assertIn("status:started", event["tags"])
+        self.assertIn("completion has not been verified", event["text"])
+
+    def test_no_updates_still_succeeds_with_no_wait(self):
+        self.stack_exists = True
+        self.failures[("cloudformation", "update-stack")] = "No updates are to be performed"
+        self.run_deploy("--no-wait")
+        self.assertEqual(self.event()["alert_type"], "success")
+        self.write.assert_called_once()
+
+    def test_inline_template_and_deploy_without_key_still_work(self):
+        self.template.return_value = {"Resources": {}}
+        self.lookup.return_value = ""
+        self.run_deploy()
+        self.assertEqual(sum(command[1:3] == ["s3", "cp"] for command, _ in self.commands), 1)
+        validate = next(command for command, _ in self.commands if command[2] == "validate-template")
+        self.assertIn("--template-body", validate)
+        self.http.assert_not_called()
+        self.assertEqual(self.errors.getvalue(), "")
+
+    def test_monitoring_reuses_key_lookup_without_exposing_key_in_arguments(self):
+        self.run_deploy("--with-datadog")
+        self.lookup.assert_called_once_with()
+        self.assertTrue(any(command[2] == "put-secret-value" for command, _ in self.commands))
+        self.assertNotIn(self.api_key, json.dumps([command for command, _ in self.commands]))
+        self.assertNotIn(self.api_key, self.output.getvalue() + self.errors.getvalue())
+
+    def test_event_delivery_failure_does_not_fail_successful_deploy(self):
+        self.http.side_effect = TimeoutError(self.api_key)
+        self.run_deploy()
+        self.write.assert_called_once()
+        self.assertIn("could not send Datadog", self.errors.getvalue())
+        self.assertNotIn(self.api_key, self.output.getvalue() + self.errors.getvalue())
+
+    def test_event_delivery_failure_preserves_original_deploy_error(self):
+        self.failed_upload = "template.json"
+        self.http.side_effect = OSError(self.api_key)
+        with self.assertRaisesRegex(RuntimeError, "Failed to upload s3://.*templates/.*RequestTimeout"):
+            self.run_deploy()
+        self.assertNotIn(self.api_key, self.output.getvalue() + self.errors.getvalue())
+
+
+class DatadogKeyTests(unittest.TestCase):
+    def test_lookup_prefers_environment_and_reads_quoted_local_key(self):
+        with tempfile.TemporaryDirectory() as temporary, patch.object(deploy, "ROOT", Path(temporary)), patch.dict(deploy.os.environ, {}, clear=True):
+            self.assertEqual(deploy.datadog_api_key(), "")
+            (Path(temporary) / ".env.local").write_text("OTHER=value\nDATADOG_API_KEY = 'local-key'\n")
+            self.assertEqual(deploy.datadog_api_key(), "local-key")
+            with patch.dict(deploy.os.environ, {"DATADOG_API_KEY": "environment-key"}):
+                self.assertEqual(deploy.datadog_api_key(), "environment-key")
+
+    def test_error_detail_redacts_key_and_key_is_only_in_request_header(self):
+        args = SimpleNamespace(environment="production", datadog_site="datadoghq.com")
+        api_key = "b" * 32
+        with patch.object(deploy.urllib.request, "urlopen") as http:
+            deploy.send_deploy_event(args, api_key, "failed", f"Error included {api_key}")
+        request = http.call_args.args[0]
+        self.assertEqual(request.method, "POST")
+        self.assertEqual(request.get_header("Dd-api-key"), api_key)
+        self.assertNotIn(api_key, request.data.decode())
+        event = json.loads(request.data)
+        self.assertIn("[redacted]", event["text"])
+        self.assertIn("env:production", event["tags"])
+        self.assertEqual(http.call_args.kwargs["timeout"], 5)

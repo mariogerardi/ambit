@@ -345,6 +345,15 @@ This starts the update and preserves the existing public endpoints. It does not
 confirm successful deployment. A first deployment can also start without waiting; use `--refresh-config` after
 it finishes to export its endpoints.
 
+Backend artifact and template uploads use `aws s3 cp` with adaptive retries and
+five total attempts. An upload failure names its S3 bucket and key. When
+`DATADOG_API_KEY` is available in the environment or `.env.local`, backend deploys
+also send Datadog events tagged `project:ambit`, `service:ambit-api`, and the selected
+environment. This does not require `--with-datadog`. Events report failures and
+completed deployments; `--no-wait` reports only that deployment started.
+`--refresh-config` does not send deploy events. Event delivery is best effort and
+does not change the deploy result; without a key it is silently skipped.
+
 Run offline checks before deploying:
 
 ```sh
