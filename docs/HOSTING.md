@@ -12,6 +12,20 @@ the dependency audit pass, GitHub retains the exact `dist/` artifact and deploys
 it to Amplify. Pull requests validate and retain their artifact without deploying.
 A manual workflow run on `main` can redeploy the current source.
 
+`main` requires a pull request and an up-to-date, passing **Tests and production
+build** check. The rule applies to administrators, blocks force pushes and branch
+deletion, and requires no reviewer approval. This check runs the frontend and
+backend tests; the production deploy job depends on it.
+
+For a Journey catalog change, run the full frontend and backend test suites before
+pushing the branch. Cover Journey IDs rather than positions or catalog totals.
+After merging a green pull request, check the production workflow and watch site
+availability during the frontend deployment; a previous deploy caused a roughly
+five-minute home-page outage. Backend releases are separate: deploy the tested
+`main` commit on a stable connection using the procedure in [Services](SERVICES.md),
+then confirm the production CloudFormation stack reaches `UPDATE_COMPLETE` and
+the Datadog deployment event appears.
+
 AWS credentials are issued through GitHub OIDC. The IAM role trusts only this
 repository's immutable GitHub identity and `main` branch, and permits deployment operations on Ambit's production
 app/branch. `AWS_DEPLOY_ROLE_ARN` is a repository variable; no persistent AWS keys
