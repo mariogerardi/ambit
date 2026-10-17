@@ -2583,6 +2583,14 @@ body
 .question-help-sources > div {
   padding: 4px 12px 10px;
 }
+.question-help-sources > div > p {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 2px solid rgb(var(--ui-line-rgb) / 0.28);
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .question-help-options :is(button, summary):focus-visible {
   outline: 2px solid var(--ui-focus);
   outline-offset: 1px;
@@ -2596,6 +2604,21 @@ body
   font-size: 22px;
   line-height: 1.4;
   letter-spacing: -0.35px;
+}
+.experience .question-card.photo-question-card h1.journey-question-copy {
+  margin-bottom: 8px;
+}
+.experience .photo-question-card .question-instruction {
+  margin-bottom: 6px;
+}
+.experience .photo-question-card .pin-answer {
+  gap: 8px;
+}
+.experience .photo-question-card .question-answer-actions {
+  margin-top: 8px;
+}
+.experience .photo-question-card .question-guidance {
+  margin-top: 8px;
 }
 .journey-question-copy > span {
   font: inherit;

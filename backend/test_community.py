@@ -4,6 +4,7 @@ import json
 import os
 import unittest
 from unittest.mock import patch
+from unittest.mock import MagicMock
 
 from test_services import ClientError
 import community
@@ -111,6 +112,17 @@ class CommunityTests(unittest.TestCase):
         self.assertNotIn("revision", public)
         self.assertNotIn("email", public)
         self.assertIsNone(self.call("GET /account/profile", "b")[1])
+
+    def test_profile_write_batches_lookups_and_tags_only_counts(self):
+        span = MagicMock()
+        with patch.object(community, "tracer", MagicMock(current_span=lambda: span)), \
+                patch.object(self.db, "batch_get_item", wraps=self.db.batch_get_item) as batch, \
+                patch.object(self.db, "get_item", wraps=self.db.get_item) as get:
+            self.profile("a", "alice")
+            self.assertEqual(batch.call_count, 1)
+            get.assert_not_called()
+            self.call("GET /account/profile", "a")
+        self.assertEqual([call.args for call in span.set_tag.call_args_list], [("profile.presets.count", 0), ("profile.presets.count", 0)])
 
     def test_flag_and_preset_avatars_round_trip_and_reject_arbitrary_paths(self):
         value = self.profile("a", "alice", avatar="flag:wurl:CAN")
@@ -295,6 +307,15 @@ class CommunityTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertEqual(page["friends"], [])
 
+    def test_activity_tags_friend_counts_without_identifiers(self):
+        self.friends()
+        span = MagicMock()
+        with patch.object(community, "tracer", MagicMock(current_span=lambda: span)):
+            status, page = self.call("GET /account/friends/activity", query={"date": "2026-10-10"})
+        self.assertEqual(status, 200)
+        self.assertEqual(len(page["friends"]), 1)
+        self.assertEqual({call.args for call in span.set_tag.call_args_list}, {("friends.count", 1), ("friends.page_count", 1)})
+
     def test_partial_batches_retry_unprocessed_keys_and_fail_instead_of_omitting_friends(self):
         pending = {"community": {"Keys": [community.encoded(community.key("user#b", "profile"))], "ConsistentRead": True}}
         item = community.encoded(community.packed("user#b", "profile", {"handle": "bob"}))
@@ -304,6 +325,7 @@ class CommunityTests(unittest.TestCase):
         with patch.object(community.dynamodb.client, "batch_get_item", return_value={"UnprocessedKeys": pending}), patch.object(community.time, "sleep"), self.assertRaises(community.Problem) as raised:
             community.batch_get([("user#b", "profile")])
         self.assertEqual(raised.exception.status, 503)
+        self.assertIn("account data", raised.exception.message)
 
     def test_challenge_participation_and_results_use_synced_sessions_not_caller_scores(self):
         challenge = self.challenge()

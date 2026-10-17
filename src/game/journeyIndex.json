@@ -1,5 +1,39 @@
 [
   {
+    "id": "across-the-divide-v1",
+    "title": "Across the Divide",
+    "description": "Five bridges. Five photographs. Five pins. How close can you get?",
+    "path": "/journey/across-the-divide",
+    "module": "./acrossDivideJourney.ts",
+    "rounds": [
+      {
+        "id": "bridge-golden-gate",
+        "label": "Bridge 1 · Suspension",
+        "progressLabel": "Bridge 1 · Suspension"
+      },
+      {
+        "id": "bridge-sydney-harbour",
+        "label": "Bridge 2 · Arch",
+        "progressLabel": "Bridge 2 · Arch"
+      },
+      {
+        "id": "bridge-tower",
+        "label": "Bridge 3 · Towers",
+        "progressLabel": "Bridge 3 · Towers"
+      },
+      {
+        "id": "bridge-oresund",
+        "label": "Bridge 4 · Strait",
+        "progressLabel": "Bridge 4 · Strait"
+      },
+      {
+        "id": "bridge-qiansimen",
+        "label": "Bridge 5 · River city",
+        "progressLabel": "Bridge 5 · River city"
+      }
+    ]
+  },
+  {
     "id": "beyond-the-maple-leaf-v1",
     "title": "Beyond the maple leaf",
     "description": "Start with a familiar flag, follow two official languages to the east coast, then travel through the capital to the northern shore.",

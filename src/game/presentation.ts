@@ -240,7 +240,7 @@ export function regionAnswerId(
 }
 const regionVariants = new WeakMap<
   RegionFeature[],
-  WeakMap<Question, Map<GameState["phase"], RegionFeature[]>>
+  WeakMap<Question, Map<string, RegionFeature[]>>
 >();
 // A display fragment is never a country identity. During the clue only, separate
 // the selected component so the rest of its owner's territory stays neutral.
@@ -248,10 +248,12 @@ export function questionRegions(
   regions: RegionFeature[],
   question: Question,
   phase: GameState["phase"],
+  helpStage?: "hinted" | "assisted",
 ) {
+  const cacheKey = `${phase}:${helpStage ?? ""}`;
   if (question.rule.type === "merged-region" && phase === "playing") {
     let variants = regionVariants.get(regions);
-    const cached = variants?.get(question)?.get(phase);
+    const cached = variants?.get(question)?.get(cacheKey);
     if (cached) return cached;
     const memberIds = question.rule.memberIds;
     const result = [
@@ -259,7 +261,7 @@ export function questionRegions(
       compositeRegion(regions, question),
     ];
     if (!variants) regionVariants.set(regions, (variants = new WeakMap()));
-    variants.set(question, new Map([[phase, result]]));
+    variants.set(question, new Map([[cacheKey, result]]));
     return result;
   }
   const highlights = (question.highlightParts ?? []).filter(
@@ -272,7 +274,9 @@ export function questionRegions(
     if (
       question.mode === "pin" &&
       phase === "playing" &&
-      !question.contextIds?.includes(region.id)
+      !question.contextIds?.includes(region.id) &&
+      !(helpStage === "assisted" &&
+        question.guidance?.assist?.regionIds?.includes(region.id))
     )
       return false;
     if (
@@ -290,7 +294,7 @@ export function questionRegions(
   if (!highlights.length && !imported.length && !displays.length)
     return regions;
   let variants = regionVariants.get(regions);
-  const cached = variants?.get(question)?.get(phase);
+  const cached = variants?.get(question)?.get(cacheKey);
   if (cached) return cached;
   const regionalIds = new Set(REGIONAL_INDEX.map((r) => r.id));
   const canonical = imported.filter((r) => regionalIds.has(r.id));
@@ -363,7 +367,7 @@ export function questionRegions(
   if (!variants) regionVariants.set(regions, (variants = new WeakMap()));
   let phases = variants.get(question);
   if (!phases) variants.set(question, (phases = new Map()));
-  phases.set(phase, result);
+  phases.set(cacheKey, result);
   return result;
 }
 
@@ -375,7 +379,7 @@ export function questionVisualStates(
   const states: Record<string, VisualState> = Object.fromEntries(
     [...context.regions, ...(question.importedRegions ?? [])].map((r) => [
       r.id,
-      "disabled",
+      question.map?.neutralRegions ? "default" : "disabled",
     ]),
   );
   if (game.phase === "home") return {};
@@ -421,6 +425,13 @@ export function questionVisualStates(
     for (const id of question.contextIds ?? [])
       if (!question.highlightParts?.some((part) => part.countryId === id))
         states[id] = "hinted";
+    if (game.phase === "playing" && game.help?.[question.id])
+      for (const id of
+        game.help[question.id] === "assisted"
+          ? (question.guidance?.assist?.regionIds ??
+            question.guidance?.hintMap?.regionIds ?? [])
+          : (question.guidance?.hintMap?.regionIds ?? []))
+        if (id in states) states[id] = "hinted";
     if (game.phase === "playing" && game.help?.[question.id] === "assisted")
       for (const id of selectableIds(question, context))
         if (context.targets.has(id)) {

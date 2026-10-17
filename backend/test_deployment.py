@@ -70,10 +70,32 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(schedule["ScheduleExpressionTimezone"], "America/New_York")
         self.assertEqual(schedule["Target"]["Arn"], {"Fn::GetAtt": ["DemoFunction", "Arn"]})
         statements = staging["DemoRole"]["Properties"]["Policies"][0]["PolicyDocument"]["Statement"]
-        writes = [value for value in statements if value["Action"] in ("dynamodb:PutItem", "dynamodb:DeleteItem")]
+        writes = [value for value in statements if value.get("Action") in ("dynamodb:PutItem", "dynamodb:DeleteItem")]
         self.assertEqual(len(writes), 2)
         for value in writes:
             self.assertEqual(value["Condition"]["ForAllValues:StringLike"]["dynamodb:LeadingKeys"], ["user#staging-demo-*"])
+
+    def test_all_lambdas_share_conditional_datadog_layers_and_secret_access(self):
+        for environment in ("production", "staging"):
+            resources = template(environment)["Resources"]
+            functions = {"ApiFunction": "handler.handler", "Confirmation": "confirmation.handler"}
+            if environment == "staging":
+                functions["DemoFunction"] = "staging_demo.handler"
+            for logical, original_handler in functions.items():
+                props = resources[logical]["Properties"]
+                self.assertEqual(props["Handler"]["Fn::If"], ["UseDatadog", "datadog_lambda.handler.handler", original_handler])
+                self.assertEqual(props["Layers"], resources["ApiFunction"]["Properties"]["Layers"])
+                variables = props["Environment"]["Variables"]
+                self.assertEqual(variables["DD_LAMBDA_HANDLER"], original_handler)
+                self.assertEqual(variables["DD_ENV"], environment)
+                self.assertEqual(variables["DD_SERVICE"], "ambit-api")
+                self.assertEqual(variables["DD_VERSION"], {"Ref": "Release"})
+                self.assertEqual(variables["DD_SITE"], {"Ref": "DatadogSite"})
+                self.assertEqual(variables["DD_API_KEY_SECRET_ARN"], {"Ref": "DatadogSecretArn"})
+            for role in ("ApiRole", "ConfirmationPolicy", "DemoRole") if environment == "staging" else ("ApiRole", "ConfirmationPolicy"):
+                props = resources[role]["Properties"]
+                statements = (props["Policies"][0] if role != "ConfirmationPolicy" else props)["PolicyDocument"]["Statement"]
+                self.assertIn({"Fn::If": ["UseDatadog", {"Effect": "Allow", "Action": "secretsmanager:GetSecretValue", "Resource": {"Ref": "DatadogSecretArn"}}, {"Ref": "AWS::NoValue"}]}, statements)
 
     def test_staging_export_preserves_production_and_unrelated_local_settings(self):
         with tempfile.TemporaryDirectory() as temporary, patch.object(deploy, "ROOT", Path(temporary)):

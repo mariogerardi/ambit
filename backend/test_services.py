@@ -153,9 +153,19 @@ class ServicesTests(unittest.TestCase):
             self.assertEqual(resources[route]["Properties"]["AuthorizationScopes"], ["openid"])
         self.assertEqual(resources["SubmitRoute"]["Properties"]["AuthorizationType"], "NONE")
         self.assertFalse(resources["Users"]["Properties"]["Schema"][0]["Mutable"])
-        variables = resources["ApiFunction"]["Properties"]["Environment"]["Variables"]
-        self.assertNotIn("DD_API_KEY", variables)
-        self.assertEqual(variables["DD_CAPTURE_LAMBDA_PAYLOAD"], "false")
+        for logical in ("ApiFunction", "Confirmation"):
+            variables = resources[logical]["Properties"]["Environment"]["Variables"]
+            self.assertNotIn("DD_API_KEY", variables)
+            self.assertEqual(variables["DD_CAPTURE_LAMBDA_PAYLOAD"], "false")
+            self.assertEqual(variables["DD_AWS_TAG_NO_PARAMS"], "true")
+            self.assertEqual(variables["DD_TRACE_CLOUD_REQUEST_PAYLOAD_TAGGING"], "")
+            self.assertEqual(variables["DD_TRACE_CLOUD_RESPONSE_PAYLOAD_TAGGING"], "")
+        demo = template("staging")["Resources"]["DemoFunction"]["Properties"]["Environment"]["Variables"]
+        self.assertNotIn("DD_API_KEY", demo)
+        self.assertEqual(demo["DD_CAPTURE_LAMBDA_PAYLOAD"], "false")
+        self.assertEqual(demo["DD_AWS_TAG_NO_PARAMS"], "true")
+        self.assertEqual(demo["DD_TRACE_CLOUD_REQUEST_PAYLOAD_TAGGING"], "")
+        self.assertEqual(demo["DD_TRACE_CLOUD_RESPONSE_PAYLOAD_TAGGING"], "")
 
     def test_production_api_excludes_local_origins_and_uses_more_cpu_without_payload_capture(self):
         resources = template()["Resources"]

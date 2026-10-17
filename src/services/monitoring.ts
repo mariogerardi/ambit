@@ -17,6 +17,13 @@ export function startMonitoring() {
   if (enabled || import.meta.env.MODE === "test") return;
   if (!import.meta.env.PROD && import.meta.env.VITE_DATADOG_ENABLED !== "true")
     return;
+  if (
+    navigator.webdriver ||
+    /bot|crawler|spider|googlebot|bingbot|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|embedly|lighthouse/i.test(
+      navigator.userAgent,
+    )
+  )
+    return;
   const applicationId = import.meta.env.VITE_DATADOG_APPLICATION_ID;
   const clientToken = import.meta.env.VITE_DATADOG_CLIENT_TOKEN;
   if (!applicationId || !clientToken || location.pathname === "/auth/callback")
@@ -33,7 +40,7 @@ export function startMonitoring() {
       version: appRelease,
       plugins: [reactPlugin()],
       sessionSampleRate: 100,
-      sessionReplaySampleRate: 0,
+      sessionReplaySampleRate: 10,
       defaultPrivacyLevel: "mask",
       trackViewsManually: true,
       trackResources: true,

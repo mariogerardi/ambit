@@ -77,6 +77,12 @@ export function AnswerForm({
     context.names.get(id) ??
     context.choiceNames.get(id) ??
     id;
+  if (definition.control === "pin" && !webgl)
+    return (
+      <p className="pin-unavailable" role="status">
+        This Journey needs the 3D globe to place a pin. Try a browser or device with WebGL support.
+      </p>
+    );
   if (definition.control === "pin")
     return (
       <div className="pin-answer">
@@ -102,66 +108,6 @@ export function AnswerForm({
             </button>
           )}
         </div>
-        <details className="typed-country-guess" open={!webgl || undefined}>
-          <summary data-dd-action-name="Answer Enter Coordinates">
-            Enter coordinates
-          </summary>
-          <form
-            autoComplete="off"
-            key={question.id}
-            onSubmit={(event) => {
-              event.preventDefault();
-              const data = new FormData(event.currentTarget);
-              const lat = String(data.get("lat") ?? ""),
-                lng = String(data.get("lng") ?? "");
-              if (lat.trim() && lng.trim())
-                dispatch({
-                  type: "drop-pin",
-                  lat: Number(lat),
-                  lng: Number(lng),
-                });
-            }}
-          >
-            <label htmlFor="pin-latitude">Latitude</label>
-            <input
-              id="pin-latitude"
-              name="lat"
-              type="number"
-              inputMode="text"
-              enterKeyHint="next"
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.nativeEvent.isComposing) {
-                  event.preventDefault();
-                  document.getElementById("pin-longitude")?.focus();
-                }
-              }}
-              min={-90}
-              max={90}
-              step="any"
-              required
-              placeholder="−90 to 90"
-            />
-            <label htmlFor="pin-longitude">Longitude</label>
-            <input
-              id="pin-longitude"
-              name="lng"
-              type="number"
-              inputMode="text"
-              enterKeyHint="done"
-              min={-180}
-              max={180}
-              step="any"
-              required
-              placeholder="−180 to 180"
-            />
-            <button
-              className="primary-button"
-              data-dd-action-name="Answer Place Pin"
-            >
-              Place pin <span>→</span>
-            </button>
-          </form>
-        </details>
       </div>
     );
   if (definition.control === "choice")

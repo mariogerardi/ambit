@@ -15,6 +15,11 @@ from datetime import date, timedelta
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+try:
+    from ddtrace import tracer
+except ImportError:
+    tracer = None
+
 COUNTRIES = set(json.loads(Path(__file__).with_name("study-countries.json").read_text()))
 AVATAR_CATALOG = Path(__file__).with_name("profile-avatars.json")
 if not AVATAR_CATALOG.exists():
@@ -28,6 +33,16 @@ from botocore.exceptions import ClientError
 class Problem(Exception):
     def __init__(self, status, message, **details):
         self.status, self.message, self.details = status, message, details
+
+
+def tag_count(name, count):
+    try:
+        span = tracer.current_span() if tracer else None
+        if span:
+            span.set_tag(name, count)
+    except Exception:
+        # Telemetry must not interrupt account access.
+        pass
 
 
 def table():
@@ -64,7 +79,7 @@ def batch_get(addresses):
             return result
         if attempt < 3:
             time.sleep(0.05 * 2 ** attempt)
-    raise Problem(503, "Couldn’t load friend activity. Please try again.")
+    raise Problem(503, "Couldn’t load account data. Please try again.")
 
 
 def packed(owner, kind, value):
@@ -189,9 +204,12 @@ def handle_collision(subject, handle):
 
 def save_profile(subject, body):
     owner = "user#" + subject
-    old = get(owner, "profile")
     handle = normalized_handle(body.get("handle"))
-    handle_collision(subject, handle)
+    records = batch_get([(owner, "profile"), ("handle#" + handle, "owner")])
+    old = records.get((owner, "profile"))
+    reservation = records.get(("handle#" + handle, "owner"))
+    if reservation and reservation["id"] != subject:
+        handle_collision(subject, handle)
     avatar = body.get("avatar", "globe")
     if not isinstance(avatar, str) or not (avatar in AVATARS or (avatar.startswith("flag:") and avatar[5:] in COUNTRIES)):
         raise Problem(400, "Choose an avatar.")
@@ -211,6 +229,7 @@ def save_profile(subject, body):
     if len({p["id"] for p in clean_presets}) != len(clean_presets):
         raise Problem(400, "Each preset needs its own identifier.")
     value = {"id": subject, "displayName": string(body.get("displayName"), 40, True), "handle": handle, "avatar": avatar, "favoriteRegion": string(body.get("favoriteRegion", ""), 60), "bio": string(body.get("bio", ""), 160), "shareJourneyScores": True, "presets": clean_presets, "revision": (old or {}).get("revision", 0) + 1}
+    tag_count("profile.presets.count", len(clean_presets))
     operations = [put(owner, "profile", value, old)]
     if not old or old["handle"] != handle:
         operations.append(put("handle#" + handle, "owner", {"id": subject}))
@@ -451,25 +470,27 @@ def activity_page(subject, params):
     cursor = (params or {}).get("cursor", "")
     if not isinstance(cursor, str) or len(cursor) > 200:
         raise Problem(400, "Invalid friends cursor.")
-    accepted = sorted((r for r in rows("user#" + subject, "friend#") if r["status"] == "accepted"), key=lambda r: r["id"])
-    selected = [r for r in accepted if r["id"] > cursor][:24]
-    addresses = [(owner, kind) for entry in selected for owner, kind in (
-        (pair(subject, entry["id"]), "relation"),
-        ("user#" + entry["id"], "profile"),
-        ("user#" + entry["id"], "activity-v1"),
-    )]
-    records = batch_get(addresses)
-    def read_entry(entry):
-        other = entry["id"]
-        relation = records.get((pair(subject, other), "relation"))
-        profile = records.get(("user#" + other, "profile"))
-        if not relation or relation["status"] != "accepted" or not profile:
-            return None
-        player = {"id": other, **{k: profile[k] for k in ("displayName", "handle", "avatar", "favoriteRegion", "bio")}}
-        return {"player": player, "summary": progress_summary(other, cached_records=records)}
-    # Viewer and friend save Queries share the pooled client, with at most four workers.
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    # Start the viewer's independent save Query while listing friends and batching their records.
+    with ThreadPoolExecutor(max_workers=8) as executor:
         viewer_future = executor.submit(progress_summary, subject, fresh=True)
+        accepted = sorted((r for r in rows("user#" + subject, "friend#") if r["status"] == "accepted"), key=lambda r: r["id"])
+        selected = [r for r in accepted if r["id"] > cursor][:24]
+        tag_count("friends.count", len(accepted))
+        tag_count("friends.page_count", len(selected))
+        addresses = [(owner, kind) for entry in selected for owner, kind in (
+            (pair(subject, entry["id"]), "relation"),
+            ("user#" + entry["id"], "profile"),
+            ("user#" + entry["id"], "activity-v1"),
+        )]
+        records = batch_get(addresses)
+        def read_entry(entry):
+            other = entry["id"]
+            relation = records.get((pair(subject, other), "relation"))
+            profile = records.get(("user#" + other, "profile"))
+            if not relation or relation["status"] != "accepted" or not profile:
+                return None
+            player = {"id": other, **{k: profile[k] for k in ("displayName", "handle", "avatar", "favoriteRegion", "bio")}}
+            return {"player": player, "summary": progress_summary(other, cached_records=records)}
         summaries = [entry for entry in executor.map(read_entry, selected) if entry]
         viewer = viewer_future.result()
     # Recheck access after reading private saves so a concurrent block stays private.
@@ -551,6 +572,7 @@ def handle(event):
         params = event.get("pathParameters") or {}
         if route == "GET /account/profile":
             value = get("user#" + subject, "profile")
+            tag_count("profile.presets.count", len(value.get("presets", [])) if value else 0)
         elif route == "PATCH /account/profile":
             value = save_profile(subject, body)
         elif route == "GET /account/handles/{handle}":

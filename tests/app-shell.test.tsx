@@ -348,7 +348,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "",
       ...journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id),
     ]);
-    expect(options).toHaveLength(17);
+    expect(options).toHaveLength(18);
     const preview = [...host.querySelectorAll<HTMLAnchorElement>("a")].find(
       (link) => link.textContent?.includes("Preview five questions"),
     );
@@ -2690,16 +2690,17 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   });
 });
 
-it("shows a static globe and written controls without mounting WebGL when unsupported", async () => {
+it("requires WebGL to play without mounting it when unsupported", async () => {
   vi.mocked(supportsWebGL).mockReturnValue(false);
   await mount();
   expect(probe.mounts).toBe(0);
   expect(host.querySelector(".account-earth")).not.toBeNull();
-  expect(host.textContent).toContain("The globe is unavailable");
+  expect(host.textContent).toContain("The 3D globe is required to play Ambit");
+  expect(host.querySelector<HTMLButtonElement>(".daily-menu .primary-button")?.disabled).toBe(true);
   expect(host.querySelector('[role="alert"]')).toBeNull();
   await click("Study");
   expect(probe.mounts).toBe(0);
-  expect(host.textContent).toContain("Study");
+  expect(host.textContent).toContain("The 3D globe is required to play Ambit");
 });
 
 it("routes comparison links on entry and updates query intent on browser history changes", async () => {

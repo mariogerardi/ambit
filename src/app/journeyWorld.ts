@@ -1,7 +1,8 @@
 import { isRegionAnswer } from "../game/questionBuilder";
+import { geoDistance, geoInterpolate } from "d3-geo";
 import { answerPlace } from "../game/answerTargets";
 import { withAssistanceLocks } from "../game/guidance";
-import type { RegionFeature, RouteFeature } from "../geography/types";
+import type { Focus, RegionFeature, RouteFeature } from "../geography/types";
 import type { GameState } from "../game/state";
 import type { Journey, QuestionContext } from "../game/questionContracts";
 import { solutionIds } from "../game/questionPreparation";
@@ -62,6 +63,10 @@ export function journeyWorld(
   const assist =
     game.phase === "playing" && game.help?.[round.id] === "assisted"
       ? round.guidance?.assist
+      : undefined;
+  const hintFocus =
+    game.phase === "playing" && game.help?.[round.id]
+      ? round.guidance?.hintMap?.focus
       : undefined;
   const catalog = new Map(
     [...regions, ...(round.importedRegions ?? [])].map((r) => [r.id, r]),
@@ -133,9 +138,36 @@ export function journeyWorld(
           shade: !!pinRule.tiers,
         }))
       : [];
+  let photoRevealFocus: Focus | undefined;
+  if (
+    game.phase === "feedback" &&
+    journey.completion?.photoResults &&
+    pinRule &&
+    pinTarget &&
+    game.pin
+  ) {
+    const target: [number, number] = [pinTarget.lng, pinTarget.lat];
+    const guess: [number, number] = [game.pin.lng, game.pin.lat];
+    const distanceKm = geoDistance(target, guess) * 6371.0088;
+    if (distanceKm <= pinRule.radiusKm)
+      photoRevealFocus = {
+        lat: pinTarget.lat,
+        lng: pinTarget.lng,
+        altitude: 0.4,
+      };
+    else {
+      const [lng, lat] = geoInterpolate(target, guess)(0.5);
+      photoRevealFocus = {
+        lat,
+        lng,
+        altitude: Math.min(5.5, 0.4 + distanceKm / 4000),
+      };
+    }
+  }
   const selected = catalog.get(game.selectedIds.at(-1) ?? "");
   const focus =
     completion?.focus ??
+    photoRevealFocus ??
     (game.phase === "feedback" && round.feedbackFocus
       ? round.feedbackFocus
       : game.phase === "feedback" &&
@@ -147,19 +179,21 @@ export function journeyWorld(
           ? { ...selected.focus, altitude: 1.3 }
           : game.phase === "finished"
             ? journey.rounds.at(-1)!.focus
-            : (assist?.focus ?? round.focus));
+            : (assist?.focus ?? hintFocus ?? round.focus));
   return {
     regions:
       game.phase === "finished"
         ? allRegions(regions, journey)
-        : questionRegions(regions, round, game.phase),
+        : questionRegions(regions, round, game.phase, game.help?.[round.id]),
     states: completion
       ? Object.fromEntries(
           allRegions(regions, journey).map((r) => [
             r.id,
             completion.regionIds?.includes(r.id)
               ? ("visited" as const)
-              : ("disabled" as const),
+              : completion.photoResults
+                ? ("default" as const)
+                : ("disabled" as const),
           ]),
         )
       : game.phase === "finished"
