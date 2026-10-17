@@ -465,7 +465,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(document.body.querySelector(".ambit-loading-screen")).not.toBeNull();
     await paint();
     expect(host.querySelector(".game-scene.globe-presented")).not.toBeNull();
-    expect(document.body.querySelector(".ambit-loading-screen")).toBeNull();
+    expect(
+      document.body.querySelector(".ambit-loading-screen.is-leaving"),
+    ).not.toBeNull();
     await click("Explore");
     await click("Study");
     await click("Home");

@@ -1066,7 +1066,7 @@ export function App() {
                     : undefined
                 }
               />
-              {!globePresented && !error && <LoadingScreen />}
+              <LoadingScreen active={!globePresented && !error} />
             </Suspense>
           </BoardBoundary>
         )}

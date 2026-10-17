@@ -67,7 +67,7 @@ def main():
             raise RuntimeError("Published release did not match the verified artifact.")
         for path in ("/", "/study", "/explore", "/journey/shared-neighbors"):
             with urllib.request.urlopen(base + path, timeout=20) as response:
-                if b'<div id="root"></div>' not in response.read():
+                if b'<div id="root">' not in response.read():
                     raise RuntimeError(f"Application route did not return the app: {path}")
         with urllib.request.urlopen(base + "/NOTICE.txt", timeout=20) as response:
             if response.read() != (directory / "NOTICE.txt").read_bytes():
