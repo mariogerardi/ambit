@@ -106,7 +106,7 @@ export function GameShell({
     if (tray) tray.scrollTop = 0;
     heading.current?.focus({ preventScroll: true });
   }, [round.id, game.phase]);
-  const inGame = game.phase === "playing" || game.phase === "feedback";
+  const inGame = (game.phase === "playing" && webgl) || game.phase === "feedback";
   const ended = game.phase === "finished" || game.phase === "failed";
   const navigation = (
     <div className="finish-actions result-actions completion-navigation">
@@ -159,14 +159,37 @@ export function GameShell({
     round.rule.type === "pin-distance" && distance !== undefined
       ? `Your pin was ${distance < 1 ? "less than 1" : Math.round(distance).toLocaleString()} km away.`
       : "";
-  const start = () => (onReplay ? onReplay() : dispatch({ type: "start" }));
+  const start = () => {
+    if (!webgl) return;
+    if (onReplay) onReplay();
+    else dispatch({ type: "start" });
+  };
   const legend =
     game.phase === "feedback" ? feedbackLegend(round, context, game) : [];
+  const clueImage =
+    round.image &&
+    (game.phase === "playing" ||
+      (!round.feedbackFlags?.length &&
+        round.feedbackImage?.src !== round.image.src)) ? (
+      <figure
+        className={`flag-clue${round.image.context ? " flag-clue-with-context" : ""}${round.image.presentation === "photo" ? " journey-photo-clue" : ""}`}
+      >
+        <img
+          src={round.image.src}
+          alt={game.phase === "playing" ? round.image.alt : round.image.feedbackAlt}
+        />
+        {round.image.context && (
+          <div className="flag-context">
+            <img src={round.image.context.src} alt={round.image.context.alt} />
+          </div>
+        )}
+      </figure>
+    ) : null;
   return (
     <>
       {inGame && context && (
         <section
-          className="question-card"
+          className={`question-card${round.image?.presentation === "photo" ? " photo-question-card" : ""}`}
           aria-label="Current round"
           data-question-id={round.id}
         >
@@ -185,6 +208,7 @@ export function GameShell({
               sources={<QuestionSources question={round} />}
             />
           </div>
+          {round.image?.presentation === "photo" && clueImage}
           <h1 className="journey-question-copy" ref={heading} tabIndex={-1}>
             {round.leadIn && (
               <>
@@ -195,29 +219,7 @@ export function GameShell({
               {questionPrompt(round, context)}
             </span>
           </h1>
-          {round.image &&
-            (game.phase === "playing" || !round.feedbackFlags?.length) && (
-              <figure
-                className={`flag-clue${round.image.context ? " flag-clue-with-context" : ""}`}
-              >
-                <img
-                  src={round.image.src}
-                  alt={
-                    game.phase === "playing"
-                      ? round.image.alt
-                      : round.image.feedbackAlt
-                  }
-                />
-                {round.image.context && (
-                  <div className="flag-context">
-                    <img
-                      src={round.image.context.src}
-                      alt={round.image.context.alt}
-                    />
-                  </div>
-                )}
-              </figure>
-            )}
+          {round.image?.presentation !== "photo" && clueImage}
           {game.phase === "playing" ? (
             <>
               {round.instruction && (
@@ -340,15 +342,6 @@ export function GameShell({
               {pinFeedback && (
                 <p className="journey-pin-distance">{pinFeedback}</p>
               )}
-              {round.rule.type === "pin-distance" && round.rule.tiers && (
-                <p className="journey-pin-tiers">
-                  Target rings:{" "}
-                  {round.rule.tiers
-                    .map((tier) => `${tier.radiusKm} km`)
-                    .join(" · ")}
-                  . All rings count as correct.
-                </p>
-              )}
               {legend.length > 0 && (
                 <div className="feedback-map-key" aria-label="Map color key">
                   {legend.map(({ key, label }) => (
@@ -424,14 +417,35 @@ export function GameShell({
                 (answer) => answer.roundId === question.id,
               );
               const help = game.help?.[question.id];
+              const recapDistance = answer && pinDistance(question, answer);
+              const recapTier = answer && pinDistanceTier(question, answer);
               return (
-                <li key={question.id}>
+                <li
+                  key={question.id}
+                  className={journey.completion?.photoResults ? "journey-photo-result" : undefined}
+                >
+                  {journey.completion?.photoResults && question.feedbackImage && (
+                    <img src={question.feedbackImage.src} alt={question.feedbackImage.alt} loading="lazy" />
+                  )}
                   <span>{String(i + 1).padStart(2, "0")}</span>
-                  <strong>
-                    {answer
-                      ? (answer.receiptLabel ?? resolvedRoundIdentity(question))
-                      : roundIdentity(question)}
-                  </strong>
+                  <div className="journey-receipt-detail">
+                    <strong>
+                      {answer
+                        ? (answer.receiptLabel ?? resolvedRoundIdentity(question))
+                        : roundIdentity(question)}
+                    </strong>
+                    {journey.completion?.photoResults && recapDistance !== undefined && (
+                      <span>
+                        {recapDistance < 1 ? "Less than 1" : Math.round(recapDistance).toLocaleString()} km away · {recapTier?.feedback ?? `Outside ${question.rule.type === "pin-distance" ? question.rule.radiusKm : 0} km`}
+                      </span>
+                    )}
+                    {journey.completion?.photoResults && question.feedbackImage && (
+                      <small>
+                        Photo: <a href={question.feedbackImage.credit.url} target="_blank" rel="noreferrer">{question.feedbackImage.credit.name}</a>
+                        {" · "}<a href={question.feedbackImage.credit.licenseUrl} target="_blank" rel="noreferrer">{question.feedbackImage.credit.license}</a>
+                      </small>
+                    )}
+                  </div>
                   <span className="journey-round-result">
                     {help && (
                       <span
@@ -480,6 +494,7 @@ export function GameShell({
             <button
               className="quiet-button tertiary-action journey-replay"
               data-dd-action-name="Journey Play Again"
+              disabled={!webgl}
               onClick={start}
             >
               <ActionIcon name="repeat" /> Play again

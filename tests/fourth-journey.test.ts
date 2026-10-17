@@ -68,7 +68,7 @@ const assisted = (i: number) =>
 
 describe("Mediterranean facelift", () => {
   it("keeps the current route and catalog, with five usable authored controls and help", () => {
-    expect(JOURNEYS).toHaveLength(16);
+    expect(JOURNEYS).toHaveLength(17);
     expect(journeyPath(journey.id)).toBe("/journey/mediterranean");
     expect(journey.rounds.map((q) => q.mode)).toEqual([
       "map-single",

@@ -5,6 +5,7 @@ import { ANSWER_TYPES, QUESTION_CATALOG } from "../src/game/questionCatalog";
 import { modeForPath } from "../src/app/modes";
 import { COUNTRY_FACTS } from "../src/game/countryFacts";
 import { CANADA_JOURNEY as JOURNEY } from "../src/game/canadaJourney";
+import { ACROSS_DIVIDE_JOURNEY } from "../src/game/acrossDivideJourney";
 import { NORTH_AMERICA_JOURNEY } from "../src/game/northAmericaJourney";
 import {
   createQuestionContext,
@@ -33,9 +34,14 @@ describe("current question catalog", () => {
   it("catalogs Journey questions only, with distinct IDs", () => {
     const rounds = QUESTION_CATALOG;
     expect(rounds.every((q) => Object.hasOwn(ANSWER_TYPES, q.mode))).toBe(true);
-    expect(rounds).toHaveLength(80);
+    expect(rounds).toHaveLength(85);
     expect(new Set(rounds.map((q) => q.id)).size).toBe(rounds.length);
-    expect(rounds.slice(0, 5)).toEqual(JOURNEY.rounds);
+    expect(rounds).toEqual(
+      expect.arrayContaining([
+        ...JOURNEY.rounds,
+        ...ACROSS_DIVIDE_JOURNEY.rounds,
+      ]),
+    );
   });
   it("keeps the border-count challenge blind and excludes every map pick", () => {
     const q = NORTH_AMERICA_JOURNEY.rounds[3];

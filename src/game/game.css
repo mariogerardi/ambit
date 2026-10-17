@@ -557,11 +557,40 @@
   font-size: 10px;
   color: var(--ui-faint, #6e9587);
 }
+.journey-receipt li.journey-photo-result > span:first-of-type {
+  font-size: 10px;
+  color: var(--ui-faint, #6e9587);
+}
 .journey-receipt strong {
   flex: 1;
   min-width: 0;
   font-weight: 500;
   color: var(--ui-muted, #aec5b0);
+}
+.journey-receipt-detail {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 3px;
+}
+.journey-receipt-detail > span,
+.journey-receipt-detail > small {
+  color: var(--ui-muted, #aec5b0);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.journey-receipt-detail > small a {
+  color: inherit;
+}
+.journey-receipt li.journey-photo-result {
+  flex-wrap: wrap;
+}
+.journey-photo-result > img {
+  display: block;
+  width: 100%;
+  max-height: 125px;
+  object-fit: contain;
+  border-radius: 6px;
 }
 .journey-receipt li > span:last-child {
   margin-left: auto;
@@ -1045,9 +1074,10 @@
 .pin-answer-actions > .tertiary-action {
   flex: none;
 }
-.pin-answer > .typed-country-guess {
-  margin-top: 4px;
-  padding-top: 8px;
+.pin-unavailable {
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.5;
 }
 .commit-note {
   font-size: 10px;
@@ -1172,6 +1202,17 @@
   width: 100%;
   height: auto;
   border-radius: 6px;
+}
+.flag-clue.journey-photo-clue {
+  margin: 0 0 15px;
+}
+.flag-clue.journey-photo-clue img,
+.experience .flag-clue.journey-photo-clue img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
 }
 .flag-comparison {
   display: grid;

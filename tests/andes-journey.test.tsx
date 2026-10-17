@@ -299,7 +299,7 @@ describe("Along the Andes authored map and finale", () => {
           webgl={false}
         />,
       ),
-    ).toContain("Enter coordinates");
+    ).toContain("This Journey needs the 3D globe");
   });
   it("grades all three bullseye tiers as correct with inclusive edges and distinct feedback", () => {
     const round = journey.rounds[3];

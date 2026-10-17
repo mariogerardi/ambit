@@ -115,6 +115,9 @@ async function click(label: string) {
 it("shows completion without leaking a locked daily score and opens a friend’s stats", async () => {
   await mount();
   expect(host.querySelector(".friend-card")?.textContent).toContain("@bob");
+  expect(
+    host.querySelector(".friend-card")?.getAttribute("data-dd-action-name"),
+  ).toBe("Friends Open Card");
   expect(host.querySelector(".friend-standings")).toBeNull();
   expect(host.querySelector(".friend-today")).toBeNull();
   expect(host.querySelector(".friend-add input")).not.toBeNull();

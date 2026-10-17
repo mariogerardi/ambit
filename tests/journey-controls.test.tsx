@@ -126,7 +126,7 @@ describe("Journey answer controls", () => {
     expect(current.answers[0]).toMatchObject({ text: "2", correct: true });
   });
 
-  it("keeps pin submission and removal together without removing the coordinate fallback", async () => {
+  it("keeps pin submission and removal together without coordinate entry", async () => {
     await act(async () =>
       root.render(
         <Harness journey={FIFTEENTH_JOURNEY} pin={{ lat: 61, lng: 25 }} />,
@@ -136,13 +136,11 @@ describe("Journey answer controls", () => {
       host.querySelector(".pin-answer-actions .answer-submit-button"),
     ).toBe(submit());
     expect(submit().disabled).toBe(false);
-    expect(host.querySelector("summary")!.textContent).toBe(
-      "Enter coordinates",
-    );
+    expect(host.textContent).not.toContain("Enter coordinates");
     await click("Remove pin");
     expect(current.pin).toBeUndefined();
     expect(submit().disabled).toBe(true);
     expect(host.querySelector(".commit-note")).toBeNull();
-    expect(host.querySelector("#pin-latitude")).not.toBeNull();
+    expect(host.querySelector("#pin-latitude")).toBeNull();
   });
 });

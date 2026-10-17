@@ -129,9 +129,10 @@ describe("Study completion, replay, and alternate answers", () => {
       vi.unstubAllGlobals();
     }
   });
-  it.each([true, false])(
-    "offers keyboard answers on map prompts (WebGL: %s)",
-    async (webgl) => {
+  it(
+    "offers keyboard answers on map prompts when WebGL is available",
+    async () => {
+      const webgl = true;
       vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
       const host = document.createElement("div"),
         root = createRoot(host);
@@ -278,7 +279,7 @@ it.each([true, false])(
     );
     expect(html).not.toContain("Answer by name");
     expect(html).not.toContain("<input");
-    if (!webgl) expect(html).toContain("another answer method");
+    if (!webgl) expect(html).toContain("3D globe is required");
   },
 );
 it("gives mobile correct-answer feedback time to read before automatic advance", async () => {

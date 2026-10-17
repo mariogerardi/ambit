@@ -154,6 +154,13 @@ export function StudyPanel({
         }}
       />
     );
+  if (!webgl && session?.phase !== "summary")
+    return (
+      <section className="info-view" role="status">
+        <p>The 3D globe is required to play Ambit on this device.</p>
+        {onHome && <button className="quiet-button" onClick={onHome}>Home</button>}
+      </section>
+    );
   if (setup || !session) {
     return (
       <StudySetup

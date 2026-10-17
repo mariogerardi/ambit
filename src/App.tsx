@@ -36,7 +36,7 @@ import { useAccount } from "./services/accounts";
 import { usePlayerProfile } from "./services/playerProfile";
 import { ProfileAvatar } from "./app/ProfileAvatar";
 import { appRelease } from "./services/config";
-import { trackView, reportFailure } from "./services/monitoring";
+import { trackAction, trackView, reportFailure } from "./services/monitoring";
 import type { FeedbackRequest } from "./services/feedback";
 import { AccountPanel, AdminAccess } from "./app/AccountPanel";
 import { FeedbackDialog } from "./app/FeedbackDialog";
@@ -590,6 +590,7 @@ export function App() {
     [],
   );
   const start = (settings: StudySettings, targets?: StudyReviewTarget[]) => {
+    if (!webgl) return;
     setStudyReview(undefined);
     setStudy((previous) => ({
       ...leaveStudy(previous),
@@ -649,7 +650,7 @@ export function App() {
     ],
   );
   function playDaily(date: string) {
-    if (date !== today || date !== localDateKey() || !schedule.ready) return;
+    if (!webgl || date !== today || date !== localDateKey() || !schedule.ready) return;
     setDaily((p) =>
       openDaily(p, date, false, allJourneys, schedule.schedule?.assignments),
     );
@@ -671,7 +672,7 @@ export function App() {
         journey={todayJourney}
         attempt={todayAttempt}
         ready={
-          !!regions.length && dailyLoaded && cloudSave.ready && schedule.ready
+          !!regions.length && dailyLoaded && cloudSave.ready && schedule.ready && webgl
         }
         scheduleError={schedule.ready ? undefined : schedule.error}
         onPlay={() => playDaily(today)}
@@ -997,7 +998,7 @@ export function App() {
                 onSelect={choose}
                 interactionLabel={
                   isJourney && journey.rounds[game.roundIndex].mode === "pin"
-                    ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom. Coordinate entry is available in the answer panel."
+                    ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
                     : isJourney &&
                         journey.rounds[game.roundIndex].mode.startsWith("city-")
                       ? "Interactive Earth. Select a city marker to answer; drag to rotate, scroll or pinch to zoom."
@@ -1055,6 +1056,7 @@ export function App() {
                 onSurfaceTap={
                   mode === "home"
                     ? (region) => {
+                        trackAction("Globe Tap", { mode });
                         setSelectedRegion(undefined);
                         setBreakdown(undefined);
                         clearBranches();
@@ -1229,12 +1231,12 @@ export function App() {
           </span>
         </footer>
       )}
-      {(error || contextError || !webgl) && (
+      {(error || contextError || (!webgl && mode !== "study")) && (
         <div className="experience-status" role="status">
           <p>
             {error ||
               contextError ||
-              "The globe is unavailable. You can still use the written answer controls."}
+              "The 3D globe is required to play Ambit on this device."}
           </p>
           {error && (
             <button onClick={() => setRetry((v) => v + 1)}>Try again ↻</button>

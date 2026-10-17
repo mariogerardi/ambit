@@ -22,8 +22,11 @@ beforeEach(() => {
   vi.stubEnv("VITE_DATADOG_SITE", "datadoghq.com");
   history.replaceState(null, "", "/study");
 });
-afterEach(() => vi.unstubAllEnvs());
-it("initializes React RUM with masked click names and no session recording", async () => {
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+it("initializes React RUM with masked click names and sampled session replay", async () => {
   const { trackView } = await import("../src/services/monitoring");
   trackView("study");
   trackView("study");
@@ -32,7 +35,7 @@ it("initializes React RUM with masked click names and no session recording", asy
   expect(rum.init.mock.calls[0][0]).toMatchObject({
     plugins: ["react-plugin"],
     sessionSampleRate: 100,
-    sessionReplaySampleRate: 0,
+    sessionReplaySampleRate: 10,
     defaultPrivacyLevel: "mask",
     trackViewsManually: true,
     trackUserInteractions: true,
@@ -42,6 +45,25 @@ it("initializes React RUM with masked click names and no session recording", asy
     [{ name: "study" }],
     [{ name: "explore" }],
   ]);
+});
+it("skips automated browsers and crawlers but allows ordinary users", async () => {
+  for (const navigatorValue of [
+    { webdriver: true, userAgent: "Mozilla/5.0" },
+    { webdriver: false, userAgent: "Googlebot/2.1" },
+    { webdriver: false, userAgent: "facebookexternalhit/1.1" },
+    { webdriver: false, userAgent: "Lighthouse" },
+  ]) {
+    vi.resetModules();
+    vi.stubGlobal("navigator", navigatorValue);
+    const { startMonitoring } = await import("../src/services/monitoring");
+    startMonitoring();
+    expect(rum.init).not.toHaveBeenCalled();
+  }
+  vi.resetModules();
+  vi.stubGlobal("navigator", { webdriver: false, userAgent: "Mozilla/5.0" });
+  const { startMonitoring } = await import("../src/services/monitoring");
+  startMonitoring();
+  expect(rum.init).toHaveBeenCalledOnce();
 });
 it("reports a supplied safe error with its original stack and context", async () => {
   const { startMonitoring, reportFailure } = await import(

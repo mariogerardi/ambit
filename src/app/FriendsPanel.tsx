@@ -793,6 +793,7 @@ export function FriendsPanel({
                   <button
                     key={identity.id}
                     className="friend-card"
+                    data-dd-action-name="Friends Open Card"
                     aria-label={`View ${identity.displayName}’s profile`}
                     onClick={() => void viewProfile(identity.id)}
                   >

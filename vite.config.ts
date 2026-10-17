@@ -18,6 +18,22 @@ export default defineConfig({
   plugins: [
     react(),
     {
+      name: "ambit-defer-entry-css",
+      apply: "build",
+      transformIndexHtml: {
+        order: "post",
+        handler(html) {
+          const deferred = html.replace(
+            /(<link rel="stylesheet" crossorigin href="\/assets\/index-[^"]+\.css")>/,
+            "$1 media=\"print\" data-ambit-style onload=\"this.media='all';this.dataset.ready='true'\" onerror=\"this.dataset.failed='true'\">",
+          );
+          if (deferred === html)
+            throw new Error("Entry stylesheet was not deferred");
+          return deferred;
+        },
+      },
+    },
+    {
       name: "ambit-release",
       apply: "build",
       generateBundle() {

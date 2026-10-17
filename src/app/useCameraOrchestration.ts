@@ -70,10 +70,12 @@ export function useCameraOrchestration({
     dailyReady,
   } = journeyCamera;
   const round = journey.rounds[roundIndex];
-  const assistFraming =
+  const helpFraming =
     phase === "playing" &&
-    help?.[round.id] === "assisted" &&
-    !!round.guidance?.assist?.focus;
+    ((help?.[round.id] === "assisted" && !!round.guidance?.assist?.focus) ||
+      (help?.[round.id] === "hinted" && !!round.guidance?.hintMap?.focus))
+      ? help?.[round.id]
+      : undefined;
   const {
     active: studying,
     session,
@@ -236,14 +238,14 @@ export function useCameraOrchestration({
     } else if (studying && session?.phase === "summary" && studyArea) {
       frame(studyArea);
     }
-    // Authored assist framing changes a stage; display and response edits keep the orbit.
+    // Authored help framing changes a stage; display and response edits keep the orbit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     ready,
     cameraKey,
     isJourney,
     !!journeyFocus,
-    assistFraming,
+    helpFraming,
     namedRegions.length,
     phase,
     roundIndex,

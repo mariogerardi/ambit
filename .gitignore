@@ -1,5 +1,6 @@
 node_modules/
 dist/
+reports/
 .cache/
 *.tsbuildinfo
 .DS_Store

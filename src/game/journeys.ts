@@ -14,7 +14,9 @@ import { ELEVENTH_JOURNEY } from "./eleventhJourney";
 import { TENTH_JOURNEY } from "./tenthJourney";
 import { NINTH_JOURNEY } from "./ninthJourney";
 import { FOURTH_JOURNEY } from "./fourthJourney";
+import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
 export const JOURNEYS = [
+  ACROSS_DIVIDE_JOURNEY,
   CANADA_JOURNEY,
   FOURTH_JOURNEY,
   NINTH_JOURNEY,
@@ -34,6 +36,7 @@ export const JOURNEYS = [
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [ACROSS_DIVIDE_JOURNEY.id]: "/journey/across-the-divide",
     [MISSING_BORDERS_JOURNEY.id]: "/journey/missing-borders",
     [SHARED_NAMES_JOURNEY.id]: "/journey/same-name-different-place",
     [SAME_HOUR_JOURNEY.id]: "/journey/same-hour-different-worlds",

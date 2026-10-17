@@ -124,8 +124,12 @@ export interface Question {
   /** A semantic clue first; an optional, separately requested change to the task display. */
   guidance?: {
     hint: string;
+    /** Optional broad geographic clue, shown only once help is requested. */
+    hintMap?: { regionIds: readonly string[]; focus?: Focus };
     assist?: {
       text: string;
+      /** Optional narrower regions to highlight in place of the hint regions. */
+      regionIds?: readonly string[];
       /** Authored survivors, including every correct answer and plausible alternatives. */
       candidateIds?: string[];
       /** Broad search context, never a grading boundary or target-centered tolerance. */
@@ -210,6 +214,8 @@ export interface Question {
     /** Hover styling/inspection only; answering is derived from the answer mode. */
     hoverFeedback: boolean;
     muteOthers: boolean;
+    /** Keep ordinary theme land colors when no region is an answer candidate. */
+    neutralRegions?: boolean;
     revealOnCorrect?: boolean;
     revealOnAnswer?: boolean;
     candidates?: "highlighted" | "decorative" | "neutral";
@@ -244,6 +250,8 @@ export interface Question {
     src: string;
     alt: string;
     feedbackAlt: string;
+    /** Give documentary clues a larger, photo-first layout. */
+    presentation?: "photo";
     /** Full visual context displayed alongside an enlarged clue. */
     context?: { src: string; alt: string };
   };
@@ -289,6 +297,8 @@ export interface Journey {
     caption?: string;
     /** Reviewed flag/motif comparison, shown only after the Journey ends. */
     flags?: FlagDisplay[];
+    /** Resolved photo-and-distance recap for pin Journeys. */
+    photoResults?: boolean;
   };
   mapAttribution?: { label: string; url: string };
 }

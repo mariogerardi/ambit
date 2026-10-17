@@ -41,6 +41,21 @@ def template(environment="production"):
     origins = ["https://playambit.com"] if environment == "production" else local_origins
     login_origins = origins + local_origins if environment == "production" else local_origins
     r = {}
+    datadog_env = {
+        "DD_ENV": environment, "DD_SERVICE": "ambit-api", "DD_VERSION": ref("Release"),
+        "DD_SITE": ref("DatadogSite"), "DD_API_KEY_SECRET_ARN": ref("DatadogSecretArn"),
+        "DD_TRACE_ENABLED": "true", "DD_LOGS_INJECTION": "true", "DD_SERVERLESS_LOGS_ENABLED": "true",
+        "DD_CAPTURE_LAMBDA_PAYLOAD": "false", "DD_AWS_TAG_NO_PARAMS": "true",
+        "DD_TRACE_CLOUD_REQUEST_PAYLOAD_TAGGING": "", "DD_TRACE_CLOUD_RESPONSE_PAYLOAD_TAGGING": "",
+    }
+    datadog_layers = {"Fn::If": ["UseDatadog", [sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python313:127"), sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension:99")], ref("AWS::NoValue")]}
+    datadog_secret_access = {"Fn::If": ["UseDatadog", {"Effect": "Allow", "Action": "secretsmanager:GetSecretValue", "Resource": ref("DatadogSecretArn")}, ref("AWS::NoValue")]}
+    def traced_lambda(handler, variables):
+        return {
+            "Handler": {"Fn::If": ["UseDatadog", "datadog_lambda.handler.handler", handler]},
+            "Layers": datadog_layers,
+            "Environment": {"Variables": {**variables, **datadog_env, "DD_LAMBDA_HANDLER": handler}},
+        }
     r["Feedback"] = resource("AWS::DynamoDB::Table", {
         "TableName": prefix + "-feedback", "BillingMode": "PAY_PER_REQUEST",
         "AttributeDefinitions": [{"AttributeName": key, "AttributeType": "S"} for key in ("pk", "queue", "createdAt")],
@@ -67,9 +82,9 @@ def template(environment="production"):
     r["ConfirmationRole"] = resource("AWS::IAM::Role", {"AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy]})
     code = {"S3Bucket": ref("ArtifactBucket"), "S3Key": ref("ArtifactKey")}
     r["Confirmation"] = resource("AWS::Lambda::Function", {
-        "FunctionName": prefix + "-account-confirmation", "Runtime": "python3.13", "Handler": "confirmation.handler",
+        "FunctionName": prefix + "-account-confirmation", "Runtime": "python3.13",
         "Role": arn("ConfirmationRole"), "Code": code, "Timeout": 5, "MemorySize": 128,
-        "Environment": {"Variables": {"ADMIN_EMAIL": ref("AdminEmail")}},
+        **traced_lambda("confirmation.handler", {"ADMIN_EMAIL": ref("AdminEmail")}),
         "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": environment}],
     })
     r["Users"] = resource("AWS::Cognito::UserPool", {
@@ -85,7 +100,7 @@ def template(environment="production"):
     }, retain=True)
     r["ConfirmationPolicy"] = resource("AWS::IAM::Policy", {
         "PolicyName": "AmbitOwnerRole", "Roles": [ref("ConfirmationRole")],
-        "PolicyDocument": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "cognito-idp:AdminAddUserToGroup", "Resource": arn("Users")}]},
+        "PolicyDocument": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "cognito-idp:AdminAddUserToGroup", "Resource": arn("Users")}, datadog_secret_access]},
     })
     r["ConfirmationPermission"] = resource("AWS::Lambda::Permission", {
         "Action": "lambda:InvokeFunction", "FunctionName": ref("Confirmation"), "Principal": "cognito-idp.amazonaws.com", "SourceArn": arn("Users"), "SourceAccount": ref("AWS::AccountId"),
@@ -111,18 +126,14 @@ def template(environment="production"):
             {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:Query"], "Resource": [arn("Feedback"), sub("${Feedback.Arn}/index/feedback-by-date")]},
             {"Effect": "Allow", "Action": ["dynamodb:PutItem", "dynamodb:Query"], "Resource": arn("Saves")},
             {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:BatchGetItem", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:Query", "dynamodb:ConditionCheckItem"], "Resource": arn("Community")},
-            {"Fn::If": ["UseDatadog", {"Effect": "Allow", "Action": "secretsmanager:GetSecretValue", "Resource": ref("DatadogSecretArn")}, ref("AWS::NoValue")]},
+            datadog_secret_access,
         ]}}],
     })
-    env = {"COMMUNITY_TABLE": ref("Community"), "SAVES_TABLE": ref("Saves"), "FEEDBACK_TABLE": ref("Feedback"), "RATE_SALT": ref("RateSalt"), "ALLOWED_ORIGINS": ",".join(origins), "RELEASE": ref("Release"),
-           "APP_ENV": environment, "DD_ENV": environment, "DD_SERVICE": "ambit-api", "DD_VERSION": ref("Release"), "DD_SITE": ref("DatadogSite"),
-           "DD_API_KEY_SECRET_ARN": ref("DatadogSecretArn"), "DD_LAMBDA_HANDLER": "handler.handler", "DD_TRACE_ENABLED": "true", "DD_LOGS_INJECTION": "true", "DD_SERVERLESS_LOGS_ENABLED": "true", "DD_CAPTURE_LAMBDA_PAYLOAD": "false", "DD_AWS_TAG_NO_PARAMS": "true", "DD_TRACE_CLOUD_REQUEST_PAYLOAD_TAGGING": "", "DD_TRACE_CLOUD_RESPONSE_PAYLOAD_TAGGING": ""}
+    env = {"COMMUNITY_TABLE": ref("Community"), "SAVES_TABLE": ref("Saves"), "FEEDBACK_TABLE": ref("Feedback"), "RATE_SALT": ref("RateSalt"), "ALLOWED_ORIGINS": ",".join(origins), "RELEASE": ref("Release"), "APP_ENV": environment}
     r["ApiFunction"] = resource("AWS::Lambda::Function", {
         "FunctionName": prefix + "-feedback", "Runtime": "python3.13",
-        "Handler": {"Fn::If": ["UseDatadog", "datadog_lambda.handler.handler", "handler.handler"]},
         "Role": arn("ApiRole"), "Code": code, "Timeout": 15, "MemorySize": 1024, "ReservedConcurrentExecutions": 5,
-        "Environment": {"Variables": env},
-        "Layers": {"Fn::If": ["UseDatadog", [sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python313:127"), sub("arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension:99")], ref("AWS::NoValue")]},
+        **traced_lambda("handler.handler", env),
         "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": environment}, {"Key": "service", "Value": "ambit-api"}],
     })
     if environment == "staging":
@@ -134,12 +145,13 @@ def template(environment="production"):
                 {"Effect": "Allow", "Action": "dynamodb:Query", "Resource": arn("Saves")},
                 {"Effect": "Allow", "Action": "dynamodb:PutItem", "Resource": arn("Saves"), "Condition": {"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["user#staging-demo-*"]}}},
                 {"Effect": "Allow", "Action": "dynamodb:DeleteItem", "Resource": arn("Community"), "Condition": {"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["user#staging-demo-*"]}}},
+                datadog_secret_access,
             ]}}],
         })
         r["DemoFunction"] = resource("AWS::Lambda::Function", {
-            "FunctionName": prefix + "-demo-activity", "Runtime": "python3.13", "Handler": "staging_demo.handler",
+            "FunctionName": prefix + "-demo-activity", "Runtime": "python3.13",
             "Role": arn("DemoRole"), "Code": code, "Timeout": 60, "MemorySize": 128, "ReservedConcurrentExecutions": 1,
-            "Environment": {"Variables": {"APP_ENV": "staging", "COMMUNITY_TABLE": ref("Community"), "SAVES_TABLE": ref("Saves"), "DEMO_HANDLE": "mars_staging"}},
+            **traced_lambda("staging_demo.handler", {"APP_ENV": "staging", "COMMUNITY_TABLE": ref("Community"), "SAVES_TABLE": ref("Saves"), "DEMO_HANDLE": "mars_staging"}),
             "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": "staging"}],
         })
         r["DemoLogs"] = resource("AWS::Logs::LogGroup", {"LogGroupName": "/aws/lambda/" + prefix + "-demo-activity", "RetentionInDays": 14})
