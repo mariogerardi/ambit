@@ -33,9 +33,25 @@ jobs:
       - name: Check documentation formatting
         run: npm run check:docs
       - name: Check backend security and feedback behavior
-        run: python3 -m unittest discover -s backend -p 'test_*.py'
+        run: python3 scripts/run-python-tests.py
       - name: Run unit, asset, and DOM tests
-        run: npm test
+        if: always()
+        run: npm test -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest.xml
+      - name: Upload test results to Datadog
+        if: always()
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+          DD_ENV: ci
+        run: |
+          if [ -n "$DATADOG_API_KEY" ]; then
+            if [ -f reports/python.xml ]; then
+              npx --yes @datadog/datadog-ci@5.25.0 junit upload --service ambit-api reports/python.xml
+            fi
+            if [ -f reports/vitest.xml ]; then
+              npx --yes @datadog/datadog-ci@5.25.0 junit upload --service ambit-web reports/vitest.xml
+            fi
+          fi
       - name: Check portable Journey exporter
         run: npm run test:journey-export
       - name: Type-check and build
@@ -97,3 +113,15 @@ jobs:
           role-session-name: ambit-${{ github.run_id }}
       - name: Publish verified artifact
         run: python3 scripts/deploy-production.py --expected-commit "$GITHUB_SHA"
+      - name: Mark production deployment in Datadog
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+          DD_SITE: datadoghq.com
+          DD_BETA_COMMANDS_ENABLED: "1"
+        run: |
+          if [ -n "$DATADOG_API_KEY" ]; then
+            npx --yes @datadog/datadog-ci@5.25.0 deployment mark --env production --service ambit-web --revision "$GITHUB_SHA"
+            npx --yes @datadog/datadog-ci@5.25.0 deployment mark --env production --service ambit-api --revision "$GITHUB_SHA"
+          fi
