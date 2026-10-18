@@ -65,7 +65,7 @@ import { ExplorePanel } from "./app/ExplorePanel";
 import type { ExploreSettings } from "./app/ExplorePanel";
 import {
   dailyJourney,
-  DAILY_SCHEDULE,
+  SCHEDULE_VERSION,
   localDateKey,
   millisecondsToMidnight,
   openDaily,
@@ -696,7 +696,7 @@ export function App() {
                   ).id,
                 version:
                   daily.attempts[today]?.scheduleVersion ??
-                  DAILY_SCHEDULE.version,
+                  SCHEDULE_VERSION,
               }
             : null
         }

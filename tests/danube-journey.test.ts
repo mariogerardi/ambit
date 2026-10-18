@@ -5,7 +5,6 @@ import { COUNTRY_FACTS } from "../src/game/countryFacts";
 import { createQuestionContext, isCorrect } from "../src/game/questions";
 import { gameReducer, initialGame, journeyScore } from "../src/game/state";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
-import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
 import type { Action, GameState } from "../src/game/state";
 import type { RegionFeature } from "../src/geography/types";
 import { journeyWorld } from "../src/app/journeyWorld";
@@ -227,5 +226,5 @@ it("grades the city radius and the gorge’s exact border pair", () => {
   expect(
     JOURNEY_INDEX.find((journey) => journey.id === DANUBE_JOURNEY.id)?.path,
   ).toBe("/journey/down-the-danube");
-  expect(ACTIVE_JOURNEY_IDS).not.toContain(DANUBE_JOURNEY.id);
+  expect(JOURNEY_INDEX.find((journey) => journey.id === DANUBE_JOURNEY.id)?.availability).toBe("unlisted");
 });

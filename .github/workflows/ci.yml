@@ -86,7 +86,8 @@ jobs:
   deploy:
     name: Deploy production
     needs: validate
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    # Phase 2 needs a reviewed history backfill and backend deploy first.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && vars.DAILY_SCHEDULE_CUTOVER_READY == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

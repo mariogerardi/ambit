@@ -3,9 +3,10 @@ import hashlib
 import json
 import os
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from journey_schedule import choose, SCHEDULE_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -45,7 +46,7 @@ def save_item(subject, attempt, clock):
     return {"pk": {"S": "user#" + subject}, "sk": {"S": hashlib.sha256(address.encode()).hexdigest()}, "namespace": {"S": "daily"}, "field": {"S": field}, "writer": {"S": DEMO_WRITER}, "clock": {"N": str(clock)}, "valueJson": {"S": json.dumps(attempt, separators=(",", ":"))}}
 
 
-def choose_journey(day, catalog, schedule, records, rotation=None):
+def choose_journey(day, catalog, schedule, records):
     resets = {}
     for row in records:
         if row.get("namespace", {}).get("S") == "daily" and row.get("field", {}).get("S", "").startswith("reset."):
@@ -67,13 +68,8 @@ def choose_journey(day, catalog, schedule, records, rotation=None):
                 attempts = selected
         active = max(attempts, key=lambda value: (value.get("startedAt", 0), len(value["game"].get("answers", []))))
         return catalog[active["journeyId"]], active.get("scheduleVersion", 1)
-    assigned = schedule.get("assignments", {}).get(day)
-    current = next((row for row in catalog.values() if row.get("supersedes") == assigned and assigned), catalog.get(assigned))
-    if current:
-        return current, 1
-    rotation = rotation or load_rotation()
-    offset = (date.fromisoformat(day) - date(2026, 10, 5)).days
-    return catalog[rotation[offset % len(rotation)]], 1
+    records = schedule.get("records", {})
+    return catalog[choose(day, records, catalog)], SCHEDULE_VERSION
 
 
 def load_catalog():
@@ -83,14 +79,7 @@ def load_catalog():
     return {row["id"]: row for row in json.loads(path.read_text())}
 
 
-def load_rotation():
-    path = Path(__file__).with_name("journey-rotation.json")
-    if path.exists():
-        return json.loads(path.read_text())
-    return re.findall(r'"([a-z0-9-]+)"', (ROOT / "src/game/journeyRotation.ts").read_text())
-
-
-def seed(aws, handle="mars_staging", day=None, dry_run=False, provision=False, catalog=None, rotation=None):
+def seed(aws, handle="mars_staging", day=None, dry_run=False, provision=False, catalog=None):
     """Refresh only marked demo saves; provision friendships only in the manual CLI."""
     day = day or datetime.now(ZoneInfo("America/New_York")).date().isoformat()
     date.fromisoformat(day)
@@ -123,7 +112,20 @@ def seed(aws, handle="mars_staging", day=None, dry_run=False, provision=False, c
         if not cursor:
             break
     catalog = catalog or load_catalog()
-    journey, version = choose_journey(day, catalog, get("journey-schedule", "published") or {}, records, rotation)
+    schedule_records, cursor = {}, None
+    while True:
+        first = (date.fromisoformat(day) - timedelta(days=14)).isoformat()
+        parameters = {"TableName": COMMUNITY, "KeyConditionExpression": "pk = :owner AND sk BETWEEN :first AND :last", "ExpressionAttributeValues": {":owner": {"S": "journey-schedule"}, ":first": {"S": "day:" + first}, ":last": {"S": "day:" + day}}, "ConsistentRead": True}
+        if cursor:
+            parameters["ExclusiveStartKey"] = cursor
+        page = aws("dynamodb", "query", **parameters)
+        for item in page.get("Items", []):
+            record = json.loads(item["dataJson"]["S"])
+            schedule_records[record["day"]] = record
+        cursor = page.get("LastEvaluatedKey")
+        if not cursor:
+            break
+    journey, version = choose_journey(day, catalog, {"records": schedule_records}, records)
     clock = int(datetime.now().timestamp() * 1000)
     prepared = []
     for friend in FRIENDS:

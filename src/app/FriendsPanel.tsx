@@ -15,7 +15,7 @@ import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
 import { invitationLink } from "./accountNavigation";
 import { copyShareText, shareCancelled } from "./journeySharing";
 import { FriendJourneyComparison } from "./FriendJourneyComparison";
-import { dailyJourney, DAILY_SCHEDULE } from "./dailyProgress";
+import { dailyJourney, SCHEDULE_VERSION } from "./dailyProgress";
 import type { DailyProgress } from "./dailyProgress";
 import { helpSummary } from "../game/guidance";
 
@@ -392,7 +392,7 @@ export function FriendsPanel({
     defaultComparison ?? {
       date: today,
       journeyId: attempt?.journeyId ?? dailyJourney(today, daily).id,
-      version: attempt?.scheduleVersion ?? DAILY_SCHEDULE.version,
+      version: attempt?.scheduleVersion ?? SCHEDULE_VERSION,
     };
   const localScore =
     attempt &&

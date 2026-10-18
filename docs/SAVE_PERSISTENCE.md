@@ -45,8 +45,8 @@ Known version-1 saves with damaged records are recovered record by record. Befor
 replacement, the exact original string is backed up at
 `<original-key>.recovery.<uuid>`. Failure to create the backup prevents replacement.
 Malformed JSON and unsupported future formats remain untouched and block writes
-to that save. Temporarily unavailable locally published Journey references also
-retain the existing protection against replacement.
+to that save. Attempts for Journeys missing from the current catalog are backed
+up, retained as hidden history, and excluded from active play; other dates remain writable.
 
 The register reader ignores individual malformed entries while leaving their raw
 data in place. Other valid records continue to load. Timestamps must be valid Date

@@ -136,12 +136,35 @@ def template(environment="production"):
         **traced_lambda("handler.handler", env),
         "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": environment}, {"Key": "service", "Value": "ambit-api"}],
     })
+    r["JourneyLockRole"] = resource("AWS::IAM::Role", {
+        "AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy],
+        "Policies": [{"PolicyName": "LockDailyJourney", "PolicyDocument": {"Version": "2012-10-17", "Statement": [
+            {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:Query", "dynamodb:PutItem"], "Resource": arn("Community")},
+            datadog_secret_access,
+        ]}}],
+    })
+    r["JourneyLockFunction"] = resource("AWS::Lambda::Function", {
+        "FunctionName": prefix + "-journey-lock", "Runtime": "python3.13",
+        "Role": arn("JourneyLockRole"), "Code": code, "Timeout": 15, "MemorySize": 256,
+        **traced_lambda("journey_lock.handler", {"APP_ENV": environment, "COMMUNITY_TABLE": ref("Community")}),
+        "Tags": [{"Key": "project", "Value": "ambit"}, {"Key": "environment", "Value": environment}, {"Key": "service", "Value": "ambit-api"}],
+    })
+    r["JourneyLockLogs"] = resource("AWS::Logs::LogGroup", {"LogGroupName": "/aws/lambda/" + prefix + "-journey-lock", "RetentionInDays": 30})
+    r["JourneyLockScheduleRole"] = resource("AWS::IAM::Role", {
+        "AssumeRolePolicyDocument": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Principal": {"Service": "scheduler.amazonaws.com"}, "Action": "sts:AssumeRole", "Condition": {"StringEquals": {"aws:SourceAccount": ref("AWS::AccountId")}, "ArnEquals": {"aws:SourceArn": sub("arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule-group/default")}}}]},
+        "Policies": [{"PolicyName": "InvokeJourneyLock", "PolicyDocument": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "lambda:InvokeFunction", "Resource": arn("JourneyLockFunction")}]}}],
+    })
+    r["JourneyLockSchedule"] = resource("AWS::Scheduler::Schedule", {
+        "Name": prefix + "-journey-lock", "ScheduleExpression": "cron(5 0 * * ? *)",
+        "ScheduleExpressionTimezone": "America/New_York", "FlexibleTimeWindow": {"Mode": "OFF"}, "State": "ENABLED",
+        "Target": {"Arn": arn("JourneyLockFunction"), "RoleArn": arn("JourneyLockScheduleRole"), "Input": "{}", "RetryPolicy": {"MaximumEventAgeInSeconds": 3600, "MaximumRetryAttempts": 2}},
+    })
     if environment == "staging":
         # No public endpoint or production resources: only private demo saves.
         r["DemoRole"] = resource("AWS::IAM::Role", {
             "AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy],
             "Policies": [{"PolicyName": "StagingDemoActivity", "PolicyDocument": {"Version": "2012-10-17", "Statement": [
-                {"Effect": "Allow", "Action": "dynamodb:GetItem", "Resource": arn("Community")},
+                {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:Query"], "Resource": arn("Community")},
                 {"Effect": "Allow", "Action": "dynamodb:Query", "Resource": arn("Saves")},
                 {"Effect": "Allow", "Action": "dynamodb:PutItem", "Resource": arn("Saves"), "Condition": {"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["user#staging-demo-*"]}}},
                 {"Effect": "Allow", "Action": "dynamodb:DeleteItem", "Resource": arn("Community"), "Condition": {"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["user#staging-demo-*"]}}},
@@ -177,7 +200,7 @@ def template(environment="production"):
         ("ReadChallenges", "GET /account/challenges"), ("CreateChallenge", "POST /account/challenges"),
         ("UpdateChallenge", "PATCH /account/challenges/{id}"),
     ]]
-    for name, route, authenticated in community_routes + [("ReadJourneySchedule", "GET /journeys/schedule", False), ("WriteJourneySchedule", "PATCH /admin/journeys/schedule", True), ("ReadSaves", "GET /account/saves", True), ("WriteSaves", "POST /account/saves", True), ("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
+    for name, route, authenticated in community_routes + [("ReadJourneySchedule", "GET /journeys/schedule", False), ("ReadAdminJourneySchedule", "GET /admin/journeys/schedule", True), ("WriteJourneySchedule", "PATCH /admin/journeys/schedule", True), ("ReadSaves", "GET /account/saves", True), ("WriteSaves", "POST /account/saves", True), ("Submit", "POST /feedback", False), ("AccountSubmit", "POST /account/feedback", True), ("Review", "GET /admin/feedback", True), ("Update", "PATCH /admin/feedback/{id}", True)]:
         properties = {"ApiId": ref("Api"), "RouteKey": route, "Target": sub("integrations/${Integration}"), "AuthorizationType": "JWT" if authenticated else "NONE"}
         if authenticated:
             properties.update(AuthorizerId=ref("Authorizer"), AuthorizationScopes=["openid"])

@@ -3,6 +3,7 @@ import { validJourneySchedule } from "../src/services/journeySchedule";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 import {
   dailyJourney,
+  seededJourney,
   emptyDaily,
   openDaily,
   unfinished,
@@ -14,7 +15,7 @@ describe("shared Journey dates", () => {
   const edition = JOURNEY_INDEX.find(
     (journey) => journey.id === "across-the-divide-v1",
   )!;
-  it("uses published dates before legacy device overrides and falls back to rotation", () => {
+  it("uses stored dates before provisional pool choices", () => {
     const progress = {
       ...emptyDaily,
       overrides: { [day]: "mediterranean-v1" },
@@ -22,9 +23,7 @@ describe("shared Journey dates", () => {
     expect(
       dailyJourney(day, progress, JOURNEY_INDEX, { [day]: edition.id }).id,
     ).toBe(edition.id);
-    expect(dailyJourney(day, progress, JOURNEY_INDEX, {}).id).toBe(
-      "beyond-the-maple-leaf-v1",
-    );
+    expect(dailyJourney(day, progress, JOURNEY_INDEX, {}).id).toBe(seededJourney(day, JOURNEY_INDEX).id);
     const started = openDaily(progress, day, false, JOURNEY_INDEX, {
       [day]: edition.id,
     });
@@ -64,18 +63,25 @@ describe("shared Journey dates", () => {
       ].game.phase,
     ).toBe("finished");
   });
-  it("rejects malformed dates, unknown editions and invalid revisions", () => {
-    expect(validJourneySchedule({ revision: 0, assignments: {} })).toBe(true);
+  it("validates records while tolerating a removed historical ID", () => {
+    expect(validJourneySchedule({ today: day, records: {} })).toBe(true);
     expect(
-      validJourneySchedule({ revision: 2, assignments: { [day]: edition.id } }),
+      validJourneySchedule({ today: day, records: { [day]: { day, journeyId: "removed-id", source: "assigned", revision: 2 } } }),
     ).toBe(true);
     for (const value of [
-      { revision: true, assignments: {} },
-      { revision: -1, assignments: {} },
-      { revision: 0, assignments: [] },
-      { revision: 0, assignments: { "2026-02-30": edition.id } },
-      { revision: 0, assignments: { [day]: "local-pack" } },
+      { today: "bad", records: {} },
+      { today: day, records: [] },
+      { today: day, records: { "2026-02-30": { day: "2026-02-30", journeyId: edition.id, source: "auto", revision: 1 } } },
+      { today: day, records: { [day]: { day, journeyId: edition.id, source: "auto", revision: -1 } } },
     ])
       expect(validJourneySchedule(value)).toBe(false);
+  });
+  it("uses the same versioned date hash as the backend and never selects an unlisted edition", () => {
+    expect(seededJourney("2026-10-05", JOURNEY_INDEX).id).toBe("along-the-andes-v1");
+    expect(seededJourney("2026-10-18", JOURNEY_INDEX).id).toBe("try-not-to-click-russia-v1");
+    expect(seededJourney("2026-11-03", JOURNEY_INDEX).id).toBe("exceptions-to-the-rule-v1");
+    expect(seededJourney("2027-01-01", JOURNEY_INDEX).id).toBe("beyond-the-maple-leaf-v1");
+    expect(dailyJourney("2027-01-01", undefined, JOURNEY_INDEX, { "2027-01-01": "removed-id" }).id).toBe(seededJourney("2027-01-01", JOURNEY_INDEX).id);
+    expect(() => dailyJourney("2026-10-05", undefined, JOURNEY_INDEX, { "2026-10-05": "removed-id" })).toThrow("Journey unavailable");
   });
 });

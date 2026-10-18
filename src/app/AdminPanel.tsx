@@ -84,9 +84,22 @@ export function AdminPanel({
   const account = useAccount();
   const [day, setDay] = useState(date);
   const [month, setMonth] = useState(date.slice(0, 7));
+  useEffect(() => { void schedule.refresh(month); }, [month]);
+  useEffect(() => { void account.accessToken().then((token) => { if (token) void schedule.refreshAll(token); }); }, [schedule.refreshAll]);
   const assignments = schedule.schedule?.assignments ?? {};
-  const current = dailyJourney(day, undefined, JOURNEY_INDEX, assignments);
-  const saved = assignments[day] ? current.id : "";
+  const records = schedule.schedule?.records ?? {};
+  const resolve = (selectedDay: string, choices: Record<string, string>) => {
+    try { return dailyJourney(selectedDay, undefined, JOURNEY_INDEX, choices); }
+    catch (error) {
+      if (error instanceof Error && error.message === "Journey unavailable") return undefined;
+      throw error;
+    }
+  };
+  const current = resolve(day, assignments);
+  const unavailableRecord = !!records[day]?.journeyId && !JOURNEY_INDEX.some(
+    (journey) => journey.id === records[day].journeyId || journey.supersedes === records[day].journeyId,
+  );
+  const saved = records[day]?.source === "assigned" ? records[day].journeyId ?? "" : "";
   const [draft, setDraft] = useState({ day, value: saved, saved });
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -124,14 +137,18 @@ export function AdminPanel({
   }, [day, saved]);
   useEffect(() => setMessage(""), [day]);
   const selection = draft.day === day ? draft.value : saved;
+  const automaticChoices = { ...assignments };
+  delete automaticChoices[day];
+  if (records[day]?.autoJourneyId)
+    automaticChoices[day] = records[day].autoJourneyId;
   const preview =
     JOURNEY_INDEX.find((journey) => journey.id === selection) ??
-    dailyJourney(day, undefined, JOURNEY_INDEX, {});
+    resolve(day, automaticChoices);
   const dirty = selection !== saved;
   const busy = submitting || schedule.busy;
   const scheduledDates = (id: string) =>
-    Object.entries(assignments)
-      .filter(([, assigned]) => assigned === id)
+    Object.entries(records)
+      .filter(([, record]) => record.journeyId === id && record.source !== "provisional")
       .map(([scheduled]) => scheduled)
       .sort();
   const displayedJourneys = JOURNEY_INDEX.filter(
@@ -228,6 +245,7 @@ export function AdminPanel({
             {schedule.error}
           </p>
         )}
+        {unavailableRecord && <p role="alert" className="schedule-notice">This date references a Journey no longer in the catalog. {day < date ? "Its history stays fixed." : "Choose another Journey or restore the automatic choice."}</p>}
         {!schedule.ready && !schedule.error && (
           <p role="status">Opening the schedule…</p>
         )}
@@ -273,13 +291,10 @@ export function AdminPanel({
             </div>
             <div className="journey-calendar">
               {calendarDays(month).map((calendarDay) => {
-                const journey = dailyJourney(
-                  calendarDay,
-                  undefined,
-                  JOURNEY_INDEX,
-                  assignments,
-                );
-                const assigned = !!assignments[calendarDay];
+                const journey = resolve(calendarDay, assignments);
+                const source = records[calendarDay]?.source ?? "provisional";
+                const assigned = source === "assigned";
+                const status = assigned ? "Scheduled" : source === "auto" ? "Auto (locked)" : "Auto (provisional)";
                 return (
                   <button
                     className={`journey-calendar-day${calendarDay.slice(0, 7) !== month ? " is-outside-month" : ""}${calendarDay === date ? " is-today" : ""}`}
@@ -289,7 +304,7 @@ export function AdminPanel({
                     aria-pressed={calendarDay === day}
                     aria-label={formatDay(calendarDay)}
                     aria-describedby={`${calendarDay}-journey ${calendarDay}-status`}
-                    title={`${formatDay(calendarDay, true)} · ${journey.title} · ${assigned ? "Scheduled" : "Automatic"}`}
+                    title={`${formatDay(calendarDay, true)} · ${journey?.title ?? "Journey unavailable"} · ${status}`}
                   >
                     <span className="journey-calendar-date">
                       <time dateTime={calendarDay}>
@@ -297,14 +312,14 @@ export function AdminPanel({
                       </time>
                       <span
                         className={`schedule-dot${assigned ? " is-assigned" : ""}`}
-                        aria-label={assigned ? "Scheduled" : "Automatic"}
+                        aria-label={status}
                       />
                     </span>
                     <strong id={`${calendarDay}-journey`}>
-                      {journey.title}
+                      {journey?.title ?? "Journey unavailable"}
                     </strong>
                     <span id={`${calendarDay}-status`} className="sr-only">
-                      {assigned ? "Scheduled" : "Automatic"}
+                      {status}
                     </span>
                   </button>
                 );
@@ -315,7 +330,7 @@ export function AdminPanel({
                 <i className="schedule-dot is-assigned" /> Scheduled
               </span>
               <span>
-                <i className="schedule-dot" /> Automatic rotation
+                <i className="schedule-dot" /> Automatic selection
               </span>
             </p>
           </section>
@@ -325,6 +340,7 @@ export function AdminPanel({
             onSubmit={async (event) => {
               event.preventDefault();
               if (!dirty || busy || !schedule.ready) return;
+              if (day < date && !window.confirm(`Rewrite the Journey for ${formatDay(day, true)}? This changes the permanent Archive record. Players who already started keep their own Journey.`)) return;
               setMessage("");
               setSubmitting(true);
               try {
@@ -333,11 +349,14 @@ export function AdminPanel({
                   setMessage("Sign in again to save the schedule.");
                   return;
                 }
-                if (await schedule.save(day, selection || undefined, token))
+                const savedChange = day < date
+                  ? await schedule.save(day, selection || undefined, token, true)
+                  : await schedule.save(day, selection || undefined, token);
+                if (savedChange)
                   setMessage(
                     selection
-                      ? `Published ${preview.title} for ${formatDay(day)}.`
-                      : `Restored automatic rotation for ${formatDay(day)}.`,
+                      ? `Published ${preview?.title ?? "Journey"} for ${formatDay(day)}.`
+                      : `Restored automatic selection for ${formatDay(day)}.`,
                   );
               } catch {
                 setMessage("Couldn’t save the schedule. Please try again.");
@@ -369,7 +388,7 @@ export function AdminPanel({
                 disabled={busy || !schedule.ready}
                 onChange={(event) => chooseJourney(event.target.value)}
               >
-                <option value="">Automatic rotation</option>
+                <option value="">Automatic selection</option>
                 {JOURNEY_INDEX.map((journey) => (
                   <option key={journey.id} value={journey.id}>
                     {journey.title}
@@ -409,6 +428,9 @@ export function AdminPanel({
             <ul className="journey-catalog-list">
               {displayedJourneys.map((journey) => {
                 const dates = scheduledDates(journey.id);
+                const nextAssigned = Object.entries(records)
+                  .filter(([scheduled, record]) => scheduled > date && record.source === "assigned" && record.journeyId === journey.id)
+                  .map(([scheduled]) => scheduled).sort()[0];
                 return (
                   <li key={journey.id}>
                     <strong>{journey.title}</strong>
@@ -420,7 +442,7 @@ export function AdminPanel({
                       {" · Last scheduled: "}
                       {dates.filter((item) => item <= date).at(-1) ?? "Never"}
                       {" · Next assigned: "}
-                      {dates.find((item) => item > date) ?? "None"}
+                      {nextAssigned ?? "None"}
                     </span>
                   </li>
                 );
@@ -435,17 +457,21 @@ export function AdminPanel({
                   ? "Ready to publish"
                   : saved
                     ? "Scheduled"
-                    : "Automatic rotation"}
+                    : records[day]?.source === "auto"
+                      ? "Auto (locked)"
+                      : "Auto (provisional)"}
               </span>
-              <h4>{preview.title}</h4>
-              <p>{preview.description}</p>
-              <a href={preview.path} className="tertiary-action">
-                Preview five questions <span aria-hidden="true">↗</span>
-              </a>
+              <h4>{preview?.title ?? "Journey unavailable"}</h4>
+              {preview ? <>
+                <p>{preview.description}</p>
+                <a href={preview.path} className="tertiary-action">
+                  Preview five questions <span aria-hidden="true">↗</span>
+                </a>
+              </> : <p>This saved Journey is no longer in the catalog.</p>}
             </article>
             {dirty && (
               <p className="schedule-current">
-                Currently published: <strong>{current.title}</strong>
+                Currently published: <strong>{current?.title ?? "Journey unavailable"}</strong>
                 {saved ? " · Scheduled" : " · Automatic"}
               </p>
             )}
@@ -460,7 +486,7 @@ export function AdminPanel({
                   ? "No changes to publish"
                   : selection
                     ? `Publish for ${formatDay(day).replace(/^[^,]+, /, "")}`
-                    : "Restore automatic rotation"}
+                    : "Restore automatic selection"}
               <span aria-hidden="true">→</span>
             </button>
             {saved && selection && (
@@ -470,7 +496,7 @@ export function AdminPanel({
                 disabled={busy}
                 onClick={() => chooseJourney("")}
               >
-                Use automatic rotation instead
+                Use automatic selection instead
               </button>
             )}
             {message && (
@@ -481,8 +507,9 @@ export function AdminPanel({
           </form>
         </div>
         <p className="schedule-footnote">
-          Unassigned days use the automatic rotation. Dates change at midnight
-          in New York; players who have started keep their Journey.
+          Unassigned days use a shared automatic choice. Today and future dates
+          are editable. Rewriting a past day requires confirmation; players who
+          already started keep their Journey.
         </p>
       </div>
     </section>

@@ -47,7 +47,7 @@ class DeploymentTests(unittest.TestCase):
 
     def test_staging_has_separate_data_identity_monitoring_and_local_origins(self):
         production, staging = template()["Resources"], template("staging")["Resources"]
-        for logical, field in (("Feedback", "TableName"), ("Saves", "TableName"), ("Community", "TableName"), ("Users", "UserPoolName"), ("ApiFunction", "FunctionName"), ("Confirmation", "FunctionName"), ("AccessLogs", "LogGroupName"), ("ApiLogs", "LogGroupName"), ("ConfirmationLogs", "LogGroupName")):
+        for logical, field in (("Feedback", "TableName"), ("Saves", "TableName"), ("Community", "TableName"), ("Users", "UserPoolName"), ("ApiFunction", "FunctionName"), ("Confirmation", "FunctionName"), ("JourneyLockFunction", "FunctionName"), ("JourneyLockLogs", "LogGroupName"), ("AccessLogs", "LogGroupName"), ("ApiLogs", "LogGroupName"), ("ConfirmationLogs", "LogGroupName")):
             self.assertIn("ambit-staging", staging[logical]["Properties"][field])
             self.assertIn("ambit-production", production[logical]["Properties"][field])
         self.assertEqual(production["LoginDomain"]["Properties"]["Domain"], {"Fn::Sub": "ambit-${AWS::AccountId}"})
@@ -71,15 +71,26 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(schedule["ScheduleExpressionTimezone"], "America/New_York")
         self.assertEqual(schedule["Target"]["Arn"], {"Fn::GetAtt": ["DemoFunction", "Arn"]})
         statements = staging["DemoRole"]["Properties"]["Policies"][0]["PolicyDocument"]["Statement"]
+        self.assertIn({"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:Query"], "Resource": {"Fn::GetAtt": ["Community", "Arn"]}}, statements)
         writes = [value for value in statements if value.get("Action") in ("dynamodb:PutItem", "dynamodb:DeleteItem")]
         self.assertEqual(len(writes), 2)
         for value in writes:
             self.assertEqual(value["Condition"]["ForAllValues:StringLike"]["dynamodb:LeadingKeys"], ["user#staging-demo-*"])
 
+    def test_daily_lock_is_scheduled_in_new_york_for_both_environments(self):
+        for environment in ("production", "staging"):
+            resources = template(environment)["Resources"]
+            schedule = resources["JourneyLockSchedule"]["Properties"]
+            self.assertEqual(schedule["ScheduleExpression"], "cron(5 0 * * ? *)")
+            self.assertEqual(schedule["ScheduleExpressionTimezone"], "America/New_York")
+            self.assertEqual(schedule["Target"]["Arn"], {"Fn::GetAtt": ["JourneyLockFunction", "Arn"]})
+            role = resources["JourneyLockRole"]["Properties"]["Policies"][0]["PolicyDocument"]["Statement"]
+            self.assertIn({"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:Query", "dynamodb:PutItem"], "Resource": {"Fn::GetAtt": ["Community", "Arn"]}}, role)
+
     def test_all_lambdas_share_conditional_datadog_layers_and_secret_access(self):
         for environment in ("production", "staging"):
             resources = template(environment)["Resources"]
-            functions = {"ApiFunction": "handler.handler", "Confirmation": "confirmation.handler"}
+            functions = {"ApiFunction": "handler.handler", "Confirmation": "confirmation.handler", "JourneyLockFunction": "journey_lock.handler"}
             if environment == "staging":
                 functions["DemoFunction"] = "staging_demo.handler"
             for logical, original_handler in functions.items():
@@ -93,7 +104,7 @@ class DeploymentTests(unittest.TestCase):
                 self.assertEqual(variables["DD_VERSION"], {"Ref": "Release"})
                 self.assertEqual(variables["DD_SITE"], {"Ref": "DatadogSite"})
                 self.assertEqual(variables["DD_API_KEY_SECRET_ARN"], {"Ref": "DatadogSecretArn"})
-            for role in ("ApiRole", "ConfirmationPolicy", "DemoRole") if environment == "staging" else ("ApiRole", "ConfirmationPolicy"):
+            for role in ("ApiRole", "ConfirmationPolicy", "JourneyLockRole", "DemoRole") if environment == "staging" else ("ApiRole", "ConfirmationPolicy", "JourneyLockRole"):
                 props = resources[role]["Properties"]
                 statements = (props["Policies"][0] if role != "ConfirmationPolicy" else props)["PolicyDocument"]["Statement"]
                 self.assertIn({"Fn::If": ["UseDatadog", {"Effect": "Allow", "Action": "secretsmanager:GetSecretValue", "Resource": {"Ref": "DatadogSecretArn"}}, {"Ref": "AWS::NoValue"}]}, statements)
