@@ -336,6 +336,8 @@ const stops = [
 
 export const ACROSS_DIVIDE_JOURNEY: Journey = {
   id: "across-the-divide-v1",
+  addedAt: "2026-10-17",
+  availability: "unlisted",
   title: "Across the Divide",
   description:
     "Five bridges. Five photographs. Five pins. How close can you get?",

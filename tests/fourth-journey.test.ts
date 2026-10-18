@@ -19,7 +19,7 @@ import { createQuestionContext, canSelect } from "../src/game/questions";
 import { gameReducer, initialGame } from "../src/game/state";
 import type { Action, GameState } from "../src/game/state";
 import type { RegionFeature } from "../src/geography/types";
-import { JOURNEYS, journeyPath } from "../src/game/journeys";
+import { journeyPath } from "../src/game/journeys";
 import { QUESTION_CATALOG } from "../src/game/questionCatalog";
 import { journeyWorld } from "../src/app/journeyWorld";
 import {
@@ -68,7 +68,6 @@ const assisted = (i: number) =>
 
 describe("Mediterranean facelift", () => {
   it("keeps the current route and catalog, with five usable authored controls and help", () => {
-    expect(JOURNEYS).toHaveLength(17);
     expect(journeyPath(journey.id)).toBe("/journey/mediterranean");
     expect(journey.rounds.map((q) => q.mode)).toEqual([
       "map-single",

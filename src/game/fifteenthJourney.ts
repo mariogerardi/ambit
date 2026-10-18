@@ -41,6 +41,8 @@ const destinations = [
 
 export const FIFTEENTH_JOURNEY: Journey = {
   id: "try-not-to-click-russia-v1",
+  addedAt: "2026-10-10",
+  availability: "pool",
   title: "On Russia’s doorstep",
   description:
     "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",

@@ -1,6 +1,8 @@
 [
   {
     "id": "across-the-divide-v1",
+    "addedAt": "2026-10-17",
+    "availability": "unlisted",
     "title": "Across the Divide",
     "description": "Five bridges. Five photographs. Five pins. How close can you get?",
     "path": "/journey/across-the-divide",
@@ -34,7 +36,40 @@
     ]
   },
   {
+    "id": "along-the-andes-v1",
+    "addedAt": "2026-10-11",
+    "availability": "pool",
+    "title": "Along the Andes",
+    "description": "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and coastal wildlife in Tierra del Fuego.",
+    "path": "/journey/along-the-andes",
+    "module": "./andesJourney.ts",
+    "rounds": [
+      {
+        "id": "andes-capital-v2",
+        "label": "Capital"
+      },
+      {
+        "id": "andes-chimborazo-v2",
+        "label": "Equator"
+      },
+      {
+        "id": "andes-titicaca-v1",
+        "label": "Lake"
+      },
+      {
+        "id": "andes-aconcagua-v1",
+        "label": "Peak"
+      },
+      {
+        "id": "andes-chile-neighbors-v2",
+        "label": "Wildlife"
+      }
+    ]
+  },
+  {
     "id": "beyond-the-maple-leaf-v1",
+    "addedAt": "2026-10-11",
+    "availability": "pool",
     "title": "Beyond the maple leaf",
     "description": "Start with a familiar flag, follow two official languages to the east coast, then travel through the capital to the northern shore.",
     "path": "/journey/beyond-the-maple-leaf",
@@ -63,7 +98,175 @@
     ]
   },
   {
+    "id": "chasing-the-sun-v2",
+    "addedAt": "2026-10-11",
+    "availability": "unlisted",
+    "title": "Chasing the sun",
+    "supersedes": "chasing-the-sun-v1",
+    "description": "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
+    "path": "/journey/chasing-the-sun",
+    "module": "./sunFlagsJourney.ts",
+    "rounds": [
+      {
+        "id": "sun-flags-may-pair-v2",
+        "label": "Shared sun"
+      },
+      {
+        "id": "sun-flags-philippines-revolution-v2",
+        "label": "Revolution"
+      },
+      {
+        "id": "sun-flags-kazakhstan-grain-v1",
+        "label": "Symbolism"
+      },
+      {
+        "id": "sun-flags-pacific-pin-v1",
+        "label": "Drop a pin"
+      },
+      {
+        "id": "sun-flags-malawi-dawn-v1",
+        "label": "Meaning"
+      }
+    ]
+  },
+  {
+    "id": "down-the-danube-v1",
+    "addedAt": "2026-10-11",
+    "availability": "unlisted",
+    "title": "Down the Danube",
+    "description": "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
+    "path": "/journey/down-the-danube",
+    "module": "./danubeJourney.ts",
+    "rounds": [
+      {
+        "id": "danube-underground-detour-v1",
+        "label": "Detour"
+      },
+      {
+        "id": "danube-vienna-pin-v1",
+        "label": "Capital"
+      },
+      {
+        "id": "danube-two-banks-city-v1",
+        "label": "Two banks"
+      },
+      {
+        "id": "danube-iron-gates-border-v1",
+        "label": "Gorge"
+      },
+      {
+        "id": "danube-delta-sea-v1",
+        "label": "Delta"
+      }
+    ]
+  },
+  {
+    "id": "exceptions-to-the-rule-v1",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
+    "title": "Exceptions to the rule",
+    "description": "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
+    "path": "/journey/exceptions-to-the-rule",
+    "module": "./twelfthJourney.ts",
+    "rounds": [
+      {
+        "id": "exceptions-france-border",
+        "label": "Border"
+      },
+      {
+        "id": "exceptions-double-landlocked",
+        "label": "Country"
+      },
+      {
+        "id": "exceptions-four-hemispheres",
+        "label": "Hemispheres"
+      },
+      {
+        "id": "exceptions-bolivia-coast",
+        "label": "History"
+      },
+      {
+        "id": "exceptions-baku",
+        "label": "Capital"
+      }
+    ]
+  },
+  {
+    "id": "island-instincts-v1",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
+    "title": "Island instincts",
+    "description": "Island-hop around the world and resist the nearest-coast guess. Five islands reveal how distance and belonging can disagree.",
+    "path": "/journey/island-instincts",
+    "module": "./fourteenthJourney.ts",
+    "rounds": [
+      {
+        "id": "island-owner-andaman-nicobar",
+        "label": "Island",
+        "progressLabel": "Andaman & Nicobar"
+      },
+      {
+        "id": "island-owner-bioko",
+        "label": "Island",
+        "progressLabel": "Bioko"
+      },
+      {
+        "id": "island-owner-svalbard",
+        "label": "Island",
+        "progressLabel": "Svalbard"
+      },
+      {
+        "id": "island-owner-galapagos",
+        "label": "Island",
+        "progressLabel": "Galápagos"
+      },
+      {
+        "id": "island-owner-reunion",
+        "label": "Island",
+        "progressLabel": "Réunion"
+      }
+    ]
+  },
+  {
+    "id": "latitude-surprises-v1",
+    "addedAt": "2026-10-11",
+    "availability": "pool",
+    "title": "Latitude surprises",
+    "description": "Take one latitude line around the world at a time. Across five continents, familiar cities turn out to be farther north—or south—than you expect.",
+    "path": "/journey/latitude-surprises",
+    "module": "./latitudeJourney.ts",
+    "rounds": [
+      {
+        "id": "latitude-africa-amman-v1",
+        "label": "Latitude",
+        "progressLabel": "Africa"
+      },
+      {
+        "id": "latitude-europe-ottawa-v1",
+        "label": "Latitude",
+        "progressLabel": "Europe"
+      },
+      {
+        "id": "latitude-asia-rome-v1",
+        "label": "Latitude",
+        "progressLabel": "Asia"
+      },
+      {
+        "id": "latitude-south-america-pretoria-v1",
+        "label": "Latitude",
+        "progressLabel": "South America"
+      },
+      {
+        "id": "latitude-oceania-buenos-aires-v1",
+        "label": "Latitude",
+        "progressLabel": "Oceania"
+      }
+    ]
+  },
+  {
     "id": "mediterranean-v1",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
     "title": "Around the Mediterranean",
     "saveRevision": 2,
     "legacyRoundLabels": {
@@ -108,70 +311,82 @@
     ]
   },
   {
-    "id": "shared-neighbors-v1",
-    "title": "Shared neighbors",
-    "description": "Two neighbors name the country; an unfamiliar outline makes pinning it another challenge. Find the shared neighbor five times.",
-    "path": "/journey/shared-neighbors",
-    "module": "./ninthJourney.ts",
+    "id": "missing-borders-v1",
+    "addedAt": "2026-10-12",
+    "availability": "unlisted",
+    "title": "Missing Borders",
+    "saveRevision": 1,
+    "description": "Five maps have been altered. Spot the territories hiding two—or three—countries, then watch their real boundaries return.",
+    "path": "/journey/missing-borders",
+    "module": "./missingBordersJourney.ts",
     "rounds": [
       {
-        "id": "pin-ivory-coast-benin",
-        "label": "Drop a pin",
-        "progressLabel": "Ivory Coast + Benin"
+        "id": "missing-borders-01-iberia",
+        "label": "Missing border",
+        "progressLabel": "Iberia",
+        "resolvedLabel": "Spain + Portugal"
       },
       {
-        "id": "pin-bulgaria-georgia",
-        "label": "Drop a pin",
-        "progressLabel": "Bulgaria + Georgia"
+        "id": "missing-borders-02-hispaniola",
+        "label": "Missing border",
+        "progressLabel": "Caribbean",
+        "resolvedLabel": "Haiti + Dominican Republic"
       },
       {
-        "id": "pin-norway-belarus",
-        "label": "Drop a pin",
-        "progressLabel": "Norway + Belarus"
+        "id": "missing-borders-03-korea",
+        "label": "Missing border",
+        "progressLabel": "East Asia",
+        "resolvedLabel": "North Korea + South Korea"
       },
       {
-        "id": "pin-eswatini-zambia",
-        "label": "Drop a pin",
-        "progressLabel": "Eswatini + Zambia"
+        "id": "missing-borders-04-senegambia",
+        "label": "Missing border",
+        "progressLabel": "West Africa",
+        "resolvedLabel": "Senegal + The Gambia"
       },
       {
-        "id": "pin-chile-colombia",
-        "label": "Drop a pin",
-        "progressLabel": "Chile + Colombia"
+        "id": "missing-borders-05-baltics",
+        "label": "Missing border",
+        "progressLabel": "Baltic region",
+        "resolvedLabel": "Estonia + Latvia + Lithuania"
       }
     ]
   },
   {
-    "id": "along-the-andes-v1",
-    "title": "Along the Andes",
-    "description": "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and coastal wildlife in Tierra del Fuego.",
-    "path": "/journey/along-the-andes",
-    "module": "./andesJourney.ts",
+    "id": "north-america-v2",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
+    "title": "North America by name",
+    "description": "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
+    "path": "/journey/north-america",
+    "module": "./northAmericaJourney.ts",
     "rounds": [
       {
-        "id": "andes-capital-v2",
-        "label": "Capital"
+        "id": "canada-three-territories-v2",
+        "label": "Territories"
       },
       {
-        "id": "andes-chimborazo-v2",
-        "label": "Equator"
+        "id": "canada-south-of-boston-v2",
+        "label": "Latitude"
       },
       {
-        "id": "andes-titicaca-v1",
-        "label": "Lake"
+        "id": "state-bordering-mexico-v2",
+        "label": "Southern border"
       },
       {
-        "id": "andes-aconcagua-v1",
-        "label": "Peak"
+        "id": "california-missouri-crossings-v2",
+        "label": "Crossings"
       },
       {
-        "id": "andes-chile-neighbors-v2",
-        "label": "Wildlife"
+        "id": "five-cardinal-states-v2",
+        "label": "Directions"
       }
     ]
   },
   {
     "id": "not-the-obvious-city-v1",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
     "title": "Not the obvious city",
     "description": "Fame, compromise, relocation and divided government: discover the decisions behind five unexpected capitals.",
     "path": "/journey/not-the-obvious-city",
@@ -205,104 +420,9 @@
     ]
   },
   {
-    "id": "island-instincts-v1",
-    "title": "Island instincts",
-    "description": "Island-hop around the world and resist the nearest-coast guess. Five islands reveal how distance and belonging can disagree.",
-    "path": "/journey/island-instincts",
-    "module": "./fourteenthJourney.ts",
-    "rounds": [
-      {
-        "id": "island-owner-andaman-nicobar",
-        "label": "Island",
-        "progressLabel": "Andaman & Nicobar"
-      },
-      {
-        "id": "island-owner-bioko",
-        "label": "Island",
-        "progressLabel": "Bioko"
-      },
-      {
-        "id": "island-owner-svalbard",
-        "label": "Island",
-        "progressLabel": "Svalbard"
-      },
-      {
-        "id": "island-owner-galapagos",
-        "label": "Island",
-        "progressLabel": "Galápagos"
-      },
-      {
-        "id": "island-owner-reunion",
-        "label": "Island",
-        "progressLabel": "Réunion"
-      }
-    ]
-  },
-  {
-    "id": "north-america-v2",
-    "title": "North America by name",
-    "description": "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
-    "path": "/journey/north-america",
-    "module": "./northAmericaJourney.ts",
-    "rounds": [
-      {
-        "id": "canada-three-territories-v2",
-        "label": "Territories"
-      },
-      {
-        "id": "canada-south-of-boston-v2",
-        "label": "Latitude"
-      },
-      {
-        "id": "state-bordering-mexico-v2",
-        "label": "Southern border"
-      },
-      {
-        "id": "california-missouri-crossings-v2",
-        "label": "Crossings"
-      },
-      {
-        "id": "five-cardinal-states-v2",
-        "label": "Directions"
-      }
-    ]
-  },
-  {
-    "id": "latitude-surprises-v1",
-    "title": "Latitude surprises",
-    "description": "Take one latitude line around the world at a time. Across five continents, familiar cities turn out to be farther north—or south—than you expect.",
-    "path": "/journey/latitude-surprises",
-    "module": "./latitudeJourney.ts",
-    "rounds": [
-      {
-        "id": "latitude-africa-amman-v1",
-        "label": "Latitude",
-        "progressLabel": "Africa"
-      },
-      {
-        "id": "latitude-europe-ottawa-v1",
-        "label": "Latitude",
-        "progressLabel": "Europe"
-      },
-      {
-        "id": "latitude-asia-rome-v1",
-        "label": "Latitude",
-        "progressLabel": "Asia"
-      },
-      {
-        "id": "latitude-south-america-pretoria-v1",
-        "label": "Latitude",
-        "progressLabel": "South America"
-      },
-      {
-        "id": "latitude-oceania-buenos-aires-v1",
-        "label": "Latitude",
-        "progressLabel": "Oceania"
-      }
-    ]
-  },
-  {
     "id": "ring-of-fire-v1",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
     "title": "Around the Ring of Fire",
     "description": "Trace the Pacific’s island arcs, cross to the Andes, and finish on its southern rim. One ocean connects every stop.",
     "path": "/journey/ring-of-fire",
@@ -331,129 +451,9 @@
     ]
   },
   {
-    "id": "exceptions-to-the-rule-v1",
-    "title": "Exceptions to the rule",
-    "description": "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
-    "path": "/journey/exceptions-to-the-rule",
-    "module": "./twelfthJourney.ts",
-    "rounds": [
-      {
-        "id": "exceptions-france-border",
-        "label": "Border"
-      },
-      {
-        "id": "exceptions-double-landlocked",
-        "label": "Country"
-      },
-      {
-        "id": "exceptions-four-hemispheres",
-        "label": "Hemispheres"
-      },
-      {
-        "id": "exceptions-bolivia-coast",
-        "label": "History"
-      },
-      {
-        "id": "exceptions-baku",
-        "label": "Capital"
-      }
-    ]
-  },
-  {
-    "id": "try-not-to-click-russia-v1",
-    "title": "On Russia’s doorstep",
-    "description": "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",
-    "path": "/journey/try-not-to-click-russia",
-    "module": "./fifteenthJourney.ts",
-    "rounds": [
-      {
-        "id": "russia-neighbor-fin",
-        "label": "Drop a pin",
-        "progressLabel": "Finland"
-      },
-      {
-        "id": "russia-neighbor-prk",
-        "label": "Drop a pin",
-        "progressLabel": "North Korea"
-      },
-      {
-        "id": "russia-neighbor-mng",
-        "label": "Drop a pin",
-        "progressLabel": "Mongolia"
-      },
-      {
-        "id": "russia-neighbor-geo",
-        "label": "Drop a pin",
-        "progressLabel": "Georgia"
-      },
-      {
-        "id": "russia-neighbor-est",
-        "label": "Drop a pin",
-        "progressLabel": "Estonia"
-      }
-    ]
-  },
-  {
-    "id": "chasing-the-sun-v2",
-    "title": "Chasing the sun",
-    "supersedes": "chasing-the-sun-v1",
-    "description": "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
-    "path": "/journey/chasing-the-sun",
-    "module": "./sunFlagsJourney.ts",
-    "rounds": [
-      {
-        "id": "sun-flags-may-pair-v2",
-        "label": "Shared sun"
-      },
-      {
-        "id": "sun-flags-philippines-revolution-v2",
-        "label": "Revolution"
-      },
-      {
-        "id": "sun-flags-kazakhstan-grain-v1",
-        "label": "Symbolism"
-      },
-      {
-        "id": "sun-flags-pacific-pin-v1",
-        "label": "Drop a pin"
-      },
-      {
-        "id": "sun-flags-malawi-dawn-v1",
-        "label": "Meaning"
-      }
-    ]
-  },
-  {
-    "id": "down-the-danube-v1",
-    "title": "Down the Danube",
-    "description": "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
-    "path": "/journey/down-the-danube",
-    "module": "./danubeJourney.ts",
-    "rounds": [
-      {
-        "id": "danube-underground-detour-v1",
-        "label": "Detour"
-      },
-      {
-        "id": "danube-vienna-pin-v1",
-        "label": "Capital"
-      },
-      {
-        "id": "danube-two-banks-city-v1",
-        "label": "Two banks"
-      },
-      {
-        "id": "danube-iron-gates-border-v1",
-        "label": "Gorge"
-      },
-      {
-        "id": "danube-delta-sea-v1",
-        "label": "Delta"
-      }
-    ]
-  },
-  {
     "id": "same-hour-different-worlds",
+    "addedAt": "2026-10-12",
+    "availability": "unlisted",
     "title": "Same Hour, Different Worlds",
     "saveRevision": 5,
     "legacyRoundLabels": {
@@ -498,6 +498,8 @@
   },
   {
     "id": "same-name-different-place-v1",
+    "addedAt": "2026-10-12",
+    "availability": "unlisted",
     "title": "Same Name, Different Place",
     "saveRevision": 2,
     "description": "One name can cross borders, borrow a history, or mean something entirely different. Explore five pairs of namesakes around the world.",
@@ -537,42 +539,74 @@
     ]
   },
   {
-    "id": "missing-borders-v1",
-    "title": "Missing Borders",
-    "saveRevision": 1,
-    "description": "Five maps have been altered. Spot the territories hiding two—or three—countries, then watch their real boundaries return.",
-    "path": "/journey/missing-borders",
-    "module": "./missingBordersJourney.ts",
+    "id": "shared-neighbors-v1",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
+    "title": "Shared neighbors",
+    "description": "Two neighbors name the country; an unfamiliar outline makes pinning it another challenge. Find the shared neighbor five times.",
+    "path": "/journey/shared-neighbors",
+    "module": "./ninthJourney.ts",
     "rounds": [
       {
-        "id": "missing-borders-01-iberia",
-        "label": "Missing border",
-        "progressLabel": "Iberia",
-        "resolvedLabel": "Spain + Portugal"
+        "id": "pin-ivory-coast-benin",
+        "label": "Drop a pin",
+        "progressLabel": "Ivory Coast + Benin"
       },
       {
-        "id": "missing-borders-02-hispaniola",
-        "label": "Missing border",
-        "progressLabel": "Caribbean",
-        "resolvedLabel": "Haiti + Dominican Republic"
+        "id": "pin-bulgaria-georgia",
+        "label": "Drop a pin",
+        "progressLabel": "Bulgaria + Georgia"
       },
       {
-        "id": "missing-borders-03-korea",
-        "label": "Missing border",
-        "progressLabel": "East Asia",
-        "resolvedLabel": "North Korea + South Korea"
+        "id": "pin-norway-belarus",
+        "label": "Drop a pin",
+        "progressLabel": "Norway + Belarus"
       },
       {
-        "id": "missing-borders-04-senegambia",
-        "label": "Missing border",
-        "progressLabel": "West Africa",
-        "resolvedLabel": "Senegal + The Gambia"
+        "id": "pin-eswatini-zambia",
+        "label": "Drop a pin",
+        "progressLabel": "Eswatini + Zambia"
       },
       {
-        "id": "missing-borders-05-baltics",
-        "label": "Missing border",
-        "progressLabel": "Baltic region",
-        "resolvedLabel": "Estonia + Latvia + Lithuania"
+        "id": "pin-chile-colombia",
+        "label": "Drop a pin",
+        "progressLabel": "Chile + Colombia"
+      }
+    ]
+  },
+  {
+    "id": "try-not-to-click-russia-v1",
+    "addedAt": "2026-10-10",
+    "availability": "pool",
+    "title": "On Russia’s doorstep",
+    "description": "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",
+    "path": "/journey/try-not-to-click-russia",
+    "module": "./fifteenthJourney.ts",
+    "rounds": [
+      {
+        "id": "russia-neighbor-fin",
+        "label": "Drop a pin",
+        "progressLabel": "Finland"
+      },
+      {
+        "id": "russia-neighbor-prk",
+        "label": "Drop a pin",
+        "progressLabel": "North Korea"
+      },
+      {
+        "id": "russia-neighbor-mng",
+        "label": "Drop a pin",
+        "progressLabel": "Mongolia"
+      },
+      {
+        "id": "russia-neighbor-geo",
+        "label": "Drop a pin",
+        "progressLabel": "Georgia"
+      },
+      {
+        "id": "russia-neighbor-est",
+        "label": "Drop a pin",
+        "progressLabel": "Estonia"
       }
     ]
   }

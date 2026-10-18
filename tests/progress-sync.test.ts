@@ -176,7 +176,7 @@ it("leaves device-local admin overrides out of cloud saves", async () => {
     a = device("a", remote);
   a.daily.save({
     ...a.daily.load(),
-    overrides: { "2026-10-10": JOURNEY_INDEX[0].id },
+    overrides: { "2026-10-10": "beyond-the-maple-leaf-v1" },
   });
   await a.sync.flush();
   expect(

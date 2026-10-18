@@ -53,6 +53,14 @@ Journey being created or edited (title, ID, source file):
 
 ## Implementation handoff
 
+### Catalog impact
+
+- **Stable Journey ID and added date:**
+- **Availability:** `unlisted` by default; explain any decision to enter the `pool`.
+- **Assignments and locked dates:** list references to a superseded or removed ID.
+- **Save continuity:** preserve started attempts and identify any retirement or recovery change.
+- **Verification:** run `npm run check:catalog` for a catalog change; use IDs in tests.
+
 - **Approved scope / material decisions:**
 - **Existing mechanic recipes and examples to consult:**
 - **Implementation owners:** contracts/builder for authored content; preparation

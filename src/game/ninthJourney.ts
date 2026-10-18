@@ -61,6 +61,8 @@ export const SHARED_NEIGHBOR_CLUES: {
 
 export const NINTH_JOURNEY: Journey = {
   id: "shared-neighbors-v1",
+  addedAt: "2026-10-10",
+  availability: "pool",
   title: "Shared neighbors",
   description:
     "Two neighbors name the country; an unfamiliar outline makes pinning it another challenge. Find the shared neighbor five times.",
