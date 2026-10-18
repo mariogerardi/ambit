@@ -153,7 +153,7 @@ class ServicesTests(unittest.TestCase):
             self.assertEqual(resources[route]["Properties"]["AuthorizationScopes"], ["openid"])
         self.assertEqual(resources["SubmitRoute"]["Properties"]["AuthorizationType"], "NONE")
         self.assertFalse(resources["Users"]["Properties"]["Schema"][0]["Mutable"])
-        for logical in ("ApiFunction", "Confirmation"):
+        for logical in ("ApiFunction", "Confirmation", "JourneyLockFunction"):
             variables = resources[logical]["Properties"]["Environment"]["Variables"]
             self.assertNotIn("DD_API_KEY", variables)
             self.assertEqual(variables["DD_CAPTURE_LAMBDA_PAYLOAD"], "false")

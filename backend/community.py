@@ -125,6 +125,20 @@ def rows(owner, prefix, maximum=200):
     return result
 
 
+def date_rows(owner, first, last):
+    """Read an inclusive sort-key date range, following DynamoDB pagination."""
+    result, cursor = [], None
+    while True:
+        options = {"KeyConditionExpression": "pk = :owner AND sk BETWEEN :first AND :last", "ExpressionAttributeValues": {":owner": owner, ":first": first, ":last": last}, "ConsistentRead": True}
+        if cursor:
+            options["ExclusiveStartKey"] = cursor
+        page = table().query(**options)
+        result.extend(json.loads(item["dataJson"]) for item in page.get("Items", []))
+        cursor = page.get("LastEvaluatedKey")
+        if not cursor:
+            return result
+
+
 def string(value, maximum, required=False):
     if not isinstance(value, str) or len(value) > maximum or any(ord(c) < 32 for c in value) or (required and not value.strip()):
         raise Problem(400, "Please check the profile fields.")

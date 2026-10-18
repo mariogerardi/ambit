@@ -267,6 +267,11 @@ export function dailySaveCodec(
         if (attempt) save.attempts[date] = attempt;
         else delete save.attempts[date];
       }
+      for (const [date, attempt] of Object.entries(save.attempts))
+        if (!catalog.some((journey) => journey.id === attempt.journeyId)) {
+          (save.archivedAttempts ??= {})[`${date}/${attempt.journeyId}`] = attempt;
+          delete save.attempts[date];
+        }
       // Keep readers compatible with the first record format and expose newer
       // progress submitted to a run after it was archived by another tab.
       for (const [date, attempt] of Object.entries(save.attempts)) {
@@ -325,10 +330,13 @@ export function dailySaveCodec(
           (isRecord(value) &&
             typeof value.date === "string" &&
             field === runField(value as unknown as DailyAttempt) &&
-            validDaily(
+            (validDaily(
               { version: 1, attempts: { [value.date]: value } },
               catalog,
-            ))
+            ) || validDaily(
+              { version: 1, attempts: {}, archivedAttempts: { [`${value.date}/${value.journeyId}`]: value } },
+              catalog,
+            )))
         );
       if (field.startsWith("selection.")) {
         try {
@@ -339,7 +347,7 @@ export function dailySaveCodec(
         return (
           value === null ||
           (isRecord(value) &&
-            catalog.some((journey) => journey.id === value.journeyId) &&
+            typeof value.journeyId === "string" && value.journeyId.length > 0 && value.journeyId.length <= 160 &&
             (value.runId === undefined || typeof value.runId === "string"))
         );
       }

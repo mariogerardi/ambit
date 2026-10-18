@@ -30,9 +30,11 @@ published local packs are read-only compatibility data.
 | Across the Divide           | `/journey/across-the-divide`          | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)     |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
-Play/Resume/View result action. The daily rotation uses midnight in New York and
-cycles the retained concepts from October 5, 2026, using the explicit IDs in
-[`journeyRotation.ts`](../src/game/journeyRotation.ts). See
+Play/Resume/View result action. Daily dates change at midnight in New York.
+Unassigned future dates show a provisional, seeded choice from the `pool`
+Journeys; a date becomes permanent when it is locked or assigned. The previous
+rotation is preserved only for cutover history in
+[`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). See
 [Journey review](JOURNEY_REVIEW.md) for the keep/scrap decisions. Results use Home/Study as primary exits,
 with daily replay secondary and available only to admins. A results flyover follows answer stops in round order and
 loops; player interaction or reduced motion interrupts it.
@@ -206,14 +208,14 @@ text to `questionText.ts`. `questions.ts` remains a compatibility import surface
    keep that naming pattern or update discovery deliberately.
 5. Regenerate `npm run prepare:journeys` when definitions or registration change
    index metadata. Run `npm run check:catalog` for a catalog change, plus TypeScript for typed changes,
-   following [AGENTS.md](../AGENTS.md). Update table/counts when content changes;
+   following [AGENTS.md](../AGENTS.md). Update the table when content changes;
    do not regenerate geography or run a full build for routine copy edits.
    Authorized releases use the normal CI checks and supported nonblocking deployment.
 
 The month calendar highlights scheduled dates and previews pending selections
-before publication. Automatic dates show the actual rotation title. Admin can
-navigate months, jump to today, enter a date directly, or restore automatic
-rotation for an assigned day.
+before publication. Automatic dates show either a locked choice or a provisional
+preview. Admin can navigate months, jump to today, enter a date directly, or
+restore the automatic choice for today or a future assigned day.
 
 Current Journeys author grouped play/assist/reveal scenes.
 There are no archived runtime editions. The revised sun Journey keeps
@@ -222,12 +224,14 @@ assignments resolve to the current edition. The original ID is retired: save
 recovery drops its old attempts while preserving progress on retained Journeys.
 The index generator includes only current definitions.
 
-Adding a bundled edition does not change the active rotation. Editing the explicit
-rotation list does change which editions subsequent dates select.
+Adding a bundled edition defaults to `unlisted` and changes no automatic date.
+Opting it into the pool can change provisional future dates, while locked dates
+remain fixed.
 Retained attempts remain pinned to their stored Journey. Removed editions are
 absent from Admin and practice routes. Their IDs are recorded
 only for save recovery: discard their attempts and overrides, while preserving
-retained progress and protecting unavailable custom packs. Evaluator fixtures in
+retained progress and retaining unavailable custom packs as hidden attempts.
+Evaluator fixtures in
 `tests/fixtures/engine` provide isolated rule coverage and are never runtime
 Journey content. Do not treat the index as an independently authored source.
 

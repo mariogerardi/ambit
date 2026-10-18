@@ -160,7 +160,7 @@ def handler(event, context):
             result = submit(event, route == "POST /account/feedback")
         elif route in ("GET /admin/feedback", "PATCH /admin/feedback/{id}"):
             result = review(event)
-        elif route in ("GET /journeys/schedule", "PATCH /admin/journeys/schedule"):
+        elif route in ("GET /journeys/schedule", "GET /admin/journeys/schedule", "PATCH /admin/journeys/schedule"):
             result = journey_schedule.handle(event, admin(event))
         elif route in ("GET /account/saves", "POST /account/saves"):
             result = saves.handle(event)

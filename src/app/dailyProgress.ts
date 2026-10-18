@@ -1,5 +1,4 @@
 import { RETIRED_JOURNEY_IDS } from "../game/retiredJourneys";
-import { ACTIVE_JOURNEY_IDS } from "../game/journeyRotation";
 import { validPin } from "../game/answerTargets";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import type { JourneySummary } from "../game/journeyRegistry";
@@ -8,11 +7,9 @@ import { initialGame } from "../game/state";
 import { isRecord, strings } from "./storage";
 export const DAILY_VERSION = 1;
 export const DAILY_KEY = "wurl.daily.v1";
-export const DAILY_SCHEDULE = {
-  version: 1,
-  begins: "2026-10-05",
-  overrides: [] as { date: string; journeyId: string }[],
-};
+export const SCHEDULE_VERSION = 2;
+export const FIRST_DAILY_DATE = "2026-10-05";
+export const NO_REPEAT_DAYS = 14;
 export const DAILY_TIME_ZONE = "America/New_York";
 const dailyDateFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: DAILY_TIME_ZONE,
@@ -39,6 +36,47 @@ export function dateOrdinal(key: string): number {
     throw Error("Invalid Journey date");
   return date.getTime() / 86400000;
 }
+/** FNV-1a 32-bit over the ASCII YYYY-MM-DD date, version 1. Mirrors the backend. */
+export function dailyHash(date: string): number {
+  let value = 2166136261;
+  for (const character of date)
+    value = Math.imul(value ^ character.charCodeAt(0), 16777619) >>> 0;
+  return value;
+}
+export function seededJourney<T extends JourneySummary>(
+  date: string,
+  catalog: T[],
+  records: Record<string, string> = {},
+): T {
+  const candidates = catalog.filter((journey) => journey.availability === "pool")
+    .sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  if (!candidates.length) throw Error("No pool Journeys are available");
+  const first = dateOrdinal(FIRST_DAILY_DATE);
+  const target = dateOrdinal(date);
+  const memo = new Map<string, string>();
+  for (let ordinal = Math.min(first, target); ordinal <= target; ordinal++) {
+    const day = new Date(ordinal * 86400000).toISOString().slice(0, 10);
+    const stored = records[day];
+    if (stored) {
+      memo.set(day, catalog.find((journey) => journey.supersedes === stored)?.id ?? stored);
+      continue;
+    }
+    const recent: string[] = [];
+    for (let offset = 1; offset <= Math.min(NO_REPEAT_DAYS, ordinal - first); offset++)
+      recent.push(memo.get(new Date((ordinal - offset) * 86400000).toISOString().slice(0, 10))!);
+    for (let window = recent.length; window >= 0; window--) {
+      const eligible = candidates.filter((journey) => !recent.slice(0, window).includes(journey.id));
+      if (eligible.length >= (candidates.length > 2 ? 2 : 1)) {
+        const id = eligible[dailyHash(day) % eligible.length].id;
+        memo.set(day, id);
+        break;
+      }
+    }
+  }
+  const selected = catalog.find((journey) => journey.id === memo.get(date));
+  if (!selected) throw Error("Journey unavailable");
+  return selected;
+}
 export function dailyJourney(
   date: string,
   progress?: DailyProgress,
@@ -55,27 +93,16 @@ export function dailyJourney(
   catalog: JourneySummary[] = JOURNEY_INDEX,
   assignments?: Record<string, string>,
 ): JourneySummary {
-  const assignedId = (assignments ?? progress?.overrides)?.[date];
+  const assignedId = assignments ? assignments[date] : progress?.overrides?.[date];
   const selected =
     catalog.find(
       (journey) => journey.supersedes === assignedId && !!assignedId,
     ) ?? catalog.find((journey) => journey.id === assignedId);
   if (selected) return selected;
-  const override = DAILY_SCHEDULE.overrides.find(
-    (entry) => entry.date === date,
-  );
-  if (override) {
-    const journey = catalog.find((j) => j.id === override.journeyId);
-    if (!journey) throw Error("Journey unavailable");
-    return journey;
-  }
-  const offset = dateOrdinal(date) - dateOrdinal(DAILY_SCHEDULE.begins);
-  const bundled = ACTIVE_JOURNEY_IDS.flatMap((id) => {
-    const journey = catalog.find((entry) => entry.id === id);
-    return journey ? [journey] : [];
-  });
-  if (!bundled.length) throw Error("No active Journeys are available");
-  return bundled[((offset % bundled.length) + bundled.length) % bundled.length];
+  if (assignedId && date < localDateKey()) throw Error("Journey unavailable");
+  const availableAssignments = { ...assignments };
+  delete availableAssignments[date];
+  return seededJourney(date, catalog, availableAssignments);
 }
 export function millisecondsToMidnight(now = new Date()): number {
   const today = localDateKey(now),
@@ -165,7 +192,7 @@ function validAttempt(
   if (
     !isRecord(value) ||
     value.date !== date ||
-    value.scheduleVersion !== DAILY_VERSION ||
+    ![1, SCHEDULE_VERSION].includes(value.scheduleVersion as number) ||
     (value.contentRevision !== undefined &&
       (!Number.isSafeInteger(value.contentRevision) ||
         Number(value.contentRevision) < 1)) ||
@@ -177,6 +204,17 @@ function validAttempt(
     return false;
   const journey = catalog.find((j) => j.id === value.journeyId);
   return !!journey && validGame(value.game, journey);
+}
+/** Retain an edition removed from the catalog as opaque, hidden history. */
+function unavailableAttempt(value: unknown, date: string, catalog: JourneySummary[]): value is DailyAttempt {
+  try { dateOrdinal(date); } catch { return false; }
+  return isRecord(value) && value.date === date &&
+    typeof value.journeyId === "string" && value.journeyId.length > 0 && value.journeyId.length <= 160 &&
+    !RETIRED_JOURNEY_IDS.has(value.journeyId) && !catalog.some((journey) => journey.id === value.journeyId) &&
+    [1, SCHEDULE_VERSION].includes(value.scheduleVersion as number) &&
+    isRecord(value.game) && ["home", "playing", "feedback", "finished", "failed"].includes(String(value.game.phase)) &&
+    Array.isArray(value.game.answers) && value.game.answers.length <= 100 &&
+    JSON.stringify(value).length <= 100000;
 }
 export function validDaily(
   value: unknown,
@@ -216,7 +254,7 @@ export function validDaily(
           isRecord(a) &&
           typeof a.date === "string" &&
           key === `${a.date}/${a.journeyId}` &&
-          validAttempt(a, a.date, catalog),
+          (validAttempt(a, a.date, catalog) || unavailableAttempt(a, a.date, catalog)),
       ))
   )
     return false;
@@ -285,7 +323,7 @@ export function setDailyPuzzle(
   if (journeyId) overrides[date] = journeyId;
   else delete overrides[date];
   const next = { ...progress, overrides };
-  const target = dailyJourney(date, next, catalog).id,
+  const target = journeyId ?? dailyJourney(date, next, catalog).id,
     current = progress.attempts[date];
   if (current?.journeyId === target) return next;
   const archivedAttempts = { ...progress.archivedAttempts };
@@ -382,7 +420,7 @@ export function openDaily(
           ),
           date,
           journeyId,
-          scheduleVersion: DAILY_VERSION,
+          scheduleVersion: SCHEDULE_VERSION,
           game: { ...initialGame, phase: "playing" as const },
         };
   return {
@@ -400,28 +438,8 @@ export function recoverDaily(
   catalog: JourneySummary[] = JOURNEY_INDEX,
 ): DailyProgress | undefined {
   if (!isRecord(value) || value.version !== DAILY_VERSION) return;
-  // A temporarily unavailable locally published Journey may return later.
-  // Keep its original save untouched instead of treating it as damage.
-  // Known retired editions are permanent removals, so their records can be dropped.
-  const referenced = [
-    ...[value.attempts, value.archivedAttempts].flatMap((items) =>
-      isRecord(items)
-        ? Object.values(items).flatMap((a) =>
-            isRecord(a) && typeof a.journeyId === "string" ? [a.journeyId] : [],
-          )
-        : [],
-    ),
-    ...(isRecord(value.overrides) ? Object.values(value.overrides) : []),
-  ];
-  if (
-    referenced.some(
-      (id) =>
-        typeof id === "string" &&
-        !RETIRED_JOURNEY_IDS.has(id) &&
-        !catalog.some((j) => j.id === id),
-    )
-  )
-    return;
+  // Unknown attempts move into hidden history after readSave backs up the
+  // original blob. Their bytes also remain in the run registers for sync.
   const attempts = Object.fromEntries(
     isRecord(value.attempts)
       ? Object.entries(value.attempts).filter(([date, a]) =>
@@ -436,10 +454,14 @@ export function recoverDaily(
             isRecord(a) &&
             typeof a.date === "string" &&
             key === `${a.date}/${a.journeyId}` &&
-            validAttempt(a, a.date, catalog),
+            (validAttempt(a, a.date, catalog) || unavailableAttempt(a, a.date, catalog)),
         )
       : [],
   );
+  if (isRecord(value.attempts))
+    for (const [date, attempt] of Object.entries(value.attempts))
+      if (unavailableAttempt(attempt, date, catalog))
+        archivedAttempts[`${date}/${attempt.journeyId}`] = attempt;
   const overrides = Object.fromEntries(
     isRecord(value.overrides)
       ? Object.entries(value.overrides).filter(([date, id]) => {

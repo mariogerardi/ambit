@@ -75,10 +75,10 @@ session actions. The maintained crafting guide is
 
 ## Daily selection and publication
 
-[`journeyRotation.ts`](../src/game/journeyRotation.ts) contains the explicit eleven
-rotation IDs. Unassigned dates repeat these packs by device-local date from
-October 5, 2026. Admin’s shared calendar publishes date assignments for everyone
-and can select any of the thirteen current Journeys. Saving uses revision checks
+[`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json) freezes the old eleven-ID
+rotation for the migration backfill. New unassigned dates use a seeded pick from
+pool Journeys after midnight in New York. Admin’s shared calendar publishes
+date assignments for everyone and can select any current Journey. Saving uses revision checks
 to prevent concurrent edits overwriting one another. Retained attempts remain
 pinned to their saved edition. The calendar can restore a date to automatic
 rotation; no dates were assigned during this editorial pass.

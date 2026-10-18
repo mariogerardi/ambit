@@ -1,58 +1,139 @@
-"""Scheduling validation, access control and concurrent-edit protection."""
+"""Per-date scheduling, access control, locking and deterministic pool choices."""
 import json
 import unittest
+from datetime import date
 from unittest.mock import patch
+from unittest.mock import MagicMock
 
 import test_services  # installs the offline AWS boundary
 import journey_schedule as schedule
 import community
 from infrastructure import template
+REAL_DATE_ROWS = community.date_rows
 
 
 class JourneyScheduleTests(unittest.TestCase):
     def setUp(self):
-        self.get = patch.object(community, "get", return_value=None)
-        self.get.start()
-        self.write = patch.object(community, "transact")
-        self.transact = self.write.start()
-        self.put = patch.object(community, "put", side_effect=lambda *args: args)
-        self.put.start()
+        self.items = {}
         self.addCleanup(patch.stopall)
-        self.journey = sorted(schedule.JOURNEYS)[0]
+        patch.object(schedule, "current_day", return_value=date(2026, 10, 20)).start()
+        patch.object(community, "get", side_effect=lambda owner, kind: self.items.get(kind)).start()
+        patch.object(community, "date_rows", side_effect=lambda owner, first, last: [value for key, value in sorted(self.items.items()) if first <= key <= last]).start()
+        patch.object(community, "put", side_effect=lambda owner, kind, value, previous=None: (kind, value, previous)).start()
+        patch.object(community, "transact", side_effect=self.transact).start()
+        self.journey = sorted(schedule.CATALOG)[0]
 
-    def event(self, **changes):
-        data = {"date": "2026-10-20", "journeyId": self.journey, "revision": 0}
-        data.update(changes)
-        return {"routeKey": "PATCH /admin/journeys/schedule", "body": json.dumps(data)}
+    def transact(self, operations):
+        for kind, value, previous in operations:
+            if self.items.get(kind) != previous:
+                raise community.Problem(409, "collision")
+            self.items[kind] = value
 
-    def test_public_read_and_private_write(self):
+    def event(self, day="2026-10-20", journey=None, revision=0):
+        return {"routeKey": "PATCH /admin/journeys/schedule", "body": json.dumps({"date": day, "journeyId": self.journey if journey is None else journey, "revision": revision})}
+
+    def test_range_read_locks_today_and_routes_remain_private_for_writes(self):
         result = schedule.handle({"routeKey": "GET /journeys/schedule"})
-        self.assertEqual(json.loads(result["body"]), {"revision": 0, "assignments": {}})
+        body = json.loads(result["body"])
+        self.assertEqual(body["today"], "2026-10-20")
+        self.assertEqual(body["records"]["2026-10-20"]["source"], "auto")
         self.assertEqual(schedule.handle(self.event())["statusCode"], 403)
-        self.transact.assert_not_called()
         routes = {r["Properties"]["RouteKey"]: r["Properties"]["AuthorizationType"] for r in template()["Resources"].values() if r["Type"] == "AWS::ApiGatewayV2::Route"}
         self.assertEqual(routes["GET /journeys/schedule"], "NONE")
+        self.assertEqual(routes["GET /admin/journeys/schedule"], "JWT")
         self.assertEqual(routes["PATCH /admin/journeys/schedule"], "JWT")
 
-    def test_publish_and_clear_keep_other_dates(self):
-        result = schedule.handle(self.event(), True)
-        published = json.loads(result["body"])
-        self.assertEqual(published, {"revision": 1, "assignments": {"2026-10-20": self.journey}})
-        with patch.object(community, "get", return_value=published):
-            cleared = schedule.handle(self.event(journeyId=None, revision=1), True)
-        self.assertEqual(json.loads(cleared["body"]), {"revision": 2, "assignments": {}})
-        self.assertEqual(self.transact.call_args.args[0][0][-1], published)
+    def test_admin_can_read_all_history_but_guests_cannot(self):
+        self.items["day:2026-10-05"] = {"day": "2026-10-05", "journeyId": self.journey, "source": "auto", "revision": 1, "lockedAt": "cutover"}
+        event = {"routeKey": "GET /admin/journeys/schedule"}
+        self.assertEqual(schedule.handle(event)["statusCode"], 403)
+        result = json.loads(schedule.handle(event, True)["body"])
+        self.assertIn("2026-10-05", result["records"])
+        self.assertIn("2026-10-20", result["records"])
 
-    def test_invalid_dates_retired_local_ids_and_revision_never_write(self):
-        for changes in ({"date": "2026-02-30"}, {"date": "2026-2-20"}, {"journeyId": "long-way-home-v2"}, {"journeyId": "local-pack"}, {"journeyId": []}, {"revision": True}):
-            self.assertEqual(schedule.handle(self.event(**changes), True)["statusCode"], 400)
-        self.transact.assert_not_called()
+    def test_pool_selection_is_order_independent_and_shrinks_no_repeat_window(self):
+        pool = {f"id-{i}": {"id": f"id-{i}", "availability": "pool"} for i in range(3)}
+        pool["hidden"] = {"id": "hidden", "availability": "unlisted"}
+        days = [(date(2026, 10, 5).toordinal() + n) for n in range(30)]
+        choices = [schedule.choose(date.fromordinal(day).isoformat(), {}, pool) for day in days]
+        self.assertTrue(all(choice != "hidden" for choice in choices))
+        self.assertTrue(all(choices[index] != choices[index + 1] for index in range(len(choices) - 1)))
+        self.assertEqual(choices, [schedule.choose(date.fromordinal(day).isoformat(), {}, dict(reversed(list(pool.items())))) for day in days])
 
-    def test_stale_revision_and_transaction_collision_return_conflict(self):
-        self.assertEqual(schedule.handle(self.event(revision=1), True)["statusCode"], 409)
-        self.transact.assert_not_called()
-        self.transact.side_effect = community.Problem(409, "collision")
-        self.assertEqual(schedule.handle(self.event(), True)["statusCode"], 409)
+    def test_frontend_hash_vectors_and_missing_historical_record(self):
+        expected = {"2026-10-05": "along-the-andes-v1", "2026-10-18": "try-not-to-click-russia-v1", "2026-11-03": "exceptions-to-the-rule-v1", "2027-01-01": "beyond-the-maple-leaf-v1"}
+        for day, journey in expected.items():
+            self.assertEqual(schedule.choose(day, {}), journey)
+        missing = {"2026-10-05": {"journeyId": "removed-id", "source": "auto"}}
+        self.assertEqual(schedule.choose("2026-10-05", missing), "removed-id")
+        self.assertEqual(schedule.choose("2026-11-03", {"2026-11-03": {"journeyId": "removed-id", "source": "assigned"}}), expected["2026-11-03"])
+        self.assertIn(schedule.choose("2035-01-01", {}), schedule.CATALOG)
+
+    def test_lock_is_idempotent_and_never_overwrites_assigned(self):
+        assigned = {"day": "2026-10-20", "journeyId": self.journey, "source": "assigned", "revision": 1}
+        self.items["day:2026-10-20"] = assigned
+        first, created = schedule.lock("2026-10-20")
+        self.assertTrue(created)
+        self.assertEqual(first["journeyId"], self.journey)
+        second, created = schedule.lock("2026-10-20")
+        self.assertFalse(created)
+        self.assertEqual(second, first)
+
+    def test_lock_on_read_race_returns_the_winning_record(self):
+        winner = {"day": "2026-10-20", "journeyId": self.journey, "source": "assigned", "revision": 1, "lockedAt": "2026-10-20T00:05:00-04:00"}
+        def concurrent_write(operations):
+            self.items["day:2026-10-20"] = winner
+            raise community.Problem(409, "collision")
+        with patch.object(community, "transact", side_effect=concurrent_write):
+            self.assertEqual(schedule.lock("2026-10-20"), (winner, False))
+
+    def test_today_can_change_then_clear_to_original_auto_choice_without_confirmation(self):
+        automatic, _ = schedule.lock("2026-10-20")
+        changed = schedule.handle(self.event(revision=automatic["revision"]), True)
+        self.assertEqual(changed["statusCode"], 200)
+        record = self.items["day:2026-10-20"]
+        self.assertEqual(record["journeyId"], self.journey)
+        cleared = schedule.handle({"routeKey": "PATCH /admin/journeys/schedule", "body": json.dumps({"date": "2026-10-20", "journeyId": None, "revision": record["revision"]})}, True)
+        self.assertEqual(cleared["statusCode"], 200)
+        self.assertEqual(self.items["day:2026-10-20"]["journeyId"], automatic["journeyId"])
+        self.assertEqual(len(self.items["day:2026-10-20"]["changes"]), 2)
+        self.assertEqual(schedule.handle(self.event(day="2026-10-19"), True)["statusCode"], 409)
+
+    def test_past_rewrite_requires_explicit_flag_and_records_the_change(self):
+        past = {"day": "2026-10-19", "journeyId": "mediterranean-v1", "autoJourneyId": "mediterranean-v1", "source": "auto", "revision": 1, "lockedAt": "2026-10-19T00:05:00-04:00"}
+        self.items["day:2026-10-19"] = past
+        self.assertEqual(schedule.handle(self.event(day="2026-10-19", revision=1), True)["statusCode"], 409)
+        event = self.event(day="2026-10-19", revision=1)
+        event["body"] = json.dumps({**json.loads(event["body"]), "rewriteHistory": True})
+        self.assertEqual(schedule.handle(event, True)["statusCode"], 200)
+        changed = self.items["day:2026-10-19"]
+        self.assertEqual(changed["journeyId"], self.journey)
+        self.assertEqual(changed["lockedAt"], past["lockedAt"])
+        self.assertEqual(changed["changes"][0]["from"], "mediterranean-v1")
+
+    def test_future_clear_keeps_revision_and_stale_write_conflicts(self):
+        self.assertEqual(schedule.handle(self.event(day="2026-11-01"), True)["statusCode"], 200)
+        cleared = {"routeKey": "PATCH /admin/journeys/schedule", "body": json.dumps({"date": "2026-11-01", "journeyId": None, "revision": 1})}
+        self.assertEqual(schedule.handle(cleared, True)["statusCode"], 200)
+        self.assertEqual(self.items["day:2026-11-01"]["source"], "provisional")
+        self.assertEqual(schedule.handle(self.event(day="2026-11-01"), True)["statusCode"], 409)
+
+    def test_invalid_date_and_unknown_id_never_write(self):
+        for day, journey in [("2026-02-30", self.journey), ("2026-11-01", "local-pack")]:
+            self.assertEqual(schedule.handle(self.event(day=day, journey=journey), True)["statusCode"], 400)
+        self.assertEqual(self.items, {})
+
+    def test_date_range_query_follows_pages_without_scanning_other_keys(self):
+        table = MagicMock()
+        table.query.side_effect = [
+            {"Items": [{"dataJson": json.dumps({"day": "2026-10-05"})}], "LastEvaluatedKey": {"pk": "journey-schedule", "sk": "day:2026-10-05"}},
+            {"Items": [{"dataJson": json.dumps({"day": "2026-10-06"})}]},
+        ]
+        with patch.object(community, "table", return_value=table):
+            self.assertEqual(REAL_DATE_ROWS("journey-schedule", "day:2026-10-05", "day:2026-10-06"), [{"day": "2026-10-05"}, {"day": "2026-10-06"}])
+        self.assertIn("BETWEEN", table.query.call_args.kwargs["KeyConditionExpression"])
+        self.assertTrue(table.query.call_args.kwargs["ConsistentRead"])
+        self.assertIn("ExclusiveStartKey", table.query.call_args.kwargs)
 
 
 if __name__ == "__main__":
