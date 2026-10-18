@@ -18,7 +18,7 @@ def aws(args, command):
     full = ["aws", *command, "--region", "us-east-1", "--output", "json"]
     if args.profile:
         full.extend(["--profile", args.profile])
-    return json.loads(subprocess.check_output(full, text=True))
+    return json.loads(subprocess.check_output(full, text=True).strip() or "{}")
 
 
 def plan(through, assignments, rotation, migrated_at):
