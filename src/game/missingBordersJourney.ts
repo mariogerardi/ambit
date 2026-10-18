@@ -163,6 +163,8 @@ const revealLabels = [
 const country = (code: string) => `wurl:${code}`;
 export const MISSING_BORDERS_JOURNEY: Journey = {
   id: "missing-borders-v1",
+  addedAt: "2026-10-12",
+  availability: "unlisted",
   saveRevision: 1,
   title: "Missing Borders",
   mapAttribution: {

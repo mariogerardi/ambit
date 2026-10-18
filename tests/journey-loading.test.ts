@@ -10,7 +10,9 @@ import {
 
 describe("deferred Journey content", () => {
   it("keeps routing and save-validation metadata aligned with the authored catalog", () => {
-    expect(JOURNEY_INDEX.map((j) => j.id)).toEqual(JOURNEYS.map((j) => j.id));
+    expect(JOURNEY_INDEX.map((j) => j.id)).toEqual(
+      JOURNEYS.map((j) => j.id).sort(),
+    );
     for (const journey of JOURNEYS) {
       const entry = JOURNEY_INDEX.find((j) => j.id === journey.id)!;
       expect(entry.path).toBe(journeyPath(journey.id));

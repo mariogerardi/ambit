@@ -122,7 +122,7 @@ it("clears the current attempt durably without restoring stale tabs/devices or c
 
 it("validates reset markers and preserves the strongest reset when stale devices sync", () => {
   const day = "2026-10-11";
-  const journeyId = JOURNEY_INDEX[0].id;
+  const journeyId = "beyond-the-maple-leaf-v1";
   const key = `${day}/${journeyId}`;
   for (const [field, cutoff] of [
     [key, -1],
@@ -183,6 +183,7 @@ it("removes retired runs during migration and ignores them when another device s
   store.save({ ...store.load(), activeDate: "2026-10-11" });
   expect(createDailySave(JOURNEY_INDEX).load().attempts).toEqual(keep.attempts);
 });
+
 function result(id: string): StudySave {
   let session = { ...startStudy(defaultSettings, 42), id };
   session = studyReducer(session, {
@@ -464,8 +465,8 @@ describe("durable player saves", () => {
   it("restores an earlier Journey without letting a stale tab change the chosen Journey", () => {
     vi.spyOn(Date, "now").mockReturnValue(100);
     const date = "2026-10-05",
-      first = JOURNEY_INDEX[0].id,
-      second = JOURNEY_INDEX[1].id;
+      first = "beyond-the-maple-leaf-v1",
+      second = "mediterranean-v1";
     const store = createDailySave(JOURNEY_INDEX);
     store.save(openDaily(setDailyPuzzle(emptyDaily, date, first), date));
     store.save(setDailyPuzzle(store.load(), date, second));
@@ -501,7 +502,7 @@ describe("durable player saves", () => {
       ...save,
       attempts: {
         ...save.attempts,
-        "bad-date": { journeyId: JOURNEY_INDEX[0].id },
+        "bad-date": { journeyId: "beyond-the-maple-leaf-v1" },
       },
     });
     values.set(DAILY_KEY, raw);

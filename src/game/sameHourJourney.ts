@@ -104,6 +104,8 @@ const base = definePresentation({
 
 export const SAME_HOUR_JOURNEY: Journey = {
   id: "same-hour-different-worlds",
+  addedAt: "2026-10-12",
+  availability: "unlisted",
   saveRevision: 5,
   legacyRoundLabels: {
     "same-hour-q4": "Sri Lanka / Nepal / Bhutan",

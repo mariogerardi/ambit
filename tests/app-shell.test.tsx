@@ -1517,6 +1517,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus.at(-1)).not.toEqual(saved);
   });
   it("saves Explore layers globally, reloads them, and preserves question disclosure", async () => {
+    vi.setSystemTime(new Date(2026, 9, 5, 12));
     await mount();
     await click("Explore");
     await click("Globe settings");
@@ -2696,7 +2697,10 @@ it("requires WebGL to play without mounting it when unsupported", async () => {
   expect(probe.mounts).toBe(0);
   expect(host.querySelector(".account-earth")).not.toBeNull();
   expect(host.textContent).toContain("The 3D globe is required to play Ambit");
-  expect(host.querySelector<HTMLButtonElement>(".daily-menu .primary-button")?.disabled).toBe(true);
+  expect(
+    host.querySelector<HTMLButtonElement>(".daily-menu .primary-button")
+      ?.disabled,
+  ).toBe(true);
   expect(host.querySelector('[role="alert"]')).toBeNull();
   await click("Study");
   expect(probe.mounts).toBe(0);

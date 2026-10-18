@@ -5,6 +5,22 @@ import type { useJourneySchedule } from "../services/journeySchedule";
 import { dailyJourney, dateOrdinal } from "./dailyProgress";
 import type { DailyAttempt } from "./dailyProgress";
 
+type JourneySort = "alphabetical" | "newest" | "last" | "never";
+type JourneyFilter = "all" | "pool" | "unlisted";
+function storedChoice<T extends string>(
+  key: string,
+  allowed: readonly T[],
+  fallback: T,
+): T {
+  try {
+    const value = localStorage.getItem(key);
+    if (allowed.includes(value as T)) return value as T;
+  } catch {
+    /* Display preferences remain optional. */
+  }
+  return fallback;
+}
+
 const formatDay = (date: string, long = false) =>
   new Date(`${date}T12:00:00`).toLocaleDateString(
     undefined,
@@ -75,6 +91,28 @@ export function AdminPanel({
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
+  const [sort, setSort] = useState<JourneySort>(() =>
+    storedChoice(
+      "ambit.admin.journey-sort",
+      ["alphabetical", "newest", "last", "never"],
+      "alphabetical",
+    ),
+  );
+  const [filter, setFilter] = useState<JourneyFilter>(() =>
+    storedChoice(
+      "ambit.admin.journey-filter",
+      ["all", "pool", "unlisted"],
+      "all",
+    ),
+  );
+  useEffect(() => {
+    try {
+      localStorage.setItem("ambit.admin.journey-sort", sort);
+      localStorage.setItem("ambit.admin.journey-filter", filter);
+    } catch {
+      /* Display preferences remain optional. */
+    }
+  }, [sort, filter]);
   useEffect(() => setResetMessage(""), [date]);
   // Refresh published dates without erasing a Journey the admin is still choosing.
   useEffect(() => {
@@ -91,6 +129,36 @@ export function AdminPanel({
     dailyJourney(day, undefined, JOURNEY_INDEX, {});
   const dirty = selection !== saved;
   const busy = submitting || schedule.busy;
+  const scheduledDates = (id: string) =>
+    Object.entries(assignments)
+      .filter(([, assigned]) => assigned === id)
+      .map(([scheduled]) => scheduled)
+      .sort();
+  const displayedJourneys = JOURNEY_INDEX.filter(
+    (journey) => filter === "all" || journey.availability === filter,
+  ).sort((a, b) => {
+    if (sort === "newest")
+      return b.addedAt.localeCompare(a.addedAt) || a.id.localeCompare(b.id);
+    if (sort === "last")
+      return (
+        (
+          scheduledDates(b.id)
+            .filter((item) => item <= date)
+            .at(-1) ?? ""
+        ).localeCompare(
+          scheduledDates(a.id)
+            .filter((item) => item <= date)
+            .at(-1) ?? "",
+        ) || a.title.localeCompare(b.title)
+      );
+    if (sort === "never")
+      return (
+        Number(scheduledDates(a.id).length > 0) -
+          Number(scheduledDates(b.id).length > 0) ||
+        a.title.localeCompare(b.title)
+      );
+    return a.title.localeCompare(b.title) || a.id.localeCompare(b.id);
+  });
   function chooseDay(next: string) {
     setDay(next);
     setMonth(next.slice(0, 7));
@@ -309,6 +377,55 @@ export function AdminPanel({
                 ))}
               </select>
             </label>
+            <div className="journey-list-controls">
+              <label className="field">
+                <span>Sort Journeys</span>
+                <select
+                  value={sort}
+                  onChange={(event) =>
+                    setSort(event.target.value as JourneySort)
+                  }
+                >
+                  <option value="alphabetical">Alphabetical</option>
+                  <option value="newest">Newest first</option>
+                  <option value="last">Last scheduled</option>
+                  <option value="never">Never scheduled</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>Show Journeys</span>
+                <select
+                  value={filter}
+                  onChange={(event) =>
+                    setFilter(event.target.value as JourneyFilter)
+                  }
+                >
+                  <option value="all">All</option>
+                  <option value="pool">In pool</option>
+                  <option value="unlisted">Unlisted</option>
+                </select>
+              </label>
+            </div>
+            <ul className="journey-catalog-list">
+              {displayedJourneys.map((journey) => {
+                const dates = scheduledDates(journey.id);
+                return (
+                  <li key={journey.id}>
+                    <strong>{journey.title}</strong>
+                    {" · "}
+                    {journey.availability === "pool" ? "In pool" : "Unlisted"}
+                    {" · Added "}
+                    {journey.addedAt}
+                    <span className="muted">
+                      {" · Last scheduled: "}
+                      {dates.filter((item) => item <= date).at(-1) ?? "Never"}
+                      {" · Next assigned: "}
+                      {dates.find((item) => item > date) ?? "None"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
             <article
               className={`scheduled-journey-preview${dirty ? " is-draft" : ""}`}
               aria-label="Journey preview"

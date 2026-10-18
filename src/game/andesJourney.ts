@@ -148,6 +148,8 @@ const common = definePresentation({
 
 export const ANDES_JOURNEY: Journey = {
   id: "along-the-andes-v1",
+  addedAt: "2026-10-11",
+  availability: "pool",
   title: "Along the Andes",
   description:
     "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and coastal wildlife in Tierra del Fuego.",

@@ -26,6 +26,8 @@ const base = definePresentation({
 
 export const TENTH_JOURNEY: Journey = {
   id: "ring-of-fire-v1",
+  addedAt: "2026-10-10",
+  availability: "pool",
   title: "Around the Ring of Fire",
   description:
     "Trace the Pacific’s island arcs, cross to the Andes, and finish on its southern rim. One ocean connects every stop.",

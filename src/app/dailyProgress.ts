@@ -64,8 +64,11 @@ export function dailyJourney(
   const override = DAILY_SCHEDULE.overrides.find(
     (entry) => entry.date === date,
   );
-  if (override)
-    return catalog.find((j) => j.id === override.journeyId) ?? catalog[0];
+  if (override) {
+    const journey = catalog.find((j) => j.id === override.journeyId);
+    if (!journey) throw Error("Journey unavailable");
+    return journey;
+  }
   const offset = dateOrdinal(date) - dateOrdinal(DAILY_SCHEDULE.begins);
   const bundled = ACTIVE_JOURNEY_IDS.flatMap((id) => {
     const journey = catalog.find((entry) => entry.id === id);

@@ -96,6 +96,8 @@ const base = definePresentation({
 
 export const FOURTH_JOURNEY: Journey = {
   id: "mediterranean-v1",
+  addedAt: "2026-10-10",
+  availability: "pool",
   title: "Around the Mediterranean",
   saveRevision: 2,
   legacyRoundLabels: {

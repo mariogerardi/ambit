@@ -33,6 +33,8 @@ const base = definePresentation({
 });
 export const TWELFTH_JOURNEY: Journey = {
   id: "exceptions-to-the-rule-v1",
+  addedAt: "2026-10-10",
+  availability: "pool",
   title: "Exceptions to the rule",
   description:
     "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",

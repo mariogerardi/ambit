@@ -65,6 +65,8 @@ const base = definePresentation({
 
 export const DANUBE_JOURNEY: Journey = {
   id: "down-the-danube-v1",
+  addedAt: "2026-10-11",
+  availability: "unlisted",
   title: "Down the Danube",
   description:
     "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",

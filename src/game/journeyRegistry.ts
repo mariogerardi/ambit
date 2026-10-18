@@ -4,6 +4,8 @@ import type { Journey, Question } from "./questionContracts";
 
 /** Enough to route, schedule and validate saves without loading clue geometry. */
 export interface JourneySummary {
+  addedAt?: string;
+  availability?: "pool" | "unlisted";
   saveRevision?: number;
   legacyRoundLabels?: Partial<Record<string, string>>;
   id: string;
@@ -12,10 +14,12 @@ export interface JourneySummary {
   description: string;
   rounds: Pick<Question, "id" | "label" | "progressLabel" | "resolvedLabel">[];
 }
-export const JOURNEY_INDEX: (JourneySummary & {
+export const JOURNEY_INDEX = index as (JourneySummary & {
+  addedAt: string;
+  availability: "pool" | "unlisted";
   path: string;
   module: string;
-})[] = index;
+})[];
 const modules = import.meta.glob<Record<string, unknown>>(["./*Journey.ts"]);
 const pending = new Map<string, Promise<Journey>>();
 
@@ -43,5 +47,5 @@ export function loadJourney(id: string): Promise<Journey> {
 }
 
 export function journeyPath(id: string) {
-  return JOURNEY_INDEX.find((j) => j.id === id)?.path ?? JOURNEY_INDEX[0].path;
+  return JOURNEY_INDEX.find((j) => j.id === id)?.path ?? "/";
 }

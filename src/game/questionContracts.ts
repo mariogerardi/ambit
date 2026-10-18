@@ -271,6 +271,10 @@ export interface Question {
   feedbackOverlays?: MapOverlay[];
 }
 export interface Journey {
+  /** Date this edition joined the catalog; drives Admin's newest-first view. */
+  addedAt?: string;
+  /** Omitted means unlisted, so registration alone never changes daily picks. */
+  availability?: "pool" | "unlisted";
   /** In-place answer-contract revision; no archived question definitions required. */
   saveRevision?: number;
   /** Receipt names for pre-revision answers, without restoring their grading rules. */

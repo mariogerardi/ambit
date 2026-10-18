@@ -26,8 +26,8 @@ These instructions apply to every coding agent working in this repository.
   or release requirement makes them necessary. Once relevant checks pass, stop
   testing; do not repeat them without a new reason.
 - A Journey catalog change is a release requirement: run the full frontend and
-  backend test suites before pushing, and test Journey identity by ID rather than
-  array position or catalog count.
+  backend test suites through `npm run check:catalog` before pushing, and test
+  Journey identity by ID rather than array position or catalog count.
 - Do not launch a browser or perform browser testing by default. Use unit/DOM
   tests and code inspection. Browser testing is reserved for an explicit request
   or a critical uncertainty that cannot be resolved otherwise (for example actual

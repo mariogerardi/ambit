@@ -4,10 +4,13 @@ import {
   readPublishedPuzzles,
 } from "../src/app/publishedPuzzles";
 import { JOURNEYS } from "../src/game/journeys";
+const example = JOURNEYS.find(
+  (journey) => journey.id === "beyond-the-maple-leaf-v1",
+)!;
 afterEach(() => vi.unstubAllGlobals());
 describe("read-only published puzzle compatibility", () => {
   it("loads only previously published five-question packs, ignoring drafts and authoring metadata", () => {
-    const journey = { ...JOURNEYS[0], id: "studio:published:legacy" };
+    const journey = { ...example, id: "studio:published:legacy" };
     const value = {
       questions: [{ prompt: "unused draft" }],
       assets: [],
@@ -27,7 +30,7 @@ describe("read-only published puzzle compatibility", () => {
     ).toEqual([]);
   });
   it("gives older published Journeys a title without changing their saved data", () => {
-    const { title: _title, ...legacy } = JOURNEYS[0];
+    const { title: _title, ...legacy } = example;
     const packs = publishedPuzzles({
       published: [{ id: legacy.id, revision: 1, journey: legacy }],
     });
@@ -45,7 +48,7 @@ describe("read-only published puzzle compatibility", () => {
     expect(await readPublishedPuzzles()).toEqual([]);
   });
   it("opens only a readonly transaction and never writes or loads drafts", async () => {
-    const journey = { ...JOURNEYS[0], id: "studio:published:legacy" };
+    const journey = { ...example, id: "studio:published:legacy" };
     const read: Record<string, unknown> = {
       result: {
         questions: [],

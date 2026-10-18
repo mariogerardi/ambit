@@ -21,32 +21,39 @@ try {
       if (editions.includes(value)) modules.set(value.id, `./${file}`);
     }
   }
-  const index = editions.map((journey) => {
-    validateJourneyContracts(journey);
-    if (!modules.has(journey.id)) throw Error(`Missing module: ${journey.id}`);
-    return {
-      id: journey.id,
-      title: journey.title,
-      ...(journey.supersedes ? { supersedes: journey.supersedes } : {}),
-      ...(journey.saveRevision
-        ? {
-            saveRevision: journey.saveRevision,
-            legacyRoundLabels: journey.legacyRoundLabels,
-          }
-        : {}),
-      description: journey.description,
-      path: journeyPath(journey.id),
-      module: modules.get(journey.id),
-      rounds: journey.rounds.map(
-        ({ id, label, progressLabel, resolvedLabel }) => ({
-          id,
-          label,
-          ...(progressLabel ? { progressLabel } : {}),
-          ...(journey.saveRevision && resolvedLabel ? { resolvedLabel } : {}),
-        }),
-      ),
-    };
-  });
+  const index = editions
+    .map((journey) => {
+      validateJourneyContracts(journey);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(journey.addedAt ?? ""))
+        throw Error(`Missing addedAt date: ${journey.id}`);
+      if (!modules.has(journey.id))
+        throw Error(`Missing module: ${journey.id}`);
+      return {
+        id: journey.id,
+        addedAt: journey.addedAt,
+        availability: journey.availability ?? "unlisted",
+        title: journey.title,
+        ...(journey.supersedes ? { supersedes: journey.supersedes } : {}),
+        ...(journey.saveRevision
+          ? {
+              saveRevision: journey.saveRevision,
+              legacyRoundLabels: journey.legacyRoundLabels,
+            }
+          : {}),
+        description: journey.description,
+        path: journeyPath(journey.id),
+        module: modules.get(journey.id),
+        rounds: journey.rounds.map(
+          ({ id, label, progressLabel, resolvedLabel }) => ({
+            id,
+            label,
+            ...(progressLabel ? { progressLabel } : {}),
+            ...(journey.saveRevision && resolvedLabel ? { resolvedLabel } : {}),
+          }),
+        ),
+      };
+    })
+    .sort((a, b) => a.id.localeCompare(b.id));
   await writeFile(
     "src/game/journeyIndex.json",
     `${JSON.stringify(index, null, 2)}\n`,

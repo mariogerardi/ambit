@@ -26,6 +26,8 @@ const regionsSource = {
 };
 export const CANADA_JOURNEY: Journey = {
   id: "beyond-the-maple-leaf-v1",
+  addedAt: "2026-10-11",
+  availability: "pool",
   title: "Beyond the maple leaf",
   description:
     "Start with a familiar flag, follow two official languages to the east coast, then travel through the capital to the northern shore.",

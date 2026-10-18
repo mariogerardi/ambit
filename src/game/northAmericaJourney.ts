@@ -56,6 +56,8 @@ const base = definePresentation({
 });
 export const NORTH_AMERICA_JOURNEY: Journey = {
   id: "north-america-v2",
+  addedAt: "2026-10-10",
+  availability: "pool",
   title: "North America by name",
   description:
     "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",

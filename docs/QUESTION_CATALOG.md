@@ -1,41 +1,37 @@
 # Journey catalog and question authoring
 
-The bundled catalog contains **17 current Journeys and 85 questions**, with eleven active
-daily concepts, reviewed against the code on October 17, 2026. Each Journey has
-five rounds. Admin’s shared calendar assigns any bundled Journey to a date for
-everyone; unassigned dates use the automatic rotation. Direct practice routes are Admin-only; Admin’s “Preview five questions” opens the selected Journey. Chasing the sun and Down the Danube are ready for date assignments and
-have not been added to the automatic rotation. Same Hour, Different Worlds is also
-available for preview and date assignments without joining the rotation. Same Name, Different Place is also available without joining the rotation. Missing Borders is available for preview and date assignments without joining the rotation. There is no current in-app authoring
-or AI generator. Previously published local packs are read-only compatibility data.
-
-Across the Divide is available for preview and date assignments without joining
-the automatic rotation.
+The bundled catalog is keyed by stable Journey IDs; registration order has no
+meaning. Each Journey has five rounds. Admin can assign any bundled Journey to
+any date. Journeys marked `pool` are eligible for automatic selection; those
+marked `unlisted` can still be assigned and previewed. Direct practice routes are
+Admin-only. There is no current in-app authoring or AI generator. Previously
+published local packs are read-only compatibility data.
 
 ## Bundled Journeys
 
-| #   | Title                       | Practice route                        | Definition                                                       |
-| --- | --------------------------- | ------------------------------------- | ---------------------------------------------------------------- |
-| 1   | Beyond the maple leaf       | `/journey/beyond-the-maple-leaf`      | [canadaJourney.ts](../src/game/canadaJourney.ts)                 |
-| 2   | Around the Mediterranean    | `/journey/mediterranean`              | [fourthJourney.ts](../src/game/fourthJourney.ts)                 |
-| 3   | Shared neighbors            | `/journey/shared-neighbors`           | [ninthJourney.ts](../src/game/ninthJourney.ts)                   |
-| 4   | Along the Andes             | `/journey/along-the-andes`            | [andesJourney.ts](../src/game/andesJourney.ts)                   |
-| 5   | Not the obvious city        | `/journey/not-the-obvious-city`       | [eleventhJourney.ts](../src/game/eleventhJourney.ts)             |
-| 6   | Island instincts            | `/journey/island-instincts`           | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)         |
-| 7   | North America by name       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)     |
-| 8   | Latitude surprises          | `/journey/latitude-surprises`         | [latitudeJourney.ts](../src/game/latitudeJourney.ts)             |
-| 9   | Around the Ring of Fire     | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)                   |
-| 10  | Exceptions to the rule      | `/journey/exceptions-to-the-rule`     | [twelfthJourney.ts](../src/game/twelfthJourney.ts)               |
-| 11  | On Russia’s doorstep        | `/journey/try-not-to-click-russia`    | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)           |
-| 12  | Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)             |
-| 13  | Down the Danube             | `/journey/down-the-danube`            | [danubeJourney.ts](../src/game/danubeJourney.ts)                 |
-| 14  | Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)             |
-| 15  | Same Name, Different Place  | `/journey/same-name-different-place`  | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)       |
-| 16  | Missing Borders             | `/journey/missing-borders`            | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts) |
-| 17  | Across the Divide           | `/journey/across-the-divide`          | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)     |
+| Title                       | Practice route                        | Definition                                                       |
+| --------------------------- | ------------------------------------- | ---------------------------------------------------------------- |
+| Beyond the maple leaf       | `/journey/beyond-the-maple-leaf`      | [canadaJourney.ts](../src/game/canadaJourney.ts)                 |
+| Around the Mediterranean    | `/journey/mediterranean`              | [fourthJourney.ts](../src/game/fourthJourney.ts)                 |
+| Shared neighbors            | `/journey/shared-neighbors`           | [ninthJourney.ts](../src/game/ninthJourney.ts)                   |
+| Along the Andes             | `/journey/along-the-andes`            | [andesJourney.ts](../src/game/andesJourney.ts)                   |
+| Not the obvious city        | `/journey/not-the-obvious-city`       | [eleventhJourney.ts](../src/game/eleventhJourney.ts)             |
+| Island instincts            | `/journey/island-instincts`           | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)         |
+| North America by name       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)     |
+| Latitude surprises          | `/journey/latitude-surprises`         | [latitudeJourney.ts](../src/game/latitudeJourney.ts)             |
+| Around the Ring of Fire     | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)                   |
+| Exceptions to the rule      | `/journey/exceptions-to-the-rule`     | [twelfthJourney.ts](../src/game/twelfthJourney.ts)               |
+| On Russia’s doorstep        | `/journey/try-not-to-click-russia`    | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)           |
+| Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)             |
+| Down the Danube             | `/journey/down-the-danube`            | [danubeJourney.ts](../src/game/danubeJourney.ts)                 |
+| Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)             |
+| Same Name, Different Place  | `/journey/same-name-different-place`  | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)       |
+| Missing Borders             | `/journey/missing-borders`            | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts) |
+| Across the Divide           | `/journey/across-the-divide`          | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)     |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. The daily rotation uses midnight in New York and
-cycles the eleven retained concepts from October 5, 2026, using the explicit IDs in
+cycles the retained concepts from October 5, 2026, using the explicit IDs in
 [`journeyRotation.ts`](../src/game/journeyRotation.ts). See
 [Journey review](JOURNEY_REVIEW.md) for the keep/scrap decisions. Results use Home/Study as primary exits,
 with daily replay secondary and available only to admins. A results flyover follows answer stops in round order and
@@ -47,27 +43,27 @@ the answer; borders, names, and markers remain hidden until submission.
 
 ## Answer modes
 
-Counts below refer to the 85 current questions, not every possible engine pairing.
+The modes below describe supported controls, not catalog totals.
 The type and rule contracts live in [`questionContracts.ts`](../src/game/questionContracts.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
-| Mode                   | Control                    | Questions |
-| ---------------------- | -------------------------- | --------: |
-| `pin`                  | Drop a pin                 |        21 |
-| `city-single`          | Single city pick           |         4 |
-| `city-multiple`        | Multiple city picks        |         0 |
-| `merged-region-single` | Single anonymous territory |         5 |
-| `map-single`           | Single country pick        |        12 |
-| `map-multiple`         | Multiple country picks     |         6 |
-| `number`               | Number                     |         2 |
-| `text`                 | Free response              |        10 |
-| `typed-regions`        | Typed region names         |         3 |
-| `ordered-countries`    | Ordered country names      |         0 |
-| `ordered-capitals`     | Ordered capital names      |         0 |
-| `choice-single`        | Single choice              |        18 |
-| `choice-multiple`      | Multiple choices           |         3 |
-| `choice-order`         | Order cards with spares    |         0 |
-| `choice-match`         | Match cards to roles       |         1 |
+| Mode                   | Control                    |
+| ---------------------- | -------------------------- |
+| `pin`                  | Drop a pin                 |
+| `city-single`          | Single city pick           |
+| `city-multiple`        | Multiple city picks        |
+| `merged-region-single` | Single anonymous territory |
+| `map-single`           | Single country pick        |
+| `map-multiple`         | Multiple country picks     |
+| `number`               | Number                     |
+| `text`                 | Free response              |
+| `typed-regions`        | Typed region names         |
+| `ordered-countries`    | Ordered country names      |
+| `ordered-capitals`     | Ordered capital names      |
+| `choice-single`        | Single choice              |
+| `choice-multiple`      | Multiple choices           |
+| `choice-order`         | Order cards with spares    |
+| `choice-match`         | Match cards to roles       |
 
 `land-path` remains an internal supported mode/evaluator, with no playable catalog
 example or supported authoring recipe. Multiple-choice questions are capped at six
@@ -209,7 +205,7 @@ text to `questionText.ts`. `questions.ts` remains a compatibility import surface
    Runtime lazy discovery covers files ending in `Journey.ts`;
    keep that naming pattern or update discovery deliberately.
 5. Regenerate `npm run prepare:journeys` when definitions or registration change
-   index metadata. Run only the relevant tests and TypeScript for typed changes,
+   index metadata. Run `npm run check:catalog` for a catalog change, plus TypeScript for typed changes,
    following [AGENTS.md](../AGENTS.md). Update table/counts when content changes;
    do not regenerate geography or run a full build for routine copy edits.
    Authorized releases use the normal CI checks and supported nonblocking deployment.
@@ -219,7 +215,7 @@ before publication. Automatic dates show the actual rotation title. Admin can
 navigate months, jump to today, enter a date directly, or restore automatic
 rotation for an assigned day.
 
-All 17 current Journeys (85 questions) author grouped play/assist/reveal scenes.
+Current Journeys author grouped play/assist/reveal scenes.
 There are no archived runtime editions. The revised sun Journey keeps
 `chasing-the-sun-v2` and its `supersedes` alias so previously published original-ID
 assignments resolve to the current edition. The original ID is retired: save

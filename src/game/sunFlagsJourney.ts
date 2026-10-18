@@ -115,6 +115,8 @@ const base = definePresentation({
 
 export const SUN_FLAGS_JOURNEY: Journey = {
   id: "chasing-the-sun-v2",
+  addedAt: "2026-10-11",
+  availability: "unlisted",
   supersedes: "chasing-the-sun-v1",
   title: "Chasing the sun",
   description:
