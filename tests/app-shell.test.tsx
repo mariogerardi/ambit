@@ -45,7 +45,8 @@ import { NORTH_AMERICA_JOURNEY as FIFTH_JOURNEY } from "../src/game/northAmerica
 import { CANADA_JOURNEY } from "../src/game/canadaJourney";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
 import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
-import { DAILY_KEY, openDaily } from "../src/app/dailyProgress";
+import { DAILY_KEY, localDateKey, openDaily } from "../src/app/dailyProgress";
+import historicRotation from "../scripts/legacy-journey-rotation.json";
 import { GLOBE_LAYERS_KEY, DEFAULT_LAYERS } from "../src/app/worldPreferences";
 import { MOBILE_LAYOUT_QUERY } from "../src/app/useMobileLayout";
 import { STUDY_PATHS } from "../src/study/paths";
@@ -153,7 +154,12 @@ vi.mock("../src/services/accounts", () => ({
   }),
 }));
 vi.mock("../src/app/FeedbackReview", () => ({ FeedbackReview: () => null }));
-let scheduleState = { revision: 0, assignments: {} as Record<string, string> };
+type MockDay = { day: string; journeyId: string | null; source: "assigned" | "auto" | "provisional"; revision: number };
+const historicRecords = () => Object.fromEntries(historicRotation.map((journeyId, index) => {
+  const day = `2026-10-${String(index + 5).padStart(2, "0")}`;
+  return [day, { day, journeyId, source: "auto" as const, revision: 1 }];
+})) as Record<string, MockDay>;
+let scheduleState = { records: historicRecords(), assignments: {} as Record<string, string> };
 let root: Root, host: HTMLDivElement;
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -213,7 +219,7 @@ let panelObservers: {
 beforeEach(() => {
   vi.mocked(supportsWebGL).mockReturnValue(true);
   clearProfileCache();
-  scheduleState = { revision: 0, assignments: {} };
+  scheduleState = { records: historicRecords(), assignments: {} };
   authProbe.admin = true;
   authProbe.subject = undefined;
   authProbe.loading = false;
@@ -269,15 +275,15 @@ beforeEach(() => {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string, init?: RequestInit) => {
-      if (url.endsWith("/journeys/schedule")) {
+      if (url.includes("/journeys/schedule")) {
         if (init?.method === "PATCH") {
           const edit = JSON.parse(init.body as string);
           if (edit.journeyId)
             scheduleState.assignments[edit.date] = edit.journeyId;
           else delete scheduleState.assignments[edit.date];
-          scheduleState.revision++;
+          scheduleState.records[edit.date] = { day: edit.date, journeyId: edit.journeyId, source: edit.journeyId ? "assigned" : "provisional", revision: (scheduleState.records[edit.date]?.revision ?? 0) + 1 };
         }
-        return new Response(JSON.stringify(scheduleState));
+        return new Response(JSON.stringify({ ...scheduleState, today: localDateKey() }));
       }
       return new Response(readFileSync(`public${url.split("?")[0]}`, "utf8"));
     }),
@@ -1421,7 +1427,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus).toHaveLength(onHome);
     expect(probe.props!.motion).toBe(true);
   });
-  it("does not overwrite an existing custom daily attempt when its local library cannot be loaded", async () => {
+  it("keeps an unavailable custom attempt hidden while allowing today's Journey to save", async () => {
     const saved = {
       version: 1,
       activeDate: "2026-10-05",
@@ -1437,8 +1443,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     localStorage.setItem(DAILY_KEY, JSON.stringify(saved));
     await mount();
     await click("Play");
-    expect(JSON.parse(localStorage.getItem(DAILY_KEY)!)).toEqual(saved);
-    expect(host.textContent).toContain("won’t be saved after this visit");
+    const recovered = JSON.parse(localStorage.getItem(DAILY_KEY)!);
+    expect(recovered.archivedAttempts["2026-10-05/studio:published:unavailable"]).toEqual(saved.attempts["2026-10-05"]);
+    expect(recovered.attempts[localDateKey()].journeyId).not.toBe("studio:published:unavailable");
+    expect(host.textContent).not.toContain("won’t be saved after this visit");
   });
   it("loads a versioned physical snapshot once and keeps the globe through toggles", async () => {
     await mount();
@@ -2061,10 +2069,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       reset.value = "";
       reset.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    await click("Restore automatic rotation");
+    await click("Restore automatic selection");
     expect(scheduleState.assignments).toEqual({});
     expect(host.textContent).toContain(
-      "Restored automatic rotation for Tue, Oct 6.",
+      "Restored automatic selection for Tue, Oct 6.",
     );
   });
   it("blocks guessing today's edition when the shared schedule cannot load", async () => {
@@ -2072,7 +2080,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn((url: string, init?: RequestInit) =>
-        url.endsWith("/journeys/schedule")
+        url.includes("/journeys/schedule")
           ? Promise.resolve(new Response("unavailable", { status: 503 }))
           : assets(url, init),
       ),
@@ -2417,6 +2425,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       }),
     );
     scheduleState.assignments[date] = FIFTEENTH_JOURNEY.id;
+    scheduleState.records[date] = { day: date, journeyId: FIFTEENTH_JOURNEY.id, source: "assigned", revision: 2 };
     await mount();
     const daily = host.querySelector(".daily-menu")!;
     expect(daily.querySelector(".daily-menu-eyebrow")?.textContent).toBe(

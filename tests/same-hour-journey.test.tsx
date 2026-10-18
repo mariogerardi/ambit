@@ -26,7 +26,6 @@ import { GameShell } from "../src/game/GameShell";
 import { auditJourney } from "../src/game/journeyAudit";
 import { JOURNEYS } from "../src/game/journeys";
 import { JOURNEY_INDEX, loadJourney } from "../src/game/journeyRegistry";
-import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
 import {
   emptyDaily,
   openDaily,
@@ -634,7 +633,7 @@ describe("Same Hour, Different Worlds", () => {
     expect(JOURNEY_INDEX.find((j) => j.id === journey.id)?.path).toBe(
       "/journey/same-hour-different-worlds",
     );
-    expect(ACTIVE_JOURNEY_IDS).not.toContain(journey.id);
+    expect(JOURNEY_INDEX.find((entry) => entry.id === journey.id)?.availability).toBe("unlisted");
     expect(await loadJourney(journey.id)).toBe(journey);
     expect(auditJourney(journey, world).errors).toEqual([]);
   });

@@ -138,18 +138,13 @@ def deploy_backend(args, aws, api_key):
     aws("s3api", "put-bucket-encryption", "--bucket", bucket, "--server-side-encryption-configuration", json.dumps({"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}))
     archive = io.BytesIO()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
-        for name in ("handler.py", "confirmation.py", "saves.py", "dynamodb.py", "community.py", "journey_schedule.py", "staging_demo.py", "study-countries.json"):
+        for name in ("handler.py", "confirmation.py", "saves.py", "dynamodb.py", "community.py", "journey_schedule.py", "journey_lock.py", "staging_demo.py", "study-countries.json"):
             info = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             package.writestr(info, (ROOT / "backend" / name).read_bytes())
         info = zipfile.ZipInfo("journey-index.json", (2026, 1, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
         package.writestr(info, (ROOT / "src" / "game" / "journeyIndex.json").read_bytes())
-        # Bundle the frontend's existing rotation without regenerating catalogs.
-        rotation = re.findall(r'"([a-z0-9-]+)"', (ROOT / "src/game/journeyRotation.ts").read_text())
-        info = zipfile.ZipInfo("journey-rotation.json", (2026, 1, 1, 0, 0, 0))
-        info.compress_type = zipfile.ZIP_DEFLATED
-        package.writestr(info, json.dumps(rotation))
         info = zipfile.ZipInfo("profile-avatars.json", (2026, 1, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
         package.writestr(info, (ROOT / "shared" / "profile-avatars.json").read_bytes())

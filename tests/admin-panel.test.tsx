@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { AdminPanel } from "../src/app/AdminPanel";
 import type { useJourneySchedule } from "../src/services/journeySchedule";
-import { emptyDaily, openDaily } from "../src/app/dailyProgress";
+import { dailyJourney, emptyDaily, openDaily } from "../src/app/dailyProgress";
 
 const token = vi.hoisted(() =>
   vi.fn(async (): Promise<string | undefined> => "test-admin"),
@@ -21,18 +21,21 @@ beforeEach(() => {
   document.body.append(host);
   root = createRoot(host);
   schedule = {
-    schedule: { revision: 0, assignments: {} },
+    schedule: { today: "2026-10-11", records: {}, assignments: {} },
     ready: true,
     error: "",
     busy: false,
     refresh: vi.fn(async () => {}),
+    refreshAll: vi.fn(async () => {}),
     save: vi.fn(async (day: string, id: string | undefined) => {
       const assignments = { ...schedule.schedule!.assignments };
+      const records = { ...schedule.schedule!.records };
       if (id) assignments[day] = id;
       else delete assignments[day];
+      records[day] = { day, journeyId: id ?? null, source: id ? "assigned" : "provisional", revision: (records[day]?.revision ?? 0) + 1 };
       schedule = {
         ...schedule,
-        schedule: { revision: schedule.schedule!.revision + 1, assignments },
+        schedule: { today: "2026-10-11", records, assignments },
       };
       root.render(<AdminPanel date="2026-10-11" schedule={schedule} />);
       return true;
@@ -96,7 +99,29 @@ it("navigates full months and selects calendar dates, including leap day", async
     host.querySelectorAll('.journey-calendar-day time[datetime="2028-02-29"]'),
   ).toHaveLength(1);
 });
-it("previews a draft before publishing and can explicitly restore automatic rotation", async () => {
+it("keeps today editable after its automatic lock and confirms a past rewrite", async () => {
+  schedule.schedule!.records["2026-10-10"] = { day: "2026-10-10", journeyId: "removed-edition", source: "auto", revision: 1 };
+  schedule.schedule!.assignments["2026-10-10"] = "removed-edition";
+  schedule.schedule!.records["2026-10-11"] = { day: "2026-10-11", journeyId: "beyond-the-maple-leaf-v1", source: "auto", revision: 2 };
+  schedule.schedule!.assignments["2026-10-11"] = "beyond-the-maple-leaf-v1";
+  await render();
+  expect(host.querySelector<HTMLSelectElement>(".journey-date-editor select")?.disabled).toBe(false);
+  await click("Sat, Oct 10");
+  expect(host.textContent).toContain("Journey unavailable");
+  expect(host.querySelector<HTMLSelectElement>(".journey-date-editor select")?.disabled).toBe(false);
+  await select("across-the-divide-v1");
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  await click("Publish for Oct 10");
+  expect(schedule.save).not.toHaveBeenCalled();
+  confirm.mockReturnValue(true);
+  await click("Publish for Oct 10");
+  expect(schedule.save).toHaveBeenCalledWith("2026-10-10", "across-the-divide-v1", "test-admin", true);
+  await click("Today");
+  await select("across-the-divide-v1");
+  expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(false);
+  confirm.mockRestore();
+});
+it("previews a draft before publishing and can explicitly restore the automatic choice", async () => {
   await render();
   expect(
     host.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled,
@@ -110,7 +135,7 @@ it("previews a draft before publishing and can explicitly restore automatic rota
     host.querySelector(".scheduled-journey-preview a")?.getAttribute("href"),
   ).toBe("/journey/down-the-danube");
   expect(host.querySelector(".schedule-current")?.textContent).toContain(
-    "Around the Ring of Fire",
+    dailyJourney("2026-10-13").title,
   );
   expect(schedule.schedule?.assignments).toEqual({});
   await click("Publish for Oct 13");
@@ -123,14 +148,14 @@ it("previews a draft before publishing and can explicitly restore automatic rota
     "Published Down the Danube",
   );
   expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
-  await click("Use automatic rotation instead");
+  await click("Use automatic selection instead");
   expect(host.querySelector(".scheduled-journey-preview h4")?.textContent).toBe(
-    "Around the Ring of Fire",
+    dailyJourney("2026-10-13").title,
   );
   expect(schedule.schedule?.assignments).toEqual({
     "2026-10-13": "down-the-danube-v1",
   });
-  await click("Restore automatic rotation");
+  await click("Restore automatic selection");
   expect(schedule.save).toHaveBeenLastCalledWith(
     "2026-10-13",
     undefined,
@@ -145,7 +170,8 @@ it("keeps an unsaved selection when a refreshed schedule changes in another sess
   schedule = {
     ...schedule,
     schedule: {
-      revision: 1,
+      today: "2026-10-11",
+      records: { "2026-10-11": { day: "2026-10-11", journeyId: "along-the-andes-v1", source: "assigned", revision: 1 } },
       assignments: { "2026-10-11": "along-the-andes-v1" },
     },
   };

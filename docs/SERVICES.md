@@ -182,8 +182,8 @@ EventBridge Scheduler cron (including daylight-saving changes). Deploying the
 staging backend activates this schedule; adding the code alone does not create
 AWS resources. The Lambda only refreshes marked demo saves and their activity
 cache, never the real player's saves or friendships. Removed/blocked demos stay
-removed/blocked. A retry overwrites the same daily registers. It uses the bundled
-Journey rotation or published date assignment, preserving the target's started
+removed/blocked. A retry overwrites the same daily registers. It uses the stored
+date choice or seeded pool choice, preserving the target's started
 edition when one exists. Production has no demo function or schedule, and the
 Lambda's IAM write permissions are limited to demo partition keys. The manual
 script remains available for initial provisioning or an immediate refresh.
@@ -394,19 +394,52 @@ submitting test feedback into the production review queue unintentionally.
 
 ## Shared Journey schedule
 
-`GET /journeys/schedule` returns public date assignments and a revision from the
-community table. `PATCH /admin/journeys/schedule` requires a Cognito admin token
-and accepts `{date, journeyId, revision}`. A null Journey removes an assignment,
-restoring automatic rotation. Only bundled active editions can be published;
-local packs cannot be assigned to other players. Conditional writes reject
-concurrent edits with 409, requiring a refresh before retrying. The calendar
-supports 1,000 assigned dates.
+`GET /journeys/schedule` returns dated records from the community table.
+`GET /admin/journeys/schedule` provides the full record history for Admin's list.
+`PATCH /admin/journeys/schedule` requires a Cognito admin token and accepts
+`{date, journeyId, revision}`. Any bundled Journey can be assigned repeatedly;
+local packs cannot be assigned to other players. A null Journey restores the
+automatic choice. Admin may edit today and future dates, including today's
+already locked choice. A past date requires an explicit `rewriteHistory: true`
+request after the Admin confirmation. Each edit
+increments the day's revision and records its previous and new Journey; conditional
+writes reject concurrent edits with 409. Each date has its own record, with no
+fixed total-date cap.
+
+Pool picks use a versioned FNV-1a date hash and a shrinking 14-day no-repeat
+window. With a small pool, the window shrinks until at least two choices remain,
+so the pick does not become a fixed cycle. Future unassigned dates remain provisional. EventBridge Scheduler locks
+the day's choice at 00:05 `America/New_York`; the first public read locks it if
+the scheduled invocation failed. The lock Lambda emits a Datadog event tagged
+`project:ambit`, `service:ambit-api`, and `status:locked|failed`. Configure a
+daily Datadog event monitor for no `status:locked` event by 00:30 ET when the
+backend cutover is deployed.
 
 The player refreshes on startup, focus, reconnect, and every minute while visible.
 A first-load scheduling failure blocks starting a daily instead of guessing the
 edition. Once started, an attempt retains its edition even if Admin changes that
 date. Calendar days use midnight in `America/New_York`, including daylight-saving changes. Schedule publication
 does not reset progress or enable past-day play.
+
+### Schedule cutover
+
+Phase 2 must not publish its frontend before the backend has per-day history.
+The production CI deploy job is paused while repository variable
+`DAILY_SCHEDULE_CUTOVER_READY` is unset. Before enabling it, review the dry-run
+output from `python3 scripts/backfill-journey-schedule.py --environment production
+--output <review-file>`, then rerun with the same file and `--apply`. Apply
+the reviewed records while the old backend is still live; the script detects
+changes in the old published assignments and refuses to apply a stale preview.
+Avoid Admin schedule edits from the preview through the backend switch; edits
+after the last backfill write would otherwise remain only in the old map.
+Deploy the new backend after the backfill, confirm the stack update and the
+lock event, then set the variable to `true` and dispatch CI on `main` for the
+frontend. Repeat the backfill and backend steps for staging separately.
+Today's cutover record keeps the old visible choice but can still be edited in
+Admin. The old map cannot reveal an assignment that was changed earlier in the
+day; review the preview against known activity before applying it. Configure
+the Datadog daily event monitor for a missing production `status:locked` event
+at 00:30 ET when the backend is deployed.
 
 The backend deployment archive includes `journey-index.json`; deploy the backend
 when the bundled Journey catalog changes.

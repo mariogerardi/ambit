@@ -28,10 +28,10 @@ class SeedTests(unittest.TestCase):
         self.assertEqual(statuses, ["finished", "finished", "finished", "playing", "home"])
 
     def test_preserves_the_players_started_edition_and_respects_resets(self):
-        catalog = {"one": {"id": "one"}, "two": {"id": "two"}}
+        catalog = {"one": {"id": "one", "availability": "pool"}, "two": {"id": "two", "availability": "pool"}}
         attempt = {"date": "2026-10-14", "journeyId": "one", "startedAt": 123, "scheduleVersion": 1, "game": {"answers": []}}
         row = {"namespace": {"S": "daily"}, "field": {"S": "run.2026-10-14/one/id"}, "valueJson": {"S": json.dumps(attempt)}}
-        schedule = {"assignments": {"2026-10-14": "two"}}
+        schedule = {"records": {"2026-10-14": {"journeyId": "two", "source": "assigned"}}}
         self.assertEqual(seed.choose_journey("2026-10-14", catalog, schedule, [row])[0]["id"], "one")
         reset = {"namespace": {"S": "daily"}, "field": {"S": "reset.2026-10-14/one"}, "valueJson": {"S": "123"}}
         self.assertEqual(seed.choose_journey("2026-10-14", catalog, schedule, [row, reset])[0]["id"], "two")
@@ -78,9 +78,9 @@ class SeedTests(unittest.TestCase):
                 return {"Items": []}
             writes.append((operation, parameters))
             return {}
-        journey = {"id": "one", "title": "Demo Journey", "rounds": [{"id": f"q{i}"} for i in range(5)]}
+        journey = {"id": "one", "availability": "pool", "title": "Demo Journey", "rounds": [{"id": f"q{i}"} for i in range(5)]}
         for day in ("2026-10-14", "2026-10-15", "2026-10-15"):
-            seed.seed(aws, day=day, catalog={"one": journey}, rotation=["one"])
+            seed.seed(aws, day=day, catalog={"one": journey})
         runs = [value["Item"] for operation, value in writes if operation == "put-item"]
         self.assertEqual(len(runs), 9)  # Ada, Maya, Owen; Nico removed, Zara unstarted.
         self.assertEqual(len({row["sk"]["S"] for row in runs}), 6)  # Retry overwrites same registers.

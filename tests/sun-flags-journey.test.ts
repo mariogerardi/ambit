@@ -7,7 +7,6 @@ import { describe, expect, it } from "vitest";
 import { SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsJourney";
 import { JOURNEYS } from "../src/game/journeys";
 import { JOURNEY_INDEX, loadJourney } from "../src/game/journeyRegistry";
-import { ACTIVE_JOURNEY_IDS } from "../src/game/journeyRotation";
 import { CAPITALS } from "../src/game/quizData";
 import {
   dailyJourney,
@@ -195,12 +194,12 @@ describe("Chasing the sun", () => {
       revealOnAnswer: true,
     });
   });
-  it("is publishable in Admin without changing existing dates in the automatic rotation", () => {
+  it("is publishable in Admin without entering the automatic pool", () => {
     expect(JOURNEYS).toContain(SUN_FLAGS_JOURNEY);
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)?.path,
     ).toBe("/journey/chasing-the-sun");
-    expect(ACTIVE_JOURNEY_IDS).not.toContain(SUN_FLAGS_JOURNEY.id);
+    expect(JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)?.availability).toBe("unlisted");
   });
   it("retires the archived Sun edition while resolving old published assignments", async () => {
     const day = "2026-10-11";

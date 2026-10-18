@@ -1,5 +1,4 @@
-/** Curated daily cycle. Archived editions remain loadable for saved results. */
-export const ACTIVE_JOURNEY_IDS = [
+[
   "beyond-the-maple-leaf-v1",
   "mediterranean-v1",
   "shared-neighbors-v1",
@@ -10,5 +9,5 @@ export const ACTIVE_JOURNEY_IDS = [
   "latitude-surprises-v1",
   "ring-of-fire-v1",
   "exceptions-to-the-rule-v1",
-  "try-not-to-click-russia-v1",
-];
+  "try-not-to-click-russia-v1"
+]
