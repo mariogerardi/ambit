@@ -36,7 +36,7 @@ jobs:
         run: python3 scripts/run-python-tests.py
       - name: Run unit, asset, and DOM tests
         if: always()
-        run: npm test -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest.xml
+        run: npm run test:all -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest.xml
       - name: Upload test results to Datadog
         if: always()
         env:

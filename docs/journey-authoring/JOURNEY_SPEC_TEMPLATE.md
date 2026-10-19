@@ -40,7 +40,8 @@ Journey being created or edited (title, ID, source file):
 - **Pin questions:** point-distance versus territory-inside. Distance pins need an
   acceptance radius and three inclusive accuracy bands ending at that radius;
   territory-inside pins use canonical containment without invented distance tiers.
-  Choose useful inner radii, show acceptance before submission, and keep supplied point
+  Choose useful inner radii, describe all three band distances before submission,
+  and keep supplied point
   references outside the acceptance zone. Current accepted pins earn one correct
   answer; proposed tier points or Journey weights require separate design.
 - **Play scene:** camera intent (coordinates only if reviewed), contextual regions,
@@ -58,6 +59,9 @@ Journey being created or edited (title, ID, source file):
 
 List every meaningful object or equally treated group. Geometry, role and input
 are independent; a displayed candidate does not automatically accept a globe tap.
+Gold land denotes globe answer choices. Noninteractive name/button area pools use
+blue clue styling, `map.candidateRole: "clue"`, deferred selection feedback and no
+hover emphasis. Established references remain a separate blue context role.
 Use the shared roles, point styles, area symbols and palettes from the crafting
 guide rather than prescribing per-question colors or marker sizes.
 

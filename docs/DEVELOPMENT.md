@@ -11,11 +11,26 @@ scripts.
 ```sh
 npm ci
 npm run dev
-npm test
+npm test -- tests/themes.test.ts
 python3 scripts/run-python-tests.py
 npm run build
 npm run preview
 ```
+
+For local frontend changes, name existing test files before any options:
+`npm test -- tests/themes.test.ts`, or add `-t "test name"` to narrow further.
+Bare `npm test` and options-only invocations refuse to run the entire suite.
+Use `npm run test:all` for an intentional full frontend run. CI uses that command;
+`npm run check:catalog` retains the full frontend/backend suites and TypeScript
+check required before pushing Journey catalog changes. Shared contract changes
+may also justify a broad run. Stop after relevant checks pass.
+
+Frontend and backend runners suppress successful test logs while preserving
+failure diagnostics. CI retains JUnit files separately. The catalog-wide Journey
+audit belongs to `tests/catalog-invariants.test.ts`; help tests retain their
+help-specific assertions and targeted broken-contract examples without repeating
+the full audit. Changed/related-file detection can inform test selection, but
+cannot replace deliberate coverage of dynamically loaded content and assets.
 
 Run commands from the repository root. `dev` and `preview` bind to `127.0.0.1`
 with strict ports; use the URL they print. `build` runs strict TypeScript checks
@@ -91,7 +106,7 @@ npm run prepare:cities
 npm run prepare:explore
 node scripts/prepare-island-clues.mjs
 npm run prepare:journeys
-npm test
+npm run test:all
 npm run build
 ```
 

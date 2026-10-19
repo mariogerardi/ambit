@@ -107,7 +107,7 @@ const base = definePresentation({
 export const SAME_HOUR_JOURNEY: Journey = {
   id: "same-hour-different-worlds",
   addedAt: "2026-10-12",
-  availability: "unlisted",
+  availability: "pool",
   saveRevision: 5,
   legacyRoundLabels: {
     "same-hour-q4": "Sri Lanka / Nepal / Bhutan",
@@ -141,7 +141,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Accra. Reykjavík and Accra both keep UTC+0 through the year. Praia is an hour behind; Algiers and Oran are an hour ahead. Nearby longitudes can still keep different clocks.",
+        "Reykjavík and Accra both keep UTC+0 throughout the year. Praia is an hour behind: nearby longitudes do not guarantee the same clock.",
       source: zone("Reykjavík", "iceland/reykjavik"),
       sources: [
         zone("Accra", "ghana/accra"),
@@ -210,7 +210,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Poland. Madrid and Warsaw change their clocks together: CET (UTC+1) in winter and CEST (UTC+2) in summer. Lisbon is an hour behind; geographical proximity is no guarantee.",
+        "Madrid and Warsaw change their clocks together: CET (UTC+1) in winter and CEST (UTC+2) in summer. Lisbon is closer to Madrid, but keeps a clock an hour behind.",
       source: zone("Madrid", "spain/madrid"),
       sources: [
         zone("Warsaw", "poland/warsaw"),
@@ -267,7 +267,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
         },
       },
       explanation:
-        "9:00 a.m. Beijing and Kashgar share China's official UTC+8 clock, despite their distance. In Xinjiang, some people also follow an unofficial local clock two hours behind Beijing Time.",
+        "Beijing and Kashgar share China’s official UTC+8 clock, despite their distance. In Xinjiang, some people also follow an unofficial local clock two hours behind Beijing Time. One landscape can be lived by more than one clock.",
       mapCaption: "Beijing and Kashgar · official civil time",
       feedbackMapCaption:
         "Official readings in this example: both cities are at 9:00 a.m. (UTC+8).",
@@ -406,7 +406,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Brisbane. Russia’s Vladivostok and Queensland’s largest city share UTC+10 all year, despite the distance between them. Darwin is just 30 minutes behind; Perth is two hours behind. One country can keep several clocks.",
+        "Vladivostok and Brisbane share UTC+10 all year, despite the distance between them. Darwin is half an hour behind Brisbane: one country can keep several clocks, while distant cities in different countries agree.",
       source: zone("Vladivostok", "russia/vladivostok"),
       sources: [
         zone("Brisbane", "australia/brisbane"),

@@ -207,7 +207,7 @@ describe("Journey answer roles across controls", () => {
     );
     const play = view(start);
     expect(
-      Object.values(play.states).filter((state) => state === "selectable"),
+      Object.values(play.states).filter((state) => state === "clue"),
     ).toHaveLength(6);
     expect(play.regions.some((region) => region.id === "wurl:CAN-NB")).toBe(
       true,
@@ -215,7 +215,10 @@ describe("Journey answer roles across controls", () => {
     expect(play.states["wurl:CAN-AB"]).toBe("disabled");
     expect(canSelect(question, context, "wurl:CAN-QB")).toBe(false);
     const selected = reduce(start, { type: "select", id: "province:qc" });
-    expect(view(selected).states["wurl:CAN-QB"]).toBe("selected");
+    expect(view(selected).states["wurl:CAN-QB"]).toBe("clue");
+    expect(
+      view(selected).places.some((p) => p.sourceId === "journey-response"),
+    ).toBe(false);
     expect(selected.selectedIds).toEqual(["province:qc"]);
     const reveal = reduce(selected, { type: "submit" });
     expect(view(reveal).states["wurl:CAN-QB"]).toBe("incorrect");

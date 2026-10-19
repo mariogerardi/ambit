@@ -17,6 +17,7 @@ import {
   PLAY_FEEDBACK,
   playRegionStyle,
 } from "../src/globe/themes";
+import { playColors } from "../src/theme/playColors";
 import { cityReference } from "../src/game/authoredPlaces";
 import type { PlaceFeature } from "../src/geography/types";
 import {
@@ -407,7 +408,7 @@ describe("cached readable place labels", () => {
     "visited",
     "hinted",
   ] as const)(
-    "shares the %s accent with region fills or reference outlines",
+    "uses the shared %s point accent independently of reference area outlines",
     (state) => {
       canvasFactory();
       const labels = new PlaceLabels();
@@ -426,7 +427,7 @@ describe("cached readable place labels", () => {
       )!;
       expect(marker.userData.markerStyle).toContain(
         state === "hinted"
-          ? playRegionStyle("wurl:TEST", state).stroke
+          ? playColors().hinted
           : playRegionStyle("wurl:TEST", state).fill,
       );
       labels.dispose();
@@ -1051,4 +1052,56 @@ describe("city quotas and accented label textures", () => {
     expect(label.material.map?.colorSpace).toBe(SRGBColorSpace);
     labels.dispose();
   });
+});
+
+it("uses contrasting river ink and casing, including after a palette change with unchanged geography", () => {
+  const physical = new PhysicalFeatures();
+  const layer = {
+    id: "physical",
+    kind: "physical-features" as const,
+    features: [
+      {
+        id: "river",
+        kind: "river" as const,
+        name: "Danube",
+        lat: 48,
+        lng: 9,
+        rank: 2,
+        paths: [
+          [
+            [8, 48],
+            [9, 48],
+          ],
+        ],
+        color: "#72b9d2",
+      },
+    ],
+  };
+  const visibleLines = () =>
+    physical.group.children.filter(
+      (o) => o.type === "LineSegments2" && o.visible,
+    ) as unknown as {
+      material: { color: { getHexString(): string }; linewidth: number };
+      renderOrder: number;
+    }[];
+  for (const palette of ["atlas", "paper"] as const) {
+    physical.update({ ...layer, palette }, 100);
+    const lines = visibleLines();
+    expect(lines).toHaveLength(2);
+    const ink = lines.find(
+      (l) =>
+        `#${l.material.color.getHexString()}` === playColors(palette).river,
+    )!;
+    const casing = lines.find(
+      (l) =>
+        `#${l.material.color.getHexString()}` ===
+        playColors(palette)["river-casing"],
+    )!;
+    expect(ink).toBeDefined();
+    expect(ink.material.linewidth).toBeCloseTo(1.62);
+    expect(casing).toBeDefined();
+    expect(casing.material.linewidth - ink.material.linewidth).toBeCloseTo(0.5);
+    expect(ink.renderOrder).toBeGreaterThan(casing.renderOrder);
+  }
+  physical.dispose();
 });

@@ -60,7 +60,7 @@ describe("Across the Divide", () => {
       const start = play(index);
       const world = journeyWorld(regions, journey, start, context);
       expect(world.places).toEqual([]);
-      expect(world.states["wurl:USA"]).toBe("surface");
+      expect(world.states["wurl:USA"]).toBe("default");
       expect(world.focus).toEqual({ lat: 0, lng: 0, altitude: 2.05 });
       expect(world.overlays).toEqual([]);
       const html = shell(start);
@@ -106,8 +106,8 @@ describe("Across the Divide", () => {
           assistedWorld.regions.some((region) => region.id === "wurl:USA-CA"),
         ).toBe(true);
         expect(assistedWorld.states["wurl:USA-CA"]).toBe("hinted");
-        expect(assistedWorld.states["wurl:USA"]).toBe("surface");
-        expect(assistedWorld.states["wurl:CAN"]).toBe("surface");
+        expect(assistedWorld.states["wurl:USA"]).toBe("default");
+        expect(assistedWorld.states["wurl:CAN"]).toBe("default");
       }
     }
   });

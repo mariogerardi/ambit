@@ -776,14 +776,23 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         id: "physical:features",
         kind: "physical-features" as const,
         features: NO_FEATURES,
+        palette: props.palette,
       }),
       [],
     );
     physicalLayer.features = props.physicalFeatures ?? NO_FEATURES;
+    physicalLayer.palette = props.palette;
     useEffect(() => {
       physical.update(physicalLayer, globe.current?.getGlobeRadius() ?? 100);
       refreshLabels();
-    }, [props.physicalFeatures, ready, physical, physicalLayer, refreshLabels]);
+    }, [
+      props.physicalFeatures,
+      props.palette,
+      ready,
+      physical,
+      physicalLayer,
+      refreshLabels,
+    ]);
     const overlayLayer = useMemo(
       () => ({
         id: "map:overlays",

@@ -141,7 +141,8 @@ export const ELEVENTH_JOURNEY: Journey = {
           text: "Sydney and Melbourne are now marked. Look inland between them; Canberra itself is still unmarked. Land within 150 km of its center.",
         },
       },
-      instruction: "Land within 150 km of the city center.",
+      instruction:
+        "Land within 150 km of the city center. Aim for the 50 km bullseye; the 100 km and 150 km rings also count as correct.",
       mode: "pin",
       rule: {
         type: "pin-distance",
@@ -295,7 +296,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       guidance: {
         hint: "Look near the middle of Brazil, away from the Atlantic coast.",
         assist: {
-          text: "The candidate field is reduced to three markers. Your answer stays editable until you submit.",
+          text: "Three markers remain. Compare their distance from the Atlantic coast: the capital was built to draw government into the interior.",
           candidateIds: ["place:3469058", "place:3448439", "place:3470127"],
         },
       },
@@ -388,7 +389,7 @@ export const ELEVENTH_JOURNEY: Journey = {
         },
       },
       explanation:
-        "National administration, Parliament and the Supreme Court of Appeal are based in three different cities. Johannesburg does house the Constitutional Court, but it is outside the traditional three-capital arrangement specified here.",
+        "National administration, Parliament, and the Supreme Court of Appeal have different homes. Johannesburg houses the Constitutional Court, adding another layer to a country whose government cannot be located with one capital marker.",
       source: source(
         "South African Government · three national capitals",
         "https://www.gov.za/about-sa/south-africas-provinces",

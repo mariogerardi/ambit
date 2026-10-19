@@ -20,21 +20,24 @@ export function playRegionStyle(
   hovered = false,
   palette: ThemeId = "atlas",
 ) {
-  const { land, border, highlight } = THEMES[palette].globe;
+  const { land, border } = THEMES[palette].globe;
   let hash = 0;
   for (const character of id)
     hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   const colors = playColors(palette);
+  const candidateHover = hovered && ["selectable", "surface"].includes(state);
   return {
-    fill:
-      state === "hinted"
+    fill: candidateHover
+      ? colors["candidate-hover"]
+      : state === "hinted"
         ? colors["context-land"]
         : (playStateColor(state, palette) ?? land[hash % land.length]),
-    stroke:
-      hovered && state !== "disabled"
-        ? highlight
-        : state === "hinted"
-          ? colors.hinted
+    stroke: candidateHover
+      ? colors["candidate-hover-outline"]
+      : state === "hinted"
+        ? colors["context-outline"]
+        : state === "clue"
+          ? colors["clue-outline"]
           : ["selected", "correct", "answer", "incorrect", "visited"].includes(
                 state,
               )

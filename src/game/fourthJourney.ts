@@ -106,7 +106,7 @@ export const FOURTH_JOURNEY: Journey = {
     "mediterranean-shores": "22 Mediterranean coastal countries",
   },
   description:
-    "Follow a western sea passage, an island, a coastal capital and the Adriatic–Ionian shores to a hidden gateway in Egypt.",
+    "Enter from the Atlantic, cross between islands and coastal cities, then follow the Mediterranean toward an eastern gateway. One sea connects shores with very different histories.",
   mapAttribution: {
     label: "Canal geometry · Natural Earth",
     url: "https://www.naturalearthdata.com/about/terms-of-use/",
@@ -258,7 +258,7 @@ export const FOURTH_JOURNEY: Journey = {
       progressLabel: "Libya",
       resolvedLabel: "Tripoli",
       title: "A capital on the southern shore.",
-      leadIn: "Cross the Mediterranean to Libya.",
+      leadIn: "Cross from Sicily to the North African shore.",
       prompt: "What is its capital?",
       mode: "text",
       inputLabel: "Capital city",
@@ -273,7 +273,7 @@ export const FOURTH_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Tripoli is Libya’s capital, on the country’s northwestern Mediterranean coast.",
+        "Libya’s capital stands on the northwestern coast, across the water from southern Europe. The sea separates these shores, but also brings them into the same neighborhood.",
       sources: [
         source(
           "GeoNames · reviewed Libyan city coordinates",
@@ -301,7 +301,8 @@ export const FOURTH_JOURNEY: Journey = {
       progressLabel: "Adriatic–Ionian",
       resolvedLabel: "Four Adriatic republics",
       title: "Four republics meet the sea.",
-      leadIn: "Follow the Adriatic and Ionian shores.",
+      leadIn:
+        "Along the Adriatic, a shared coastline meets the borders of a former federation.",
       prompt: "Which four of these countries were republics of Yugoslavia?",
       instruction: "Select four countries on the globe.",
       mode: "map-multiple",
@@ -322,7 +323,7 @@ export const FOURTH_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Slovenia, Croatia, Bosnia and Herzegovina, and Montenegro were republics of Yugoslavia. Albania and Greece were neighboring states outside the federation. Bosnia and Herzegovina reaches the Adriatic through its small coastal opening at Neum.",
+        "These four former Yugoslav republics all reach the Adriatic. Bosnia and Herzegovina does so through a small opening at Neum. Albania and Greece share the wider coastal region, but were outside the federation: a sea’s neighborhood and a political union are different things.",
       source: source(
         "UN ICTY · Yugoslavia’s six republics",
         "https://www.icty.org/en/about/what-former-yugoslavia",

@@ -1,3 +1,7 @@
+import type { PhysicalFeature } from "../geography/types";
+import { referenceCity, referenceLabel } from "./helpReferences";
+import andesContext from "./data/andes-context.v1.json";
+import andesRelief from "./data/andes-relief.v1.json";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import type { Journey } from "./questionContracts";
 import { CAPITALS, FEATURES, capitalSource } from "./quizData";
@@ -28,16 +32,26 @@ export const TENTH_JOURNEY: Journey = {
   id: "ring-of-fire-v1",
   addedAt: "2026-10-10",
   availability: "pool",
-  title: "Around the Ring of Fire",
+  title: "Pacific Landfalls",
   description:
-    "Trace the Pacific’s island arcs, cross to the Andes, and finish on its southern rim. One ocean connects every stop.",
+    "Island chains, narrow straits, a mountain-lined continent: follow the changing shores of the Pacific to a final harbor in New Zealand.",
   rounds: [
     defineQuestion({
       count: 1,
 
       ...base,
       id: "pacific-rising-sun",
-      leadIn: "Begin on the western Pacific rim.",
+      resolvedLabel: "Japan",
+      guidance: {
+        hint: "Look for an island country east of the Korean Peninsula.",
+        assist: {
+          text: "Japan, South Korea, and China remain. Compare their shapes without country labels.",
+          candidateIds: ["wurl:JPN", "wurl:KOR", "wurl:CHN"],
+          focus: { lat: 36, lng: 132, altitude: 1 },
+        },
+      },
+      leadIn:
+        "Begin off the eastern coast of Asia, among the Pacific’s island countries.",
       title: "Follow the sun.",
       label: "Flag",
       topic: "flags",
@@ -53,7 +67,7 @@ export const TENTH_JOURNEY: Journey = {
         feedbackAlt: "National flag of Japan",
       },
       explanation:
-        "The red disc represents the sun. Our trip around the Pacific begins here.",
+        "The red disc represents the sun. Japan’s islands form our first Pacific shore; next, look more closely at the land and water within the chain.",
       scenes: {
         play: {
           map: {
@@ -72,7 +86,16 @@ export const TENTH_JOURNEY: Journey = {
 
       ...base,
       id: "pacific-hokkaido",
-      leadIn: "Head to the northern islands.",
+      resolvedLabel: "Hokkaido",
+      guidance: {
+        hint: "Sapporo is the principal city on this island.",
+        assist: {
+          text: "Sapporo is now marked. Hokkaido, Honshu, and Sakhalin remain as named choices.",
+          candidateIds: ["island:hokkaido", "island:honshu", "island:sakhalin"],
+          places: [referenceCity("Sapporo")],
+        },
+      },
+      leadIn: "Follow Japan’s island chain north.",
       title: "An island apart.",
       label: "Island",
       topic: "islands",
@@ -98,7 +121,7 @@ export const TENTH_JOURNEY: Journey = {
         },
       ],
       explanation:
-        "The Tsugaru Strait separates this northern island from Honshu.",
+        "The Tsugaru Strait separates Hokkaido from Honshu. Even within one country, a narrow stretch of sea can divide two large pieces of land.",
       source: {
         name: "Japan National Tourism Organization · Hokkaido",
         url: "https://www.japan.travel/en/destinations/hokkaido/hokkaido/",
@@ -118,20 +141,37 @@ export const TENTH_JOURNEY: Journey = {
 
       ...base,
       id: "pacific-indonesia-pin",
-      leadIn: "Follow the islands south.",
+      resolvedLabel: "Indonesia",
+      visualExceptions: {
+        "open-search-background":
+          "The island country’s footprint is withheld within an unrestricted pin search field.",
+        "hidden-boundaries":
+          "Identify the country’s islands from their shapes without political borders.",
+      },
+      guidance: {
+        hint: "Look along the island chain between mainland Southeast Asia and Australia.",
+        assist: {
+          text: "Singapore and Darwin are now marked outside the target country. Search along the archipelago between them.",
+          places: [referenceCity("Singapore"), referenceCity("Darwin")],
+          focus: { lat: -5, lng: 120, altitude: 1.15 },
+        },
+      },
+      leadIn: "Farther southwest, islands stretch between two oceans.",
       title: "Pick an island.",
-      label: "Drop a pin",
+      label: "Archipelago",
       topic: "archipelagos",
       prompt: "Place a pin anywhere on Indonesia’s land.",
-      instruction: "",
+      instruction:
+        "Country borders are hidden. Use the island shapes to estimate your pin.",
       mode: "pin",
       rule: { type: "pin-inside", ids: ["wurl:IDN"] },
       explanation:
-        "The archipelago bridges the Indian and Pacific oceans. A pin on any of its land counts.",
+        "Indonesia spreads across an archipelago between the Indian and Pacific oceans. Its many islands form a country whose connections run across water.",
       scenes: {
         play: {
           focus: { lat: -5, lng: 118, altitude: 1.15 },
           map: {
+            background: "open-search",
             borders: false,
             hoverFeedback: false,
             muteOthers: true,
@@ -145,6 +185,25 @@ export const TENTH_JOURNEY: Journey = {
 
       ...base,
       id: "pacific-andes-coast",
+      resolvedLabel: "Pacific-facing Andes",
+      guidance: {
+        hint: "Follow the mountain chain along South America’s western side. Which countries also reach the ocean to its west?",
+        assist: {
+          text: "The Andes are now shown. Of the six remaining countries, one is landlocked and another faces the Atlantic. Find the four with Pacific shores.",
+          candidateIds: [
+            "wurl:COL",
+            "wurl:ECU",
+            "wurl:PER",
+            "wurl:CHL",
+            "wurl:BOL",
+            "wurl:ARG",
+          ],
+          physicalFeatures: [
+            { ...(andesContext.andes as PhysicalFeature), relief: andesRelief },
+          ],
+          focus: { lat: -20, lng: -70, altitude: 1.5 },
+        },
+      },
       leadIn: "Cross to the Pacific’s eastern shore.",
       title: "Mountains meet ocean.",
       label: "Mountains",
@@ -167,7 +226,7 @@ export const TENTH_JOURNEY: Journey = {
         committedNames: true,
       },
       explanation:
-        "Here the Andes meet the Pacific. The other Andean countries either lack a Pacific coast or are landlocked.",
+        "Colombia, Ecuador, Peru, and Chile share both the mountain chain and a Pacific shore. Argentina’s coast faces the Atlantic, while Bolivia is landlocked: the same mountains do not give every country the same ocean.",
       source: FEATURES.andes.source,
       sources: [FEATURES.andes.source, mapSource],
       scenes: {
@@ -190,7 +249,20 @@ export const TENTH_JOURNEY: Journey = {
 
       ...base,
       id: "pacific-wellington",
-      leadIn: "Finish on the southern rim.",
+      resolvedLabel: "Wellington",
+      guidance: {
+        hint: "It sits at the southern end of the North Island, beside the strait between the main islands.",
+        assist: {
+          text: "Auckland, Christchurch, and Cook Strait are now marked. The capital’s name begins with W.",
+          places: [
+            referenceCity("Auckland"),
+            referenceCity("Christchurch"),
+            referenceLabel("Cook Strait", -41.2, 174.4),
+          ],
+          focus: { lat: -40, lng: 174, altitude: 0.7 },
+        },
+      },
+      leadIn: "Cross back into the South Pacific for a final harbor.",
       title: "One last landing.",
       label: "Capital",
       topic: "capitals",
@@ -199,7 +271,7 @@ export const TENTH_JOURNEY: Journey = {
       inputLabel: "Capital city",
       rule: { type: "capital-name", countryId: "wurl:NZL" },
       explanation:
-        "At the southern tip of the North Island, the capital is our last landing on the Pacific rim.",
+        "Wellington sits beside a harbor at the southern end of the North Island, near Cook Strait. Our last landfall brings us back to the water between islands.",
       source: capitalSource,
       scenes: {
         play: {
@@ -210,4 +282,20 @@ export const TENTH_JOURNEY: Journey = {
       },
     }),
   ],
+  completion: {
+    focus: { lat: 0, lng: -160, altitude: 1.9 },
+    views: [
+      { lat: 36, lng: 139, altitude: 1.05 },
+      { lat: 44, lng: 143, altitude: 0.5 },
+      { lat: -3, lng: 118, altitude: 1.15 },
+      { lat: -17, lng: -68, altitude: 1.45 },
+      { lat: -41.2, lng: 174.8, altitude: 0.55 },
+    ],
+    physicalFeatures: [
+      { ...(andesContext.andes as PhysicalFeature), relief: andesRelief },
+    ],
+    places: [],
+    caption:
+      "From Japan’s straits through Indonesia’s archipelago, across to the Pacific-facing Andes and back to Wellington’s harbor: one ocean meets many forms of land. The water between these places is part of what connects them.",
+  },
 };

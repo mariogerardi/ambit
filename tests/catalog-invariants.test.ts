@@ -52,13 +52,11 @@ describe("catalog identity", () => {
     }
   });
 
-  it("audits every Journey in the automatic pool", () => {
+  it("audits every current Journey, including unlisted editions", () => {
     const world = JSON.parse(
       readFileSync("public/geography/world.v1.json", "utf8"),
     ) as RegionFeature[];
-    for (const journey of JOURNEYS.filter(
-      (item) => item.availability === "pool",
-    ))
+    for (const journey of JOURNEYS)
       expect(auditJourney(journey, world).errors, journey.id).toEqual([]);
   });
 });

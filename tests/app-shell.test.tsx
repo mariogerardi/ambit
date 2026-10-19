@@ -154,12 +154,23 @@ vi.mock("../src/services/accounts", () => ({
   }),
 }));
 vi.mock("../src/app/FeedbackReview", () => ({ FeedbackReview: () => null }));
-type MockDay = { day: string; journeyId: string | null; source: "assigned" | "auto" | "provisional"; revision: number };
-const historicRecords = () => Object.fromEntries(historicRotation.map((journeyId, index) => {
-  const day = `2026-10-${String(index + 5).padStart(2, "0")}`;
-  return [day, { day, journeyId, source: "auto" as const, revision: 1 }];
-})) as Record<string, MockDay>;
-let scheduleState = { records: historicRecords(), assignments: {} as Record<string, string> };
+type MockDay = {
+  day: string;
+  journeyId: string | null;
+  source: "assigned" | "auto" | "provisional";
+  revision: number;
+};
+const historicRecords = () =>
+  Object.fromEntries(
+    historicRotation.map((journeyId, index) => {
+      const day = `2026-10-${String(index + 5).padStart(2, "0")}`;
+      return [day, { day, journeyId, source: "auto" as const, revision: 1 }];
+    }),
+  ) as Record<string, MockDay>;
+let scheduleState = {
+  records: historicRecords(),
+  assignments: {} as Record<string, string>,
+};
 let root: Root, host: HTMLDivElement;
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -281,9 +292,16 @@ beforeEach(() => {
           if (edit.journeyId)
             scheduleState.assignments[edit.date] = edit.journeyId;
           else delete scheduleState.assignments[edit.date];
-          scheduleState.records[edit.date] = { day: edit.date, journeyId: edit.journeyId, source: edit.journeyId ? "assigned" : "provisional", revision: (scheduleState.records[edit.date]?.revision ?? 0) + 1 };
+          scheduleState.records[edit.date] = {
+            day: edit.date,
+            journeyId: edit.journeyId,
+            source: edit.journeyId ? "assigned" : "provisional",
+            revision: (scheduleState.records[edit.date]?.revision ?? 0) + 1,
+          };
         }
-        return new Response(JSON.stringify({ ...scheduleState, today: localDateKey() }));
+        return new Response(
+          JSON.stringify({ ...scheduleState, today: localDateKey() }),
+        );
       }
       return new Response(readFileSync(`public${url.split("?")[0]}`, "utf8"));
     }),
@@ -869,13 +887,11 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       expect(host.textContent).not.toContain(
         "The same Journey, with a fresh start.",
       );
-      const countries = ["FIN", "PRK", "MNG", "GEO", "EST"];
       if (reduced) {
         expect(probe.tours).toHaveLength(0);
-        expect(probe.focus.at(-1)).toMatchObject({
-          lat: member("wurl:FIN").focus.lat,
-          lng: member("wurl:FIN").focus.lng,
-        });
+        expect(probe.focus.at(-1)).toMatchObject(
+          FIFTEENTH_JOURNEY.completion!.focus,
+        );
         await click("Study");
         expect(location.pathname).toBe("/study");
         expect(
@@ -883,12 +899,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
         ).not.toBeNull();
       } else {
         expect(probe.tours).toHaveLength(1);
-        expect(probe.tours[0].map(({ lat, lng }) => ({ lat, lng }))).toEqual(
-          countries.map((code) => ({
-            lat: member(`wurl:${code}`).focus.lat,
-            lng: member(`wurl:${code}`).focus.lng,
-          })),
-        );
+        expect(probe.tours[0]).toEqual(FIFTEENTH_JOURNEY.completion!.views);
         const before = probe.tourCancellations;
         await click("Home");
         expect(probe.tourCancellations).toBeGreaterThan(before);
@@ -1444,8 +1455,12 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Play");
     const recovered = JSON.parse(localStorage.getItem(DAILY_KEY)!);
-    expect(recovered.archivedAttempts["2026-10-05/studio:published:unavailable"]).toEqual(saved.attempts["2026-10-05"]);
-    expect(recovered.attempts[localDateKey()].journeyId).not.toBe("studio:published:unavailable");
+    expect(
+      recovered.archivedAttempts["2026-10-05/studio:published:unavailable"],
+    ).toEqual(saved.attempts["2026-10-05"]);
+    expect(recovered.attempts[localDateKey()].journeyId).not.toBe(
+      "studio:published:unavailable",
+    );
     expect(host.textContent).not.toContain("won’t be saved after this visit");
   });
   it("loads a versioned physical snapshot once and keeps the globe through toggles", async () => {
@@ -1864,9 +1879,16 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     )!;
     const buttons = actions.querySelectorAll<HTMLButtonElement>("button");
     expect(buttons[0].textContent).toContain("Need a hint?");
-    expect(buttons[0].disabled).toBe(true);
+    expect(buttons[0].disabled).toBe(false);
     expect(buttons[0].type).toBe("button");
     expect(buttons[1].textContent).toContain("Submit answer");
+    await click("Need a hint?");
+    expect(host.textContent).toContain("toward Lake Constance");
+    await click("Need an assist?");
+    expect(
+      probe.props!.places?.find((p) => p.name === "Lake Constance")
+        ?.markerHidden,
+    ).toBe(true);
     await click("Rhine");
     await click("Submit answer");
     expect(
@@ -1914,6 +1936,18 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.physicalFeatures?.some((f) => f.paths?.length)).toBe(
       true,
     );
+    expect(probe.props!.places.some((p) => p.name === "Iron Gates")).toBe(true);
+    await click("Croatia");
+    const croatiaButton = [
+      ...host.querySelectorAll(".mode-incoming button"),
+    ].find((b) => b.textContent?.includes("Croatia"))!;
+    expect(croatiaButton.getAttribute("aria-pressed")).toBe("true");
+    expect(probe.props!.states["wurl:HRV"]).toBe("clue");
+    expect(
+      probe.props!.places.some((p) => p.sourceId === "journey-response"),
+    ).toBe(false);
+    await click("Croatia");
+    expect(probe.props!.states["wurl:HRV"]).toBe("clue");
     await click("Serbia");
     await click("Romania");
     await click("Submit answer");
@@ -2425,7 +2459,12 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       }),
     );
     scheduleState.assignments[date] = FIFTEENTH_JOURNEY.id;
-    scheduleState.records[date] = { day: date, journeyId: FIFTEENTH_JOURNEY.id, source: "assigned", revision: 2 };
+    scheduleState.records[date] = {
+      day: date,
+      journeyId: FIFTEENTH_JOURNEY.id,
+      source: "assigned",
+      revision: 2,
+    };
     await mount();
     const daily = host.querySelector(".daily-menu")!;
     expect(daily.querySelector(".daily-menu-eyebrow")?.textContent).toBe(

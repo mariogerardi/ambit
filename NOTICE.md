@@ -374,3 +374,16 @@ and its [TinyQueue](https://github.com/mourner/tinyqueue) 3.0.0 dependency, both
 the ISC license. Their complete copyright and permission notices are shipped in
 [the geometry library notices](public/licenses/journey-geometry.txt)
 (`/licenses/journey-geometry.txt` in the published app).
+
+## Iron Gates mountain relief
+
+`src/game/data/iron-gates-relief.v1.json` uses the same Mapzen/Tilezen elevation
+sources and pictorial processing described above for Andes mountain hatching.
+Run `scripts/prepare-mountain-relief.py --region iron-gates` to prepare this
+regional variant. Zoom-6 tiles, their hashes, attribution, and the derived asset
+hash are recorded in `sources/iron-gates-relief-manifest.json`.
+
+Elevation maxima above 900 m anchor the symbols inside the display window
+20°–25.5°E, 42.5°–46.5°N. This window is not a mountain-range boundary. The
+symbols are generalized terrain illustrations, not surveyed ridges, exact peak
+locations, political boundaries, or grading geometry.

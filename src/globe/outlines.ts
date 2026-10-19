@@ -17,10 +17,17 @@ export function outlineEmphasis(state?: VisualState, hovered = false) {
   const committed = ["selected", "correct", "answer", "incorrect"].includes(
     state ?? "",
   );
+  const candidateHover =
+    hovered && ["selectable", "surface"].includes(state ?? "");
   return {
-    order: committed ? 3 : hovered || state === "hinted" ? 2 : 1,
-    width: committed ? 1.8 : hovered ? 1.6 : 1.35,
-    lift: state === "hinted" ? 0.001 : 0,
+    order: committed
+      ? 3
+      : candidateHover || state === "hinted" || state === "clue"
+        ? 2
+        : 1,
+    width: committed ? 1.8 : candidateHover ? 1.75 : 1.35,
+    // Clear country/state/county caps while keeping blue borders close to land.
+    lift: state === "hinted" || state === "clue" ? 0.00035 : 0,
   };
 }
 

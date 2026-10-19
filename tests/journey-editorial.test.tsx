@@ -53,6 +53,32 @@ function render(journey: Journey, index: number, actions: Action[]) {
 }
 
 describe("connected Journey drafts and answer feedback", () => {
+  it.each(
+    JOURNEYS.flatMap((j) =>
+      j.rounds
+        .filter((q) => q.mode === "pin")
+        .map((q) => ({ journey: j, question: q })),
+    ),
+  )(
+    "$question.id presents pin instructions and status in one block",
+    ({ journey, question }) => {
+      const index = journey.rounds.findIndex((q) => q.id === question.id);
+      for (const actions of [
+        [],
+        [{ type: "drop-pin", lat: 20, lng: 20 }],
+      ] as Action[][]) {
+        const html = render(journey, index, actions);
+        expect(html.match(/class="commit-note"/g)).toHaveLength(1);
+        expect(html).not.toContain('class="question-instruction"');
+        if (question.instruction) expect(html).toContain(question.instruction);
+        expect(html).toContain(
+          actions.length
+            ? "Pin placed. Tap another spot to move it."
+            : "You can move",
+        );
+      }
+    },
+  );
   it.each([
     [
       CANADA_JOURNEY.title,
@@ -148,7 +174,7 @@ describe("connected Journey drafts and answer feedback", () => {
   it("shows the answer once, a short insight, and only the submitted mistake", () => {
     const correct = render(TWELFTH_JOURNEY, 3, select("wurl:CHL"));
     expect(correct).toContain("Correct answer: </span><strong>Chile</strong>");
-    expect(correct).toContain("Bolivia lost its coast in the war.");
+    expect(correct).toContain('class="journey-explanation"');
     expect(correct).not.toContain("Your answer:");
     expect(correct).not.toContain("Chile. Bolivia");
     const wrong = render(CANADA_JOURNEY, 3, text("Toronto"));

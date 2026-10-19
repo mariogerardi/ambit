@@ -61,7 +61,7 @@ class JourneyScheduleTests(unittest.TestCase):
         self.assertEqual(choices, [schedule.choose(date.fromordinal(day).isoformat(), {}, dict(reversed(list(pool.items())))) for day in days])
 
     def test_frontend_hash_vectors_and_missing_historical_record(self):
-        expected = {"2026-10-05": "along-the-andes-v1", "2026-10-18": "try-not-to-click-russia-v1", "2026-11-03": "exceptions-to-the-rule-v1", "2027-01-01": "beyond-the-maple-leaf-v1"}
+        expected = {'2026-10-05': 'island-instincts-v1', '2026-10-18': 'same-name-different-place-v1', '2026-11-03': 'mediterranean-v1', '2027-01-01': 'along-the-andes-v1'}
         for day, journey in expected.items():
             self.assertEqual(schedule.choose(day, {}), journey)
         missing = {"2026-10-05": {"journeyId": "removed-id", "source": "auto"}}

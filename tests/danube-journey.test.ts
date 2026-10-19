@@ -111,7 +111,13 @@ it("keeps borders for the pin and requires named knowledge at the gorge, not tra
   expect(gorge.regionInteraction).toBe(false);
   expect(gorge.selectDisabled).toBe(false);
   expect(gorge.regionNames).toBe("none");
-  expect(Object.values(gorge.states).every((s) => s === "disabled")).toBe(true);
+  for (const choice of DANUBE_JOURNEY.rounds[3].choices!) {
+    const id = choice.geographyIds?.[0] ?? choice.id;
+    expect(gorge.states[id]).toBe("clue");
+  }
+  expect(gorge.places.find((p) => p.name === "Iron Gates")?.visualState).toBe(
+    "hinted",
+  );
   expect(gorge.physicalFeatures.some((f) => f.paths?.length)).toBe(true);
 });
 it("reveals relevant physical geography without coloring starting context as the answer or leaking later stops", () => {
@@ -229,5 +235,91 @@ it("grades the city radius and the gorge’s exact border pair", () => {
   expect(
     JOURNEY_INDEX.find((journey) => journey.id === DANUBE_JOURNEY.id)
       ?.availability,
-  ).toBe("unlisted");
+  ).toBe("pool");
+});
+
+it("keeps named picks anonymous on the map until submission and resolves saved Croatia responses", () => {
+  expect(
+    journeyWorld(world, DANUBE_JOURNEY, at(1), context).states["wurl:AUT"],
+  ).toBe("hinted");
+  const q = DANUBE_JOURNEY.rounds[3];
+  let game = gameReducer(
+    at(3),
+    { type: "select", id: "wurl:CRO" },
+    DANUBE_JOURNEY,
+    context,
+  );
+  expect(
+    journeyWorld(world, DANUBE_JOURNEY, game, context).states["wurl:HRV"],
+  ).toBe("clue");
+  expect(game.selectedIds).toContain("wurl:CRO");
+  expect(
+    journeyWorld(world, DANUBE_JOURNEY, game, context).places.some(
+      (p) => p.sourceId === "journey-response",
+    ),
+  ).toBe(false);
+  game = gameReducer(
+    game,
+    { type: "select", id: "wurl:ROU" },
+    DANUBE_JOURNEY,
+    context,
+  );
+  game = gameReducer(game, { type: "submit" }, DANUBE_JOURNEY, context);
+  const feedback = journeyWorld(world, DANUBE_JOURNEY, game, context);
+  expect(feedback.states["wurl:HRV"]).toBe("incorrect");
+  expect(feedback.states["wurl:ROU"]).toBe("correct");
+  expect(feedback.states["wurl:SRB"]).toBe("answer");
+  expect(() =>
+    createQuestionContext(world, COUNTRY_FACTS, {
+      ...DANUBE_JOURNEY,
+      rounds: [
+        {
+          ...q,
+          choices: q.choices!.map((c) =>
+            c.id === "wurl:CRO" ? { ...c, geographyIds: undefined } : c,
+          ),
+        },
+      ],
+    }),
+  ).toThrow("Unknown country choice");
+});
+it("adds sourced relief only with assistance and removes it on feedback", () => {
+  const q = DANUBE_JOURNEY.rounds[3];
+  const before = journeyWorld(world, DANUBE_JOURNEY, at(3), context);
+  const helped = { ...at(3), help: { [q.id]: "assisted" as const } };
+  const assist = journeyWorld(world, DANUBE_JOURNEY, helped, context);
+  expect(before.physicalFeatures.some((f) => f.relief)).toBe(false);
+  const relief = assist.physicalFeatures.find((f) => f.relief)!.relief!;
+  expect(relief.ridges.length).toBeGreaterThan(0);
+  expect(relief.lightFaces!.length).toBeGreaterThan(0);
+  for (const path of [...relief.ridges, ...relief.lightFaces!])
+    for (const [lng, lat] of path) {
+      expect(lng).toBeGreaterThanOrEqual(20);
+      expect(lng).toBeLessThanOrEqual(25.5);
+      expect(lat).toBeGreaterThanOrEqual(42.5);
+      expect(lat).toBeLessThanOrEqual(46.5);
+    }
+  expect(
+    journeyWorld(
+      world,
+      DANUBE_JOURNEY,
+      { ...helped, phase: "feedback" },
+      context,
+    ).physicalFeatures.some((f) => f.relief),
+  ).toBe(false);
+});
+
+it("keeps anonymous map candidates unchanged by pending picks before and after assistance", () => {
+  const q = DANUBE_JOURNEY.rounds[3];
+  for (const help of [undefined, "assisted"] as const) {
+    const game = { ...at(3), help: help ? { [q.id]: help } : {} };
+    const before = journeyWorld(world, DANUBE_JOURNEY, game, context);
+    for (const choice of q.choices!) {
+      const pending = { ...game, selectedIds: [choice.id] };
+      const after = journeyWorld(world, DANUBE_JOURNEY, pending, context);
+      expect(after.states, choice.label).toEqual(before.states);
+      expect(after.places, choice.label).toEqual(before.places);
+      expect(after.focus, choice.label).toEqual(before.focus);
+    }
+  }
 });

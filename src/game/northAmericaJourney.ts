@@ -1,3 +1,5 @@
+import { referenceCity, referenceLabel } from "./helpReferences";
+import { cityReference } from "./authoredPlaces";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { geoBounds } from "d3-geo";
 import { US_STATES } from "../geography/usStates";
@@ -58,9 +60,9 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
   id: "north-america-v2",
   addedAt: "2026-10-10",
   availability: "pool",
-  title: "North America by name",
+  title: "A Continent in Pieces",
   description:
-    "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
+    "Familiar countries, unfamiliar pieces. Explore the territories, provinces, and states within North America—and the surprises hidden in their boundaries and names.",
   rounds: (
     [
       defineQuestion({
@@ -68,6 +70,17 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
 
         ...base,
         id: "canada-three-territories",
+        guidance: {
+          hint: "One territory shares its name with a major river; another has a directional name.",
+          assist: {
+            text: "Whitehorse, Yellowknife, and Iqaluit are now marked. Recall the name of a territory containing one of these cities.",
+            places: [
+              referenceCity("Whitehorse"),
+              referenceCity("Yellowknife"),
+              referenceCity("Iqaluit"),
+            ],
+          },
+        },
         label: "Territories",
         title: "Canada’s far north.",
         prompt: "Name one of Canada’s three northern territories.",
@@ -89,11 +102,13 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           play: {
             candidateRegionIds: CANADIAN_TERRITORIES,
             map: {
+              candidateRole: "clue",
               borders: true,
               hoverFeedback: false,
               muteOthers: true,
               revealOnAnswer: true,
               candidates: undefined,
+              selectionFeedback: "after-submit",
             },
             focus: { lat: 64, lng: -108, altitude: 1.1 },
           },
@@ -106,6 +121,17 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         qualification: "Province boundaries are simplified from Natural Earth.",
         ...base,
         id: "canada-south-of-boston",
+        guidance: {
+          hint: "Look toward the Great Lakes rather than the Atlantic coast.",
+          assist: {
+            text: "Lakes Erie and Ontario are now labeled. Follow Boston’s latitude across the lakes; province names remain hidden.",
+            places: [
+              referenceLabel("Lake Erie", 42.2, -81.2),
+              referenceLabel("Lake Ontario", 43.7, -77.8),
+            ],
+            focus: { lat: 43.5, lng: -80, altitude: 0.55 },
+          },
+        },
         label: "Latitude",
         title: "A northern latitude check.",
         prompt:
@@ -134,11 +160,13 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           play: {
             candidateRegionIds: provinces.map((r) => r.id),
             map: {
+              candidateRole: "clue",
               borders: true,
               hoverFeedback: false,
               muteOthers: true,
               revealOnAnswer: true,
               candidates: undefined,
+              selectionFeedback: "after-submit",
             },
             focus: { lat: 48, lng: -90, altitude: 0.9 },
             places: [boston],
@@ -153,6 +181,18 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
 
         ...base,
         id: "state-bordering-mexico",
+        visualExceptions: {
+          "hidden-boundaries":
+            "Recall a state’s name without using visible state boundaries as clues.",
+        },
+        guidance: {
+          hint: "Both the Pacific end and the Gulf end of the border offer possible answers.",
+          assist: {
+            text: "San Diego and El Paso are now marked. Use them to recall a state along the Mexican border.",
+            places: [referenceCity("San Diego"), referenceCity("El Paso")],
+            focus: { lat: 31, lng: -106, altitude: 1.05 },
+          },
+        },
         label: "Southern border",
         title: "Across the southern border.",
         prompt: "Name a U.S. state that borders Mexico.",
@@ -164,7 +204,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         selection: { type: "none" },
         importedRegions: US_STATES,
         explanation:
-          "Four states meet Mexico along the southern border. Any one qualifies.",
+          "California, Arizona, New Mexico, and Texas each meet Mexico. On one side of the international boundary, four different states share the same southern neighbor.",
         source: {
           name: "U.S. Customs and Border Protection · Southwest Region",
           url: "https://www.cbp.gov/sites/default/files/2025-07/250728%20AMO%20Southwest%20Region_0.pdf",
@@ -192,6 +232,18 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
           "Routes use Natural Earth state boundaries. The result describes geography, not a driving itinerary.",
         ...base,
         id: "california-missouri-crossings",
+        visualExceptions: {
+          "hidden-boundaries":
+            "Recall border crossings from memory; the assist deliberately restores state boundaries.",
+        },
+        guidance: {
+          hint: "Try a corridor through the Southwest and southern Plains. Count transitions between states, rather than the states themselves.",
+          assist: {
+            text: "State boundaries are now visible, including competing routes. Find a shortest sequence; no route has been drawn.",
+            borders: true,
+            focus: { lat: 37, lng: -104, altitude: 0.85 },
+          },
+        },
         label: "Crossings",
         title: "The shortest state route.",
         prompt:
@@ -228,6 +280,24 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
 
         ...base,
         id: "five-cardinal-states",
+        guidance: {
+          hint: "Think of two North/South pairs and one state containing West. East contributes none.",
+          assist: {
+            text: "West Virginia is selected and locked. Find the other four among the remaining candidates.",
+            candidateIds: [
+              "wurl:USA-WV",
+              "wurl:USA-ND",
+              "wurl:USA-SD",
+              "wurl:USA-NC",
+              "wurl:USA-SC",
+              "wurl:USA-VA",
+              "wurl:USA-NH",
+              "wurl:USA-NY",
+              "wurl:USA-NM",
+            ],
+            fixedSelections: ["wurl:USA-WV"],
+          },
+        },
         label: "Directions",
         title: "Five names, four directions.",
         prompt:
@@ -235,6 +305,23 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         instruction: "",
         count: 5,
         rule: { type: "region-ids", ids: CARDINAL_STATES },
+        sources: [
+          {
+            name: "North Carolina DNCR · the division of Carolina",
+            url: "https://www.dncr.nc.gov/index.php/blog/2024/01/19/north-carolina-south-carolina-p-13",
+            reviewedOn: "2026-10-19",
+          },
+          {
+            name: "North Dakota Geological Survey · Dakota’s boundaries",
+            url: "https://www.dmr.nd.gov/ndgs/ndnotes/Boundaries/Boundaries.asp",
+            reviewedOn: "2026-10-19",
+          },
+          {
+            name: "National Archives · West Virginia statehood",
+            url: "https://www.archives.gov/legislative/features/west-virginia",
+            reviewedOn: "2026-10-19",
+          },
+        ],
         selection: { type: "ids", ids: US_STATES.map((r) => r.id) },
         importedRegions: US_STATES,
         explanation:
@@ -245,19 +332,47 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
   ).map((question, index) => ({
     ...question,
     id: `${question.id}-v2`,
+    progressLabel: [
+      "Northern territories",
+      "Great Lakes",
+      "Mexican border",
+      "State connections",
+      "Names of division",
+    ][index],
+    resolvedLabel: [
+      "Canada’s northern territories",
+      "Ontario",
+      "States bordering Mexico",
+      "California → Missouri",
+      "Five directional states",
+    ][index],
     leadIn: [
-      "Start in the far north.",
-      "Head south for a latitude check.",
-      "Continue to the Mexican border.",
-      "Turn inland toward Missouri.",
-      "Finish with a few directional names.",
+      "Begin with the vast northern pieces of Canada.",
+      "Farther south, a province reaches past an unexpected neighbor.",
+      "At the Mexican border, several states share one international boundary.",
+      "Now follow the connections between the pieces.",
+      "Some divisions survive in the names themselves.",
     ][index],
     explanation: [
-      "These three territories make up Canada’s north; the other ten subdivisions are provinces.",
-      "The province reaches below Boston’s latitude, including the Point Pelee area.",
-      "Four states meet Mexico along the southern border. Any one qualifies.",
+      "Yukon, the Northwest Territories, and Nunavut span Canada’s north. These vast territories sit alongside ten provinces: one country, two kinds of subdivision.",
+      "Ontario reaches south into the Great Lakes, including the Point Pelee area below Boston’s latitude. The Canada–U.S. border is not a simple division of north from south.",
+      "California, Arizona, New Mexico, and Texas each meet Mexico. On one side of the international boundary, four different states share the same southern neighbor.",
       "",
-      "No state has East in its name, but the other three directions all appear.",
+      "The Carolinas grew from one colony, and the Dakotas from one territory. West Virginia separated from Virginia during the Civil War. These directions preserve histories of division, not just positions on a compass.",
     ][index],
   })),
+  completion: {
+    focus: { lat: 46, lng: -100, altitude: 1.05 },
+    views: [
+      { lat: 67, lng: -110, altitude: 1 },
+      { lat: 43, lng: -82, altitude: 0.7 },
+      { lat: 32, lng: -106, altitude: 1.1 },
+      { lat: 37, lng: -104, altitude: 0.85 },
+      { lat: 39, lng: -97, altitude: 0.9 },
+    ],
+    physicalFeatures: [],
+    places: [cityReference(boston)],
+    caption:
+      "Vast territories, a province south of Boston, four states on one international border, and a route through neighboring pieces. Even the directional names preserve divisions of older regions: familiar countries become more interesting when we look inside their outlines.",
+  },
 };

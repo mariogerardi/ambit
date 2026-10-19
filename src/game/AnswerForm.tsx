@@ -89,16 +89,14 @@ export function AnswerForm({
   if (definition.control === "pin")
     return (
       <div className="pin-answer">
-        {!game.pin && (
-          <p className="commit-note">
-            Tap land or water to place a pin. You can move it before submitting.
-          </p>
-        )}
-        {game.pin && (
-          <p className="commit-note" aria-live="polite">
-            Pin placed. Tap another spot to move it.
-          </p>
-        )}
+        <p className="commit-note" aria-live={game.pin ? "polite" : undefined}>
+          {question.instruction && <>{question.instruction} </>}
+          {game.pin
+            ? "Pin placed. Tap another spot to move it."
+            : question.instruction
+              ? "You can move your pin before submitting."
+              : "Tap land or water to place a pin. You can move it before submitting."}
+        </p>
         <div className="pin-answer-actions">
           <QuestionActions
             guidance={guidance}

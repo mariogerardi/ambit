@@ -93,26 +93,18 @@ describe("authored Journey hint and assist stages", () => {
     }
   });
   it("authors both stages for the reviewed Journeys and validates candidate uncertainty", () => {
-    for (const pack of JOURNEYS)
+    for (const pack of JOURNEYS) {
       expect(
         pack.rounds.every(
-          (round) =>
-            !!round.guidance ===
-            [
-              journey.id,
-              "along-the-andes-v1",
-              "chasing-the-sun-v2",
-              "mediterranean-v1",
-              "same-hour-different-worlds",
-              "same-name-different-place-v1",
-              "missing-borders-v1",
-              "across-the-divide-v1",
-            ].includes(pack.id),
+          (round) => !!round.guidance?.hint && !!round.guidance.assist,
         ),
+        pack.id,
       ).toBe(true);
-    expect(journey.rounds.every((round) => !!round.guidance?.assist)).toBe(
-      true,
-    );
+      expect(
+        () => createQuestionContext(regions, [], pack),
+        pack.id,
+      ).not.toThrow();
+    }
     const invalid: Journey = {
       ...journey,
       rounds: [

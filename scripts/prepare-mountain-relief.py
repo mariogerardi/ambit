@@ -3,6 +3,7 @@
 Run in a virtualenv with scripts/terrain-requirements.txt. The pinned input
 manifest detects upstream changes; intentionally review before replacing it.
 """
+import argparse
 import hashlib
 import json
 import math
@@ -13,21 +14,24 @@ from urllib.request import urlopen
 import numpy as np
 from PIL import Image
 from scipy.ndimage import gaussian_filter, maximum_filter
-from shapely.geometry import Point, Polygon, LineString, GeometryCollection, shape
+from shapely.geometry import Point, Polygon, LineString, GeometryCollection, shape, box
 from shapely.ops import unary_union, triangulate
 from shapely.prepared import prep
 
-ZOOM = 5
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--region", choices=["andes", "iron-gates"], default="andes")
+region = parser.parse_args().region
+ZOOM = 6 if region == "iron-gates" else 5
 SIZE = 256
 N = 2 ** ZOOM * SIZE
 BASE = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium"
-OUT = Path("src/game/data/andes-relief.v1.json")
-MANIFEST = Path("sources/andes-relief-manifest.json")
+OUT = Path(f"src/game/data/{region}-relief.v1.json")
+MANIFEST = Path(f"sources/{region}-relief-manifest.json")
 CACHE = Path(".cache/terrain")
 CACHE.mkdir(parents=True, exist_ok=True)
 # Covers the complete reviewed range, including Tierra del Fuego and Mérida.
-XS = range(8, 11)
-YS = range(14, 23)
+XS = range(35, 37) if region == "iron-gates" else range(8, 11)
+YS = range(22, 24) if region == "iron-gates" else range(14, 23)
 previous = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else None
 
 def load_tile(tile):
@@ -50,10 +54,17 @@ for x, y, _, _, elevation in tiles:
     height[(y - YS.start)*SIZE:(y-YS.start+1)*SIZE,
            (x - XS.start)*SIZE:(x-XS.start+1)*SIZE] = elevation
 height = gaussian_filter(height, 1.2)
-context = json.loads(Path("src/game/data/andes-context.v1.json").read_text())
-footprint = prep(shape(context["andes"]["geometry"]))
-# A small breathing margin around the actual shoreline; only applied when authored.
-lake_clearance = prep(shape(context["lake"]["geometry"]).buffer(.08))
+if region == "iron-gates":
+    # Display window around the gorge, not an asserted mountain-range boundary.
+    # Elevation maxima, rather than an invented range outline, determine symbols.
+    context = None
+    footprint = prep(box(20, 42.5, 25.5, 46.5))
+    lake_clearance = prep(GeometryCollection())
+else:
+    context = json.loads(Path("src/game/data/andes-context.v1.json").read_text())
+    footprint = prep(shape(context["andes"]["geometry"]))
+    # A small breathing margin around the actual shoreline; only applied when authored.
+    lake_clearance = prep(shape(context["lake"]["geometry"]).buffer(.08))
 
 def location(y, x):
     # Pixel centers in Web Mercator. GeoJSON coordinates are always lng, lat.
@@ -171,14 +182,14 @@ face_area = sum(face.area for face in visible_faces)
 assert face_area - unary_union(visible_faces).area < face_area * .0001, "Mountain face overlap"
 result = {"ridges": ridges, "hachures": hachures, "highlights": highlights,
           "lightFaces": light_faces, "darkFaces": dark_faces,
-          "clearances": {context["lake"]["id"]: clearance}}
+          "clearances": {context["lake"]["id"]: clearance} if context else {}}
 OUT.write_text(json.dumps(result, separators=(",", ":")) + "\n")
 MANIFEST.write_text(json.dumps({
     "source": "Mapzen/Tilezen Terrain Tiles on AWS; USGS GMTED2010/SRTM and NOAA ETOPO1",
-    "accessed": "2026-10-11", "zoom": ZOOM,
+    "accessed": "2026-10-19" if region == "iron-gates" else "2026-10-11", "zoom": ZOOM,
     "attributionUrl": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
     "tiles": {url: digest for _, _, url, digest, _ in tiles},
     "derivedSha256": hashlib.sha256(OUT.read_bytes()).hexdigest(),
-    "processing": "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. Symbols scaled to 85% of the initial pictorial size. All vertices clipped to reviewed Andes extent. North-up pictorial occlusion clips rear faces and ink behind southern foreground silhouettes. Optional whole-symbol lake clearance tests faces and ink against actual Titicaca shoreline plus 0.08 degree display margin. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading."
+    "processing": ("Terrain-anchored pictorial relief for the Iron Gates region. Symbols use spaced elevation maxima above 900 m inside the display window [20, 42.5, 25.5, 46.5], not a mountain-range boundary. North-up silhouette clipping prevents overlapping faces and ink. Display only; never used for grading." if region == "iron-gates" else "Gaussian elevation generalization; spaced regional high points anchor joined pictorial peaks with shared saddles, shaded faces and attached hatching. Symbols scaled to 85% of the initial pictorial size. All vertices clipped to reviewed Andes extent. North-up pictorial occlusion clips rear faces and ink behind southern foreground silhouettes. Optional whole-symbol lake clearance tests faces and ink against actual Titicaca shoreline plus 0.08 degree display margin. Symbols are illustrative, not exact summit outlines, ridgelines or snow cover. Display only; never used for grading.")
 }, indent=2)+"\n")
 print(f"Prepared {len(ridges)} crest segments, {len(hachures)} slope strokes, {len(highlights)} high-elevation segments; {OUT.stat().st_size} bytes.")

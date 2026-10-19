@@ -14,6 +14,7 @@ import {
   SUEZ_REFERENCE_CITIES,
   SUEZ_CANAL,
 } from "../src/game/fourthJourney";
+import { playColors } from "../src/theme/playColors";
 import { COUNTRY_FACTS } from "../src/game/countryFacts";
 import { createQuestionContext, canSelect } from "../src/game/questions";
 import { gameReducer, initialGame } from "../src/game/state";
@@ -221,7 +222,7 @@ describe("Mediterranean facelift", () => {
         state,
       );
       expect(playRegionStyle("wurl:LBY", map.states["wurl:LBY"]).stroke).toBe(
-        PLAY_HIGHLIGHTS.context,
+        playColors()["context-outline"],
       );
     }
     const map = journeyWorld(

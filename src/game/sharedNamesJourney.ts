@@ -1,6 +1,6 @@
 import { definePresentation, defineQuestion } from "./questionBuilder";
 import { ANSWER_PLACES } from "./answerTargets";
-import { cityReference } from "./authoredPlaces";
+import { cityReference, explanationPlace } from "./authoredPlaces";
 import { US_STATES } from "../geography/usStates";
 import type { FactSource, Journey } from "./questionContracts";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
@@ -93,7 +93,7 @@ const base = definePresentation({
 export const SHARED_NAMES_JOURNEY: Journey = {
   id: "same-name-different-place-v1",
   addedAt: "2026-10-12",
-  availability: "unlisted",
+  availability: "pool",
   saveRevision: 2,
   title: "Same Name, Different Place",
   description:
@@ -255,7 +255,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
         },
         reveal: {
           contextIds: ["wurl:LBY", "wurl:LBN"],
-          places: tripolis.map((place) => ({ ...place, answerTarget: true })),
+          places: tripolis.map(explanationPlace),
         },
       },
     }),
@@ -279,7 +279,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
       rule: { type: "country-ids", ids: ["wurl:GEO"] },
       importedRegions: [georgiaState],
       explanation:
-        "Georgia is the country; Georgians call it Sakartvelo. Its English name is commonly traced through Persian-derived names for its people, though the ultimate etymology is unsettled. The U.S. state honors King George II.",
+        "Georgians call their country Sakartvelo. Its English name is commonly traced through Persian-derived names for its people, though its ultimate origin is unsettled. The U.S. state honors King George II: a shared English name need not mean a shared namesake.",
       source: source(
         "Encyclopaedia Iranica · the land and people",
         "https://www.iranicaonline.org/articles/georgia-i/",
@@ -357,10 +357,13 @@ export const SHARED_NAMES_JOURNEY: Journey = {
       },
       scenes: {
         play: {
-          focus: { lat: -17.2, lng: 27.5, altitude: 0.5 },
+          focus: { lat: -9, lng: 29.5, altitude: 0.85 },
           contextIds: ["wurl:ZMB", "wurl:ZWE"],
           places: [falls],
-          physicalFeatures: zambezi,
+          physicalFeatures: [
+            ...zambezi,
+            lakes.find((l) => l.name === "Lake Victoria")!,
+          ],
           map: {
             feedbackRegions: "neutral",
             borderIds: ["wurl:ZMB", "wurl:ZWE"],
@@ -371,7 +374,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
           places: [reference("place:909137"), reference("place:894701")],
         },
         reveal: {
-          focus: { lat: -9, lng: 29.5, altitude: 0.85 },
+          focus: { lat: -17.9, lng: 25.9, altitude: 0.35 },
           contextIds: ["wurl:ZMB", "wurl:ZWE"],
           places: [falls],
           physicalFeatures: [

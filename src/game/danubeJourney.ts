@@ -1,9 +1,11 @@
+import { referenceCity, referenceLabel } from "./helpReferences";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import type { FactSource, Journey } from "./questionContracts";
 import { CAPITALS, capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
 import type { PhysicalFeature, PlaceFeature } from "../geography/types";
 import mapContext from "./data/danube-context.v1.json";
+import gorgeRelief from "./data/iron-gates-relief.v1.json";
 
 const segments = mapContext.segments as Record<string, PhysicalFeature[]>;
 const stages = ["upper", "vienna", "budapest", "gorge", "lower", "delta"];
@@ -66,7 +68,7 @@ const base = definePresentation({
 export const DANUBE_JOURNEY: Journey = {
   id: "down-the-danube-v1",
   addedAt: "2026-10-11",
-  availability: "unlisted",
+  availability: "pool",
   title: "Down the Danube",
   description:
     "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
@@ -89,7 +91,7 @@ export const DANUBE_JOURNEY: Journey = {
       { ...landmark("delta", "Danube Delta", 45.15, 29.6), markerHidden: true },
     ],
     caption:
-      "From the upper river to the Black Sea: five stops, one continuous journey.",
+      "A hidden diversion, two capitals, a mountain gorge, and a delta: the Danube reaches the Black Sea through landscapes that divide people, connect cities, and carry life downstream.",
   },
   rounds: [
     defineQuestion({
@@ -100,6 +102,15 @@ export const DANUBE_JOURNEY: Journey = {
 
       ...base,
       id: "danube-underground-detour-v1",
+      guidance: {
+        hint: "The diverted water heads toward Lake Constance instead of continuing east with the Danube.",
+        assist: {
+          text: "Lake Constance is now labeled. The Rhine and Rhône remain; which system receives that lake’s outflow?",
+          candidateIds: ["river:rhine", "river:rhone"],
+          places: [referenceLabel("Lake Constance", 47.65, 9.3)],
+          focus: { lat: 47.5, lng: 9, altitude: 0.7 },
+        },
+      },
       label: "Detour",
       resolvedLabel: "Danube seepage",
       correctFeedback: "Nice connection.",
@@ -149,12 +160,21 @@ export const DANUBE_JOURNEY: Journey = {
 
       ...base,
       id: "danube-vienna-pin-v1",
+      guidance: {
+        hint: "Look in eastern Austria, downstream from Linz and south of Brno.",
+        assist: {
+          text: "Linz and Brno are now marked. Follow the Danube east of Linz and look south of Brno.",
+          places: [referenceCity("Linz"), referenceCity("Brno")],
+          focus: { lat: 48.3, lng: 15.6, altitude: 0.65 },
+        },
+      },
       label: "Capital",
       resolvedLabel: "Vienna",
       title: "The first capital downstream.",
       leadIn: "Follow the river east into Austria.",
       prompt: "Drop a pin in Vienna.",
-      instruction: "Land within 50 km of the city center.",
+      instruction:
+        "Within 50 km counts. Aim for the 15 km bullseye; 30 km and 50 km also count.",
       mode: "pin",
       rule: {
         type: "pin-distance",
@@ -177,6 +197,7 @@ export const DANUBE_JOURNEY: Journey = {
       scenes: {
         play: {
           focus: { lat: 48.3, lng: 14.5, altitude: 0.26 },
+          contextIds: ["wurl:AUT"],
           physicalFeatures: route("upper"),
           map: {
             borders: true,
@@ -198,6 +219,15 @@ export const DANUBE_JOURNEY: Journey = {
 
       ...base,
       id: "danube-two-banks-city-v1",
+      guidance: {
+        hint: "Look downstream of Austria and Slovakia, where the river runs through Hungary.",
+        assist: {
+          text: "Hungary is now highlighted and Bratislava marked upstream. Continue southeast along the Danube; combine the two bank names in the clue.",
+          regionIds: ["wurl:HUN"],
+          places: [referenceCity("Bratislava")],
+          focus: { lat: 47.7, lng: 18, altitude: 0.65 },
+        },
+      },
       label: "Two banks",
       resolvedLabel: "Budapest",
       title: "A city made across the river.",
@@ -252,6 +282,26 @@ export const DANUBE_JOURNEY: Journey = {
 
       ...base,
       id: "danube-iron-gates-border-v1",
+      guidance: {
+        hint: "This gorge is downstream of Hungary, where the Danube cuts between mountain ranges.",
+        assist: {
+          text: "Mountain relief is now shown around the marked gorge. Serbia, Romania, Bulgaria, and Hungary remain; choose two.",
+          candidateIds: ["wurl:SRB", "wurl:ROU", "wurl:BGR", "wurl:HUN"],
+          physicalFeatures: [
+            {
+              id: "danube:iron-gates-terrain",
+              name: "",
+              kind: "mountain",
+              lat: 44.8,
+              lng: 22.3,
+              rank: 2,
+              labelAnchors: [],
+              relief: gorgeRelief,
+            },
+          ],
+          focus: { lat: 44.8, lng: 22, altitude: 0.65 },
+        },
+      },
       label: "Gorge",
       resolvedLabel: "Iron Gates",
       correctFeedback: "Exactly right.",
@@ -266,7 +316,8 @@ export const DANUBE_JOURNEY: Journey = {
         { id: "wurl:SRB", label: "Serbia" },
         { id: "wurl:BGR", label: "Bulgaria" },
         { id: "wurl:ROU", label: "Romania" },
-        { id: "wurl:CRO", label: "Croatia" },
+        // Retain the choice ID so saved answers still resolve; map its canonical geography.
+        { id: "wurl:CRO", label: "Croatia", geographyIds: ["wurl:HRV"] },
         { id: "wurl:SVK", label: "Slovakia" },
       ],
       rule: { type: "country-ids", ids: ["wurl:SRB", "wurl:ROU"] },
@@ -276,9 +327,26 @@ export const DANUBE_JOURNEY: Journey = {
         "ICPDR · restoring fish migration at the Iron Gates",
         "https://www.icpdr.org/tasks-topics/tasks/river-basin-management/sturgeon-conservation/we-pass-facilitating-fish-migration",
       ),
-      sources: [mapSource, riverSource],
+      sources: [
+        mapSource,
+        riverSource,
+        source(
+          "Mapzen Terrain Tiles · elevation-derived relief",
+          "https://registry.opendata.aws/terrain-tiles/",
+        ),
+      ],
       scenes: {
         play: {
+          map: { selectionFeedback: "after-submit", candidateRole: "clue" },
+          candidateRegionIds: [
+            "wurl:HUN",
+            "wurl:SRB",
+            "wurl:BGR",
+            "wurl:ROU",
+            "wurl:HRV",
+            "wurl:SVK",
+          ],
+          places: [landmark("iron-gates", "Iron Gates", 44.65, 22.3)],
           physicalFeatures: route("gorge"),
           focus: { lat: 44.9, lng: 21.1, altitude: 0.23 },
         },
@@ -296,6 +364,14 @@ export const DANUBE_JOURNEY: Journey = {
 
       ...base,
       id: "danube-delta-sea-v1",
+      guidance: {
+        hint: "Follow the river east across the lower Balkans, toward the coast beyond Romania.",
+        assist: {
+          text: "The Black, Aegean, and Caspian seas remain. Use the river’s eastward progress to identify its outlet; sea names stay hidden on the map.",
+          candidateIds: ["sea:black", "sea:aegean", "sea:caspian"],
+          focus: { lat: 42, lng: 35, altitude: 1.35 },
+        },
+      },
       label: "Delta",
       resolvedLabel: "Danube Delta",
       correctFeedback: "Exactly right.",

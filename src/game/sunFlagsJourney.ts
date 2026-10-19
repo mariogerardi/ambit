@@ -116,7 +116,7 @@ const base = definePresentation({
 export const SUN_FLAGS_JOURNEY: Journey = {
   id: "chasing-the-sun-v2",
   addedAt: "2026-10-11",
-  availability: "unlisted",
+  availability: "pool",
   supersedes: "chasing-the-sun-v1",
   title: "Chasing the sun",
   description:
@@ -174,7 +174,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       },
       feedbackFlags: sunFlags.slice(0, 2),
       explanation:
-        "This shared face recalls the May Revolution of 1810. Compare the suns: one has 32 rays, the other 16, alternating straight and wavy in both designs.",
+        "This shared face recalls the May Revolution of 1810. Argentina’s sun has 32 rays; Uruguay’s has 16. Both alternate straight and wavy rays, giving one symbol two distinct designs.",
       source: source(
         "Buenos Aires City Government · the national flag’s sun",
         "https://buenosaires.gob.ar/gcaba_historico/noticias/dia-de-la-bandera-como-debe-representarse-el-sol-de-mayo-en-la-insignia",
@@ -332,7 +332,13 @@ export const SUN_FLAGS_JOURNEY: Journey = {
 
       ...base,
       id: "sun-flags-pacific-pin-v1",
-      label: "Drop a pin",
+      visualExceptions: {
+        "open-search-background":
+          "The island country’s footprint is withheld within an unrestricted pin search field.",
+        "hidden-boundaries":
+          "Identify the country’s islands from their shapes without political borders.",
+      },
+      label: "Sun circle",
       resolvedLabel: "Japan · sun circle",
       title: "No rays required.",
       leadIn: "Head east to the Pacific.",
@@ -361,6 +367,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         play: {
           focus: { lat: 25, lng: 132, altitude: 1.5 },
           map: {
+            background: "open-search",
             borders: false,
             hoverFeedback: false,
             muteOthers: true,
@@ -407,7 +414,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ),
       feedbackFlags: [sunFlags[5]],
       explanation:
-        "The rising sun looks beyond Malawi to a whole continent: a dawn of freedom and hope across Africa. Our final view places that promise in its wider setting.",
+        "The rising sun looks beyond Malawi to a whole continent: a dawn of freedom and hope across Africa.",
       source: source(
         "Embassy of Malawi in Cairo · national flag",
         "https://www.malawiembassycairo.org/about-malawi",

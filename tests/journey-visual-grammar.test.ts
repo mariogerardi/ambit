@@ -65,7 +65,7 @@ describe("Journey visual grammar", () => {
     expect(q.candidateRegionIds).toBeDefined();
     expect(q.contextIds ?? []).toEqual([]);
     for (const id of q.candidateRegionIds!)
-      expect(scene().states[id]).toBe("selectable");
+      expect(scene().states[id]).toBe("clue");
     expect(scene().selectableRegionIds).toEqual([]);
     expect(() =>
       validateQuestionContract({
@@ -75,6 +75,95 @@ describe("Journey visual grammar", () => {
       }),
     ).toThrow("distinct from reference");
   });
+  it.each([
+    "canada-three-territories-v2",
+    "canada-south-of-boston-v2",
+    "canada-bilingual-province-v1",
+    "danube-iron-gates-border-v1",
+  ])("uses the shared noninteractive clue role for %s", (id) => {
+    const { q, scene } = question(id);
+    const view = scene();
+    expect(q.candidateRegionIds?.length).toBeGreaterThan(0);
+    for (const regionId of q.candidateRegionIds!) {
+      expect(view.states[regionId]).toBe("clue");
+      expect(
+        regionBorderVisible(view.regions.find((r) => r.id === regionId)!, view),
+      ).toBe(true);
+    }
+    expect(view.selectableRegionIds).toEqual([]);
+  });
+  it("highlights all visible Canada on completion while retaining a wrong province", () => {
+    const { scene, reduce } = question("canada-bilingual-province-v1");
+    const wrong = reduce(
+      { type: "select", id: "province:on" },
+      { type: "submit" },
+    );
+    expect(wrong.answers.at(-1)?.correct).toBe(false);
+    const recap = scene({ ...wrong, phase: "finished" });
+    expect(recap.states["wurl:CAN"]).toBe("visited");
+    for (const region of recap.regions.filter((r) =>
+      r.id.startsWith("wurl:CAN-"),
+    ))
+      expect(recap.states[region.id], region.id).toBe(
+        region.id === "wurl:CAN-ON" ? "incorrect" : "visited",
+      );
+    expect(recap.states["wurl:USA"]).toBe("disabled");
+  });
+  it("keeps the Boston parallel for its question but removes it from the flyover", () => {
+    const { scene, reduce } = question("canada-south-of-boston-v2");
+    expect(scene().overlays?.some((o) => o.type === "parallel")).toBe(true);
+    const feedback = reduce(
+      { type: "ordered", index: 0, value: "Ontario" },
+      { type: "submit" },
+    );
+    expect(scene(feedback).overlays?.some((o) => o.type === "parallel")).toBe(
+      true,
+    );
+    expect(
+      (scene({ ...feedback, phase: "finished" }).overlays ?? []).some(
+        (o) => o.type === "parallel",
+      ),
+    ).toBe(false);
+  });
+  it.each([
+    ["canada-three-territories-v2", "Nunavut", "wurl:CAN-NU"],
+    ["canada-south-of-boston-v2", "Ontario", "wurl:CAN-ON"],
+  ])(
+    "does not reveal typed geography before submitting %s",
+    (id, name, regionId) => {
+      const { scene, reduce } = question(id);
+      for (const help of [
+        [],
+        [{ type: "request-hint" }, { type: "request-assist" }],
+      ] as Action[][]) {
+        const before = scene(reduce(...help));
+        const pending = reduce(...help, {
+          type: "ordered",
+          index: 0,
+          value: name,
+        });
+        const view = scene(pending);
+        expect(pending.ordered[0]).toBe(name);
+        expect(view.states).toEqual(before.states);
+        expect(view.places).toEqual(before.places);
+        expect(view.focus).toEqual(before.focus);
+        const feedback = scene(
+          reduce(
+            ...help,
+            { type: "ordered", index: 0, value: name },
+            { type: "submit" },
+          ),
+        );
+        expect(feedback.states[regionId]).toBe("correct");
+        expect(
+          feedback.places.some(
+            (p) =>
+              p.sourceId === "journey-response" && p.visualState === "correct",
+          ),
+        ).toBe(true);
+      }
+    },
+  );
   it("uses names and area fills for Samoa and American Samoa, without city dots", () => {
     const { scene } = question("same-hour-q4");
     expect(scene().states["wurl:WSM"]).toBe("hinted");
@@ -117,16 +206,28 @@ describe("Journey visual grammar", () => {
         ?.annotationRadius,
     ).toBeGreaterThan(0);
   });
-  it("explains a crossing count with areas and text rather than invented travel or graded area symbols", () => {
-    const { reduce, scene } = question("california-missouri-crossings-v2");
-    const result = scene(
-      reduce({ type: "text", value: "4" }, { type: "submit" }),
+  it("colors the whole demonstrated crossing route by the count result without inventing selections or travel lines", () => {
+    const { q, context, reduce, scene } = question(
+      "california-missouri-crossings-v2",
     );
-    expect(result.routes).toEqual([]);
-    expect(result.places.filter((p) => p.markerRole === "annotation")).toEqual(
-      [],
-    );
-    expect(result.states["wurl:USA-NM"]).toBe("hinted");
+    for (const [value, state] of [
+      ["4", "correct"],
+      ["3", "answer"],
+    ] as const) {
+      const game = reduce({ type: "text", value }, { type: "submit" });
+      const result = scene(game);
+      expect(game.answers[0].correct).toBe(value === "4");
+      expect(result.routes).toEqual([]);
+      expect(
+        result.places.filter((p) => p.markerRole === "annotation"),
+      ).toEqual([]);
+      const path = solutionIds(q, context);
+      expect(path).toHaveLength(5);
+      for (const id of path) expect(result.states[id], id).toBe(state);
+      expect(result.states["wurl:USA-WA"]).toBe("disabled");
+      const recap = scene({ ...game, phase: "finished" });
+      for (const id of path) expect(recap.states[id], id).toBe("visited");
+    }
   });
   it("promotes containing geography as reference when a city is revealed and retains the city in a generic recap", () => {
     const { reduce, scene } = question("canada-ottawa-v1");

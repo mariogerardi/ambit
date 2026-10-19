@@ -1,11 +1,14 @@
 import { isRegionAnswer } from "../game/questionBuilder";
-import { geoDistance, geoInterpolate } from "d3-geo";
 import { answerPlace } from "../game/answerTargets";
-import { pinBands } from "../game/pinPresentation";
+import { pinBands, pinReviewViews } from "../game/pinPresentation";
 import { withAssistanceLocks } from "../game/guidance";
-import type { Focus, RegionFeature, RouteFeature } from "../geography/types";
+import type { RegionFeature, RouteFeature } from "../geography/types";
 import type { GameState } from "../game/state";
-import type { Journey, QuestionContext } from "../game/questionContracts";
+import type {
+  Journey,
+  Question,
+  QuestionContext,
+} from "../game/questionContracts";
 import { solutionIds, selectableIds } from "../game/questionPreparation";
 import { candidateAvailable } from "../game/guidance";
 import { presentJourneyPlace } from "../game/authoredPlaces";
@@ -17,15 +20,24 @@ import {
   questionRegions,
   questionVisualStates,
   journeyDiscoveryPlaces,
+  highlightedPartId,
 } from "../game/presentation";
 const recapRegions = new WeakMap<
   Journey,
-  WeakMap<RegionFeature[], RegionFeature[]>
+  WeakMap<RegionFeature[], Map<string, RegionFeature[]>>
 >();
-function allRegions(regions: RegionFeature[], journey: Journey) {
+function allRegions(
+  regions: RegionFeature[],
+  journey: Journey,
+  answers: GameState["answers"],
+) {
   let cache = recapRegions.get(journey);
   if (!cache) recapRegions.set(journey, (cache = new WeakMap()));
-  const cached = cache.get(regions);
+  let versions = cache.get(regions);
+  if (!versions) cache.set(regions, (versions = new Map()));
+  const answered = new Set(answers.map((a) => a.roundId));
+  const key = [...answered].sort().join("|");
+  const cached = versions.get(key);
   if (cached) return cached;
   const additions = [
     ...new Map(
@@ -38,20 +50,50 @@ function allRegions(regions: RegionFeature[], journey: Journey) {
     {},
     ...journey.rounds.map((q) => q.displayGeometries ?? {}),
   );
+  const highlights = new Map<
+    string,
+    NonNullable<Question["highlightParts"]>[number]
+  >();
+  const polygons = (geometry: RegionFeature["geometry"]) =>
+    geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+  for (const q of journey.rounds.filter((q) => answered.has(q.id)))
+    for (const part of q.highlightParts ?? []) {
+      if (!part.reveal) continue;
+      const fragment = questionRegions(regions, q, "feedback").find(
+        (r) => r.id === highlightedPartId(part.countryId),
+      )!;
+      const previous = highlights.get(part.countryId);
+      const coordinates = [
+        ...new Map(
+          [
+            ...(previous?.geometry ? polygons(previous.geometry) : []),
+            ...polygons(fragment.geometry),
+          ].map((polygon) => [JSON.stringify(polygon), polygon]),
+        ).values(),
+      ];
+      highlights.set(part.countryId, {
+        ...part,
+        points: [...(previous?.points ?? []), ...(part.points ?? [part.point])],
+        geometry: { type: "MultiPolygon", coordinates },
+        name: [...new Set([previous?.name, part.name].filter(Boolean))].join(
+          " / ",
+        ),
+      });
+    }
   const result =
-    additions.length || Object.keys(displayGeometries).length
+    additions.length || Object.keys(displayGeometries).length || highlights.size
       ? questionRegions(
           regions,
           {
             ...journey.rounds[0],
             importedRegions: additions,
             displayGeometries,
-            highlightParts: [],
+            highlightParts: [...highlights.values()],
           },
           "finished",
         )
       : regions;
-  cache.set(regions, result);
+  versions.set(key, result);
   return result;
 }
 export function journeyWorld(
@@ -63,7 +105,12 @@ export function journeyWorld(
   const round = journey.rounds[game.roundIndex];
   game = withAssistanceLocks(round, game);
   const correct = !!game.answers.at(-1)?.correct;
-  const map = questionMapPresentation(round, game.phase, correct);
+  const map = questionMapPresentation(
+    round,
+    game.phase,
+    correct,
+    game.help?.[round.id],
+  );
   const completion = game.phase === "finished" ? journey.completion : undefined;
   const assist =
     game.phase === "playing" && game.help?.[round.id] === "assisted"
@@ -123,36 +170,9 @@ export function journeyWorld(
           }),
         )
       : [];
-  let photoRevealFocus: Focus | undefined;
-  if (
-    game.phase === "feedback" &&
-    journey.completion?.photoResults &&
-    pinRule &&
-    pinTarget &&
-    game.pin
-  ) {
-    const target: [number, number] = [pinTarget.lng, pinTarget.lat];
-    const guess: [number, number] = [game.pin.lng, game.pin.lat];
-    const distanceKm = geoDistance(target, guess) * 6371.0088;
-    if (distanceKm <= pinRule.radiusKm)
-      photoRevealFocus = {
-        lat: pinTarget.lat,
-        lng: pinTarget.lng,
-        altitude: 0.4,
-      };
-    else {
-      const [lng, lat] = geoInterpolate(target, guess)(0.5);
-      photoRevealFocus = {
-        lat,
-        lng,
-        altitude: Math.min(5.5, 0.4 + distanceKm / 4000),
-      };
-    }
-  }
   const selected = catalog.get(game.selectedIds.at(-1) ?? "");
-  const focus =
+  const preferredFocus =
     completion?.focus ??
-    photoRevealFocus ??
     (game.phase === "feedback" && round.feedbackFocus
       ? round.feedbackFocus
       : game.phase === "feedback" &&
@@ -165,6 +185,15 @@ export function journeyWorld(
           : game.phase === "finished"
             ? journey.rounds.at(-1)!.focus
             : (assist?.focus ?? hintFocus ?? round.focus));
+  const focus =
+    pinReviewViews(
+      round,
+      context,
+      game,
+      journey.completion?.photoResults && pinTarget
+        ? { lat: pinTarget.lat, lng: pinTarget.lng, altitude: 0.4 }
+        : preferredFocus,
+    )?.overview ?? preferredFocus;
   const visited =
     game.phase === "finished"
       ? journeyVisitedStates(journey, context, game.answers)
@@ -173,20 +202,32 @@ export function journeyWorld(
     game.phase === "finished"
       ? journeyDiscoveryPlaces(journey, context, game.answers)
       : [];
-  const pointMistakes = new Set(
-    discoveries
-      .filter((place) => place.visualState === "incorrect")
-      .map((place) => place.id),
+  const reviewedPointStates = new Map(
+    discoveries.map((place) => [place.id, place.visualState]),
   );
+  const states =
+    game.phase === "finished"
+      ? undefined
+      : questionVisualStates(round, context, game);
+  // Reference and committed answer boundaries survive narrower authored border lists.
+  const outlinedIds = Object.keys(states ?? {}).filter((id) =>
+    ["hinted", "clue", "selected", "correct", "answer", "incorrect"].includes(
+      states![id],
+    ),
+  );
+  const borderRegionIds =
+    round.map?.borderIds || !map.borders
+      ? [...new Set([...(round.map?.borderIds ?? []), ...outlinedIds])]
+      : undefined;
   return {
     regions:
       game.phase === "finished"
-        ? allRegions(regions, journey)
+        ? allRegions(regions, journey, game.answers)
         : questionRegions(regions, round, game.phase, game.help?.[round.id]),
     states:
       game.phase === "finished"
         ? Object.fromEntries(
-            allRegions(regions, journey).map((region) => [
+            allRegions(regions, journey, game.answers).map((region) => [
               region.id,
               visited?.[region.id] === "incorrect"
                 ? "incorrect"
@@ -195,7 +236,7 @@ export function journeyWorld(
                   : (visited?.[region.id] ?? "disabled"),
             ]),
           )
-        : questionVisualStates(round, context, game),
+        : states!,
     places:
       game.phase === "finished"
         ? [
@@ -204,9 +245,15 @@ export function journeyWorld(
                 ...(completion?.places ?? []).map((place) =>
                   presentJourneyPlace({
                     ...place,
-                    visualState: pointMistakes.has(place.id)
-                      ? "incorrect"
-                      : (place.visualState ?? "visited"),
+                    displayRole: reviewedPointStates.has(place.id)
+                      ? undefined
+                      : place.displayRole,
+                    // Authored references add context; they cannot demote a discovery
+                    // or erase a mistake when the same city serves both roles.
+                    visualState:
+                      reviewedPointStates.get(place.id) ??
+                      place.visualState ??
+                      "visited",
                   }),
                 ),
                 ...discoveries.filter(
@@ -266,7 +313,7 @@ export function journeyWorld(
     borderRegionIds:
       game.phase === "home" || game.phase === "finished"
         ? undefined
-        : round.map?.borderIds,
+        : borderRegionIds,
     regionInteraction:
       isRegionAnswer(round) ||
       (game.phase === "feedback" &&

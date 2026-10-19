@@ -1674,6 +1674,16 @@
   width: 12px;
   height: 12px;
 }
+.journey-map-review {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.journey-map-review button {
+  min-height: 40px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .pin-accuracy-bands {
   list-style: none;
   margin: 16px 0;

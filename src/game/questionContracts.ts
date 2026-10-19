@@ -138,6 +138,8 @@ export interface Question {
       places?: PlaceFeature[];
       /** Display-only geography and framing for the assisted stage. */
       physicalFeatures?: PhysicalFeature[];
+      /** Assistance may disclose political boundaries without changing eligibility. */
+      borders?: boolean;
       focus?: Focus;
       /** A stronger ordering/matching assist may place and lock an authored card. */
       fixedSlots?: { index: number; id: string }[];
@@ -207,7 +209,16 @@ export interface Question {
   /** Known geographic setting remains context-colored, not answer-colored. */
   feedbackHintIds?: string[];
   sources?: FactSource[];
+  /** Reviewed departures from shared visual defaults; reasons are audited, not blanket waivers. */
+  visualExceptions?: Partial<
+    Record<
+      "open-search-background" | "natural-background" | "hidden-boundaries",
+      string
+    >
+  >;
   map?: {
+    /** Unrelated land is muted by default; a world search field must be deliberate. */
+    background?: "muted" | "open-search";
     borders: boolean;
     /** Override reveal outlines, e.g. a single continent without internal borders. */
     feedbackBorders?: boolean;
@@ -221,6 +232,10 @@ export interface Question {
     revealOnCorrect?: boolean;
     revealOnAnswer?: boolean;
     candidates?: "highlighted" | "decorative" | "neutral";
+    /** Anonymous area clues to name, with no globe selection or pending identity feedback. */
+    candidateRole?: "clue";
+    /** Withhold the name-to-shape mapping while named or typed answers are editable. */
+    selectionFeedback?: "after-submit";
     /** City/physical answers can leave countries neutral on reveal. */
     feedbackRegions?: "neutral";
   };

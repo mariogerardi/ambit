@@ -16,6 +16,7 @@ export interface PlayScene {
   map?: Partial<NonNullable<Question["map"]>>;
 }
 export interface AssistScene {
+  borders?: boolean;
   focus?: Focus;
   places?: PlaceFeature[];
   overlays?: MapOverlay[];
@@ -88,6 +89,7 @@ export function compileQuestionScenes(
       ...question.guidance,
       assist: {
         ...question.guidance.assist,
+        ...(assist.borders !== undefined ? { borders: assist.borders } : {}),
         ...(assist.places !== undefined ? { places: assist.places } : {}),
         ...(assist.overlays !== undefined ? { overlays: assist.overlays } : {}),
         ...(assist.focus !== undefined ? { focus: assist.focus } : {}),

@@ -358,7 +358,7 @@ Run offline checks before deploying:
 
 ```sh
 python3 -m unittest discover -s backend -p 'test_*.py'
-npm test
+npm run test:all
 npm run build
 ```
 

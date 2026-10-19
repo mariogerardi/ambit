@@ -18,7 +18,7 @@ def cases(suite):
 def main():
     suite = unittest.defaultTestLoader.discover("backend", pattern="test_*.py")
     tests = list(cases(suite))
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    result = unittest.TextTestRunner(verbosity=0, buffer=True).run(suite)
     failures = {test.id() for test, _ in result.failures}
     errors = {test.id() for test, _ in result.errors}
     skipped = {test.id() for test, _ in result.skipped}

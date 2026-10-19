@@ -1,9 +1,5 @@
-import {
-  capitalForName,
-  countryIdForName,
-  normalizeAnswer,
-} from "./answerNames";
-import { answerPlace, pinInside } from "./answerTargets";
+import { capitalForName, countryIdForName } from "./answerNames";
+import { answerPlace, pinInside, responsePlaceForName } from "./answerTargets";
 import { REGIONAL_INDEX, exploreBoundaries } from "../geography/regions";
 import type { VisualState } from "../geography/types";
 import type { Journey, Question, QuestionContext } from "./questionContracts";
@@ -18,7 +14,11 @@ import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
 import type { Answer, GameState } from "./state";
 import { compositeRegion } from "./compositeRegions";
 import { candidateAvailable } from "./guidance";
-import { answerItems } from "./answerPresentation";
+import {
+  answerItems,
+  acceptsAlternatives,
+  responseIds,
+} from "./answerPresentation";
 import { pinBands } from "./pinPresentation";
 import { interiorAnchor } from "../geography/interiorAnchor";
 import { presentJourneyPlace } from "./authoredPlaces";
@@ -206,7 +206,7 @@ function resolveQuestionPlaces(
   ) {
     const expected = question.rule.countryIds;
     const supplied = (response?.ordered ?? []).map((name) =>
-      capitalForName(context, name),
+      responsePlaceForName(question, context, name),
     );
     const capitals = new Map(
       [
@@ -224,7 +224,8 @@ function resolveQuestionPlaces(
         ...capital,
         visualState:
           slot >= 0
-            ? expected[slot] === capital.countryId
+            ? context.capitals.find((p) => p.countryId === expected[slot])
+                ?.id === capital.id
               ? "correct"
               : "incorrect"
             : "answer",
@@ -245,7 +246,7 @@ function resolveQuestionPlaces(
     const reveal = accepted ? [accepted] : matchingCapitals(question, context);
     const submitted =
       question.rule.type === "capital-coordinate"
-        ? capitalForName(context, responseText)
+        ? responsePlaceForName(question, context, responseText)
         : undefined;
     return [
       ...new Map(
@@ -278,12 +279,7 @@ function resolveQuestionPlaces(
       (capital) => capital.countryId === countryId,
     )?.id;
     const places = question.feedbackPlaces ?? question.places ?? [];
-    const submitted =
-      places.find((place) =>
-        [place.name, ...(place.aliases ?? [])].some(
-          (name) => normalizeAnswer(name) === normalizeAnswer(responseText),
-        ),
-      ) ?? capitalForName(context, responseText);
+    const submitted = responsePlaceForName(question, context, responseText);
     const result = places.map((place) => ({
       ...place,
       visualState:
@@ -307,7 +303,9 @@ function resolveQuestionPlaces(
     ? projectPlaces(
         (question.feedbackPlaces ?? question.places ?? []).map<PlaceFeature>(
           (place) =>
-            question.mode.startsWith("choice-") && place.answerTarget
+            question.mode.startsWith("choice-") &&
+            place.answerTarget &&
+            items.some((item) => item.geographyIds.includes(place.id))
               ? { ...place, visualState: "answer" }
               : place,
         ),
@@ -326,6 +324,7 @@ export function questionMapPresentation(
   question: Question,
   phase: GameState["phase"],
   correct = false,
+  helpStage?: "hinted" | "assisted",
 ) {
   const recap = phase === "home" || phase === "finished";
   const reveal =
@@ -334,9 +333,13 @@ export function questionMapPresentation(
       (correct && question.map?.revealOnCorrect));
   return {
     borders:
-      phase === "feedback" && question.map?.feedbackBorders !== undefined
-        ? question.map.feedbackBorders
-        : recap || !!reveal || question.map?.borders !== false,
+      phase === "playing" &&
+      helpStage === "assisted" &&
+      question.guidance?.assist?.borders !== undefined
+        ? question.guidance.assist.borders
+        : phase === "feedback" && question.map?.feedbackBorders !== undefined
+          ? question.map.feedbackBorders
+          : recap || !!reveal || question.map?.borders !== false,
     hover: recap || !!reveal || question.map?.hoverFeedback !== false,
     muteOthers:
       !recap &&
@@ -397,7 +400,8 @@ export function questionRegions(
   const cacheKey = `${phase}:${helpStage ?? ""}`;
   const highlights = (question.highlightParts ?? []).filter(
     (highlight) =>
-      phase === "playing" || (phase === "feedback" && !!highlight.reveal),
+      phase === "playing" ||
+      ((phase === "feedback" || phase === "finished") && !!highlight.reveal),
   );
   // An imported reveal is available to the answer checker, but must not leave
   // an identifying outline in the playable map before the answer is committed.
@@ -477,7 +481,7 @@ export function questionRegions(
       ...owner,
       id: highlightedPartId(owner.id),
       name:
-        phase === "feedback"
+        phase === "feedback" || phase === "finished"
           ? (highlight.name ?? "Highlighted territory")
           : "Highlighted territory",
       parentId: owner.id,
@@ -524,7 +528,10 @@ export function questionVisualStates(
     [...context.regions, ...(question.importedRegions ?? [])].map((r) => [
       r.id,
       game.phase === "playing" &&
-      (question.mode === "pin" || (wholeWorld && context.members.has(r.id)))
+      (question.map?.background === "open-search" ||
+        (wholeWorld &&
+          question.map?.candidates === "neutral" &&
+          context.members.has(r.id)))
         ? "surface"
         : question.map?.neutralRegions
           ? "default"
@@ -564,13 +571,15 @@ export function questionVisualStates(
             question.selection.type === "neighbors" ||
             question.map?.candidates === "highlighted"
               ? "selectable"
-              : wholeWorld
+              : wholeWorld && question.map?.candidates === "neutral"
                 ? "surface"
                 : question.map?.candidates === "decorative"
                   ? "surface"
                   : "disabled";
     for (const id of question.candidateRegionIds ?? [])
-      if (context.targets.has(id)) states[id] = "selectable";
+      if (context.targets.has(id))
+        states[id] =
+          question.map?.candidateRole === "clue" ? "clue" : "selectable";
     if (question.disclosure.previousVisits)
       for (const answer of game.answers)
         for (const id of answer.selectedIds)
@@ -591,9 +600,16 @@ export function questionVisualStates(
       for (const id of selectableIds(question, context))
         if (context.targets.has(id)) {
           if (!candidateAvailable(question, game, id)) states[id] = "disabled";
-          else if (question.mode.startsWith("map-")) states[id] = "selectable";
+          else if (
+            question.mode.startsWith("map-") &&
+            question.guidance?.assist?.candidateIds
+          )
+            states[id] = "selectable";
         }
-    if (!question.mode.startsWith("choice-"))
+    if (
+      !question.mode.startsWith("choice-") &&
+      question.map?.selectionFeedback !== "after-submit"
+    )
       for (const id of game.selectedIds)
         if (
           context.targets.has(id) &&
@@ -622,10 +638,20 @@ export function questionVisualStates(
         if (
           context.targets.has(id) &&
           (states[id] === "selectable" ||
+            states[id] === "clue" ||
             states[id] === "selected" ||
             question.map?.candidates === "highlighted")
         )
-          states[id] = item.state;
+          // A named or typed answer must not identify an anonymous candidate shape.
+          // Elimination remains independent of pending selection and never reveals the pick.
+          states[id] =
+            question.map?.selectionFeedback === "after-submit"
+              ? item.eliminated
+                ? "disabled"
+                : question.map.candidateRole === "clue"
+                  ? "clue"
+                  : "selectable"
+              : item.state;
     return states;
   }
   const expected = solutionIds(question, context);
@@ -658,7 +684,12 @@ export function questionVisualStates(
   if (!placeAnswer)
     for (const id of expected)
       if (context.targets.has(id))
-        states[id] = question.mode === "number" ? "hinted" : "answer";
+        // A count's qualifying set or shortest route is its geographic solution.
+        // Supporting context stays blue; no per-area selection symbols are added.
+        states[id] =
+          question.mode === "number" && game.answers.at(-1)?.correct
+            ? "correct"
+            : "answer";
   if (question.rule.type === "pin-inside")
     for (const id of expected) {
       if (
@@ -709,8 +740,8 @@ export function questionVisualStates(
   return states;
 }
 
-// Context countries and written-answer geography are part of the journey too.
-// A multiple-pick rule contributes only the actual picks, not every valid answer.
+// Required revealed solutions survive a miss. Alternative-answer tasks retain
+// the accepted picks or one canonical example, rather than the entire valid pool.
 export function journeyVisitedStates(
   journey: Journey,
   context: QuestionContext,
@@ -727,6 +758,22 @@ export function journeyVisitedStates(
       roundIndex: journey.rounds.indexOf(question),
       answers: [answer],
     };
+    const example =
+      acceptsAlternatives(question) && question.mode !== "number"
+        ? new Set(
+            answer.correct
+              ? responseIds(question, context, review)
+              : solutionIds(question, context).slice(0, question.count),
+          )
+        : undefined;
+    for (const [id, state] of Object.entries(
+      questionVisualStates(question, context, review),
+    ))
+      if (
+        (state === "correct" || state === "answer") &&
+        (!example || example.has(id) || id.startsWith("clue-part:"))
+      )
+        states[id] = "visited";
     // Choice IDs and merged targets need their graded depiction, not raw save IDs.
     if (question.mode !== "ordered-capitals")
       for (const item of answerItems(question, context, review))
@@ -808,7 +855,7 @@ export function journeyVisitedStates(
     if (question.mode !== "map-multiple")
       for (const id of question.mode === "land-path" && answer.correct
         ? answer.selectedIds
-        : expected)
+        : expected.filter((id) => !example || example.has(id)))
         if (context.names.has(id)) states[id] = "visited";
     if (!answer.correct)
       for (const id of answer.selectedIds)
@@ -879,6 +926,19 @@ export function journeyDiscoveryPlaces(
         }),
       );
     }
+    for (const highlight of question.highlightParts ?? [])
+      if (highlight.reveal && highlight.name) {
+        const id = `discovery:${question.id}:${highlight.countryId}`;
+        places.set(id, {
+          id,
+          name: highlight.name,
+          ...highlight.point,
+          kind: "other",
+          sourceId: "journey",
+          markerHidden: true,
+          visualState: "visited",
+        });
+      }
   }
   return [...places.values()];
 }

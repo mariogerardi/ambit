@@ -110,6 +110,13 @@ export function createQuestionContext(
       );
     }
     for (const choice of round.choices ?? [])
+      if (
+        choice.id.startsWith("wurl:") &&
+        !context.targets.has(choice.id) &&
+        !choice.geographyIds?.length
+      )
+        throw Error(`Unknown country choice ${choice.id} for ${round.id}.`);
+    for (const choice of round.choices ?? [])
       for (const id of choice.geographyIds ?? [])
         if (
           !context.targets.has(id) &&

@@ -172,7 +172,7 @@ export const ANDES_JOURNEY: Journey = {
     physicalFeatures: [andesAtLake, lake],
     places: discoveries,
     caption:
-      "From Bogotá’s highlands to the king penguins of Tierra del Fuego, this Journey connects cities, summits, a shared lake and a living southern coast.",
+      "From Bogotá’s highlands to the king penguins of Tierra del Fuego, South America’s mountain spine connects high plateaus, shared waters, towering summits, and a cold southern coast.",
   },
   rounds: [
     defineQuestion({

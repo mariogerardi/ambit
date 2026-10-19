@@ -14,6 +14,7 @@ import type { GameState } from "../src/game/state";
 import type { RegionFeature } from "../src/geography/types";
 import { journeyWorld } from "../src/app/journeyWorld";
 import { regionAnswerId, highlightedPartId } from "../src/game/presentation";
+import { playColors } from "../src/theme/playColors";
 import { playRegionStyle } from "../src/globe/themes";
 import { sphericalGeometry } from "../src/geography/sphericalGeometry.mjs";
 import { regionBorderVisible } from "../src/globe/outlines";
@@ -73,9 +74,7 @@ describe("Island instincts Journey", () => {
         (r) => r.id === highlightedPartId(owners[i]),
       )!;
       expect(view.states[clue.id]).toBe("clue");
-      expect(playRegionStyle(clue.id, "clue").fill).toBe(
-        playRegionStyle(owners[i], "hinted").stroke,
-      );
+      expect(playRegionStyle(clue.id, "clue").fill).toBe(playColors().clue);
       expect(playRegionStyle(clue.id, "clue").fill).not.toBe(
         playRegionStyle(owners[i], "selectable").fill,
       );
