@@ -71,6 +71,8 @@ export function useCameraOrchestration({
   } = journeyCamera;
   const round = journey.rounds[roundIndex];
   const helpFraming =
+    isJourney &&
+    round &&
     phase === "playing" &&
     ((help?.[round.id] === "assisted" && !!round.guidance?.assist?.focus) ||
       (help?.[round.id] === "hinted" && !!round.guidance?.hintMap?.focus))

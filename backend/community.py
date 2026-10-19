@@ -341,6 +341,25 @@ def saved_values(subject, namespace, field=None):
     return [json.loads(item["valueJson"]) for item in saved_records(subject) if item["namespace"] == namespace and (not field or item["field"] == field)]
 
 
+def journey_points(answers, usage):
+    """Rewards are separate from correctness; old answers keep prior full credit."""
+    points, legacy = 0, False
+    for answer in answers:
+        if not isinstance(answer, dict):
+            continue
+        old = "pointsVersion" not in answer and "points" not in answer
+        legacy = legacy or old
+        if answer.get("correct") is not True:
+            continue
+        if old:
+            points += 3
+        elif answer.get("pointsVersion") == 1 and type(answer.get("points")) is int and 0 <= answer["points"] <= 3:
+            stage = usage.get(answer.get("roundId")) if isinstance(usage, dict) else None
+            ceiling = 1 if stage == "assisted" else 2 if stage == "hinted" else 3
+            points += min(answer["points"], ceiling)
+    return min(15, points), legacy
+
+
 def progress_summary(subject, fresh=False, cached_records=None):
     cached = None if fresh else (get("user#" + subject, "activity-v1") if cached_records is None else cached_records.get(("user#" + subject, "activity-v1")))
     now = int(time.time())
@@ -404,6 +423,9 @@ def progress_summary(subject, fresh=False, cached_records=None):
         completed = game.get("phase") in ("finished", "failed")
         activity.append({"date": day, "journeyId": journey, "gameId": "journey", "gameVersion": attempt.get("scheduleVersion", 1), "status": "completed" if completed else "not_started" if game.get("phase") == "home" else "in_progress", "correct": sum(a.get("correct") is True for a in answers if isinstance(a, dict)) if completed else None, "total": 5, "startedAt": attempt.get("startedAt", 0)})
         usage = game.get("help", {})
+        if completed:
+            points, legacy = journey_points(answers, usage)
+            activity[-1].update({"points": points, "maxPoints": 15, "legacyPoints": legacy})
         if completed and isinstance(usage, dict):
             # Only aggregate help for answered rounds; never disclose IDs, clues or inputs.
             answered = {a.get("roundId") for a in answers if isinstance(a, dict) and isinstance(a.get("roundId"), str)}
@@ -456,9 +478,9 @@ def shared_activity(summary, viewer, today):
     if daily:
         today_status["journeyId"] = daily["journeyId"]
         if daily["status"] == "completed" and not today_status["scoreLocked"]:
-            today_status["score"] = {k: daily[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total", "help") if k in daily}
+            today_status["score"] = {k: daily[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total", "help", "points", "maxPoints", "legacyPoints") if k in daily}
     # Lock historical results by Journey identity too, including admin overrides.
-    scores = [{k: a[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total", "help") if k in a} for a in completed if (a["date"], a["journeyId"], a["gameVersion"]) in finished][:30]
+    scores = [{k: a[k] for k in ("date", "journeyId", "gameId", "gameVersion", "correct", "total", "help", "points", "maxPoints", "legacyPoints") if k in a} for a in completed if (a["date"], a["journeyId"], a["gameVersion"]) in finished][:30]
     return {"today": today_status, "stats": {"journeyStreak": streak, "journeysCompleted": len(completed), "studySessions": summary["studySessions"], "studyQuestions": summary["studyQuestions"], "studyAccuracy": summary["studyAccuracy"]}, "journeys": scores}
 
 

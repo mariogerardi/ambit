@@ -132,7 +132,7 @@ it("shows completion without leaking a locked daily score and opens a friend’s
   expect(host.textContent).toContain(
     "Finish the same Journey to reveal their score",
   );
-  expect(host.textContent).not.toContain("4/5");
+  expect(host.textContent).not.toContain("12/15");
   await click("Block");
   expect(onAction).toHaveBeenCalledWith("b", "block");
 });
@@ -174,10 +174,10 @@ it("keeps the directory focused on friends and shows comparisons inside their pr
   await click("View Bob’s profile");
   expect(
     host.querySelector(".account-comparison tbody")?.textContent,
-  ).toContain("3/5");
+  ).toContain("9/15");
   expect(
     host.querySelector(".account-comparison tbody")?.textContent,
-  ).toContain("4/5");
+  ).toContain("12/15");
   expect(
     host.querySelector(".account-comparison tbody")?.textContent,
   ).toContain("Hinted");
@@ -291,10 +291,10 @@ it("compares you first and friends alphabetically, excluding other Journey editi
     "Amy",
     "Bob",
   ]);
-  expect(rows[0].textContent).toContain("3/5");
+  expect(rows[0].textContent).toContain("9/15");
   expect(rows[1].textContent).toContain("Different Journey");
-  expect(rows[1].textContent).not.toContain("5/5");
-  expect(rows[2].textContent).toContain("4/5");
+  expect(rows[1].textContent).not.toContain("15/15");
+  expect(rows[2].textContent).toContain("12/15");
   expect(host.querySelector('[aria-label="Friends views"]')).toBeNull();
   expect(host.querySelectorAll(".friend-card")).toHaveLength(2);
 });
@@ -580,7 +580,7 @@ it("shows unlocked help as icons with counts and accessible summaries while reta
     },
   });
   const result = host.querySelector(".friend-comparison-list li:last-child")!;
-  expect(result.querySelector(".comparison-score")?.textContent).toBe("4/5");
+  expect(result.querySelector(".comparison-score")?.textContent).toBe("12/15");
   const help = result.querySelector('.comparison-help[role="img"]')!;
   expect(help.getAttribute("aria-label")).toBe(
     "Assisted · 3 hints · 2 assists",

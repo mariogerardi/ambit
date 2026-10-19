@@ -18,6 +18,15 @@ import { FriendJourneyComparison } from "./FriendJourneyComparison";
 import { dailyJourney, SCHEDULE_VERSION } from "./dailyProgress";
 import type { DailyProgress } from "./dailyProgress";
 import { helpSummary } from "../game/guidance";
+import {
+  journeyPoints,
+  legacyPointCredit,
+  scorePointTotals,
+} from "../game/points";
+const pointFraction = (score: JourneyScore) => {
+  const points = scorePointTotals(score);
+  return `${points.earned}/${points.maximum}`;
+};
 
 function ScoreHelp({ score }: { score: JourneyScore }) {
   const status = score.help?.status ?? "unassisted";
@@ -407,6 +416,9 @@ export function FriendsPanel({
           correct: attempt.game.answers.filter((answer) => answer.correct)
             .length,
           total: 5,
+          points: journeyPoints(attempt.game),
+          maxPoints: 15,
+          legacyPoints: legacyPointCredit(attempt.game),
           help: helpSummary(attempt.game),
         }
       : undefined;
@@ -459,7 +471,7 @@ export function FriendsPanel({
           <p className={`friend-daily-status status-${selected.today.status}`}>
             Today’s Journey · {statusLabel[selected.today.status]}
             {selected.today.score &&
-              ` · ${selected.today.score.correct}/${selected.today.score.total}`}
+              ` · ${pointFraction(selected.today.score)}`}
           </p>
           {selected.today.scoreLocked && (
             <p className="muted">
@@ -498,11 +510,11 @@ export function FriendsPanel({
                           <small>{score.date}</small>
                         </td>
                         <td>
-                          {yours ? `${yours.correct}/${yours.total}` : "—"}
+                          {yours ? pointFraction(yours) : "—"}
                           {yours && <ScoreHelp score={yours} />}
                         </td>
                         <td>
-                          {score.correct}/{score.total}
+                          {pointFraction(score)}
                           <ScoreHelp score={score} />
                         </td>
                       </tr>

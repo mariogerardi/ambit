@@ -99,6 +99,7 @@ export function AnswerForm({
         </p>
         <div className="pin-answer-actions">
           <QuestionActions
+            pointScoring
             guidance={guidance}
             label="Submit pin"
             disabled={!canSubmit(question, context, game)}
@@ -148,6 +149,7 @@ export function AnswerForm({
           ))}
         </div>
         <QuestionActions
+          pointScoring
           guidance={guidance}
           showSubmit={question.commitment === "submit"}
           disabled={!canSubmit(question, context, game)}
@@ -237,13 +239,18 @@ export function AnswerForm({
           </p>
         ) : (
           <QuestionActions
+            pointScoring
             guidance={guidance}
             disabled={!canSubmit(question, context, game)}
             onSubmit={() => dispatch({ type: "submit" })}
           />
         )}
         {question.commitment === "immediate" && (
-          <QuestionActions guidance={guidance} showSubmit={false} />
+          <QuestionActions
+            pointScoring
+            guidance={guidance}
+            showSubmit={false}
+          />
         )}
         {question.mode !== "merged-region-single" &&
           !question.disclosure.namedChoices &&
@@ -414,6 +421,7 @@ export function AnswerForm({
         </>
       )}
       <QuestionActions
+        pointScoring
         guidance={guidance}
         submitType="submit"
         disabled={!canSubmit(question, context, game)}

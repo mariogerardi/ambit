@@ -16,6 +16,13 @@ import {
   committedNameVisible,
 } from "./questionText";
 import { journeyScore } from "./state";
+import {
+  answerPoints,
+  journeyPoints,
+  legacyPointCredit,
+  QUESTION_POINTS,
+} from "./points";
+import { PointOrbs } from "./PointOrbs";
 import { helpSummary, helpCountCopy } from "./guidance";
 import type { GameState, Action } from "./state";
 import { questionMapPresentation } from "./presentation";
@@ -290,11 +297,18 @@ export function GameShell({
               className={`round-feedback ${correct ? "answer-correct" : "answer-discovered"}`}
               role="status"
             >
-              <div className="feedback-label">
-                <span>{correct ? "✳" : "◎"}</span>
-                {correct
-                  ? (distanceTier?.feedback ?? correctAnswerCopy(round))
-                  : "Not quite."}
+              <div className="feedback-point-summary">
+                <div className="feedback-label">
+                  <span>{correct ? "✳" : "◎"}</span>
+                  {correct
+                    ? (distanceTier?.feedback ?? correctAnswerCopy(round))
+                    : "Not quite."}
+                </div>
+                <PointOrbs
+                  earned={answerPoints(feedback, game.help?.[round.id])}
+                  key={round.id}
+                  animate
+                />
               </div>
               <p className="study-response study-correction journey-correct-answer">
                 <span>{correctAnswer.label}: </span>
@@ -488,12 +502,31 @@ export function GameShell({
           </h1>
           <div className="journey-score">
             <strong>
-              {journeyScore(game)}
-              <span>/{journey.rounds.length}</span>
+              {journeyPoints(game)}
+              <span>/{journey.rounds.length * QUESTION_POINTS}</span>
             </strong>
-            <span>correct answers</span>
+            <span>points</span>
           </div>
-          {helpCounts && <p className="journey-help-summary">{helpCounts}</p>}
+          <div className="journey-point-total">
+            <PointOrbs
+              earned={journeyPoints(game)}
+              total={journey.rounds.length * QUESTION_POINTS}
+              animate
+            />
+          </div>
+          <p className="journey-result-summary">
+            <span className="journey-correct-count">
+              {journeyScore(game)}/{journey.rounds.length} correct answers
+            </span>
+            {helpCounts && (
+              <span className="journey-help-summary">{helpCounts}</span>
+            )}
+          </p>
+          {legacyPointCredit(game) && (
+            <p className="journey-legacy-points">
+              Earlier answers keep full credit under the previous scoring rules.
+            </p>
+          )}
           {game.phase === "failed" && <p>{feedbackText}</p>}
 
           <ol className="journey-receipt">
@@ -580,14 +613,18 @@ export function GameShell({
                         />
                       </span>
                     )}
-                    <span
-                      className={
-                        answer && !answer.correct
-                          ? "journey-incorrect"
-                          : undefined
-                      }
-                    >
-                      {answer ? (answer.correct ? "✓" : "×") : "Not reached"}
+                    <span className="journey-round-points">
+                      <PointOrbs
+                        earned={answerPoints(answer, help)}
+                        label={`Question ${i + 1}: ${answerPoints(answer, help)} of 3 points`}
+                      />
+                      <span
+                        className={`journey-round-outcome${answer && !answer.correct ? " journey-incorrect" : ""}`}
+                        aria-label={answer ? undefined : "Not reached"}
+                        title={answer ? undefined : "Not reached"}
+                      >
+                        {answer ? (answer.correct ? "✓" : "×") : "—"}
+                      </span>
                     </span>
                   </span>
                 </li>

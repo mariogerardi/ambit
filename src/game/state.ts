@@ -13,11 +13,15 @@ import { canSelect, responseCount, solutionIds } from "./questionPreparation";
 import type { Journey, QuestionContext, Response } from "./questionContracts";
 import { canSubmit, isCorrect } from "./questionEvaluation";
 import { cityIdForName } from "./answerTargets";
+import { submittedPoints, POINTS_VERSION } from "./points";
 export interface Answer extends Response {
   roundId: string;
   /** Captured at submission so a later facelift cannot rename earned results. */
   receiptLabel?: string;
   correct: boolean;
+  /** Submission-time rewards; absent for answers earned under the old rules. */
+  points?: number;
+  pointsVersion?: number;
 }
 export interface GameState extends Response {
   phase: "home" | "playing" | "feedback" | "finished" | "failed";
@@ -82,6 +86,13 @@ export function gameReducer(
         ordered: [...response.ordered],
         pin: response.pin ? { ...response.pin } : undefined,
         correct,
+        points: submittedPoints(
+          round,
+          response,
+          correct,
+          state.help?.[round.id],
+        ),
+        pointsVersion: POINTS_VERSION,
       },
     ],
   });

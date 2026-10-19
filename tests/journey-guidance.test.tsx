@@ -365,9 +365,10 @@ describe("authored Journey hint and assist stages", () => {
     expect(rows[0].querySelector(".journey-round-result")?.textContent).toBe(
       "✓",
     );
-    expect(rows[3].querySelector(".journey-round-result")?.textContent).toBe(
-      "Not reached",
+    expect(rows[3].querySelector(".journey-round-outcome")?.textContent).toBe(
+      "—",
     );
+    expect(rows[3].querySelector('[aria-label="Not reached"]')).toBeTruthy();
     expect(content.querySelectorAll(".journey-row-help")).toHaveLength(2);
     for (const row of rows)
       expect(row.textContent).not.toMatch(/Hinted|Assisted/);

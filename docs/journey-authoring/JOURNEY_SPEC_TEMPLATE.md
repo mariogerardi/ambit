@@ -42,8 +42,11 @@ Journey being created or edited (title, ID, source file):
   territory-inside pins use canonical containment without invented distance tiers.
   Choose useful inner radii, describe all three band distances before submission,
   and keep supplied point
-  references outside the acceptance zone. Current accepted pins earn one correct
-  answer; proposed tier points or Journey weights require separate design.
+  references outside the acceptance zone. Standard distance tiers earn 3/2/1
+  points; accepted pins still count as one correct answer. Territory-inside pins
+  earn three points. Hint/assist ceilings are two/one, applied with `min`, not an
+  additional deduction. All five questions currently total 15 points; variable
+  weights and timers require separate design.
 - **Play scene:** camera intent (coordinates only if reviewed), contextual regions,
   selectable objects, labels, borders, overlays, physical features and media.
   State what is deliberately hidden and why the player still has a fair task.

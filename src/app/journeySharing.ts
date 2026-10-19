@@ -1,12 +1,20 @@
 import { helpCountCopy, helpSummary } from "../game/guidance";
 import type { Journey } from "../game/questionContracts";
 import type { GameState } from "../game/state";
+import {
+  journeyPoints,
+  legacyPointCredit,
+  QUESTION_POINTS,
+} from "../game/points";
 export const DAILY_SHARE_URL = "https://playambit.com/daily";
 
 export interface SharedJourneyResult {
   title: string;
   date: string;
   correct: number;
+  points: number;
+  maxPoints: number;
+  legacyPoints: boolean;
   outcomes: ("correct" | "incorrect" | "unreached")[];
   help: string;
   endedEarly: boolean;
@@ -23,6 +31,9 @@ export function sharedJourneyResult(
     title: journey.title,
     date,
     correct: game.answers.filter((answer) => answer.correct).length,
+    points: journeyPoints(game),
+    maxPoints: journey.rounds.length * QUESTION_POINTS,
+    legacyPoints: legacyPointCredit(game),
     outcomes: journey.rounds.map((round) => {
       const answer = game.answers.find((answer) => answer.roundId === round.id);
       return !answer ? "unreached" : answer.correct ? "correct" : "incorrect";
@@ -53,7 +64,10 @@ export function resultText(result: SharedJourneyResult) {
   return [
     `Ambit · ${resultDate(result.date)}`,
     result.title,
-    `${result.outcomes.map((value) => (value === "correct" ? "✓" : value === "incorrect" ? "×" : "—")).join(" ")} · ${result.correct}/${result.outcomes.length}`,
+    `${result.outcomes.map((value) => (value === "correct" ? "✓" : value === "incorrect" ? "×" : "—")).join(" ")} · ${result.points}/${result.maxPoints} points`,
+    ...(result.legacyPoints
+      ? ["Earlier answers retain their original credit."]
+      : []),
     ...(result.endedEarly ? ["Ended early · — not reached"] : []),
     result.help,
     `Play today’s Journey: ${result.playUrl}`,
@@ -127,57 +141,60 @@ export function paintResultCard(
   ctx.fillStyle = "#edf4f7";
   ctx.font = '800 160px "Manrope"';
   const titleBottom = 275 + (lines.length - 1) * size * 1.15;
-  const previousBaseline = titleBottom + 125;
-  const transferredSpace = Math.max(0, 615 - (previousBaseline + 45)) / 2;
-  const scoreBaseline = previousBaseline + transferredSpace;
-  ctx.fillText(
-    `${result.correct}/${result.outcomes.length}`,
-    80,
-    scoreBaseline,
-  );
+  const scoreBaseline = Math.max(520, titleBottom + 164);
+  const score = `${result.points}/${result.maxPoints}`;
+  const scoreWidth = ctx.measureText(score).width;
+  const scoreX = 80;
+  ctx.fillText(score, scoreX, scoreBaseline);
   ctx.font = '500 30px "Manrope"';
   ctx.fillStyle = "#b2c9d7";
-  ctx.fillText("correct answers", 85, scoreBaseline + 45);
-  result.outcomes.forEach((outcome, index) => {
-    const x = 80 + index * 116;
-    ctx.fillStyle =
-      outcome === "correct"
-        ? "#9de0b7"
-        : outcome === "incorrect"
-          ? "#ffa19a"
-          : "#7291a7";
+  ctx.fillText("points", scoreX + scoreWidth + 12, scoreBaseline);
+  for (let slot = 0; slot < result.maxPoints; slot++) {
+    const x = 94 + slot * 30,
+      y = scoreBaseline + 50,
+      filled = slot < result.points;
     ctx.beginPath();
-    ctx.roundRect(x, 615, 92, 92, 18);
-    ctx.fill();
-    ctx.strokeStyle = "#071321";
-    ctx.lineWidth = 7;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    if (outcome === "correct") {
-      ctx.moveTo(x + 23, 661);
-      ctx.lineTo(x + 40, 678);
-      ctx.lineTo(x + 70, 643);
-    } else if (outcome === "incorrect") {
-      ctx.moveTo(x + 29, 644);
-      ctx.lineTo(x + 63, 678);
-      ctx.moveTo(x + 63, 644);
-      ctx.lineTo(x + 29, 678);
-    } else {
-      ctx.moveTo(x + 28, 661);
-      ctx.lineTo(x + 64, 661);
+    ctx.arc(x, y, 12, 0, Math.PI * 2);
+    ctx.strokeStyle = filled ? "#a7d9cc" : "#7291a7";
+    ctx.lineWidth = 1.5;
+    if (filled) {
+      ctx.fillStyle = "#a7d9cc";
+      ctx.fill();
     }
     ctx.stroke();
-  });
+    if (filled) {
+      ctx.beginPath();
+      for (let vertex = 0; vertex < 10; vertex++) {
+        const angle = -Math.PI / 2 + (vertex * Math.PI) / 5;
+        const radius = vertex % 2 ? 3.2 : 7;
+        const px = x + Math.cos(angle) * radius,
+          py = y + Math.sin(angle) * radius;
+        if (vertex) ctx.lineTo(px, py);
+        else ctx.moveTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = "#071321";
+      ctx.fill();
+    }
+  }
   ctx.fillStyle = "#edf4f7";
   ctx.font = '500 28px "Manrope"';
-  wrapCardText(
-    result.help,
+  const summary = wrapCardText(
+    `${result.correct}/${result.outcomes.length} correct answers · ${result.legacyPoints ? "Earlier scoring · " : ""}${result.help}`,
     (text) => ctx.measureText(text).width,
-    1040,
-  ).forEach((line, i) => ctx.fillText(line, 80, 752 + i * 35));
+    960,
+  );
+  ctx.textAlign = "left";
+  summary.forEach((line, i) =>
+    ctx.fillText(line, 80, scoreBaseline + 108 + i * 42),
+  );
   if (result.endedEarly) {
     ctx.fillStyle = "#b2c9d7";
-    ctx.fillText("Ended early · — not reached", 80, 812);
+    ctx.fillText(
+      "Ended early · — not reached",
+      80,
+      scoreBaseline + 108 + summary.length * 42 + 12,
+    );
   }
   ctx.fillStyle = "#9fdde4";
   ctx.font = '600 27px "Manrope"';
@@ -185,7 +202,7 @@ export function paintResultCard(
   ctx.fillStyle = "#b2c9d7";
   ctx.font = '500 24px "Manrope"';
   const playUrl = new URL(result.playUrl);
-  ctx.fillText(playUrl.host + playUrl.pathname, 80, 882, 1040);
+  ctx.fillText(playUrl.host + playUrl.pathname, 80, 895, 1040);
 }
 export async function resultImage(result: SharedJourneyResult): Promise<Blob> {
   await Promise.all([

@@ -11,6 +11,7 @@ import {
 } from "../src/app/dailyProgress";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 import { initialGame } from "../src/game/state";
+import { journeyPoints } from "../src/game/points";
 import {
   STUDY_KEY,
   emptyStudy,
@@ -213,6 +214,15 @@ it("persists assistance through reload, stale draft writes and device merges wit
         game: {
           ...save.attempts[date].game,
           help: { [round]: "assisted" as const },
+          answers: [
+            {
+              ...initialGame,
+              roundId: round,
+              correct: true,
+              points: 3,
+              pointsVersion: 1,
+            },
+          ],
         },
       },
     },
@@ -240,6 +250,11 @@ it("persists assistance through reload, stale draft writes and device merges wit
   expect(reloaded.load().attempts[date].game.help).toEqual({
     [round]: "assisted",
   });
+  expect(reloaded.load().attempts[date].game.answers[0]).toMatchObject({
+    points: 3,
+    pointsVersion: 1,
+  });
+  expect(journeyPoints(reloaded.load().attempts[date].game)).toBe(1);
   reloaded.save(openDaily(reloaded.load(), date, true, JOURNEY_INDEX));
   expect(
     createDailySave(JOURNEY_INDEX).load().attempts[date].game.help,

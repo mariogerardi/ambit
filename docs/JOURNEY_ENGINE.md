@@ -375,17 +375,36 @@ response shapes are independent of these presentation rules.
 crosshair target, a distinct submitted pin, labelled radii, and the achieved band.
 Rings and accuracy coloring appear only after commitment. Overlays live under one
 persistent renderer layer; question changes remove and dispose its inactive
-children, including when leaving a Journey. Existing acceptance
-radii, all-or-nothing grades, points, and saved responses remain unchanged: an
-accepted pin still earns one correct answer, regardless of its visual band.
+children, including when leaving a Journey. Acceptance radii and boolean
+correctness remain unchanged: an accepted pin still counts as one correct answer.
+`points.ts` separately awards 3 / 2 / 1 for the standard three distance tiers and
+applies the hint/assist ceiling; colors never determine rewards.
 Missed distance pins use a shared adaptive overview when both locations fit on the
 visible globe. Feedback provides explicit **Show your pin** and **Show answer**
 camera controls for pin tasks; extremely distant or antipodal locations keep the
 answer framing and rely on those separate views. These controls change only the
 camera, never the submitted response. Nearby and correct pins preserve authored
 framing.
-Tier points, Journey weights, and historical assessment snapshots require a
-separate scoring contract; do not infer points from colors or band positions.
+`state.ts` records `Answer.points` (0–3) and `pointsVersion: 1` at submission.
+`points.ts` owns rewards and totals; `journeyScore` remains a correct-answer count.
+`answerPoints` preserves historical answers without these fields as full prior
+credit and clamps versioned rewards to stronger help arriving from another tab.
+Old coordinates and changed facts are never regraded. Daily save validation
+accepts legacy answers and validates new snapshots. `PointOrbs` renders fixed
+slots: three on feedback and receipts, 15 in one continuous completion row. Earned
+and hollow orbs animate together, sequentially from left to right, respecting
+reduced motion. Receipt help icons precede the aligned rewards and correctness symbol.
+Study uses the same action controls without Journey point costs. Variable weights
+and timers are not implemented.
+
+Shared cards, friend comparisons and backend activity totals use reward points
+out of 15, while retaining correctness counts and aggregate help separately.
+The results screen places correctness and help beside each other beneath the
+continuous 15-slot total. Shared image previews and downloaded PNGs use that same
+continuous earned-then-hollow orb row, with point and correctness totals kept distinct.
+The backend exposes `points`, `maxPoints` and `legacyPoints`, never private answer
+inputs or question IDs in a score response. Older cached/backend summaries without
+reward fields display full prior credit and are identified as earlier scoring.
 
 ## Extending the engine
 

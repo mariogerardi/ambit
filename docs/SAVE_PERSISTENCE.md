@@ -64,6 +64,15 @@ receipt labels, clear obsolete unsubmitted drafts/help, and skip already graded
 feedback. Completed results are not regraded. New runs capture receipt names
 and the current content revision. Synced register merges apply the same upgrade.
 
+New Journey answers also capture `points` (0–3) and `pointsVersion: 1`.
+Correctness and receipt names remain independent. Answers without point snapshots
+retain their old full credit (three for correct, zero for incorrect), including
+previously free help and accepted pin bands. They are not regraded or reset;
+results label earlier scoring. New rewards survive content facelifts. Stronger
+help merged from another tab caps a versioned reward without increasing it when
+help disappears. Friend summaries apply the same rule and retain correctness
+counts separately from the 15-point reward total.
+
 The Journey's **Play again**
 action creates that new run rather than resetting the old run's forward-only state;
 it keeps the played Journey even when the admin's local override is absent on a

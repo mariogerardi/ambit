@@ -32,6 +32,9 @@ export interface JourneyScore {
   journeyId: string;
   correct: number;
   total: number;
+  points?: number;
+  maxPoints?: number;
+  legacyPoints?: boolean;
   help?: {
     hints: number;
     assists: number;

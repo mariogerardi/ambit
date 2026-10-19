@@ -113,7 +113,7 @@ For distance pins, design four separate decisions:
 | **Acceptance radius** | The maximum distance that counts as correct.                        |
 | **Accuracy tiers**    | Ordered bands within the radius that distinguish placement quality. |
 | **Feedback**          | The distance, praise, and visual explanation for the achieved band. |
-| **Points**            | Whether bands earn the same score or explicitly different rewards.  |
+| **Points**            | Standard bands earn 3 / 2 / 1, capped independently by help used.   |
 
 Choose the radius for the intended skill, geographic scale, available clues, and
 small-screen input precision. Audit nearby plausible locations and both sides of
@@ -128,9 +128,8 @@ radius. Territory-inside pins grade an area, so do not invent concentric distanc
 tiers for them.
 
 Aconcagua accepts all pins within 450 km, with inclusive bands ending at 150, 300,
-and 450 km. Every band earns one correct answer; feedback varies by accuracy.
-Tiered feedback does **not** imply tiered points. More complex Journey scoring is
-future product work and must be explicitly designed before an author relies on it.
+and 450 km. Every accepted band earns one correct answer; point rewards are
+3, 2 and 1 respectively. Accuracy grading and reward points remain separate.
 Technical tier requirements live in the [question catalog](QUESTION_CATALOG.md#answer-modes).
 
 **Distractors are authored content, not filler.** Each plausible wrong choice should embody a recognizable misconception; at most a couple of obvious exclusions can make a question approachable. A useful four-choice structure may deliberately combine: a correct answer, a tempting near miss, a familiar category error, and an easier elimination. For example, a northern-Andes capital question can juxtapose **Bogotá** (capital in the Andes), **Caracas** (capital of an Andean country but outside the Andean range), **Medellín** (Andean city but not a national capital), and **Paramaribo** (capital outside the Andes). Do not state in the lead-in or hint that a listed distractor is wrong.
@@ -154,6 +153,35 @@ membership. Broader candidates may require a wider camera; do not leave the
 correct location privileged at the center or hide all plausible alternatives.
 
 When a round asks for _some_ members of a larger valid set, author the acceptance rule and reveal carefully. A set of three arbitrary countries out of seven may be technically easy to grade but too broad to make an engaging question. Prefer a specific spatial or conceptual relationship over “any three” when the narrower task offers a clearer learning payoff.
+
+### Point rewards
+
+The current five-question Daily is worth **15 points**: three per question.
+All 17 reviewed Journeys use this uniform budget. Variable question weights are
+not implemented; agree a new scoring/display contract before authoring them.
+
+- Discrete answers and territory-inside pins earn three points when correct,
+  otherwise zero. Multi-answer, ordered and matching questions retain their
+  all-or-nothing correctness contract; no new partial credit is implied.
+- Distance pins with the standard three tiers earn 3 / 2 / 1 from the innermost
+  to outermost accepted band, or zero outside acceptance. Legacy single-radius
+  pins retain three points for an accepted answer.
+- A hint caps the question at two points; an assist caps it at one. Apply
+  `min(outcome points, help ceiling)`, rather than subtracting help again from
+  an already lower pin reward. The strongest help stage wins across synced tabs.
+- The total stays out of 15 after help or an early finish. Unreached questions
+  contribute zero. Correct-answer counts remain a separate statistic.
+- Earned star orbs sit beside the reveal message: three fixed positions, filled
+  from left to right, then hollow. Results place the total below the closing line,
+  with one continuous row of 15 slots and per-question receipt rewards. Reveal all
+  slots once, sequentially from left to right, including hollow shells;
+  reduced motion uses a static display. Theme accents carry the orb styling.
+- New answers capture versioned point rewards at submission. Earlier submitted
+  answers retain full credit (three for a correct answer) under their original
+  rules, without recomputing old pin distances or retroactively charging for help.
+  Mixed/legacy receipts identify that earlier credit. The save data is not reset.
+
+There is no time limit or speed-based reward.
 
 ## 5. Give the globe purposeful question-state information
 
@@ -347,7 +375,9 @@ accuracy feedback merely by pinning a supplied reference marker. Keep reference
 points outside the outer acceptance zone and verify this against the authored
 coordinates; visual separation on the globe is not sufficient.
 
-Keep the hint on screen after the assist. Preserve prior selections and explain when eliminated choices conflict with them. Store the strongest help stage per round and reflect it in the receipt. **Correctness and completion stay unchanged**; assistance is reported separately (unassisted, hinted, assisted), not scored as a penalty.
+Keep the hint on screen after the assist. Preserve prior selections and explain when eliminated choices conflict with them. Store the strongest help stage per round and reflect it in the receipt. **Correctness and completion stay unchanged**; assistance is reported separately (unassisted, hinted, assisted) and caps the
+question's points at two for a hint or one for an assist. Disclose the ceiling
+before help is used; never change the acceptance rule or tolerance.
 
 Help controls should be visually secondary to the normal answer/submit action and clearly progress from “Need a hint?” to “Need an assist?”. Question information/sources/reporting is separate from gameplay help.
 
