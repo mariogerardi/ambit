@@ -979,6 +979,7 @@ export function App() {
                 placeLabels={studyPresentation.placeLabels}
                 routes={world?.routes ?? emptyRoutes}
                 overlays={world?.overlays}
+                clueLocators={world?.clueLocators}
                 showBorders={borders}
                 borderRegionIds={
                   world?.borderRegionIds ?? studyPresentation.borderRegionIds

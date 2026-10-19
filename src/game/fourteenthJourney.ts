@@ -34,7 +34,7 @@ const definitions = [
       "Indonesia",
       "Thailand",
     ],
-    focus: { lat: 15, lng: 90, altitude: 0.8 },
+    focus: { lat: 12, lng: 92, altitude: 0.65 },
     feedbackFocus: { lat: 17, lng: 86, altitude: 0.85 },
     explanation:
       "These islands belong to India as a union territory, across the Bay of Bengal from much of its mainland. Their closeness to Southeast Asia does not determine their political home.",
@@ -66,7 +66,7 @@ const definitions = [
       "Equatorial Guinea",
       "Benin",
     ],
-    focus: { lat: 3.4, lng: 5.7, altitude: 0.52 },
+    focus: { lat: 3.4, lng: 7, altitude: 0.45 },
     feedbackFocus: { lat: 2.5, lng: 9.2, altitude: 0.33 },
     explanation:
       "Bioko sits off Cameroon’s coast, but belongs to Equatorial Guinea. That country is divided between islands and a mainland territory farther south: the nearest coast is not the whole story.",
@@ -98,7 +98,7 @@ const definitions = [
       "Iceland",
       "United States",
     ],
-    focus: { lat: 69, lng: -8, altitude: 1.2 },
+    focus: { lat: 73, lng: 7, altitude: 1.05 },
     feedbackFocus: { lat: 72, lng: 17, altitude: 0.75 },
     explanation:
       "The Svalbard Treaty recognizes Norwegian sovereignty. Russian settlements are part of the archipelago’s story, but they do not make its islands Russian territory.",
@@ -130,7 +130,7 @@ const definitions = [
       "The Galápagos Islands are highlighted. Which country are they part of?",
     candidates: ["PAN", "PER", "CHL", "COL", "CRI", "ECU"],
     names: ["Panama", "Peru", "Chile", "Colombia", "Costa Rica", "Ecuador"],
-    focus: { lat: -3, lng: -83, altitude: 0.95 },
+    focus: { lat: -2, lng: -85, altitude: 0.8 },
     feedbackFocus: { lat: -1, lng: -85, altitude: 0.65 },
     explanation:
       "Roughly 1,000 km of Pacific water separates this Ecuadorian province from the mainland. Here, belonging spans an ocean gap rather than a shared land boundary.",
@@ -161,7 +161,7 @@ const definitions = [
       "India",
       "United Kingdom",
     ],
-    focus: { lat: -20, lng: 51, altitude: 0.7 },
+    focus: { lat: -20, lng: 52, altitude: 0.6 },
     feedbackFocus: { lat: 8, lng: 29, altitude: 1.45 },
     explanation:
       "Réunion is an overseas department of France, near Mauritius and Madagascar. Our final island belongs to a country whose European mainland is on the other side of Africa.",
@@ -230,6 +230,12 @@ export const FOURTEENTH_JOURNEY: Journey = {
       sources: [source(islands.source, islands.sourceUrl)],
       scenes: {
         play: {
+          clueLocators: [
+            {
+              regionId: `clue-part:${island.countryId}`,
+              label: definition.label,
+            },
+          ],
           focus: definition.focus,
           map: {
             borders: false,

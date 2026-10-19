@@ -98,6 +98,20 @@ an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
 contract, not scene geometry.
 
+`scenes.play.clueLocators` accepts `{ regionId, label }` annotations for supplied
+reference/candidate areas or highlighted fragments (`clue-part:<countryId>`).
+The builder requires a unique supplied area and a nonempty authored label; it does
+not infer an island or owner's name. Keep withheld names out of these labels.
+`journeyWorld` exposes locators only during play. `globe/clueLocators.ts` measures
+the projected display footprint, so sparse archipelagos and small areas receive
+the same treatment below 1,600 square screen pixels: a two-cycle blue pulse and
+a persistent leader/name callout. It avoids the horizon, viewport edges, question
+panel and other labels, creates no hit target, and is removed when play ends.
+Reduced motion retains only the static callout. These are orientation cues, not
+accuracy rings, grading geometry, or answer disclosure. Island instincts shows
+the pattern; use the same shared annotation rather than per-question city dots
+or thick white borders.
+
 For named-choice or typed-region questions that test identification of anonymous geography, author
 `scenes.play.map.selectionFeedback: "after-submit"` and use
 `map.candidateRole: "clue"` for noninteractive area pools. Blue clue fills remain uniform

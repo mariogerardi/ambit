@@ -76,6 +76,7 @@
     "src/theme/playColors.ts",
     "src/geography/interiorAnchor.ts",
     "src/globe/areaSymbols.ts",
+    "src/globe/clueLocators.ts",
     "src/globe/interaction.ts",
     "src/globe/outlines.ts",
     "src/globe/overlays.ts"

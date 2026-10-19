@@ -101,6 +101,7 @@ function editorialScene(view) {
       pick(feature, ["name", "kind", "lat", "lng"]),
     ),
     overlays: view.overlays,
+    clueLocators: view.clueLocators,
     routes: view.routes,
   };
 }
@@ -622,6 +623,11 @@ export async function exportJourneyKit(options) {
             places: world.places,
             physicalFeatures: world.physicalFeatures,
             overlays: world.overlays ?? [],
+            clueLocators: world.clueLocators.map(({ id, label, region }) => ({
+              id,
+              label,
+              regionId: region.id,
+            })),
             routes: world.routes,
             ...(stage === "play"
               ? { disclosure: question.disclosure, map: question.map }

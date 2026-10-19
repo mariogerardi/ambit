@@ -30,6 +30,8 @@ import type {
   PhysicalFeature,
 } from "../geography/types";
 import { canPickRegion } from "./interaction";
+import { ClueLocators } from "./clueLocators";
+import type { ClueLocator } from "./clueLocators";
 import { MapOverlays, isOverlayLayer } from "./overlays";
 import {
   CameraTravel,
@@ -84,6 +86,7 @@ interface Props {
   initialFocus?: Focus;
   physicalFeatures?: PhysicalFeature[];
   overlays?: MapOverlay[];
+  clueLocators?: ClueLocator[];
   surfaceRoutes?: boolean;
   showBorders?: boolean;
   borderRegionIds?: string[];
@@ -181,6 +184,11 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     const placeLabels = useMemo(() => new PlaceLabels(), []);
     const physical = useMemo(() => new PhysicalFeatures(), []);
     const mapOverlays = useMemo(() => new MapOverlays(), []);
+    const clueLocators = useMemo(() => new ClueLocators(), []);
+    useEffect(() => {
+      host.current?.append(clueLocators.element);
+      return () => clueLocators.dispose();
+    }, [clueLocators]);
     useEffect(
       () => mapOverlays.setPalette(props.palette ?? "atlas"),
       [mapOverlays, props.palette],
@@ -197,12 +205,32 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       const camera = g.camera() as PerspectiveCamera;
       // Geographic context gets first claim on space; city names then avoid it.
       physical.view(camera, rendererSize.x, rendererSize.y);
-      placeLabels.view(
+      const panel = document
+        .querySelector(".question-card")
+        ?.getBoundingClientRect();
+      const canvas = host.current?.getBoundingClientRect();
+      const panelBoxes =
+        panel?.width && canvas
+          ? [
+              {
+                left: panel.left - canvas.left,
+                right: panel.right - canvas.left,
+                top: panel.top - canvas.top,
+                bottom: panel.bottom - canvas.top,
+              },
+            ]
+          : [];
+      const clueBoxes = clueLocators.view(
         camera,
         rendererSize.x,
         rendererSize.y,
-        physical.labelBoxes(),
+        g.getGlobeRadius(),
+        [...physical.labelBoxes(), ...panelBoxes],
       );
+      placeLabels.view(camera, rendererSize.x, rendererSize.y, [
+        ...physical.labelBoxes(),
+        ...clueBoxes,
+      ]);
       if (
         (placeLabels.needsRefresh() || physical.needsRefresh()) &&
         !labelFrame.current
@@ -225,7 +253,23 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         if (position.z < 0)
           object.scale.x = object.scale.y = -position.z * pixelScale * 6;
       }
-    }, [placeLabels, physical]);
+    }, [placeLabels, physical, clueLocators]);
+    useEffect(() => {
+      clueLocators.update(
+        props.active === false ? [] : (props.clueLocators ?? []),
+        props.palette,
+        props.reduced,
+      );
+      refreshLabels();
+    }, [
+      props.clueLocators,
+      props.palette,
+      props.reduced,
+      props.active,
+      ready,
+      clueLocators,
+      refreshLabels,
+    ]);
     useEffect(() => {
       if (!document.fonts) return;
       let disposed = false;

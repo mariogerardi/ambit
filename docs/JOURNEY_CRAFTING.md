@@ -252,8 +252,16 @@ may both receive emphasis, but one answer must not acquire duplicate status
 symbols. Numeric crossing-count examples use geography as explanation, without
 claiming that each route territory was a submitted answer.
 Small clue fragments need a contrasting outline that remains visible at the
-authored zoom. Strengthen the clue's display stroke before enlarging its geometry
-or introducing point markers; candidate geography must not overpower the clue.
+authored zoom. Keep the shared thin boundary treatment; do not enlarge grading
+geometry, add city markers or use thick white borders to manufacture visibility.
+Candidate geography must not overpower the clue.
+When a supplied clue is too small to locate, use a modestly tighter camera and
+`scenes.play.clueLocators: [{ regionId, label }]`. The label must already be given
+to the player (or say “Highlighted island” when its name is withheld). The shared
+locator measures the displayed area, gives two short blue pulses, and leaves a
+fine leader/name callout while the clue remains small. It adds no city marker or
+answer hit target. Reduced motion uses only the static callout; locators clear on
+submission and exit. Never use one to expose an undisclosed pin target or owner.
 
 **Protect the task.** A named country supporting a city question is free
 orientation. A named country the player must locate with a pin is still a withheld
