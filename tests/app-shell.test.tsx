@@ -50,7 +50,9 @@ import historicRotation from "../scripts/legacy-journey-rotation.json";
 import { GLOBE_LAYERS_KEY, DEFAULT_LAYERS } from "../src/app/worldPreferences";
 import { MOBILE_LAYOUT_QUERY } from "../src/app/useMobileLayout";
 import { STUDY_PATHS } from "../src/study/paths";
+import type { ClueLocator } from "../src/globe/clueLocators";
 interface GlobeProps {
+  clueLocators?: ClueLocator[];
   palette?: string;
   visualScale?: number;
   initialFocus?: Focus;
@@ -2706,6 +2708,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     const clue = probe.props!.regions.find(
       (r) => r.id === "clue-part:wurl:IND",
     )!;
+    expect(probe.props!.clueLocators).toEqual([
+      expect.objectContaining({ label: "Andaman & Nicobar", region: clue }),
+    ]);
     await act(async () => probe.props!.onSelect(clue));
     expect(host.querySelector(".mode-incoming .round-feedback")).toBeNull();
     await act(async () =>
@@ -2717,6 +2722,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       host.querySelector(".mode-incoming .round-feedback")!.textContent,
     ).toContain("Correct answer: India");
     expect(probe.props!.states["clue-part:wurl:IND"]).toBe("correct");
+    expect(probe.props!.clueLocators).toEqual([]);
     await act(async () => probe.props!.onSelect(member("wurl:MMR")));
     expect(
       host.querySelector(".mode-incoming .round-feedback")!.textContent,
@@ -2725,6 +2731,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(
       host.querySelector(".mode-incoming .question-card")!.textContent,
     ).toContain("Bioko Norte");
+    expect(probe.props!.clueLocators?.map((c) => c.label)).toEqual(["Bioko"]);
     const answer = [
       ...host.querySelectorAll<HTMLButtonElement>(
         ".mode-incoming .candidate-grid button",

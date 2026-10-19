@@ -109,6 +109,22 @@ function setup(q: Question) {
 }
 
 describe("shared role rules independently of authored questions", () => {
+  it("retains only the authored label for a supplied reference locator during play", () => {
+    const q: Question = {
+      ...questions[0],
+      clueLocators: [{ regionId: "wurl:AUT", label: "Given reference" }],
+    };
+    const { context, game, view } = setup(q);
+    expect(auditVisualScene(q, context, game, view)).toEqual([]);
+    expect(
+      auditVisualScene(q, context, game, { ...view, clueLocators: [] }),
+    ).toContain(
+      `[clue-locator] Supplied area locator missing or renamed: ${q.id} / wurl:AUT`,
+    );
+    expect(
+      auditVisualScene(q, context, { ...game, phase: "feedback" }, view),
+    ).toContain(`[clue-locator] Locator survived play: ${q.id}`);
+  });
   it.each([questions[1], questions[2]])(
     "$mode keeps supplied area clues blue until a named answer is submitted",
     (baseQuestion) => {

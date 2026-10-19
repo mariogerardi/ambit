@@ -70,6 +70,9 @@ guide rather than prescribing per-question colors or marker sizes.
 |                          | area / point / line / label | reference / candidate / open search / withheld clue |                                  |                                            |
 
 - **Given and withheld:** distinguish a reference from the place to be found.
+  For tiny supplied clues, specify a play-only locator label already given in the
+  prompt, or generic wording if the name is withheld. Use the shared size-based
+  pulse/callout, never a city marker, owner label or withheld target locator.
   Explain deliberately hidden boundaries/features. Show area-selection outlines;
   do not expose a withheld pin target's footprint or coordinate.
 - **Outcome cases:** specify correct, actual wrong, and partial set/assignment

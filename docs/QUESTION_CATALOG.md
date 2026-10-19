@@ -307,6 +307,8 @@ Prefer grouped scenes: `scenes.play.contextIds` declares established references;
 `scenes.play.candidateRegionIds` declares a visible area pool; noninteractive
 name/button pools use `scenes.play.map.candidateRole: "clue"` with
 `selectionFeedback: "after-submit"` and no hover emphasis;
+`scenes.play.clueLocators` optionally supplies already-given labels and small-area
+orientation for visible region IDs. Never put a withheld name/target in a locator.
 `scenes.reveal.contextIds` supplies supporting geography and
 `scenes.reveal.answerIds` identifies actual solution areas. The compiler maps
 reveal fields to `feedbackHintIds` and `feedbackContextIds` respectively. These

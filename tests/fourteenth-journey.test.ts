@@ -73,6 +73,18 @@ describe("Island instincts Journey", () => {
       const clue = view.regions.find(
         (r) => r.id === highlightedPartId(owners[i]),
       )!;
+      expect(view.clueLocators).toEqual([
+        {
+          id: `${journey.id}:${q.id}:${clue.id}`,
+          label: q.progressLabel,
+          region: clue,
+        },
+      ]);
+      for (const phase of ["feedback", "finished", "home"] as const)
+        expect(
+          journeyWorld(world, journey, { ...at(i), phase }, context)
+            .clueLocators,
+        ).toEqual([]);
       expect(view.states[clue.id]).toBe("clue");
       expect(playRegionStyle(clue.id, "clue").fill).toBe(playColors().clue);
       expect(playRegionStyle(clue.id, "clue").fill).not.toBe(

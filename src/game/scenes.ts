@@ -10,6 +10,8 @@ export interface PlayScene {
   focus?: Focus;
   contextIds?: string[];
   candidateRegionIds?: string[];
+  /** Labels for already supplied area clues; never infer a withheld name. */
+  clueLocators?: { regionId: string; label: string }[];
   places?: PlaceFeature[];
   overlays?: MapOverlay[];
   physicalFeatures?: PhysicalFeature[];
@@ -55,6 +57,7 @@ export function compileQuestionScenes(
   };
   assign("contextIds", play?.contextIds);
   assign("candidateRegionIds", play?.candidateRegionIds);
+  assign("clueLocators", play?.clueLocators);
   assign("places", play?.places);
   assign("overlays", play?.overlays);
   assign("physicalFeatures", play?.physicalFeatures);

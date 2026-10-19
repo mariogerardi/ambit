@@ -219,11 +219,27 @@ export function journeyWorld(
     round.map?.borderIds || !map.borders
       ? [...new Set([...(round.map?.borderIds ?? []), ...outlinedIds])]
       : undefined;
+  const displayedRegions =
+    game.phase === "finished"
+      ? allRegions(regions, journey, game.answers)
+      : questionRegions(regions, round, game.phase, game.help?.[round.id]);
   return {
-    regions:
-      game.phase === "finished"
-        ? allRegions(regions, journey, game.answers)
-        : questionRegions(regions, round, game.phase, game.help?.[round.id]),
+    regions: displayedRegions,
+    clueLocators:
+      game.phase === "playing"
+        ? (round.clueLocators ?? []).flatMap((clue) => {
+            const region = displayedRegions.find((r) => r.id === clue.regionId);
+            return region
+              ? [
+                  {
+                    id: `${journey.id}:${round.id}:${clue.regionId}`,
+                    label: clue.label,
+                    region,
+                  },
+                ]
+              : [];
+          })
+        : [],
     states:
       game.phase === "finished"
         ? Object.fromEntries(

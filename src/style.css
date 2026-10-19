@@ -93,6 +93,53 @@ strong {
 .globe-canvas[data-pin-input] canvas {
   cursor: crosshair;
 }
+.clue-locators {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+.clue-locators path,
+.clue-locator-pulse {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25px;
+}
+.clue-locators text {
+  fill: currentColor;
+  stroke: var(--clue-label-stroke);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  font:
+    600 12px Manrope,
+    sans-serif;
+}
+.clue-locator-pulse {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.is-pulsing > .clue-locator-pulse {
+  animation: clue-locator-pulse 1.6s ease-out 2 both;
+}
+@keyframes clue-locator-pulse {
+  from {
+    transform: scale(0.65);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-pulsing > .clue-locator-pulse {
+    animation: none;
+  }
+}
 .ambit-wordmark {
   --logo-spacing: -0.02em;
   position: relative;

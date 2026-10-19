@@ -18,6 +18,8 @@ export const SHARED_VISUAL_RULES = {
     "Editable names must not reveal anonymous geography before submission.",
   "clue-role":
     "Anonymous shapes supplied for naming remain blue and noninteractive before submission.",
+  "clue-locator":
+    "Supplied area locators retain authored labels during play and clear when play ends.",
   "pin-reference":
     "Supplied reference points cannot themselves earn a correct pin.",
   "point-answer-role":
@@ -64,6 +66,19 @@ export function auditVisualScene(
 ) {
   const errors: string[] = [];
   const live = game.phase === "playing";
+  for (const clue of q.clueLocators ?? [])
+    if (
+      live &&
+      !world.clueLocators.some(
+        (locator) =>
+          locator.region.id === clue.regionId && locator.label === clue.label,
+      )
+    )
+      errors.push(
+        `[clue-locator] Supplied area locator missing or renamed: ${q.id} / ${clue.regionId}`,
+      );
+  if (!live && world.clueLocators.length)
+    errors.push(`[clue-locator] Locator survived play: ${q.id}`);
   if (live && mechanicFor(q).mapSelection === "none")
     for (const [id, state] of Object.entries(world.states))
       if (["selectable", "selected"].includes(state))

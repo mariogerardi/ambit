@@ -75,6 +75,22 @@ export function validateQuestionContract(q: Question): void {
       "clue candidates require noninteractive geography and deferred identity feedback",
     );
   const city = definition.mapSelection === "places";
+  const suppliedAreas = new Set([
+    ...(q.contextIds ?? []),
+    ...(q.candidateRegionIds ?? []),
+    ...(q.highlightParts ?? []).map((part) => `clue-part:${part.countryId}`),
+  ]);
+  if (
+    q.clueLocators?.some(
+      (clue, index, clues) =>
+        !clue.label.trim() ||
+        !suppliedAreas.has(clue.regionId) ||
+        clues.findIndex((other) => other.regionId === clue.regionId) !== index,
+    )
+  )
+    fail(
+      "clue locators require unique, explicitly supplied areas and authored labels",
+    );
   if (isRegionAnswer(q) || city) {
     if (q.selection.type === "none")
       fail("map answers require selectable candidates");

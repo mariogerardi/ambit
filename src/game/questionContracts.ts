@@ -239,6 +239,8 @@ export interface Question {
     /** City/physical answers can leave countries neutral on reveal. */
     feedbackRegions?: "neutral";
   };
+  /** Optional play-only orientation for small, explicitly supplied area clues. */
+  clueLocators?: { regionId: string; label: string }[];
   highlightParts?: {
     countryId: string;
     point: { lat: number; lng: number };

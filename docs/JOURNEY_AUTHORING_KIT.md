@@ -34,6 +34,12 @@ metadata can include compatibility/internal behavior that is not the recommended
 standard. Historical review notes are not exported as current policy.
 
 The highlights identify our most complete experiences, not a compulsory template.
+The 17 current Journeys are the reviewed reference set for new authoring; the
+four highlighted examples are convenient starting points. Preserve their
+established contracts and styles when proposing new content. Fresh local changes
+still need player review; neither a source snapshot nor automated checks certify
+every rendered view. Proposed point scoring is separate product work and is not
+part of the current one-correct-answer scoring contract.
 The kit encourages consulting other Journeys for repeated mechanics, different
 structures and unusual geography. Edit
 [`scripts/journey-export.config.json`](../scripts/journey-export.config.json) to
