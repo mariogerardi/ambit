@@ -133,15 +133,26 @@ it("shares current reward totals with a continuous earned-then-hollow orb row", 
   expect(unit.y).toBe(score.y);
   expect(unit.x).toBeGreaterThan(score.x);
   const summary = labels.find((l) => l.text.includes("4/5 correct answers"))!;
-  expect((score.x + unit.x + "points".length * 14) / 2).toBe(600);
-  expect((circles[0].x + circles.at(-1)!.x) / 2).toBe(600);
-  expect(summary.x).toBe(600);
+  expect(score.x).toBe(80);
+  expect(circles[0].x).toBe(94);
+  expect(summary.x).toBe(score.x);
   expect(circles[0].y - score.y).toBeLessThan(60);
   expect(summary.y - circles[0].y).toBeLessThan(60);
   const invitation = labels.find((l) => l.text === "Play today’s Journey")!;
   const url = labels.find((l) => l.text === "playambit.com/daily")!;
   expect(invitation.y).toBeGreaterThan(800);
   expect(url.y - invitation.y).toBeGreaterThan(35);
+  labels.length = 0;
+  paintResultCard(ctx, {} as CanvasImageSource, {
+    ...result,
+    legacyPoints: true,
+    help: "Assisted · 5 hints · 5 assists",
+  });
+  const summaryLines = labels.filter(
+    (l) => l.y >= score.y + 90 && l.y < invitation.y,
+  );
+  expect(summaryLines.length).toBeGreaterThan(1);
+  expect(summaryLines[1].y - summaryLines[0].y).toBeGreaterThan(35);
 });
 
 it("wraps long words without dropping title characters", () => {

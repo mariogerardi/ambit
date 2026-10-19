@@ -144,15 +144,13 @@ export function paintResultCard(
   const scoreBaseline = Math.max(520, titleBottom + 164);
   const score = `${result.points}/${result.maxPoints}`;
   const scoreWidth = ctx.measureText(score).width;
-  ctx.font = '500 30px "Manrope"';
-  const scoreX = (1200 - scoreWidth - 12 - ctx.measureText("points").width) / 2;
-  ctx.font = '800 160px "Manrope"';
+  const scoreX = 80;
   ctx.fillText(score, scoreX, scoreBaseline);
   ctx.font = '500 30px "Manrope"';
   ctx.fillStyle = "#b2c9d7";
   ctx.fillText("points", scoreX + scoreWidth + 12, scoreBaseline);
   for (let slot = 0; slot < result.maxPoints; slot++) {
-    const x = 600 - ((result.maxPoints - 1) * 30) / 2 + slot * 30,
+    const x = 94 + slot * 30,
       y = scoreBaseline + 44,
       filled = slot < result.points;
     ctx.beginPath();
@@ -186,26 +184,25 @@ export function paintResultCard(
     (text) => ctx.measureText(text).width,
     960,
   );
-  ctx.textAlign = "center";
+  ctx.textAlign = "left";
   summary.forEach((line, i) =>
-    ctx.fillText(line, 600, scoreBaseline + 90 + i * 35),
+    ctx.fillText(line, 80, scoreBaseline + 90 + i * 42),
   );
   if (result.endedEarly) {
     ctx.fillStyle = "#b2c9d7";
     ctx.fillText(
       "Ended early · — not reached",
-      600,
-      scoreBaseline + 90 + summary.length * 35 + 12,
+      80,
+      scoreBaseline + 90 + summary.length * 42 + 12,
     );
   }
-  ctx.textAlign = "left";
   ctx.fillStyle = "#9fdde4";
   ctx.font = '600 27px "Manrope"';
   ctx.fillText("Play today’s Journey", 80, 851);
   ctx.fillStyle = "#b2c9d7";
   ctx.font = '500 24px "Manrope"';
   const playUrl = new URL(result.playUrl);
-  ctx.fillText(playUrl.host + playUrl.pathname, 80, 891, 1040);
+  ctx.fillText(playUrl.host + playUrl.pathname, 80, 895, 1040);
 }
 export async function resultImage(result: SharedJourneyResult): Promise<Blob> {
   await Promise.all([

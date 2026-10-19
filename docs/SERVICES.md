@@ -103,7 +103,7 @@ Result sharing works for guests and signed-in players, including ended-early dai
 attempts. A locally generated 1200 × 940 PNG contains the title, date,
 point score, one continuous row of 15 star-orb slots, correct-answer count,
 aggregate help use and a link to today's Journey. The score, orb row and summary
-form a compact centered group; the invitation and play URL stay at the bottom.
+form a compact left-aligned group; the invitation and play URL stay at the bottom.
 A single sharing action sends the image with a short invitation caption; the
 caption avoids repeating the result and keeps its invitation and link on one line.
 Unsupported devices save the image and copy the caption together.
