@@ -10,6 +10,8 @@ const paths = {
   explore: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm5 5-3 7-7 3 3-7 7-3Z",
   journey:
     "M5 5h8a4 4 0 0 1 0 8H9a4 4 0 0 0 0 8h10M3 5a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm14 16a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z",
+  archive:
+    "M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2ZM7 2v4m10-4v4M3 10h18M7 14h3m4 0h3m-10 3h3",
 };
 
 export function ActionIcon({ name }: { name: keyof typeof paths }) {

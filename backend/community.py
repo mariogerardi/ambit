@@ -406,6 +406,9 @@ def progress_summary(subject, fresh=False, cached_records=None):
                                 usage[identifier] = stage
                 if usage:
                     preferred = {**preferred, "game": {**preferred["game"], "help": usage}}
+                completion_days = [candidate.get("completedOn") for candidate in (prior, value) if isinstance(candidate.get("completedOn"), str)]
+                if completion_days:
+                    preferred = {**preferred, "completedOn": min(completion_days)}
             attempts[identity] = preferred
         elif record["namespace"] == "study" and record["field"].startswith("history.") and isinstance(value.get("session"), dict):
             if not isinstance(value["session"].get("history", []), list) or not isinstance(value["session"].get("settings", {}), dict):
@@ -422,6 +425,7 @@ def progress_summary(subject, fresh=False, cached_records=None):
             continue
         completed = game.get("phase") in ("finished", "failed")
         activity.append({"date": day, "journeyId": journey, "gameId": "journey", "gameVersion": attempt.get("scheduleVersion", 1), "status": "completed" if completed else "not_started" if game.get("phase") == "home" else "in_progress", "correct": sum(a.get("correct") is True for a in answers if isinstance(a, dict)) if completed else None, "total": 5, "startedAt": attempt.get("startedAt", 0)})
+        activity[-1]["streakEligible"] = attempt.get("completedOn", day) == day
         usage = game.get("help", {})
         if completed:
             points, legacy = journey_points(answers, usage)
@@ -466,7 +470,7 @@ def activity_date(params):
 def shared_activity(summary, viewer, today):
     completed = [a for a in summary["activity"] if a["status"] == "completed"]
     finished = {(a["date"], a["journeyId"], a["gameVersion"]) for a in viewer["activity"] if a["status"] == "completed"}
-    days = {date.fromisoformat(a["date"]) for a in completed}
+    days = {date.fromisoformat(a["date"]) for a in completed if a.get("streakEligible", True)}
     day, streak = date.fromisoformat(today), 0
     if day not in days:
         day -= timedelta(days=1)

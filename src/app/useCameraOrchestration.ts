@@ -217,7 +217,12 @@ export function useCameraOrchestration({
       if (questionDestination) {
         stop();
         frame(questionDestination);
-      } else if (mode === "home" || mode === "explore" || mode === "study") {
+      } else if (
+        mode === "home" ||
+        mode === "explore" ||
+        mode === "archive" ||
+        mode === "study"
+      ) {
         // Overview screens share one continuously moving globe, never a saved orbit.
         const view = globe.current?.view();
         const worldZoom = altitude();
@@ -306,7 +311,8 @@ export function useCameraOrchestration({
   }, [ready, mode, namedRegions, focusExplore, stop]);
 
   const prepareNavigation = (url: string) => {
-    if (url !== "/" && url !== "/explore") stop();
+    if (url !== "/" && url !== "/explore" && url.split("?")[0] !== "/archive")
+      stop();
     globe.current?.cancelFocus();
   };
   const toggleMotion = () => {

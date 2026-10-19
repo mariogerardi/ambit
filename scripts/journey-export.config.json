@@ -37,6 +37,8 @@
   "implementationReferences": [
     "AGENTS.md",
     "src/app/ErrorBoundaries.tsx",
+    "src/app/JourneyArchive.tsx",
+    "src/app/archiveDates.ts",
     "src/app/useProgressSync.ts",
     "src/game/mechanics.ts",
     "src/game/answerNames.ts",

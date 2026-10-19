@@ -9,11 +9,13 @@ import { JourneyShareDialog } from "./JourneyShareDialog";
 
 export function JourneySocial({
   journey,
+  archive = false,
   attempt,
   sync,
   onNavigate,
 }: {
   journey: Journey;
+  archive?: boolean;
   attempt: DailyAttempt;
   sync: { status: string; retry(): void };
   onNavigate(url: string): void;
@@ -23,8 +25,14 @@ export function JourneySocial({
   const close = useCallback(() => setSharing(false), []);
   const result = useMemo(
     () =>
-      sharedJourneyResult(journey, attempt.game, attempt.date, location.origin),
-    [journey, attempt.game, attempt.date],
+      sharedJourneyResult(
+        journey,
+        attempt.game,
+        attempt.date,
+        location.origin,
+        archive,
+      ),
+    [journey, attempt.game, attempt.date, archive],
   );
   const target = {
     date: attempt.date,

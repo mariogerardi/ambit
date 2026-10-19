@@ -4,6 +4,7 @@ export type AppMode =
   | "admin"
   | "home"
   | "daily"
+  | "archive"
   | "explore"
   | "study"
   | "practice";
@@ -13,13 +14,15 @@ export function modeForPath(path: string): AppMode {
     ? "account"
     : path === "/admin"
       ? "admin"
-      : path === "/daily"
-        ? "daily"
-        : path === "/explore"
-          ? "explore"
-          : path === "/study"
-            ? "study"
-            : JOURNEY_INDEX.some((j) => j.path === path)
-              ? "practice"
-              : "home";
+      : path === "/archive"
+        ? "archive"
+        : path === "/daily" || path.startsWith("/archive/")
+          ? "daily"
+          : path === "/explore"
+            ? "explore"
+            : path === "/study"
+              ? "study"
+              : JOURNEY_INDEX.some((j) => j.path === path)
+                ? "practice"
+                : "home";
 }

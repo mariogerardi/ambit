@@ -12,6 +12,25 @@ import {
 } from "./presentation";
 import type { GameState } from "./state";
 
+const JOURNEY_RESULT_LINES = [
+  [14, "That was an ", "ambitious run."],
+  [12, "Look how far ", "you wandered."],
+  [10, "You’ve covered ", "serious ground."],
+  [8, "You found ", "your stride."],
+  [6, "You’re finding ", "your way."],
+  [4, "A few turns, ", "new discoveries."],
+  [1, "Every step ", "takes you somewhere."],
+  [0, "A whole world ", "still awaits."],
+] as const;
+
+/** Shared completion copy follows earned points, including accuracy and help caps. */
+export function journeyResultCopy(points: number) {
+  const [, lead, emphasis] =
+    JOURNEY_RESULT_LINES.find(([minimum]) => points >= minimum) ??
+    JOURNEY_RESULT_LINES.at(-1)!;
+  return { lead, emphasis };
+}
+
 /** Praise the action used to answer, rather than varying praise at random. */
 export function correctAnswerCopy(question: Question): string {
   if (question.correctFeedback) return question.correctFeedback;

@@ -36,6 +36,31 @@ dates and users remain intact. Start again from Home to use the currently
 scheduled Journey. The reset saves locally and synchronizes through the existing
 account save service.
 
+## Public Journey archive
+
+`/archive` is available to guests and signed-in players through a link inside
+Today's Journey on Home and in the app menu. The fixed opening date is October 11,
+2026 (`ARCHIVE_START_DATE` in `archiveDates.ts`); it is not derived from private
+player records at runtime. Monthly pages use the existing public schedule range
+API and only offer past dates with a stored assignment or a valid existing
+attempt. Provisional, missing and unavailable historical editions never fall back
+to today's rotation. Started attempts retain their edition after schedule edits.
+
+The calendar and selected-day details occupy the same left sidebar/mobile tray
+as Explore, beside the persistent interactive globe. Entering the archive retains
+the live orientation and global map layers; choosing a calendar date does not
+reframe the globe or reveal that Journey's geography before play.
+
+Dated routes (`/archive/YYYY-MM-DD`) play/resume normal saved attempts and open
+completed results. Points, help, account sync and friend-score disclosure use the
+existing contracts. New `completedOn` dates exclude late archive completions from
+Daily streaks, while preserving their points and completed-Journey count. Legacy
+completions keep prior credit. Archive share images and captions invite the player
+to the public dated route; today's sharing continues to link to `/daily`.
+
+Deploy the backend's completion-date/streak handling before publishing the archive
+frontend. No table/schema migration or rewritten historical schedule is required.
+
 ## Profiles, dashboard, and friends
 
 The Account screen shows daily Journey totals, a calendar-day Journey streak,
@@ -80,7 +105,8 @@ informational; sessions with different settings are not ranked.
 Daily Journey completion offers **Share result** and **Compare with friends**.
 Friends shows a wider search column beside friend cards, above Journey comparisons. Comparisons show you first, then all accepted
 friends with completed players first; ties are alphabetical. The comparison is
-for today's New York Journey; older comparison links open today's section.
+for today's New York Journey by default; links from playable archive dates retain
+that date and Journey edition.
 Unlocked scores show hint/assist icons with counts and accessible summaries,
 without rankings. Journey reward totals are out of 15, with three points per
 question, 3/2/1 distance-pin rewards and hint/assist ceilings of two/one.

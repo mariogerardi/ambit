@@ -248,6 +248,24 @@ it("retains Home-tap entry intent while consuming its camera request, including 
   expect(exploreEntries).toEqual([true]);
 });
 
+it.each(["/archive", "/archive?date=2026-10-11"])(
+  "keeps the live overview orbit and rotation when entering %s",
+  async (path) => {
+    view = { lat: -20, lng: 130, altitude: worldAltitude(width, height) };
+    await render();
+    await act(async () => result.prepareNavigation(path));
+    expect(result.motion).toBe(true);
+    await render({ mode: "archive", transitionKey: path });
+    expect(result.motion).toBe(true);
+    expect(port.focus).not.toHaveBeenCalled();
+    expect(view).toEqual({
+      lat: -20,
+      lng: 130,
+      altitude: worldAltitude(width, height),
+    });
+  },
+);
+
 it("uses live viewport dimensions for recentering and tighter mobile Explore framing", async () => {
   await render({ mobile: true });
   width = 390;

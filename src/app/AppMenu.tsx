@@ -126,6 +126,13 @@ export function AppMenu({
             </button>
           </div>
           <div className="app-menu-secondary">
+            <button
+              data-dd-action-name="Menu Archive"
+              aria-current={path.startsWith("/archive") ? "page" : undefined}
+              onClick={() => navigate("/archive")}
+            >
+              Journey archive
+            </button>
             {onFeedback && (
               <button
                 data-dd-action-name="Menu Send Feedback"

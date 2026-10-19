@@ -36,6 +36,7 @@ import {
   feedbackLegend,
   roundIdentity,
   resolvedRoundIdentity,
+  journeyResultCopy,
 } from "./copy";
 function FlagComparison({
   flags,
@@ -126,8 +127,10 @@ export function GameShell({
   onReplay,
   canReplay = false,
   social,
+  contextNavigation,
 }: {
   social?: ReactNode;
+  contextNavigation?: ReactNode;
   onReport?(questionId: string): void;
   onReplay?(): void;
   canReplay?: boolean;
@@ -178,6 +181,8 @@ export function GameShell({
     </div>
   );
   const helpCounts = helpCountCopy(helpSummary(game));
+  const points = journeyPoints(game);
+  const closing = journeyResultCopy(points);
   const feedback = game.answers.at(-1),
     correct = feedback?.correct;
   const mapPresentation = questionMapPresentation(round, game.phase, !!correct);
@@ -247,6 +252,7 @@ export function GameShell({
           aria-label="Current round"
           data-question-id={round.id}
         >
+          {contextNavigation}
           <div className="round-overline">
             <span
               className="round-number journey-step"
@@ -489,6 +495,7 @@ export function GameShell({
               )}
             </div>
           )}
+          {contextNavigation}
           <h1 className="journey-result-heading" ref={heading} tabIndex={-1}>
             {game.phase === "failed" ? (
               <>
@@ -496,20 +503,21 @@ export function GameShell({
               </>
             ) : (
               <>
-                Look how far <em>you wandered.</em>
+                {closing.lead}
+                <em>{closing.emphasis}</em>
               </>
             )}
           </h1>
           <div className="journey-score">
             <strong>
-              {journeyPoints(game)}
+              {points}
               <span>/{journey.rounds.length * QUESTION_POINTS}</span>
             </strong>
             <span>points</span>
           </div>
           <div className="journey-point-total">
             <PointOrbs
-              earned={journeyPoints(game)}
+              earned={points}
               total={journey.rounds.length * QUESTION_POINTS}
               animate
             />

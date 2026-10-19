@@ -9,6 +9,7 @@ import type {
 } from "../services/community";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { localDateKey } from "./dailyProgress";
+import { isArchiveDate } from "./archiveDates";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { helpCountCopy } from "../game/guidance";
 import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
@@ -394,15 +395,22 @@ export function FriendsPanel({
       )}
     </>
   );
-  const attempt = daily?.attempts[today];
-  const target = (intent?.comparison?.date === today
-    ? intent.comparison
+  const todayAttempt = daily?.attempts[today];
+  const requested = intent?.comparison;
+  const target = (requested &&
+  (requested.date === today || isArchiveDate(requested.date, today))
+    ? requested
     : undefined) ??
     defaultComparison ?? {
       date: today,
-      journeyId: attempt?.journeyId ?? dailyJourney(today, daily).id,
-      version: attempt?.scheduleVersion ?? SCHEDULE_VERSION,
+      journeyId: todayAttempt?.journeyId ?? dailyJourney(today, daily).id,
+      version: todayAttempt?.scheduleVersion ?? SCHEDULE_VERSION,
     };
+  const candidate = daily?.attempts[target.date];
+  const attempt =
+    candidate?.journeyId === target.journeyId
+      ? candidate
+      : daily?.archivedAttempts?.[`${target.date}/${target.journeyId}`];
   const localScore =
     attempt &&
     attempt.date === target.date &&

@@ -4,6 +4,14 @@ import { useWorldGeography } from "./app/useWorldGeography";
 import { useCameraOrchestration } from "./app/useCameraOrchestration";
 import { usePlayerProgress } from "./app/usePlayerProgress";
 import { HomePanel } from "./app/HomePanel";
+import { JourneyArchive } from "./app/JourneyArchive";
+import {
+  archiveDay,
+  archiveDateFromPath,
+  archiveDateLabel,
+  archivePath,
+  isArchiveDate,
+} from "./app/archiveDates";
 import { LoadingScreen } from "./app/LoadingScreen";
 import { JourneySocial } from "./app/JourneySocial";
 import { accountIntent } from "./app/accountNavigation";
@@ -69,6 +77,7 @@ import {
   localDateKey,
   millisecondsToMidnight,
   openDaily,
+  withDailyGame,
 } from "./app/dailyProgress";
 import { useJourneySchedule } from "./services/journeySchedule";
 import { usePublishedPuzzles } from "./app/publishedPuzzles";
@@ -185,7 +194,11 @@ export function App() {
     mode === "admin" ||
     (mode === "study" && (studySetup || !study.session));
   const displayLayers =
-    mode === "explore" ? explore : unrestricted ? defaultLayers : undefined;
+    mode === "explore" || mode === "archive"
+      ? explore
+      : unrestricted
+        ? defaultLayers
+        : undefined;
   const {
     regions,
     error,
@@ -228,23 +241,41 @@ export function App() {
     () => Object.fromEntries(namedRegions.map((r) => [r.id, "disabled"])),
     [namedRegions],
   );
-  const activeAttempt =
-    daily.activeDate === today ? daily.attempts[today] : undefined;
+  const archiveDate = archiveDateFromPath(path);
+  const playDate = archiveDate ?? today;
+  const archiveEntry = archiveDate
+    ? archiveDay(
+        archiveDate,
+        today,
+        daily,
+        allJourneys,
+        schedule.schedule?.records ?? {},
+      )
+    : undefined;
+  const activeAttempt = daily.attempts[playDate];
+  const activeJourneyId = archiveDate
+    ? archiveEntry?.journey?.id
+    : (activeAttempt?.journeyId ??
+      dailyJourney(
+        today,
+        daily,
+        allJourneys,
+        schedule.schedule?.assignments ?? {},
+      ).id);
+  const canOpenDate = !archiveDate || !!archiveEntry?.journey;
+  useEffect(() => {
+    if (archiveDate && isArchiveDate(archiveDate, today))
+      void schedule.refresh(archiveDate.slice(0, 7));
+  }, [archiveDate, today, schedule.refresh]);
   const cameraKey =
     mode === "daily"
-      ? `${path}:${activeAttempt?.date ?? today}:${activeAttempt?.journeyId ?? dailyJourney(today, daily, allJourneys, schedule.schedule?.assignments ?? {}).id}`
+      ? `${path}:${playDate}:${activeJourneyId ?? "unavailable"}`
       : mode === "study"
         ? `${path}:${studyBrowsingHistory ? "history" : studySetup || !study.session ? "setup" : `session:${study.session.id ?? study.session.seed}`}`
         : path;
   const journeyId =
     mode === "daily"
-      ? (activeAttempt?.journeyId ??
-        dailyJourney(
-          today,
-          daily,
-          allJourneys,
-          schedule.schedule?.assignments ?? {},
-        ).id)
+      ? activeJourneyId
       : JOURNEY_INDEX.find((j) => j.path === pathname)?.id;
   const {
     journey,
@@ -525,20 +556,47 @@ export function App() {
     };
   }, []);
   useEffect(() => {
-    if (mode === "daily" && dailyReady && !activeAttempt)
+    if (
+      mode === "daily" &&
+      dailyReady &&
+      canOpenDate &&
+      (!archiveDate || cloudSave.hydrated) &&
+      !activeAttempt
+    )
       setDaily((p) =>
-        openDaily(p, today, false, allJourneys, schedule.schedule?.assignments),
+        openDaily(
+          p,
+          playDate,
+          false,
+          allJourneys,
+          schedule.schedule?.assignments,
+        ),
       );
     document.title = `ambit — ${mode === "home" ? "A world of wonders" : mode === "daily" || mode === "practice" ? "Journey" : mode[0].toUpperCase() + mode.slice(1)}`;
-  }, [mode, activeAttempt, today, dailyReady, allJourneys, schedule.schedule]);
+  }, [
+    mode,
+    activeAttempt,
+    playDate,
+    archiveDate,
+    canOpenDate,
+    dailyReady,
+    cloudSave.hydrated,
+    allJourneys,
+    schedule.schedule,
+  ]);
   const dispatch = useCallback(
     (action: Action) => {
       if (!context) return;
       if (mode === "daily")
         setDaily((p) => {
-          const date = p.activeDate,
-            attempt = date ? p.attempts[date] : undefined;
-          if (!date || date !== today || date !== localDateKey() || !attempt)
+          const date = playDate,
+            attempt = p.attempts[date];
+          if (
+            !attempt ||
+            (archiveDate
+              ? !isArchiveDate(date, localDateKey())
+              : date !== localDateKey())
+          )
             return p;
           const selectedJourney =
             journey.id === attempt.journeyId ? journey : undefined;
@@ -547,15 +605,10 @@ export function App() {
             ...p,
             attempts: {
               ...p.attempts,
-              [date]: {
-                ...attempt,
-                game: gameReducer(
-                  attempt.game,
-                  action,
-                  selectedJourney,
-                  context,
-                ),
-              },
+              [date]: withDailyGame(
+                attempt,
+                gameReducer(attempt.game, action, selectedJourney, context),
+              ),
             },
           };
         });
@@ -570,7 +623,7 @@ export function App() {
           ),
         }));
     },
-    [context, mode, journey, allJourneys, today],
+    [context, mode, journey, allJourneys, playDate, archiveDate],
   );
   const studyAction = useCallback(
     (action: StudyAction) =>
@@ -650,12 +703,25 @@ export function App() {
     ],
   );
   function playDaily(date: string) {
-    if (!webgl || date !== today || date !== localDateKey() || !schedule.ready) return;
+    if (!webgl || !dailyLoaded || !schedule.ready || !cloudSave.ready) return;
+    if (
+      date === today
+        ? date !== localDateKey()
+        : !cloudSave.hydrated ||
+          !archiveDay(
+            date,
+            localDateKey(),
+            daily,
+            allJourneys,
+            schedule.schedule?.records ?? {},
+          )?.journey
+    )
+      return;
     setDaily((p) =>
       openDaily(p, date, false, allJourneys, schedule.schedule?.assignments),
     );
     stop();
-    navigate("/daily");
+    navigate(date === today ? "/daily" : archivePath(date));
   }
   const todayAttempt = daily.attempts[today];
   const todayJourney =
@@ -672,13 +738,39 @@ export function App() {
         journey={todayJourney}
         attempt={todayAttempt}
         ready={
-          !!regions.length && dailyLoaded && cloudSave.ready && schedule.ready && webgl
+          !!regions.length &&
+          dailyLoaded &&
+          cloudSave.ready &&
+          schedule.ready &&
+          webgl
         }
         scheduleError={schedule.ready ? undefined : schedule.error}
         onPlay={() => playDaily(today)}
+        onArchive={() => navigate("/archive")}
         onRetrySchedule={() => void schedule.refresh()}
         onExplore={() => navigate("/explore")}
         onStudy={() => navigate("/study")}
+      />
+    ) : mode === "archive" ? (
+      <JourneyArchive
+        onContentHeight={mobile.enabled ? setExploreContentHeight : undefined}
+        initialDate={
+          new URLSearchParams(path.split("?")[1]).get("date") ?? undefined
+        }
+        today={schedule.schedule?.today ?? today}
+        progress={daily}
+        catalog={allJourneys}
+        schedule={schedule}
+        ready={
+          !!regions.length &&
+          dailyLoaded &&
+          cloudSave.ready &&
+          cloudSave.hydrated &&
+          schedule.ready &&
+          webgl
+        }
+        onPlay={playDaily}
+        onToday={() => playDaily(today)}
       />
     ) : mode === "account" ? (
       <AccountPanel
@@ -695,8 +787,7 @@ export function App() {
                     schedule.schedule?.assignments ?? {},
                   ).id,
                 version:
-                  daily.attempts[today]?.scheduleVersion ??
-                  SCHEDULE_VERSION,
+                  daily.attempts[today]?.scheduleVersion ?? SCHEDULE_VERSION,
               }
             : null
         }
@@ -798,7 +889,34 @@ export function App() {
           setStudySetup(true);
         }}
       />
-    ) : mode === "daily" && !dailyReady ? (
+    ) : archiveDate && !canOpenDate ? (
+      <section className="info-view" role="status">
+        <h1>Journey archive</h1>
+        <p>
+          {!isArchiveDate(archiveDate, today)
+            ? "Choose a past day from October 11, 2026 onward."
+            : !schedule.loadedMonths.includes(archiveDate.slice(0, 7)) &&
+                !schedule.error
+              ? "Loading this day’s Journey…"
+              : "This day’s Journey isn’t available."}
+        </p>
+        {schedule.error && (
+          <p role="alert">
+            {schedule.error}{" "}
+            <button
+              className="quiet-button"
+              onClick={() => void schedule.refresh(archiveDate.slice(0, 7))}
+            >
+              Retry archive
+            </button>
+          </p>
+        )}
+        <button className="quiet-button" onClick={() => navigate("/archive")}>
+          ← Journey archive
+        </button>
+      </section>
+    ) : mode === "daily" &&
+      (!dailyReady || (!!archiveDate && !cloudSave.hydrated)) ? (
       <section className="info-view" role="status">
         <p>{schedule.error || cloudSave.message}</p>
         {!schedule.ready && (
@@ -825,14 +943,27 @@ export function App() {
       </section>
     ) : context ? (
       <GameShell
-        canReplay={mode !== "daily" || account.admin}
+        canReplay={!archiveDate && (mode !== "daily" || account.admin)}
+        contextNavigation={
+          archiveDate ? (
+            <div className="journey-archive-context">
+              <button
+                className="quiet-button"
+                onClick={() => navigate(`/archive?date=${archiveDate}`)}
+              >
+                ← Journey archive
+              </button>
+              <span>{archiveDateLabel(archiveDate)}</span>
+            </div>
+          ) : undefined
+        }
         onReplay={() => {
           if (mode === "daily") {
             if (!account.admin) return;
             setDaily((progress) =>
               openDaily(
                 progress,
-                progress.activeDate ?? today,
+                playDate,
                 true,
                 allJourneys,
                 schedule.schedule?.assignments,
@@ -861,6 +992,7 @@ export function App() {
         social={
           mode === "daily" && activeAttempt ? (
             <JourneySocial
+              archive={!!archiveDate}
               journey={journey}
               attempt={activeAttempt}
               sync={
@@ -894,6 +1026,7 @@ export function App() {
         : "playing";
   const motionControls = (mode === "home" ||
     mode === "explore" ||
+    mode === "archive" ||
     (mode === "study" &&
       unrestricted &&
       !studyEditorOpen &&
@@ -988,6 +1121,7 @@ export function App() {
                 surfaceRoutes
                 regionNames={names}
                 regionInteraction={
+                  mode !== "archive" &&
                   !studyBrowsingHistory &&
                   !studyEditing &&
                   (world?.regionInteraction ?? true)

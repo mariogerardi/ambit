@@ -528,6 +528,36 @@ it("labels the comparison as today's Journey and follows today's date for an old
   expect(host.textContent).toContain("invite them to play.");
 });
 
+it("keeps an archive comparison's date instead of redirecting to today's Journey", async () => {
+  vi.setSystemTime(new Date("2026-10-19T16:00:00Z"));
+  await mount({
+    intent: {
+      comparison: {
+        date: "2026-10-11",
+        journeyId: "along-the-andes-v1",
+        version: 2,
+      },
+    },
+    defaultComparison: {
+      date: "2026-10-19",
+      journeyId: "shared-neighbors-v1",
+      version: 2,
+    },
+  });
+  expect(host.querySelector("#journey-comparison h3")?.textContent).toContain(
+    "October 11, 2026",
+  );
+  expect(host.querySelector("#journey-comparison h3")?.textContent).toContain(
+    "Along the Andes",
+  );
+  expect(request).toHaveBeenCalledWith(
+    "friends/activity?date=2026-10-11",
+    "GET",
+    undefined,
+    expect.any(AbortSignal),
+  );
+});
+
 it("drops yesterday's local score when today's comparison date changes", async () => {
   const day = score.date;
   const attempt = {

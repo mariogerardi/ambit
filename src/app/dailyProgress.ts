@@ -118,6 +118,8 @@ export function millisecondsToMidnight(now = new Date()): number {
   return high - start;
 }
 export interface DailyAttempt {
+  /** New completions record their actual New York date; legacy results stay unchanged. */
+  completedOn?: string;
   contentRevision?: number;
   runId?: string;
   startedAt?: number;
@@ -192,6 +194,10 @@ function validAttempt(
 ): value is DailyAttempt {
   try {
     dateOrdinal(date);
+    if (isRecord(value) && value.completedOn !== undefined) {
+      if (typeof value.completedOn !== "string" || value.completedOn < date) return false;
+      dateOrdinal(value.completedOn);
+    }
   } catch {
     return false;
   }
@@ -498,6 +504,26 @@ export function recoverDaily(
     resets: resets as Record<string, number>,
     ...(typeof value.activeDate === "string" && attempts[value.activeDate]
       ? { activeDate: value.activeDate }
+      : {}),
+  };
+}
+
+/** Snapshot when the last answer is earned, rather than when results are later opened. */
+export function withDailyGame(
+  attempt: DailyAttempt,
+  game: GameState,
+  playedOn = localDateKey(),
+): DailyAttempt {
+  const alreadyComplete =
+    attempt.game.answers.length === 5 ||
+    ["finished", "failed"].includes(attempt.game.phase);
+  const complete =
+    game.answers.length === 5 || ["finished", "failed"].includes(game.phase);
+  return {
+    ...attempt,
+    game,
+    ...(!attempt.completedOn && !alreadyComplete && complete
+      ? { completedOn: playedOn }
       : {}),
   };
 }

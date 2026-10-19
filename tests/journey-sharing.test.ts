@@ -259,3 +259,17 @@ it("always shares the public play URL when running on localhost or staging", () 
     expect(resultCaption(result)).not.toContain(origin);
   }
 });
+
+it("shares an archive result with its public dated route rather than today's puzzle", () => {
+  const result = sharedJourneyResult(
+    CANADA_JOURNEY,
+    { ...initialGame, phase: "finished" },
+    "2026-10-11",
+    "http://localhost:5173",
+    true,
+  );
+  expect(result.playUrl).toBe("https://playambit.com/archive/2026-10-11");
+  expect(resultText(result)).toContain("Play this Journey:");
+  expect(resultCaption(result)).toContain("Explore this Journey with me");
+  expect(resultCaption(result)).not.toContain("localhost");
+});

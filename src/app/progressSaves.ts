@@ -188,7 +188,11 @@ export function dailySaveCodec(
       { home: 0, playing: 1, feedback: 2, finished: 3, failed: 3 }[
         attempt.game.phase
       ];
-    const preferred = rank(a) > rank(b) ? a : b;
+    const selected = rank(a) > rank(b) ? a : b;
+    const completedOn = [a.completedOn, b.completedOn]
+      .filter((d): d is string => !!d)
+      .sort()[0];
+    const preferred = completedOn ? { ...selected, completedOn } : selected;
     return a.game.help || b.game.help
       ? {
           ...preferred,
