@@ -1,4 +1,13 @@
-# Journey review and retained rotation
+# Historical record: Journey review and retained rotation
+
+> Historical record of the October 2026 work described below. Retained for the
+> decisions, provenance and verification scope at that time; it is not current
+> authoring policy, a current catalog inventory, or a fresh browser/deployment check.
+> References below to “current,” “now,” palettes, tolerances and question sequences
+> describe that earlier work and may have been superseded. For current behavior use
+> [Crafting a Journey](JOURNEY_CRAFTING.md),
+> [the catalog](QUESTION_CATALOG.md),
+> [the engine guide](JOURNEY_ENGINE.md), and the linked current definitions.
 
 Owner decisions recorded October 10–11, 2026. The active daily rotation now
 contains **eleven five-question Journeys and 55 questions**. The additional

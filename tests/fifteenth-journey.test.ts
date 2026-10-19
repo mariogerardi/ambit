@@ -70,7 +70,7 @@ describe("Try not to click Russia Journey", () => {
       expect(world.regionInteraction).toBe(false);
       expect(world.regionNames).toBe("none");
       expect(new Set(Object.values(world.states))).toEqual(
-        new Set(["disabled"]),
+        new Set(["surface"]),
       );
       expect(world.places).toEqual([]);
       expect(isCorrect(q, context, { ...initialGame, pin: points[i] })).toBe(

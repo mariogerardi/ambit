@@ -63,6 +63,9 @@ export function createQuestionContext(
       context.targets.set(target.id, target);
       context.names.set(target.id, target.name);
     }
+    for (const id of round.candidateRegionIds ?? [])
+      if (!context.targets.has(id))
+        throw Error(`Unknown candidate geography (${round.id}): ${id}`);
     if (round.rule.type === "merged-region") {
       const rule = round.rule;
       if (context.targets.has(rule.targetId))
@@ -106,6 +109,14 @@ export function createQuestionContext(
         rule.memberIds.map((id) => context.names.get(id)).join(" + "),
       );
     }
+    for (const choice of round.choices ?? [])
+      for (const id of choice.geographyIds ?? [])
+        if (
+          !context.targets.has(id) &&
+          !answerPlace(round, id) &&
+          !round.feedbackPlaces?.some((place) => place.id === id)
+        )
+          throw Error(`Missing choice geography ${id} for ${round.id}.`);
     const survivors = round.guidance?.assist?.candidateIds;
     const fixedSelections = round.guidance?.assist?.fixedSelections;
     if (fixedSelections) {
@@ -322,12 +333,17 @@ export function selectableIds(
   if (usesChoiceCards(question))
     return (question.choices ?? []).map((c) => c.id);
   if (selection.type === "none") return [];
-  if (selection.type === "ids") return selection.ids;
-  if (selection.type === "neighbors")
-    return [...(context.graph.get(selection.of) ?? [])];
-  return [...context.members].filter(
-    (id) => !selection.excludeIds?.includes(id),
-  );
+  const ids =
+    selection.type === "ids"
+      ? selection.ids
+      : selection.type === "neighbors"
+        ? [...(context.graph.get(selection.of) ?? [])]
+        : [...context.members].filter(
+            (id) => !selection.excludeIds?.includes(id),
+          );
+  return mechanicFor(question).mapSelection === "regions"
+    ? ids.filter((id) => !question.contextIds?.includes(id))
+    : ids;
 }
 export function canSelect(
   question: Question,

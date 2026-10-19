@@ -86,7 +86,7 @@ export const DANUBE_JOURNEY: Journey = {
       { ...vienna, labelFlexible: true },
       { ...budapest, labelFlexible: true },
       landmark("iron-gates", "Iron Gates", 44.65, 22.3),
-      landmark("delta", "Danube Delta", 45.15, 29.6),
+      { ...landmark("delta", "Danube Delta", 45.15, 29.6), markerHidden: true },
     ],
     caption:
       "From the upper river to the Black Sea: five stops, one continuous journey.",
@@ -156,7 +156,16 @@ export const DANUBE_JOURNEY: Journey = {
       prompt: "Drop a pin in Vienna.",
       instruction: "Land within 50 km of the city center.",
       mode: "pin",
-      rule: { type: "pin-distance", targetId: vienna.id, radiusKm: 50 },
+      rule: {
+        type: "pin-distance",
+        targetId: vienna.id,
+        radiusKm: 50,
+        tiers: [
+          { radiusKm: 15, feedback: "Bullseye!" },
+          { radiusKm: 30, feedback: "Very close." },
+          { radiusKm: 50, feedback: "In range." },
+        ],
+      },
       disclosure: { ...base.disclosure, namedChoices: false },
       explanation:
         "The river runs through the eastern side of the city. Continue downstream: this is only the first capital on our route.",
@@ -320,6 +329,8 @@ export const DANUBE_JOURNEY: Journey = {
           places: [
             {
               id: "danube:delta",
+              markerHidden: true,
+              displayRole: "explanation",
               name: "Danube Delta",
               kind: "other",
               lat: 45.2,

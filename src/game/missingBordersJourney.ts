@@ -186,13 +186,10 @@ export const MISSING_BORDERS_JOURNEY: Journey = {
       resolvedLabel: definition.receipt,
       leadIn: definition.leadIn,
       prompt: definition.prompt,
-      instruction:
-        index === 0
-          ? "Tap a territory on the globe, then submit. You can tap a different territory to change your selection."
-          : "",
+      instruction: index === 0 ? "Tap a territory on the globe to answer." : "",
       mode: "merged-region-single",
       count: 1,
-      commitment: "submit",
+      commitment: "immediate",
       selection: { type: "ids", ids: targets(definition.candidates) },
       rule: {
         type: "merged-region",

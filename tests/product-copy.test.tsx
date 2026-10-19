@@ -139,9 +139,28 @@ describe("product copy follows the answer and visible reveal", () => {
         expect(html).not.toContain("question-prompt");
         expect(html).not.toContain(question.title);
         expect(html.match(/<h[1-6]\b/g)).toHaveLength(1);
+        expect(
+          (html.match(/Your first answer is final\./g) ?? []).length,
+        ).toBeLessThanOrEqual(1);
         expect(question.instruction).not.toMatch(
-          /names are hidden|borders are hidden|any order|when you hover|until you (?:submit|answer)/i,
+          /(?:first|each) answer is final/i,
         );
+        expect(question.instruction).not.toMatch(
+          /names are hidden|any order|when you hover|until you (?:submit|answer)/i,
+        );
+        expect(
+          [
+            question.prompt,
+            question.instruction,
+            question.guidance?.hint,
+            question.guidance?.assist?.text,
+          ].join(" "),
+        ).not.toMatch(/shown in (?:darker|lighter) (?:yellow|blue|purple)/i);
+        if (/borders are hidden/i.test(question.instruction ?? "")) {
+          expect(question.map?.borders).toBe(false);
+          expect(question.instruction).toMatch(/estimate|memory/i);
+          expect(html).toContain(question.instruction);
+        }
       });
     },
   );
@@ -161,7 +180,7 @@ describe("product copy follows the answer and visible reveal", () => {
       );
     const territories = render(FIFTH_JOURNEY, 0);
     expect(territories).toMatch(
-      /<\/h1><form[^>]*><ul class="ordered-answer unordered-answer"/,
+      /<form[^>]*><ul class="ordered-answer unordered-answer"/,
     );
     expect(territories.match(/placeholder="Your answer"/g)).toHaveLength(3);
     expect(territories).not.toContain("Any order");
@@ -197,10 +216,9 @@ describe("product copy follows the answer and visible reveal", () => {
     const { question, context, game } = play(EIGHTH_JOURNEY, 1, [
       { type: "select", id: "place:2988507" },
     ]);
-    expect(feedbackLegend(question, context, game).map((e) => e.key)).toEqual([
-      "correct",
-      "neutral",
-    ]);
+    expect(feedbackLegend(question, context, game).map((e) => e.key)).toEqual(
+      [],
+    );
     const wrong = play(EIGHTH_JOURNEY, 1, [
       { type: "select", id: "place:2950159" },
     ]);
@@ -223,13 +241,7 @@ describe("product copy follows the answer and visible reveal", () => {
       { type: "submit" },
     ]);
     expect(feedbackLegend(question, context, game).map((e) => e.label)).toEqual(
-      [
-        "Correct",
-        "Other correct answers",
-        "Incorrect match",
-        "Highlighted context",
-        "Other places",
-      ],
+      ["Correct assignment", "Required answers", "Incorrect match"],
     );
   });
   it("explains a pin target and highlighted clues without claiming multiple correct answers", () => {
@@ -241,7 +253,7 @@ describe("product copy follows the answer and visible reveal", () => {
       feedbackLegend(distance.question, distance.context, distance.game).map(
         (e) => e.label,
       ),
-    ).toEqual(["Correct", "Target location", "Other countries"]);
+    ).toEqual(["Correct", "Target location"]);
     const inside = play(NINTH_JOURNEY, 0, [
       { type: "drop-pin", lat: 12, lng: -1 },
       { type: "submit" },
@@ -250,7 +262,7 @@ describe("product copy follows the answer and visible reveal", () => {
       feedbackLegend(inside.question, inside.context, inside.game).map(
         (e) => e.label,
       ),
-    ).toContain("Highlighted context");
+    ).not.toContain("Context");
   });
   it("uses distinct clue identities without revealing the shared-neighbor answers", () => {
     const labels = NINTH_JOURNEY.rounds.map(roundIdentity);

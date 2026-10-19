@@ -974,6 +974,7 @@ export function App() {
                 selectDisabled={
                   world?.selectDisabled || mode === "explore" || !!studyPreview
                 }
+                selectableRegionIds={world?.selectableRegionIds}
                 placeMarkers={studyPresentation.placeMarkers}
                 placeLabels={studyPresentation.placeLabels}
                 routes={world?.routes ?? emptyRoutes}

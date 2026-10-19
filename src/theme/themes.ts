@@ -1,3 +1,4 @@
+import { playColors } from "./playColors";
 export type ThemeId = "atlas" | "ocean" | "dusk" | "paper";
 interface Theme {
   name: string;
@@ -203,6 +204,8 @@ export function applyTheme(id: ThemeId, root = document.documentElement) {
   for (const [name, value] of Object.entries(theme.ui))
     root.style.setProperty(`--ui-${name}`, value);
   root.style.setProperty("--map-neutral", theme.globe.disabled);
+  for (const [role, color] of Object.entries(playColors(id)))
+    root.style.setProperty(`--play-${role}`, color);
   root.ownerDocument
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute("content", theme.ui.bg);

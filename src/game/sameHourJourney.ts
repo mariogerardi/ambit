@@ -1,5 +1,5 @@
 import { ANSWER_PLACES } from "./answerTargets";
-import { cityReference } from "./authoredPlaces";
+import { cityReference, areaLabel } from "./authoredPlaces";
 import { definePresentation, defineQuestion } from "./questionBuilder";
 import { capitalSource } from "./quizData";
 import type { FactSource, Journey } from "./questionContracts";
@@ -34,7 +34,7 @@ const kashgar = city("1280849");
 const vladivostok = city("2013348");
 const brisbane = city("2174003");
 const perth = city("2063523");
-const samoa = city("4035413", "Samoa");
+const samoa = areaLabel(city("4035413", "Samoa"));
 const savaii: PlaceFeature = {
   id: "same-hour:savaii-label",
   name: "Savai‘i",
@@ -57,15 +57,17 @@ const darwin = cityReference({
   lng: 130.84185,
   sourceId: "geonames:2073124",
 });
-const americanSamoa = cityReference({
-  id: "place:5881576",
-  name: "American Samoa",
-  kind: "city",
-  parentId: "wurl:ASM",
-  lat: -14.27806,
-  lng: -170.7025,
-  sourceId: "geonames:5881576",
-});
+const americanSamoa = areaLabel(
+  cityReference({
+    id: "place:5881576",
+    name: "American Samoa",
+    kind: "city",
+    parentId: "wurl:ASM",
+    lat: -14.27806,
+    lng: -170.7025,
+    sourceId: "geonames:5881576",
+  }),
+);
 const africaCities = [accra, algiers, praia, oran];
 const australianCities = [brisbane, darwin, perth];
 const context = (place: PlaceFeature): PlaceFeature => ({
@@ -179,7 +181,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       instruction: "Tap a highlighted country on the globe.",
       mode: "map-single",
       count: 1,
-      commitment: "submit",
+      commitment: "immediate",
       selection: {
         type: "ids",
         ids: ["wurl:PRT", "wurl:POL", "wurl:GBR", "wurl:GRC"],
@@ -355,11 +357,14 @@ export const SAME_HOUR_JOURNEY: Journey = {
       scenes: {
         play: {
           focus: samoaView,
+          contextIds: ["wurl:WSM", "wurl:ASM"],
+          map: { borderIds: ["wurl:WSM", "wurl:ASM"] },
           places: [context(samoa), context(americanSamoa), context(savaii)],
         },
         assist: {},
         reveal: {
           focus: samoaView,
+          contextIds: ["wurl:WSM", "wurl:ASM"],
           overlays: [
             {
               id: "same-hour:date-line",

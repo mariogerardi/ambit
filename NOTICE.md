@@ -366,3 +366,11 @@ state boundary, documented above and in `sources/usa-adm1.metadata.json`; it is
 hidden during the question.
 Journey lakes use opaque blue surfaces and source shoreline paths, matching the
 Lake Titicaca treatment in Along the Andes.
+
+## Polygon interior markers
+
+Journey response markers use [Polylabel](https://github.com/mapbox/polylabel) 2.1.0
+and its [TinyQueue](https://github.com/mourner/tinyqueue) 3.0.0 dependency, both under
+the ISC license. Their complete copyright and permission notices are shipped in
+[the geometry library notices](public/licenses/journey-geometry.txt)
+(`/licenses/journey-geometry.txt` in the published app).

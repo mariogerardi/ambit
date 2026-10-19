@@ -520,16 +520,16 @@ describe("Along the Andes authored map and finale", () => {
     );
     expect(shell).not.toContain('class="question-instruction"');
   });
-  it("enlarges Q1 reveal stars without changing ordinary map capital sizes", () => {
+  it("uses shared Journey city dots without changing ordinary map capital sizes", () => {
     const answer = reduce(
       at(0),
       { type: "select", id: "city:bogota" },
       { type: "submit" },
     );
     const places = journeyWorld(regions, journey, answer, context).places;
-    expect(places.map(placeMarkerSize)).toEqual([30, 30]);
-    expect(places.every((place) => place.kind === "capital")).toBe(true);
-    expect(placeMarkerSize(ANSWER_PLACES.get(places[0].id)!)).toBe(18);
+    expect(places.map((place) => placeMarkerSize(place))).toEqual([24, 24]);
+    expect(places.every((place) => place.kind === "city")).toBe(true);
+    expect(placeMarkerSize(ANSWER_PLACES.get(places[0].id)!, true)).toBe(18);
   });
   it("ends the completion tour at the colony and keeps the full Journey discoveries", () => {
     const recap = journeyWorld(

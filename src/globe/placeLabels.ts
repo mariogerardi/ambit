@@ -8,7 +8,11 @@ import {
 } from "three";
 import type { PerspectiveCamera } from "three";
 import type { PlaceFeature } from "../geography/types";
+import type { ThemeId } from "../theme/themes";
+import { pinBandColor } from "../theme/playColors";
 import { playStateColor } from "./themes";
+import { playColors } from "../theme/playColors";
+import { areaSymbolSize } from "./areaSymbols";
 export interface PlaceLabelLayer {
   id: string;
   kind: "place-labels";
@@ -18,6 +22,7 @@ export interface PlaceLabelLayer {
   /** Broad context layers reveal smaller places with zoom; authored clues stay explicit. */
   contextual?: boolean;
   density?: "physical" | "study";
+  palette?: ThemeId;
 }
 export const isPlaceLabels = (value: object): value is PlaceLabelLayer =>
   "kind" in value && value.kind === "place-labels";
@@ -59,11 +64,12 @@ export function placeStyle(kind: PlaceFeature["kind"]) {
         textHeight: 24,
       };
 }
-/** Texture padding is included: city dots are ~4px, ~5.5px for large cities. */
-export function placeMarkerSize(place: PlaceFeature) {
+/** Authored clues stay legible; dense contextual city layers scale by population. */
+export function placeMarkerSize(place: PlaceFeature, contextual = false) {
   if (place.markerSize !== undefined) return place.markerSize;
   if (place.kind === "pin") return 36;
   if (place.answerTarget) return place.visualState === "selected" ? 34 : 30;
+  if (!contextual) return 30;
   return place.kind === "capital"
     ? 18
     : (place.population ?? 0) >= 2_000_000
@@ -209,6 +215,7 @@ export class PlaceLabels {
   private radius = 100;
   private contextual = false;
   private density?: PlaceLabelLayer["density"];
+  private palette: ThemeId = "atlas";
   private drawnBoxes: LabelBox[] = [];
   private pendingLabels = false;
   needsRefresh() {
@@ -293,11 +300,26 @@ export class PlaceLabels {
     const style = place.answerTarget
       ? { ...placeStyle(place.kind), shape: "circle" }
       : placeStyle(place.kind);
-    const color = place.visualState
-      ? (playStateColor(place.visualState) ??
-        (place.visualState === "hover" ? "#ffe391" : "#849899"))
-      : style.marker;
-    const key = `${style.shape}:${color}:${!!place.answerTarget}`;
+    const color = place.accuracyBand
+      ? pinBandColor(
+          place.accuracyBand.index,
+          place.accuracyBand.count,
+          this.palette,
+        )
+      : place.visualState
+        ? (playStateColor(place.visualState, this.palette) ??
+          (place.visualState === "hover" ? "#ffe391" : "#849899"))
+        : style.marker;
+    const badge =
+      place.markerBadge ??
+      (place.visualState === "correct"
+        ? "✓"
+        : place.visualState === "incorrect"
+          ? "×"
+          : place.visualState === "answer"
+            ? "◎"
+            : "");
+    const key = `${style.shape}:${color}:${!!place.answerTarget}:${place.markerRole}:${badge}:${this.contextual}:${place.visualState}`;
     if (sprite && sprite.userData.markerStyle === key) return sprite;
     let material = this.markerMaterials.get(key);
     if (!material) {
@@ -308,7 +330,7 @@ export class PlaceLabels {
       if (style.shape === "star") {
         for (let i = 0; i < 10; i++) {
           const angle = -Math.PI / 2 + (i * Math.PI) / 5,
-            radius = i % 2 ? 8 : 18;
+            radius = i % 2 ? 8 : this.contextual ? 18 : 22;
           const x = 32 + Math.cos(angle) * radius,
             y = 32 + Math.sin(angle) * radius;
           if (i) ctx.lineTo(x, y);
@@ -321,7 +343,18 @@ export class PlaceLabels {
         ctx.arc(32, 23, 19, Math.PI, 0);
         ctx.bezierCurveTo(51, 33, 38, 43, 32, 58);
         ctx.closePath();
-      } else ctx.arc(32, 32, place.answerTarget ? 15 : 10, 0, Math.PI * 2);
+      } else
+        ctx.arc(
+          32,
+          32,
+          !this.contextual && place.markerRole !== "annotation"
+            ? 20
+            : place.answerTarget || place.markerBadge
+              ? 15
+              : 10,
+          0,
+          Math.PI * 2,
+        );
       ctx.lineJoin = "round";
       ctx.lineWidth = 5;
       ctx.strokeStyle = "#071524";
@@ -329,11 +362,59 @@ export class PlaceLabels {
       ctx.fill();
       // Context dots can share their country’s fill; a dark outline keeps them visible.
       ctx.stroke();
-      if (style.shape === "pin") {
+      if (place.markerRole === "annotation") {
+        // Area status is a bare symbol, never a city dot or a circled badge.
+        ctx.clearRect(0, 0, 64, 64);
+        ctx.strokeStyle =
+          place.visualState === "selected"
+            ? "#172b35"
+            : playColors(this.palette)["on-feedback"];
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = "round";
         ctx.beginPath();
-        ctx.arc(32, 23, 6, 0, Math.PI * 2);
-        ctx.fillStyle = "#071524";
-        ctx.fill();
+        if (badge === "✓") {
+          ctx.moveTo(12, 32);
+          ctx.lineTo(26, 46);
+          ctx.lineTo(52, 17);
+        } else if (badge === "×") {
+          ctx.moveTo(18, 18);
+          ctx.lineTo(46, 46);
+          ctx.moveTo(46, 18);
+          ctx.lineTo(18, 46);
+        } else {
+          ctx.arc(32, 32, 20, 0, Math.PI * 2);
+          ctx.moveTo(41, 32);
+          ctx.arc(32, 32, 9, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+      } else if (place.markerRole === "target") {
+        ctx.clearRect(0, 0, 64, 64);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(32, 32, 16, 0, Math.PI * 2);
+        ctx.moveTo(32, 7);
+        ctx.lineTo(32, 23);
+        ctx.moveTo(32, 41);
+        ctx.lineTo(32, 57);
+        ctx.moveTo(7, 32);
+        ctx.lineTo(23, 32);
+        ctx.moveTo(41, 32);
+        ctx.lineTo(57, 32);
+        ctx.stroke();
+      } else if (badge) {
+        ctx.fillStyle =
+          this.palette === "paper" &&
+          ["correct", "answer", "incorrect"].includes(
+            place.visualState ?? "",
+          ) &&
+          (!place.accuracyBand || place.accuracyBand.index === 0)
+            ? "#fffaf0"
+            : "#071524";
+        ctx.font = "400 22px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(badge, 32, style.shape === "pin" ? 24 : 32);
       }
       material = new SpriteMaterial({
         map: placeTexture(canvas),
@@ -347,13 +428,16 @@ export class PlaceLabels {
     if (sprite) sprite.material = material;
     else sprite = new Sprite(material);
     sprite.userData.markerStyle = key;
-    sprite.center.set(0.5, style.shape === "pin" ? 6 / 64 : 0.5);
+    sprite.center.set(
+      0.5,
+      style.shape === "pin" && place.markerRole !== "target" ? 6 / 64 : 0.5,
+    );
     sprite.renderOrder = 20;
     sprite.userData.placeId = place.id;
     sprite.userData.role = "marker";
     const group = this.group;
     sprite.raycast = function (raycaster, intersections) {
-      if (this.visible && group.visible)
+      if (this.visible && group.visible && place.markerRole !== "annotation")
         Sprite.prototype.raycast.call(this, raycaster, intersections);
     };
     this.markers.set(place.id, sprite);
@@ -372,7 +456,8 @@ export class PlaceLabels {
       this.showLabels === layer.visible &&
       this.showMarkers === markers &&
       this.contextual === !!layer.contextual &&
-      this.density === layer.density
+      this.density === layer.density &&
+      this.palette === (layer.palette ?? "atlas")
     )
       return;
     this.data = layer.places;
@@ -381,6 +466,7 @@ export class PlaceLabels {
     this.showMarkers = markers;
     this.contextual = !!layer.contextual;
     this.density = layer.density;
+    this.palette = layer.palette ?? "atlas";
     this.active = layer.places.map((place) => {
       const lat = (place.lat * Math.PI) / 180,
         lng = (place.lng * Math.PI) / 180;
@@ -551,10 +637,22 @@ export class PlaceLabels {
         const marker = entry.marker ?? (entry.marker = this.marker(place));
         if (marker.parent !== this.group) this.group.add(marker);
         marker.position.copy(position);
-        const size = placeMarkerSize(place);
+        const size =
+          place.markerRole === "annotation" &&
+          place.annotationRadius !== undefined
+            ? areaSymbolSize(
+                position,
+                place.annotationRadius,
+                camera,
+                width,
+                height,
+                place.markerSize,
+              )
+            : placeMarkerSize(place, this.contextual);
         marker.scale.set(scale * size, scale * size, 1);
-        marker.visible = true;
-        this.targets.push({ place, x, y });
+        marker.visible = size > 0;
+        if (place.markerRole !== "annotation")
+          this.targets.push({ place, x, y });
       }
       if (
         !this.showLabels ||

@@ -95,6 +95,7 @@ const andeanCountries = ["VEN", "COL", "ECU", "PER", "BOL", "CHL", "ARG"].map(
 );
 const colony: PlaceFeature = {
   id: "andes:king-penguin-colony",
+  displayRole: "explanation",
   name: "King penguin colony",
   kind: "other",
   lat: -53.460556,
@@ -191,8 +192,8 @@ export const ANDES_JOURNEY: Journey = {
       rule: { type: "choice-ids", ids: ["city:bogota"] },
       selection: { type: "none" },
       choices: [
-        { id: "city:bogota", label: "Bogotá" },
-        { id: "city:caracas", label: "Caracas" },
+        { id: "city:bogota", label: "Bogotá", geographyIds: [bogota.id] },
+        { id: "city:caracas", label: "Caracas", geographyIds: [caracas.id] },
         { id: "city:paramaribo", label: "Paramaribo" },
         { id: "city:medellin", label: "Medellín" },
       ],
@@ -312,7 +313,7 @@ export const ANDES_JOURNEY: Journey = {
           contextIds: ["wurl:ECU"],
           answerIds: [],
           focus: { lat: -1.5, lng: -78.8, altitude: 0.18 },
-          places: [chimborazo],
+          places: [{ ...chimborazo, displayRole: "explanation" }],
         },
       },
     }),

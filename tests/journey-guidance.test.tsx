@@ -271,7 +271,9 @@ describe("authored Journey hint and assist stages", () => {
     expect(southAfrica.places).toHaveLength(4);
     expect(
       southAfrica.places.every(
-        (place) => !!place.name && place.visualState === "hinted",
+        (place) =>
+          !!place.name &&
+          ["selectable", "selected"].includes(place.visualState!),
       ),
     ).toBe(true);
   });

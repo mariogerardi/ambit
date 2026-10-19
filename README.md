@@ -33,20 +33,24 @@ Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 
 ## What is included
 
-| View                     | Behavior                                                                                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **Home** (`/`)           | Today's Journey, saved progress, and entry points to Explore and Study.                                                                   |
-| **Journey**              | Eleven active daily concepts, with 13 current five-question editions covering pins, map picks, recall, choices, and geographic reasoning. |
-| **Explore** (`/explore`) | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.                               |
-| **Study** (`/study`)     | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions.                           |
-| **Account** (`/account`) | Optional verified-email signup, sign-in, recovery, and sign-out.                                                                          |
-| **Admin** (`/admin`)     | Verified owner only: review feedback and publish shared date-to-Journey assignments.                                                      |
+| View                     | Behavior                                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **Home** (`/`)           | Today's Journey, saved progress, and entry points to Explore and Study.                                         |
+| **Journey**              | Five-question editions covering pins, map picks, recall, choices, matching, and geographic reasoning.           |
+| **Explore** (`/explore`) | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.     |
+| **Study** (`/study`)     | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions. |
+| **Account** (`/account`) | Optional verified-email signup, sign-in, recovery, and sign-out.                                                |
+| **Admin** (`/admin`)     | Verified owner only: review feedback and publish shared date-to-Journey assignments.                            |
 
-The daily schedule cycles through the eleven retained Journey concepts from October 5, 2026, using
-New York calendar dates. Admin’s Journey calendar can override any date for everyone;
-unassigned dates continue that rotation. Chasing the sun and Down the Danube are additional concepts ready for Admin date assignments. Archived Journey definitions have been removed; new Sun attempts use its revised edition. Started attempts keep their edition and
-progress when an assignment changes. Past attempts remain in saved history but
-cannot be reopened by players after midnight. Direct practice routes require admin access; use Admin’s “Preview five questions” button. See the [Journey catalog](docs/QUESTION_CATALOG.md) for titles and routes.
+Daily dates use New York midnight. Unassigned future dates use provisional seeded
+selection from Journeys marked `pool`; locking or an Admin assignment makes the
+date permanent. Any current Journey, including `unlisted` editions, can be assigned
+in Admin. The old eleven-ID rotation is migration history, not the current
+selection algorithm. Started attempts keep their edition and progress when an
+assignment changes. Past attempts remain in saved history but cannot be reopened
+by players after midnight. Direct practice routes require Admin access; use
+“Preview five questions.” See the [Journey catalog](docs/QUESTION_CATALOG.md) for
+current titles and routes.
 The removed editor/AI generator is not part of the current app; legacy locally
 published packs remain readable.
 

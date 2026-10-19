@@ -74,7 +74,7 @@ describe("Island instincts Journey", () => {
       )!;
       expect(view.states[clue.id]).toBe("clue");
       expect(playRegionStyle(clue.id, "clue").fill).toBe(
-        playRegionStyle(owners[i], "hinted").fill,
+        playRegionStyle(owners[i], "hinted").stroke,
       );
       expect(playRegionStyle(clue.id, "clue").fill).not.toBe(
         playRegionStyle(owners[i], "selectable").fill,

@@ -145,7 +145,7 @@ describe("connected Journey drafts and answer feedback", () => {
     ).toBe(false);
   });
 
-  it("shows the correct answer, a short insight, and no incorrect guess recap", () => {
+  it("shows the answer once, a short insight, and only the submitted mistake", () => {
     const correct = render(TWELFTH_JOURNEY, 3, select("wurl:CHL"));
     expect(correct).toContain("Correct answer: </span><strong>Chile</strong>");
     expect(correct).toContain("Bolivia lost its coast in the war.");
@@ -153,8 +153,7 @@ describe("connected Journey drafts and answer feedback", () => {
     expect(correct).not.toContain("Chile. Bolivia");
     const wrong = render(CANADA_JOURNEY, 3, text("Toronto"));
     expect(wrong).toContain("Correct answer: </span><strong>Ottawa</strong>");
-    expect(wrong).not.toContain("Your answer:");
-    expect(wrong).not.toContain("<strong>Toronto</strong>");
+    expect(wrong).toContain("Your answer: <strong>Toronto</strong>");
   });
 
   it("uses accepted alternatives on success and clearly labelled examples on a miss", () => {

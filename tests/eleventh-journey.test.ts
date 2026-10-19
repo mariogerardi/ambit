@@ -98,12 +98,13 @@ describe("not the obvious city", () => {
       ),
       context,
     );
-    expect(after.places.map((p) => p.name)).toEqual([
-      "Your pin",
-      "Canberra",
-      "Sydney",
-      "Melbourne",
-    ]);
+    expect(after.places.find((p) => p.sourceId === "player")).toMatchObject({
+      name: "",
+      labelHidden: true,
+    });
+    expect(
+      after.places.filter((p) => p.sourceId !== "player").map((p) => p.name),
+    ).toEqual(["Canberra", "Sydney", "Melbourne"]);
     expect(new Set(after.places.map((p) => p.id)).size).toBe(
       after.places.length,
     );
@@ -208,7 +209,7 @@ describe("not the obvious city", () => {
       wrong.places.find((p) => p.id === "place:3451190")?.visualState,
     ).toBe("incorrect");
   });
-  it("keeps four South African cities equally contextual, then reveals matched roles", () => {
+  it("keeps four South African candidates equal, then reveals matched roles", () => {
     const before = journeyWorld(world, journey, at(4), context);
     expect(before.places.map((p) => p.name)).toEqual([
       "Pretoria",
@@ -218,7 +219,7 @@ describe("not the obvious city", () => {
     ]);
     expect(
       before.places.every(
-        (p) => p.kind === "city" && p.visualState === "hinted",
+        (p) => p.kind === "city" && p.visualState === "selectable",
       ),
     ).toBe(true);
     expect(before.regionInteraction).toBe(false);
@@ -286,7 +287,7 @@ describe("not the obvious city", () => {
     expect(
       completion.places
         .slice(0, 7)
-        .every((p) => p.kind === "capital" && p.visualState === "visited"),
+        .every((p) => p.kind === "city" && p.visualState === "visited"),
     ).toBe(true);
     expect(
       completion.places.slice(7).map((p) => p.name.split(" · ")[0]),

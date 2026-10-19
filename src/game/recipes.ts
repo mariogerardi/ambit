@@ -38,7 +38,7 @@ export const MECHANIC_RECIPES: Question[] = [
       "This example dissolves the canonical Spain–Portugal border and restores both countries after submission.",
     mode: "merged-region-single",
     count: 1,
-    commitment: "submit",
+    commitment: "immediate",
     selection: {
       type: "ids",
       ids: [
@@ -98,6 +98,11 @@ export const MECHANIC_RECIPES: Question[] = [
       type: "pin-distance",
       targetId: "place:2172517",
       radiusKm: 150,
+      tiers: [
+        { radiusKm: 50, feedback: "Bullseye!" },
+        { radiusKm: 100, feedback: "Very close." },
+        { radiusKm: 150, feedback: "In range." },
+      ],
     },
     focus: {
       lat: -34,
@@ -198,7 +203,7 @@ export const MECHANIC_RECIPES: Question[] = [
       type: "ids",
       ids: ["wurl:CAN", "wurl:USA", "wurl:MEX"],
     },
-    commitment: "submit",
+    commitment: "immediate",
     rule: {
       type: "country-ids",
       ids: ["wurl:CAN"],

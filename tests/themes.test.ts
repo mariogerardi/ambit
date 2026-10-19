@@ -10,6 +10,7 @@ import {
   THEME_KEY,
   THEMES,
 } from "../src/theme/themes";
+import { playColors } from "../src/theme/playColors";
 import {
   PLAY_HIGHLIGHTS,
   playRegionStyle,
@@ -135,24 +136,27 @@ describe("application themes", () => {
     },
   );
 
-  it("keeps available, selected, and known-context yellows distinct across themes", () => {
-    expect(PLAY_HIGHLIGHTS).toEqual({
-      selectable: "#efd88e",
-      selected: "#ffdb70",
-      context: "#efb75b",
-    });
+  it("distinguishes interaction from context and gives selection a legible outline in every theme", () => {
     expect(new Set(Object.values(PLAY_HIGHLIGHTS)).size).toBe(3);
     for (const theme of THEME_IDS) {
-      expect(playRegionStyle("wurl:ARG", "selectable", false, theme).fill).toBe(
-        PLAY_HIGHLIGHTS.selectable,
+      const candidate = playRegionStyle("wurl:ARG", "selectable", false, theme);
+      const selected = playRegionStyle("wurl:ARG", "selected", false, theme);
+      const context = playRegionStyle("wurl:ARG", "hinted", false, theme);
+      expect(context.fill).not.toBe(playColors(theme).hinted);
+      expect(context.stroke).toBe(playColors(theme).hinted);
+      expect(
+        contrast(playColors(theme).visited, playColors(theme).disabled),
+      ).toBeGreaterThan(2);
+      expect(new Set([candidate.fill, selected.fill, context.fill]).size).toBe(
+        3,
       );
-      expect(playRegionStyle("wurl:ARG", "selected", false, theme).fill).toBe(
-        PLAY_HIGHLIGHTS.selected,
+      expect(contrast(selected.stroke, selected.fill)).toBeGreaterThanOrEqual(
+        3,
       );
-      for (const state of ["hinted", "clue"] as const)
-        expect(playRegionStyle("wurl:ARG", state, false, theme).fill).toBe(
-          PLAY_HIGHLIGHTS.context,
-        );
+      applyTheme(theme);
+      expect(
+        document.documentElement.style.getPropertyValue("--play-selected"),
+      ).toBe(selected.fill);
     }
   });
 
@@ -174,7 +178,7 @@ describe("application themes", () => {
         "clue",
       ] as const) {
         expect(playRegionStyle("CAN", state, false, id).fill).toBe(
-          playRegionStyle("CAN", state).fill,
+          playColors(id)[state === "clue" ? "clue" : state],
         );
         expect(playRegionStyle("CAN", state, true, id).fill).toBe(
           playRegionStyle("CAN", state, false, id).fill,

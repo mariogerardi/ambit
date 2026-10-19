@@ -14,7 +14,10 @@ import { SECOND_JOURNEY } from "./fixtures/engine/secondJourney";
 import { SECOND_VARIANTS } from "./fixtures/ruleVariants";
 import { playRegionStyle } from "../src/globe/themes";
 import { JOURNEYS } from "../src/game/journeys";
-import { FIFTH_JOURNEY, CANADIAN_TERRITORIES } from "./fixtures/engine/fifthJourney";
+import {
+  FIFTH_JOURNEY,
+  CANADIAN_TERRITORIES,
+} from "./fixtures/engine/fifthJourney";
 
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -109,7 +112,7 @@ describe("question reveal and journey recap", () => {
       playRegionStyle("x", "answer").fill,
     );
   });
-  it("keeps irrelevant countries gray during written and language rounds and removes pending yellows on reveal", () => {
+  it("keeps irrelevant countries gray and retains given context through reveal", () => {
     for (const q of [
       JOURNEY.rounds[3],
       SECOND_JOURNEY.rounds[1],
@@ -133,8 +136,7 @@ describe("question reveal and journey recap", () => {
     });
     expect(states["wurl:ZWE"]).toBe("incorrect");
     expect(states["wurl:NAM"]).toBe("answer");
-    expect(states["wurl:ZAF"]).toBe("disabled");
-    expect(Object.values(states)).not.toContain("hinted");
+    expect(states["wurl:ZAF"]).toBe("hinted");
     expect(Object.values(states)).not.toContain("default");
   });
   it("reveals borders, hover and route geography only after a correct border-count answer", () => {

@@ -11,6 +11,7 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import { playColors } from "../src/theme/playColors.ts";
 import {
   ROOT,
   parseArgs,
@@ -144,7 +145,26 @@ test(
         "utf8",
       );
       assert.match(kit, /Do not force increasing difficulty/);
-      assert.match(kit, /#ffdb70/);
+      const palette = JSON.parse(
+        kit.match(/## Semantic map colors[^]*?```json\n([^]*?)\n```/)[1],
+      );
+      for (const theme of ["atlas", "ocean", "dusk", "paper"])
+        assert.deepEqual(palette.themes[theme], playColors(theme));
+      assert.notEqual(
+        palette.themes.paper.correct,
+        palette.themes.atlas.correct,
+      );
+      assert.ok(palette.themes.atlas.surface);
+      assert.ok(palette.themes.atlas["context-land"]);
+      assert.match(
+        kit,
+        /One tap commits an anonymous composite territory immediately/,
+      );
+      assert.match(kit, /does not grant globe input/);
+      assert.doesNotMatch(
+        kit,
+        /Selectable means eligible|Tap one anonymous composite territory, then submit/,
+      );
       assert.match(kit, /### choice-match/);
       assert.match(kit, /### choice-order/);
       assert.match(kit, /city-multiple/);
@@ -164,18 +184,41 @@ test(
       );
       const app = await readFile(path.join(ROOT, "src/App.tsx"), "utf8");
       assert.ok(review.includes(app));
-      assert.equal(
-        await readFile(
-          path.join(directory, "code/src/game/mechanics.ts"),
-          "utf8",
-        ),
-        await readFile(path.join(ROOT, "src/game/mechanics.ts"), "utf8"),
-      );
+      for (const file of [
+        "src/game/mechanics.ts",
+        "src/game/answerPresentation.ts",
+        "src/game/AnswerReview.tsx",
+        "src/game/pinPresentation.ts",
+        "src/theme/playColors.ts",
+        "src/geography/interiorAnchor.ts",
+        "src/globe/areaSymbols.ts",
+        "src/globe/interaction.ts",
+      ]) {
+        assert.equal(
+          await readFile(path.join(directory, "code", file), "utf8"),
+          await readFile(path.join(ROOT, file), "utf8"),
+        );
+        assert.ok(manifest.inputs.some((input) => input.path === file));
+      }
       const northAmerica = await readFile(
         path.join(directory, "examples/north-america.md"),
         "utf8",
       );
       assert.match(northAmerica, /"acceptedAnswers": \[\s*4\s*\]/);
+      assert.match(northAmerica, /"eligibleRegions": \[\]/);
+      const mediterranean = await readFile(
+        path.join(directory, "examples/mediterranean.md"),
+        "utf8",
+      );
+      assert.match(mediterranean, /"markerRole": "annotation"/);
+      assert.match(featured, /"markerRole":"annotation"/);
+      const template = await readFile(
+        path.join(directory, "JOURNEY_SPEC_TEMPLATE.md"),
+        "utf8",
+      );
+      assert.match(template, /Visual contract/);
+      assert.match(template, /actual wrong/);
+      assert.match(template, /mistake\s+precedence/);
       await writeFile(path.join(directory, "my-notes.md"), "Keep my notes");
       await exportJourneyKit({
         ...options,

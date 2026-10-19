@@ -2,6 +2,8 @@ import { capitalForName, countryIdForName } from "./answerNames";
 import type { VisualState } from "../geography/types";
 import type { Question, QuestionContext } from "./questionContracts";
 import { matchingCapitals, solutionIds } from "./questionPreparation";
+import { pinBands } from "./pinPresentation";
+import { acceptsAlternatives } from "./answerPresentation";
 import { answerPlace } from "./answerTargets";
 import {
   questionPlaces,
@@ -155,20 +157,44 @@ export function feedbackLegend(
     game,
   ))
     if (place.visualState) visible.add(place.visualState);
-  const entries: { key: string; label: string }[] = [];
+  const entries: { key: string; label: string; colorRole?: string }[] = [];
+  const band = pinBands(question, game).find((band) => band.achieved);
   if (visible.has("correct"))
-    entries.push({ key: "correct", label: "Correct" });
+    entries.push(
+      band
+        ? {
+            key: "pin",
+            label: `Your pin · ${band.label}`,
+            colorRole:
+              band.index === 0
+                ? "correct"
+                : band.index === band.count - 1
+                  ? "hinted"
+                  : "selected",
+          }
+        : {
+            key: "correct",
+            label:
+              question.mode === "choice-match"
+                ? "Correct assignment"
+                : "Correct",
+          },
+    );
   if (visible.has("answer"))
     entries.push({
       key: "answer",
       label:
         question.rule.type === "pin-distance"
           ? "Target location"
-          : question.count > 1
-            ? visible.has("correct")
-              ? "Other correct answers"
-              : "Correct answers"
-            : "Correct answer",
+          : question.mode === "land-path"
+            ? "Example route"
+            : question.mode === "number"
+              ? "Solution geography"
+              : acceptsAlternatives(question)
+                ? "Other valid answers"
+                : question.count > 1
+                  ? "Required answers"
+                  : "Correct answer",
     });
   if (visible.has("incorrect"))
     entries.push({
@@ -180,19 +206,16 @@ export function feedbackLegend(
             ? "Incorrect match"
             : "Incorrect pick",
     });
+  // Context and ordinary background are not results. Legends explain only
+  // distinctions that help read a response, never every color on the globe.
   if (
-    visible.has("hinted") ||
-    visible.has("selectable") ||
+    game.phase === "playing" &&
+    visible.has("selectable") &&
     visible.has("selected")
   )
-    entries.push({ key: "hint", label: "Highlighted context" });
-  if (visible.has("disabled") || visible.has("default"))
-    entries.push({
-      key: "neutral",
-      label:
-        question.mode.startsWith("city-") || question.mode === "choice-match"
-          ? "Other places"
-          : "Other countries",
-    });
-  return entries;
+    entries.push(
+      { key: "selectable", label: "Available choices" },
+      { key: "selected", label: "Selected" },
+    );
+  return entries.length > 1 || question.mode === "pin" ? entries : [];
 }

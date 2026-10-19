@@ -65,6 +65,15 @@
     "src/globe/camera.ts",
     "src/game/journeys.ts",
     "src/game/journeyRegistry.ts",
-    "src/game/journeyIndex.json"
+    "src/game/journeyIndex.json",
+    "src/game/answerPresentation.ts",
+    "src/game/AnswerReview.tsx",
+    "src/game/pinPresentation.ts",
+    "src/theme/playColors.ts",
+    "src/geography/interiorAnchor.ts",
+    "src/globe/areaSymbols.ts",
+    "src/globe/interaction.ts",
+    "src/globe/outlines.ts",
+    "src/globe/overlays.ts"
   ]
 }

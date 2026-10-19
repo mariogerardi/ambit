@@ -3,6 +3,11 @@ export const stateStyles: Record<
   VisualState,
   { fill: string; stroke: string; label: string }
 > = {
+  surface: {
+    fill: "rgba(190,201,197,0.35)",
+    stroke: "rgba(191,219,211,0.34)",
+    label: "Pin placement surface",
+  },
   default: {
     fill: "rgba(157,190,175,0.015)",
     stroke: "rgba(191,219,211,0.34)",

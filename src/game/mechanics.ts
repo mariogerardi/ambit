@@ -227,7 +227,6 @@ export const MECHANICS = {
     "regions",
     true,
     {
-      editableCommitment: false,
       canSubmit: (question, response, { eligible }) =>
         response.selectedIds.length === 1 &&
         eligible.includes(response.selectedIds[0]) &&

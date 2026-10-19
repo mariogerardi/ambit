@@ -40,8 +40,10 @@ Subdivision IDs are established during preparation, not inferred from display
 names at runtime. U.S. geoBoundaries IDs map to subdivision-derived IDs such as
 `wurl:USA-NY`; New York counties use committed county-FIPS mappings. Queens source
 ID `52423323B86897144494159` maps to `wurl:USA-NY-36081`. The U.S. source layer has
-56 entries including territories; Explore and state-based Journey questions
-restrict the indexed state set to 50 states and Washington, D.C.
+56 entries including territories. Explore indexes 50 states and Washington, D.C.;
+the `US_STATES` Journey pool contains the 50 states only. D.C. is classified as a
+federal district, not a state. Include it explicitly when a reviewed task calls
+for the broader set; never infer the Journey pool from the source layer count.
 
 The worldwide regional catalog combines Natural Earth and detailed geoBoundaries
 branches. The [manifest](../public/geography/manifest.json) specifies available
@@ -65,7 +67,12 @@ masking improve the map without changing jurisdictional grading geometry.
 
 Camera framing fits geometry and permitted clue/scope, rather than assuming the
 focus point is a legal centroid or correct answer. Point places may reference a
-containing region; they do not imply a globally available city polygon.
+containing region; they do not imply a globally available city polygon. Area-name
+anchors use labels without invented city dots. Area response symbols use a
+cached interior point and clearance derived from display geometry; this does
+not change grading or camera framing. See the
+[visual grammar](JOURNEY_CRAFTING.md#5-give-the-globe-purposeful-question-state-information)
+for shared representation and lifecycle rules.
 Geographic adjacency means shared boundary edges, not point contact or permission
 to cross a border. Simplified geometry and source territorial conventions constrain
 all calculations and need review for ambiguous new questions.

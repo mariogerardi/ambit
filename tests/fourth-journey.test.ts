@@ -104,16 +104,15 @@ describe("Mediterranean facelift", () => {
     }
     const selected = reduce(at(0), { type: "select", id: "wurl:MAR" });
     choices.innerHTML = shell(selected);
-    expect(
-      choices.querySelector('.candidate-grid button[aria-pressed="true"]')
-        ?.textContent,
-    ).toContain("Morocco");
+    expect(selected.phase).toBe("feedback");
+    expect(choices.textContent).toContain("Morocco");
+    expect(choices.querySelector(".candidate-grid")).toBeNull();
     expect(
       playRegionStyle(
         "wurl:MAR",
         questionVisualStates(q, context, selected)["wurl:MAR"],
       ).fill,
-    ).toBe(PLAY_HIGHLIGHTS.selected);
+    ).toBe(PLAY_FEEDBACK.correct);
     expect(journeyWorld(regions, journey, at(0), context).places).toHaveLength(
       0,
     );
@@ -191,7 +190,7 @@ describe("Mediterranean facelift", () => {
         .answers[0].correct,
     ).toBe(true);
   });
-  it("uses bright green for a correctly named Sicily and dark green when revealing a missed answer", () => {
+  it("distinguishes a correctly named Sicily from its revealed solution", () => {
     const part = highlightedPartId("wurl:ITA");
     for (const [id, state] of [
       ["island:sicily", "correct"],
@@ -204,10 +203,10 @@ describe("Mediterranean facelift", () => {
         PLAY_FEEDBACK[state],
       );
       expect(map.states["wurl:ITA"]).toBe("disabled");
-      expect(shell(game)).toContain(`background:${PLAY_FEEDBACK[state]}`);
+      expect(shell(game)).not.toContain('aria-label="Map color key"');
     }
   });
-  it("keeps context amber, grades Tripoli's dot, distinguishes Adriatic picks, and recaps in purple", () => {
+  it("keeps context distinct, grades Tripoli's dot, distinguishes Adriatic picks, and recaps in purple", () => {
     for (const [text, state] of [
       ["Tripoli", "correct"],
       ["Benghazi", "answer"],
@@ -221,7 +220,7 @@ describe("Mediterranean facelift", () => {
       expect(map.places.find((p) => p.name === "Tripoli")?.visualState).toBe(
         state,
       );
-      expect(playRegionStyle("wurl:LBY", map.states["wurl:LBY"]).fill).toBe(
+      expect(playRegionStyle("wurl:LBY", map.states["wurl:LBY"]).stroke).toBe(
         PLAY_HIGHLIGHTS.context,
       );
     }
@@ -372,7 +371,7 @@ describe("Mediterranean facelift", () => {
       expect(
         map.places.find((p) => p.id === SUEZ_ENTRANCE.id)?.visualState,
       ).toBe("answer");
-      expect(map.places.find((p) => p.name === "Your pin")?.visualState).toBe(
+      expect(map.places.find((p) => p.sourceId === "player")?.visualState).toBe(
         feedback ? "correct" : "incorrect",
       );
       if (feedback) expect(shell(answer)).toContain(feedback);

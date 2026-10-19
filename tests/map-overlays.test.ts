@@ -1,16 +1,116 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   Mesh,
+  Group,
   MeshBasicMaterial,
   Raycaster,
+  ShaderMaterial,
   Texture,
   TextureLoader,
   Vector3,
 } from "three";
+import { pinBandColor } from "../src/theme/playColors";
+import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
+import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { MapOverlays, overlayPositions } from "../src/globe/overlays";
 import type { MapOverlay } from "../src/geography/types";
 
 describe("decorative map overlays", () => {
+  it("keeps the same attached guide when answer changes supply fresh overlay records", () => {
+    const overlays = new MapOverlays();
+    const scene = new Group();
+    scene.add(overlays.group);
+    const guide: MapOverlay = { id: "equator", type: "parallel", latitude: 0 };
+    const layer = {
+      id: "overlays",
+      kind: "map-overlays" as const,
+      overlays: [guide],
+    };
+    overlays.update(layer, 100);
+    const lineGroup = overlays.group.children[0];
+    const line = lineGroup.children[0] as LineSegments2;
+    const dispose = vi.spyOn(line.geometry, "dispose");
+    overlays.update({ ...layer, overlays: [{ ...guide }] }, 100);
+    expect(scene.children).toEqual([overlays.group]);
+    expect(overlays.group.children).toEqual([lineGroup]);
+    expect(lineGroup.parent).toBe(overlays.group);
+    expect(dispose).not.toHaveBeenCalled();
+    overlays.dispose();
+  });
+
+  it("detaches replaced accuracy rings and removes all geometry on Journey exit", () => {
+    const overlays = new MapOverlays();
+    const circle: MapOverlay = {
+      id: "accuracy",
+      type: "circle",
+      center: { lat: 0, lng: 0 },
+      radiusKm: 150,
+      accuracyBand: { index: 0, count: 3 },
+    };
+    const layer = {
+      id: "overlays",
+      kind: "map-overlays" as const,
+      overlays: [circle],
+    };
+    overlays.update(layer, 100);
+    const old = overlays.group.children[0];
+    const oldDispose = vi.spyOn(
+      (old.children[0] as LineSegments2).geometry,
+      "dispose",
+    );
+    overlays.update({ ...layer, overlays: [{ ...circle, active: true }] }, 100);
+    expect(old.parent).toBeNull();
+    expect(oldDispose).toHaveBeenCalledOnce();
+    expect(overlays.group.children).toHaveLength(1);
+    const active = overlays.group.children[0];
+    const activeDispose = vi.spyOn(
+      (active.children[0] as LineSegments2).geometry,
+      "dispose",
+    );
+    overlays.update({ ...layer, overlays: [] }, 100);
+    expect(active.parent).toBeNull();
+    expect(activeDispose).toHaveBeenCalledOnce();
+    expect(overlays.group.children).toEqual([]);
+    expect(overlays.group.visible).toBe(false);
+    overlays.dispose();
+    expect(activeDispose).toHaveBeenCalledOnce();
+  });
+
+  it("emphasizes an achieved accuracy ring and recolors cached line and disk together when the theme changes", () => {
+    const overlays = new MapOverlays();
+    const source: MapOverlay = {
+      id: "accuracy",
+      type: "circle",
+      center: { lat: 0, lng: 179 },
+      radiusKm: 150,
+      shade: true,
+      accuracyBand: { index: 0, count: 3 },
+      active: true,
+    };
+    const group = overlays.get(source, 100);
+    const line = group.children.find(
+      (child) => child instanceof LineSegments2,
+    ) as LineSegments2;
+    const disk = group.children.find(
+      (child) =>
+        child instanceof Mesh &&
+        !(child instanceof LineSegments2) &&
+        child.material instanceof ShaderMaterial,
+    ) as Mesh;
+    expect((line.material as LineMaterial).linewidth).toBe(3);
+    overlays.setPalette("paper");
+    expect((line.material as LineMaterial).color.getHexString()).toBe(
+      pinBandColor(0, 3, "paper").slice(1),
+    );
+    const shader = disk.material as ShaderMaterial;
+    expect(shader.uniforms.bandColor.value.getHexString()).toBe(
+      pinBandColor(0, 3, "paper").slice(1),
+    );
+    expect(shader.fragmentShader).toContain("colorspace_fragment");
+    expect(overlays.get(source, 100, "paper")).toBe(group);
+    overlays.dispose();
+  });
+
   it("aligns an equirectangular texture with globe coordinates, caches it and releases GPU resources", () => {
     const texture = new Texture();
     let loaded!: (texture: Texture) => void;

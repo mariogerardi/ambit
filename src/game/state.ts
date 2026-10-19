@@ -154,7 +154,7 @@ export function gameReducer(
     return { ...state, ordered, inputError: undefined };
   }
   if (action.type === "clear")
-    return round.commitment === "immediate"
+    return round.commitment === "immediate" && !mechanicFor(round).single
       ? state
       : {
           ...state,
@@ -215,7 +215,12 @@ export function gameReducer(
               "That option was removed by the assist. Choose one of the remaining candidates.",
           }
         : state;
-    if (state.selectedIds.includes(id))
+    // A saved draft may predate the move to immediate single-country answers.
+    // Tapping it again commits it; it was never graded merely by restoring it.
+    if (
+      state.selectedIds.includes(id) &&
+      !(round.commitment === "immediate" && mechanic.single)
+    )
       return round.commitment === "immediate" ||
         lockedSelectionIds(round, state).includes(id)
         ? state

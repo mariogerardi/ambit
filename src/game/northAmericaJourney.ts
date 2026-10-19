@@ -87,7 +87,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         },
         scenes: {
           play: {
-            contextIds: CANADIAN_TERRITORIES,
+            candidateRegionIds: CANADIAN_TERRITORIES,
             map: {
               borders: true,
               hoverFeedback: false,
@@ -132,7 +132,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         ],
         scenes: {
           play: {
-            contextIds: provinces.map((r) => r.id),
+            candidateRegionIds: provinces.map((r) => r.id),
             map: {
               borders: true,
               hoverFeedback: false,
@@ -156,7 +156,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         label: "Southern border",
         title: "Across the southern border.",
         prompt: "Name a U.S. state that borders Mexico.",
-        instruction: "",
+        instruction: "State borders are hidden. Name a state from memory.",
         mode: "typed-regions",
         inputLabel: "State",
         count: 1,
@@ -197,7 +197,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         prompt:
           "What is the fewest number of state border crossings from California to Missouri?",
         instruction:
-          "Stay within the United States. States meeting at a single point don’t count.",
+          "State borders are hidden; count the crossings from memory. Stay within the United States. States meeting at a single point don’t count.",
         mode: "number",
         inputLabel: "State border crossings",
         rule: {

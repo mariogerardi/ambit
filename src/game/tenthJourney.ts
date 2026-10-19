@@ -59,8 +59,8 @@ export const TENTH_JOURNEY: Journey = {
           map: {
             borders: true,
             hoverFeedback: true,
-            muteOthers: false,
-            candidates: "decorative",
+            muteOthers: true,
+            candidates: "neutral",
           },
         },
       },

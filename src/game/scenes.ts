@@ -9,6 +9,7 @@ import type { Question } from "./questionContracts";
 export interface PlayScene {
   focus?: Focus;
   contextIds?: string[];
+  candidateRegionIds?: string[];
   places?: PlaceFeature[];
   overlays?: MapOverlay[];
   physicalFeatures?: PhysicalFeature[];
@@ -52,6 +53,7 @@ export function compileQuestionScenes(
     if (value !== undefined) compiled[key] = value;
   };
   assign("contextIds", play?.contextIds);
+  assign("candidateRegionIds", play?.candidateRegionIds);
   assign("places", play?.places);
   assign("overlays", play?.overlays);
   assign("physicalFeatures", play?.physicalFeatures);

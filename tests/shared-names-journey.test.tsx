@@ -77,7 +77,7 @@ describe("Same Name, Different Place", () => {
     expect(view(game).routes).toEqual([]);
     expect(view(game).regions.some((r) => r.id === "wurl:USA-GA")).toBe(true);
     expect(view(game).states["wurl:USA-GA"]).toBe("visited");
-    expect(view(game).states["wurl:USA"]).toBe("disabled");
+    expect(view(game).states["wurl:USA"]).toBe("visited");
     expect(view(game).places.every((p) => p.visualState === "visited")).toBe(
       true,
     );
@@ -117,10 +117,11 @@ describe("Same Name, Different Place", () => {
         (f) => f.name === "Congo" && f.paths?.length,
       ),
     ).toBe(true);
-    expect(missed.places.map((p) => p.parentId)).toEqual([
-      "wurl:COD",
-      "wurl:COG",
-    ]);
+    expect(
+      missed.places
+        .filter((p) => p.markerRole !== "annotation")
+        .map((p) => p.parentId),
+    ).toEqual(["wurl:COD", "wurl:COG"]);
   });
 
   it("keeps four anonymous equal city targets, then two Thames choices with named references", () => {
@@ -310,7 +311,7 @@ describe("Same Name, Different Place", () => {
       "Tripoli · Lebanon",
     ]);
     for (const [choice, state] of [
-      ["tripoli:three-cities", "correct"],
+      ["tripoli:three-cities", "answer"],
       ["tripoli:three-islands", "answer"],
     ] as const) {
       const feedback = view(
@@ -327,13 +328,14 @@ describe("Same Name, Different Place", () => {
       at(3),
       reduce(at(3), { type: "request-hint" }),
       help(at(3)),
-      reduce(help(at(3)), ...select("wurl:GEO")),
     ]) {
       expect(render(game).replace(/data-question-id="[^"]*"/g, "")).not.toMatch(
         /Georgia|Sakartvelo|Tbilisi|Atlanta|iranicaonline|georgiaencyclopedia/i,
       );
       expect(view(game).regionNames).toBe("none");
-      expect(view(game).places).toEqual([]);
+      expect(
+        view(game).places.filter((p) => p.markerRole !== "annotation"),
+      ).toEqual([]);
       expect(view(game).regions.some((r) => r.id === "wurl:USA-GA")).toBe(
         false,
       );

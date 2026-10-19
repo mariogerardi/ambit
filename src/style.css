@@ -90,6 +90,9 @@ strong {
 .globe-canvas canvas {
   display: block;
 }
+.globe-canvas[data-pin-input] canvas {
+  cursor: crosshair;
+}
 .ambit-wordmark {
   --logo-spacing: -0.02em;
   position: relative;

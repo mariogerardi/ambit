@@ -1,3 +1,4 @@
+import { answerItems } from "./answerPresentation";
 import { mechanicFor } from "./mechanics";
 import { pointAnswerNoun, answerPlace } from "./answerTargets";
 import type { Dispatch } from "react";
@@ -41,6 +42,7 @@ export function AnswerForm({
   }, [question.choices, question.shuffleChoices]);
   game = withAssistanceLocks(question, game);
   const locked = lockedSelectionIds(question, game);
+  const items = answerItems(question, context, game);
   if (isSlotAnswer(question))
     return (
       <OrderAnswer
@@ -80,12 +82,18 @@ export function AnswerForm({
   if (definition.control === "pin" && !webgl)
     return (
       <p className="pin-unavailable" role="status">
-        This Journey needs the 3D globe to place a pin. Try a browser or device with WebGL support.
+        This Journey needs the 3D globe to place a pin. Try a browser or device
+        with WebGL support.
       </p>
     );
   if (definition.control === "pin")
     return (
       <div className="pin-answer">
+        {!game.pin && (
+          <p className="commit-note">
+            Tap land or water to place a pin. You can move it before submitting.
+          </p>
+        )}
         {game.pin && (
           <p className="commit-note" aria-live="polite">
             Pin placed. Tap another spot to move it.
@@ -126,7 +134,17 @@ export function AnswerForm({
               disabled={!candidateAvailable(question, game, choice.id)}
               onClick={() => dispatch({ type: "select", id: choice.id })}
             >
-              <span>{choice.label}</span>
+              <span>
+                {choice.label}
+                {items.some(
+                  (item) =>
+                    item.id === choice.id && item.selected && item.eliminated,
+                ) && (
+                  <small className="assist-conflict">
+                    Removed by assist · select again to remove
+                  </small>
+                )}
+              </span>
               <i>{game.selectedIds.includes(choice.id) ? "✓" : "·"}</i>
             </button>
           ))}
@@ -158,7 +176,17 @@ export function AnswerForm({
                     : undefined
                 }
               >
-                <span>{name(id)}</span>
+                <span>
+                  {name(id)}
+                  {items.some(
+                    (item) =>
+                      item.id === id && item.selected && item.eliminated,
+                  ) && (
+                    <small className="assist-conflict">
+                      Removed by assist · select again to remove
+                    </small>
+                  )}
+                </span>
                 <i>{game.selectedIds.includes(id) ? "✓" : "→"}</i>
               </button>
             ))}

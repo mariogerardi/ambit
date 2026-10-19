@@ -28,6 +28,11 @@ examples, and keep settled decisions in the specification rather than relying on
 conversation history. Give the approved specification to a coding agent with
 access to the current repository.
 
+The crafting guide owns authoring standards; the catalog/engine references explain
+supported APIs, and the specification records the design. Generated capability
+metadata can include compatibility/internal behavior that is not the recommended
+standard. Historical review notes are not exported as current policy.
+
 The highlights identify our most complete experiences, not a compulsory template.
 The kit encourages consulting other Journeys for repeated mechanics, different
 structures and unusual geography. Edit
@@ -52,7 +57,9 @@ Study presentation, camera orchestration and Home-panel modules, so reviewing th
 its delegated behavior.
 The `code/` tree includes those files, engine/scene/help/control references,
 the app's Journey/geography loading, player-progress, Study presentation and camera hooks,
-executable recipes and all current Journey definitions. `questionSeeds.ts` no
+executable recipes and all current Journey definitions. It also includes response
+identity/review, pin-band and palette helpers, territory-anchor/symbol fitting,
+region interaction and overlay owners, so the visual grammar is reviewable. `questionSeeds.ts` no
 longer exists; presentation presets and explicit contracts are the current pattern.
 The source review is intentionally separate from the compact editorial kit.
 
@@ -61,13 +68,20 @@ Dependencies, binary media, screenshots and large data files are not exported.
 Copied documentation retains repository-relative source links; use those paths
 to find implementation references or the original repository. Structural scene
 snapshots use engine functions but do not render the globe or fully simulate
-typed/pin responses, prior-round choices or label collisions. Geometry summaries
+typed/pin responses, prior-round choices, actual wrong selections, completed
+recaps or label collisions. Examples show authored completion configuration, not a
+simulation of its merged discoveries/mistakes. Marker sizes are authored maxima;
+projected territory symbols may shrink or hide in the actual view. Geometry summaries
 must never be used to reconstruct grading boundaries. Source metadata records
 earlier review; the exporter does not independently verify facts.
 
 ## Refresh and verify
 
-Re-run after relevant code or documentation changes. The exporter fails on a
+Re-run after relevant code or documentation changes. Check `manifest.json` for
+`generatedAt`, the repository revision, local-change indicator and source hashes;
+a copied or uploaded kit does not update when this repository changes. Palette
+values are generated from `playColors(theme)` for every current theme; candidate
+appearance is distinct from canonical input eligibility. The exporter fails on a
 stale Journey index, unknown highlighted Journey, missing source/recipe or a new
 mechanic without an author-facing description. If requested, update the index
 using `npm run prepare:journeys`, then retry. It never regenerates source data itself.

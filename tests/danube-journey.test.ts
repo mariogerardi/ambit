@@ -142,7 +142,7 @@ it("reveals relevant physical geography without coloring starting context as the
       context,
     );
   const opening = reveal(0);
-  expect(opening.states["wurl:DEU"]).toBe("disabled");
+  expect(opening.states["wurl:DEU"]).toBe("hinted");
   expect(opening.physicalFeatures.map((f) => f.name)).toContain("Rhine");
   expect(opening.physicalFeatures.map((f) => f.name)).not.toContain(
     "Black Sea",
@@ -150,7 +150,7 @@ it("reveals relevant physical geography without coloring starting context as the
   const city = reveal(2);
   expect(city.places.map((p) => p.name)).toEqual(["Budapest"]);
   expect(city.places[0].visualState).toBe("answer");
-  expect(city.states["wurl:HUN"]).toBe("disabled");
+  expect(city.states["wurl:HUN"]).toBe("hinted");
   expect(DANUBE_JOURNEY.rounds[2].feedbackDiagram).toMatchObject({
     type: "river-banks",
     westBank: "Buda",
@@ -226,5 +226,8 @@ it("grades the city radius and the gorge’s exact border pair", () => {
   expect(
     JOURNEY_INDEX.find((journey) => journey.id === DANUBE_JOURNEY.id)?.path,
   ).toBe("/journey/down-the-danube");
-  expect(JOURNEY_INDEX.find((journey) => journey.id === DANUBE_JOURNEY.id)?.availability).toBe("unlisted");
+  expect(
+    JOURNEY_INDEX.find((journey) => journey.id === DANUBE_JOURNEY.id)
+      ?.availability,
+  ).toBe("unlisted");
 });
