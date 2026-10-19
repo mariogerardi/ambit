@@ -1973,7 +1973,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     });
     expect(
       host.querySelector(".mode-incoming .journey-score")?.textContent,
-    ).toContain("5/5");
+    ).toContain("13/15");
+    expect(
+      host.querySelector(".mode-incoming .journey-correct-count")?.textContent,
+    ).toBe("5/5 correct answers");
     expect(
       host.querySelector(".mode-incoming .journey-receipt")?.textContent,
     ).toContain("Vienna");

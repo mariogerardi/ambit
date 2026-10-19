@@ -1,6 +1,7 @@
 import { ActionIcon } from "../app/ActionIcon";
 import type { Question } from "./questionContracts";
 import type { HelpStage } from "./guidance";
+import { useId } from "react";
 
 /** Shared footer; help is authored per question and never changes submission rules. */
 export function QuestionActions({
@@ -10,12 +11,14 @@ export function QuestionActions({
   onSubmit,
   showSubmit = true,
   guidance,
+  pointScoring = false,
 }: {
   disabled?: boolean;
   label?: string;
   submitType?: "button" | "submit";
   onSubmit?(): void;
   showSubmit?: boolean;
+  pointScoring?: boolean;
   guidance?: {
     content: NonNullable<Question["guidance"]>;
     stage?: HelpStage;
@@ -28,6 +31,8 @@ export function QuestionActions({
   const exhausted =
     guidance?.stage === "assisted" ||
     (!!guidance?.stage && !guidance.content.assist);
+  const ceilingId = useId();
+  const ceiling = guidance?.stage === "assisted" || assist ? 1 : 2;
   return (
     <>
       {guidance?.stage && (
@@ -64,6 +69,14 @@ export function QuestionActions({
           data-dd-action-name={assist ? "Answer Assist" : "Answer Hint"}
           className={`primary-button answer-hint-button${assist ? " answer-assist-button" : ""}`}
           disabled={!guidance || exhausted}
+          aria-label={
+            pointScoring
+              ? assist
+                ? "Need an assist?"
+                : "Need a hint?"
+              : undefined
+          }
+          aria-describedby={pointScoring && guidance ? ceilingId : undefined}
           title={
             !guidance
               ? "Hints are coming soon."
@@ -78,6 +91,11 @@ export function QuestionActions({
         >
           {assist ? "Need an assist?" : "Need a hint?"}{" "}
           <ActionIcon name={assist ? "assist" : "hint"} />
+          {pointScoring && guidance && (
+            <small id={ceilingId} className="help-point-ceiling">
+              Play for up to {ceiling} {ceiling === 1 ? "point" : "points"}
+            </small>
+          )}
         </button>
         {showSubmit && (
           <button

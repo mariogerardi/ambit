@@ -139,8 +139,9 @@ Distance-pin rules support inclusive `tiers`, ordered by increasing radius and
 ending exactly at `radiusKm`. The field remains optional at the engine/API level
 for compatibility. Current Journey authoring requires three bands: bullseye,
 close, and within range. Choose inner radii for the task; never enlarge acceptance
-just to add bands. All accepted bands currently earn one correct answer; band
-colors and praise do not define point weights. Territory-inside pins use canonical
+just to add bands. All accepted bands count as one correct answer; the current
+point rewards are 3 / 2 / 1, capped at two after a hint or one after an assist.
+Colors and praise do not define point weights. Territory-inside pins use canonical
 containment and have no invented distance tiers. See
 [pin design standards](JOURNEY_CRAFTING.md#4-design-the-answer-method-and-distractors-intentionally)
 and `pinPresentation.ts` for labels and feedback.
@@ -386,13 +387,14 @@ buttons, or typing; existing selections are preserved and can still be removed.
 `GameState.help` records each round’s strongest stage (`hinted` or `assisted`).
 Older saves can omit it. The daily save codec validates round IDs and stages,
 merges help monotonically within the same run, and keeps new replays independent.
-Results show help counts and per-round annotations without subtracting points.
+Results show help counts and point rewards. Help caps a question at two points
+for a hint or one for an assist; see `points.ts` and the crafting guide.
 
 Around the Mediterranean now follows Gibraltar → Sicily → Tripoli → the Adriatic
 → the hidden Suez entrance, using map-single, choice-single, text, map-multiple and pin controls.
 All five rounds have authored hints and assists. The Suez pin uses a 150 km
-acceptance radius and inclusive 50/100/150 km accuracy bands, all worth one correct
-answer. Completion and canal geometry are authored separately from grading.
+acceptance radius and inclusive 50/100/150 km accuracy bands, worth 3/2/1 points
+before help ceilings while each accepted band still counts as one correct answer. Completion and canal geometry are authored separately from grading.
 
 The Mediterranean opening now has six equally styled, named country candidates
 across Africa and Europe, keeping the gateway name until reveal. Q4’s six

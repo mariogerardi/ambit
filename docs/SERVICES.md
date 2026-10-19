@@ -82,7 +82,12 @@ Friends shows a wider search column beside friend cards, above Journey compariso
 friends with completed players first; ties are alphabetical. The comparison is
 for today's New York Journey; older comparison links open today's section.
 Unlocked scores show hint/assist icons with counts and accessible summaries,
-without rankings or point penalties. Different Journey editions
+without rankings. Journey reward totals are out of 15, with three points per
+question, 3/2/1 distance-pin rewards and hint/assist ceilings of two/one.
+Correctness totals remain separate. New answers store versioned rewards; legacy
+answers retain original full credit and are identified as earlier scoring.
+The score API supplies `points`, `maxPoints` and `legacyPoints`, with the same
+monotonic help ceiling as the local app. Different Journey editions
 are excluded from the selected comparison. Comparison links preserve the attempt's
 Journey context through sign-in and scroll to the comparison section once after the
 directory loads. Switching account tabs does not replay that arrival scroll. Friend activity updates automatically; regular section refresh controls
@@ -96,7 +101,9 @@ request action. Adding or accepting a friend always requires an explicit click.
 
 Result sharing works for guests and signed-in players, including ended-early daily
 attempts. A locally generated 1200 × 940 PNG contains the title, date,
-score, five outcome marks, aggregate help use and a link to today's Journey.
+point score, one continuous row of 15 star-orb slots, correct-answer count,
+aggregate help use and a link to today's Journey. The score, orb row and summary
+form a compact centered group; the invitation and play URL stay at the bottom.
 A single sharing action sends the image with a short invitation caption; the
 caption avoids repeating the result and keeps its invitation and link on one line.
 Unsupported devices save the image and copy the caption together.

@@ -95,6 +95,36 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
+it("waits for a deferred Journey when restoring a playing attempt with saved help", async () => {
+  const round = ANDES_JOURNEY.rounds[2];
+  await render({
+    mode: "daily",
+    transitionKey: "/daily:restored",
+    ready: false,
+    journey: {
+      ...options.journey,
+      definition: { ...ANDES_JOURNEY, rounds: [] },
+      context: undefined,
+      roundIndex: 2,
+      help: { [round.id]: "hinted" },
+      dailyReady: false,
+    },
+  });
+  expect(port.focus).not.toHaveBeenCalled();
+  await render({
+    ready: true,
+    journey: {
+      ...options.journey,
+      active: true,
+      definition: ANDES_JOURNEY,
+      context,
+      focus: round.focus,
+      dailyReady: true,
+    },
+  });
+  expect(port.focus).toHaveBeenCalledExactlyOnceWith(round.focus);
+});
+
 it("uses the latest reveal focus on a phase transition without restarting travel for display edits", async () => {
   const clue = { lat: 5, lng: -65, altitude: 0.8 };
   const reveal = { lat: 4, lng: -74, altitude: 0.6 };

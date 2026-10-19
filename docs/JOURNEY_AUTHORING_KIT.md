@@ -38,8 +38,9 @@ The 17 current Journeys are the reviewed reference set for new authoring; the
 four highlighted examples are convenient starting points. Preserve their
 established contracts and styles when proposing new content. Fresh local changes
 still need player review; neither a source snapshot nor automated checks certify
-every rendered view. Proposed point scoring is separate product work and is not
-part of the current one-correct-answer scoring contract.
+every rendered view. Current Dailies award 15 points: three per question, with
+3/2/1 distance-pin tiers and hint/assist ceilings of two/one. The crafting guide
+owns the full scoring contract; variable weights and timers are not implemented.
 The kit encourages consulting other Journeys for repeated mechanics, different
 structures and unusual geography. Edit
 [`scripts/journey-export.config.json`](../scripts/journey-export.config.json) to

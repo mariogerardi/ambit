@@ -152,6 +152,35 @@ class CommunityTests(unittest.TestCase):
         attempt = {"date": day, "journeyId": journey, "scheduleVersion": version, "startedAt": 1, "game": {"phase": phase, "answers": [{"correct": i < correct, "text": "private answer", "pin": {"lat": 1, "lng": 2}} for i in range(5 if phase == "finished" else 1)]}}
         return {"pk": "user#" + subject, "namespace": "daily", "field": "run." + day + "/" + journey, "writer": writer, "clock": 1, "valueJson": json.dumps(attempt)}
 
+    def test_point_totals_reach_unlocked_friend_scores_without_answer_payloads(self):
+        self.friends()
+        record = self.daily_record("b", correct=5)
+        attempt = json.loads(record["valueJson"])
+        rewards = [3, 2, 1, 1, 3]
+        for i, answer in enumerate(attempt["game"]["answers"]):
+            answer.update({"roundId": "private-round-" + str(i), "points": rewards[i], "pointsVersion": 1})
+        attempt["game"]["help"] = {"private-round-0": "hinted"}
+        record["valueJson"] = json.dumps(attempt)
+        self.db.saves = [record, self.daily_record("a")]
+        scores = self.call("GET /account/friends/{id}/journeys", "a", id="b")[1]
+        self.assertEqual(scores[0]["points"], 9)
+        self.assertEqual(scores[0]["maxPoints"], 15)
+        self.assertEqual(scores[0]["correct"], 5)
+        self.assertFalse(scores[0]["legacyPoints"])
+        self.assertNotIn("private", str(scores))
+
+    def test_point_rewards_preserve_legacy_credit_and_apply_monotonic_help_caps(self):
+        answers = [
+            {"roundId": "legacy", "correct": True},
+            {"roundId": "hinted", "correct": True, "points": 3, "pointsVersion": 1},
+            {"roundId": "assisted", "correct": True, "points": 2, "pointsVersion": 1},
+            {"roundId": "range", "correct": True, "points": 1, "pointsVersion": 1},
+            {"roundId": "wrong", "correct": False, "points": 3, "pointsVersion": 1},
+        ]
+        self.assertEqual(community.journey_points(answers, {"legacy": "assisted", "hinted": "hinted", "assisted": "assisted"}), (7, True))
+        self.assertEqual(community.journey_points([{ "correct": True, "points": 99, "pointsVersion": 1 }], {}), (0, False))
+        self.assertEqual(community.journey_points([{ "correct": True, "points": True, "pointsVersion": 1 }], {}), (0, False))
+
     def test_scores_unlock_only_for_mutual_friends_who_finished_the_same_journey_version(self):
         self.friends()
         self.db.saves = [self.daily_record("b")]
@@ -170,7 +199,7 @@ class CommunityTests(unittest.TestCase):
         completed["valueJson"] = json.dumps(value)
         self.db.saves.append(completed)
         scores = self.call("GET /account/friends/{id}/journeys", "a", id="b")[1]
-        self.assertEqual(scores, [{"date": "2026-10-10", "journeyId": "test", "gameId": "journey", "gameVersion": 1, "correct": 3, "total": 5}])
+        self.assertEqual(scores, [{"date": "2026-10-10", "journeyId": "test", "gameId": "journey", "gameVersion": 1, "correct": 3, "total": 5, "points": 9, "maxPoints": 15, "legacyPoints": True}])
         self.assertNotIn("private", str(scores))
         self.assertEqual(self.call("GET /account/friends/{id}/profile", "c", id="b")[0], 403)
         self.call("PATCH /account/friends/{id}", "b", {"action": "block"}, id="a")

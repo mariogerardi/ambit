@@ -73,6 +73,8 @@
     "src/game/answerPresentation.ts",
     "src/game/AnswerReview.tsx",
     "src/game/pinPresentation.ts",
+    "src/game/points.ts",
+    "src/game/PointOrbs.tsx",
     "src/theme/playColors.ts",
     "src/geography/interiorAnchor.ts",
     "src/globe/areaSymbols.ts",

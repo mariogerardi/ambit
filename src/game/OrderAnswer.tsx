@@ -287,6 +287,7 @@ export function OrderAnswer({
             : "Fill each slot before submitting."}
       </p>
       <QuestionActions
+        pointScoring
         guidance={guided}
         disabled={!canSubmit(question, context, game)}
         onSubmit={() => dispatch({ type: "submit" })}

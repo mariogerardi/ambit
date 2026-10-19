@@ -3031,10 +3031,14 @@ body
   text-decoration: line-through;
   cursor: default;
 }
+.experience .journey-result-summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
 .experience .journey-help-summary {
-  margin: -12px 0 24px;
   color: var(--ui-muted);
-  font-size: 14px;
 }
 .journey-round-result {
   display: inline-flex;

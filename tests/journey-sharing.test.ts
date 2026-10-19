@@ -7,6 +7,7 @@ import {
   resultCaption,
   resultDate,
   wrapCardText,
+  paintResultCard,
 } from "../src/app/journeySharing";
 import { accountIntent, comparisonLink } from "../src/app/accountNavigation";
 import { modeForPath } from "../src/app/modes";
@@ -53,7 +54,7 @@ it("shares outcomes and aggregate help without revealing answers, round names or
     "unreached",
   ]);
   const text = resultText(result);
-  expect(text).toContain("✓ × — — — · 1/5");
+  expect(text).toContain("✓ × — — — · 3/15 points");
   expect(text).toContain("Ended early");
   expect(text).toContain("October 13th, 2026");
   expect(text).toContain("Play today’s Journey: https://playambit.com/daily");
@@ -69,6 +70,80 @@ it("shares outcomes and aggregate help without revealing answers, round names or
   ])
     expect(text).not.toContain(secret);
 });
+it("shares current reward totals with a continuous earned-then-hollow orb row", () => {
+  const result = sharedJourneyResult(
+    CANADA_JOURNEY,
+    {
+      ...initialGame,
+      phase: "finished",
+      answers: [3, 2, 1, 0, 3].map((points, i) => ({
+        ...initialGame,
+        roundId: CANADA_JOURNEY.rounds[i].id,
+        correct: points > 0,
+        points,
+        pointsVersion: 1,
+      })),
+      help: {
+        [CANADA_JOURNEY.rounds[1].id]: "hinted",
+        [CANADA_JOURNEY.rounds[2].id]: "assisted",
+      },
+    },
+    "2026-10-19",
+  );
+  expect(resultText(result)).toContain("9/15 points");
+  expect(result.legacyPoints).toBe(false);
+  const circles: { x: number; y: number; filled: boolean }[] = [];
+  const labels: { text: string; x: number; y: number }[] = [];
+  let circle: (typeof circles)[number] | undefined;
+  const ctx = {
+    fillRect() {},
+    save() {},
+    restore() {},
+    drawImage() {},
+    measureText: (text: string) => ({ width: text.length * 14 }),
+    fillText(text: string, x: number, y: number) {
+      labels.push({ text, x, y });
+    },
+    beginPath() {
+      circle = undefined;
+    },
+    arc(x: number, y: number) {
+      circle = { x, y, filled: false };
+      circles.push(circle);
+    },
+    fill() {
+      if (circle) circle.filled = true;
+    },
+    stroke() {},
+    moveTo() {},
+    lineTo() {},
+    closePath() {},
+  } as unknown as CanvasRenderingContext2D;
+  paintResultCard(ctx, {} as CanvasImageSource, result);
+  expect(circles).toHaveLength(15);
+  expect(circles.map((c) => c.filled)).toEqual([
+    ...Array(9).fill(true),
+    ...Array(6).fill(false),
+  ]);
+  expect(new Set(circles.slice(1).map((c, i) => c.x - circles[i].x)).size).toBe(
+    1,
+  );
+  const score = labels.find((l) => l.text === "9/15")!;
+  const unit = labels.find((l) => l.text === "points")!;
+  expect(unit.y).toBe(score.y);
+  expect(unit.x).toBeGreaterThan(score.x);
+  const summary = labels.find((l) => l.text.includes("4/5 correct answers"))!;
+  expect((score.x + unit.x + "points".length * 14) / 2).toBe(600);
+  expect((circles[0].x + circles.at(-1)!.x) / 2).toBe(600);
+  expect(summary.x).toBe(600);
+  expect(circles[0].y - score.y).toBeLessThan(60);
+  expect(summary.y - circles[0].y).toBeLessThan(60);
+  const invitation = labels.find((l) => l.text === "Play today’s Journey")!;
+  const url = labels.find((l) => l.text === "playambit.com/daily")!;
+  expect(invitation.y).toBeGreaterThan(800);
+  expect(url.y - invitation.y).toBeGreaterThan(35);
+});
+
 it("wraps long words without dropping title characters", () => {
   const title = "Chasing the extraordinarilylongjourneyname across the world";
   const lines = wrapCardText(title, (value) => value.length * 10, 160);

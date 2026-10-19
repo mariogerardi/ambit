@@ -6,6 +6,7 @@ import type {
 import type { ComparisonTarget } from "./accountNavigation";
 import { ActionIcon } from "./ActionIcon";
 import { helpCountCopy } from "../game/guidance";
+import { scorePointTotals } from "../game/points";
 
 export function alphabeticalFriends(friends: FriendActivity[]) {
   return [...friends].sort(
@@ -33,6 +34,7 @@ export function comparisonScore(
   );
 }
 export function ScoreSummary({ score }: { score: JourneyScore }) {
+  const points = scorePointTotals(score);
   const status = score.help?.status ?? "unassisted";
   const label =
     status === "assisted"
@@ -67,9 +69,12 @@ export function ScoreSummary({ score }: { score: JourneyScore }) {
           )}
         </span>
       )}
+      {(score.legacyPoints || score.points === undefined) && (
+        <small className="comparison-legacy">Earlier scoring</small>
+      )}
       <strong className="comparison-score">
-        {score.correct}
-        <span>/{score.total}</span>
+        {points.earned}
+        <span>/{points.maximum}</span>
       </strong>
     </span>
   );

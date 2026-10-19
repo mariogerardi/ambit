@@ -176,6 +176,12 @@ export function validGame(
       strings(a.ordered) &&
       typeof a.text === "string" &&
       typeof a.correct === "boolean" &&
+      ((a.points === undefined && a.pointsVersion === undefined) ||
+        (a.pointsVersion === 1 &&
+          Number.isInteger(a.points) &&
+          Number(a.points) >= 0 &&
+          Number(a.points) <= 3 &&
+          (a.correct || a.points === 0))) &&
       (a.receiptLabel === undefined || typeof a.receiptLabel === "string"),
   );
 }
