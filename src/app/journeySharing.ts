@@ -151,7 +151,7 @@ export function paintResultCard(
   ctx.fillText("points", scoreX + scoreWidth + 12, scoreBaseline);
   for (let slot = 0; slot < result.maxPoints; slot++) {
     const x = 94 + slot * 30,
-      y = scoreBaseline + 44,
+      y = scoreBaseline + 50,
       filled = slot < result.points;
     ctx.beginPath();
     ctx.arc(x, y, 12, 0, Math.PI * 2);
@@ -186,14 +186,14 @@ export function paintResultCard(
   );
   ctx.textAlign = "left";
   summary.forEach((line, i) =>
-    ctx.fillText(line, 80, scoreBaseline + 90 + i * 42),
+    ctx.fillText(line, 80, scoreBaseline + 108 + i * 42),
   );
   if (result.endedEarly) {
     ctx.fillStyle = "#b2c9d7";
     ctx.fillText(
       "Ended early · — not reached",
       80,
-      scoreBaseline + 90 + summary.length * 42 + 12,
+      scoreBaseline + 108 + summary.length * 42 + 12,
     );
   }
   ctx.fillStyle = "#9fdde4";

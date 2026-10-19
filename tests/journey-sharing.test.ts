@@ -149,7 +149,7 @@ it("shares current reward totals with a continuous earned-then-hollow orb row", 
     help: "Assisted · 5 hints · 5 assists",
   });
   const summaryLines = labels.filter(
-    (l) => l.y >= score.y + 90 && l.y < invitation.y,
+    (l) => l.y >= score.y + 108 && l.y < invitation.y,
   );
   expect(summaryLines.length).toBeGreaterThan(1);
   expect(summaryLines[1].y - summaryLines[0].y).toBeGreaterThan(35);
