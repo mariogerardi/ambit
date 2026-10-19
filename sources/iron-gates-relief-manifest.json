@@ -1,0 +1,14 @@
+{
+  "source": "Mapzen/Tilezen Terrain Tiles on AWS; USGS GMTED2010/SRTM and NOAA ETOPO1",
+  "accessed": "2026-10-19",
+  "zoom": 6,
+  "attributionUrl": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
+  "tiles": {
+    "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/6/35/22.png": "9e6a0b15fe3424781813aae21c71470307ec57a4cbbeb8fe08a0f3e2bf60a015",
+    "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/6/36/22.png": "f1f6981378332397aef76858bdb36a52a65a82f5adac563c3774ed3a3cc73c85",
+    "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/6/35/23.png": "d0a07ea16f144b5780afc85ef285b0ad7ff51e53d94aa167e47b83f2a0787885",
+    "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/6/36/23.png": "9b440903d49732a6a9642574349dff1eb890e87f5ef2d03f0af0924bc66fb456"
+  },
+  "derivedSha256": "44975bcef660cb9ecde4ff964a3ea23d067165b4fb28701ad2b5237190d7394b",
+  "processing": "Terrain-anchored pictorial relief for the Iron Gates region. Symbols use spaced elevation maxima above 900 m inside the display window [20, 42.5, 25.5, 46.5], not a mountain-range boundary. North-up silhouette clipping prevents overlapping faces and ink. Display only; never used for grading."
+}

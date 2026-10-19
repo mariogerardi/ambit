@@ -21,12 +21,20 @@ const regions = prepareGlobeRegions(
   ),
 );
 describe("independent boundary outlines", () => {
+  it("uses the same quiet outline for clues and references independently of hover", () => {
+    const clue = outlineEmphasis("clue");
+    expect(clue).toEqual(outlineEmphasis("hinted"));
+    expect(clue.width).toBe(outlineEmphasis("selectable").width);
+    expect(clue.order).toBeGreaterThan(outlineEmphasis("disabled").order);
+    expect(clue.lift).toBeGreaterThan(0);
+    expect(outlineEmphasis("clue", true)).toEqual(clue);
+  });
   it("raises reference outlines above ordinary geography without changing selection priority", () => {
     const reference = outlineEmphasis("hinted");
     expect(reference.order).toBeGreaterThan(outlineEmphasis("disabled").order);
     expect(reference.order).toBeLessThan(outlineEmphasis("selected").order);
     expect(reference.lift).toBeGreaterThan(0);
-    expect(reference.lift).toBeLessThan(0.002);
+    expect(reference.lift).toBeLessThan(0.0005);
   });
   it("draws committed selections above neighboring and hovered outlines", () => {
     const ordinary = outlineEmphasis("selectable"),
@@ -46,6 +54,28 @@ describe("independent boundary outlines", () => {
       outlineEmphasis("selected"),
     );
     expect(ordinary.lift).toBe(0);
+    expect(hover.width).toBeGreaterThan(ordinary.width);
+    expect(outlineEmphasis("hinted", true)).toEqual(outlineEmphasis("hinted"));
+  });
+  it("keeps lowered country reference segments above state and county caps", () => {
+    const country = regions.find((r) => r.id === "wurl:USA")!;
+    const subdivisions = regions.filter((r) =>
+      ["ADM1", "ADM2"].includes(r.level),
+    );
+    expect(subdivisions.length).toBeGreaterThan(0);
+    const capRadius = Math.max(
+      ...subdivisions.map((r) => 1 + boundaryAltitude(r)),
+    );
+    const positions = boundaryOutlinePositions(country);
+    const scale = 1 + outlineEmphasis("hinted").lift;
+    for (let i = 0; i < positions.length; i += 6) {
+      const midpoint = Math.hypot(
+        (positions[i] + positions[i + 3]) / 2,
+        (positions[i + 1] + positions[i + 4]) / 2,
+        (positions[i + 2] + positions[i + 5]) / 2,
+      );
+      expect(midpoint * scale).toBeGreaterThan(capRadius);
+    }
   });
   it("keeps every straight segment above the highest possible land surface, including its midpoint", () => {
     for (const region of regions) {

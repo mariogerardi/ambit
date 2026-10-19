@@ -20,6 +20,11 @@ These instructions apply to every coding agent working in this repository.
 - Run only tests relevant to the changed behavior. Prefer named files or focused
   test filters. Add regression coverage for meaningful behavior and failure modes,
   not tests that merely repeat the implementation.
+- Use `npm test -- tests/<file>.test.ts` for local frontend checks; put test files
+  before options such as `-t <test-name>`. The command refuses unscoped runs.
+  `npm run test:all` explicitly runs the full frontend suite. Passing test logs
+  are suppressed; failure diagnostics remain visible. Do not rerun a passing
+  command just to obtain more output.
 - Use a TypeScript check when changing typed code. Do not routinely run the full
   test suite, production build, dependency audit, or all preparation scripts.
 - Broaden checks only when a failure, shared-contract change, explicit request,

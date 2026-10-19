@@ -22,7 +22,8 @@ to loopback and requires its configured port to be available. Generated assets
 are included; no data preparation or API keys are needed to run the app.
 
 ```sh
-npm test         # Unit, asset, and DOM integration tests; no browser/WebGL
+npm test -- tests/themes.test.ts  # Focused unit/DOM tests; list files before options
+npm run test:all                  # Intentional full frontend suite; no browser/WebGL
 npm run build    # Strict TypeScript checks, then the production build in dist/
 npm run preview  # Inspect dist/ locally; this is not a production server
 ```

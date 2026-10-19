@@ -21,7 +21,7 @@ import type { GameState, Action } from "./state";
 import { questionMapPresentation } from "./presentation";
 
 import { AnswerReview } from "./AnswerReview";
-import { pinBands } from "./pinPresentation";
+import { pinBands, pinReviewViews } from "./pinPresentation";
 import { AnswerForm } from "./AnswerForm";
 import {
   correctAnswerCopy,
@@ -195,6 +195,7 @@ export function GameShell({
       : undefined;
   const distance = pinDistance(round, game);
   const distanceTier = pinDistanceTier(round, game);
+  const pinViews = pinReviewViews(round, context, game);
   const feedbackText = explanation(round, context, game.selectedIds, !!correct);
   const correctAnswer = correctAnswerSummary(round, context, game);
   const pinFeedback =
@@ -268,7 +269,7 @@ export function GameShell({
           {round.image?.presentation !== "photo" && clueImage}
           {game.phase === "playing" ? (
             <>
-              {round.instruction && (
+              {round.instruction && round.mode !== "pin" && (
                 <p className="question-instruction">{round.instruction}</p>
               )}
               <MapKey
@@ -393,6 +394,28 @@ export function GameShell({
               )}
               {pinFeedback && (
                 <p className="journey-pin-distance">{pinFeedback}</p>
+              )}
+              {webgl && !correct && pinViews && (
+                <div
+                  className="journey-map-review"
+                  role="group"
+                  aria-label="Review pin locations"
+                >
+                  <button
+                    type="button"
+                    className="quiet-button"
+                    onClick={() => frame(pinViews.guess)}
+                  >
+                    Show your pin
+                  </button>
+                  <button
+                    type="button"
+                    className="quiet-button"
+                    onClick={() => frame(pinViews.answer)}
+                  >
+                    Show answer
+                  </button>
+                </div>
               )}
               {pinBands(round, game).length > 0 && (
                 <ol

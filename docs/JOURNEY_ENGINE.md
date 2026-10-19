@@ -86,7 +86,10 @@ The place variables above stand for reviewed bundled records; the full examples
 resolve concrete IDs. A scene can contain places, regions, overlays, physical
 features or framing appropriate to its stage. `scenes.assist` requires authored
 assist copy in `guidance` and can add physical features and a focus alongside
-places/overlays. Hint copy normally retains the play scene;
+places/overlays. `scenes.assist.borders` (or `guidance.assist.borders`) can
+reveal political boundaries without changing eligibility or grading. Established
+reference areas retain their blue outlines even when other boundaries are hidden.
+Hint copy normally retains the play scene;
 `guidance.hintMap` can add reference region emphasis and/or a focus when authored.
 Across the Divide demonstrates this hint-stage support. There is no separate
 `scenes.hint` object.
@@ -94,6 +97,15 @@ Assist layers are merged with play geography and removed when feedback begins;
 an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
 contract, not scene geometry.
+
+For named-choice or typed-region questions that test identification of anonymous geography, author
+`scenes.play.map.selectionFeedback: "after-submit"` and use
+`map.candidateRole: "clue"` for noninteractive area pools. Blue clue fills remain uniform
+while buttons or text fields track pending answers. Typed names must not preview
+their locations before submission. Map selection colors and area symbols
+appear only in feedback, preserving the name-to-shape task. Keep hover names and
+map interaction disabled for this pattern. Other questions retain normal pending
+map feedback; eligibility and grading are unchanged.
 
 `reveal.contextIds` stays context-colored. `reveal.answerIds` identifies answered
 regions; use it only when the region is the answered object. A symbol, history or
@@ -112,8 +124,11 @@ It never participates in picking or grading. A `path` overlay supports a sourced
 or explicitly schematic geographic guide, with optional dashes and opacity.
 
 `compileQuestionScenes` merges scene values over presentation defaults without
-mutating the source/preset. Explicit empty arrays clear a layer; omission preserves
-the default. It produces the legacy runtime fields once, and existing records
+mutating the source/preset. An explicit empty array replaces that scene's inherited
+field; omission preserves the default. At runtime, reveal overlays and physical
+features augment the play layers, so an empty reveal array does not remove a play
+layer. Completion owns its layers separately and can clear them with empty arrays.
+The compiler produces the legacy runtime fields once, and existing records
 without scenes pass through unchanged. No renderer or persistence migration is
 required. New authors should use the grouped fields for state-specific geography;
 all bundled Journeys have been migrated. Do not edit both an authored
@@ -208,23 +223,56 @@ motion shows the authored completion focus.
 ```sh
 npm run check:journey -- not-the-obvious-city
 npm run check:journey -- --recipe choice-match
+npm run check:journey -- --all
 npm run check:journey -- --list
 npm run --silent check:journey -- not-the-obvious-city --json
 ```
 
-The command loads only the requested Journey module, builds its canonical context,
-and inspects play, hint, assist, correct-reveal and missed-reveal states. It checks
+The command loads the requested Journey module (or every indexed definition with
+`--all`), builds its canonical context,
+and inspects play, hint, assist, correct-reveal and missed-reveal states. Correct
+and missed samples run through the reducer with actual responses; the audit also
+checks their completed recaps for lost required solutions and mistakes. It also
+probes editable named/typed answers against anonymous geography and reports the
+question ID, help stage, and choice when a pending response leaks its location. It checks
 contracts, source metadata, media existence, camera coordinates, duplicate visible
 places and anonymous city-name disclosure. JSON includes answer identities and
-base marker shapes/sizes for editorial review. These are not projected symbol
+base marker shapes/sizes, shared rule definitions, and accepted authored exceptions
+with their reasons for editorial review. These are not projected symbol
 sizes or a simulation of role-specific glyphs; actual annotation/target rendering
-and depth still belong to the renderer. The command does not simulate completed
-recaps or actual typed/pin mistakes. It never fetches data, regenerates
+and depth still belong to the renderer. Samples are representative, not exhaustive:
+partial assignments, repeated objects, and alternate spellings still need focused
+behavior coverage. An unavailable missed sample is reported as a warning rather
+than replaced with an empty response carrying a fabricated grade. It never fetches data, regenerates
 assets, opens a browser or deploys. Failure exits nonzero. Missing authored completion
 is reported as a note because legacy Journeys may use the generic recap.
 
-Feedback snapshots are synthetic scene previews, not proof that every location
-can be clicked or that a fact is true. Recipe tests separately grade known answers.
+The consistency check has two levels: mechanic-independent role rules in
+`journeyVisualRules.ts`, and narrow authored exceptions reviewed against those
+rules. `visualExceptions` maps `hidden-boundaries`, `open-search-background`, or
+`natural-background` to a nonempty reason. Unsupported or stale entries fail;
+exceptions never disable unrelated rules. The catalog sweep applies the same
+checks to play, hint, assist, both reveal outcomes and completion retention. Independent role fixtures
+exercise map, choice, typing, number and pin inputs, including broken examples.
+See the crafting guide for the editorial decisions behind these exceptions.
+
+Unrelated geography defaults to muted regardless of input mode.
+`scenes.play.map.background: "open-search"` deliberately shows a broad neutral
+search surface; it requires an `open-search-background` reason.
+`map.candidates: "neutral"` declares the equivalent whole-world country candidate
+field. `map.neutralRegions: true` uses ordinary political map colors and requires
+a `natural-background` reason. Boundary hiding that removes candidate outlines
+requires a `hidden-boundaries` reason; reference outlines remain mandatory.
+Reference area strokes use `playColors()["context-outline"]`, separate from the
+light blue point accent, with tested contrast against the reference fill and muted land.
+Clue area strokes share that thin, dark blue treatment. Both retain a small
+clearance above subdivision caps and depth testing. In play, only selectable or
+open-search candidate land receives the amber hover outline and warm hover fill;
+references, clues and committed answer colors stay steady.
+
+Exported scene previews are synthetic; audit submissions exercise the reducer.
+Neither proves that every location can be clicked or that a fact is true.
+Recipe tests separately grade known answers.
 Review geography, copy and sources with judgment; automated checks cannot establish
 historical truth, screen-space legibility or every form of answer leakage.
 
@@ -259,18 +307,27 @@ The implementation keeps those decisions independent:
 - `contextIds` supplies established references and excludes those regions from
   map-answer eligibility. `candidateRegionIds` supplies an openly shown area pool
   independently of the input control. Scenes compile both fields, and preparation
-  validates candidate geography. Whole-world country and pin tasks share the
-  neutral `surface` state; finite candidate fields use `selectable`.
+  validates candidate geography. Whole-world country candidates and explicitly
+  authored open pin searches use neutral `surface`; pin input alone leaves
+  unrelated land muted. Finite globe answer fields use `selectable`. Area pools
+  supplied for name/button answers use `map.candidateRole: "clue"` with deferred
+  selection feedback and no hover emphasis. They render as blue `clue` shapes;
+  preparation rejects this role on globe-selection mechanics.
 - `authoredPlaces.ts` supplies `cityReference`, `areaLabel`, and
   `explanationPlace`. `displayRole` distinguishes a supporting illustration from
   a graded location; `markerHidden` makes a label anchor without inventing a point.
+  A choice grades a point only when its answer identity is linked to that point;
+  an abstract reason or meaning does not grade illustrative cities.
   Authored city points share one style and size. Canonical location records remain
   unchanged for grading, names, and aliases.
 - `interiorAnchor.ts` supplies a cached interior point and clearance on the main
   displayed landmass. `areaSymbols.ts` projects that clearance through the current
   camera. Bare area symbols shrink with usable screen space and disappear below
   legibility; they never become hit targets. A fragment and owner share one answer
-  identity. Number-only solution geography uses reference emphasis without symbols.
+  identity. For numeric area counts and border crossings, the qualifying set or
+  demonstrated route uses green after a correct count and teal after a miss;
+  supporting reference areas stay blue. Numeric reveals do not add per-area
+  selection symbols or center-to-center travel lines.
 - Reference outlines have a small physical lift and drawing-order advantage over
   ordinary geography, while retaining depth testing. Border graphs and ordered
   lists never manufacture center-to-center travel paths. Great-circle comparisons,
@@ -282,8 +339,17 @@ The implementation keeps those decisions independent:
   Recap mistakes use graded answer identities, including linked choice geography,
   merged-region picks, city assignments, and submitted pins. Incorrect status wins
   over custom completion decoration; a revealed solution remains a discovery even
-  after the player misses it. City and pin mistakes do not grade their containing
-  countries. The answer control owns commitment notices; authored copy must not
+  after the player misses it. Authored reference or explanation points cannot
+  demote reviewed discoveries back to context. City and pin mistakes do not grade their containing
+  countries. A known wrong typed city remains a red point even when it is not a
+  capital; display lookup prefers authored cities and rejects ambiguous or unknown
+  names without inventing coordinates. This lookup never changes grading.
+  Required solutions persist after omissions. For questions accepting alternatives,
+  retain the accepted response, or a canonical example after a miss, rather than
+  promoting the entire valid pool. Revealed named clue fragments persist as geometry
+  and label anchors, including multiple fragments belonging to the same country.
+  Generic flyover stops prefer authored `feedbackFocus` to a containing country's
+  mainland. The answer control owns commitment notices; authored copy must not
   repeat them.
 
 Bundled single-country and merged-territory questions declare immediate commitment.
@@ -298,6 +364,12 @@ persistent renderer layer; question changes remove and dispose its inactive
 children, including when leaving a Journey. Existing acceptance
 radii, all-or-nothing grades, points, and saved responses remain unchanged: an
 accepted pin still earns one correct answer, regardless of its visual band.
+Missed distance pins use a shared adaptive overview when both locations fit on the
+visible globe. Feedback provides explicit **Show your pin** and **Show answer**
+camera controls for pin tasks; extremely distant or antipodal locations keep the
+answer framing and rely on those separate views. These controls change only the
+camera, never the submitted response. Nearby and correct pins preserve authored
+framing.
 Tier points, Journey weights, and historical assessment snapshots require a
 separate scoring contract; do not infer points from colors or band positions.
 
@@ -349,6 +421,7 @@ consume these roles with theme adaptations.
 
 Named map alternatives require `disclosure.namedChoices`. Use
 `map.candidates: "highlighted"` for a disclosed map-candidate field, and
-`candidateRegionIds` for a visible area pool independent of input. Color does not
-encode eligibility. Do not rely on help to introduce an initially required
-candidate field.
+`candidateRegionIds` for a visible area pool independent of input. Use
+`map.candidateRole: "clue"` for a noninteractive area pool; reserve gold land for
+available globe answers. Eligibility still comes from the mechanic, never a
+color. Do not rely on help to introduce an initially required candidate field.

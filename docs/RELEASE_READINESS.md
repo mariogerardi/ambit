@@ -80,7 +80,7 @@ candidate source:
 
 ```sh
 npm ci
-npm test
+npm run test:all
 npm run build
 npm audit
 ```

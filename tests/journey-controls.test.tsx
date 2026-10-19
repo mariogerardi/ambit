@@ -141,7 +141,7 @@ describe("Journey answer controls", () => {
     expect(current.pin).toBeUndefined();
     expect(submit().disabled).toBe(true);
     expect(host.querySelector(".commit-note")?.textContent).toContain(
-      "Tap land or water to place a pin",
+      "You can move your pin before submitting.",
     );
     expect(host.querySelector("#pin-latitude")).toBeNull();
   });

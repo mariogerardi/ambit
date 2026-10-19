@@ -76,6 +76,21 @@ Example: **Context:** “Downstream, Buda and Pest face each other across the ri
 
 A question may be short. Do not fill every content field to satisfy a template.
 
+Write for the player discovering a place or relationship. Source-review status,
+rendering decisions, answer-validation rationale, and explanations of why the
+challenge is difficult belong outside the story. Instructions and assists can
+explain necessary tolerances, hidden boundaries, changed geography, or locked
+answers. After submission, use the reveal to add geographic meaning rather than
+repeat what qualifies as an accepted response. An assist that changes the map
+should help the player reason from that change, not explain how the puzzle was
+authored.
+
+Give each Journey its own voice. A repeated mechanic can develop a comparison
+without pretending to follow a continuous itinerary. Keep movement language
+geographically honest, particularly when the previous question accepts several
+different locations. A title must promise the subject the five questions actually
+develop; a thematic name cannot substitute for that development.
+
 Each new question opens at the top of its panel and focuses its heading. Advancing
 resets both the desktop card and mobile tray; selecting answers or opening help
 preserves the player's reading position.
@@ -106,6 +121,8 @@ each boundary. A larger radius intentionally changes the challenge; do not use i
 to compensate for poor framing or unusable controls. State the acceptance rule
 before submission; show the target and rings only on reveal. Help must preserve it.
 Author three accuracy bands for distance pins: bullseye, close, and within range.
+State all three band distances before submission, while keeping target rings
+reveal-only.
 Choose useful inner radii for the subject; the outer band must end at the acceptance
 radius. Territory-inside pins grade an area, so do not invent concentric distance
 tiers for them.
@@ -162,28 +179,56 @@ comparisons can use connecting lines.
 
 **Use roles consistently.**
 
-- **Reference (subdued blue land and raised blue outline; blue point accent):**
-  Geography already established by the prompt. Reference areas are inspectable,
+- **Reference (subdued blue land and raised, contrasting blue outline; blue point accent):**
+  Geography already established by the prompt. Area outlines use darker blue ink
+  that contrasts with the fill; point accents retain the lighter blue. Reference outlines remain visible
+  when the surrounding search field has hidden borders. Reference areas are inspectable,
   rather than country-selection answers. Reference cities share one point style
   and size, independent of capital status. Use `cityReference` for authored cities.
-- **Candidate field (pale gold):** An openly shown, equally styled answer pool.
-  This may support buttons or typing as well as globe selection. Use
-  `scenes.play.candidateRegionIds` for geographic pools that do not themselves
-  grant map input. Do not store candidates in `contextIds`.
+- **Candidate field (pale gold):** An openly shown, equally styled pool of
+  answers selectable on the globe. Gold land signals an available map action.
+- **Anonymous area clues (blue fill and contrasting outline):** Shapes supplied
+  for reasoning while the player answers by name or buttons. Declare their pool
+  with `scenes.play.candidateRegionIds` and `map.candidateRole: "clue"`;
+  this keeps them distinct from established references in `contextIds` without
+  implying globe selection. Use the same rule for provinces, territories and
+  countries, including map-assisted knowledge questions.
+  Use the same thin, dark blue boundary treatment as established references,
+  with only enough elevation to clear the geography; avoid bright white halos.
+  Set `map.selectionFeedback: "after-submit"` and disable hover emphasis.
+  Keep clues equally emphasized while the player chooses named buttons or types
+  a place name. Buttons and text fields may show their pending state;
+  the map must not identify their shapes through selection color, symbols, labels,
+  hover names, or camera movement until submission. This is a task-specific
+  disclosure rule, not the default for questions where that identity is already given.
 - **Open search surface (light neutral land):** Undisclosed land available for
-  whole-world recall or coordinate pinning. Gray muted geography represents
+  whole-world recall or a deliberately unrestricted pin search. Pin input alone
+  does not imply an open search field: city pins with given reference countries
+  use the same muted background as other questions. Declare
+  `map.background: "open-search"` and its authored reason when the withheld
+  footprint is itself part of a broad pin search. Whole-world country selection
+  uses `map.candidates: "neutral"`. Gray muted geography represents
   background outside the current search field. Do not color only the correct
   candidate or expose a withheld pin target's outline.
   Keep this broad surface lower in visual emphasis than the blue references;
   references must remain easy to locate against it.
 - **Selected (strong gold):** A pending answer. Area selections use a bare check,
   not a city-marker disk. The same symbol grammar applies to feedback.
+  Available globe candidates use a richer amber outline and a warmer fill on
+  hover. Blue references/clues remain steady; hover never adds a selection symbol
+  or replaces an already selected answer's color.
 - **Correct / solution / incorrect:** Green, teal, and rose belong to the actual
-  answered object or assignment. A reason, number, language, or animal answer does
+  answered object or assignment. A reason, language, or animal answer does
   not make every illustrative location a graded answer. Use `explanationPlace`
   or `displayRole: "explanation"` for supporting discoveries. Keep matching/order
   numbers attached to their locations through feedback; use color and text for
-  correctness. Valid alternatives are distinct from missed required answers.
+  correctness. Bind geographic choices explicitly to the locations they grade;
+  a meaning or reason choice must not grade its illustrative cities. Valid
+  alternatives are distinct from missed required answers.
+  For numeric geography tasks, color the complete counted set or demonstrated
+  border-crossing route green after a correct answer, teal after a miss. Keep
+  unrelated supporting geography blue and omit individual selection checks:
+  the submitted answer was a count, not a set of country selections.
 - **Completion (purple):** Retain the reviewed discoveries, including cities and
   landmarks, alongside useful containing geography. Custom completion scenes add
   framing and context; they do not remove the answered locations. Supporting
@@ -193,6 +238,11 @@ comparisons can use connecting lines.
   assignments, and coordinate pins remain red. For city and pin answers, grade
   the location rather than its containing country. A mistake takes precedence
   when the same object is also included in a discovery or custom recap scene.
+  Keep omitted required solutions, named clue geometry, and its labels in the
+  recap. For tasks accepting alternatives, retain the player's accepted answer;
+  after a miss, use an illustrative accepted solution rather than the entire pool.
+  A known wrong typed city remains visible even when it is not a capital. Unknown
+  or ambiguous names should never create an invented map point.
 
 Area symbols occupy the widest interior of the main displayed landmass. Their
 size follows the available space on screen, with an upper bound; hide a symbol
@@ -201,6 +251,9 @@ land. Keep the whole territory as the hit target. A clue fragment and its owner
 may both receive emphasis, but one answer must not acquire duplicate status
 symbols. Numeric crossing-count examples use geography as explanation, without
 claiming that each route territory was a submitted answer.
+Small clue fragments need a contrasting outline that remains visible at the
+authored zoom. Strengthen the clue's display stroke before enlarging its geometry
+or introducing point markers; candidate geography must not overpower the clue.
 
 **Protect the task.** A named country supporting a city question is free
 orientation. A named country the player must locate with a pin is still a withheld
@@ -251,6 +304,10 @@ Design **question camera → answer action → feedback camera → next question
 - A route Journey should feel like movement. A feature-based Journey (Danube, Andes) should retain a geographic throughline where useful. A conceptual Journey spanning continents may instead use deliberate, clearly separated views.
 - Account for desktop and narrow-screen viewports. The panel changes the useful map area; latitude, longitude, and altitude alone do not establish visual quality. Use the scoped verification policy in section 11 when an actual rendering uncertainty needs resolution.
 
+Rivers use the shared theme’s cerulean ink and thin light casing so they remain
+legible over reference, candidate, and muted land. Keep physical water styling
+independent of answer correctness; do not author a one-off river color per Journey.
+
 **Linear geography must be honest.** Rivers, roads, coastlines, routes, and mountain chains must not seem to end only because an author clipped a data segment. Let the geometry continue past the frame, fade at a viewport edge, reach a real terminus, or clearly identify a schematic/partial segment. At a destination reveal, show the true connection to the receiving feature. Do not invent a straight connector to cover a source gap; use reviewed geometry or revise the depiction.
 
 A persistent feature need not appear in full at all times. **Visibility is part of the clue budget.** Show the relevant stretch during question states when it doesn't expose an answer; withhold answer-bearing segments only when warranted. Keep continuity in the available underlying geography, and explicitly label a shortened drawn itinerary as “route so far” if its ending could be mistaken for the end of the actual feature. Re-evaluate this per question rather than applying an indiscriminate whole-Journey visibility rule.
@@ -298,7 +355,7 @@ The revealed visual must represent the **actual type of answer**:
 - **River:** reveal the relevant route, banks, tributary, or drainage relationship rather than color its starting country as correct.
 - **Receiving sea:** identify the waterbody and show the river visibly meeting it.
 - **Country / group of countries:** apply correct/incorrect states to the eligible answer polygons, while retaining given geography as context.
-- **Pin:** show the target, submitted pin, distance or accepted region, and tolerance appropriately **after** commitment.
+- **Pin:** show the target, submitted pin, distance or accepted region, and tolerance appropriately **after** commitment. Keep local explanation framing when useful; the shared engine widens distant distance-pin reveals when both locations fit. Separate **Show your pin** and **Show answer** views handle extreme distances without hiding either location or changing the answer.
 - **Order:** retain numbered assignments on the relevant objects, distinguish the excluded distractor, and avoid an ambiguous “one green mass” reveal. A sequence alone does not justify drawing a travel route.
 
 A documentary photograph can make a discovery tangible, as in Tierra del Fuego.
@@ -332,6 +389,11 @@ countries alone does not resolve an iconographic premise.
 - **Repeated mechanic:** make the repeated relationship visible in the recap. Resolved round labels may reveal actual names once spoilers no longer matter.
 
 Use an appropriate `completion` state (camera, markers, physical features, caption). When a single hemisphere cannot show everything well, use multiple authored views rather than a midpoint that hides both ends. Reduced-motion and small-screen experiences must communicate the same takeaway. Keep the result receipt legible across the panel width, with meaningful resolved labels. Report help separately from correctness; the shared receipt uses a lightbulb for a hint and a lifebuoy for an assist beside the result icon, with accessible labels. Update the caption and flyover whenever a destination changes.
+
+Frame the actual revealed subject or relationship. Generic flyovers prefer an
+authored reveal focus; an island clue should not send the player to its owner's
+mainland. Revealed clue fragments and labels survive completion even when several
+stops share the same country.
 
 ## 10. Reuse supported mechanics and keep contracts explicit
 
@@ -376,15 +438,43 @@ in proportion to the change:
    answer, an actual wrong response, a partial set/assignment where supported,
    and the completed recap. A correct revealed solution and the player's wrong
    pick are different objects. Check repeated objects across rounds, restored
-   drafts, and cleanup when advancing or exiting. `check:journey` and exported
-   scene samples do not simulate this whole lifecycle; use focused behavior tests
-   and inspect the effective scenes.
+   drafts, and cleanup when advancing or exiting. `check:journey` submits
+   representative correct and wrong responses through the reducer and checks
+   completion retention. These samples are not exhaustive; exported scene previews
+   remain synthetic. Use focused behavior tests for partial answers, repeated
+   geography, ambiguous text, and extreme pins, and inspect the effective scenes.
 4. **Conditional browser verification:** Use a browser only when explicitly
    requested or when a critical uncertainty cannot be resolved otherwise, such
    as actual WebGL picking, rendered label collisions, or device-specific input.
    State the reason first and check the smallest affected flow/device. A Journey
    facelift does not automatically require a complete desktop/mobile playthrough.
    Use practice without changing shared dates or clearing real player saves.
+
+### Two levels of consistency checks
+
+1. **Shared rules:** `journeyVisualRules.ts` defines role invariants used by
+   `check:journey` and the catalog tests. References stay blue, outlined and
+   ineligible; candidate and revealed answer areas retain boundaries; background
+   follows explicit scene scope rather than answer input. Editable names cannot
+   identify anonymous geography before submission, and supplied pin reference
+   markers cannot satisfy the answer. Independent mechanic fixtures test these
+   rules with deliberately broken scenes. The same rules audit existing content,
+   not just the question that originally exposed a problem.
+2. **Authored intent:** A departure needs a narrow `visualExceptions` entry and a
+   reason tied to the learning task. Supported keys are `hidden-boundaries`,
+   `open-search-background`, and `natural-background`. For example, recalling
+   border crossings can withhold state borders until assistance; an unrestricted
+   coastline-based pin search can withhold political boundaries; photograph
+   recognition may use natural political map colors (`map.neutralRegions`).
+   Explain hidden boundaries to players. Reasons do not waive reference outlines,
+   eligibility, pending-answer disclosure or grading rules. The audit rejects
+   empty, unknown and stale exceptions whose scene configuration no longer applies.
+
+Use `npm run check:journey -- --all` for a concise catalog sweep. Use a Journey ID
+for detailed stages and exception reasons, or add `--json` for structured findings.
+Review each finding by its shared role and the skill being tested before deciding
+whether to fix presentation or document an exception. A passing check establishes
+these particular invariants, not every aspect of editorial or visual quality.
 
 An automated scoring check does not establish rendered visual quality. State
 exactly what was inspected, simulated, or browser-tested and any unresolved

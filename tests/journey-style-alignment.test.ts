@@ -46,7 +46,7 @@ describe("shared Journey style contracts", () => {
           ).toEqual(committed.answers);
         });
       if (question.mode === "pin")
-        it(`${question.id} exposes an even pin surface without disclosing the answer`, () => {
+        it(`${question.id} preserves authored search scope without disclosing the pin answer`, () => {
           expect(question.commitment).toBe("submit");
           if (question.rule.type === "pin-distance") {
             expect(question.rule.tiers).toHaveLength(3);
@@ -59,8 +59,26 @@ describe("shared Journey style contracts", () => {
           expect(Object.values(scene.states)).not.toContain("selectable");
           const ids =
             question.rule.type === "pin-inside" ? question.rule.ids : [];
-          for (const id of ids) expect(scene.states[id]).toBe("surface");
-          expect(scene.states["wurl:AUS"]).not.toBe("disabled");
+          for (const id of ids)
+            expect([
+              "selected",
+              "correct",
+              "answer",
+              "incorrect",
+              "hinted",
+            ]).not.toContain(scene.states[id]);
+          const background = regions.find(
+            (r) =>
+              !(question.contextIds ?? []).includes(r.id) &&
+              !(question.candidateRegionIds ?? []).includes(r.id),
+          )!;
+          expect(scene.states[background.id]).toBe(
+            question.map?.background === "open-search"
+              ? "surface"
+              : question.map?.neutralRegions
+                ? "default"
+                : "disabled",
+          );
         });
     }
     it(`${journey.id} consistently mutes all unvisited recap land`, () => {

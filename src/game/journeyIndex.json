@@ -2,9 +2,9 @@
   {
     "id": "across-the-divide-v1",
     "addedAt": "2026-10-17",
-    "availability": "unlisted",
+    "availability": "pool",
     "title": "Across the Divide",
-    "description": "Five bridges. Five photographs. Five pins. How close can you get?",
+    "description": "A tidal strait, a busy harbor, a city river: five photographs reveal how bridges connect the land across water. How close can you get to each crossing?",
     "path": "/journey/across-the-divide",
     "module": "./acrossDivideJourney.ts",
     "rounds": [
@@ -71,7 +71,7 @@
     "addedAt": "2026-10-11",
     "availability": "pool",
     "title": "Beyond the maple leaf",
-    "description": "Start with a familiar flag, follow two official languages to the east coast, then travel through the capital to the northern shore.",
+    "description": "Begin with a familiar flag, then look beyond it: two official languages, a bilingual province, a capital between communities, and a northern ocean shore.",
     "path": "/journey/beyond-the-maple-leaf",
     "module": "./canadaJourney.ts",
     "rounds": [
@@ -100,7 +100,7 @@
   {
     "id": "chasing-the-sun-v2",
     "addedAt": "2026-10-11",
-    "availability": "unlisted",
+    "availability": "pool",
     "title": "Chasing the sun",
     "supersedes": "chasing-the-sun-v1",
     "description": "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
@@ -121,7 +121,7 @@
       },
       {
         "id": "sun-flags-pacific-pin-v1",
-        "label": "Drop a pin"
+        "label": "Sun circle"
       },
       {
         "id": "sun-flags-malawi-dawn-v1",
@@ -132,7 +132,7 @@
   {
     "id": "down-the-danube-v1",
     "addedAt": "2026-10-11",
-    "availability": "unlisted",
+    "availability": "pool",
     "title": "Down the Danube",
     "description": "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
     "path": "/journey/down-the-danube",
@@ -165,7 +165,7 @@
     "addedAt": "2026-10-10",
     "availability": "pool",
     "title": "Exceptions to the rule",
-    "description": "Five map assumptions, five exceptions. Test what borders, coastlines, hemispheres, and sea level really tell you.",
+    "description": "A country need not fit on one continent, a coastline need not last, and land need not stand above the sea. Follow five places that complicate a familiar map.",
     "path": "/journey/exceptions-to-the-rule",
     "module": "./twelfthJourney.ts",
     "rounds": [
@@ -274,7 +274,7 @@
       "yugoslavia-six": "Six Yugoslav republics",
       "mediterranean-shores": "22 Mediterranean coastal countries"
     },
-    "description": "Follow a western sea passage, an island, a coastal capital and the Adriatic–Ionian shores to a hidden gateway in Egypt.",
+    "description": "Enter from the Atlantic, cross between islands and coastal cities, then follow the Mediterranean toward an eastern gateway. One sea connects shores with very different histories.",
     "path": "/journey/mediterranean",
     "module": "./fourthJourney.ts",
     "rounds": [
@@ -313,7 +313,7 @@
   {
     "id": "missing-borders-v1",
     "addedAt": "2026-10-12",
-    "availability": "unlisted",
+    "availability": "pool",
     "title": "Missing Borders",
     "saveRevision": 1,
     "description": "Five maps have been altered. Spot the territories hiding two—or three—countries, then watch their real boundaries return.",
@@ -356,30 +356,35 @@
     "id": "north-america-v2",
     "addedAt": "2026-10-10",
     "availability": "pool",
-    "title": "North America by name",
-    "description": "From Canada’s far north to the southern states, names and borders offer a new way to read the map.",
+    "title": "A Continent in Pieces",
+    "description": "Familiar countries, unfamiliar pieces. Explore the territories, provinces, and states within North America—and the surprises hidden in their boundaries and names.",
     "path": "/journey/north-america",
     "module": "./northAmericaJourney.ts",
     "rounds": [
       {
         "id": "canada-three-territories-v2",
-        "label": "Territories"
+        "label": "Territories",
+        "progressLabel": "Northern territories"
       },
       {
         "id": "canada-south-of-boston-v2",
-        "label": "Latitude"
+        "label": "Latitude",
+        "progressLabel": "Great Lakes"
       },
       {
         "id": "state-bordering-mexico-v2",
-        "label": "Southern border"
+        "label": "Southern border",
+        "progressLabel": "Mexican border"
       },
       {
         "id": "california-missouri-crossings-v2",
-        "label": "Crossings"
+        "label": "Crossings",
+        "progressLabel": "State connections"
       },
       {
         "id": "five-cardinal-states-v2",
-        "label": "Directions"
+        "label": "Directions",
+        "progressLabel": "Names of division"
       }
     ]
   },
@@ -423,8 +428,8 @@
     "id": "ring-of-fire-v1",
     "addedAt": "2026-10-10",
     "availability": "pool",
-    "title": "Around the Ring of Fire",
-    "description": "Trace the Pacific’s island arcs, cross to the Andes, and finish on its southern rim. One ocean connects every stop.",
+    "title": "Pacific Landfalls",
+    "description": "Island chains, narrow straits, a mountain-lined continent: follow the changing shores of the Pacific to a final harbor in New Zealand.",
     "path": "/journey/ring-of-fire",
     "module": "./tenthJourney.ts",
     "rounds": [
@@ -438,7 +443,7 @@
       },
       {
         "id": "pacific-indonesia-pin",
-        "label": "Drop a pin"
+        "label": "Archipelago"
       },
       {
         "id": "pacific-andes-coast",
@@ -453,7 +458,7 @@
   {
     "id": "same-hour-different-worlds",
     "addedAt": "2026-10-12",
-    "availability": "unlisted",
+    "availability": "pool",
     "title": "Same Hour, Different Worlds",
     "saveRevision": 5,
     "legacyRoundLabels": {
@@ -499,7 +504,7 @@
   {
     "id": "same-name-different-place-v1",
     "addedAt": "2026-10-12",
-    "availability": "unlisted",
+    "availability": "pool",
     "title": "Same Name, Different Place",
     "saveRevision": 2,
     "description": "One name can cross borders, borrow a history, or mean something entirely different. Explore five pairs of namesakes around the world.",
@@ -543,33 +548,33 @@
     "addedAt": "2026-10-10",
     "availability": "pool",
     "title": "Shared neighbors",
-    "description": "Two neighbors name the country; an unfamiliar outline makes pinning it another challenge. Find the shared neighbor five times.",
+    "description": "Two countries can point to a third. Follow five pairs of neighbors across inland frontiers, long coasts, and mountain borders to find the land between them.",
     "path": "/journey/shared-neighbors",
     "module": "./ninthJourney.ts",
     "rounds": [
       {
         "id": "pin-ivory-coast-benin",
-        "label": "Drop a pin",
+        "label": "Shared neighbor",
         "progressLabel": "Ivory Coast + Benin"
       },
       {
         "id": "pin-bulgaria-georgia",
-        "label": "Drop a pin",
+        "label": "Shared neighbor",
         "progressLabel": "Bulgaria + Georgia"
       },
       {
         "id": "pin-norway-belarus",
-        "label": "Drop a pin",
+        "label": "Shared neighbor",
         "progressLabel": "Norway + Belarus"
       },
       {
         "id": "pin-eswatini-zambia",
-        "label": "Drop a pin",
+        "label": "Shared neighbor",
         "progressLabel": "Eswatini + Zambia"
       },
       {
         "id": "pin-chile-colombia",
-        "label": "Drop a pin",
+        "label": "Shared neighbor",
         "progressLabel": "Chile + Colombia"
       }
     ]
@@ -579,33 +584,33 @@
     "addedAt": "2026-10-10",
     "availability": "pool",
     "title": "On Russia’s doorstep",
-    "description": "Try not to click Russia! Drop a pin in five of its neighbors, with no borders or names to guide you.",
+    "description": "From the Baltic to the Pacific, Russia meets neighbors of very different shapes and sizes. Find five of them using coastlines and geography, with political borders hidden.",
     "path": "/journey/try-not-to-click-russia",
     "module": "./fifteenthJourney.ts",
     "rounds": [
       {
         "id": "russia-neighbor-fin",
-        "label": "Drop a pin",
+        "label": "Neighbor",
         "progressLabel": "Finland"
       },
       {
         "id": "russia-neighbor-prk",
-        "label": "Drop a pin",
+        "label": "Neighbor",
         "progressLabel": "North Korea"
       },
       {
         "id": "russia-neighbor-mng",
-        "label": "Drop a pin",
+        "label": "Neighbor",
         "progressLabel": "Mongolia"
       },
       {
         "id": "russia-neighbor-geo",
-        "label": "Drop a pin",
+        "label": "Neighbor",
         "progressLabel": "Georgia"
       },
       {
         "id": "russia-neighbor-est",
-        "label": "Drop a pin",
+        "label": "Neighbor",
         "progressLabel": "Estonia"
       }
     ]

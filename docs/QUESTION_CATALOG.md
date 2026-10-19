@@ -21,9 +21,9 @@ published local packs are read-only compatibility data.
 | Along the Andes             | `/journey/along-the-andes`            | [andesJourney.ts](../src/game/andesJourney.ts)                   |
 | Not the obvious city        | `/journey/not-the-obvious-city`       | [eleventhJourney.ts](../src/game/eleventhJourney.ts)             |
 | Island instincts            | `/journey/island-instincts`           | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)         |
-| North America by name       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)     |
+| A Continent in Pieces       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)     |
 | Latitude surprises          | `/journey/latitude-surprises`         | [latitudeJourney.ts](../src/game/latitudeJourney.ts)             |
-| Around the Ring of Fire     | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)                   |
+| Pacific Landfalls           | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)                   |
 | Exceptions to the rule      | `/journey/exceptions-to-the-rule`     | [twelfthJourney.ts](../src/game/twelfthJourney.ts)               |
 | On Russia’s doorstep        | `/journey/try-not-to-click-russia`    | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)           |
 | Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)             |
@@ -304,13 +304,17 @@ not automatically accumulated. Use stable, distinct IDs for fixed geometry.
 `mapCaption` / `feedbackMapCaption` qualify partial or local features.
 
 Prefer grouped scenes: `scenes.play.contextIds` declares established references;
-`scenes.play.candidateRegionIds` declares a visible area pool;
+`scenes.play.candidateRegionIds` declares a visible area pool; noninteractive
+name/button pools use `scenes.play.map.candidateRole: "clue"` with
+`selectionFeedback: "after-submit"` and no hover emphasis;
 `scenes.reveal.contextIds` supplies supporting geography and
 `scenes.reveal.answerIds` identifies actual solution areas. The compiler maps
 reveal fields to `feedbackHintIds` and `feedbackContextIds` respectively. These
-flat fields are the runtime read model, not a second authoring source. Numeric
-answers use reference emphasis for explanatory route geography; a number does
-not grade every route country. For other supporting illustrations use
+flat fields are the runtime read model, not a second authoring source. For numeric
+area counts and border crossings, actual solution areas use green after a correct
+count and teal after a miss, without per-area selection symbols or connecting
+lines. Supporting reference geography stays blue; an abstract number does not
+grade unrelated regions. For other supporting illustrations use
 `explanationPlace` or `displayRole: "explanation"`.
 
 Use `cityReference` for established city points and `areaLabel` for area names

@@ -143,7 +143,13 @@ describe("application themes", () => {
       const selected = playRegionStyle("wurl:ARG", "selected", false, theme);
       const context = playRegionStyle("wurl:ARG", "hinted", false, theme);
       expect(context.fill).not.toBe(playColors(theme).hinted);
-      expect(context.stroke).toBe(playColors(theme).hinted);
+      expect(context.stroke).toBe(playColors(theme)["context-outline"]);
+      expect(contrast(context.stroke, context.fill)).toBeGreaterThanOrEqual(
+        4.5,
+      );
+      expect(
+        contrast(context.stroke, playColors(theme).disabled),
+      ).toBeGreaterThanOrEqual(2);
       expect(
         contrast(playColors(theme).visited, playColors(theme).disabled),
       ).toBeGreaterThan(2);
@@ -180,13 +186,77 @@ describe("application themes", () => {
         expect(playRegionStyle("CAN", state, false, id).fill).toBe(
           playColors(id)[state === "clue" ? "clue" : state],
         );
-        expect(playRegionStyle("CAN", state, true, id).fill).toBe(
-          playRegionStyle("CAN", state, false, id).fill,
-        );
+        if (state !== "selectable")
+          expect(playRegionStyle("CAN", state, true, id).fill).toBe(
+            playRegionStyle("CAN", state, false, id).fill,
+          );
       }
       expect(
         themedRegionStyle("natural", "CAN", "selected", false, id),
       ).toEqual(themedRegionStyle("natural", "CAN", "selected"));
     }
   });
+});
+
+it("gives clues the same restrained, legible outline as references in every theme", () => {
+  for (const theme of THEME_IDS) {
+    const style = playRegionStyle("clue-part:test", "clue", false, theme);
+    expect(
+      contrast(style.stroke, playColors(theme).disabled),
+      theme,
+    ).toBeGreaterThanOrEqual(2);
+    expect(contrast(style.stroke, style.fill), theme).toBeGreaterThanOrEqual(3);
+    expect(style.stroke).toBe(
+      playRegionStyle("reference", "hinted", false, theme).stroke,
+    );
+    expect(style.stroke).not.toBe(
+      playRegionStyle("candidate", "selectable", false, theme).stroke,
+    );
+  }
+});
+
+it("distinguishes candidate hover from selection and leaves noninteractive roles steady", () => {
+  for (const theme of THEME_IDS) {
+    for (const state of ["selectable", "surface"] as const) {
+      const idle = playRegionStyle("candidate", state, false, theme);
+      const hover = playRegionStyle("candidate", state, true, theme);
+      expect(hover.fill, theme).not.toBe(idle.fill);
+      expect(hover.fill, theme).not.toBe(playColors(theme).selected);
+      expect(hover.stroke, theme).not.toBe(idle.stroke);
+      expect(contrast(hover.stroke, hover.fill), theme).toBeGreaterThanOrEqual(
+        3,
+      );
+    }
+    for (const state of [
+      "hinted",
+      "clue",
+      "disabled",
+      "selected",
+      "correct",
+      "answer",
+      "incorrect",
+      "visited",
+    ] as const)
+      expect(playRegionStyle("steady", state, true, theme)).toEqual(
+        playRegionStyle("steady", state, false, theme),
+      );
+  }
+});
+
+it("keeps river ink or casing readable over reference and muted land in every theme", () => {
+  for (const theme of THEME_IDS) {
+    const colors = playColors(theme);
+    expect(
+      contrast(colors.river, colors["context-land"]),
+      theme,
+    ).toBeGreaterThanOrEqual(2);
+    for (const background of [colors.disabled, colors.selectable])
+      expect(
+        Math.max(
+          contrast(colors.river, background),
+          contrast(colors["river-casing"], background),
+        ),
+        theme,
+      ).toBeGreaterThanOrEqual(3);
+  }
 });

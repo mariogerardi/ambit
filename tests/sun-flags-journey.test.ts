@@ -196,7 +196,7 @@ describe("Chasing the sun", () => {
       revealOnAnswer: true,
     });
   });
-  it("is publishable in Admin without entering the automatic pool", () => {
+  it("is available in Admin and in the automatic pool", () => {
     expect(JOURNEYS).toContain(SUN_FLAGS_JOURNEY);
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)?.path,
@@ -204,7 +204,7 @@ describe("Chasing the sun", () => {
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)
         ?.availability,
-    ).toBe("unlisted");
+    ).toBe("pool");
   });
   it("retires the archived Sun edition while resolving old published assignments", async () => {
     const day = "2026-10-11";

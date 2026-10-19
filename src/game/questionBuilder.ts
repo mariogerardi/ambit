@@ -64,6 +64,16 @@ export function validateQuestionContract(q: Question): void {
       q.candidateRegionIds.some((id) => q.contextIds?.includes(id)))
   )
     fail("candidate geography must be distinct from reference geography");
+  if (
+    q.map?.candidateRole === "clue" &&
+    (!q.candidateRegionIds?.length ||
+      definition.mapSelection !== "none" ||
+      q.map.selectionFeedback !== "after-submit" ||
+      q.map.hoverFeedback)
+  )
+    fail(
+      "clue candidates require noninteractive geography and deferred identity feedback",
+    );
   const city = definition.mapSelection === "places";
   if (isRegionAnswer(q) || city) {
     if (q.selection.type === "none")

@@ -89,7 +89,7 @@ const definitions = [
     assistText:
       "Four territories remain selectable in the region. Think about which peninsula has been divided into two states since the mid-twentieth century.",
     explanation:
-      "North and South Korea occupy the Korean Peninsula. The 1953 armistice established a Military Demarcation Line within the Demilitarized Zone. The line and the surrounding zone are related, but different, geographic features.",
+      "North and South Korea occupy the same peninsula. The 1953 armistice established a Military Demarcation Line within the Demilitarized Zone, dividing a landmass whose coast gives no hint of that political separation.",
     source: source(
       "US National Archives · Korean Armistice Agreement (1953)",
       "https://www.archives.gov/milestone-documents/armistice-agreement-restoration-south-korean-state",
@@ -164,7 +164,7 @@ const country = (code: string) => `wurl:${code}`;
 export const MISSING_BORDERS_JOURNEY: Journey = {
   id: "missing-borders-v1",
   addedAt: "2026-10-12",
-  availability: "unlisted",
+  availability: "pool",
   saveRevision: 1,
   title: "Missing Borders",
   mapAttribution: {

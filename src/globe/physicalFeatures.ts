@@ -1,3 +1,5 @@
+import { playColors } from "../theme/playColors";
+import type { ThemeId } from "../theme/themes";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { Group, Mesh, MeshBasicMaterial, DoubleSide } from "three";
 import ConicPolygonGeometry from "three-conic-polygon-geometry";
@@ -13,6 +15,7 @@ export interface PhysicalLayer {
   id: string;
   kind: "physical-features";
   features: PhysicalFeature[];
+  palette?: ThemeId;
 }
 export const isPhysicalLayer = (v: object): v is PhysicalLayer =>
   "kind" in v && v.kind === "physical-features";
@@ -60,6 +63,7 @@ export class PhysicalFeatures {
   private featureTokens = new WeakMap<PhysicalFeature, number>();
   private nextFeatureToken = 0;
   private radius = 100;
+  private palette: ThemeId = "atlas";
   private labelLevels: PlaceFeature[][] = [[], [], []];
   private labelLevel = -1;
   constructor() {
@@ -69,7 +73,14 @@ export class PhysicalFeatures {
     this.labels.refreshFont();
   }
   update(layer: PhysicalLayer, radius: number) {
-    if (this.data === layer.features && this.radius === radius) return;
+    const palette = layer.palette ?? "atlas";
+    if (
+      this.data === layer.features &&
+      this.radius === radius &&
+      this.palette === palette
+    )
+      return;
+    this.palette = palette;
     this.data = layer.features;
     this.radius = radius;
     this.activeLines.clear();
@@ -164,6 +175,20 @@ export class PhysicalFeatures {
       if (token === undefined)
         this.featureTokens.set(source, (token = this.nextFeatureToken++));
       const feature = { ...source, id: `${source.id}@${token}` };
+      if (feature.kind === "river" && feature.paths?.length) {
+        const colors = playColors(palette);
+        const width = Math.max(2, feature.lineWidth ?? 2) * 0.81;
+        return [
+          {
+            ...feature,
+            id: `${feature.id}:casing`,
+            color: colors["river-casing"],
+            lineWidth: width + 0.5,
+            lineOpacity: 1,
+          },
+          { ...feature, color: colors.river, lineWidth: width, lineOpacity: 1 },
+        ];
+      }
       return feature.relief
         ? [
             {
@@ -239,7 +264,11 @@ export class PhysicalFeatures {
             polygonOffsetUnits: -2,
           }),
         );
-        line.renderOrder = 5;
+        line.renderOrder = features.every(
+          (f) => f.kind === "river" && !f.id.endsWith(":casing"),
+        )
+          ? 6
+          : 5;
         line.raycast = () => {};
         this.lines.set(key, {
           line,
@@ -302,6 +331,7 @@ export class PhysicalFeatures {
           markers: false,
           contextual: true,
           density: "physical",
+          palette: this.palette,
         },
         this.radius,
       );

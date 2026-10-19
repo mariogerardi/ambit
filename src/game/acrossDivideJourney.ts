@@ -69,7 +69,12 @@ const northAmerica = [
 ];
 const california = US_STATES.find((state) => state.id === "wurl:USA-CA")!;
 const common = definePresentation({
-  instruction: "Place a pin within 300 km of the bridge.",
+  visualExceptions: {
+    "natural-background":
+      "Bridge photograph recognition uses political map colors for broad orientation; countries are not answer candidates.",
+  },
+  instruction:
+    "Land within 300 km of the bridge. Aim for the 100 km bullseye; the 200 km and 300 km rings also count as correct.",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -337,10 +342,10 @@ const stops = [
 export const ACROSS_DIVIDE_JOURNEY: Journey = {
   id: "across-the-divide-v1",
   addedAt: "2026-10-17",
-  availability: "unlisted",
+  availability: "pool",
   title: "Across the Divide",
   description:
-    "Five bridges. Five photographs. Five pins. How close can you get?",
+    "A tidal strait, a busy harbor, a city river: five photographs reveal how bridges connect the land across water. How close can you get to each crossing?",
   completion: {
     focus: { lat: 8, lng: 20, altitude: 2.05 },
     views: [

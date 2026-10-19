@@ -14,6 +14,7 @@ export function journeyStops(
   return journey.rounds
     .filter((question) => answered.has(question.id))
     .map((question) => {
+      if (question.feedbackFocus) return question.feedbackFocus;
       const ids = solutionIds(question, context);
       const place =
         ids.length === 1 ? answerPlace(question, ids[0]) : undefined;

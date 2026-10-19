@@ -105,7 +105,7 @@ describe("shared-neighbor Journey", () => {
           .filter((r) => regionBorderVisible(r, revealed))
           .map((r) => r.id)
           .sort(),
-      ).toEqual([...clue.countries].sort());
+      ).toEqual([...clue.countries, clue.answer].sort());
       expect(revealed.places[0].visualState).toBe("correct");
     });
   });

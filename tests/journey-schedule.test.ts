@@ -23,7 +23,9 @@ describe("shared Journey dates", () => {
     expect(
       dailyJourney(day, progress, JOURNEY_INDEX, { [day]: edition.id }).id,
     ).toBe(edition.id);
-    expect(dailyJourney(day, progress, JOURNEY_INDEX, {}).id).toBe(seededJourney(day, JOURNEY_INDEX).id);
+    expect(dailyJourney(day, progress, JOURNEY_INDEX, {}).id).toBe(
+      seededJourney(day, JOURNEY_INDEX).id,
+    );
     const started = openDaily(progress, day, false, JOURNEY_INDEX, {
       [day]: edition.id,
     });
@@ -66,22 +68,95 @@ describe("shared Journey dates", () => {
   it("validates records while tolerating a removed historical ID", () => {
     expect(validJourneySchedule({ today: day, records: {} })).toBe(true);
     expect(
-      validJourneySchedule({ today: day, records: { [day]: { day, journeyId: "removed-id", source: "assigned", revision: 2 } } }),
+      validJourneySchedule({
+        today: day,
+        records: {
+          [day]: {
+            day,
+            journeyId: "removed-id",
+            source: "assigned",
+            revision: 2,
+          },
+        },
+      }),
     ).toBe(true);
     for (const value of [
       { today: "bad", records: {} },
       { today: day, records: [] },
-      { today: day, records: { "2026-02-30": { day: "2026-02-30", journeyId: edition.id, source: "auto", revision: 1 } } },
-      { today: day, records: { [day]: { day, journeyId: edition.id, source: "auto", revision: -1 } } },
+      {
+        today: day,
+        records: {
+          "2026-02-30": {
+            day: "2026-02-30",
+            journeyId: edition.id,
+            source: "auto",
+            revision: 1,
+          },
+        },
+      },
+      {
+        today: day,
+        records: {
+          [day]: { day, journeyId: edition.id, source: "auto", revision: -1 },
+        },
+      },
     ])
       expect(validJourneySchedule(value)).toBe(false);
   });
   it("uses the same versioned date hash as the backend and never selects an unlisted edition", () => {
-    expect(seededJourney("2026-10-05", JOURNEY_INDEX).id).toBe("along-the-andes-v1");
-    expect(seededJourney("2026-10-18", JOURNEY_INDEX).id).toBe("try-not-to-click-russia-v1");
-    expect(seededJourney("2026-11-03", JOURNEY_INDEX).id).toBe("exceptions-to-the-rule-v1");
-    expect(seededJourney("2027-01-01", JOURNEY_INDEX).id).toBe("beyond-the-maple-leaf-v1");
-    expect(dailyJourney("2027-01-01", undefined, JOURNEY_INDEX, { "2027-01-01": "removed-id" }).id).toBe(seededJourney("2027-01-01", JOURNEY_INDEX).id);
-    expect(() => dailyJourney("2026-10-05", undefined, JOURNEY_INDEX, { "2026-10-05": "removed-id" })).toThrow("Journey unavailable");
+    expect(seededJourney("2026-10-05", JOURNEY_INDEX).id).toBe(
+      "island-instincts-v1",
+    );
+    expect(seededJourney("2026-10-18", JOURNEY_INDEX).id).toBe(
+      "same-name-different-place-v1",
+    );
+    expect(seededJourney("2026-11-03", JOURNEY_INDEX).id).toBe(
+      "mediterranean-v1",
+    );
+    expect(seededJourney("2027-01-01", JOURNEY_INDEX).id).toBe(
+      "along-the-andes-v1",
+    );
+    expect(
+      dailyJourney("2027-01-01", undefined, JOURNEY_INDEX, {
+        "2027-01-01": "removed-id",
+      }).id,
+    ).toBe(seededJourney("2027-01-01", JOURNEY_INDEX).id);
+    expect(() =>
+      dailyJourney("2026-10-05", undefined, JOURNEY_INDEX, {
+        "2026-10-05": "removed-id",
+      }),
+    ).toThrow("Journey unavailable");
   });
+});
+
+it("includes each newly promoted Journey in automatic picks while retaining started attempts", () => {
+  const promoted = [
+    "across-the-divide-v1",
+    "chasing-the-sun-v2",
+    "down-the-danube-v1",
+    "missing-borders-v1",
+    "same-hour-different-worlds",
+    "same-name-different-place-v1",
+  ];
+  const picked = new Set(
+    Array.from(
+      { length: 90 },
+      (_, offset) =>
+        seededJourney(
+          new Date(Date.UTC(2027, 0, 1 + offset)).toISOString().slice(0, 10),
+          JOURNEY_INDEX,
+        ).id,
+    ),
+  );
+  for (const id of promoted) {
+    expect(JOURNEY_INDEX.find((j) => j.id === id)?.availability).toBe("pool");
+    expect(picked.has(id), id).toBe(true);
+  }
+  const date = "2026-10-18";
+  const old = openDaily(emptyDaily, date, false, JOURNEY_INDEX, {
+    [date]: "try-not-to-click-russia-v1",
+  });
+  expect(openDaily(old, date, false, JOURNEY_INDEX, {}).attempts[date]).toEqual(
+    old.attempts[date],
+  );
 });

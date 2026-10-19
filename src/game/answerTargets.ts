@@ -15,6 +15,44 @@ export const ANSWER_PLACES = new Map<string, PlaceFeature>(
 export function answerPlace(question: Question, id: string) {
   return question.places?.find((p) => p.id === id) ?? ANSWER_PLACES.get(id);
 }
+/** Display lookup only: never turn an unknown or ambiguous typed name into a coordinate. */
+export function responsePlaceForName(
+  question: Question,
+  context: QuestionContext,
+  value: string,
+): PlaceFeature | undefined {
+  const normalized = normalizeAnswer(value);
+  if (!normalized) return undefined;
+  const matches = (places: PlaceFeature[]) =>
+    new Map(
+      places
+        .filter(
+          (p) =>
+            ["city", "capital"].includes(p.kind) &&
+            [p.name, ...(p.aliases ?? [])].some(
+              (name) => normalizeAnswer(name) === normalized,
+            ),
+        )
+        .map((p) => [p.id, p]),
+    );
+  const authored = matches([
+    ...(question.places ?? []),
+    ...(question.guidance?.assist?.places ?? []),
+    ...(question.feedbackPlaces ?? []),
+  ]);
+  const candidates = authored.size
+    ? authored
+    : matches([...context.capitals, ...ANSWER_PLACES.values()]);
+  if (candidates.size === 1) return [...candidates.values()][0];
+  if (question.rule.type === "capital-name") {
+    const country = question.rule.countryId;
+    const local = [...candidates.values()].filter(
+      (p) => p.parentId === country,
+    );
+    if (local.length === 1) return local[0];
+  }
+  return undefined;
+}
 /** The point-selection control also supports summits and other authored places. */
 export function pointAnswerNoun(question: Question) {
   const ids = question.selection.type === "ids" ? question.selection.ids : [];

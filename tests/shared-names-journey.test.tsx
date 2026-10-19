@@ -236,7 +236,7 @@ describe("Same Name, Different Place", () => {
     [1280, 800],
     [390, 450],
   ])(
-    "frames both Victoria namesakes within a %s × %s reveal viewport",
+    "frames both Victoria namesakes initially within a %s × %s viewport, then focuses the revealed falls",
     (width, height) => {
       const feedback = view(
         reduce(
@@ -245,7 +245,8 @@ describe("Same Name, Different Place", () => {
           { type: "submit" },
         ),
       );
-      const focus = feedback.focus;
+      const opening = view(at(4));
+      const focus = opening.focus;
       const point = (lng: number, lat: number, radius = 1) => {
         const phi = (lat * Math.PI) / 180,
           theta = (lng * Math.PI) / 180;
@@ -270,7 +271,7 @@ describe("Same Name, Different Place", () => {
       );
       camera.lookAt(0, 0, 0);
       camera.updateMatrixWorld();
-      const lake = feedback.physicalFeatures.find(
+      const lake = opening.physicalFeatures.find(
         (f) => f.name === "Lake Victoria",
       )!;
       const shoreline =
@@ -287,9 +288,12 @@ describe("Same Name, Different Place", () => {
         expect(Math.abs(projected.x)).toBeLessThan(0.8);
         expect(Math.abs(projected.y)).toBeLessThan(0.8);
       }
-      expect(
-        view(at(4)).physicalFeatures.some((f) => f.name === "Lake Victoria"),
-      ).toBe(false);
+      expect(feedback.focus.lat).toBeCloseTo(geography.falls.lat, 0);
+      expect(feedback.focus.lng).toBeCloseTo(geography.falls.lng, 0);
+      expect(feedback.focus.altitude).toBeLessThan(opening.focus.altitude!);
+      expect(feedback.physicalFeatures.some((f) => f.id === lake.id)).toBe(
+        true,
+      );
     },
   );
 
@@ -311,8 +315,8 @@ describe("Same Name, Different Place", () => {
       "Tripoli · Lebanon",
     ]);
     for (const [choice, state] of [
-      ["tripoli:three-cities", "answer"],
-      ["tripoli:three-islands", "answer"],
+      ["tripoli:three-cities", "hinted"],
+      ["tripoli:three-islands", "hinted"],
     ] as const) {
       const feedback = view(
         reduce(at(2), ...select(choice), { type: "submit" }),
@@ -394,8 +398,8 @@ describe("Same Name, Different Place", () => {
     const scene = view(at(4));
     expect(scene.states["wurl:ZMB"]).toBe("hinted");
     expect(scene.states["wurl:ZWE"]).toBe("hinted");
-    expect(scene.physicalFeatures.every((f) => f.name === "Zambezi")).toBe(
-      true,
+    expect(new Set(scene.physicalFeatures.map((f) => f.name))).toEqual(
+      new Set(["Zambezi", "Lake Victoria"]),
     );
     expect(
       scene.physicalFeatures.flatMap((f) => f.paths ?? []).flat().length,
@@ -413,7 +417,10 @@ describe("Same Name, Different Place", () => {
       ).toBeGreaterThan(120);
     expect(
       assisted.physicalFeatures.filter((f) => f.name === "Zambezi"),
-    ).toEqual(scene.physicalFeatures);
+    ).toEqual(scene.physicalFeatures.filter((f) => f.name === "Zambezi"));
+    expect(
+      assisted.physicalFeatures.find((f) => f.name === "Lake Victoria"),
+    ).toBe(scene.physicalFeatures.find((f) => f.name === "Lake Victoria"));
     const lake = assisted.physicalFeatures.find(
       (f) => f.name === "Lake Kariba",
     )!;
