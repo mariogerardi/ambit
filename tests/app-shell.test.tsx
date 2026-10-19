@@ -320,6 +320,197 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 describe("persistent application shell (DOM only; no browser or WebGL)", () => {
+  it("plays and resumes a historical Journey from Home without replacing today's attempt", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-19T16:00:00Z"));
+    authProbe.admin = false;
+    const past = "2026-10-11",
+      today = "2026-11-19";
+    scheduleState.records[past] = {
+      day: past,
+      journeyId: ANDES_JOURNEY.id,
+      source: "assigned",
+      revision: 2,
+    };
+    const store = createDailySave(journeyRegistry.JOURNEY_INDEX);
+    const seeded = openDaily(
+      store.load(),
+      today,
+      false,
+      journeyRegistry.JOURNEY_INDEX,
+      { [today]: CANADA_JOURNEY.id },
+    );
+    seeded.attempts[today].game.text = "today's saved draft";
+    store.save(seeded);
+    await mount();
+    expect(
+      host.querySelector('.daily-menu [data-dd-action-name="Home Archive"]'),
+    ).not.toBeNull();
+    probe.currentView = { lat: 12, lng: 112, altitude: 1.65 };
+    const flights = probe.focus.length;
+    await click("Journey archive");
+    expect(location.pathname).toBe("/archive");
+    expect(probe.mounts).toBe(1);
+    expect(probe.props!.active).toBe(true);
+    expect(probe.props!.motion).toBe(true);
+    expect(probe.currentView).toEqual({ lat: 12, lng: 112, altitude: 1.65 });
+    expect(probe.focus).toHaveLength(flights);
+    expect(host.querySelector(".experience.page-layout")).toBeNull();
+    expect(host.querySelector(".game-scene")!.hasAttribute("inert")).toBe(
+      false,
+    );
+    expect(host.querySelector(".account-earth")).toBeNull();
+    await click("Pause Earth");
+    expect(probe.props!.motion).toBe(false);
+    const topline = host.querySelector(".archive-heading")!;
+    expect(
+      host.querySelector(".journey-archive")!.firstElementChild?.className,
+    ).toContain("explore-heading");
+    expect(topline.querySelector("h1")?.textContent).toBe("Journey archive.");
+    expect(host.textContent).not.toContain("PAST JOURNEYS");
+    expect(topline.querySelector("button")?.textContent).toContain(
+      "Today’s Journey",
+    );
+    expect(host.textContent).not.toContain(
+      "A different way to see the world, one day at a time.",
+    );
+    await click("Previous month");
+    expect(
+      host.querySelector<HTMLButtonElement>(
+        'button[aria-label="Previous month"]',
+      )!.disabled,
+    ).toBe(true);
+    const dateButton = host.querySelector<HTMLButtonElement>(
+      'button[aria-label^="October 11, 2026"]',
+    )!;
+    expect(dateButton.disabled).toBe(false);
+    await act(async () => dateButton.click());
+    expect(probe.focus).toHaveLength(flights);
+    await click("Play Journey");
+    expect(location.pathname).toBe("/archive/2026-10-11");
+    expect(
+      host.querySelector(".journey-archive-context")?.textContent,
+    ).toContain("October 11, 2026");
+    await click("Bogotá");
+    const submit = host.querySelector<HTMLButtonElement>(
+      '[data-dd-action-name="Answer Submit"]',
+    );
+    if (submit && !submit.disabled) await act(async () => submit.click());
+    await settleLoads();
+    const saved = createDailySave(journeyRegistry.JOURNEY_INDEX).load();
+    expect(saved.attempts[past].game.answers).toHaveLength(1);
+    expect(saved.attempts[past].game.answers[0].correct).toBe(true);
+    expect(saved.attempts[today]).toEqual(seeded.attempts[today]);
+    await click("← Journey archive");
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>(
+          'button[aria-label^="October 11, 2026"]',
+        )!
+        .click(),
+    );
+    await click("Resume Journey");
+    expect(host.querySelector(".round-feedback")?.textContent).toContain(
+      "Bogotá",
+    );
+    await click("← Journey archive");
+    await click("Today’s Journey");
+    expect(location.pathname).toBe("/daily");
+    expect(
+      createDailySave(journeyRegistry.JOURNEY_INDEX).load().attempts[today],
+    ).toEqual(seeded.attempts[today]);
+  });
+
+  it("records an archive completion on the day earned and opens its saved result directly", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-19T16:00:00Z"));
+    authProbe.admin = false;
+    const past = "2026-10-11";
+    const store = createDailySave(journeyRegistry.JOURNEY_INDEX);
+    const seeded = openDaily(
+      store.load(),
+      past,
+      false,
+      journeyRegistry.JOURNEY_INDEX,
+      { [past]: ANDES_JOURNEY.id },
+    );
+    seeded.attempts[past].game = {
+      ...initialGame,
+      phase: "playing",
+      roundIndex: 4,
+      answers: ANDES_JOURNEY.rounds.slice(0, 4).map((q) => ({
+        ...initialGame,
+        roundId: q.id,
+        correct: true,
+        points: 3,
+        pointsVersion: 1,
+      })),
+    };
+    store.save(seeded);
+    history.replaceState(null, "", "/archive/2026-10-11");
+    await mount();
+    const question = ANDES_JOURNEY.rounds[4];
+    if (question.rule.type !== "choice-ids")
+      throw Error("Expected final choice");
+    const correctId = question.rule.ids[0];
+    await click(question.choices!.find((c) => c.id === correctId)!.label);
+    const submit = host.querySelector<HTMLButtonElement>(
+      '[data-dd-action-name="Answer Submit"]',
+    );
+    if (submit && !submit.disabled) await act(async () => submit.click());
+    await settleLoads();
+    expect(
+      createDailySave(journeyRegistry.JOURNEY_INDEX).load().attempts[past]
+        .completedOn,
+    ).toBe("2026-10-19");
+    await click("See results");
+    expect(host.querySelector(".journey-score")?.textContent).toContain(
+      "15/15",
+    );
+    expect(host.textContent).not.toContain("Play again");
+    await click("← Journey archive");
+    const completedDay = host.querySelector<HTMLButtonElement>(
+      'button[aria-label^="October 11, 2026"]',
+    )!;
+    expect(completedDay.getAttribute("aria-label")).toContain(
+      "Completed · 15/15 points",
+    );
+    expect(
+      completedDay.querySelector(".archive-completed-icon"),
+    ).not.toBeNull();
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>(
+          'button[aria-label^="October 11, 2026"]',
+        )!
+        .click(),
+    );
+    await click("View result");
+    expect(host.querySelector(".journey-score")?.textContent).toContain(
+      "15/15",
+    );
+    expect(
+      createDailySave(journeyRegistry.JOURNEY_INDEX).load().attempts[past]
+        .completedOn,
+    ).toBe("2026-10-19");
+  });
+
+  it.each(["2026-10-10", "2026-10-19", "2026-10-20", "2026-02-30"])(
+    "does not create attempts for a blocked archive link %s",
+    async (date) => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-10-19T16:00:00Z"));
+      history.replaceState(null, "", "/archive/" + date);
+      await mount();
+      expect(host.textContent).toContain(
+        "Choose a past day from October 11, 2026 onward.",
+      );
+      expect(
+        createDailySave(journeyRegistry.JOURNEY_INDEX).load().attempts,
+      ).toEqual({});
+    },
+  );
+
   it("clears the signed-in admin's Journey and starts a fresh attempt from Home", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date(2026, 9, 11, 12));
@@ -768,65 +959,72 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     });
   });
 
-  it("fits the mobile Explore tray to changing content while keeping the globe and enlargement control", async () => {
-    let contentHeight = 196;
-    const bounds = HTMLElement.prototype.getBoundingClientRect;
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-      function (this: HTMLElement) {
-        if (!this.matches(".explore-card")) return bounds.call(this);
+  it.each([
+    ["Explore", ".explore-card"],
+    ["Journey archive", ".journey-archive"],
+  ])(
+    "fits the mobile %s tray to changing content while keeping the globe and enlargement control",
+    async (label, panelClass) => {
+      let contentHeight = 196;
+      const bounds = HTMLElement.prototype.getBoundingClientRect;
+      vi.spyOn(
+        HTMLElement.prototype,
+        "getBoundingClientRect",
+      ).mockImplementation(function (this: HTMLElement) {
+        if (!this.matches(panelClass)) return bounds.call(this);
         return { ...bounds.call(this), height: contentHeight } as DOMRect;
-      },
-    );
-    vi.stubGlobal("matchMedia", (query: string) => ({
-      matches: query === MOBILE_LAYOUT_QUERY,
-      addEventListener() {},
-      removeEventListener() {},
-    }));
-    await mount();
-    expect(probe.props!.visualScale).toBe(1.2);
-    const tray = host.querySelector(".mode-incoming");
-    const mapTools = host.querySelector(".mobile-map-tools");
-    await click("Explore");
-    expect(host.querySelector(".mode-incoming")).toBe(tray);
-    expect(host.querySelector(".mobile-map-tools")).toBe(mapTools);
-    const experience = host.querySelector<HTMLElement>(".experience")!;
-    expect(experience.style.getPropertyValue("--explore-content-height")).toBe(
-      "196px",
-    );
-    expect(probe.props!.visualScale).toBe(1);
-    const enlargement = [
-      ...host.querySelectorAll<HTMLButtonElement>("button"),
-    ].find((button) => button.textContent?.trim() === "Enlarge globe")!;
-    expect(enlargement.getAttribute("aria-expanded")).toBe("false");
-    expect(host.querySelector(".mode-incoming")!.hasAttribute("inert")).toBe(
-      false,
-    );
-    const observer = panelObservers.find((item) =>
-      item.element?.matches(".explore-card"),
-    )!;
-    contentHeight = 480;
-    await act(async () => observer.resize());
-    expect(experience.style.getPropertyValue("--explore-content-height")).toBe(
-      "480px",
-    );
-    await act(async () => enlargement.click());
-    expect(enlargement.getAttribute("aria-expanded")).toBe("true");
-    await act(async () => enlargement.click());
-    expect(enlargement.textContent?.trim()).toBe("Enlarge globe");
-    expect(host.querySelector(".explore-card")).not.toBeNull();
-    expect(probe.mounts).toBe(1);
-    await click("Home");
-    expect(observer.disconnected).toBe(true);
-    expect(probe.props!.visualScale).toBe(1.2);
-    expect(host.querySelector(".mode-incoming")).toBe(tray);
-    await click("Study");
-    expect(host.querySelector(".mode-incoming")).toBe(tray);
-    await click("Explore");
-    expect(host.querySelector(".mode-incoming")).toBe(tray);
-    await click("Study");
-    expect(host.querySelector(".mode-incoming")).toBe(tray);
-    expect(probe.mounts).toBe(1);
-  });
+      });
+      vi.stubGlobal("matchMedia", (query: string) => ({
+        matches: query === MOBILE_LAYOUT_QUERY,
+        addEventListener() {},
+        removeEventListener() {},
+      }));
+      await mount();
+      expect(probe.props!.visualScale).toBe(1.2);
+      const tray = host.querySelector(".mode-incoming");
+      const mapTools = host.querySelector(".mobile-map-tools");
+      await click(label);
+      expect(host.querySelector(".mode-incoming")).toBe(tray);
+      expect(host.querySelector(".mobile-map-tools")).toBe(mapTools);
+      const experience = host.querySelector<HTMLElement>(".experience")!;
+      expect(
+        experience.style.getPropertyValue("--explore-content-height"),
+      ).toBe("196px");
+      expect(probe.props!.visualScale).toBe(1);
+      const enlargement = [
+        ...host.querySelectorAll<HTMLButtonElement>("button"),
+      ].find((button) => button.textContent?.trim() === "Enlarge globe")!;
+      expect(enlargement.getAttribute("aria-expanded")).toBe("false");
+      expect(host.querySelector(".mode-incoming")!.hasAttribute("inert")).toBe(
+        false,
+      );
+      const observer = panelObservers.find((item) =>
+        item.element?.matches(panelClass),
+      )!;
+      contentHeight = 480;
+      await act(async () => observer.resize());
+      expect(
+        experience.style.getPropertyValue("--explore-content-height"),
+      ).toBe("480px");
+      await act(async () => enlargement.click());
+      expect(enlargement.getAttribute("aria-expanded")).toBe("true");
+      await act(async () => enlargement.click());
+      expect(enlargement.textContent?.trim()).toBe("Enlarge globe");
+      expect(host.querySelector(panelClass)).not.toBeNull();
+      expect(probe.mounts).toBe(1);
+      await click("Home");
+      expect(observer.disconnected).toBe(true);
+      expect(probe.props!.visualScale).toBe(1.2);
+      expect(host.querySelector(".mode-incoming")).toBe(tray);
+      await click("Study");
+      expect(host.querySelector(".mode-incoming")).toBe(tray);
+      await click("Explore");
+      expect(host.querySelector(".mode-incoming")).toBe(tray);
+      await click("Study");
+      expect(host.querySelector(".mode-incoming")).toBe(tray);
+      expect(probe.mounts).toBe(1);
+    },
+  );
 
   it("restores a saved theme at startup", async () => {
     localStorage.setItem(

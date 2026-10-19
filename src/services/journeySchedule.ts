@@ -71,6 +71,7 @@ async function request(token?: string, body?: unknown, month?: string, admin = f
 export function useJourneySchedule() {
   const [schedule, setSchedule] = useState<JourneySchedule>();
   const [error, setError] = useState("");
+  const [loadedMonths, setLoadedMonths] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const epoch = useRef(0);
   const reading = useRef(false);
@@ -93,7 +94,10 @@ export function useJourneySchedule() {
     const version = epoch.current;
     try {
       const result = await request(undefined, undefined, month);
-      if (version === epoch.current) { setSchedule((prior) => merge(prior, result)); setError(""); }
+      if (version === epoch.current) {
+        setSchedule((prior) => merge(prior, result)); setError("");
+        if (month) setLoadedMonths(prior => prior.includes(month) ? prior : [...prior, month]);
+      }
     } catch (failure) {
       if (version === epoch.current) setError(failure instanceof Error ? failure.message : "Couldn’t load the Journey schedule.");
     } finally {
@@ -152,5 +156,5 @@ export function useJourneySchedule() {
       }
     }
   };
-  return { schedule, ready: !!schedule, error, busy, refresh, refreshAll, save };
+  return { schedule, ready: !!schedule, error, busy, loadedMonths, refresh, refreshAll, save };
 }

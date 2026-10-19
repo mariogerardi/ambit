@@ -400,7 +400,10 @@ and timers are not implemented.
 Shared cards, friend comparisons and backend activity totals use reward points
 out of 15, while retaining correctness counts and aggregate help separately.
 The results screen places correctness and help beside each other beneath the
-continuous 15-slot total. Shared image previews and downloaded PNGs use that same
+continuous 15-slot total. Its shared closing heading follows earned points in
+`copy.ts` (14–15, 12–13, 10–11, 8–9, 6–7, 4–5, 1–3 and 0), including help caps
+and distance accuracy. Early failure retains its separate pause heading.
+Shared image previews and downloaded PNGs use that same
 continuous earned-then-hollow orb row, with point and correctness totals kept distinct.
 The backend exposes `points`, `maxPoints` and `legacyPoints`, never private answer
 inputs or question IDs in a score response. Older cached/backend summaries without

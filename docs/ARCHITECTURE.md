@@ -75,6 +75,7 @@ The following modules own their own lifetimes and can be read independently:
   `camera.ts` still owns animation, cancellation and live viewport fitting.
 - [`HomePanel.tsx`](../src/app/HomePanel.tsx): today's Journey title, progress,
   Play/Resume/View result action and navigation; readiness is supplied by the shell.
+- [`JourneyArchive.tsx`](../src/app/JourneyArchive.tsx) and [`archiveDates.ts`](../src/app/archiveDates.ts): public monthly archive, fixed October 11, 2026 opening date, historical assignment/edition resolution, and dated play routes. Missing history is unavailable, never replaced by a new seeded choice. The route date owns the visible attempt independently of the shared `activeDate` pointer.
 - [`useStudyPresentation.ts`](../src/study/useStudyPresentation.ts): declarative
   Study globe state for the builder preview, visible session and summary review.
   It returns colors, places, border/name scope, disclosure flags and visible clue
@@ -165,7 +166,7 @@ copies normalize winding without mutating the source catalog. Renderer caches
 and mesh bindings belong to the mounted globe, not the shared source objects.
 Highlights use near-surface geometry and draw order rather than large elevation.
 
-Idle motion and Fidget share playback state. Home, Explore and the Study overview
+Idle motion and Fidget share playback state. Home, Explore, Archive and the Study overview
 continue from the globe's live orientation with rotation enabled; returning from
 a close view zooms out smoothly. Explore clears its prior selection on mode entry,
 and neither Explore nor Study stores/restores a mode-specific camera position.

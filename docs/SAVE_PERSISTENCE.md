@@ -73,6 +73,17 @@ help merged from another tab caps a versioned reward without increasing it when
 help disappears. Friend summaries apply the same rule and retain correctness
 counts separately from the 15-point reward total.
 
+Archive play uses the same date/edition/run registers as the Daily. The URL date,
+not the shared `activeDate` selection pointer, determines which attempt receives
+answers, so browsing history in another tab cannot redirect today's writes.
+New completions capture `DailyAttempt.completedOn`, the actual New York day on
+which the final answer (or early failure) was submitted. Later results views do
+not alter it; same-run merges retain the earliest recorded completion day. Legacy
+results without this field keep prior streak credit. A completion earned after
+its scheduled date contributes points and completed-Journey totals, but cannot
+retroactively fill a Daily streak. Completed public archive entries open results;
+players cannot overwrite them with a replay.
+
 The Journey's **Play again**
 action creates that new run rather than resetting the old run's forward-only state;
 it keeps the played Journey even when the admin's local override is absent on a

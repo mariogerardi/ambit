@@ -301,7 +301,7 @@ describe("product copy follows the answer and visible reveal", () => {
       <GameShell {...props} game={{ ...game, phase: "finished" }} />,
     );
     expect(finished).not.toContain("JOURNEY COMPLETE");
-    expect(finished).toContain("Look how far");
+    expect(finished).toContain("Every step <em>takes you somewhere.</em>");
     expect(finished).not.toContain(JOURNEY.description);
   });
   it.each(["typing", "choices", "map"] as const)(

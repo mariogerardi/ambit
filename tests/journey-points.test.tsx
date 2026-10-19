@@ -33,6 +33,52 @@ const answer = (points?: number): Answer => ({
 });
 
 describe("Journey point rewards", () => {
+  it.each([
+    [14, 15, "That was an <em>ambitious run.</em>"],
+    [12, 13, "Look how far <em>you wandered.</em>"],
+    [10, 11, "You’ve covered <em>serious ground.</em>"],
+    [8, 9, "You found <em>your stride.</em>"],
+    [6, 7, "You’re finding <em>your way.</em>"],
+    [4, 5, "A few turns, <em>new discoveries.</em>"],
+    [1, 3, "Every step <em>takes you somewhere.</em>"],
+    [0, 0, "A whole world <em>still awaits.</em>"],
+  ] as const)(
+    "uses the earned-score closing line for %i–%i points",
+    (minimum, maximum, line) => {
+      for (let total = minimum; total <= maximum; total++) {
+        const game: GameState = {
+          ...initialGame,
+          phase: "finished",
+          roundIndex: 4,
+          answers: CANADA_JOURNEY.rounds.map((round, index) => {
+            const points = Math.max(0, Math.min(3, total - index * 3));
+            return {
+              ...answer(points),
+              roundId: round.id,
+              correct: points > 0,
+            };
+          }),
+        };
+        const html = renderToStaticMarkup(
+          <GameShell
+            journey={CANADA_JOURNEY}
+            game={game}
+            context={context}
+            dispatch={() => {}}
+            webgl
+            frame={() => {}}
+            onHome={() => {}}
+            onStudy={() => {}}
+          />,
+        );
+        const heading = html
+          .split('class="journey-result-heading"')[1]
+          .split("</h1>")[0];
+        expect(heading).toContain(line);
+      }
+    },
+  );
+
   it("shows a continuous 15-point total below the closing line and aligned receipt rewards", () => {
     const game: GameState = {
       ...initialGame,
@@ -66,7 +112,7 @@ describe("Journey point rewards", () => {
     expect(summary).toContain('class="journey-help-summary"');
     expect(summary).toContain("1 hint");
     expect(html.indexOf("journey-score")).toBeGreaterThan(
-      html.indexOf("you wandered."),
+      html.indexOf("your stride."),
     );
     const overview = html
       .split('class="journey-point-total"')[1]

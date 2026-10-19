@@ -15,6 +15,8 @@ import {
 import { useFriendActivity } from "./useFriendActivity";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
+import { localDateKey } from "./dailyProgress";
+import { archiveDateLabel } from "./archiveDates";
 
 export function FriendJourneyComparison({
   api,
@@ -130,7 +132,10 @@ export function FriendJourneyComparison({
       <header>
         <div>
           <h3>
-            Today’s Journey —{" "}
+            {target.date === localDateKey()
+              ? "Today’s Journey"
+              : archiveDateLabel(target.date)}{" "}
+            —{" "}
             <em>
               {JOURNEY_INDEX.find((journey) => journey.id === target.journeyId)
                 ?.title ?? "Explore the world"}

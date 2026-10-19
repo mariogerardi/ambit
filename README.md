@@ -38,6 +38,7 @@ Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
 | ------------------------ | --------------------------------------------------------------------------------------------------------------- |
 | **Home** (`/`)           | Today's Journey, saved progress, and entry points to Explore and Study.                                         |
 | **Journey**              | Five-question editions covering pins, map picks, recall, choices, matching, and geographic reasoning.           |
+| **Archive** (`/archive`) | Past Daily Journeys from October 11, 2026: play, resume, or revisit a saved result.                             |
 | **Explore** (`/explore`) | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.     |
 | **Study** (`/study`)     | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions. |
 | **Account** (`/account`) | Optional verified-email signup, sign-in, recovery, and sign-out.                                                |
@@ -48,8 +49,9 @@ selection from Journeys marked `pool`; locking or an Admin assignment makes the
 date permanent. Any current Journey, including `unlisted` editions, can be assigned
 in Admin. The old eleven-ID rotation is migration history, not the current
 selection algorithm. Started attempts keep their edition and progress when an
-assignment changes. Past attempts remain in saved history but cannot be reopened
-by players after midnight. Direct practice routes require Admin access; use
+assignment changes. The public archive starts on October 11, 2026 and uses stored
+historical assignments. Past attempts can be resumed through `/archive/YYYY-MM-DD`;
+new archive completions earn points without retroactively extending Daily streaks. Direct practice routes require Admin access; use
 “Preview five questions.” See the [Journey catalog](docs/QUESTION_CATALOG.md) for
 current titles and routes.
 The removed editor/AI generator is not part of the current app; legacy locally

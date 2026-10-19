@@ -1,6 +1,7 @@
 import type { JourneySummary } from "../game/journeyRegistry";
 import { unfinished } from "./dailyProgress";
 import type { DailyAttempt } from "./dailyProgress";
+import { ActionIcon } from "./ActionIcon";
 
 export function HomePanel({
   journey,
@@ -8,6 +9,7 @@ export function HomePanel({
   ready,
   scheduleError,
   onPlay,
+  onArchive,
   onRetrySchedule,
   onExplore,
   onStudy,
@@ -17,6 +19,7 @@ export function HomePanel({
   ready: boolean;
   scheduleError?: string;
   onPlay(): void;
+  onArchive?(): void;
   onRetrySchedule(): void;
   onExplore(): void;
   onStudy(): void;
@@ -54,15 +57,33 @@ export function HomePanel({
             </span>
           ))}
         </div>
-        <button
-          className="primary-button"
-          data-dd-action-name="Home Journey"
-          disabled={!ready}
-          onClick={onPlay}
-        >
-          {label}
-          <span>→</span>
-        </button>
+        <div className="daily-menu-actions">
+          <button
+            className="primary-button daily-menu-action"
+            data-dd-action-name="Home Journey"
+            disabled={!ready}
+            onClick={onPlay}
+          >
+            <ActionIcon name="journey" />
+            <span className="daily-menu-action-label">{label}</span>
+            <span className="daily-menu-action-arrow" aria-hidden="true">
+              →
+            </span>
+          </button>
+          {onArchive && (
+            <button
+              className="daily-menu-action home-archive-link"
+              data-dd-action-name="Home Archive"
+              onClick={onArchive}
+            >
+              <ActionIcon name="archive" />
+              <span className="daily-menu-action-label">Journey archive</span>
+              <span className="daily-menu-action-arrow" aria-hidden="true">
+                →
+              </span>
+            </button>
+          )}
+        </div>
       </div>
       {scheduleError && (
         <p role="alert">
@@ -79,13 +100,21 @@ export function HomePanel({
       <div className="menu-secondary">
         <button data-dd-action-name="Home Explore" onClick={onExplore}>
           <strong>
-            Explore <span>→</span>
+            <ActionIcon name="explore" />
+            <span className="menu-secondary-label">Explore</span>
+            <span className="menu-secondary-arrow" aria-hidden="true">
+              →
+            </span>
           </strong>
           <small>Follow your curiosity.</small>
         </button>
         <button data-dd-action-name="Home Study" onClick={onStudy}>
           <strong>
-            Study <span>→</span>
+            <ActionIcon name="study" />
+            <span className="menu-secondary-label">Study</span>
+            <span className="menu-secondary-arrow" aria-hidden="true">
+              →
+            </span>
           </strong>
           <small>Practice at your pace.</small>
         </button>

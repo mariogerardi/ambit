@@ -205,6 +205,22 @@ class CommunityTests(unittest.TestCase):
         self.call("PATCH /account/friends/{id}", "b", {"action": "block"}, id="a")
         self.assertEqual(self.call("GET /account/friends/{id}/profile", "a", id="b")[0], 403)
 
+    def test_archive_completion_counts_points_and_comparison_without_backfilling_streak(self):
+        archive = self.daily_record("b", day="2026-10-17")
+        value = json.loads(archive["valueJson"])
+        value.update({"completedOn": "2026-10-19", "runId": "archive"})
+        archive["valueJson"] = json.dumps(value)
+        stale = {**archive, "writer": "stale"}
+        stale["valueJson"] = json.dumps({k: v for k, v in value.items() if k != "completedOn"})
+        self.db.saves = [self.daily_record("b", day="2026-10-18"), archive, stale, self.daily_record("b", day="2026-10-16")]
+        summary = community.progress_summary("b", fresh=True)
+        result = community.shared_activity(summary, summary, "2026-10-19")
+        self.assertEqual(result["stats"]["journeyStreak"], 1)
+        self.assertEqual(result["stats"]["journeysCompleted"], 3)
+        score = next(s for s in result["journeys"] if s["date"] == "2026-10-17")
+        self.assertEqual(score["points"], 9)
+        self.assertNotIn("private", str(result))
+
     def test_journey_reset_removes_old_scores_and_allows_a_fresh_run(self):
         self.db.saves = [self.daily_record("a"), self.daily_record("a", writer="stale"), self.daily_record("a", day="2026-10-09")]
         reset = {"pk": "user#a", "namespace": "daily", "field": "reset.2026-10-10/test", "writer": "admin", "clock": 2, "valueJson": "2"}

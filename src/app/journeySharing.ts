@@ -10,6 +10,7 @@ export const DAILY_SHARE_URL = "https://playambit.com/daily";
 
 export interface SharedJourneyResult {
   title: string;
+  archive: boolean;
   date: string;
   correct: number;
   points: number;
@@ -25,10 +26,12 @@ export function sharedJourneyResult(
   game: GameState,
   date: string,
   _origin?: string,
+  archive = false,
 ): SharedJourneyResult {
   const help = helpSummary(game);
   return {
     title: journey.title,
+    archive,
     date,
     correct: game.answers.filter((answer) => answer.correct).length,
     points: journeyPoints(game),
@@ -43,7 +46,9 @@ export function sharedJourneyResult(
         ? "Unassisted"
         : `${help.status === "assisted" ? "Assisted" : "Hinted"} · ${helpCountCopy(help)}`,
     endedEarly: game.phase === "failed",
-    playUrl: DAILY_SHARE_URL,
+    playUrl: archive
+      ? `https://playambit.com/archive/${date}`
+      : DAILY_SHARE_URL,
   };
 }
 export function resultDate(date: string) {
@@ -70,11 +75,11 @@ export function resultText(result: SharedJourneyResult) {
       : []),
     ...(result.endedEarly ? ["Ended early · — not reached"] : []),
     result.help,
-    `Play today’s Journey: ${result.playUrl}`,
+    `${result.archive ? "Play this Journey" : "Play today’s Journey"}: ${result.playUrl}`,
   ].join("\n");
 }
 export function resultCaption(result: SharedJourneyResult) {
-  return `A world of wonders. Take today’s Journey with me → ${result.playUrl}`;
+  return `A world of wonders. ${result.archive ? "Explore this Journey" : "Take today’s Journey"} with me → ${result.playUrl}`;
 }
 
 /** Wrap even a single long word; title fitting must never silently clip content. */
@@ -198,7 +203,11 @@ export function paintResultCard(
   }
   ctx.fillStyle = "#9fdde4";
   ctx.font = '600 27px "Manrope"';
-  ctx.fillText("Play today’s Journey", 80, 851);
+  ctx.fillText(
+    result.archive ? "Play this Journey" : "Play today’s Journey",
+    80,
+    851,
+  );
   ctx.fillStyle = "#b2c9d7";
   ctx.font = '500 24px "Manrope"';
   const playUrl = new URL(result.playUrl);

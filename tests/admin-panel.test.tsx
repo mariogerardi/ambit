@@ -23,6 +23,7 @@ beforeEach(() => {
   schedule = {
     schedule: { today: "2026-10-11", records: {}, assignments: {} },
     ready: true,
+    loadedMonths: [],
     error: "",
     busy: false,
     refresh: vi.fn(async () => {}),
