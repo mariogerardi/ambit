@@ -58,6 +58,12 @@ export function validateQuestionContract(q: Question): void {
     fail("count must be a positive integer");
   if (definition.single && q.count !== 1)
     fail("single answers require count 1");
+  if (
+    q.candidateRegionIds &&
+    (new Set(q.candidateRegionIds).size !== q.candidateRegionIds.length ||
+      q.candidateRegionIds.some((id) => q.contextIds?.includes(id)))
+  )
+    fail("candidate geography must be distinct from reference geography");
   const city = definition.mapSelection === "places";
   if (isRegionAnswer(q) || city) {
     if (q.selection.type === "none")
@@ -89,6 +95,13 @@ export function validateQuestionContract(q: Question): void {
   )
     fail("typed answers require a field label");
   definition.validate?.(q, fail);
+  for (const choice of q.choices ?? [])
+    if (
+      choice.geographyIds &&
+      (!choice.geographyIds.length ||
+        new Set(choice.geographyIds).size !== choice.geographyIds.length)
+    )
+      fail("choice geography requires distinct, nonempty identities");
   if (q.mode !== "choice-match" && q.matchSlots)
     fail("matching slots require a matching answer mode");
 }

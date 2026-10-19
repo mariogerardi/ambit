@@ -1600,3 +1600,120 @@
   font-size: 12px;
   color: var(--ui-muted);
 }
+
+/* Journey answer roles share the globe palette; text and symbols carry the meaning too. */
+.experience .candidate-grid button.chosen,
+.experience .order-card.chosen {
+  background: var(--play-selected, #f6bc46);
+  border-color: var(--play-outline, #172b35);
+  color: #172b35;
+}
+.assist-conflict {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+}
+.answer-review {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: grid;
+  gap: 8px;
+}
+.answer-review li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+}
+.answer-review li > span:first-child {
+  color: var(--ui-muted);
+  font-size: 18px;
+  min-width: 20px;
+}
+.answer-review li[data-result="correct"] > span:first-child {
+  color: var(--play-correct);
+}
+.answer-review li[data-result="incorrect"] > span:first-child {
+  color: var(--play-incorrect);
+}
+.answer-review li[data-result="answer"] > span:first-child {
+  color: var(--play-answer);
+}
+.answer-review li > div {
+  display: grid;
+  gap: 2px;
+}
+.answer-review strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.answer-review li div > span {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.submitted-answer {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.feedback-map-key {
+  font-size: 11px;
+}
+.feedback-map-key i {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 15px;
+  width: 15px;
+  height: 15px;
+  font-size: 12px;
+  font-style: normal;
+  color: #172b35;
+}
+.feedback-map-key i svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+.pin-accuracy-bands {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.pin-accuracy-bands li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 0;
+  color: var(--ui-muted);
+}
+.pin-accuracy-bands li > span:first-child {
+  color: var(--band-color);
+  font-size: 20px;
+}
+.pin-accuracy-bands li > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+.pin-accuracy-bands strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.pin-accuracy-bands li span span {
+  font-size: 11px;
+}
+.pin-accuracy-bands li[data-achieved] {
+  color: var(--ui-text);
+  border-bottom: 2px solid var(--band-color);
+}
+.feedback-map-key .key-correct,
+.feedback-map-key .key-incorrect {
+  color: var(--play-on-feedback, #172b35);
+}
+/* Selection symbols inherit the same dark ink as the selected card copy. */
+.experience .candidate-grid button.chosen i,
+.experience .order-card.chosen i {
+  color: inherit;
+}

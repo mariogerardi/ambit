@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { PerspectiveCamera, SRGBColorSpace } from "three";
+import { PerspectiveCamera, SRGBColorSpace, Raycaster, Vector3 } from "three";
 import {
   PlaceLabels,
   placeStyle,
@@ -50,6 +50,7 @@ function canvasFactory() {
       measureText: (text: string) => ({ width: text.length * 14 }),
       strokeText() {},
       fillText() {},
+      clearRect() {},
       beginPath() {},
       moveTo() {},
       lineTo() {},
@@ -131,6 +132,37 @@ describe("cached readable place labels", () => {
       labels.dispose();
     },
   );
+  it("renders response badges without adding pick targets or intercepting country raycasts", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "response",
+        kind: "place-labels",
+        visible: false,
+        markers: true,
+        places: [
+          {
+            ...places[0],
+            name: "",
+            kind: "other",
+            markerRole: "annotation",
+            markerBadge: "✓",
+            visualState: "selected",
+            markerSize: 26,
+          },
+        ],
+      },
+      100,
+    );
+    labels.view(camera(), 800, 800);
+    expect(labels.group.children.some((child) => child.visible)).toBe(true);
+    expect(labels.pick(400, 400)).toBeUndefined();
+    labels.group.updateMatrixWorld(true);
+    const ray = new Raycaster(new Vector3(0, 0, 300), new Vector3(0, 0, -1));
+    expect(ray.intersectObjects([labels.group], true)).toEqual([]);
+    labels.dispose();
+  });
   it("outlines contextual city dots so they remain visible on the same-colored land", () => {
     const context = {
       beginPath: vi.fn(),
@@ -375,7 +407,7 @@ describe("cached readable place labels", () => {
     "visited",
     "hinted",
   ] as const)(
-    "renders %s place markers in the same palette as regions",
+    "shares the %s accent with region fills or reference outlines",
     (state) => {
       canvasFactory();
       const labels = new PlaceLabels();
@@ -393,7 +425,9 @@ describe("cached readable place labels", () => {
         (p) => p.userData.role === "marker",
       )!;
       expect(marker.userData.markerStyle).toContain(
-        playRegionStyle("wurl:TEST", state).fill,
+        state === "hinted"
+          ? playRegionStyle("wurl:TEST", state).stroke
+          : playRegionStyle("wurl:TEST", state).fill,
       );
       labels.dispose();
     },
@@ -714,11 +748,11 @@ describe("cached readable place labels", () => {
       ((capitalMarker.scale.y / (c.position.z - capitalMarker.position.z)) *
         700) /
       (2 * Math.tan((c.fov * Math.PI) / 360));
-    expect(pixelHeight()).toBeCloseTo(18);
+    expect(pixelHeight()).toBeCloseTo(30);
     c.position.z = 105;
     c.updateMatrixWorld();
     labels.view(c, 700, 700);
-    expect(pixelHeight()).toBeCloseTo(18);
+    expect(pixelHeight()).toBeCloseTo(30);
     expect(capitalMarker.material.depthTest).toBe(false);
     expect(capitalMarker.material.map?.colorSpace).toBe(SRGBColorSpace);
     expect(capitalLabel.material.depthTest).toBe(false);
@@ -896,9 +930,9 @@ describe("zoom-aware context places", () => {
     expect(placeStyle("city").marker).toBe("#101010");
     expect(placeStyle("city").textHeight).toBeGreaterThanOrEqual(24);
     expect(placeStyle("city").font).toContain("500 26px");
-    expect(placeMarkerSize({ ...city, population: 3_820_914 })).toBeGreaterThan(
-      placeMarkerSize(city),
-    );
+    expect(
+      placeMarkerSize({ ...city, population: 3_820_914 }, true),
+    ).toBeGreaterThan(placeMarkerSize(city, true));
     expect(placeDetailVisible(city, 1.65)).toBe(false);
     expect(placeDetailVisible({ ...city, population: 3_820_914 }, 1.65)).toBe(
       true,
@@ -910,6 +944,14 @@ describe("zoom-aware context places", () => {
         0.8,
       ),
     ).toBe(true);
+  });
+  it("makes authored city and summit clues larger than dense background places", () => {
+    const city = { ...places[0], kind: "city" as const, population: 300_000 };
+    expect(placeMarkerSize(city)).toBeGreaterThan(placeMarkerSize(city, true));
+    expect(placeMarkerSize({ ...city, kind: "mountain" })).toBeGreaterThan(
+      placeMarkerSize(city, true),
+    );
+    expect(placeMarkerSize({ ...city, markerSize: 40 })).toBe(40);
   });
 });
 

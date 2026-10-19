@@ -3,6 +3,7 @@ import type { FactSource, Journey } from "./questionContracts";
 import type { PlaceFeature, RegionFeature } from "../geography/types";
 import geography from "./data/exceptions-geography.v1.json";
 import { ANSWER_PLACES } from "./answerTargets";
+import { areaLabel } from "./authoredPlaces";
 
 const source = (name: string, url: string): FactSource => ({
   name,
@@ -85,13 +86,14 @@ export const TWELFTH_JOURNEY: Journey = {
           focus: { lat: 28, lng: -25, altitude: 1.7 },
         },
         reveal: {
-          answerIds: ["wurl:FRA-GF"],
+          contextIds: ["wurl:FRA-GF"],
           focus: { lat: 4, lng: -53, altitude: 0.35 },
           places: [
             {
               id: "reveal:french-guiana",
               name: "French Guiana · France",
               kind: "other",
+              markerHidden: true,
               lat: 4.2,
               lng: -53.3,
               sourceId: "naturalearth:1159311355",
@@ -104,7 +106,7 @@ export const TWELFTH_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "members" },
-      commitment: "submit",
+      commitment: "immediate",
 
       ...base,
       id: "exceptions-double-landlocked",
@@ -129,12 +131,14 @@ export const TWELFTH_JOURNEY: Journey = {
         play: { focus: { lat: 43, lng: 58, altitude: 1.45 } },
         reveal: {
           focus: { lat: 40, lng: 66, altitude: 0.6 },
+          contextIds: neighbors.map(([id]) => id),
           places: neighbors.map(([id, name, lat, lng]) => ({
             id: `reveal:${id}`,
             name,
             lat,
             lng,
             kind: "other",
+            markerHidden: true,
             sourceId: "naturalearth",
             parentId: id,
           })),
@@ -185,9 +189,9 @@ export const TWELFTH_JOURNEY: Journey = {
             { id: "kiribati-antimeridian", type: "meridian", longitude: 180 },
           ],
           places: (geography.islands as PlaceFeature[]).map((p) => ({
-            ...p,
-            visualState: "answer",
-            answerTarget: true,
+            ...areaLabel(p),
+            displayRole: "explanation",
+            visualState: "hinted",
           })),
         },
       },
@@ -196,7 +200,7 @@ export const TWELFTH_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "members" },
-      commitment: "submit",
+      commitment: "immediate",
 
       ...base,
       id: "exceptions-bolivia-coast",
@@ -216,8 +220,7 @@ export const TWELFTH_JOURNEY: Journey = {
         play: {
           contextIds: ["wurl:BOL"],
           map: {
-            borders: false,
-            borderIds: ["wurl:BOL"],
+            borders: true,
             hoverFeedback: true,
             muteOthers: true,
             candidates: "neutral",
@@ -230,6 +233,7 @@ export const TWELFTH_JOURNEY: Journey = {
             {
               id: "reveal:bolivia",
               name: "Bolivia",
+              markerHidden: true,
               lat: -17,
               lng: -64,
               kind: "other",
@@ -238,6 +242,7 @@ export const TWELFTH_JOURNEY: Journey = {
             {
               id: "reveal:chile",
               name: "Chile",
+              markerHidden: true,
               lat: -25,
               lng: -69,
               kind: "other",
@@ -251,7 +256,7 @@ export const TWELFTH_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "members" },
-      commitment: "submit",
+      commitment: "immediate",
 
       ...base,
       id: "exceptions-baku",

@@ -159,7 +159,7 @@ export const FOURTH_JOURNEY: Journey = {
       instruction: "Choose a country on the globe or below.",
       mode: "map-single",
       count: 1,
-      commitment: "submit",
+      commitment: "immediate",
       selection: {
         type: "ids",
         ids: WESTERN_GATEWAY_CANDIDATES,

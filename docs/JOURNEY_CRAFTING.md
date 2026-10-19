@@ -8,7 +8,7 @@ This is the single maintained Journey crafting guide, incorporating the former
 `Crafting_a_Journey_Revised.md` and the implementation lessons from Andes.
 [AGENTS.md](../AGENTS.md) governs working efficiency, verification, and deployment.
 
-This guide covers what authors design and what players actually experience. [Question catalog and authoring](QUESTION_CATALOG.md) remains the reference for registration, data contracts, supported modes, and technical mechanics. Where this guide identifies desired behavior not yet implemented, treat it as a product requirement—not as an existing API.
+This guide covers what authors design and what players actually experience. [Question catalog and authoring](QUESTION_CATALOG.md) remains the reference for registration, data contracts, supported modes, and technical mechanics. These are current authoring standards. The engine may support additional legacy or internal configurations; that does not make them the default for new Journeys. Label proposed features explicitly and agree on their scope before relying on a new API.
 
 ## 1. Design the whole Journey first
 
@@ -105,6 +105,10 @@ small-screen input precision. Audit nearby plausible locations and both sides of
 each boundary. A larger radius intentionally changes the challenge; do not use it
 to compensate for poor framing or unusable controls. State the acceptance rule
 before submission; show the target and rings only on reveal. Help must preserve it.
+Author three accuracy bands for distance pins: bullseye, close, and within range.
+Choose useful inner radii for the subject; the outer band must end at the acceptance
+radius. Territory-inside pins grade an area, so do not invent concentric distance
+tiers for them.
 
 Aconcagua accepts all pins within 450 km, with inclusive bands ending at 150, 300,
 and 450 km. Every band earns one correct answer; feedback varies by accuracy.
@@ -136,17 +140,90 @@ When a round asks for _some_ members of a larger valid set, author the acceptanc
 
 ## 5. Give the globe purposeful question-state information
 
-The globe is an active part of the question, not decorative background. An endless field of gray countries is often a sign that the author has not deliberately specified the **given** geography.
+The globe communicates the question's geography. Choose these four properties
+independently for every visible object:
 
-- **Context (amber):** Geography already named or established by the prompt. Yellow is **not** a decoration requirement on every round.
-- **Available candidates (pale yellow):** An equally styled eligible candidate field; distinct from known context.
-- **Neutral/muted:** Background, undisclosed answers, and nonprivileged candidates. These may still need to be selectable.
-- **Selected/committed (brighter yellow):** What the player has chosen, with an emphasized outline and a different fill from both context and available candidates. These shared globe colors are defined in `PLAY_HIGHLIGHTS` in `src/globe/themes.ts` and used for country fills and place markers.
-- **Correct/incorrect:** Feedback states for the **answered object**, not arbitrary neighboring land. `PLAY_FEEDBACK` in `src/globe/themes.ts` shares the bright correct green, darker revealed-answer green, red mistakes, and purple recap across regions, place markers, distance lines and legend swatches. A correctly named highlighted island uses the correct green; a missed island uses the revealed-answer green.
+| Property    | Authoring decision                                                                                 |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| Geometry    | An area, an actual point location, a linear feature, or a label anchor.                            |
+| Role        | Established reference, undisclosed clue, openly shown candidate, submitted answer, or explanation. |
+| Interaction | Inspection, country/region selection, city selection, coordinate pin placement, or none.           |
+| Lifecycle   | What is shown during play, added by help, explained on reveal, and retained at completion.         |
 
-If a question names a country and asks for its mountain, capital, language, or history, highlighting that named country is **free orientation**, not a hint. Do not make players rediscover information already in the copy.
+**Match representation to geometry.** Countries, states, territories, islands,
+lakes, and other areas use their footprints and labels. A country-name label must
+not create a city dot. Use `areaLabel` for label anchors when a footprint is already
+shown or no reviewed extent is available; never invent a precise point or boundary.
+Cities, summits, bridges, and other actual locations may use point markers. Rivers
+and surveyed routes use reviewed line geometry. Border adjacency, crossing counts,
+and sequences do not imply center-to-center travel paths: use area emphasis and a
+written sequence. Point-to-point distance and explicitly assessed great-circle
+comparisons can use connecting lines.
 
-If an explicit candidate region is provided, give its eligible members equivalent styling when appropriate. Do not pre-highlight only correct members. And do not assume every multi-choice question needs yellow map fills: use them only if they clarify the actual task.
+**Use roles consistently.**
+
+- **Reference (subdued blue land and raised blue outline; blue point accent):**
+  Geography already established by the prompt. Reference areas are inspectable,
+  rather than country-selection answers. Reference cities share one point style
+  and size, independent of capital status. Use `cityReference` for authored cities.
+- **Candidate field (pale gold):** An openly shown, equally styled answer pool.
+  This may support buttons or typing as well as globe selection. Use
+  `scenes.play.candidateRegionIds` for geographic pools that do not themselves
+  grant map input. Do not store candidates in `contextIds`.
+- **Open search surface (light neutral land):** Undisclosed land available for
+  whole-world recall or coordinate pinning. Gray muted geography represents
+  background outside the current search field. Do not color only the correct
+  candidate or expose a withheld pin target's outline.
+  Keep this broad surface lower in visual emphasis than the blue references;
+  references must remain easy to locate against it.
+- **Selected (strong gold):** A pending answer. Area selections use a bare check,
+  not a city-marker disk. The same symbol grammar applies to feedback.
+- **Correct / solution / incorrect:** Green, teal, and rose belong to the actual
+  answered object or assignment. A reason, number, language, or animal answer does
+  not make every illustrative location a graded answer. Use `explanationPlace`
+  or `displayRole: "explanation"` for supporting discoveries. Keep matching/order
+  numbers attached to their locations through feedback; use color and text for
+  correctness. Valid alternatives are distinct from missed required answers.
+- **Completion (purple):** Retain the reviewed discoveries, including cities and
+  landmarks, alongside useful containing geography. Custom completion scenes add
+  framing and context; they do not remove the answered locations. Supporting
+  references may remain blue. Keep unrelated land muted and mistakes distinct.
+  Purple means a reviewed discovery, including a solution revealed after a miss;
+  it is not a correct-answer grade. Actual mistaken areas, city selections,
+  assignments, and coordinate pins remain red. For city and pin answers, grade
+  the location rather than its containing country. A mistake takes precedence
+  when the same object is also included in a discovery or custom recap scene.
+
+Area symbols occupy the widest interior of the main displayed landmass. Their
+size follows the available space on screen, with an upper bound; hide a symbol
+when it cannot fit legibly instead of imposing a minimum that covers neighboring
+land. Keep the whole territory as the hit target. A clue fragment and its owner
+may both receive emphasis, but one answer must not acquire duplicate status
+symbols. Numeric crossing-count examples use geography as explanation, without
+claiming that each route territory was a submitted answer.
+
+**Protect the task.** A named country supporting a city question is free
+orientation. A named country the player must locate with a pin is still a withheld
+target. Reveal a city's containing country as reference geography when its answer
+is shown; do not grade the country for a city answer. Waterbody answers need a
+reviewed extent or a clear waterbody label, rather than a city-like dot.
+Show country and regional boundaries when players must select areas. Hide them
+only when estimating an undisclosed footprint or recalling a relationship from
+memory is part of the task, and explain that omission before submission. Write prompts
+around geographic names or “the highlighted island,” rather than palette values
+such as “darker yellow”; meaning must survive theme changes.
+
+**Keep input consistent.** Single-country and merged-territory taps submit
+immediately, including named button alternatives. Pins and multi-answer selections
+retain confirmation. Pins use a crosshair on land and water. Reference areas do
+not gain answer cursors or hover emphasis. Colors alone never grant eligibility,
+change grading, expose names, or frame the camera.
+The shared answer control owns commitment notices such as “Your first answer is
+final.” Authored instructions explain the task without repeating that notice.
+
+Legends explain distinctions needed to interpret an answer, rather than listing
+every background or context color. Preserve ordinary point-marker readability and
+its accessible hit area independently of territory-symbol scaling.
 
 **Three-state authoring:**
 
@@ -222,7 +299,7 @@ The revealed visual must represent the **actual type of answer**:
 - **Receiving sea:** identify the waterbody and show the river visibly meeting it.
 - **Country / group of countries:** apply correct/incorrect states to the eligible answer polygons, while retaining given geography as context.
 - **Pin:** show the target, submitted pin, distance or accepted region, and tolerance appropriately **after** commitment.
-- **Order:** map the resolved sequence spatially, distinguish the excluded distractor, and avoid an ambiguous “one green mass” reveal.
+- **Order:** retain numbered assignments on the relevant objects, distinguish the excluded distractor, and avoid an ambiguous “one green mass” reveal. A sequence alone does not justify drawing a travel route.
 
 A documentary photograph can make a discovery tangible, as in Tierra del Fuego.
 Distinguish pre-answer clue media from reveal-only media; audit captions, alt text,
@@ -231,7 +308,14 @@ and licenses, and display attribution. See the [reveal-media contract](QUESTION_
 
 Some ideas cannot be explained honestly with the globe alone: underground diversions, two-bank urban relationships, historical border changes, and other relational concepts may warrant an **explicitly schematic diagram**. Distinguish schematics from surveyed cartography; they should clarify rather than feign precision.
 
-Review feedback colors and legends: if `contextIds` becomes answer-green in a particular state, adjust `feedbackContextIds`/`feedbackHintIds` so background geography is not misrepresented. Set `feedbackFocus` purposefully. Match the success phrase to the skill: _remembered, placed, inferred, identified_, not always “Well spotted.”
+Review declared roles through reveal and completion. In grouped scenes,
+`reveal.contextIds` supplies references and `reveal.answerIds` identifies actual
+solution areas; use explanatory place roles for supporting illustrations. The
+compiler owns the flat feedback fields. If a reference becomes graded or a city
+becomes a country answer, correct the role/input contract or shared presentation
+logic rather than adding a one-off color override. Set the reveal focus
+purposefully. Match the success phrase to the skill: _remembered, placed, inferred,
+identified_, not always “Well spotted.”
 
 ## 9. Make completion resolve the premise
 
@@ -288,7 +372,14 @@ in proportion to the change:
    reveals, tier edges, or stale presentation between rounds. Run TypeScript for
    typed-code changes. Documentation-only changes need formatting/link checks,
    not gameplay tests. Stop once the relevant checks pass.
-3. **Conditional browser verification:** Use a browser only when explicitly
+3. **Lifecycle and outcome review:** For affected mechanics, inspect a correct
+   answer, an actual wrong response, a partial set/assignment where supported,
+   and the completed recap. A correct revealed solution and the player's wrong
+   pick are different objects. Check repeated objects across rounds, restored
+   drafts, and cleanup when advancing or exiting. `check:journey` and exported
+   scene samples do not simulate this whole lifecycle; use focused behavior tests
+   and inspect the effective scenes.
+4. **Conditional browser verification:** Use a browser only when explicitly
    requested or when a critical uncertainty cannot be resolved otherwise, such
    as actual WebGL picking, rendered label collisions, or device-specific input.
    State the reason first and check the smallest affected flow/device. A Journey
@@ -330,6 +421,8 @@ completion genuinely depends on it.
 - [ ] Pin acceptance, accuracy feedback, and points are explicit; reference markers lie outside every accepted tier.
 - [ ] Camera transitions make sense, and linear geographic features do not falsely end.
 - [ ] The reveal shows the correct _type_ of answer and teaches something new.
+- [ ] Areas use fills and fitting status symbols; actual locations use point markers. Reference and candidate roles agree with input eligibility.
+- [ ] Supporting geography stays contextual, matching assignments retain their identity, and discoveries survive into the recap.
 - [ ] The completion map/caption resolves the five-round premise.
 - [ ] Sources validate both facts and the relevant geometry or historical claims.
 - [ ] Shared configs cannot inherit unrelated question behavior unnoticed.

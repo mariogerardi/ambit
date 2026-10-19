@@ -14,7 +14,7 @@ const definitions = [
     label: "Andaman & Nicobar",
     title: "Across the Bay of Bengal.",
     prompt:
-      "The Andaman and Nicobar Islands are shown in darker yellow. Which country are they part of?",
+      "The Andaman and Nicobar Islands are highlighted. Which country are they part of?",
     candidates: ["IND", "MMR", "BGD", "LKA", "IDN", "THA"],
     names: [
       "India",
@@ -38,7 +38,7 @@ const definitions = [
     label: "Bioko",
     title: "The coast can fool you.",
     prompt:
-      "Bioko Norte and Bioko Sur share the island shown in darker yellow. Which country are these two provinces part of?",
+      "Bioko Norte and Bioko Sur share the highlighted island. Which country are these two provinces part of?",
     candidates: ["CMR", "NGA", "GAB", "STP", "GNQ", "BEN"],
     names: [
       "Cameroon",
@@ -62,7 +62,7 @@ const definitions = [
     label: "Svalbard",
     title: "Farther north than you think.",
     prompt:
-      "The Arctic archipelago of Svalbard is shown in darker yellow. Which country has sovereignty over it?",
+      "The Arctic archipelago of Svalbard is highlighted. Which country has sovereignty over it?",
     candidates: ["RUS", "GBR", "CAN", "NOR", "ISL", "USA"],
     names: [
       "Russia",
@@ -86,7 +86,7 @@ const definitions = [
     label: "Galápagos",
     title: "An ocean away.",
     prompt:
-      "The Galápagos Islands are shown in darker yellow. Which country are they part of?",
+      "The Galápagos Islands are highlighted. Which country are they part of?",
     candidates: ["PAN", "PER", "CHL", "COL", "CRI", "ECU"],
     names: ["Panama", "Peru", "Chile", "Colombia", "Costa Rica", "Ecuador"],
     focus: { lat: -3, lng: -83, altitude: 0.95 },
@@ -103,7 +103,7 @@ const definitions = [
     label: "Réunion",
     title: "A very distant neighbor.",
     prompt:
-      "Réunion, the island shown in darker yellow near Mauritius and Madagascar, is part of which country?",
+      "Réunion, the highlighted island near Mauritius and Madagascar, is part of which country?",
     candidates: ["MDG", "MUS", "FRA", "ZAF", "IND", "GBR"],
     names: [
       "Madagascar",

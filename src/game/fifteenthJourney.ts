@@ -62,7 +62,8 @@ export const FIFTEENTH_JOURNEY: Journey = {
           GEO: "Head west again, this time to the Caucasus.",
           EST: "Circle back toward the Baltic for our final landing.",
         }[code],
-        instruction: "",
+        instruction:
+          "Country borders are hidden. Estimate the country’s location and place a pin.",
         mode: "pin",
         rule: { type: "pin-inside", ids: [`wurl:${code}`] },
         count: 1,

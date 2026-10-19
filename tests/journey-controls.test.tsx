@@ -140,7 +140,9 @@ describe("Journey answer controls", () => {
     await click("Remove pin");
     expect(current.pin).toBeUndefined();
     expect(submit().disabled).toBe(true);
-    expect(host.querySelector(".commit-note")).toBeNull();
+    expect(host.querySelector(".commit-note")?.textContent).toContain(
+      "Tap land or water to place a pin",
+    );
     expect(host.querySelector("#pin-latitude")).toBeNull();
   });
 });

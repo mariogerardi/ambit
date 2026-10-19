@@ -55,7 +55,7 @@ describe("shared-neighbor Journey", () => {
       expect(before.states[clue.countries[1]]).toBe("hinted");
       expect(
         Object.entries(before.states)
-          .filter(([, state]) => state !== "disabled")
+          .filter(([, state]) => state !== "surface")
           .map(([id]) => id)
           .sort(),
       ).toEqual([...clue.countries].sort());

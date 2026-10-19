@@ -120,7 +120,7 @@ describe("Missing Borders composite mechanic", () => {
         neighbor,
       );
     });
-    it(`edits, grades, assists and restores both feedback outcomes: ${question.id}`, () => {
+    it(`commits a tap, assists and restores both feedback outcomes: ${question.id}`, () => {
       if (
         question.rule.type !== "merged-region" ||
         question.selection.type !== "ids"
@@ -148,29 +148,24 @@ describe("Missing Borders composite mechanic", () => {
       ).toBe(false);
       const typed = { ...game, text: question.resolvedLabel! };
       expect(reduce(typed, { type: "guess-country" })).toBe(typed);
-      const miss = reduce(reduce(game, { type: "select", id: wrong }), {
-        type: "submit",
-      });
+      const miss = reduce(game, { type: "select", id: wrong });
       expect(miss.answers.at(-1)?.correct).toBe(false);
       expect(miss.phase).toBe("feedback");
-      game = reduce(game, { type: "select", id: wrong });
-      expect(game.phase).toBe("playing");
-      game = reduce(game, { type: "select", id: target });
-      expect(game.selectedIds).toEqual([target]);
+      expect(reduce(miss, { type: "select", id: target })).toBe(miss);
       game = reduce(game, { type: "request-hint" });
       expect(journeyWorld(regions, journey, game, context).regions).toBe(
         journeyWorld(regions, journey, playing(index), context).regions,
       );
       game = reduce(game, { type: "request-assist" });
-      expect(game.selectedIds).toEqual([target]);
+      expect(game.selectedIds).toEqual([]);
       const assisted = journeyWorld(regions, journey, game, context);
       expect(
         Object.values(assisted.states).filter(
           (state) => state === "selectable",
         ),
-      ).toHaveLength(3);
-      expect(assisted.states[target]).toBe("selected");
-      game = reduce(game, { type: "submit" });
+      ).toHaveLength(4);
+      expect(assisted.states[target]).toBe("selectable");
+      game = reduce(game, { type: "select", id: target });
       expect(game.answers.at(-1)?.correct).toBe(true);
       expect(game.answers.at(-1)?.receiptLabel).toBe(question.resolvedLabel);
       for (const correct of [true, false]) {
@@ -340,7 +335,7 @@ describe("Missing Borders composite mechanic", () => {
 afterEach(() => vi.unstubAllGlobals());
 describe("globe-only answer controls", () => {
   for (const webgl of [true, false])
-    it(`keeps submission and clearing without extra choices or hidden typing (WebGL ${webgl})`, async () => {
+    it(`explains immediate tapping without submission, extra choices or hidden typing (WebGL ${webgl})`, async () => {
       vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
       const host = document.createElement("div");
       const root = createRoot(host);
@@ -368,7 +363,8 @@ describe("globe-only answer controls", () => {
           [...host.querySelectorAll<HTMLButtonElement>("button")].find(
             (button) => button.textContent?.includes("Submit answer"),
           )!;
-        expect(submit().disabled).toBe(true);
+        expect(submit()).toBeUndefined();
+        expect(host.textContent).toContain("Your first answer is final.");
         if (question.rule.type !== "merged-region")
           throw Error("Wrong contract");
         const targetId = question.rule.targetId;
@@ -383,14 +379,11 @@ describe("globe-only answer controls", () => {
             />,
           ),
         );
-        expect(submit().disabled).toBe(false);
-        await act(async () => submit().click());
-        expect(dispatch).toHaveBeenLastCalledWith({ type: "submit" });
+        expect(submit()).toBeUndefined();
         const clear = [
           ...host.querySelectorAll<HTMLButtonElement>("button"),
         ].find((button) => button.textContent?.includes("Clear selection"))!;
-        await act(async () => clear.click());
-        expect(dispatch).toHaveBeenLastCalledWith({ type: "clear" });
+        expect(clear).toBeUndefined();
       } finally {
         await act(async () => root.unmount());
       }
@@ -437,7 +430,12 @@ describe("composite persistence and completion", () => {
     };
     const draft = JSON.parse(JSON.stringify(game));
     expect(validGame(draft, summary)).toBe(true);
-    const feedback = gameReducer(draft, { type: "submit" }, journey, context);
+    const feedback = gameReducer(
+      draft,
+      { type: "select", id: question.rule.targetId },
+      journey,
+      context,
+    );
     expect(feedback.answers[0]).toMatchObject({
       selectedIds: [question.rule.targetId],
       correct: true,

@@ -23,7 +23,8 @@ import type { Response } from "../src/game/questions";
 import type { Action, GameState } from "../src/game/state";
 import type { RegionFeature } from "../src/geography/types";
 import { journeyWorld } from "../src/app/journeyWorld";
-import { playRegionStyle, PLAY_HIGHLIGHTS } from "../src/globe/themes";
+import { playRegionStyle } from "../src/globe/themes";
+import { playColors } from "../src/theme/playColors";
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
@@ -141,7 +142,8 @@ describe("Chasing the sun", () => {
     }
     const japan = prepared(3);
     expect(japan.showBorders).toBe(false);
-    expect(japan.states["wurl:JPN"]).toBe("disabled");
+    expect(japan.states["wurl:JPN"]).toBe("surface");
+    expect(japan.states["wurl:CHN"]).toBe("surface");
     expect(japan.regionNames).toBe("none");
     expect(japan.places).toEqual([]);
     expect(japan.focus).toEqual({ lat: 25, lng: 132, altitude: 1.5 });
@@ -199,7 +201,10 @@ describe("Chasing the sun", () => {
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)?.path,
     ).toBe("/journey/chasing-the-sun");
-    expect(JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)?.availability).toBe("unlisted");
+    expect(
+      JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)
+        ?.availability,
+    ).toBe("unlisted");
   });
   it("retires the archived Sun edition while resolving old published assignments", async () => {
     const day = "2026-10-11";
@@ -349,7 +354,7 @@ describe("Chasing the sun", () => {
     const map = journeyWorld(world, SUN_FLAGS_JOURNEY, assisted, context);
     expect(map.showBorders).toBe(false);
     expect(map.regionNames).toBe("none");
-    expect(map.states["wurl:JPN"]).toBe("disabled");
+    expect(map.states["wurl:JPN"]).toBe("surface");
     expect(map.overlays).toEqual([]);
     expect(map.focus).toEqual(round.focus);
     expect(map.places.map((place) => place.name)).toEqual(["Seoul"]);
@@ -401,12 +406,21 @@ describe("Chasing the sun", () => {
       Object.values(map.states).filter((state) => state === "visited"),
     ).toHaveLength(6);
     expect(map.states["wurl:ESP"]).toBe("disabled");
-    expect(map.places).toHaveLength(6);
+    const labels = map.places.filter((place) => place.sourceId !== "player");
+    expect(labels).toHaveLength(6);
     expect(
-      map.places.every(
+      labels.every(
         (place) => place.visualState === "visited" && place.markerHidden,
       ),
     ).toBe(true);
+    expect(
+      map.places.find((place) => place.sourceId === "player"),
+    ).toMatchObject({
+      kind: "pin",
+      visualState: "incorrect",
+      lat: 39.9,
+      lng: 116.4,
+    });
     expect(map.routes).toEqual([]);
     expect(
       SUN_FLAGS_JOURNEY.completion!.views!.slice(0, 5).map((view) => view.lng),
@@ -495,7 +509,7 @@ describe("Chasing the sun", () => {
       ]) {
         expect(view.states[country]).toBe("hinted");
         expect(playRegionStyle(country, view.states[country]).fill).toBe(
-          PLAY_HIGHLIGHTS.context,
+          playColors()["context-land"],
         );
       }
       expect(view.states["wurl:KAZ"]).toBe("disabled");

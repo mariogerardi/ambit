@@ -14,6 +14,7 @@ import { gameReducer, initialGame, journeyScore } from "../src/game/state";
 import {
   highlightedPartId,
   journeyVisitedStates,
+  journeyDiscoveryPlaces,
   questionMapPresentation,
   questionPlaces,
   questionRegions,
@@ -41,6 +42,39 @@ const playing = (roundIndex: number): GameState => ({
 });
 
 describe("Asia journey and local facts", () => {
+  it("keeps ordered-capital mistakes on the cities through reveal and recap", () => {
+    const index = THIRD_JOURNEY.rounds.findIndex(
+      (q) => q.id === "silk-road-capitals",
+    );
+    const question = THIRD_JOURNEY.rounds[index];
+    const game = reduce(
+      playing(index),
+      ...["Moscow", "Baku", "Astana", "Tashkent", "Dushanbe"].map(
+        (value, index): Action => ({ type: "ordered", index, value }),
+      ),
+      { type: "submit" },
+    );
+    expect(game.answers[0].correct).toBe(false);
+    const feedback = questionPlaces(
+      question,
+      context,
+      "feedback",
+      "",
+      false,
+      game,
+    );
+    expect(feedback.find((p) => p.name === "Moscow")).toMatchObject({
+      visualState: "incorrect",
+      markerBadge: "1",
+    });
+    const recap = journeyDiscoveryPlaces(THIRD_JOURNEY, context, game.answers);
+    for (const name of ["Moscow", "Baku"])
+      expect(recap.find((p) => p.name === name)?.visualState).toBe("incorrect");
+    expect(recap.find((p) => p.name === "Astana")?.visualState).toBe("visited");
+    expect(
+      journeyVisitedStates(THIRD_JOURNEY, context, game.answers)["wurl:RUS"],
+    ).toBe("visited");
+  });
   it("identifies Tajikistan from complete five-country language profiles, without treating minority languages as national languages", () => {
     expect(solutionIds(THIRD_JOURNEY.rounds[0], context)).toEqual(["wurl:TJK"]);
     expect(

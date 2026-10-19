@@ -1872,7 +1872,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(
       host.querySelector(".mode-incoming .feedback-label")?.textContent,
     ).toContain("Nice connection.");
-    expect(probe.props!.states["wurl:DEU"]).toBe("disabled");
+    expect(probe.props!.states["wurl:DEU"]).toBe("hinted");
     expect(probe.props!.physicalFeatures?.map((f) => f.name)).toContain(
       "Rhine",
     );
@@ -1901,7 +1901,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     });
     await click("Submit answer");
     expect(probe.props!.places.map((p) => p.name)).toEqual(["Budapest"]);
-    expect(probe.props!.states["wurl:HUN"]).toBe("disabled");
+    expect(probe.props!.states["wurl:HUN"]).toBe("hinted");
     expect(
       host
         .querySelector(".mode-incoming .river-banks-diagram svg")

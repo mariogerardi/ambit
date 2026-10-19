@@ -69,7 +69,7 @@ describe("pins and cities remain playable without the authoring tool", () => {
     expect(journeyWorld(regions, journey, at(0), context).places).toEqual([]);
     expect(
       journeyWorld(regions, journey, state, context).places.some(
-        (p) => p.name === "Your pin",
+        (p) => p.sourceId === "player" && p.labelHidden,
       ),
     ).toBe(true);
   });

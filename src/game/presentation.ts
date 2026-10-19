@@ -1,4 +1,8 @@
-import { capitalForName, countryIdForName } from "./answerNames";
+import {
+  capitalForName,
+  countryIdForName,
+  normalizeAnswer,
+} from "./answerNames";
 import { answerPlace, pinInside } from "./answerTargets";
 import { REGIONAL_INDEX, exploreBoundaries } from "../geography/regions";
 import type { VisualState } from "../geography/types";
@@ -14,6 +18,11 @@ import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
 import type { Answer, GameState } from "./state";
 import { compositeRegion } from "./compositeRegions";
 import { candidateAvailable } from "./guidance";
+import { answerItems } from "./answerPresentation";
+import { pinBands } from "./pinPresentation";
+import { interiorAnchor } from "../geography/interiorAnchor";
+import { presentJourneyPlace } from "./authoredPlaces";
+import { mechanicFor } from "./mechanics";
 
 export function questionPlaces(
   question: Question,
@@ -23,7 +32,47 @@ export function questionPlaces(
   correct = false,
   response?: GameState,
 ): PlaceFeature[] {
+  return resolveQuestionPlaces(
+    question,
+    context,
+    phase,
+    responseText,
+    correct,
+    response,
+  ).map(presentJourneyPlace);
+}
+
+function resolveQuestionPlaces(
+  question: Question,
+  context: QuestionContext | undefined,
+  phase: GameState["phase"],
+  responseText = "",
+  correct = false,
+  response?: GameState,
+): PlaceFeature[] {
   if (phase === "home" || phase === "finished") return [];
+  const items =
+    context && response ? answerItems(question, context, response) : [];
+  const projectPlaces = (places: PlaceFeature[]) =>
+    places.map((place) => {
+      const item = items.find((item) => item.geographyIds.includes(place.id));
+      if (!item) return place;
+      const reveal = phase === "feedback" || phase === "failed";
+      // Existing marker visibility is authored; mapping never introduces a hidden marker.
+      return {
+        ...place,
+        visualState:
+          reveal ||
+          question.mode === "choice-match" ||
+          question.map?.candidates === "highlighted"
+            ? item.state
+            : place.visualState,
+        markerBadge:
+          question.mode === "choice-match" && item.slot !== undefined
+            ? String(item.slot + 1)
+            : place.markerBadge,
+      };
+    });
   if (
     question.mode === "choice-match" &&
     context &&
@@ -42,6 +91,7 @@ export function questionPlaces(
             : expected.includes(place.id)
               ? "answer"
               : (place.visualState ?? "hinted"),
+        markerBadge: assigned >= 0 ? String(assigned + 1) : undefined,
       };
     });
   }
@@ -73,11 +123,16 @@ export function questionPlaces(
     if (response?.pin)
       result.push({
         id: `pin:${question.id}:guess`,
-        name: "Your pin",
+        name: "",
+        labelHidden: true,
         kind: "pin",
         sourceId: "player",
         ...response.pin,
         visualState: reveal ? (correct ? "correct" : "incorrect") : "selected",
+        accuracyBand:
+          reveal && correct
+            ? pinBands(question, response).find((band) => band.achieved)
+            : undefined,
       });
     if (reveal && question.rule.type === "pin-distance") {
       const target = answerPlace(question, question.rule.targetId);
@@ -86,6 +141,8 @@ export function questionPlaces(
           ...target,
           ...question.feedbackPlaces?.find((place) => place.id === target.id),
           kind: "pin",
+          markerRole: "target",
+          markerSize: 30,
           visualState: "answer",
         });
     }
@@ -142,11 +199,39 @@ export function questionPlaces(
       }),
     ];
   }
-  if (phase === "feedback" && context && question.rule.type === "capital-order")
-    return question.rule.countryIds.flatMap((id) => {
-      const capital = context.capitals.find((c) => c.countryId === id);
-      return capital ? [capital] : [];
+  if (
+    phase === "feedback" &&
+    context &&
+    question.rule.type === "capital-order"
+  ) {
+    const expected = question.rule.countryIds;
+    const supplied = (response?.ordered ?? []).map((name) =>
+      capitalForName(context, name),
+    );
+    const capitals = new Map(
+      [
+        ...expected.map((id) =>
+          context.capitals.find((c) => c.countryId === id),
+        ),
+        ...supplied,
+      ]
+        .filter((capital) => !!capital)
+        .map((capital) => [capital.id, capital]),
+    );
+    return [...capitals.values()].map<PlaceFeature>((capital) => {
+      const slot = supplied.findIndex((place) => place?.id === capital.id);
+      return {
+        ...capital,
+        visualState:
+          slot >= 0
+            ? expected[slot] === capital.countryId
+              ? "correct"
+              : "incorrect"
+            : "answer",
+        markerBadge: slot >= 0 ? String(slot + 1) : undefined,
+      };
     });
+  }
   if (
     phase === "feedback" &&
     context &&
@@ -158,9 +243,28 @@ export function questionPlaces(
         ? capitalForName(context, responseText)
         : undefined;
     const reveal = accepted ? [accepted] : matchingCapitals(question, context);
+    const submitted =
+      question.rule.type === "capital-coordinate"
+        ? capitalForName(context, responseText)
+        : undefined;
     return [
       ...new Map(
-        [...(question.places ?? []), ...reveal].map((c) => [c.id, c]),
+        [
+          ...(question.places ?? []).map((place) => ({
+            ...place,
+            visualState: place.visualState ?? ("hinted" as const),
+          })),
+          ...reveal.map((place) => ({
+            ...place,
+            visualState:
+              accepted?.id === place.id
+                ? ("correct" as const)
+                : ("answer" as const),
+          })),
+          ...(submitted && !correct
+            ? [{ ...submitted, visualState: "incorrect" as const }]
+            : []),
+        ].map((place) => [place.id, place]),
       ).values(),
     ];
   }
@@ -173,23 +277,49 @@ export function questionPlaces(
     const targetId = context.capitals.find(
       (capital) => capital.countryId === countryId,
     )?.id;
-    return (question.feedbackPlaces ?? question.places ?? []).map((place) =>
-      place.id === targetId
-        ? {
-            ...place,
-            visualState: correct ? ("correct" as const) : ("answer" as const),
-          }
-        : place,
-    );
+    const places = question.feedbackPlaces ?? question.places ?? [];
+    const submitted =
+      places.find((place) =>
+        [place.name, ...(place.aliases ?? [])].some(
+          (name) => normalizeAnswer(name) === normalizeAnswer(responseText),
+        ),
+      ) ?? capitalForName(context, responseText);
+    const result = places.map((place) => ({
+      ...place,
+      visualState:
+        place.id === targetId
+          ? correct
+            ? ("correct" as const)
+            : ("answer" as const)
+          : !correct && place.id === submitted?.id
+            ? ("incorrect" as const)
+            : place.visualState,
+    }));
+    if (
+      !correct &&
+      submitted &&
+      !result.some((place) => place.id === submitted.id)
+    )
+      result.push({ ...submitted, visualState: "incorrect" });
+    return result;
   }
   return phase === "feedback"
-    ? (question.feedbackPlaces ?? question.places ?? []).map<PlaceFeature>(
-        (place) =>
-          question.mode.startsWith("choice-") && place.answerTarget
-            ? { ...place, visualState: correct ? "correct" : "answer" }
-            : place,
+    ? projectPlaces(
+        (question.feedbackPlaces ?? question.places ?? []).map<PlaceFeature>(
+          (place) =>
+            question.mode.startsWith("choice-") && place.answerTarget
+              ? { ...place, visualState: "answer" }
+              : place,
+        ),
       )
-    : (question.places ?? []);
+    : projectPlaces(
+        question.mode === "choice-match"
+          ? (question.places ?? []).map((place) => ({
+              ...place,
+              visualState: "selectable" as const,
+            }))
+          : (question.places ?? []),
+      );
 }
 
 export function questionMapPresentation(
@@ -276,20 +406,30 @@ export function questionRegions(
       question.mode === "pin" &&
       phase === "playing" &&
       !question.contextIds?.includes(region.id) &&
-      !(helpStage === "assisted" &&
-        question.guidance?.assist?.regionIds?.includes(region.id))
+      !(
+        helpStage === "assisted" &&
+        question.guidance?.assist?.regionIds?.includes(region.id)
+      )
     )
       return false;
     if (
       phase !== "playing" ||
-      !question.feedbackContextIds?.includes(region.id)
+      (!question.feedbackContextIds?.includes(region.id) &&
+        !question.feedbackHintIds?.includes(region.id))
     )
       return true;
     const mapTarget =
       ["map-single", "map-multiple", "land-path"].includes(question.mode) &&
       question.selection.type === "ids" &&
       question.selection.ids.includes(region.id);
-    return question.contextIds?.includes(region.id) || mapTarget;
+    const choiceTarget =
+      question.map?.candidates === "highlighted" &&
+      question.choices?.some((choice) =>
+        choice.geographyIds?.includes(region.id),
+      );
+    return (
+      question.contextIds?.includes(region.id) || mapTarget || choiceTarget
+    );
   });
   const displays = Object.entries(question.displayGeometries ?? {});
   if (!highlights.length && !imported.length && !displays.length)
@@ -377,10 +517,18 @@ export function questionVisualStates(
   context: QuestionContext,
   game: GameState,
 ) {
+  const wholeWorld =
+    question.selection.type === "members" &&
+    mechanicFor(question).mapSelection === "regions";
   const states: Record<string, VisualState> = Object.fromEntries(
     [...context.regions, ...(question.importedRegions ?? [])].map((r) => [
       r.id,
-      question.map?.neutralRegions ? "default" : "disabled",
+      game.phase === "playing" &&
+      (question.mode === "pin" || (wholeWorld && context.members.has(r.id)))
+        ? "surface"
+        : question.map?.neutralRegions
+          ? "default"
+          : "disabled",
     ]),
   );
   if (game.phase === "home") return {};
@@ -416,7 +564,13 @@ export function questionVisualStates(
             question.selection.type === "neighbors" ||
             question.map?.candidates === "highlighted"
               ? "selectable"
-              : "default";
+              : wholeWorld
+                ? "surface"
+                : question.map?.candidates === "decorative"
+                  ? "surface"
+                  : "disabled";
+    for (const id of question.candidateRegionIds ?? [])
+      if (context.targets.has(id)) states[id] = "selectable";
     if (question.disclosure.previousVisits)
       for (const answer of game.answers)
         for (const id of answer.selectedIds)
@@ -427,11 +581,11 @@ export function questionVisualStates(
       if (!question.highlightParts?.some((part) => part.countryId === id))
         states[id] = "hinted";
     if (game.phase === "playing" && game.help?.[question.id])
-      for (const id of
-        game.help[question.id] === "assisted"
-          ? (question.guidance?.assist?.regionIds ??
-            question.guidance?.hintMap?.regionIds ?? [])
-          : (question.guidance?.hintMap?.regionIds ?? []))
+      for (const id of game.help[question.id] === "assisted"
+        ? (question.guidance?.assist?.regionIds ??
+          question.guidance?.hintMap?.regionIds ??
+          [])
+        : (question.guidance?.hintMap?.regionIds ?? []))
         if (id in states) states[id] = "hinted";
     if (game.phase === "playing" && game.help?.[question.id] === "assisted")
       for (const id of selectableIds(question, context))
@@ -441,30 +595,70 @@ export function questionVisualStates(
         }
     if (!question.mode.startsWith("choice-"))
       for (const id of game.selectedIds)
-        if (context.targets.has(id))
+        if (
+          context.targets.has(id) &&
+          !(
+            mechanicFor(question).mapSelection === "regions" &&
+            question.contextIds?.includes(id)
+          )
+        )
           states[id] =
-            question.commitment === "immediate" ? "correct" : "selected";
-    if (question.rule.type === "official-languages" && game.selectedIds.length)
-      states[question.rule.countryId] = "selected";
+            question.commitment === "immediate" && question.count > 1
+              ? "correct"
+              : "selected";
     for (const highlight of question.highlightParts ?? [])
       states[highlightedPartId(highlight.countryId)] =
         highlight.tone === "dark"
           ? "clue"
-          : game.selectedIds.length
+          : game.selectedIds.includes(highlight.countryId)
             ? "selected"
             : "hinted";
+    for (const item of answerItems(
+      question,
+      context,
+      blindFeedback ? { ...game, phase: "playing" } : game,
+    ))
+      for (const id of item.geographyIds)
+        if (
+          context.targets.has(id) &&
+          (states[id] === "selectable" ||
+            states[id] === "selected" ||
+            question.map?.candidates === "highlighted")
+        )
+          states[id] = item.state;
     return states;
   }
   const expected = solutionIds(question, context);
-  for (const id of question.feedbackHintIds ?? [])
+  for (const id of question.feedbackHintIds ?? question.contextIds ?? [])
     if (context.targets.has(id)) states[id] = "hinted";
+  // Once a location is revealed, its containing area supplies orientation, not a grade.
+  for (const place of questionPlaces(
+    question,
+    context,
+    game.phase,
+    game.text,
+    !!game.answers.at(-1)?.correct,
+    game,
+  ))
+    if (
+      place.parentId &&
+      context.targets.has(place.parentId) &&
+      !place.markerHidden &&
+      ["correct", "answer", "incorrect"].includes(place.visualState ?? "") &&
+      place.displayRole !== "explanation"
+    )
+      states[place.parentId] = "hinted";
   if (question.map?.feedbackRegions === "neutral") return states;
-  // A pin question's outlined clues stay yellow on reveal; they are not answers.
-  if (question.mode === "pin")
-    for (const id of question.contextIds ?? [])
-      if (question.map?.borderIds?.includes(id) && !expected.includes(id))
-        states[id] = "hinted";
-  for (const id of expected) if (context.names.has(id)) states[id] = "answer";
+  const placeAnswer =
+    question.mode.startsWith("city-") ||
+    question.mode === "ordered-capitals" ||
+    ["capital-name", "capital-coordinate", "capital-circle"].includes(
+      question.rule.type,
+    );
+  if (!placeAnswer)
+    for (const id of expected)
+      if (context.targets.has(id))
+        states[id] = question.mode === "number" ? "hinted" : "answer";
   if (question.rule.type === "pin-inside")
     for (const id of expected) {
       if (
@@ -476,52 +670,23 @@ export function questionVisualStates(
       )
         states[id] = "correct";
     }
-  if (question.rule.type === "official-languages")
-    states[question.rule.countryId] = game.answers.at(-1)?.correct
-      ? "correct"
-      : "answer";
-  for (const id of question.feedbackContextIds ??
-    (["choice-ids", "manual-text", "manual-number"].includes(question.rule.type)
-      ? (question.contextIds ?? [])
-      : []))
-    states[id] = game.answers.at(-1)?.correct ? "correct" : "answer";
-  const mistakes = new Set<string>();
-  for (const id of game.selectedIds)
-    if (context.targets.has(id)) {
-      states[id] = expected.includes(id) ? "correct" : "incorrect";
-      if (!expected.includes(id)) mistakes.add(id);
-    }
+  // Explicit reveal geography is solution evidence, not a proxy for the player's grade.
+  for (const id of question.feedbackContextIds ?? [])
+    if (context.targets.has(id))
+      states[id] = question.mode === "number" ? "hinted" : "answer";
   if (
-    question.mode === "typed-regions" ||
-    question.mode === "ordered-countries" ||
-    question.mode === "ordered-capitals" ||
-    question.mode === "choice-order"
+    !placeAnswer &&
+    question.mode !== "pin" &&
+    question.mode !== "land-path" &&
+    question.mode !== "number"
   )
-    game.ordered.forEach((value, i) => {
-      const id =
-        question.mode === "choice-order"
-          ? value
-          : question.mode === "ordered-capitals"
-            ? capitalForName(context, value)?.countryId
-            : countryIdForName(context, value);
-      if (!id) return;
-      const correct =
-        question.mode === "typed-regions"
-          ? expected.includes(id)
-          : expected[i] === id;
-      states[id] = correct ? "correct" : "incorrect";
-      if (!correct) mistakes.add(id);
-    });
-  if (question.mode === "text") {
-    const capital = capitalForName(context, game.text);
-    if (capital)
-      states[capital.countryId] = game.answers.at(-1)?.correct
-        ? "correct"
-        : "incorrect";
-    else if (game.answers.at(-1)?.correct)
-      for (const id of expected)
-        if (context.targets.has(id)) states[id] = "correct";
-  }
+    for (const item of answerItems(question, context, game))
+      for (const id of item.geographyIds)
+        if (
+          context.targets.has(id) &&
+          (item.state !== "disabled" || states[id] !== "hinted")
+        )
+          states[id] = item.state;
   for (const highlight of question.highlightParts ?? [])
     if (highlight.reveal) {
       const owner = states[highlight.countryId];
@@ -529,7 +694,9 @@ export function questionVisualStates(
         question.mode === "choice-single" && !!game.answers.at(-1)?.correct;
       const knownContext =
         question.mode.startsWith("map-") &&
-        question.feedbackHintIds?.includes(highlight.countryId) &&
+        (question.feedbackHintIds ?? question.contextIds)?.includes(
+          highlight.countryId,
+        ) &&
         !expected.includes(highlight.countryId) &&
         !question.feedbackContextIds?.includes(highlight.countryId);
       states[highlightedPartId(highlight.countryId)] = knownContext
@@ -539,7 +706,6 @@ export function questionVisualStates(
           : "answer";
       if (highlight.reveal === "part") states[highlight.countryId] = "disabled";
     }
-  for (const id of mistakes) states[id] = "incorrect";
   return states;
 }
 
@@ -555,6 +721,35 @@ export function journeyVisitedStates(
   for (const answer of answers) {
     const question = journey.rounds.find((q) => q.id === answer.roundId);
     if (!question) continue;
+    const review: GameState = {
+      ...answer,
+      phase: "feedback",
+      roundIndex: journey.rounds.indexOf(question),
+      answers: [answer],
+    };
+    // Choice IDs and merged targets need their graded depiction, not raw save IDs.
+    if (question.mode !== "ordered-capitals")
+      for (const item of answerItems(question, context, review))
+        if (item.state === "incorrect")
+          for (const id of item.geographyIds)
+            if (context.targets.has(id)) mistakes.add(id);
+    // The containing country is orientation for an answered city, even on a miss.
+    for (const place of questionPlaces(
+      question,
+      context,
+      "feedback",
+      answer.text,
+      answer.correct,
+      review,
+    ))
+      if (
+        place.parentId &&
+        context.names.has(place.parentId) &&
+        !place.markerHidden &&
+        place.sourceId !== "player" &&
+        ["correct", "answer", "incorrect"].includes(place.visualState ?? "")
+      )
+        states[place.parentId] = "visited";
     if (question.rule.type === "merged-region") {
       for (const id of question.rule.memberIds) states[id] = "visited";
       continue;
@@ -576,13 +771,13 @@ export function journeyVisitedStates(
     for (const id of [
       ...(question.contextIds ?? []),
       ...(question.feedbackContextIds ?? []),
+      ...(question.highlightParts ?? []).map((part) => part.countryId),
       ...answer.selectedIds,
     ])
       if (context.names.has(id)) states[id] = "visited";
     if (question.rule.type === "capital-coordinate") {
       const capital = capitalForName(context, answer.text);
       if (capital && answer.correct) states[capital.countryId] = "visited";
-      else if (capital) mistakes.add(capital.countryId);
       continue;
     }
     const expected = solutionIds(question, context);
@@ -606,7 +801,8 @@ export function journeyVisitedStates(
             : countryIdForName(context, value);
         if (id && context.members.has(id)) {
           states[id] = "visited";
-          if (expected[i] !== id) mistakes.add(id);
+          if (question.mode === "ordered-countries" && expected[i] !== id)
+            mistakes.add(id);
         }
       });
     if (question.mode !== "map-multiple")
@@ -621,4 +817,135 @@ export function journeyVisitedStates(
   }
   for (const id of mistakes) states[id] = "incorrect";
   return states;
+}
+
+/** Completion keeps discoveries and actual mistakes independently of custom decoration. */
+export function journeyDiscoveryPlaces(
+  journey: Journey,
+  context: QuestionContext,
+  answers: Answer[],
+): PlaceFeature[] {
+  const places = new Map<string, PlaceFeature>();
+  for (const answer of answers) {
+    const index = journey.rounds.findIndex(
+      (question) => question.id === answer.roundId,
+    );
+    if (index < 0) continue;
+    const question = journey.rounds[index];
+    const game: GameState = {
+      ...answer,
+      phase: "feedback",
+      roundIndex: index,
+      answers: [answer],
+    };
+    for (const place of questionPlaces(
+      question,
+      context,
+      "feedback",
+      answer.text,
+      answer.correct,
+      game,
+    )) {
+      const mistake = place.visualState === "incorrect";
+      if (
+        place.markerRole === "annotation" ||
+        (place.sourceId === "player" && !mistake) ||
+        (!["correct", "answer", "incorrect"].includes(
+          place.visualState ?? "",
+        ) &&
+          place.displayRole !== "explanation")
+      )
+        continue;
+      const original = answerPlace(question, place.id);
+      const previous = places.get(place.id);
+      places.set(
+        place.id,
+        presentJourneyPlace({
+          ...place,
+          kind:
+            place.sourceId === "player"
+              ? "pin"
+              : (original?.kind ??
+                (place.kind === "pin" ? "landmark" : place.kind)),
+          visualState:
+            mistake || previous?.visualState === "incorrect"
+              ? "incorrect"
+              : "visited",
+          displayRole: undefined,
+          markerRole: undefined,
+          markerBadge: undefined,
+          accuracyBand: undefined,
+          answerTarget: false,
+        }),
+      );
+    }
+  }
+  return [...places.values()];
+}
+
+/** A non-color response cue on political geography; never a new answer surface. */
+export function questionRegionMarkers(
+  question: Question,
+  context: QuestionContext,
+  game: GameState,
+): PlaceFeature[] {
+  if (
+    !["playing", "feedback", "failed"].includes(game.phase) ||
+    question.rule.type === "merged-region" ||
+    question.mode === "pin" ||
+    question.mode === "land-path"
+  )
+    return [];
+  const states = questionVisualStates(question, context, game);
+  const visible = new Map(
+    questionRegions(context.regions, question, game.phase)
+      .filter(
+        (region) =>
+          region.displayGeometry !== null &&
+          !region.displayBase &&
+          !region.displayCovered,
+      )
+      .map((region) => [region.id, region]),
+  );
+  return Object.entries(states).flatMap(([id, state]) => {
+    if (
+      !visible.has(id) ||
+      !["selected", "correct", "incorrect", "answer"].includes(state)
+    )
+      return [];
+    const region = visible.get(id);
+    if (!region) return [];
+    // A clue fragment and its owner can share emphasis, but represent one answer.
+    if (
+      id.startsWith("clue-part:") &&
+      region.parentId &&
+      ["selected", "correct", "incorrect", "answer"].includes(
+        states[region.parentId],
+      )
+    )
+      return [];
+    if (question.mode === "number") return [];
+    const anchor = interiorAnchor(region);
+    return [
+      {
+        id: `response:${id}`,
+        name: "",
+        kind: "other" as const,
+        lat: anchor.lat,
+        lng: anchor.lng,
+        annotationRadius: anchor.clearance,
+        sourceId: "journey-response",
+        visualState: state,
+        labelHidden: true,
+        markerRole: "annotation" as const,
+        markerSize: 30,
+        markerBadge:
+          state === "selected" || state === "correct"
+            ? "✓"
+            : state === "incorrect"
+              ? "×"
+              : "◎",
+      },
+    ];
+  });
 }

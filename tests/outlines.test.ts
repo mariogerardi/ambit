@@ -21,6 +21,13 @@ const regions = prepareGlobeRegions(
   ),
 );
 describe("independent boundary outlines", () => {
+  it("raises reference outlines above ordinary geography without changing selection priority", () => {
+    const reference = outlineEmphasis("hinted");
+    expect(reference.order).toBeGreaterThan(outlineEmphasis("disabled").order);
+    expect(reference.order).toBeLessThan(outlineEmphasis("selected").order);
+    expect(reference.lift).toBeGreaterThan(0);
+    expect(reference.lift).toBeLessThan(0.002);
+  });
   it("draws committed selections above neighboring and hovered outlines", () => {
     const ordinary = outlineEmphasis("selectable"),
       hover = outlineEmphasis("selectable", true);

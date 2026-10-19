@@ -4,7 +4,11 @@ The bundled catalog is keyed by stable Journey IDs; registration order has no
 meaning. Each Journey has five rounds. Admin can assign any bundled Journey to
 any date. Journeys marked `pool` are eligible for automatic selection; those
 marked `unlisted` can still be assigned and previewed. Direct practice routes are
-Admin-only. There is no current in-app authoring or AI generator. Previously
+Admin-only. There is no current in-app authoring or AI generator. Follow
+[Crafting a Journey](JOURNEY_CRAFTING.md) for current authoring standards and
+[JOURNEY_ENGINE.md](JOURNEY_ENGINE.md) for implementation details. This catalog
+records supported capabilities; capability alone does not make a format the
+recommended product behavior. Previously
 published local packs are read-only compatibility data.
 
 ## Bundled Journeys
@@ -34,8 +38,9 @@ Play/Resume/View result action. Daily dates change at midnight in New York.
 Unassigned future dates show a provisional, seeded choice from the `pool`
 Journeys; a date becomes permanent when it is locked or assigned. The previous
 rotation is preserved only for cutover history in
-[`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). See
-[Journey review](JOURNEY_REVIEW.md) for the keep/scrap decisions. Results use Home/Study as primary exits,
+[`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). See the historical
+[Journey review](JOURNEY_REVIEW.md) for earlier keep/scrap decisions; current IDs,
+availability and routes come from `journeyIndex.json`. Results use Home/Study as primary exits,
 with daily replay secondary and available only to admins. A results flyover follows answer stops in round order and
 loops; player interaction or reduced motion interrupts it.
 
@@ -67,24 +72,31 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `choice-order`         | Order cards with spares    |
 | `choice-match`         | Match cards to roles       |
 
-`land-path` remains an internal supported mode/evaluator, with no playable catalog
-example or supported authoring recipe. Multiple-choice questions are capped at six
+`land-path` remains an internal supported mode/evaluator, with an executable
+`recipe:land-path` example and no playable catalog question. Inspect it with
+`npm run check:journey -- --recipe land-path`; introducing it into the product
+requires an explicit design decision. Multiple-choice questions are capped at six
 options. The numeric counter supports nonnegative integers with explicit +/-
 controls and direct typing; a new numeric rule should respect that UI contract.
 
-Map picking is derived from the answer mode; `map.hoverFeedback` controls hover
-presentation, independently of answer eligibility. Muted countries may have a
-disabled visual style while the `selectDisabled` path still permits eligible
-answers. Use disclosure settings to hide names, not hover settings to disable
-the intended control. Author typed recall as `mode: "text"` with an immediately
+Map picking is derived from the answer mode and canonical candidate pool.
+`journeyWorld.selectableRegionIds` restricts region answers independently of fill;
+`map.hoverFeedback` controls hover presentation. References in `contextIds` are
+excluded from region-answer eligibility. Use `scenes.play.candidateRegionIds` for
+an openly shown geographic pool independent of the input method, and use
+`choices[].geographyIds` to link button identities to reviewed depictions. Neither
+field enables globe input. Whole-world recall and pin placement use the neutral
+search surface, not the finite-candidate gold. Use disclosure settings to hide
+names, not hover settings to disable the intended control. Author typed recall as `mode: "text"` with an immediately
 visible input. `allowTyping: false` suppresses a globe-only question's typing
 shortcut while retaining the unavailable-WebGL fallback.
 
 `merged-region-single` asks for one apparent territory with hidden internal
 country boundaries. A `merged-region` rule declares a Journey-scoped synthetic
 `targetId`, canonical `memberIds`, and every internal `hiddenAdjacencies` pair.
-Use explicit candidates excluding the individual members, explicit submission,
-anonymous disclosure and equally highlighted candidate fills. Preparation checks
+Use explicit candidates excluding the individual members, immediate commitment,
+anonymous disclosure and equally highlighted candidate fills. One territory tap
+commits the answer; a restored unsubmitted draft remains a draft until re-tapped. Preparation checks
 canonical land adjacency and connectivity. The bundled shared-edge polygons are
 dissolved into one fill, outline and hit target during play; grading uses only the
 submitted target ID. Outer edges, mapped islands and enclave holes are preserved.
@@ -117,16 +129,21 @@ mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
 There is no current catalog example; focused ordering-control tests retain coverage.
 `assist.fixedSelections` can lock correct unordered picks, preserve existing picks,
 and keep the anchors selected after clearing. Focused tests retain coverage of
-this supported behavior. The Andes finale continues south to Bahía Inútil in
-Tierra del Fuego and asks which animal breeds there in the wild. The hint points
-to differences between Arctic and southern wildlife; assist leaves penguins and
-puffins. A documentary colony photograph and the king-penguin marker appear only
-after submission. The Aconcagua round accepts pins within 450 km of
-the summit by distance alone, with inclusive tiers at 150, 300 and 450 km. All tiers
-earn one correct answer; tier-specific praise and concentric rings appear on reveal.
-`pin-distance.tiers` is optional, ordered from smallest to largest radius, and must
-end at the rule's `radiusKm`. Questions without tiers keep their single-radius behavior.
-The finale hides prior landmarks; the full results tour includes the colony.
+this supported behavior. The current authoring standard commits single-country and merged-territory
+answers immediately; pins and multi-answer selections retain confirmation.
+The engine supports additional commitment configurations for compatibility and
+reviewed extensions. Do not copy those configurations into new content merely
+because validation permits them. See [the shared input rules](JOURNEY_CRAFTING.md#5-give-the-globe-purposeful-question-state-information).
+
+Distance-pin rules support inclusive `tiers`, ordered by increasing radius and
+ending exactly at `radiusKm`. The field remains optional at the engine/API level
+for compatibility. Current Journey authoring requires three bands: bullseye,
+close, and within range. Choose inner radii for the task; never enlarge acceptance
+just to add bands. All accepted bands currently earn one correct answer; band
+colors and praise do not define point weights. Territory-inside pins use canonical
+containment and have no invented distance tiers. See
+[pin design standards](JOURNEY_CRAFTING.md#4-design-the-answer-method-and-distractors-intentionally)
+and `pinPresentation.ts` for labels and feedback.
 
 ## Knowledge rules and data scope
 
@@ -202,13 +219,15 @@ text to `questionText.ts`. `questions.ts` remains a compatibility import surface
    alongside each prompt, including earlier reveals that could solve later stops.
    The shared question help keeps sources locked until submission because a source
    title or destination page can reveal the answer.
-4. Register the Journey and route in [`journeys.ts`](../src/game/journeys.ts), and
-   add its rounds to [`questionCatalog.ts`](../src/game/questionCatalog.ts).
+4. Register the Journey and route in [`journeys.ts`](../src/game/journeys.ts).
+   [`questionCatalog.ts`](../src/game/questionCatalog.ts) derives its rounds from
+   `JOURNEYS` automatically; do not maintain a second list.
    Runtime lazy discovery covers files ending in `Journey.ts`;
    keep that naming pattern or update discovery deliberately.
 5. Regenerate `npm run prepare:journeys` when definitions or registration change
-   index metadata. Run `npm run check:catalog` for a catalog change, plus TypeScript for typed changes,
-   following [AGENTS.md](../AGENTS.md). Update the table when content changes;
+   index metadata. Run relevant checks while authoring, TypeScript for typed changes,
+   and `npm run check:catalog` before pushing catalog changes, following
+   [AGENTS.md](../AGENTS.md). Update the table when titles/routes/registration change;
    do not regenerate geography or run a full build for routine copy edits.
    Authorized releases use the normal CI checks and supported nonblocking deployment.
 
@@ -242,23 +261,21 @@ review. Answer validation alone does not verify that globe taps are enabled or
 that clue and reveal displays support the task. Review inherited map settings
 whenever changing answer modes, and make borderless difficulty explicit.
 
-A throughline may be an itinerary, a shared surprise, or a distinctive mechanic
-repeated across five questions. Do not require varied controls for their own sake.
-Shared neighbors uses irregular country footprints, Island instincts repeats
-ownership-versus-location surprises, and On Russia’s doorstep repeats borderless
-pin placement. Establish the premise in the introduction and develop it in the
-reveals; preserve useful difficulty and favorite questions. Use a short, spoiler-safe
-`leadIn` alongside the prompt to make geographic movement or the developing idea
-explicit. Use On Russia’s doorstep as the model: a short directional cue such as
-“Head west again, this time to the Caucasus.” Keep detailed geographic context in
-the reveal, rather than adding a second paragraph before every question.
+Use the compact five-stop outline and review checklist in the crafting guide.
+The input format should fit the task; repeated mechanics and varied controls are
+both supported. `leadIn` is optional context joined to `prompt`, not a second
+heading. The shared control owns commitment notices; do not repeat them in
+`instruction`.
 
-Journey feedback uses Study’s answer-card layout, showing the correct answer
-rather than the incorrect guess. For questions accepting multiple valid answers,
-a successful answer is shown canonically; a miss shows one labelled correct
-example or set. Keep the explanation to a short insight beneath that answer.
-Do not begin by repeating the answer, listing all alternatives, or narrating the
-interface. Numeric border questions can show one useful shortest route.
+Feedback displays the canonical answer once, with a short explanation. Submitted
+mistakes can be reviewed without listing unused distractors. Assignment controls
+retain role/position identity; accepted alternatives are distinct from missed
+required answers. At completion, purple denotes reviewed discoveries, including
+solutions revealed after misses. Actual mistaken areas, cities, assignments and
+pins remain red; containing countries do not inherit a city's grade. Custom
+completion decoration cannot overwrite a mistake. The maintained rules are in
+[the visual grammar](JOURNEY_CRAFTING.md#5-give-the-globe-purposeful-question-state-information)
+and [reveal design](JOURNEY_CRAFTING.md#8-design-the-reveal-before-declaring-the-question-finished).
 
 ## Review checklist
 
@@ -286,15 +303,27 @@ include previously traveled segments in each stop's context; side reveals are
 not automatically accumulated. Use stable, distinct IDs for fixed geometry.
 `mapCaption` / `feedbackMapCaption` qualify partial or local features.
 
-`contextIds` highlights known setting geography during play. `feedbackHintIds`
-retains context-colored geography on reveal; `feedbackContextIds` identifies
-answer-colored regions. Explicitly separate these when the answer is a symbol or
-historical fact rather than the country whose flag is shown.
+Prefer grouped scenes: `scenes.play.contextIds` declares established references;
+`scenes.play.candidateRegionIds` declares a visible area pool;
+`scenes.reveal.contextIds` supplies supporting geography and
+`scenes.reveal.answerIds` identifies actual solution areas. The compiler maps
+reveal fields to `feedbackHintIds` and `feedbackContextIds` respectively. These
+flat fields are the runtime read model, not a second authoring source. Numeric
+answers use reference emphasis for explanatory route geography; a number does
+not grade every route country. For other supporting illustrations use
+`explanationPlace` or `displayRole: "explanation"`.
+
+Use `cityReference` for established city points and `areaLabel` for area names
+without city dots. Bare territory symbols are placed in the displayed interior
+and fit available screen space; they are not point-answer markers or hit targets.
+Do not author arbitrary marker sizes or hex colors to repair a shared role.
 `map.feedbackBorders: false` suppresses political outlines on reveal when the
 subject is a whole continent, without changing borders during the question.
 
-`map.feedbackRegions: "neutral"` keeps land neutral when the answer is a city or
-physical feature; supply its answer marker separately in `feedbackPlaces`.
+`map.feedbackRegions: "neutral"` suppresses area grading while retaining declared
+references. Revealed city/place answers also promote their containing geography
+as reference, never as a graded country answer. Supply the actual location in
+`scenes.reveal.places` (compiled to `feedbackPlaces`).
 `labelFlexible` allows explanatory place labels to use alternate screen anchors
 without making them playable answer targets. A `feedbackDiagram` of type
 `river-banks` explains bank relationships schematically without claiming sourced
@@ -314,13 +343,15 @@ crops only the already-reviewed local flag vectors; it does not refresh the flag
 `feedbackImage` supplies reveal-only documentary media with `src`, `alt`,
 `caption`, and `credit` (`name`, source `url`, `license`, `licenseUrl`). It is
 rendered only after submission, including after an incorrect answer. Pre-answer
-`image` is a separate clue contract and remains visible during play and feedback.
-Record asset provenance and license notices; do not put an answer-revealing photo
+`image` is a separate pre-answer clue contract; it may remain during feedback
+unless reveal media such as `feedbackFlags` replaces it. Record asset provenance and license notices; do not put an answer-revealing photo
 in the clue field.
 
 `resolvedLabel` replaces a spoiler-safe step label only in the answered completion
-receipt. `Journey.completion` authors a static focus, physical features, stop
-markers, and optional caption instead of the default answer-country flyover.
+receipt. `Journey.completion` authors focus, optional ordered flyover views, physical
+features, labels, stop markers and a caption. It augments reviewed discoveries
+and retained mistakes; it does not replace them. With no custom completion, the
+shared recap derives the discoveries and uses the default answer-stop tour.
 `Journey.mapAttribution` supplies required on-map source credits.
 
 `npm run prepare:journey-map` regenerates the Danube context from the reviewed,
@@ -334,7 +365,10 @@ and submission on the right. Immediate-answer questions keep their original
 commitment without an extra submit step. Questions without authored help retain
 the disabled placeholder. Help is authored per round, not inferred from its answer.
 
-`guidance.hint` is an authored semantic clue. An optional `guidance.assist` supplies
+`guidance.hint` is an authored semantic clue. Optional `guidance.hintMap`
+adds reference `regionIds` and/or broad framing at the hint stage; it does not
+change the answer contract. Across the Divide demonstrates this supported path.
+An optional `guidance.assist` supplies
 separate copy, surviving `candidateIds`, named reference `places`, and/or broad
 search `overlays`. The first
 request reveals the hint; the button then changes from “Need a hint?” with a bulb

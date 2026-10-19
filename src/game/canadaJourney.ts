@@ -116,12 +116,24 @@ export const CANADA_JOURNEY: Journey = {
         "Which Canadian province is officially bilingual in English and French?",
       rule: { type: "choice-ids", ids: ["province:nb"] },
       choices: [
-        { id: "province:qc", label: "Quebec" },
-        { id: "province:on", label: "Ontario" },
-        { id: "province:nb", label: "New Brunswick" },
-        { id: "province:ns", label: "Nova Scotia" },
-        { id: "province:mb", label: "Manitoba" },
-        { id: "province:nl", label: "Newfoundland and Labrador" },
+        { id: "province:qc", geographyIds: ["wurl:CAN-QB"], label: "Quebec" },
+        { id: "province:on", geographyIds: ["wurl:CAN-ON"], label: "Ontario" },
+        {
+          id: "province:nb",
+          geographyIds: ["wurl:CAN-NB"],
+          label: "New Brunswick",
+        },
+        {
+          id: "province:ns",
+          geographyIds: ["wurl:CAN-NS"],
+          label: "Nova Scotia",
+        },
+        { id: "province:mb", geographyIds: ["wurl:CAN-MB"], label: "Manitoba" },
+        {
+          id: "province:nl",
+          geographyIds: ["wurl:CAN-NL"],
+          label: "Newfoundland and Labrador",
+        },
       ],
       importedRegions: CANADIAN_PROVINCES,
       explanation:
@@ -133,13 +145,13 @@ export const CANADA_JOURNEY: Journey = {
       },
       scenes: {
         play: {
-          contextIds: CANADIAN_PROVINCES.map((province) => province.id),
+          contextIds: [],
           map: {
             borders: true,
             hoverFeedback: false,
             muteOthers: true,
             revealOnAnswer: true,
-            candidates: undefined,
+            candidates: "highlighted",
           },
           focus: { lat: 54, lng: -96, altitude: 1.1 },
         },
@@ -201,7 +213,24 @@ export const CANADA_JOURNEY: Journey = {
       explanation:
         "Canada reaches three oceans: this northern shore completes the trio with the Atlantic and Pacific.",
       source: regionsSource,
-      scenes: { play: { focus: { lat: 73, lng: -105, altitude: 1.05 } } },
+      scenes: {
+        play: { focus: { lat: 73, lng: -105, altitude: 1.05 } },
+        reveal: {
+          places: [
+            {
+              id: "ocean:arctic",
+              name: "Arctic Ocean",
+              kind: "ocean",
+              lat: 85,
+              lng: -105,
+              markerHidden: true,
+              displayRole: "explanation",
+              sourceId: "journey:canada-ocean-label",
+              priority: 100,
+            },
+          ],
+        },
+      },
     }),
   ],
 };

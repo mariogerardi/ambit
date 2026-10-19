@@ -5,14 +5,14 @@
 Use Node.js **24.21.0**, pinned in [`.nvmrc`](../.nvmrc), with bundled npm 11.19.0.
 `package.json` records the supported Node 24/npm 11 ranges and npm package-manager
 version. If you use nvm, run `nvm install` and `nvm use` before installing.
-Python 3 runs offline backend tests and the optional preparation/deployment
+Python 3.11 or newer runs offline backend tests and the optional preparation/deployment
 scripts.
 
 ```sh
 npm ci
 npm run dev
 npm test
-python3 -m unittest discover -s backend -p 'test_*.py'
+python3 scripts/run-python-tests.py
 npm run build
 npm run preview
 ```
@@ -119,16 +119,16 @@ stages all outputs atomically, and Node locale differences can affect labels.
 
 ## Common problems
 
-| Symptom                                       | Check                                                                                                                                        |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vite will not start                           | Node version, `npm ci`, and whether the strict port is already occupied.                                                                     |
-| Missing/changed preparation input             | Cache path and committed checksum; distinguish an absent snapshot from an intentional source update.                                         |
-| Subdivisions disappear after base preparation | Run `prepare:explore` to restore the extended manifest and reconciled footprints.                                                            |
-| Journey metadata test fails                   | Run `prepare:journeys` after editing definitions or registration.                                                                            |
-| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Release readiness](RELEASE_READINESS.md).                                              |
-| Save warning or missing active Study attempt  | Storage availability/quota and the documented [save lifecycle](SAVE_PERSISTENCE.md). Avoid clearing storage as a first troubleshooting step. |
-| Globe unavailable                             | WebGL/context availability; written controls remain, and Study offers Answer by name. Actual renderer recovery is separate work.             |
-| Large-chunk build warning                     | Deferred globe/geometry bundles are still substantial. A successful build does not establish device performance.                             |
+| Symptom                                       | Check                                                                                                                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vite will not start                           | Node version, `npm ci`, and whether the strict port is already occupied.                                                                                                              |
+| Missing/changed preparation input             | Cache path and committed checksum; distinguish an absent snapshot from an intentional source update.                                                                                  |
+| Subdivisions disappear after base preparation | Run `prepare:explore` to restore the extended manifest and reconciled footprints.                                                                                                     |
+| Journey metadata test fails                   | Run `prepare:journeys` after editing definitions or registration.                                                                                                                     |
+| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Release readiness](RELEASE_READINESS.md).                                                                                       |
+| Save warning or missing active Study attempt  | Storage availability/quota and the documented [save lifecycle](SAVE_PERSISTENCE.md). Avoid clearing storage as a first troubleshooting step.                                          |
+| Globe unavailable                             | WebGL/context availability; supported written fallbacks remain, but merged-territory questions require WebGL. Study offers Answer by name. Actual renderer recovery is separate work. |
+| Large-chunk build warning                     | Deferred globe/geometry bundles are still substantial. A successful build does not establish device performance.                                                                      |
 
 ## Keep documentation current
 
@@ -137,7 +137,13 @@ For production deployment, HTTP configuration, and rollback, see
 checks; deploying does not require regenerating committed geography.
 
 - Update the root overview and affected guide when public behavior changes.
-- After a Journey change, regenerate the index and update the catalog table/counts.
+- After a Journey change, regenerate the index only if its metadata inputs changed;
+  update the catalog table when titles, routes or registration change. Run focused
+  checks during authoring and `npm run check:catalog` before pushing catalog changes.
+- Keep authoring standards in `JOURNEY_CRAFTING.md`, capability/API details in the
+  catalog and engine guide, and historical verification in clearly dated reviews.
+  Refresh the authoring kit after relevant code/docs changes; check its manifest
+  rather than assuming an old export or uploaded copy is current.
 - After a data change, review mappings, metadata, manifest, hashes, attribution,
   and eligibility conventions together.
 - After a save-format change, document migration, failure behavior, and old-version handling.

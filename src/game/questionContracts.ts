@@ -200,6 +200,8 @@ export interface Question {
   /** Question-local render footprints; canonical geometry still grades answers. */
   displayGeometries?: Record<string, RegionFeature["geometry"]>;
   contextIds?: string[];
+  /** An openly shown geographic answer pool; does not grant globe input. */
+  candidateRegionIds?: string[];
   /** Feedback can reveal a different region from the highlighted clue. */
   feedbackContextIds?: string[];
   /** Known geographic setting remains context-colored, not answer-colored. */
@@ -255,7 +257,12 @@ export interface Question {
     /** Full visual context displayed alongside an enlarged clue. */
     context?: { src: string; alt: string };
   };
-  choices?: { id: string; label: string }[];
+  choices?: {
+    id: string;
+    label: string;
+    /** What this option depicts, independently of its grading ID. Never grants map input. */
+    geographyIds?: string[];
+  }[];
   /** Shuffle choice-button positions once per mounted question; IDs still grade. */
   shuffleChoices?: boolean;
   /** Directional captions for an ordering puzzle's slots. */
@@ -368,7 +375,7 @@ export type QuestionContract =
       mode: "merged-region-single";
       rule: Rule<"merged-region-single">;
       selection: { type: "ids"; ids: string[] };
-      commitment: "submit";
+      commitment: Question["commitment"];
     } & Single)
   | ({ mode: "pin"; rule: Rule<"pin"> } & Single & NoMapSelection)
   | ({

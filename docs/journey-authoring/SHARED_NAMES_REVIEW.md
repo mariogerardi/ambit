@@ -1,4 +1,13 @@
-# Same Name, Different Place — implementation review
+# Historical record: Same Name, Different Place — implementation review
+
+> Historical record of the October 2026 work described below. Retained for the
+> decisions, provenance and verification scope at that time; it is not current
+> authoring policy, a current catalog inventory, or a fresh browser/deployment check.
+> References below to “current,” “now,” palettes, tolerances and question sequences
+> describe that earlier work and may have been superseded. For current behavior use
+> [Crafting a Journey](../JOURNEY_CRAFTING.md),
+> [the catalog](../QUESTION_CATALOG.md),
+> [the engine guide](../JOURNEY_ENGINE.md), and the linked current definitions.
 
 Implemented locally on October 12, 2026 as `same-name-different-place-v1`,
 with the five specified stops: Congo, London, Tripoli, the unnamed Caucasus

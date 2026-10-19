@@ -86,7 +86,10 @@ The place variables above stand for reviewed bundled records; the full examples
 resolve concrete IDs. A scene can contain places, regions, overlays, physical
 features or framing appropriate to its stage. `scenes.assist` requires authored
 assist copy in `guidance` and can add physical features and a focus alongside
-places/overlays. Hint copy retains the play scene.
+places/overlays. Hint copy normally retains the play scene;
+`guidance.hintMap` can add reference region emphasis and/or a focus when authored.
+Across the Divide demonstrates this hint-stage support. There is no separate
+`scenes.hint` object.
 Assist layers are merged with play geography and removed when feedback begins;
 an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
@@ -115,6 +118,21 @@ without scenes pass through unchanged. No renderer or persistence migration is
 required. New authors should use the grouped fields for state-specific geography;
 all bundled Journeys have been migrated. Do not edit both an authored
 scene and its generated flat field independently.
+
+## Standards and supported capabilities
+
+[Crafting a Journey](JOURNEY_CRAFTING.md) owns current authoring standards. The
+registry and contracts describe a wider supported API, including compatibility
+and internal recipes. In particular:
+
+- Current single-country and merged-territory questions commit immediately;
+  pins and multi-answer selections confirm. Editable commitment in the registry
+  describes engine support, not permission to introduce a different convention.
+- Distance tiers remain optional in the schema; current authored Journeys use
+  three inclusive bands ending at the unchanged acceptance radius.
+- `land-path` has a complete internal recipe, but no current published question.
+- A disclosed geographic pool need not be map-selectable. Input comes from the
+  mode/selection contract; reference areas are excluded from region answers.
 
 ## Matching example
 
@@ -198,7 +216,10 @@ The command loads only the requested Journey module, builds its canonical contex
 and inspects play, hint, assist, correct-reveal and missed-reveal states. It checks
 contracts, source metadata, media existence, camera coordinates, duplicate visible
 places and anonymous city-name disclosure. JSON includes answer identities and
-marker shapes/sizes for editorial review. The command never fetches data, regenerates
+base marker shapes/sizes for editorial review. These are not projected symbol
+sizes or a simulation of role-specific glyphs; actual annotation/target rendering
+and depth still belong to the renderer. The command does not simulate completed
+recaps or actual typed/pin mistakes. It never fetches data, regenerates
 assets, opens a browser or deploys. Failure exits nonzero. Missing authored completion
 is reported as a note because legacy Journeys may use the generic recap.
 
@@ -206,6 +227,79 @@ Feedback snapshots are synthetic scene previews, not proof that every location
 can be clicked or that a fact is true. Recipe tests separately grade known answers.
 Review geography, copy and sources with judgment; automated checks cannot establish
 historical truth, screen-space legibility or every form of answer leakage.
+
+## Answer roles and presentation
+
+`answerPresentation.ts` resolves response identities, slot assignments, assistance
+provenance, and outcome states independently of their colors. A choice may declare
+`geographyIds` to link its stable grading ID to one or more region/place depictions.
+These links do not make a button question answerable by tapping the map. Preparation
+validates the depicted identities; grading continues to use the original choice IDs.
+
+Use `map.candidates: "highlighted"` to disclose a candidate field. A link alone
+must not introduce hidden markers, names, or boundaries. Context stays contextual
+through selection and reveal unless explicitly cleared or itself answered. Imported
+regions appearing only in reveal context stay hidden during play. City results belong
+to their markers, not their parent countries. Numeric and abstract responses must not
+promote background countries to correct answers. Use reveal `answerIds` for actual
+solution areas; use `contextIds` and explanatory places for supporting geography.
+
+Feedback shows the canonical answer once. Simple answers review only submitted
+mistakes, without listing unused choices. Role/position assignments retain their
+slot review. Legends explain competing answer states; ordinary context and
+background geography do not need legend entries. Unchosen valid alternatives
+are labelled separately from required answers.
+Region response badges are annotations and never intercept picking. The palettes
+in `src/theme/playColors.ts` share role meanings across globe, controls and legends,
+with values adapted for Paper; physical/thematic layers retain their own meaning.
+
+The editorial fundamentals live in [Crafting a Journey, section 5](JOURNEY_CRAFTING.md#5-give-the-globe-purposeful-question-state-information).
+The implementation keeps those decisions independent:
+
+- `contextIds` supplies established references and excludes those regions from
+  map-answer eligibility. `candidateRegionIds` supplies an openly shown area pool
+  independently of the input control. Scenes compile both fields, and preparation
+  validates candidate geography. Whole-world country and pin tasks share the
+  neutral `surface` state; finite candidate fields use `selectable`.
+- `authoredPlaces.ts` supplies `cityReference`, `areaLabel`, and
+  `explanationPlace`. `displayRole` distinguishes a supporting illustration from
+  a graded location; `markerHidden` makes a label anchor without inventing a point.
+  Authored city points share one style and size. Canonical location records remain
+  unchanged for grading, names, and aliases.
+- `interiorAnchor.ts` supplies a cached interior point and clearance on the main
+  displayed landmass. `areaSymbols.ts` projects that clearance through the current
+  camera. Bare area symbols shrink with usable screen space and disappear below
+  legibility; they never become hit targets. A fragment and owner share one answer
+  identity. Number-only solution geography uses reference emphasis without symbols.
+- Reference outlines have a small physical lift and drawing-order advantage over
+  ordinary geography, while retaining depth testing. Border graphs and ordered
+  lists never manufacture center-to-center travel paths. Great-circle comparisons,
+  pin error measurements, and reviewed physical paths retain meaningful lines.
+- Matching locations retain slot numbers during feedback. Revealed point answers
+  promote containing geography as context. `journeyDiscoveryPlaces` retains reviewed
+  point discoveries in generic and custom recaps; custom scenes add framing and
+  context. Unrelated geography stays muted; mistakes retain their separate status.
+  Recap mistakes use graded answer identities, including linked choice geography,
+  merged-region picks, city assignments, and submitted pins. Incorrect status wins
+  over custom completion decoration; a revealed solution remains a discovery even
+  after the player misses it. City and pin mistakes do not grade their containing
+  countries. The answer control owns commitment notices; authored copy must not
+  repeat them.
+
+Bundled single-country and merged-territory questions declare immediate commitment.
+Legacy unsubmitted selections remain drafts until the player taps an answer again;
+restoring them never assigns a grade. Disclosure, canonical grading, and saved
+response shapes are independent of these presentation rules.
+
+`pinPresentation.ts` supplies display-only accuracy bands. Distance pins show a
+crosshair target, a distinct submitted pin, labelled radii, and the achieved band.
+Rings and accuracy coloring appear only after commitment. Overlays live under one
+persistent renderer layer; question changes remove and dispose its inactive
+children, including when leaving a Journey. Existing acceptance
+radii, all-or-nothing grades, points, and saved responses remain unchanged: an
+accepted pin still earns one correct answer, regardless of its visual band.
+Tier points, Journey weights, and historical assessment snapshots require a
+separate scoring contract; do not infer points from colors or band positions.
 
 ## Extending the engine
 
@@ -223,7 +317,7 @@ historical truth, screen-space legibility or every form of answer leakage.
 6. Document the supported behavior and current limits in the catalog. Run focused
    checks. Update scheduling metadata only if its authored inputs changed.
 
-All 16 current Journeys (80 questions) now use grouped scenes. Shared presentation
+Current Journeys use grouped scenes. Shared presentation
 presets can still supply defaults; scene overrides compile into the renderer's
 existing fields. This is one engine and one current catalog, without archived
 runtime definitions. Isolated evaluator fixtures are test data, not playable
@@ -245,10 +339,16 @@ revision. The same upgrade runs for synced and archived attempt registers, so a
 stale device cannot restore an obsolete draft. This metadata stores receipt
 names only, not archived questions or old grading rules.
 
-Globe color roles come from `src/globe/themes.ts`: `PLAY_HIGHLIGHTS` for eligible
-choices, selections and context, and `PLAY_FEEDBACK` for correct, revealed,
-incorrect and visited objects. Region fills, authored place markers, pin-distance
-lines and feedback legends share these values. Named map choices require
-`disclosure.namedChoices`; use `map.candidates: "highlighted"` when eligibility
-should be visible from the start. Do not rely on assistance to introduce the
-initial candidate field.
+`src/theme/playColors.ts` owns semantic palette values through `playColors(theme)`.
+`src/globe/themes.ts` adapts them to region fills/outlines and re-exports the common
+`PLAY_HIGHLIGHTS`/`PLAY_FEEDBACK` aliases. Reference land uses `context-land`;
+point/outline reference accents use `hinted`. Open search uses `surface`, distinct
+from finite-candidate `selectable` and muted background `disabled`. Do not assume
+one context hex is used on every surface. UI, places, paths, rings and legends
+consume these roles with theme adaptations.
+
+Named map alternatives require `disclosure.namedChoices`. Use
+`map.candidates: "highlighted"` for a disclosed map-candidate field, and
+`candidateRegionIds` for a visible area pool independent of input. Color does not
+encode eligibility. Do not rely on help to introduce an initially required
+candidate field.

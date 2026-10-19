@@ -338,6 +338,8 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       leadIn: "Head east to the Pacific.",
       prompt:
         "Here the sun becomes a simple red disc. Drop a pin on one of the four main islands of the country that flies this flag.",
+      instruction:
+        "Country borders are hidden. Use the island shapes to estimate your pin.",
       mode: "pin",
       rule: { type: "pin-inside", ids: ["wurl:JPN"] },
       disclosure: { ...base.disclosure, namedChoices: false },

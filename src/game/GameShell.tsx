@@ -19,7 +19,9 @@ import { journeyScore } from "./state";
 import { helpSummary, helpCountCopy } from "./guidance";
 import type { GameState, Action } from "./state";
 import { questionMapPresentation } from "./presentation";
-import { PLAY_FEEDBACK, PLAY_HIGHLIGHTS } from "../globe/themes";
+
+import { AnswerReview } from "./AnswerReview";
+import { pinBands } from "./pinPresentation";
 import { AnswerForm } from "./AnswerForm";
 import {
   correctAnswerCopy,
@@ -64,6 +66,45 @@ function FlagComparison({
     </div>
   );
 }
+function MapKey({ entries }: { entries: ReturnType<typeof feedbackLegend> }) {
+  return (
+    entries.length > 0 && (
+      <div className="feedback-map-key" aria-label="Map color key">
+        {entries.map(({ key, label, colorRole }) => (
+          <span key={key}>
+            <i
+              className={`key-${key}`}
+              aria-hidden="true"
+              style={{
+                background: `var(--play-${colorRole ?? (key === "hint" ? "hinted" : key === "neutral" ? "disabled" : key)})`,
+              }}
+            >
+              {["correct", "selected", "incorrect"].includes(key) && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path
+                    d={
+                      key === "incorrect"
+                        ? "M7 7l10 10M17 7L7 17"
+                        : "M5 12l5 5L20 7"
+                    }
+                  />
+                </svg>
+              )}
+            </i>
+            {label}
+          </span>
+        ))}
+      </div>
+    )
+  );
+}
 export function GameShell({
   journey,
   context,
@@ -106,7 +147,8 @@ export function GameShell({
     if (tray) tray.scrollTop = 0;
     heading.current?.focus({ preventScroll: true });
   }, [round.id, game.phase]);
-  const inGame = (game.phase === "playing" && webgl) || game.phase === "feedback";
+  const inGame =
+    (game.phase === "playing" && webgl) || game.phase === "feedback";
   const ended = game.phase === "finished" || game.phase === "failed";
   const navigation = (
     <div className="finish-actions result-actions completion-navigation">
@@ -165,7 +207,9 @@ export function GameShell({
     else dispatch({ type: "start" });
   };
   const legend =
-    game.phase === "feedback" ? feedbackLegend(round, context, game) : [];
+    game.phase === "feedback" || game.phase === "playing"
+      ? feedbackLegend(round, context, game)
+      : [];
   const clueImage =
     round.image &&
     (game.phase === "playing" ||
@@ -176,7 +220,9 @@ export function GameShell({
       >
         <img
           src={round.image.src}
-          alt={game.phase === "playing" ? round.image.alt : round.image.feedbackAlt}
+          alt={
+            game.phase === "playing" ? round.image.alt : round.image.feedbackAlt
+          }
         />
         {round.image.context && (
           <div className="flag-context">
@@ -225,6 +271,11 @@ export function GameShell({
               {round.instruction && (
                 <p className="question-instruction">{round.instruction}</p>
               )}
+              <MapKey
+                entries={legend.filter((entry) =>
+                  ["hint", "selectable", "selected"].includes(entry.key),
+                )}
+              />
               <AnswerForm
                 question={round}
                 context={context}
@@ -248,6 +299,7 @@ export function GameShell({
                 <span>{correctAnswer.label}: </span>
                 <strong>{correctAnswer.value}</strong>
               </p>
+              <AnswerReview question={round} context={context} game={game} />
               {feedbackText && (
                 <p className="journey-explanation">{feedbackText}</p>
               )}
@@ -342,26 +394,36 @@ export function GameShell({
               {pinFeedback && (
                 <p className="journey-pin-distance">{pinFeedback}</p>
               )}
-              {legend.length > 0 && (
-                <div className="feedback-map-key" aria-label="Map color key">
-                  {legend.map(({ key, label }) => (
-                    <span key={key}>
-                      <i
-                        className={`key-${key}`}
-                        style={{
-                          background:
-                            key === "hint"
-                              ? PLAY_HIGHLIGHTS.context
-                              : PLAY_FEEDBACK[
-                                  key as keyof typeof PLAY_FEEDBACK
-                                ],
-                        }}
-                      />
-                      {label}
-                    </span>
+              {pinBands(round, game).length > 0 && (
+                <ol
+                  className="pin-accuracy-bands"
+                  aria-label="Pin accuracy bands"
+                >
+                  {pinBands(round, game).map((band) => (
+                    <li
+                      key={band.radiusKm}
+                      data-achieved={band.achieved || undefined}
+                      style={
+                        {
+                          "--band-color": `var(--play-${band.index === 0 ? "correct" : band.index === band.count - 1 ? "hinted" : "selected"})`,
+                        } as import("react").CSSProperties
+                      }
+                    >
+                      <span aria-hidden="true">
+                        {band.achieved ? "✓" : "◎"}
+                      </span>
+                      <span>
+                        <strong>{band.label}</strong>
+                        <span>
+                          Within {band.radiusKm.toLocaleString()} km
+                          {band.achieved ? " · Your band" : ""}
+                        </span>
+                      </span>
+                    </li>
                   ))}
-                </div>
+                </ol>
               )}
+              <MapKey entries={legend} />
               <button
                 className="primary-button"
                 data-dd-action-name="Journey Next Round"
@@ -422,29 +484,60 @@ export function GameShell({
               return (
                 <li
                   key={question.id}
-                  className={journey.completion?.photoResults ? "journey-photo-result" : undefined}
+                  className={
+                    journey.completion?.photoResults
+                      ? "journey-photo-result"
+                      : undefined
+                  }
                 >
-                  {journey.completion?.photoResults && question.feedbackImage && (
-                    <img src={question.feedbackImage.src} alt={question.feedbackImage.alt} loading="lazy" />
-                  )}
+                  {journey.completion?.photoResults &&
+                    question.feedbackImage && (
+                      <img
+                        src={question.feedbackImage.src}
+                        alt={question.feedbackImage.alt}
+                        loading="lazy"
+                      />
+                    )}
                   <span>{String(i + 1).padStart(2, "0")}</span>
                   <div className="journey-receipt-detail">
                     <strong>
                       {answer
-                        ? (answer.receiptLabel ?? resolvedRoundIdentity(question))
+                        ? (answer.receiptLabel ??
+                          resolvedRoundIdentity(question))
                         : roundIdentity(question)}
                     </strong>
-                    {journey.completion?.photoResults && recapDistance !== undefined && (
-                      <span>
-                        {recapDistance < 1 ? "Less than 1" : Math.round(recapDistance).toLocaleString()} km away · {recapTier?.feedback ?? `Outside ${question.rule.type === "pin-distance" ? question.rule.radiusKm : 0} km`}
-                      </span>
-                    )}
-                    {journey.completion?.photoResults && question.feedbackImage && (
-                      <small>
-                        Photo: <a href={question.feedbackImage.credit.url} target="_blank" rel="noreferrer">{question.feedbackImage.credit.name}</a>
-                        {" · "}<a href={question.feedbackImage.credit.licenseUrl} target="_blank" rel="noreferrer">{question.feedbackImage.credit.license}</a>
-                      </small>
-                    )}
+                    {journey.completion?.photoResults &&
+                      recapDistance !== undefined && (
+                        <span>
+                          {recapDistance < 1
+                            ? "Less than 1"
+                            : Math.round(recapDistance).toLocaleString()}{" "}
+                          km away ·{" "}
+                          {recapTier?.feedback ??
+                            `Outside ${question.rule.type === "pin-distance" ? question.rule.radiusKm : 0} km`}
+                        </span>
+                      )}
+                    {journey.completion?.photoResults &&
+                      question.feedbackImage && (
+                        <small>
+                          Photo:{" "}
+                          <a
+                            href={question.feedbackImage.credit.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {question.feedbackImage.credit.name}
+                          </a>
+                          {" · "}
+                          <a
+                            href={question.feedbackImage.credit.licenseUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {question.feedbackImage.credit.license}
+                          </a>
+                        </small>
+                      )}
                   </div>
                   <span className="journey-round-result">
                     {help && (

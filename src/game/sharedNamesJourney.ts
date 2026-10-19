@@ -271,7 +271,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
       prompt: "Find the country on the globe.",
       mode: "map-single",
       count: 1,
-      commitment: "submit",
+      commitment: "immediate",
       selection: {
         type: "ids",
         ids: ["wurl:GEO", "wurl:ARM", "wurl:AZE", "wurl:TUR"],
@@ -301,7 +301,8 @@ export const SHARED_NAMES_JOURNEY: Journey = {
         play: { focus: { lat: 40.5, lng: 40.5, altitude: 0.65 } },
         reveal: {
           focus: { lat: 42, lng: 43.5, altitude: 0.3 },
-          answerIds: ["wurl:GEO", georgiaState.id],
+          answerIds: ["wurl:GEO"],
+          contextIds: [georgiaState.id],
           places: [georgia],
         },
       },

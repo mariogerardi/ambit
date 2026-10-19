@@ -25,15 +25,15 @@ const DOCS = [
   "docs/journey-authoring/JOURNEY_SPEC_TEMPLATE.md",
 ];
 const MODE_NOTES = {
-  pin: "Place a point near a reviewed target or inside canonical territory. Distance bands are inclusive and all currently earn one correct answer. Help cannot change tolerance; target rings belong to reveal.",
+  pin: "Place a point near a reviewed target or inside canonical territory, then confirm. Current distance-pin authoring uses three inclusive bands ending at the unchanged acceptance radius; the schema also supports legacy single-radius questions. Territory-inside pins use containment without invented distance bands. All accepted pins currently earn one correct answer. Help cannot change tolerance; target rings belong to reveal.",
   "city-single":
     "Pick one place marker. Named or anonymous candidates are controlled separately; use equal city-reference styling when capital status must not reveal the answer.",
   "city-multiple":
     "Pick the required number of place markers, then submit. Author explicit place IDs and deliberate label disclosure.",
   "merged-region-single":
-    "Tap one anonymous composite territory, then submit. Declare a synthetic target ID, connected canonical member countries, and every hidden internal adjacency. All members share one fill and hit target; reveals restore canonical polygons. Assist retains meaningful alternatives. Requires WebGL and pointer/touch input.",
+    "One tap commits an anonymous composite territory immediately under the current authoring standard. Declare a synthetic target ID, connected canonical member countries, and every hidden internal adjacency. All members share one fill and hit target; reveals restore canonical polygons. Assist retains meaningful alternatives. Requires WebGL and pointer/touch input.",
   "map-single":
-    "Pick one eligible country or region. Immediate or explicit submission is supported. Eligibility, visible context and names are independent; named alternatives are limited to six.",
+    "Pick one eligible country or region. Current authoring commits the first pick immediately, including named alternatives. The engine also supports explicit confirmation for compatibility or a reviewed extension. Eligibility, visible context and names are independent; named alternatives are limited to six.",
   "map-multiple":
     "Pick the required number of countries/regions, then submit. A stronger assist can lock fewer than all correct selections while preserving the remaining task.",
   number:
@@ -54,7 +54,7 @@ const MODE_NOTES = {
   "choice-match":
     "Place two to six distinct cards into named role slots, with optional spare cards. Each role has one unique card; no many-to-one matching or partial credit. Assists can lock fewer than all slots.",
   "land-path":
-    "Internal/test-supported land-path control, not exposed in the author-facing answer-type catalog. Do not propose it as a published format without an explicit product decision.",
+    "Internal/test-supported land-path control with an executable recipe, absent from the current published catalog. Introducing it as a product format requires an explicit design decision.",
 };
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const json = (value) => `\`\`\`json\n${JSON.stringify(value, null, 2)}\n\`\`\``;
@@ -73,6 +73,9 @@ function editorialScene(view) {
     camera: view.focus,
     borders: view.borders,
     names: view.regionNames,
+    borderRegionIds: view.borderRegionIds,
+    regionInteraction: view.regionInteraction,
+    eligibleRegions: view.eligibleRegions,
     regions: Object.groupBy(view.emphasis, ({ state }) => state),
     markers: view.places.map((place) =>
       pick(place, [
@@ -85,6 +88,13 @@ function editorialScene(view) {
         "markerHidden",
         "visualState",
         "answerTarget",
+        "parentId",
+        "displayRole",
+        "markerRole",
+        "markerBadge",
+        "markerSize",
+        "annotationRadius",
+        "accuracyBand",
       ]),
     ),
     features: view.physicalFeatures.map((feature) =>
@@ -100,7 +110,12 @@ function editorialSceneText(view) {
   scene.regions = Object.fromEntries(
     Object.entries(scene.regions).map(([state, regions]) => [
       state,
-      regions.map(({ name }) => name),
+      regions.length > 12 && ["surface", "selectable", "hinted"].includes(state)
+        ? {
+            count: regions.length,
+            note: "Broad geography summarized; use the answer contract and detailed example for identities.",
+          }
+        : regions.map(({ name }) => name),
     ]),
   );
   return Object.fromEntries(
@@ -338,9 +353,9 @@ export async function exportJourneyKit(options) {
     );
     const { correctAnswerSummary } =
       await server.ssrLoadModule("/src/game/copy.ts");
-    const { PLAY_HIGHLIGHTS, PLAY_FEEDBACK } = await server.ssrLoadModule(
-      "/src/globe/themes.ts",
-    );
+    const { PLAY_HIGHLIGHTS, PLAY_FEEDBACK, playColors } =
+      await server.ssrLoadModule("/src/theme/playColors.ts");
+    const { THEME_IDS } = await server.ssrLoadModule("/src/theme/themes.ts");
     const { MECHANIC_RECIPES } = await server.ssrLoadModule(
       "/src/game/recipes.ts",
     );
@@ -422,7 +437,7 @@ export async function exportJourneyKit(options) {
         snapshot,
         `Source: \`${modulePath}\`. ID: \`${journey.id}\`. Admin preview route: \`${entry.path}\`.`,
         journey.description,
-        "These are current authored examples, not instructions. Scenes below are effective structural snapshots, not browser renders. Geometry payloads are intentionally omitted.",
+        "These are current authored examples, not instructions. Scenes below are effective structural snapshots, not browser renders. Geometry payloads are intentionally omitted. See the crafting guide for current authoring standards; engine capability and an example alone do not establish a default.",
       ];
       const editorial = [
         `## ${journey.title}`,
@@ -594,6 +609,13 @@ export async function exportJourneyKit(options) {
             borderRegionIds: world.borderRegionIds ?? null,
             regionNames: world.regionNames,
             regionInteraction: world.regionInteraction,
+            eligibleRegions:
+              world.selectableRegionIds.length > 12
+                ? {
+                    count: world.selectableRegionIds.length,
+                    note: "Large input pool; use the canonical selection contract, reference exclusions and assistance limits.",
+                  }
+                : world.selectableRegionIds.map((id) => identify(id, question)),
             emphasis: Object.entries(world.states)
               .filter(([, state]) => !["disabled", "default"].includes(state))
               .map(([id, state]) => ({ ...identify(id, question), state })),
@@ -725,7 +747,7 @@ export async function exportJourneyKit(options) {
     const crafting = fullCrafting.split(/^## Appendix:/m)[0].trim();
     files.set(
       "AUTHORING_KIT.md",
-      `# Ambit Journey authoring kit\n\n${snapshot}\n\n## How to use this kit\n\nRead this file first. It contains the editorial guide, current mechanics and a catalog of all ${JOURNEYS.length} Journeys (${JOURNEYS.reduce((sum, journey) => sum + journey.rounds.length, 0)} questions). Load only relevant examples and references afterward. Start one conversation per Journey and keep settled decisions in JOURNEY_SPEC_TEMPLATE.md. PROJECT_INSTRUCTIONS.md can be pasted into project instructions.\n\n## Game and architecture in plain language\n\nAmbit is a geography game with one shared globe. A Journey develops one premise over five rounds. Each round defines a player task, canonical grading, eligible inputs and stage-specific presentation. The panel displays a joined lead-in/prompt, answer controls, optional hint followed by assist, then graded feedback. Completion resolves the premise with authored geography, media and optional flyover views. Admin's “Preview five questions” is the testing entry point; there is no playground or in-app AI authoring service.\n\nJourney modules author content with defineQuestion and presentation-only presets with definePresentation. Group map geography into scenes.play, scenes.assist and scenes.reveal; the compiler converts these into the engine's read model. Omitted fields retain defaults; explicit empty arrays clear layers. Hints normally retain the play map; assists can add references, narrow candidates or lock partial answers. Grading never comes from visual geometry, camera position or colors.\n\nCurrent implementation owners: App.tsx orchestrates sessions and the globe; GameShell.tsx renders the panel, help, feedback and results; AnswerForm.tsx and OrderAnswer.tsx provide controls. mechanics.ts owns capabilities; questionContracts.ts defines type-only schemas; questionBuilder.ts is the authoring and validation entry point. questionPreparation.ts resolves canonical data, candidates and expected answers; questionEvaluation.ts handles submission readiness and grading. answerNames.ts supplies shared name/alias matching without loading the engine; questionText.ts owns prompt/disclosure/feedback text. Current Journeys and controls import their owner modules directly; questions.ts remains a compatibility facade. state.ts owns transitions; presentation.ts and app/journeyWorld.ts resolve effective scenes; GlobeView.tsx renders them. questionSeeds.ts is no longer present: use presentation presets and explicit contracts. See references/JOURNEY_ENGINE.md and references/ARCHITECTURE.md for the current boundaries.\n\n## Semantic map colors (generated from the current code)\n\n${json({ highlights: PLAY_HIGHLIGHTS, feedback: PLAY_FEEDBACK })}\n\nSelectable means eligible; selected means the player's pending pick. Context is known setting geography (hinted/clue), not an answer. Correct is successful feedback; answer is the revealed solution; incorrect is a wrong response; visited is recap. Countries surrounding a city or symbol can stay contextual/neutral. Use semantic roles, not ad hoc hex values. Themes determine neutral land and other UI roles.\n\n## Most complete examples\n\n${featured.map((entry) => `- **${entry.title}:** ${entry.reason} [Example](examples/${entry.path.split("/").at(-1)}.md).`).join("\n")}\n\nThese examples are preferred starting points, not the only models. Explore the broader catalog for repeated mechanics, unusual geography and other pacing. Choose the format to fit the reasoning task; do not imitate Andes' rhythm mechanically. FEATURED_EXAMPLES.md collects the highlighted examples for convenient uploading. Individual files avoid loading unrelated examples.\n\n## Current crafting guide\n\nSource: docs/JOURNEY_CRAFTING.md. The technical terrain appendix is available in references/JOURNEY_CRAFTING.md; the editorial sections below are copied verbatim, not AI-summarized.\n\n${crafting}\n\n## Supported mechanics\n\nRegistry metadata and usage counts below are generated. Descriptions explain current behavior; code/contracts remain authoritative. Complete executable recipes are implementation examples, not editorial gold standards. Any unlisted mechanic requires explicit engineering work.\n\n${mechanics}\n\n## All current Journey examples\n\n★ = highlighted. Every current Journey has a detailed example export, including help, answer rules, effective stages, sources and completion.\n\n| Journey | Five-round mechanics | Reference |\n| --- | --- | --- |\n${catalogRows.join("\n")}\n\n## Accuracy and scope\n\nThis is a local snapshot, not a live repository connection. manifest.json records the revision, local changes and input/output hashes. Scene exports simulate engine state without browser rendering, full response entry, prior-round player choices or GPU label placement. They do not establish visual quality or independently verify facts. Geometry payloads are replaced with summaries; never reconstruct grading from them. Source links and media descriptions remain available; binary media and screenshots are not embedded. Re-export when code or guides change.\n`,
+      `# Ambit Journey authoring kit\n\n${snapshot}\n\n## How to use this kit\n\nRead this file first. It contains the editorial guide, current mechanics and a catalog of all ${JOURNEYS.length} Journeys (${JOURNEYS.reduce((sum, journey) => sum + journey.rounds.length, 0)} questions). Load only relevant examples and references afterward. Start one conversation per Journey and keep settled decisions in JOURNEY_SPEC_TEMPLATE.md. PROJECT_INSTRUCTIONS.md can be pasted into project instructions.\n\n## Game and architecture in plain language\n\nAmbit is a geography game with one shared globe. A Journey develops one premise over five rounds. Each round defines a player task, canonical grading, eligible inputs and stage-specific presentation. The panel displays a joined lead-in/prompt, answer controls, optional hint followed by assist, then graded feedback. Completion resolves the premise with authored geography, media and optional flyover views. Admin's “Preview five questions” is the testing entry point; there is no playground or in-app AI authoring service.\n\nJourney modules author content with defineQuestion and presentation-only presets with definePresentation. Group map geography into scenes.play, scenes.assist and scenes.reveal; the compiler converts these into the engine's read model. Omitted fields retain defaults; explicit empty arrays clear layers. Hints normally retain the play map; guidance.hintMap can add references or broad framing. Assists can add references, narrow candidates or lock partial answers. Grading never comes from visual geometry, camera position or colors.\n\nCurrent implementation owners: App.tsx orchestrates sessions and the globe; GameShell.tsx renders the panel, help, feedback and results; AnswerForm.tsx and OrderAnswer.tsx provide controls. mechanics.ts owns capabilities; questionContracts.ts defines type-only schemas; questionBuilder.ts is the authoring and validation entry point. questionPreparation.ts resolves canonical data, candidates and expected answers; questionEvaluation.ts handles submission readiness and grading. answerNames.ts supplies shared name/alias matching without loading the engine; questionText.ts owns prompt/disclosure/feedback text. Current Journeys and controls import their owner modules directly; questions.ts remains a compatibility facade. state.ts owns transitions; answerPresentation.ts and AnswerReview.tsx resolve response identities and concise mistake/assignment review. pinPresentation.ts owns display accuracy bands and theme/playColors.ts owns semantic palettes. presentation.ts and app/journeyWorld.ts resolve effective scenes and recap mistakes/discoveries; GlobeView.tsx renders them. geography/interiorAnchor.ts and globe/areaSymbols.ts supply display-only territory anchors and fitting; authoredPlaces.ts supplies shared city/reference/area-label helpers. questionSeeds.ts is no longer present: use presentation presets and explicit contracts. See references/JOURNEY_ENGINE.md and references/ARCHITECTURE.md for the current boundaries.\n\n## Semantic map colors (generated from the current code)\n\n${json({ highlights: PLAY_HIGHLIGHTS, feedback: PLAY_FEEDBACK, themes: Object.fromEntries(THEME_IDS.map((theme) => [theme, playColors(theme)])) })}\n\nThe crafting guide below owns role meanings and authoring standards; these values are generated from playColors(theme), not instructions to hardcode hex colors. The selectable role promotes a finite candidate field; it does not grant globe input. Input eligibility comes from the mode, selection contract, reference exclusions and assistance limits. Surface is the open search field; disabled is muted background. Reference land uses context-land while point/outline accents use hinted. Correct, answer and incorrect describe graded objects; visited marks reviewed discoveries, including revealed solutions after a miss. Actual mistakes remain incorrect in recap and take precedence over custom decoration. A city/pin does not grade its containing country. Area statuses use fitting bare symbols; actual locations use point markers.\n\n## Most complete examples\n\n${featured.map((entry) => `- **${entry.title}:** ${entry.reason} [Example](examples/${entry.path.split("/").at(-1)}.md).`).join("\n")}\n\nThese examples are preferred starting points, not the only models. Explore the broader catalog for repeated mechanics, unusual geography and other pacing. Choose the format to fit the reasoning task; do not imitate Andes' rhythm mechanically. FEATURED_EXAMPLES.md collects the highlighted examples for convenient uploading. Individual files avoid loading unrelated examples.\n\n## Current crafting guide\n\nSource: docs/JOURNEY_CRAFTING.md. The technical terrain appendix is available in references/JOURNEY_CRAFTING.md; the editorial sections below are copied verbatim, not AI-summarized.\n\n${crafting}\n\n## Supported mechanics\n\nRegistry metadata and usage counts below are generated. Capabilities describe engine support, including compatibility/internal configurations. Follow the current crafting standards when choosing defaults; flag departures as design decisions. Complete executable recipes are implementation examples, not editorial gold standards. A mode absent from the registry requires explicit engineering work; internal modes require a product decision before publication.\n\n${mechanics}\n\n## All current Journey examples\n\n★ = highlighted. Every current Journey has a detailed example export, including help, answer rules, effective stages, sources and completion.\n\n| Journey | Five-round mechanics | Reference |\n| --- | --- | --- |\n${catalogRows.join("\n")}\n\n## Accuracy and scope\n\nThis is a local snapshot, not a live repository connection. manifest.json records the revision, local changes and input/output hashes. Scene exports simulate engine state without browser rendering, full response entry, actual wrong selections, prior-round player choices, completed recaps or GPU label placement. Completion exports show authored configuration, not a simulation of merged discoveries/mistakes. Territory marker sizes are authored maxima; actual rendering may shrink or hide them to fit. They do not establish visual quality or independently verify facts. Geometry payloads are replaced with summaries; never reconstruct grading from them. Source links and media descriptions remain available; binary media and screenshots are not embedded. Re-export when code or guides change.\n`,
     );
     files.set(
       "FEATURED_EXAMPLES.md",

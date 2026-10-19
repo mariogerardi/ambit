@@ -18,9 +18,9 @@ export function outlineEmphasis(state?: VisualState, hovered = false) {
     state ?? "",
   );
   return {
-    order: committed ? 3 : hovered ? 2 : 1,
+    order: committed ? 3 : hovered || state === "hinted" ? 2 : 1,
     width: committed ? 1.8 : hovered ? 1.6 : 1.35,
-    lift: 0,
+    lift: state === "hinted" ? 0.001 : 0,
   };
 }
 

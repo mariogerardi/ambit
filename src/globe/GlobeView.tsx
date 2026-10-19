@@ -29,7 +29,8 @@ import type {
   MapOverlay,
   PhysicalFeature,
 } from "../geography/types";
-import { MapOverlays } from "./overlays";
+import { canPickRegion } from "./interaction";
+import { MapOverlays, isOverlayLayer } from "./overlays";
 import {
   CameraTravel,
   CameraFlyover,
@@ -39,7 +40,8 @@ import {
   worldAltitude,
   focusAltitude,
 } from "./camera";
-import { themedRegionStyle, PLAY_FEEDBACK } from "./themes";
+import { pinBandColor } from "../theme/playColors";
+import { themedRegionStyle, playStateColor } from "./themes";
 import type { GlobeTheme } from "./themes";
 import { THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
@@ -104,6 +106,7 @@ interface Props {
   placeContextual?: boolean;
   placeDensity?: "study";
   selectDisabled?: boolean;
+  selectableRegionIds?: readonly string[];
   regions: RegionFeature[];
   warmRegions?: RegionFeature[];
   places: PlaceFeature[];
@@ -178,6 +181,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     const placeLabels = useMemo(() => new PlaceLabels(), []);
     const physical = useMemo(() => new PhysicalFeatures(), []);
     const mapOverlays = useMemo(() => new MapOverlays(), []);
+    useEffect(
+      () => mapOverlays.setPalette(props.palette ?? "atlas"),
+      [mapOverlays, props.palette],
+    );
     useEffect(() => () => mapOverlays.dispose(), [mapOverlays]);
     const labelFrame = useRef(0);
     const countryPoints = useRef<
@@ -678,11 +685,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       const p = point(obj),
         props = current.current;
       if (p.region) {
-        if (
-          props.regionInteraction !== false &&
-          (props.selectDisabled || props.states[p.region.id] !== "disabled")
-        )
-          props.onSelect(p.region);
+        if (canPickRegion(p.region, props)) props.onSelect(p.region);
       } else props.onPlace(p);
     }, []);
     useEffect(() => {
@@ -726,6 +729,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         markers: props.placeMarkers !== false,
         contextual: !!props.placeContextual,
         density: props.placeDensity,
+        palette: props.palette,
       }),
       [],
     );
@@ -735,6 +739,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     labelLayer.markers = props.placeMarkers !== false;
     labelLayer.contextual = !!props.placeContextual;
     labelLayer.density = props.placeDensity;
+    labelLayer.palette = props.palette;
     useEffect(() => {
       placeLabels.update(labelLayer, globe.current?.getGlobeRadius() ?? 100);
       refreshLabels();
@@ -744,6 +749,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       props.placeMarkers,
       props.placeContextual,
       props.placeDensity,
+      props.palette,
       ready,
       placeLabels,
       labelLayer,
@@ -778,15 +784,27 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       physical.update(physicalLayer, globe.current?.getGlobeRadius() ?? 100);
       refreshLabels();
     }, [props.physicalFeatures, ready, physical, physicalLayer, refreshLabels]);
+    const overlayLayer = useMemo(
+      () => ({
+        id: "map:overlays",
+        kind: "map-overlays" as const,
+        overlays: props.overlays ?? [],
+        palette: props.palette,
+      }),
+      [],
+    );
+    overlayLayer.overlays = props.overlays ?? [];
+    overlayLayer.palette = props.palette;
+    useEffect(() => {
+      mapOverlays.update(overlayLayer, globe.current?.getGlobeRadius() ?? 100);
+    }, [props.overlays, props.palette, ready, overlayLayer, mapOverlays]);
     const customData = useMemo(
       () => [
         ...renderRegions,
         labelLayer,
         physicalLayer,
         ...(props.surfaceRoutes ? props.routes : []),
-        // The library stamps renderer bookkeeping onto custom data objects.
-        // Keep the authored overlay records independent of those mutations.
-        ...(props.overlays ?? []).map((overlay) => ({ ...overlay })),
+        overlayLayer,
       ],
       [
         renderRegions,
@@ -794,7 +812,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         physicalLayer,
         props.routes,
         props.surfaceRoutes,
-        props.overlays,
+        overlayLayer,
       ],
     );
     const capColor = useCallback(
@@ -803,10 +821,21 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           props.theme ?? "natural",
           region(obj).id,
           props.states[region(obj).id],
-          props.hovered === region(obj).id,
+          props.hovered === region(obj).id &&
+            canPickRegion(region(obj), props) &&
+            !props.onCoordinateTap,
           props.palette,
         ).fill,
-      [props.theme, props.palette, props.states, props.hovered],
+      [
+        props.theme,
+        props.palette,
+        props.states,
+        props.hovered,
+        props.selectableRegionIds,
+        props.regionInteraction,
+        props.selectDisabled,
+        props.onCoordinateTap,
+      ],
     );
     const updateOutline = useCallback(
       (object: Object3D, obj: object) => {
@@ -820,7 +849,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           refreshLabels();
           return;
         }
-        if ("type" in obj) return;
+        if (isOverlayLayer(obj)) {
+          mapOverlays.update(obj, globe.current?.getGlobeRadius() ?? 100);
+          return;
+        }
         const r = region(obj),
           p = current.current;
         const line = (object.userData.outline ?? object) as LineSegments2;
@@ -831,7 +863,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               p.theme ?? "natural",
               r.id,
               p.states[r.id],
-              p.hovered === r.id,
+              p.hovered === r.id && canPickRegion(r, p) && !p.onCoordinateTap,
               p.palette,
             ).fill,
           );
@@ -840,11 +872,16 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         line.visible = "from" in obj || regionBorderVisible(r, p);
         if ("from" in obj) {
           line.material.color.set(
-            route(obj).visualState === "incorrect"
-              ? PLAY_FEEDBACK.incorrect
-              : route(obj).visualState === "correct"
-                ? PLAY_FEEDBACK.correct
-                : "#efd18f",
+            route(obj).accuracyBand
+              ? pinBandColor(
+                  route(obj).accuracyBand!.index,
+                  route(obj).accuracyBand!.count,
+                  p.palette,
+                )
+              : (playStateColor(
+                  route(obj).visualState ?? "hinted",
+                  p.palette,
+                ) ?? "#efd18f"),
           );
           line.material.opacity = 1;
           line.material.linewidth = 2.2;
@@ -856,20 +893,24 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             p.theme ?? "natural",
             r.id,
             p.states[r.id],
-            p.hovered === r.id,
+            p.hovered === r.id && canPickRegion(r, p) && !p.onCoordinateTap,
             p.palette,
           ).stroke,
         );
         line.material.color.set(color);
         line.material.opacity = opacity;
-        const emphasis = outlineEmphasis(p.states[r.id], p.hovered === r.id);
+        const emphasis = outlineEmphasis(
+          p.states[r.id],
+          p.hovered === r.id && canPickRegion(r, p) && !p.onCoordinateTap,
+        );
         line.material.linewidth = emphasis.width;
         line.renderOrder = emphasis.order;
         line.scale.setScalar(
-          r.level !== "ADM0" ? 1 : (globe.current?.getGlobeRadius() ?? 100),
+          (r.level !== "ADM0" ? 1 : (globe.current?.getGlobeRadius() ?? 100)) *
+            (1 + emphasis.lift),
         );
       },
-      [placeLabels, physical, refreshLabels, regionalSurfaces],
+      [placeLabels, physical, refreshLabels, regionalSurfaces, mapOverlays],
     );
     const makeOutline = useCallback(
       (obj: object) => {
@@ -882,11 +923,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           refreshLabels();
           return placeLabels.group;
         }
-        if ("type" in obj)
-          return mapOverlays.get(
-            obj as MapOverlay,
-            globe.current?.getGlobeRadius() ?? 100,
-          );
+        if (isOverlayLayer(obj)) {
+          mapOverlays.update(obj, globe.current?.getGlobeRadius() ?? 100);
+          return mapOverlays.group;
+        }
         const r = region(obj);
         const cap =
           !("from" in obj) && r.level !== "ADM0"
@@ -980,12 +1020,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           if (gesture.current.consume()) current.current.onSurfaceTap(r);
           return;
         }
-        if (
-          current.current.regionInteraction !== false &&
-          (current.current.selectDisabled ||
-            current.current.states[r.id] !== "disabled") &&
-          gesture.current.consume()
-        )
+        if (canPickRegion(r, current.current) && gesture.current.consume())
           current.current.onSelect(r, point);
       },
       [],
@@ -1016,6 +1051,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     return (
       <div
         className="globe-canvas"
+        data-pin-input={!!props.onCoordinateTap || undefined}
         data-scene-instance={sceneId}
         ref={host}
         onPointerDownCapture={(event) => {
@@ -1087,6 +1123,20 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             !!props.onCoordinateTap ||
             props.placeInteraction
           }
+          showPointerCursor={(_type, obj) => {
+            const p = current.current;
+            if (p.onCoordinateTap) return false;
+            if ("level" in obj) return canPickRegion(obj as RegionFeature, p);
+            if ("region" in obj && obj.region)
+              return canPickRegion(obj.region as RegionFeature, p);
+            return (
+              isPlaceLabels(obj) &&
+              !!p.placeInteraction &&
+              p.places.some(
+                (place) => place.id === hoverPlaceId && place.answerTarget,
+              )
+            );
+          }}
           globeMaterial={material}
           globeImageUrl={props.theme === "play" ? undefined : texture}
           atmosphereColor={THEMES[props.palette ?? "atlas"].globe.atmosphere}

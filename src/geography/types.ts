@@ -2,6 +2,8 @@ import type { Polygon, MultiPolygon } from "geojson";
 export type AdminLevel = "ADM0" | "ADM1" | "ADM2" | "ADM3" | "ADM4" | "ADM5";
 export type VisualState =
   | "default"
+  /** Undisclosed land available for coordinate pin placement. */
+  | "surface"
   | "hover"
   | "selectable"
   | "selected"
@@ -39,6 +41,14 @@ export interface RegionFeature {
   sourceId: string;
 }
 export interface PlaceFeature {
+  /** Display intent is independent of location kind, eligibility, and correctness. */
+  displayRole?: "reference" | "explanation";
+  /** Available interior radius in radians, for screen-fitting area symbols. */
+  annotationRadius?: number;
+  /** Read-only response badge; never changes picking eligibility or grading. */
+  markerBadge?: string;
+  markerRole?: "target" | "annotation";
+  accuracyBand?: { index: number; count: number };
   /** Authored answer markers use semantic colors independently of countries. */
   visualState?: VisualState;
   answerTarget?: boolean;
@@ -74,6 +84,7 @@ export interface PlaceFeature {
   sourceId: string;
 }
 export interface RouteFeature {
+  accuracyBand?: { index: number; count: number };
   id: string;
   from: { lat: number; lng: number };
   to: { lat: number; lng: number };
@@ -86,6 +97,9 @@ export type MapOverlay =
       center: { lat: number; lng: number };
       radiusKm: number;
       shade?: boolean;
+      /** Reveal-only accuracy bands share the pin's display palette. */
+      accuracyBand?: { index: number; count: number };
+      active?: boolean;
     }
   | { id: string; type: "parallel"; latitude: number }
   | { id: string; type: "meridian"; longitude: number }

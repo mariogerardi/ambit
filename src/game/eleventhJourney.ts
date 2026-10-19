@@ -143,7 +143,16 @@ export const ELEVENTH_JOURNEY: Journey = {
       },
       instruction: "Land within 150 km of the city center.",
       mode: "pin",
-      rule: { type: "pin-distance", targetId: "place:2172517", radiusKm: 150 },
+      rule: {
+        type: "pin-distance",
+        targetId: "place:2172517",
+        radiusKm: 150,
+        tiers: [
+          { radiusKm: 50, feedback: "Bullseye!" },
+          { radiusKm: 100, feedback: "Very close." },
+          { radiusKm: 150, feedback: "In range." },
+        ],
+      },
       sources: [
         source(
           "National Capital Authority · Federation and the national capital",

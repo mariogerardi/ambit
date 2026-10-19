@@ -1,17 +1,22 @@
 import { isRegionAnswer } from "../game/questionBuilder";
 import { geoDistance, geoInterpolate } from "d3-geo";
 import { answerPlace } from "../game/answerTargets";
+import { pinBands } from "../game/pinPresentation";
 import { withAssistanceLocks } from "../game/guidance";
 import type { Focus, RegionFeature, RouteFeature } from "../geography/types";
 import type { GameState } from "../game/state";
 import type { Journey, QuestionContext } from "../game/questionContracts";
-import { solutionIds } from "../game/questionPreparation";
+import { solutionIds, selectableIds } from "../game/questionPreparation";
+import { candidateAvailable } from "../game/guidance";
+import { presentJourneyPlace } from "../game/authoredPlaces";
 import {
   journeyVisitedStates,
   questionMapPresentation,
   questionPlaces,
+  questionRegionMarkers,
   questionRegions,
   questionVisualStates,
+  journeyDiscoveryPlaces,
 } from "../game/presentation";
 const recapRegions = new WeakMap<
   Journey,
@@ -73,35 +78,6 @@ export function journeyWorld(
   );
   const routes: RouteFeature[] = [];
   if (map.borders && game.phase !== "home") {
-    if (round.rule.type === "shortest-borders") {
-      const path =
-        round.mode === "land-path" && game.selectedIds.length
-          ? game.selectedIds
-          : game.phase === "feedback"
-            ? (context.paths.get(round.id) ?? [])
-            : [];
-      for (let i = 1; i < path.length; i++) {
-        const from = catalog.get(path[i - 1]),
-          to = catalog.get(path[i]);
-        if (from && to)
-          routes.push({
-            id: `journey:${round.id}-${i}`,
-            from: from.focus,
-            to: to.focus,
-          });
-      }
-    }
-    if (round.rule.type === "capital-order" && game.phase === "feedback") {
-      const capitals = round.rule.countryIds.map(
-        (id) => context.capitals.find((c) => c.countryId === id)!,
-      );
-      for (let i = 1; i < capitals.length; i++)
-        routes.push({
-          id: `capital-route:${round.id}:${i}`,
-          from: capitals[i - 1],
-          to: capitals[i],
-        });
-    }
     if (round.rule.type === "great-circle-order") {
       const { from, to } = round.rule;
       routes.push({
@@ -123,6 +99,9 @@ export function journeyWorld(
         from: game.pin,
         to: target,
         visualState: correct ? "correct" : "incorrect",
+        accuracyBand: correct
+          ? pinBands(round, game).find((band) => band.achieved)
+          : undefined,
       });
   }
   const destination = solutionIds(round, context).at(-1);
@@ -130,13 +109,19 @@ export function journeyWorld(
   const pinTarget = pinRule && answerPlace(round, pinRule.targetId);
   const pinRings =
     game.phase === "feedback" && pinRule && pinTarget
-      ? (pinRule.tiers ?? [{ radiusKm: pinRule.radiusKm }]).map((tier) => ({
-          id: `pin-tolerance:${round.id}${pinRule.tiers ? `:${tier.radiusKm}` : ""}`,
-          type: "circle" as const,
-          center: pinTarget,
-          radiusKm: tier.radiusKm,
-          shade: !!pinRule.tiers,
-        }))
+      ? (pinRule.tiers ?? [{ radiusKm: pinRule.radiusKm }]).map(
+          (tier, index, tiers) => ({
+            id: `pin-tolerance:${round.id}${pinRule.tiers ? `:${tier.radiusKm}` : ""}`,
+            type: "circle" as const,
+            center: pinTarget,
+            radiusKm: tier.radiusKm,
+            shade: !!pinRule.tiers,
+            accuracyBand: pinRule.tiers
+              ? { index, count: tiers.length }
+              : undefined,
+            active: pinBands(round, game)[index]?.achieved ?? false,
+          }),
+        )
       : [];
   let photoRevealFocus: Focus | undefined;
   if (
@@ -180,31 +165,73 @@ export function journeyWorld(
           : game.phase === "finished"
             ? journey.rounds.at(-1)!.focus
             : (assist?.focus ?? hintFocus ?? round.focus));
+  const visited =
+    game.phase === "finished"
+      ? journeyVisitedStates(journey, context, game.answers)
+      : undefined;
+  const discoveries =
+    game.phase === "finished"
+      ? journeyDiscoveryPlaces(journey, context, game.answers)
+      : [];
+  const pointMistakes = new Set(
+    discoveries
+      .filter((place) => place.visualState === "incorrect")
+      .map((place) => place.id),
+  );
   return {
     regions:
       game.phase === "finished"
         ? allRegions(regions, journey)
         : questionRegions(regions, round, game.phase, game.help?.[round.id]),
-    states: completion
-      ? Object.fromEntries(
-          allRegions(regions, journey).map((r) => [
-            r.id,
-            completion.regionIds?.includes(r.id)
-              ? ("visited" as const)
-              : completion.photoResults
-                ? ("default" as const)
-                : ("disabled" as const),
-          ]),
-        )
-      : game.phase === "finished"
-        ? journeyVisitedStates(journey, context, game.answers)
+    states:
+      game.phase === "finished"
+        ? Object.fromEntries(
+            allRegions(regions, journey).map((region) => [
+              region.id,
+              visited?.[region.id] === "incorrect"
+                ? "incorrect"
+                : completion?.regionIds?.includes(region.id)
+                  ? "visited"
+                  : (visited?.[region.id] ?? "disabled"),
+            ]),
+          )
         : questionVisualStates(round, context, game),
-    places: completion?.places ?? [
-      ...questionPlaces(round, context, game.phase, game.text, correct, game),
-      ...(game.phase === "playing" && game.help?.[round.id] === "assisted"
-        ? (round.guidance?.assist?.places ?? [])
-        : []),
-    ],
+    places:
+      game.phase === "finished"
+        ? [
+            ...new Map(
+              [
+                ...(completion?.places ?? []).map((place) =>
+                  presentJourneyPlace({
+                    ...place,
+                    visualState: pointMistakes.has(place.id)
+                      ? "incorrect"
+                      : (place.visualState ?? "visited"),
+                  }),
+                ),
+                ...discoveries.filter(
+                  (place) =>
+                    !completion?.places?.some(
+                      (authored) => authored.id === place.id,
+                    ),
+                ),
+              ].map((place) => [place.id, place]),
+            ).values(),
+          ]
+        : [
+            ...questionPlaces(
+              round,
+              context,
+              game.phase,
+              game.text,
+              correct,
+              game,
+            ),
+            ...questionRegionMarkers(round, context, game),
+            ...(game.phase === "playing" && game.help?.[round.id] === "assisted"
+              ? (round.guidance?.assist?.places ?? []).map(presentJourneyPlace)
+              : []),
+          ],
     routes,
     physicalFeatures:
       completion?.physicalFeatures ??
@@ -247,6 +274,12 @@ export function journeyWorld(
         map.hover),
     // Neutral land is still eligible for blind map picks; the engine validates IDs.
     selectDisabled: game.phase === "playing" && isRegionAnswer(round),
+    selectableRegionIds:
+      game.phase === "playing" && isRegionAnswer(round)
+        ? selectableIds(round, context).filter((id) =>
+            candidateAvailable(round, game, id),
+          )
+        : [],
     regionNames:
       round.mode.startsWith("city-") || (!isRegionAnswer(round) && !map.hover)
         ? ("none" as const)
