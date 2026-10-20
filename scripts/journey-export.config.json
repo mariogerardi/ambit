@@ -54,6 +54,8 @@
     "src/game/copy.ts",
     "src/game/authoredPlaces.ts",
     "src/game/OrderAnswer.tsx",
+    "src/game/QuestionSupport.tsx",
+    "src/app/QuestionHelp.tsx",
     "src/game/answerTargets.ts",
     "src/game/quizData.ts",
     "src/game/countryFacts.ts",

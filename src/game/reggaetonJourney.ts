@@ -254,8 +254,7 @@ export const REGGAETON_JOURNEY: Journey = {
       leadIn:
         "Caribbean migration connected Jamaica with Panama long before Puerto Rico's mixtapes. Workers and their families settled around Colón, near the canal's Caribbean entrance.",
       prompt: "Drop a pin on that coast, as close to Colón as you can.",
-      instruction:
-        "Land within 45 km of Colón. The bullseye is 15 km; the other accepted bands end at 30 km and 45 km.",
+      instruction: "",
       mode: "pin",
       count: 1,
       selection: { type: "none" },
@@ -309,7 +308,7 @@ export const REGGAETON_JOURNEY: Journey = {
       leadIn:
         "Near New York City, a Long Island studio brought Jamaican and Panamanian musicians together to record an influential version of the dembow loop.",
       prompt: "Which marker is New York City?",
-      instruction: "Select one of the five anonymous city markers.",
+      instruction: "",
       mode: "city-single",
       count: 1,
       selection: { type: "ids", ids: nyCandidates.map((place) => place.id) },
@@ -437,7 +436,7 @@ export const REGGAETON_JOURNEY: Journey = {
         "As reggaetón reached international audiences, Nicky Jam rebuilt his career in Medellín, Colombia.",
       prompt:
         "Roughly how far apart are San Juan and Medellín in a straight line?",
-      instruction: "Aim within 500 km. Bullseye: 100 km · Close: 300 km.",
+      instruction: "",
       inputLabel: "Distance in kilometres",
       mode: "slider",
       count: 1,

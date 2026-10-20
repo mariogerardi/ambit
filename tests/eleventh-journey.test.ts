@@ -304,7 +304,11 @@ describe("not the obvious city", () => {
   it("keeps countries as context on every reveal and gives each stop a connection", () => {
     expect(journey.rounds.every((round) => !!round.leadIn)).toBe(true);
     expect(journey.rounds[1].prompt).toContain("Canberra");
-    expect(journey.rounds[1].instruction).toContain("150 km");
+    expect(journey.rounds[1].rule).toMatchObject({
+      type: "pin-distance",
+      radiusKm: 150,
+    });
+    expect(journey.rounds[1].instruction).not.toContain("km");
     for (let roundIndex = 0; roundIndex < journey.rounds.length; roundIndex++) {
       const round = journey.rounds[roundIndex];
       const game: GameState = {

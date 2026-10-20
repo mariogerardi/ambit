@@ -162,7 +162,7 @@ export const TENTH_JOURNEY: Journey = {
       topic: "archipelagos",
       prompt: "Place a pin anywhere on Indonesia’s land.",
       instruction:
-        "Country borders are hidden. Use the island shapes to estimate your pin.",
+        "Country borders are hidden; estimate using the island shapes.",
       mode: "pin",
       rule: { type: "pin-inside", ids: ["wurl:IDN"] },
       explanation:

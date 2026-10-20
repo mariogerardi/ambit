@@ -6,7 +6,12 @@ export interface ComparisonTarget {
   version: number;
 }
 export type AdminSection = "schedule" | "feedback" | "tools";
-export type AccountSection = "dashboard" | "profile" | "friends" | "admin";
+export type AccountSection =
+  | "dashboard"
+  | "profile"
+  | "friends"
+  | "appearance"
+  | "admin";
 export interface AccountIntent {
   tab?: AccountSection;
   section?: AdminSection;
@@ -29,6 +34,7 @@ export function accountIntent(url: string): AccountIntent {
   const friend = params.get("friend");
   if (friend && /^[a-zA-Z][a-zA-Z0-9_]{2,23}$/.test(friend))
     return { tab: "friends", friend: friend.toLowerCase() };
+  if (params.get("tab") === "appearance") return { tab: "appearance" };
   if (params.get("tab") === "profile") return { tab: "profile" };
   if (params.get("tab") === "dashboard") return { tab: "dashboard" };
   if (params.get("tab") !== "friends") return {};

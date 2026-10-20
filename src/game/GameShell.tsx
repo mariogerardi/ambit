@@ -31,6 +31,7 @@ import { AnswerReview } from "./AnswerReview";
 import { pinBands, pinReviewViews } from "./pinPresentation";
 import { estimateTier } from "./numericEstimate";
 import { AnswerForm } from "./AnswerForm";
+import { QuestionAccuracy } from "./QuestionSupport";
 import {
   correctAnswerCopy,
   correctAnswerSummary,
@@ -264,6 +265,7 @@ export function GameShell({
             </span>
             <span className="overline">{round.label.toUpperCase()}</span>
             <QuestionHelp
+              information={<QuestionAccuracy question={round} />}
               sourcesLocked={game.phase === "playing"}
               key={round.id}
               onReport={onReport ? () => onReport(round.id) : undefined}
@@ -284,20 +286,19 @@ export function GameShell({
           {round.image?.presentation !== "photo" && clueImage}
           {game.phase === "playing" ? (
             <>
-              {round.instruction && round.mode !== "pin" && (
-                <p className="question-instruction">{round.instruction}</p>
-              )}
-              <MapKey
-                entries={legend.filter((entry) =>
-                  ["hint", "selectable", "selected"].includes(entry.key),
-                )}
-              />
               <AnswerForm
                 question={round}
                 context={context}
                 game={game}
                 dispatch={dispatch}
                 webgl={webgl}
+                mapKey={
+                  <MapKey
+                    entries={legend.filter((entry) =>
+                      ["hint", "selectable", "selected"].includes(entry.key),
+                    )}
+                  />
+                }
               />
             </>
           ) : (

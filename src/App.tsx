@@ -49,6 +49,8 @@ import type { FeedbackRequest } from "./services/feedback";
 import { AccountPanel, AdminAccess } from "./app/AccountPanel";
 import { FeedbackDialog } from "./app/FeedbackDialog";
 import { FeedbackReview } from "./app/FeedbackReview";
+import { AppearancePanel } from "./app/AppearancePanel";
+import { WorldCreditsDialog } from "./app/WorldCreditsDialog";
 import { AppMenu } from "./app/AppMenu";
 import { GlobeControls } from "./app/GlobeControls";
 import { AmbitLogo } from "./app/AmbitLogo";
@@ -116,6 +118,8 @@ export function App() {
   const playerProfile = usePlayerProfile(subject, account.accessToken);
   const [feedback, setFeedback] = useState<FeedbackRequest>();
   const closeFeedback = useCallback(() => setFeedback(undefined), []);
+  const [creditsOpen, setCreditsOpen] = useState(false);
+  const closeCredits = useCallback(() => setCreditsOpen(false), []);
   const mobile = useMobileLayout();
   const [globeExpanded, setGlobeExpanded] = useState(false);
   const [exploreContentHeight, setExploreContentHeight] = useState(220);
@@ -778,6 +782,9 @@ export function App() {
       />
     ) : mode === "account" ? (
       <AccountPanel
+        appearanceContent={
+          <AppearancePanel theme={theme} onTheme={changeTheme} />
+        }
         onNavigate={navigate}
         adminContent={
           <AdminAccess onAccount={() => navigate("/account")}>
@@ -1062,7 +1069,7 @@ export function App() {
             } as CSSProperties)
           : undefined
       }
-      inert={!!feedback}
+      inert={!!feedback || creditsOpen}
       data-keyboard-open={mobile.keyboard || undefined}
       data-panel-only={panelOnly || undefined}
     >
@@ -1275,8 +1282,7 @@ export function App() {
               setFeedback({ kind: "experience", context: { view: mode } })
             }
             path={path}
-            theme={theme}
-            onTheme={changeTheme}
+            onCredits={() => setCreditsOpen(true)}
             onNavigate={navigate}
           />
         </div>
@@ -1395,6 +1401,7 @@ export function App() {
       {feedback && (
         <FeedbackDialog request={feedback} onClose={closeFeedback} />
       )}
+      {creditsOpen && <WorldCreditsDialog onClose={closeCredits} />}
     </main>
   );
 }

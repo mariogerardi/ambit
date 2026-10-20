@@ -248,8 +248,6 @@ export const MECHANIC_RECIPES: Question[] = [
     id: "recipe:slider",
     title: "slider example",
     prompt: "Estimate the straight-line distance from London to Paris.",
-    instruction:
-      "Move the slider. Estimates within 100 km count; the closer bands end at 25 and 50 km.",
     explanation:
       "The two city centres are roughly 350 km apart by great circle.",
     mode: "slider",

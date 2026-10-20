@@ -623,7 +623,8 @@ describe("Same Hour, Different Worlds", () => {
       }),
     );
     expect(shell).not.toContain('aria-label="Choose an answer"');
-    expect(shell).toContain("Choose one city marker on the globe.");
+    expect(shell).toContain("Which marked Australian city shares its clock");
+    expect(shell).not.toContain("Choose one city marker on the globe.");
     expect(shell).not.toContain("UTC+9:30");
     expect(shell).not.toContain("GeoNames");
   });

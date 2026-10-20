@@ -78,10 +78,12 @@ frontend. No table/schema migration or rewritten historical schedule is required
 ## Profiles, dashboard, and friends
 
 The Account screen shows daily Journey totals, a calendar-day Journey streak,
-Study completion totals and answer accuracy. It keeps Dashboard, Profile and
-Friends tabs, plus a protected Admin tab for administrators. Each tab updates its
+Study completion totals and answer accuracy. It keeps Dashboard, Profile,
+Friends and Appearance tabs, plus a protected Admin tab for administrators. Each tab updates its
 `/account?tab=...` URL and supports refresh and Back/Forward. The header and tab
 bar remain mounted across switches, preserving profile and schedule drafts.
+Appearance owns the device-local theme preference; guests can use it without
+signing in. It does not write theme settings to the profile API.
 Journey/session history, Study setup presets, resume actions and
 Challenges are not shown on Account. Account and Admin scroll with the page.
 Account and Admin use a static globe illustration behind the content, while the hidden

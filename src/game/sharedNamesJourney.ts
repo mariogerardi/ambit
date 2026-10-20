@@ -317,8 +317,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
       leadIn:
         "Lake Victoria lies in East Africa. Farther south, Victoria Falls is on the Zambezi River at the Zambia–Zimbabwe border.",
       prompt: "Drop a pin as close to the falls as you can.",
-      instruction:
-        "Within 120 km counts. Aim for the 40 km bullseye; 80 km and 120 km also count.",
+      instruction: "",
       mode: "pin",
       count: 1,
       commitment: "submit",

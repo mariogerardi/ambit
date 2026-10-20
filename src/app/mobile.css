@@ -265,15 +265,7 @@
     width: 20px;
     height: 20px;
   }
-  .experience
-    :is(
-      .muted,
-      .commit-note,
-      .source-note,
-      .info-view small,
-      .round-feedback p,
-      .question-instruction
-    ) {
+  .experience :is(.muted, .source-note, .info-view small, .round-feedback p) {
     font-size: 13px;
     line-height: 1.6;
   }
@@ -690,6 +682,7 @@
     margin: 0 0 16px;
   }
   .experience .tertiary-action,
+  .experience .answer-secondary-actions summary,
   .study-options-dialog .tertiary-action {
     min-height: 44px;
     font-size: 13px;

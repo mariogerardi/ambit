@@ -296,7 +296,7 @@ export function StudyPanel({
         {session.phase === "playing" ? (
           prompt.style === "map" ? (
             <div className="study-map-answer">
-              <p className="study-map-instruction muted">
+              <p className="study-map-instruction question-support">
                 {webgl
                   ? "Tap your answer on the globe."
                   : canTypeStudyAnswer(prompt)

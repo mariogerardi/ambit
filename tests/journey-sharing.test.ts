@@ -178,6 +178,9 @@ it("routes query links and rejects invalid comparison identities", () => {
   ).toBeUndefined();
   expect(accountIntent("/account?friend=Mars").friend).toBe("mars");
   expect(accountIntent("/account?tab=profile")).toEqual({ tab: "profile" });
+  expect(accountIntent("/account?tab=appearance")).toEqual({
+    tab: "appearance",
+  });
   expect(accountIntent("/account?tab=dashboard")).toEqual({ tab: "dashboard" });
   expect(modeForPath("/admin")).toBe("account");
   expect(accountIntent("/admin?section=tools")).toEqual({

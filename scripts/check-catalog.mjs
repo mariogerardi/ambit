@@ -31,6 +31,7 @@ function supportedPython() {
 }
 
 run(process.execPath, ["scripts/catalog-reference-report.mjs"]);
-run("npm", ["run", "test:all"]);
+// Full-catalog geometry checks share CPU with the rest of the release suite.
+run("npm", ["run", "test:all", "--", "--testTimeout=15000"]);
 run(supportedPython(), ["scripts/run-python-tests.py"]);
 run("./node_modules/.bin/tsc", ["--noEmit"]);

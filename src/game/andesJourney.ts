@@ -381,8 +381,7 @@ export const ANDES_JOURNEY: Journey = {
       leadIn: "Follow the range south to its highest peak.",
       prompt:
         "Aconcagua is the highest mountain in the Americas, on the Argentine side of the Chilean border. Drop a pin as close to its summit as you can.",
-      instruction:
-        "Land within 450 km of the summit. Aim for the 150 km bullseye; the 300 km and 450 km rings also count as correct.",
+      instruction: "",
       mode: "pin",
       rule: {
         type: "pin-distance",

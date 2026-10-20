@@ -73,8 +73,7 @@ const common = definePresentation({
     "natural-background":
       "Bridge photograph recognition uses political map colors for broad orientation; countries are not answer candidates.",
   },
-  instruction:
-    "Land within 300 km of the bridge. Aim for the 100 km bullseye; the 200 km and 300 km rings also count as correct.",
+  instruction: "",
   failure: "feedback",
   disclosure: {
     hoverNames: false,

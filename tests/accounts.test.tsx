@@ -278,7 +278,7 @@ it("preserves only valid comparison parameters through authentication", () => {
 });
 
 it("retains only recognized account tab destinations through sign-in", () => {
-  for (const tab of ["dashboard", "profile", "friends"])
+  for (const tab of ["dashboard", "profile", "friends", "appearance"])
     expect(safeReturnPath(`/account?tab=${tab}`)).toBe(`/account?tab=${tab}`);
   expect(safeReturnPath("/account?tab=admin&section=tools")).toBe(
     "/account?tab=admin&section=tools",

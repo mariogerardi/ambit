@@ -173,8 +173,7 @@ export const DANUBE_JOURNEY: Journey = {
       title: "The first capital downstream.",
       leadIn: "Follow the river east into Austria.",
       prompt: "Drop a pin in Vienna.",
-      instruction:
-        "Within 50 km counts. Aim for the 15 km bullseye; 30 km and 50 km also count.",
+      instruction: "",
       mode: "pin",
       rule: {
         type: "pin-distance",
@@ -308,7 +307,7 @@ export const DANUBE_JOURNEY: Journey = {
       title: "A river between two countries.",
       leadIn: "Travel southeast into the Iron Gates gorge.",
       prompt: "Which two countries border this stretch of the Danube?",
-      instruction: "Choose both countries.",
+      instruction: "",
       mode: "choice-multiple",
       count: 2,
       choices: [

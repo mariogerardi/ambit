@@ -821,56 +821,62 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(document.querySelector('[role="dialog"]')).toBeNull();
     expect(host.querySelector("canvas")).toBe(earth);
   });
-  it("switches and syncs themes without replacing Earth or changing its current selection and view", async () => {
-    history.replaceState(null, "", "/explore");
-    await mount();
-    await act(async () => probe.props!.onSelect(member("wurl:CAN")));
-    const earth = host.querySelector("canvas");
-    const focusCount = probe.focus.length;
-    const states = probe.props!.states;
-    const motion = probe.props!.motion;
-    await click("Open menu");
-    const menuTrigger =
-      host.querySelector<HTMLButtonElement>(".app-menu-toggle")!;
-    await act(async () => menuTrigger.focus());
-    const paper = host.querySelector<HTMLInputElement>(
-      'input[name="app-theme"][value="paper"]',
-    )!;
-    const choice = paper.closest<HTMLLabelElement>("label")!;
-    // A pointer press on the visible label can blur the trigger before the
-    // label's default click forwards activation to its hidden radio input.
-    await act(async () => {
-      choice.dispatchEvent(new Event("pointerdown", { bubbles: true }));
-      menuTrigger.blur();
-    });
-    expect(choice.isConnected).toBe(true);
-    await act(async () => choice.click());
-    expect(readTheme()).toBe("paper");
-    expect(document.documentElement.dataset.theme).toBe("paper");
-    expect(probe.props!.palette).toBe("paper");
-    expect(probe.props!.states).toEqual(states);
-    expect(probe.props!.motion).toBe(motion);
-    expect(probe.focus).toHaveLength(focusCount);
-    expect(host.querySelector("canvas")).toBe(earth);
-    expect(probe.mounts).toBe(1);
-    await act(async () => paper.focus());
-    expect(host.querySelector(".app-menu-content")).not.toBeNull();
-    await act(async () =>
-      host.querySelector<HTMLButtonElement>(".experience-logo")!.focus(),
-    );
-    expect(host.querySelector(".app-menu-content")).toBeNull();
-    localStorage.setItem(
-      THEME_KEY,
-      JSON.stringify({ version: 1, theme: "dusk" }),
-    );
-    await act(async () =>
-      dispatchEvent(new StorageEvent("storage", { key: THEME_KEY })),
-    );
-    expect(probe.props!.palette).toBe("dusk");
-    await click("Home");
-    expect(probe.props!.palette).toBe("dusk");
-    expect(probe.mounts).toBe(1);
-  });
+  it.each([undefined, "owner"])(
+    "switches and syncs themes from Appearance without replacing Earth (account: %s)",
+    async (subject) => {
+      authProbe.subject = subject;
+      history.replaceState(null, "", "/explore");
+      await mount();
+      await act(async () => probe.props!.onSelect(member("wurl:CAN")));
+      const earth = host.querySelector("canvas");
+      await click("Account");
+      await click("Appearance");
+      expect(location.pathname + location.search).toBe(
+        "/account?tab=appearance",
+      );
+      const heading = host.querySelector(
+        subject ? ".account-heading" : ".account-panel h1",
+      );
+      const focusCount = probe.focus.length;
+      const states = probe.props!.states;
+      const motion = probe.props!.motion;
+      await click("Open menu");
+      expect(host.querySelector(".app-menu-content .theme-picker")).toBeNull();
+      await click("Close menu");
+      const paper = host.querySelector<HTMLInputElement>(
+        'input[name="app-theme"][value="paper"]',
+      )!;
+      await act(async () => paper.closest<HTMLLabelElement>("label")!.click());
+      expect(readTheme()).toBe("paper");
+      expect(document.documentElement.dataset.theme).toBe("paper");
+      expect(probe.props!.palette).toBe("paper");
+      expect(probe.props!.states).toEqual(states);
+      expect(probe.props!.motion).toBe(motion);
+      expect(probe.focus).toHaveLength(focusCount);
+      expect(host.querySelector("canvas")).toBe(earth);
+      expect(
+        host.querySelector(subject ? ".account-heading" : ".account-panel h1"),
+      ).toBe(heading);
+      expect(paper.checked).toBe(true);
+      expect(probe.mounts).toBe(1);
+      localStorage.setItem(
+        THEME_KEY,
+        JSON.stringify({ version: 1, theme: "dusk" }),
+      );
+      await act(async () =>
+        dispatchEvent(new StorageEvent("storage", { key: THEME_KEY })),
+      );
+      expect(probe.props!.palette).toBe("dusk");
+      expect(
+        host.querySelector<HTMLInputElement>(
+          'input[name="app-theme"][value="dusk"]',
+        )!.checked,
+      ).toBe(true);
+      await click("Home");
+      expect(probe.props!.palette).toBe("dusk");
+      expect(probe.mounts).toBe(1);
+    },
+  );
 
   it.each(
     (["finished", "failed"] as const).flatMap((phase) =>
@@ -2983,18 +2989,43 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       host.querySelector('.app-menu-content [aria-current="page"]')
         ?.textContent,
     ).toBe("Home");
-    const credits =
-      host.querySelector<HTMLDetailsElement>(".app-menu-credits")!;
-    await act(async () =>
-      credits.querySelector<HTMLElement>("summary")!.click(),
-    );
-    expect(credits.open).toBe(true);
+    await click("World credits");
+    const credits = document.querySelector<HTMLElement>(
+      '.world-credits-dialog[role="dialog"][aria-modal="true"]',
+    )!;
+    expect(credits).not.toBeNull();
     expect(credits.textContent).toContain("Natural Earth");
+    expect(credits.querySelector('a[href="/NOTICE.txt"]')).not.toBeNull();
+    expect(
+      credits.querySelector('a[href="/geography/danube-context.v1.json"]'),
+    ).not.toBeNull();
+    expect(host.querySelector(".app-menu-content")).toBeNull();
+    expect(host.querySelector("main")?.hasAttribute("inert")).toBe(true);
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.activeElement).toBe(credits);
+    const controls = credits.querySelectorAll<HTMLElement>("button, a[href]");
+    await act(async () =>
+      dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" })),
+    );
+    expect(document.activeElement).toBe(controls[0]);
+    await act(async () =>
+      dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true }),
+      ),
+    );
+    expect(document.activeElement).toBe(controls[controls.length - 1]);
+    await act(async () =>
+      dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" })),
+    );
+    expect(document.activeElement).toBe(controls[0]);
     await act(async () =>
       dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })),
     );
     expect(host.querySelector(".app-menu-content")).toBeNull();
     expect(document.activeElement).toBe(host.querySelector(".app-menu-toggle"));
+    expect(document.querySelector(".world-credits-dialog")).toBeNull();
+    expect(host.querySelector("main")?.hasAttribute("inert")).toBe(false);
+    expect(document.body.style.overflow).toBe("");
     await click("Open menu");
     await act(async () =>
       canvas!.dispatchEvent(new Event("pointerdown", { bubbles: true })),
@@ -3005,6 +3036,28 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector(".app-menu-content")).toBeNull();
     expect(host.querySelector("canvas")).toBe(canvas);
   });
+  it.each(["button", "backdrop"])(
+    "closes world credits with its %s",
+    async (method) => {
+      await mount();
+      await click("Open menu");
+      await click("World credits");
+      await act(async () =>
+        document
+          .querySelector<HTMLElement>(
+            method === "button"
+              ? '[aria-label="Close world credits"]'
+              : ".world-credits-backdrop",
+          )!
+          .click(),
+      );
+      expect(document.querySelector(".world-credits-dialog")).toBeNull();
+      expect(document.activeElement).toBe(
+        host.querySelector(".app-menu-toggle"),
+      );
+      expect(document.body.style.overflow).toBe("");
+    },
+  );
   it.each([false, true])(
     "adjusts rotation speed without restarting rotation (mobile: %s)",
     async (mobile) => {

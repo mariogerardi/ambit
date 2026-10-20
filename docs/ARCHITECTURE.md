@@ -207,15 +207,20 @@ The editor checks availability and suggests alternatives, while saving remains
 protected against concurrent claims. Profile links prefill the friend finder.
 Activity pages contain at most 24 friends, with bounded server fan-out and cached
 summaries invalidated by progress sync. See [services](SERVICES.md) for API behavior.
-Dashboard, Profile, Friends, and the protected Admin tab share one persistent
+Dashboard, Profile, Friends, Appearance, and the protected Admin tab share one persistent
 account header and navigation bar. `/account?tab=dashboard`, `profile`, `friends`,
-or `admin` selects the content; Admin uses `section=schedule`, `feedback`, or
+`appearance`, or `admin` selects the content; Admin uses `section=schedule`, `feedback`, or
 `tools` for its compact secondary controls. Tab navigation updates browser history
 without remounting the account shell or replaying its entry animation. Admin mounts
 on first use and stays mounted when switching account tabs, retaining its editor.
 Legacy `/admin` links replace their URL with the matching account destination.
 The menu groups Home, Journey (with Archive nested beneath it), Explore, and Study
-above feedback, credits, and theme settings. Its heading is simply “Ambit”. Explore opens search
+above feedback and World credits. The Archive hierarchy connector sits outside
+the row's selected/hover background. World credits opens a modal with source and
+license links, trapped keyboard focus, Escape/backdrop dismissal and focus return.
+Theme settings live in the account's Appearance tab and save on this device;
+guests can open Appearance alongside the sign-in Profile tab. The menu heading
+is simply “Ambit”. Explore opens search
 through the underlined introduction link. Selected-country
 details keep the input out of their layout; “Search another country” opens a
 floating search box without clearing or reframing the current selection. A shared

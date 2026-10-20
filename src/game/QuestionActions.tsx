@@ -1,7 +1,7 @@
 import { ActionIcon } from "../app/ActionIcon";
 import type { Question } from "./questionContracts";
 import type { HelpStage } from "./guidance";
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 
 /** Shared footer; help is authored per question and never changes submission rules. */
 export function QuestionActions({
@@ -12,6 +12,7 @@ export function QuestionActions({
   showSubmit = true,
   guidance,
   pointScoring = false,
+  mapKey,
 }: {
   disabled?: boolean;
   label?: string;
@@ -19,6 +20,7 @@ export function QuestionActions({
   onSubmit?(): void;
   showSubmit?: boolean;
   pointScoring?: boolean;
+  mapKey?: ReactNode;
   guidance?: {
     content: NonNullable<Question["guidance"]>;
     stage?: HelpStage;
@@ -63,6 +65,7 @@ export function QuestionActions({
           )}
         </aside>
       )}
+      {mapKey}
       <div className="question-answer-actions">
         <button
           type="button"

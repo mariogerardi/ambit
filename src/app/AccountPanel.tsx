@@ -3,6 +3,8 @@ import { useAccount } from "../services/accounts";
 import { AccountDashboard } from "./AccountDashboard";
 import type { DailyProgress } from "./dailyProgress";
 import type { StudySave } from "../study/engine";
+import { AccountTabs } from "./AccountTabs";
+import { accountTabLink } from "./accountNavigation";
 import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
 export function AccountPanel({
   sync,
@@ -12,6 +14,7 @@ export function AccountPanel({
   defaultComparison,
   onNavigate,
   adminContent,
+  appearanceContent,
 }: {
   defaultComparison?: ComparisonTarget | null;
   intent?: AccountIntent;
@@ -20,6 +23,7 @@ export function AccountPanel({
   sync?: { status: string; message: string; retry(): void };
   onNavigate?(url: string): void;
   adminContent?: ReactNode;
+  appearanceContent?: ReactNode;
 }) {
   const account = useAccount();
   if (!account.loading && account.user)
@@ -37,6 +41,7 @@ export function AccountPanel({
           busy={account.busy}
           onNavigate={onNavigate}
           adminContent={adminContent}
+          appearanceContent={appearanceContent}
         />
         {account.error && (
           <p className="account-auth-error" role="alert">
@@ -68,38 +73,50 @@ export function AccountPanel({
               ? "You’re signed in."
               : "Welcome to Ambit."}
       </h1>
-      {account.loading ? (
-        <p role="status">Checking your account…</p>
+      <AccountTabs
+        guest
+        active={intent?.tab === "appearance" ? "appearance" : "profile"}
+        onSelect={(tab) => onNavigate?.(accountTabLink(tab))}
+      />
+      {intent?.tab === "appearance" ? (
+        appearanceContent
       ) : (
         <>
-          <p>
-            Create an account or sign in. You can also keep playing as a guest.
-          </p>
-          <p>
-            Guest progress is saved on this device. Sign in to save Journey and
-            Study progress across devices.
-          </p>
-          <div className="account-actions">
-            <button
-              className="primary-button"
-              data-dd-action-name="Account Sign In"
-              disabled={account.busy}
-              onClick={() => void account.signIn()}
-            >
-              Sign in
-            </button>
-            <button
-              className="quiet-button tertiary-action"
-              data-dd-action-name="Account Create Account"
-              disabled={account.busy}
-              onClick={() => void account.signIn(true)}
-            >
-              Create account
-            </button>
-          </div>
+          {account.loading ? (
+            <p role="status">Checking your account…</p>
+          ) : (
+            <>
+              <p>
+                Create an account or sign in. You can also keep playing as a
+                guest.
+              </p>
+              <p>
+                Guest progress is saved on this device. Sign in to save Journey
+                and Study progress across devices.
+              </p>
+              <div className="account-actions">
+                <button
+                  className="primary-button"
+                  data-dd-action-name="Account Sign In"
+                  disabled={account.busy}
+                  onClick={() => void account.signIn()}
+                >
+                  Sign in
+                </button>
+                <button
+                  className="quiet-button tertiary-action"
+                  data-dd-action-name="Account Create Account"
+                  disabled={account.busy}
+                  onClick={() => void account.signIn(true)}
+                >
+                  Create account
+                </button>
+              </div>
+            </>
+          )}
+          {account.error && <p role="alert">{account.error}</p>}
         </>
       )}
-      {account.error && <p role="alert">{account.error}</p>}
     </section>
   );
 }

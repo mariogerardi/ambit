@@ -68,13 +68,33 @@ The renderer joins `leadIn` and `prompt` into one visual paragraph with equal fo
 
 - **`leadIn` is optional.** Use it for meaningful movement, a necessary premise, or conceptual context. Avoid filler such as “Head to West Africa” when the globe and prompt already establish that.
 - **`prompt` is one clear task.** State what the player has to answer, not an essay about the topic.
-- **`instruction` explains nonobvious interaction mechanics**, exact count/order, or spatial tolerance. Do not use it to repeat what the controls already convey. “Choose two countries” under a clearly labeled two-selection choice UI is redundant; “Tap both countries on the globe” may be necessary if the map is the control.
+- **`instruction` supplies only a missing interaction cue or genuine exception.** Leave it empty when the prompt or visible control already explains the action. “Tap the island” can clarify a globe response; repeating “Tap a territory” after the prompt already says to tap is redundant. Preserve necessary qualifications such as hidden boundaries, overseas departments and which borders count.
 - **Overlines/step labels describe the content** consistently (`Capital`, `Lake`, `Border`), rather than unpredictably changing to a method (`Drop a pin`). The method should be clear from the primary control.
 - Move incidental dates, statistics, and long explanations into the reveal unless they are needed for the task.
 
 Example: **Context:** “Downstream, Buda and Pest face each other across the river.” **Task:** “What capital brings the two banks together?” Render as a single paragraph with different text colors; do not add a second heading or a vertical break.
 
 A question may be short. Do not fill every content field to satisfy a template.
+
+Supporting copy is one shared paragraph at 14px across Journey and Study questions.
+Instructions stay muted; immediate-commitment notices retain the accent color in
+the same inline flow and font size. Let the paragraph wrap naturally on narrow
+screens. Do not add separate paragraphs for “Your first answer is final,” generic
+pin movement instructions, or controls that already have a Submit button.
+
+For a distance pin, the shared control derives “Aim for the bullseye (within
+100 km)!” from the rule. All acceptance bands remain available before answering in
+the free question-information menu under **Accuracy**; opening it does not use a
+hint or lower points. Authors provide the radii, not another prose version of
+them. Numeric sliders use the same convention. Territory-containment pins do not
+receive a distance bullseye. Review the combined rendered prompt, supporting copy
+and control text, rather than reviewing the authored fields in isolation.
+
+Feedback headings are a brief reaction: one to four words, such as “Well
+spotted.” or “Very close.” Apply this to `correctFeedback` and accuracy-tier
+`feedback` too. Put discoveries in the reveal body; omit interface narration
+such as “The missing boundaries are back.” Live map legends belong after the
+player’s selection and hint text, immediately above the hint/assist buttons.
 
 Write for the player discovering a place or relationship. Source-review status,
 rendering decisions, answer-validation rationale, and explanations of why the
@@ -118,11 +138,13 @@ For distance pins, design four separate decisions:
 Choose the radius for the intended skill, geographic scale, available clues, and
 small-screen input precision. Audit nearby plausible locations and both sides of
 each boundary. A larger radius intentionally changes the challenge; do not use it
-to compensate for poor framing or unusable controls. State the acceptance rule
-before submission; show the target and rings only on reveal. Help must preserve it.
+to compensate for poor framing or unusable controls. Make the acceptance rule
+available before submission in the free **Accuracy** information; show the target
+and rings only on reveal. Help must preserve it.
 Author three accuracy bands for distance pins: bullseye, close, and within range.
-State all three band distances before submission, while keeping target rings
-reveal-only.
+The shared bullseye line and **Accuracy** information disclose the bands before
+submission, while keeping target rings reveal-only. Do not repeat those distances
+in `instruction`.
 Choose useful inner radii for the subject; the outer band must end at the acceptance
 radius. Territory-inside pins grade an area, so do not invent concentric distance
 tiers for them.

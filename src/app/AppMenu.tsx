@@ -1,7 +1,5 @@
 import { ActionIcon } from "./ActionIcon";
 import { useEffect, useRef, useState } from "react";
-import { ThemePicker } from "../theme/ThemePicker";
-import type { ThemeId } from "../theme/themes";
 
 export function AppMenu({
   onJourney,
@@ -9,16 +7,14 @@ export function AppMenu({
   onFeedback,
   path,
   onNavigate,
-  theme,
-  onTheme,
+  onCredits,
 }: {
   onJourney?(): void;
   journeyReady?: boolean;
   onFeedback?(): void;
   path: string;
   onNavigate(path: string): void;
-  theme: ThemeId;
-  onTheme(theme: ThemeId): void;
+  onCredits(): void;
 }) {
   const [open, setOpen] = useState(false);
   const shell = useRef<HTMLDivElement>(null);
@@ -111,15 +107,19 @@ export function AppMenu({
                 <ActionIcon name="journey" />
                 <span>Journey</span>
               </button>
-              <button
-                className="app-menu-subitem"
-                data-dd-action-name="Menu Archive"
-                aria-current={path.startsWith("/archive") ? "page" : undefined}
-                onClick={() => navigate("/archive")}
-              >
-                <ActionIcon name="archive" />
-                <span>Archive</span>
-              </button>
+              <div className="app-menu-subnav">
+                <button
+                  className="app-menu-subitem"
+                  data-dd-action-name="Menu Archive"
+                  aria-current={
+                    path.startsWith("/archive") ? "page" : undefined
+                  }
+                  onClick={() => navigate("/archive")}
+                >
+                  <ActionIcon name="archive" />
+                  <span>Archive</span>
+                </button>
+              </div>
             </div>
             <button
               data-dd-action-name="Menu Explore"
@@ -151,37 +151,17 @@ export function AppMenu({
                 Send feedback
               </button>
             )}
-            <details className="app-menu-credits">
-              <summary data-dd-action-name="Menu World Credits">
-                World credits
-              </summary>
-              <p>
-                Decorative geography: Natural Earth (public domain). Capitals,
-                cities &amp; continent membership: GeoNames (CC BY 4.0). Flags:
-                public-domain SVGs from Wikimedia Commons. Regional boundaries:
-                geoBoundaries / U.S. Census Bureau (CC BY 4.0). Map and clue
-                assets are served locally. Danube route: OpenStreetMap
-                contributors (ODbL). Question sources appear after answering.
-              </p>
-              <a
-                data-dd-action-name="Menu Source Notices"
-                href="/NOTICE.txt"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Full source and license notices
-              </a>
-              <a
-                data-dd-action-name="Menu Danube Data"
-                href="/geography/danube-context.v1.json"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Danube map data (ODbL)
-              </a>
-            </details>
+            <button
+              data-dd-action-name="Menu World Credits"
+              onClick={() => {
+                setOpen(false);
+                trigger.current?.focus();
+                onCredits();
+              }}
+            >
+              World credits
+            </button>
           </div>
-          <ThemePicker value={theme} onChange={onTheme} />
         </nav>
       )}
     </div>

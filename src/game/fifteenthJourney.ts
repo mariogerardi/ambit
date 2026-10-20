@@ -127,7 +127,7 @@ export const FIFTEENTH_JOURNEY: Journey = {
           EST: "Circle back toward the Baltic for our final landing.",
         }[code],
         instruction:
-          "Country borders are hidden. Estimate the country’s location and place a pin.",
+          "Country borders are hidden; estimate the country’s location.",
         mode: "pin",
         rule: { type: "pin-inside", ids: [`wurl:${code}`] },
         count: 1,

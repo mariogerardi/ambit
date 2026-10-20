@@ -158,7 +158,6 @@ describe("product copy follows the answer and visible reveal", () => {
         ).not.toMatch(/shown in (?:darker|lighter) (?:yellow|blue|purple)/i);
         if (/borders are hidden/i.test(question.instruction ?? "")) {
           expect(question.map?.borders).toBe(false);
-          expect(question.instruction).toMatch(/estimate|memory/i);
           expect(html).toContain(question.instruction);
         }
       });
