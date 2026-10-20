@@ -623,7 +623,13 @@
   .experience .profile-toggle {
     transform: translateY(10px);
     width: 44px;
-    padding: 10px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 0;
+    border-radius: 50%;
+    flex: 0 0 44px;
     justify-content: center;
   }
   .experience .profile-toggle > span:last-child:not(.profile-avatar) {

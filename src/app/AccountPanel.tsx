@@ -10,12 +10,16 @@ export function AccountPanel({
   study,
   intent,
   defaultComparison,
+  onNavigate,
+  adminContent,
 }: {
   defaultComparison?: ComparisonTarget | null;
   intent?: AccountIntent;
   daily?: DailyProgress;
   study?: StudySave;
   sync?: { status: string; message: string; retry(): void };
+  onNavigate?(url: string): void;
+  adminContent?: ReactNode;
 }) {
   const account = useAccount();
   if (!account.loading && account.user)
@@ -31,6 +35,8 @@ export function AccountPanel({
           sync={sync}
           onSignOut={() => void account.signOut()}
           busy={account.busy}
+          onNavigate={onNavigate}
+          adminContent={adminContent}
         />
         {account.error && (
           <p className="account-auth-error" role="alert">
@@ -49,6 +55,7 @@ export function AccountPanel({
         )}
       </>
     );
+  if (intent?.tab === "admin" && adminContent) return adminContent;
   return (
     <section className="info-view account-panel" aria-label="Account">
       <span className="overline">YOUR ACCOUNT</span>

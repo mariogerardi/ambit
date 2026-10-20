@@ -75,6 +75,12 @@ The following modules own their own lifetimes and can be read independently:
   `camera.ts` still owns animation, cancellation and live viewport fitting.
 - [`HomePanel.tsx`](../src/app/HomePanel.tsx): today's Journey title, progress,
   Play/Resume/View result action and navigation; readiness is supplied by the shell.
+- [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Feedback/Tools tabs, calendar
+  selection from the October 11 opening date, searchable Journey picker, explicit assignment, and compact reset
+  tools. Tabs retain the editor; unpublished selections survive navigation within
+  the browser tab through session storage. Date/month switches confirm before
+  discarding a draft. The shell supplies protected feedback and account reset;
+  choosing a Journey alone never publishes or alters a player's attempt.
 - [`JourneyArchive.tsx`](../src/app/JourneyArchive.tsx) and [`archiveDates.ts`](../src/app/archiveDates.ts): public monthly archive, fixed October 11, 2026 opening date, historical assignment/edition resolution, and dated play routes. Missing history is unavailable, never replaced by a new seeded choice. The route date owns the visible attempt independently of the shared `activeDate` pointer.
 - [`useStudyPresentation.ts`](../src/study/useStudyPresentation.ts): declarative
   Study globe state for the builder preview, visible session and summary review.
@@ -201,8 +207,15 @@ The editor checks availability and suggests alternatives, while saving remains
 protected against concurrent claims. Profile links prefill the friend finder.
 Activity pages contain at most 24 friends, with bounded server fan-out and cached
 summaries invalidated by progress sync. See [services](SERVICES.md) for API behavior.
-The menu groups Home, Journey, Explore, and Study above feedback, admin,
-credits, and theme settings. Its heading is simply “Ambit”. Explore opens search
+Dashboard, Profile, Friends, and the protected Admin tab share one persistent
+account header and navigation bar. `/account?tab=dashboard`, `profile`, `friends`,
+or `admin` selects the content; Admin uses `section=schedule`, `feedback`, or
+`tools` for its compact secondary controls. Tab navigation updates browser history
+without remounting the account shell or replaying its entry animation. Admin mounts
+on first use and stays mounted when switching account tabs, retaining its editor.
+Legacy `/admin` links replace their URL with the matching account destination.
+The menu groups Home, Journey (with Archive nested beneath it), Explore, and Study
+above feedback, credits, and theme settings. Its heading is simply “Ambit”. Explore opens search
 through the underlined introduction link. Selected-country
 details keep the input out of their layout; “Search another country” opens a
 floating search box without clearing or reframing the current selection. A shared

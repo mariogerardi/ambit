@@ -29,8 +29,22 @@ Cognito access tokens with `openid` scope, and the Lambda checks group membershi
 Hiding a menu item is not the API authorization boundary. No password or account
 is created on the owner's behalf: use **Create account** and verify that address.
 
-The admin view offers shared Journey scheduling, feedback review, and **Clear my
-Journey attempt**. Clearing asks for confirmation and removes the signed-in
+The Admin account tab opens on **Schedule**, with compact secondary controls for
+**Feedback** and **Tools**. These sections have URLs under
+`/account?tab=admin&section=...`; legacy `/admin` links redirect there. Select a
+calendar day, open **Choose a Journey**, then search/filter the selectable catalog
+and review the draft before assigning it. Previews open in a separate tab. Month
+navigation keeps the editor on a date in the displayed month; changing dates asks
+before discarding an unpublished choice. Drafts survive leaving Admin within the
+same browser tab using session storage and are removed after publication or
+discard. Calendar markers distinguish manual, locked automatic, and provisional
+automatic assignments. On mobile, selecting a date brings its editor into view.
+
+Scheduling starts on October 11, 2026, matching the public Archive. Earlier
+calendar cells have no Journey and cannot be selected or assigned.
+
+**Clear my Journey attempt** is a compact entry in the **Tools** tab. Clearing
+asks for confirmation and removes the signed-in
 admin's current-day attempt, including its answers, score, and help use. Other
 dates and users remain intact. Start again from Home to use the currently
 scheduled Journey. The reset saves locally and synchronizes through the existing
@@ -65,7 +79,10 @@ frontend. No table/schema migration or rewritten historical schedule is required
 
 The Account screen shows daily Journey totals, a calendar-day Journey streak,
 Study completion totals and answer accuracy. It keeps Dashboard, Profile and
-Friends tabs; Journey/session history, Study setup presets, resume actions and
+Friends tabs, plus a protected Admin tab for administrators. Each tab updates its
+`/account?tab=...` URL and supports refresh and Back/Forward. The header and tab
+bar remain mounted across switches, preserving profile and schedule drafts.
+Journey/session history, Study setup presets, resume actions and
 Challenges are not shown on Account. Account and Admin scroll with the page.
 Account and Admin use a static globe illustration behind the content, while the hidden
 WebGL renderer is paused and kept mounted for returning to play.

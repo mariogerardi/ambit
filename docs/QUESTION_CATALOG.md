@@ -41,7 +41,9 @@ rotation is preserved only for cutover history in
 [`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). See the historical
 [Journey review](JOURNEY_REVIEW.md) for earlier keep/scrap decisions; current IDs,
 availability and routes come from `journeyIndex.json`. Results use Home/Study as primary exits,
-with daily replay secondary and available only to admins. A results flyover follows answer stops in round order and
+with replay available only on practice routes. Daily and Archive results retain the
+saved run for all players, including admins; Admin Tools provides the separate
+explicit current-day reset. A results flyover follows answer stops in round order and
 loops; player interaction or reduced motion interrupts it.
 
 The Russia-neighbor Journey asks for pins in Finland, North Korea, Mongolia,

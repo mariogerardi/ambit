@@ -140,11 +140,27 @@ test(
         );
         assert.ok(!file.path.includes(".env"));
       }
+      for (const input of manifest.inputs) {
+        const content = await readFile(path.join(ROOT, input.path));
+        assert.equal(content.length, input.bytes);
+        assert.equal(
+          createHash("sha256").update(content).digest("hex"),
+          input.sha256,
+        );
+      }
       const kit = await readFile(
         path.join(directory, "AUTHORING_KIT.md"),
         "utf8",
       );
       assert.match(kit, /Do not force increasing difficulty/);
+      assert.match(
+        kit,
+        /Daily and Archive results have no replay action, including for admins/,
+      );
+      assert.match(
+        kit,
+        /closing heading follows earned points and is shared UI/,
+      );
       const palette = JSON.parse(
         kit.match(/## Semantic map colors[^]*?```json\n([^]*?)\n```/)[1],
       );

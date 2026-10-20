@@ -177,6 +177,21 @@ it("routes query links and rejects invalid comparison identities", () => {
     accountIntent(link.replace("version=2", "version=0")).comparison,
   ).toBeUndefined();
   expect(accountIntent("/account?friend=Mars").friend).toBe("mars");
+  expect(accountIntent("/account?tab=profile")).toEqual({ tab: "profile" });
+  expect(accountIntent("/account?tab=dashboard")).toEqual({ tab: "dashboard" });
+  expect(modeForPath("/admin")).toBe("account");
+  expect(accountIntent("/admin?section=tools")).toEqual({
+    tab: "admin",
+    section: "tools",
+  });
+  expect(accountIntent("/account?tab=admin&section=feedback")).toEqual({
+    tab: "admin",
+    section: "feedback",
+  });
+  expect(accountIntent("/account?tab=admin&section=unknown")).toEqual({
+    tab: "admin",
+    section: "schedule",
+  });
 });
 it("reads all activity pages, deduplicates friends, and rejects repeating cursors", async () => {
   const calls: string[] = [];

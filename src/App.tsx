@@ -14,7 +14,7 @@ import {
 } from "./app/archiveDates";
 import { LoadingScreen } from "./app/LoadingScreen";
 import { JourneySocial } from "./app/JourneySocial";
-import { accountIntent } from "./app/accountNavigation";
+import { accountIntent, accountTabLink } from "./app/accountNavigation";
 import {
   Suspense,
   lazy,
@@ -149,6 +149,12 @@ export function App() {
   const [path, setPath] = useState(location.pathname + location.search);
   const pathname = path.split(/[?#]/)[0];
   const accountNavigation = useMemo(() => accountIntent(path), [path]);
+  useEffect(() => {
+    if (pathname !== "/admin") return;
+    const canonical = accountTabLink("admin", accountNavigation.section);
+    history.replaceState(null, "", canonical);
+    setPath(canonical);
+  }, [pathname, accountNavigation.section]);
   const requestedMode = modeForPath(path);
   const restricted = requestedMode === "practice" && !account.admin;
   const mode = restricted ? "home" : requestedMode;
@@ -191,7 +197,7 @@ export function App() {
   );
   const unrestricted =
     mode === "home" ||
-    mode === "admin" ||
+    mode === "account" ||
     (mode === "study" && (studySetup || !study.session));
   const displayLayers =
     mode === "explore" || mode === "archive"
@@ -320,13 +326,11 @@ export function App() {
   const [studyCustomizing, setStudyCustomizing] = useState(false);
   const panelOnly =
     mode === "account" ||
-    mode === "admin" ||
     (mobile.enabled &&
       mode === "study" &&
       (studyEditorOpen || studyCustomizing));
   const pageLayout =
     mode === "account" ||
-    mode === "admin" ||
     (mobile.enabled && mode === "study" && studyEditorOpen);
   const [studyPreview, setStudyPreview] = useState<StudySettings>();
   const studying =
@@ -774,6 +778,30 @@ export function App() {
       />
     ) : mode === "account" ? (
       <AccountPanel
+        onNavigate={navigate}
+        adminContent={
+          <AdminAccess onAccount={() => navigate("/account")}>
+            <div className="admin-content">
+              <Suspense fallback={<p role="status">Opening admin tools…</p>}>
+                <AdminPanel
+                  embedded
+                  section={accountNavigation.section ?? "schedule"}
+                  onSectionChange={(section) =>
+                    navigate(accountTabLink("admin", section))
+                  }
+                  date={today}
+                  schedule={schedule}
+                  attempt={daily.attempts[today]}
+                  resetReady={
+                    !!subject && dailyLoaded && cloudSave.hydrated && canSave
+                  }
+                  onResetAttempt={() => account.admin && resetAttempt(today)}
+                  feedback={<FeedbackReview />}
+                />
+              </Suspense>
+            </div>
+          </AdminAccess>
+        }
         defaultComparison={
           schedule.ready
             ? {
@@ -806,21 +834,6 @@ export function App() {
               }
         }
       />
-    ) : mode === "admin" ? (
-      <AdminAccess onAccount={() => navigate("/account")}>
-        <div className="admin-content">
-          <AdminPanel
-            date={today}
-            schedule={schedule}
-            attempt={daily.attempts[today]}
-            resetReady={
-              !!subject && dailyLoaded && cloudSave.hydrated && canSave
-            }
-            onResetAttempt={() => account.admin && resetAttempt(today)}
-          />
-          <FeedbackReview />
-        </div>
-      </AdminAccess>
     ) : mode === "explore" ? (
       <ExplorePanel
         onContentHeight={mobile.enabled ? setExploreContentHeight : undefined}
@@ -943,7 +956,7 @@ export function App() {
       </section>
     ) : context ? (
       <GameShell
-        canReplay={!archiveDate && (mode !== "daily" || account.admin)}
+        canReplay={mode === "practice"}
         contextNavigation={
           archiveDate ? (
             <div className="journey-archive-context">
@@ -958,18 +971,7 @@ export function App() {
           ) : undefined
         }
         onReplay={() => {
-          if (mode === "daily") {
-            if (!account.admin) return;
-            setDaily((progress) =>
-              openDaily(
-                progress,
-                playDate,
-                true,
-                allJourneys,
-                schedule.schedule?.assignments,
-              ),
-            );
-          } else dispatch({ type: "start" });
+          if (mode === "practice") dispatch({ type: "start" });
         }}
         onReport={(questionId) =>
           setFeedback({
@@ -1065,7 +1067,7 @@ export function App() {
       data-panel-only={panelOnly || undefined}
     >
       <div className="experience-glow" aria-hidden="true" />
-      {(!webgl || mode === "account" || mode === "admin") && (
+      {(!webgl || mode === "account") && (
         <div className="account-earth" aria-hidden="true" />
       )}
       <div
@@ -1262,7 +1264,6 @@ export function App() {
             </span>
           </button>
           <AppMenu
-            admin={account.admin}
             onJourney={() => playDaily(today)}
             journeyReady={
               !!regions.length &&
@@ -1310,7 +1311,7 @@ export function App() {
         </div>
       )}
       <ModePanels
-        mode={path}
+        mode={mode === "account" ? "account" : path}
         animateExit={
           !(mode === "study" && (studyEditorOpen || studyCustomizing))
         }
@@ -1320,7 +1321,7 @@ export function App() {
         hidden={expanded}
         scrollKey={mobile.enabled ? mobileStep : undefined}
       >
-        <PanelBoundary key={path}>
+        <PanelBoundary key={mode === "account" ? "account" : path}>
           <Suspense
             fallback={
               <section className="info-view" role="status">

@@ -4,7 +4,6 @@ import { ThemePicker } from "../theme/ThemePicker";
 import type { ThemeId } from "../theme/themes";
 
 export function AppMenu({
-  admin = false,
   onJourney,
   journeyReady = true,
   onFeedback,
@@ -13,7 +12,6 @@ export function AppMenu({
   theme,
   onTheme,
 }: {
-  admin?: boolean;
   onJourney?(): void;
   journeyReady?: boolean;
   onFeedback?(): void;
@@ -96,18 +94,33 @@ export function AppMenu({
               <ActionIcon name="home" />
               <span>Home</span>
             </button>
-            <button
-              data-dd-action-name="Menu Journey"
-              aria-current={path === "/daily" ? "page" : undefined}
-              disabled={!journeyReady}
-              onClick={() => {
-                setOpen(false);
-                onJourney ? onJourney() : navigate("/daily");
-              }}
+            <div
+              className="app-menu-journeys"
+              role="group"
+              aria-label="Journeys"
             >
-              <ActionIcon name="journey" />
-              <span>Journey</span>
-            </button>
+              <button
+                data-dd-action-name="Menu Journey"
+                aria-current={path === "/daily" ? "page" : undefined}
+                disabled={!journeyReady}
+                onClick={() => {
+                  setOpen(false);
+                  onJourney ? onJourney() : navigate("/daily");
+                }}
+              >
+                <ActionIcon name="journey" />
+                <span>Journey</span>
+              </button>
+              <button
+                className="app-menu-subitem"
+                data-dd-action-name="Menu Archive"
+                aria-current={path.startsWith("/archive") ? "page" : undefined}
+                onClick={() => navigate("/archive")}
+              >
+                <ActionIcon name="archive" />
+                <span>Archive</span>
+              </button>
+            </div>
             <button
               data-dd-action-name="Menu Explore"
               aria-current={path === "/explore" ? "page" : undefined}
@@ -126,13 +139,6 @@ export function AppMenu({
             </button>
           </div>
           <div className="app-menu-secondary">
-            <button
-              data-dd-action-name="Menu Archive"
-              aria-current={path.startsWith("/archive") ? "page" : undefined}
-              onClick={() => navigate("/archive")}
-            >
-              Journey archive
-            </button>
             {onFeedback && (
               <button
                 data-dd-action-name="Menu Send Feedback"
@@ -143,15 +149,6 @@ export function AppMenu({
                 }}
               >
                 Send feedback
-              </button>
-            )}
-            {admin && (
-              <button
-                data-dd-action-name="Menu Admin"
-                aria-current={path === "/admin" ? "page" : undefined}
-                onClick={() => navigate("/admin")}
-              >
-                Admin
               </button>
             )}
             <details className="app-menu-credits">

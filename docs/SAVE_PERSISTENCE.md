@@ -55,8 +55,9 @@ values before Study history can render them.
 Preference conflicts resolve per field using the latest logical revision. For the
 same Journey run, answered rounds/advanced phases take precedence over stale draft
 edits. Replays receive a new run ID and monotonically increasing start time, so a
-late edit from an old run cannot replace a fresh replay. Daily Journey replay is
-available only to admins; ordinary players can still view their completed result.
+late edit from an old run cannot replace a fresh replay. Daily and Archive results
+have no replay action, including for admins. Admins can explicitly clear today's
+attempt from the Tools tab; other players retain their completed result.
 
 In-place Journey facelifts can declare a `saveRevision` and prior receipt names.
 Daily save decoding and opening preserve submitted grades, stamp their original
@@ -84,10 +85,9 @@ its scheduled date contributes points and completed-Journey totals, but cannot
 retroactively fill a Daily streak. Completed public archive entries open results;
 players cannot overwrite them with a replay.
 
-The Journey's **Play again**
-action creates that new run rather than resetting the old run's forward-only state;
-it keeps the played Journey even when the admin's local override is absent on a
-second device. Selection pointers are
+The register layer still recognizes older replay runs and keeps the played Journey
+when merging them across devices. **Play again** is now offered only for practice
+Journeys outside the saved Daily/Archive flow. Selection pointers are
 independent of run progress, so restoring an earlier Journey also works without
 allowing a stale tab to change the chosen Journey. Conflicting answers at
 the same progress level resolve deterministically by revision; this is not a
