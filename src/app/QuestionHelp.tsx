@@ -3,10 +3,12 @@ import { InfoTooltip } from "./InfoTooltip";
 
 export function QuestionHelp({
   sources,
+  information,
   onReport,
   sourcesLocked = false,
 }: {
   sources?: ReactNode;
+  information?: ReactNode;
   sourcesLocked?: boolean;
   onReport?(): void;
 }) {
@@ -32,6 +34,7 @@ export function QuestionHelp({
     >
       {(close) => (
         <div className="question-help-options">
+          {information}
           {sources && (
             <details className="question-help-sources">
               <summary>Sources</summary>

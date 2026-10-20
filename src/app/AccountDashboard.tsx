@@ -63,6 +63,7 @@ export function AccountDashboard({
   defaultComparison,
   onNavigate,
   adminContent,
+  appearanceContent,
 }: {
   defaultComparison?: ComparisonTarget | null;
   intent?: AccountIntent;
@@ -76,6 +77,7 @@ export function AccountDashboard({
   busy?: boolean;
   onNavigate?(url: string): void;
   adminContent?: ReactNode;
+  appearanceContent?: ReactNode;
 }) {
   const intent = useMemo(
     () => suppliedIntent ?? accountIntent(location.pathname + location.search),
@@ -292,7 +294,7 @@ export function AccountDashboard({
         newFriends={friends.some((friend) => friend.status === "incoming")}
         onSelect={selectTab}
       />
-      <div hidden={tab === "admin"}>
+      <div hidden={tab === "admin" || tab === "appearance"}>
         {loading && <p role="status">Opening your account…</p>}
         {error && (
           <div className="account-message" role="alert">
@@ -712,6 +714,7 @@ export function AccountDashboard({
           </div>
         )}
       </div>
+      {tab === "appearance" && appearanceContent}
       {(tab === "admin" || adminVisited) && (
         <div hidden={tab !== "admin"}>{adminContent}</div>
       )}

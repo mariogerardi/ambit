@@ -214,11 +214,25 @@
   outline: none;
 }
 
-.question-instruction {
-  font-size: 11px;
-  line-height: 1.75;
+.question-support {
+  font: 400 14px/1.6 var(--font-ui);
   color: var(--ui-muted, #90afa8);
-  margin: 0 0 20px;
+  margin: 0 0 16px;
+}
+.question-support-commitment {
+  color: var(--ui-accent);
+}
+.question-accuracy {
+  font: 400 14px/1.6 var(--font-ui);
+}
+.question-help-sources > .question-accuracy > p {
+  font: inherit;
+  border: 0;
+  padding: 0;
+}
+.question-accuracy ul {
+  padding-left: 18px;
+  margin: 8px 0 0;
 }
 .quiet-button {
   font-size: 10px;
@@ -230,12 +244,6 @@
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin: 22px 0;
-}
-.order-instructions {
-  color: var(--ui-muted);
-  font-size: 10px;
-  line-height: 1.6;
-  margin: 18px 0 12px;
 }
 .order-slots {
   list-style: none;
@@ -968,10 +976,6 @@
     margin-bottom: 15px;
   }
 
-  .question-instruction {
-    font-size: 11px;
-    margin-bottom: 15px;
-  }
   .experience.phase-playing .board-tools,
   .experience.phase-feedback .board-tools {
     top: 120px;
@@ -1286,10 +1290,6 @@
 .answer-form > .primary-button {
   margin-top: 18px;
 }
-.pin-answer > .commit-note {
-  margin: 0;
-  color: var(--ui-muted);
-}
 .pin-answer-actions {
   display: flex;
   align-items: center;
@@ -1307,12 +1307,6 @@
   color: var(--ui-muted);
   font-size: 13px;
   line-height: 1.5;
-}
-.commit-note {
-  font-size: 10px;
-  line-height: 1.6;
-  color: var(--ui-accent, #c4b88a);
-  margin: 15px 0 0;
 }
 .committed-choices > p {
   font-size: 11px;
@@ -1354,6 +1348,45 @@
 }
 .typed-country-guess form {
   margin-top: 15px;
+}
+.answer-secondary-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  margin-top: 17px;
+  padding-top: 9px;
+}
+.answer-secondary-actions .typed-country-guess {
+  grid-area: 1 / 1 / 2 / -1;
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.answer-secondary-actions summary.tertiary-action {
+  width: fit-content;
+  justify-content: flex-start;
+  color: var(--ui-muted, #99b6a5);
+}
+.answer-secondary-actions:has(.answer-clear-selection) summary {
+  max-width: calc(100% - 120px);
+}
+.answer-secondary-actions summary::marker,
+.answer-secondary-actions summary::-webkit-details-marker {
+  display: none;
+  content: "";
+}
+.typing-disclosure-icon {
+  text-decoration: none;
+}
+.typed-country-guess[open] .typing-disclosure-icon {
+  transform: rotate(90deg);
+}
+.answer-clear-selection {
+  grid-area: 1 / 2;
+  justify-self: end;
+  position: relative;
 }
 .input-error {
   font-size: 11px;

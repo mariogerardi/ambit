@@ -156,7 +156,7 @@ export const FOURTH_JOURNEY: Journey = {
       leadIn:
         "A narrow strait connects the Atlantic Ocean with the Mediterranean Sea.",
       prompt: "Which country faces Spain across it?",
-      instruction: "Choose a country on the globe or below.",
+      instruction: "Tap a country.",
       mode: "map-single",
       count: 1,
       commitment: "immediate",
@@ -304,7 +304,7 @@ export const FOURTH_JOURNEY: Journey = {
       leadIn:
         "Along the Adriatic, a shared coastline meets the borders of a former federation.",
       prompt: "Which four of these countries were republics of Yugoslavia?",
-      instruction: "Select four countries on the globe.",
+      instruction: "Tap four countries.",
       mode: "map-multiple",
       count: 4,
       selection: { type: "ids", ids: ADRIATIC_CANDIDATES },
@@ -364,8 +364,7 @@ export const FOURTH_JOURNEY: Journey = {
       leadIn: "Continue east to Egypt.",
       prompt:
         "We’ve hidden the Suez Canal on this map. Drop a pin where ships enter it from the Mediterranean.",
-      instruction:
-        "Land within 150 km of the entrance. Aim for the 50 km bullseye; the 100 km and 150 km rings also count as correct.",
+      instruction: "",
       mode: "pin",
       count: 1,
       selection: { type: "none" },

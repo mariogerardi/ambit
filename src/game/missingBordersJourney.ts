@@ -173,7 +173,7 @@ export const MISSING_BORDERS_JOURNEY: Journey = {
   },
   description:
     "Five maps have been altered. Spot the territories hiding two—or three—countries, then watch their real boundaries return.",
-  rounds: definitions.map((definition, index): Question => {
+  rounds: definitions.map((definition): Question => {
     const targetId = `composite:missing-borders:${definition.slug}`;
     const targets = (codes: string[]) =>
       codes.map((code) => (code === "@" ? targetId : country(code)));
@@ -186,7 +186,7 @@ export const MISSING_BORDERS_JOURNEY: Journey = {
       resolvedLabel: definition.receipt,
       leadIn: definition.leadIn,
       prompt: definition.prompt,
-      instruction: index === 0 ? "Tap a territory on the globe to answer." : "",
+      instruction: "",
       mode: "merged-region-single",
       count: 1,
       commitment: "immediate",
@@ -208,7 +208,7 @@ export const MISSING_BORDERS_JOURNEY: Journey = {
       },
       explanation: definition.explanation,
       sources: [definition.source],
-      correctFeedback: "Well spotted. The missing boundaries are back.",
+      correctFeedback: "Well spotted.",
       scenes: {
         play: { focus: definition.focus },
         reveal: {

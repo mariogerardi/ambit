@@ -279,8 +279,13 @@ whenever changing answer modes, and make borderless difficulty explicit.
 Use the compact five-stop outline and review checklist in the crafting guide.
 The input format should fit the task; repeated mechanics and varied controls are
 both supported. `leadIn` is optional context joined to `prompt`, not a second
-heading. The shared control owns commitment notices; do not repeat them in
-`instruction`.
+heading. `QuestionSupport` owns a single 14px supporting paragraph with muted
+instructions and inline accent-colored commitment notices. Leave `instruction`
+empty unless it supplies a missing interaction cue or meaningful exception. Do
+not repeat an action already in the prompt or visible control. Distance pins and
+numeric sliders derive the short bullseye line from their rules; full acceptance
+bands are available in the free question-information **Accuracy** section before
+submission. Do not hand-author band numbers or pin movement boilerplate.
 
 Feedback displays the canonical answer once, with a short explanation. Submitted
 mistakes can be reviewed without listing unused distractors. Assignment controls

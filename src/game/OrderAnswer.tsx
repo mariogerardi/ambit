@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, Dispatch, PointerEvent } from "react";
+import type { CSSProperties, Dispatch, PointerEvent, ReactNode } from "react";
 import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questionContracts";
 import { canSubmit } from "./questionEvaluation";
@@ -14,11 +14,13 @@ export function OrderAnswer({
   context,
   game,
   dispatch,
+  mapKey,
 }: {
   question: Question;
   context: QuestionContext;
   game: GameState;
   dispatch: Dispatch<Action>;
+  mapKey?: ReactNode;
 }) {
   const [picked, setPicked] = useState<string>();
   const [dragging, setDragging] = useState<string>();
@@ -258,11 +260,6 @@ export function OrderAnswer({
     <div
       className={`order-puzzle${populated ? " order-populated" : ""}${matching ? " match-puzzle" : ""}`}
     >
-      <p className="order-instructions">
-        {populated
-          ? "Drag to swap, or select two cards."
-          : `Drag cards into the ${matching ? "roles" : "slots"}, or choose a card and then a ${matching ? "role" : "slot"}.${spareCount > 0 ? ` Leave ${spareCopy} aside.` : ""}`}
-      </p>
       {populated && question.orderGroupLabel && (
         <p className="order-group-title">{question.orderGroupLabel}</p>
       )}
@@ -287,6 +284,7 @@ export function OrderAnswer({
             : "Fill each slot before submitting."}
       </p>
       <QuestionActions
+        mapKey={mapKey}
         pointScoring
         guidance={guided}
         disabled={!canSubmit(question, context, game)}

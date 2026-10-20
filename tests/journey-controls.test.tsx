@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnswerForm } from "../src/game/AnswerForm";
 import { JOURNEY, COUNTRY_FACTS } from "./fixtures/engine/journey";
 import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
+import { SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsJourney";
 import { createQuestionContext } from "../src/game/questions";
 import type { Journey } from "../src/game/questions";
 import { gameReducer, initialGame } from "../src/game/state";
@@ -24,14 +25,17 @@ let root: Root, host: HTMLDivElement, current: GameState;
 function Harness({
   journey,
   pin,
+  selectedIds = [],
 }: {
   journey: Journey;
   pin?: GameState["pin"];
+  selectedIds?: string[];
 }) {
   const [game, setGame] = useState<GameState>({
     ...initialGame,
     phase: "playing",
     pin,
+    selectedIds,
   });
   const [context] = useState(() =>
     createQuestionContext(regions, COUNTRY_FACTS, journey),
@@ -82,6 +86,30 @@ const submit = () =>
   host.querySelector<HTMLButtonElement>("button.answer-submit-button")!;
 
 describe("Journey answer controls", () => {
+  it("keeps typing and clear in a shared footer while typing is expanded", async () => {
+    await act(async () =>
+      root.render(
+        <Harness journey={SUN_FLAGS_JOURNEY} selectedIds={["wurl:URY"]} />,
+      ),
+    );
+    const footer = host.querySelector(".answer-secondary-actions")!;
+    const details = footer.querySelector("details")!;
+    const summary = details.querySelector("summary")!;
+    const clear = footer.querySelector<HTMLButtonElement>(
+      ".answer-clear-selection",
+    )!;
+    expect(summary.classList.contains("tertiary-action")).toBe(true);
+    expect(clear.classList.contains("tertiary-action")).toBe(true);
+    expect(clear.parentElement).toBe(footer);
+    await act(async () => summary.click());
+    expect(details.open).toBe(true);
+    expect(details.querySelector("#country-guess")).not.toBeNull();
+    await act(async () => clear.click());
+    expect(current.selectedIds).toEqual([]);
+    expect(details.open).toBe(true);
+    expect(host.querySelector(".answer-clear-selection")).toBeNull();
+  });
+
   it("starts unanswered, steps explicitly down to zero, and submits the player's chosen number", async () => {
     await act(async () => root.render(<Harness journey={numbers} />));
     expect(submit().disabled).toBe(true);
@@ -140,9 +168,11 @@ describe("Journey answer controls", () => {
     await click("Remove pin");
     expect(current.pin).toBeUndefined();
     expect(submit().disabled).toBe(true);
-    expect(host.querySelector(".commit-note")?.textContent).toContain(
-      "You can move your pin before submitting.",
+    expect(host.querySelector(".question-support")?.textContent).toBe(
+      FIFTEENTH_JOURNEY.rounds[0].instruction,
     );
+    expect(host.textContent).not.toContain("You can move your pin");
+    expect(host.querySelector('[role="status"]')?.textContent).toBe("");
     expect(host.querySelector("#pin-latitude")).toBeNull();
   });
 });

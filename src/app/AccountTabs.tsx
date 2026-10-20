@@ -7,15 +7,19 @@ export function AccountTabs({
   active,
   admin = false,
   newFriends = false,
+  guest = false,
   onSelect,
 }: {
   active: AccountSection;
   admin?: boolean;
   newFriends?: boolean;
+  guest?: boolean;
   onSelect(section: AccountSection): void;
 }) {
-  const sections: AccountSection[] = ["dashboard", "profile", "friends"];
-  if (admin) sections.push("admin");
+  const sections: AccountSection[] = guest
+    ? ["profile", "appearance"]
+    : ["dashboard", "profile", "friends", "appearance"];
+  if (admin && !guest) sections.push("admin");
   return (
     <nav className="account-tabs" aria-label="Account sections">
       {sections.map((section) => (

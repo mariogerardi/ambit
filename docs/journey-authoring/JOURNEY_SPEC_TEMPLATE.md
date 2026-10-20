@@ -28,8 +28,11 @@ Journey being created or edited (title, ID, source file):
 - **Identity:** stable ID when editing, label, spoiler-safe progress label and
   resolved receipt label where needed.
 - **Copy:** optional lead-in, prompt, exceptional interaction instruction only.
-  The shared control supplies commitment notices; do not repeat them or refer to
-  palette shades such as “darker yellow.”
+  Leave the instruction empty if the prompt/control already conveys the action.
+  The shared control combines instructions and commitment notices in one 14px
+  supporting paragraph. It derives distance/slider bullseye copy from the rule;
+  do not repeat notices, band numbers or pin movement instructions. Review the
+  complete rendered copy. Do not refer to palette shades such as “darker yellow.”
 - **Mechanic:** exact registered mode; count, order, immediate/submit commitment,
   failure behavior. Current single-country/merged-territory taps commit immediately;
   pins and multi-answer selections confirm. Distinguish engine capabilities from
@@ -40,8 +43,8 @@ Journey being created or edited (title, ID, source file):
 - **Pin questions:** point-distance versus territory-inside. Distance pins need an
   acceptance radius and three inclusive accuracy bands ending at that radius;
   territory-inside pins use canonical containment without invented distance tiers.
-  Choose useful inner radii, describe all three band distances before submission,
-  and keep supplied point
+  Choose useful inner radii; the shared bullseye line and free **Accuracy**
+  information expose the bands before submission. Keep supplied point
   references outside the acceptance zone. Standard distance tiers earn 3/2/1
   points; accepted pins still count as one correct answer. Territory-inside pins
   earn three points. Hint/assist ceilings are two/one, applied with `min`, not an

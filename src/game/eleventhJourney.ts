@@ -141,8 +141,7 @@ export const ELEVENTH_JOURNEY: Journey = {
           text: "Sydney and Melbourne are now marked. Look inland between them; Canberra itself is still unmarked. Land within 150 km of its center.",
         },
       },
-      instruction:
-        "Land within 150 km of the city center. Aim for the 50 km bullseye; the 100 km and 150 km rings also count as correct.",
+      instruction: "",
       mode: "pin",
       rule: {
         type: "pin-distance",

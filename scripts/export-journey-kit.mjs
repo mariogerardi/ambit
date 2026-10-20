@@ -25,7 +25,9 @@ const DOCS = [
   "docs/journey-authoring/JOURNEY_SPEC_TEMPLATE.md",
 ];
 const MODE_NOTES = {
-  pin: "Place a point near a reviewed target or inside canonical territory, then confirm. Current distance-pin authoring describes all three inclusive band distances before submission, ending at the unchanged acceptance radius; the schema also supports legacy single-radius questions. Territory-inside pins use containment without invented distance bands. Accepted pins still count as one correct answer; three distance tiers award 3/2/1 points and help caps rewards at two (hint) or one (assist). Territory-inside pins award three points before help. Help cannot change tolerance; target rings belong to reveal.",
+  pin: "Place a point near a reviewed target or inside canonical territory, then confirm. The shared supporting row derives a concise bullseye sentence from the rule; all inclusive acceptance bands remain available before answering in the free Accuracy information. Do not hand-write numeric bands or movement boilerplate in instruction. The schema also supports legacy single-radius questions. Territory-inside pins use containment without invented distance bands. Accepted pins still count as one correct answer; three distance tiers award 3/2/1 points and help caps rewards at two (hint) or one (assist). Territory-inside pins award three points before help. Help cannot change tolerance; target rings belong to reveal.",
+  slider:
+    "Estimate a quantity using a native range input. The rule owns bounds, step, unit, target and tolerance. The shared supporting row derives the concise bullseye message; free Accuracy information discloses all bands. Do not repeat those numbers in instruction. The committed scale shows the answer, estimate and accuracy ranges.",
   "city-single":
     "Pick one place marker. Named or anonymous candidates are controlled separately; use equal city-reference styling when capital status must not reveal the answer.",
   "city-multiple":

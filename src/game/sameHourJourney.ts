@@ -126,7 +126,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       title: "An Atlantic pairing.",
       leadIn: "Begin in Iceland, where Reykjavík keeps one clock all year.",
       prompt: "Which marked African city keeps exactly the same time all year?",
-      instruction: "Choose a city marker on the globe.",
+      instruction: "",
       mode: "city-single",
       count: 1,
       commitment: "submit",
@@ -178,7 +178,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       leadIn: "Now compare Madrid's clock with the rest of Europe.",
       prompt:
         "Which of these countries keeps the same time as Madrid in both winter and summer?",
-      instruction: "Tap a highlighted country on the globe.",
+      instruction: "Tap a country.",
       mode: "map-single",
       count: 1,
       commitment: "immediate",
@@ -391,7 +391,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       leadIn: "Vladivostok keeps UTC+10 all year.",
       prompt:
         "Which marked Australian city shares its clock throughout the year?",
-      instruction: "Choose one city marker on the globe.",
+      instruction: "",
       mode: "city-single",
       count: 1,
       commitment: "submit",

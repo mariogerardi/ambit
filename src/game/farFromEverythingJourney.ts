@@ -406,7 +406,7 @@ export const FAR_FROM_EVERYTHING_JOURNEY: Journey = {
       topic: "remoteness",
       leadIn: stop.leadIn,
       prompt: stop.prompt,
-      instruction: `Drop a pin within ${outer} km. The bullseye is ${inner} km; the other accepted bands end at ${middle} km and ${outer} km.`,
+      instruction: "",
       mode: "pin",
       count: 1,
       commitment: "submit",

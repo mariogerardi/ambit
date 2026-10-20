@@ -1,7 +1,7 @@
 import { answerItems } from "./answerPresentation";
 import { mechanicFor } from "./mechanics";
 import { pointAnswerNoun, answerPlace } from "./answerTargets";
-import type { Dispatch } from "react";
+import type { Dispatch, ReactNode } from "react";
 import { useMemo } from "react";
 import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questionContracts";
@@ -18,20 +18,33 @@ import {
 } from "./guidance";
 import { OrderAnswer } from "./OrderAnswer";
 import { isSlotAnswer } from "./ordering";
+import { QuestionSupport } from "./QuestionSupport";
 
-export function AnswerForm({
-  question,
-  context,
-  game,
-  dispatch,
-  webgl,
-}: {
+type AnswerFormProps = {
   question: Question;
   context: QuestionContext;
   game: GameState;
   dispatch: Dispatch<Action>;
   webgl: boolean;
-}) {
+  mapKey?: ReactNode;
+};
+export function AnswerForm(props: AnswerFormProps) {
+  return (
+    <>
+      <QuestionSupport question={props.question} webgl={props.webgl} />
+      <AnswerControls {...props} />
+    </>
+  );
+}
+
+function AnswerControls({
+  question,
+  context,
+  game,
+  dispatch,
+  webgl,
+  mapKey,
+}: AnswerFormProps) {
   const choices = useMemo(() => {
     const cards = [...(question.choices ?? [])];
     if (question.shuffleChoices)
@@ -52,6 +65,7 @@ export function AnswerForm({
         context={context}
         game={game}
         dispatch={dispatch}
+        mapKey={mapKey}
       />
     );
   const assistCandidates = question.guidance?.assist?.candidateIds;
@@ -72,6 +86,14 @@ export function AnswerForm({
   const single = definition.single;
   const regional = question.rule.type === "region-ids";
   const count = responseCount(question, context);
+  const canType =
+    question.mode !== "merged-region-single" &&
+    !question.disclosure.namedChoices &&
+    ((!city && question.allowTyping !== false) ||
+      question.allowTyping === true ||
+      !webgl);
+  const canClear =
+    question.commitment === "submit" && game.selectedIds.length > 0;
   const unordered = question.mode === "typed-regions";
   const AnswerList = unordered ? "ul" : "ol";
   const name = (id: string) =>
@@ -90,16 +112,12 @@ export function AnswerForm({
   if (definition.control === "pin")
     return (
       <div className="pin-answer">
-        <p className="commit-note" aria-live={game.pin ? "polite" : undefined}>
-          {question.instruction && <>{question.instruction} </>}
-          {game.pin
-            ? "Pin placed. Tap another spot to move it."
-            : question.instruction
-              ? "You can move your pin before submitting."
-              : "Tap land or water to place a pin. You can move it before submitting."}
-        </p>
+        <span className="sr-only" role="status">
+          {game.pin ? "Pin placed." : ""}
+        </span>
         <div className="pin-answer-actions">
           <QuestionActions
+            mapKey={mapKey}
             pointScoring
             guidance={guidance}
             label="Submit pin"
@@ -121,9 +139,6 @@ export function AnswerForm({
   if (definition.control === "choice")
     return (
       <div className="choice-answer">
-        {question.commitment === "immediate" && (
-          <p className="commit-note">Your first answer is final.</p>
-        )}
         <div className="candidate-grid" aria-label="Answer choices">
           {choices.map((choice) => (
             <button
@@ -150,6 +165,7 @@ export function AnswerForm({
           ))}
         </div>
         <QuestionActions
+          mapKey={mapKey}
           pointScoring
           guidance={guidance}
           showSubmit={question.commitment === "submit"}
@@ -230,16 +246,9 @@ export function AnswerForm({
             </ol>
           </div>
         )}
-        {question.commitment === "immediate" ? (
-          <p className="commit-note">
-            {question.failure === "end-game"
-              ? "Each answer is final; one wrong answer ends this Journey."
-              : count > 1
-                ? "Each answer is final."
-                : "Your first answer is final."}
-          </p>
-        ) : (
+        {question.commitment !== "immediate" && (
           <QuestionActions
+            mapKey={mapKey}
             pointScoring
             guidance={guidance}
             disabled={!canSubmit(question, context, game)}
@@ -248,72 +257,82 @@ export function AnswerForm({
         )}
         {question.commitment === "immediate" && (
           <QuestionActions
+            mapKey={mapKey}
             pointScoring
             guidance={guidance}
             showSubmit={false}
           />
         )}
-        {question.mode !== "merged-region-single" &&
-          !question.disclosure.namedChoices &&
-          ((!city && question.allowTyping !== false) ||
-            question.allowTyping === true ||
-            !webgl) && (
-            <details className="typed-country-guess" open={!webgl || undefined}>
-              <summary data-dd-action-name="Answer Type Instead">
-                Answer by typing
-              </summary>
-              <form
-                autoComplete="off"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  dispatch({ type: "guess-country" });
-                }}
+        {(canType || canClear) && (
+          <div className="answer-secondary-actions">
+            {canType && (
+              <details
+                className="typed-country-guess"
+                open={!webgl || undefined}
               >
-                <label htmlFor="country-guess">
-                  {city
-                    ? `${pointNoun === "summit" ? "Summit" : "City"} name`
-                    : regional
-                      ? "Region name"
-                      : "Country name"}
-                </label>
-                <AnswerInput
-                  id="country-guess"
-                  autoComplete="off"
-                  spellCheck={false}
-                  enterKeyHint="go"
-                  value={game.text}
-                  onChange={(event) =>
-                    dispatch({ type: "text", value: event.target.value })
-                  }
-                  placeholder={
-                    city
-                      ? `Type a ${pointNoun}’s name`
-                      : regional
-                        ? "Type a region’s name"
-                        : "Type a country’s name"
-                  }
-                />
-                <button
-                  className="primary-button"
-                  data-dd-action-name="Answer Add Typed Choice"
-                  disabled={!game.text.trim()}
+                <summary
+                  className="tertiary-action"
+                  data-dd-action-name="Answer Type Instead"
                 >
-                  {question.commitment === "immediate"
-                    ? "Answer now"
-                    : `Add ${city ? pointNoun : regional ? "region" : "country"}`}{" "}
-                  <span>→</span>
-                </button>
-              </form>
-            </details>
-          )}
-        {question.commitment === "submit" && game.selectedIds.length > 0 && (
-          <button
-            className="quiet-button tertiary-action"
-            data-dd-action-name="Answer Clear Selection"
-            onClick={() => dispatch({ type: "clear" })}
-          >
-            Clear selection
-          </button>
+                  <span className="typing-disclosure-icon" aria-hidden="true">
+                    ▸
+                  </span>
+                  Answer by typing
+                </summary>
+                <form
+                  autoComplete="off"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    dispatch({ type: "guess-country" });
+                  }}
+                >
+                  <label htmlFor="country-guess">
+                    {city
+                      ? `${pointNoun === "summit" ? "Summit" : "City"} name`
+                      : regional
+                        ? "Region name"
+                        : "Country name"}
+                  </label>
+                  <AnswerInput
+                    id="country-guess"
+                    autoComplete="off"
+                    spellCheck={false}
+                    enterKeyHint="go"
+                    value={game.text}
+                    onChange={(event) =>
+                      dispatch({ type: "text", value: event.target.value })
+                    }
+                    placeholder={
+                      city
+                        ? `Type a ${pointNoun}’s name`
+                        : regional
+                          ? "Type a region’s name"
+                          : "Type a country’s name"
+                    }
+                  />
+                  <button
+                    className="primary-button"
+                    data-dd-action-name="Answer Add Typed Choice"
+                    disabled={!game.text.trim()}
+                  >
+                    {question.commitment === "immediate"
+                      ? "Answer now"
+                      : `Add ${city ? pointNoun : regional ? "region" : "country"}`}{" "}
+                    <span>→</span>
+                  </button>
+                </form>
+              </details>
+            )}
+            {canClear && (
+              <button
+                className="quiet-button tertiary-action answer-clear-selection"
+                data-dd-action-name="Answer Clear Selection"
+                onClick={() => dispatch({ type: "clear" })}
+              >
+                Clear selection
+              </button>
+            )}
+          </div>
         )}
         {game.inputError && (
           <p className="input-error" role="alert">
@@ -432,6 +451,7 @@ export function AnswerForm({
         </>
       )}
       <QuestionActions
+        mapKey={mapKey}
         pointScoring
         guidance={guidance}
         submitType="submit"

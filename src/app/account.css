@@ -1127,3 +1127,26 @@
     margin-left: 44px;
   }
 }
+
+.account-appearance {
+  width: 100%;
+}
+.account-appearance h2 {
+  margin: 0 0 8px;
+  font: 26px var(--font-editorial);
+  color: var(--ui-text);
+}
+.account-appearance > p {
+  margin: 0 0 24px;
+  color: var(--ui-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.experience .account-appearance .theme-choice input {
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}

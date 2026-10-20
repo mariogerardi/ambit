@@ -370,8 +370,13 @@ The implementation keeps those decisions independent:
   promoting the entire valid pool. Revealed named clue fragments persist as geometry
   and label anchors, including multiple fragments belonging to the same country.
   Generic flyover stops prefer authored `feedbackFocus` to a containing country's
-  mainland. The answer control owns commitment notices; authored copy must not
-  repeat them.
+  mainland. `QuestionSupport.tsx` owns the single supporting paragraph: muted
+  authored exceptions and accent commitment notices share one 14px size and inline
+  flow. `AnswerForm` renders it once; `OrderAnswer` does not append a second
+  instruction. Pin placement status is screen-reader-only. Distance and numeric
+  rules generate the bullseye sentence; their full bands remain available through
+  `QuestionHelp`'s free information slot, separately from locked source links and
+  paid hints/assists. Authored instructions must not repeat generated copy.
 
 Bundled single-country and merged-territory questions declare immediate commitment.
 Legacy unsubmitted selections remain drafts until the player taps an answer again;

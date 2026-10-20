@@ -151,7 +151,7 @@ export const NINTH_JOURNEY: Journey = {
         topic: "shared land borders",
         prompt: `Place a pin inside the country that shares a land border with both ${clue.names[0]} and ${clue.names[1]}.`,
         instruction:
-          "Country borders are hidden. Use the coastlines and the two reference countries to estimate your pin.",
+          "Country borders are hidden; estimate using the coastlines and reference countries.",
         mode: "pin",
         rule: { type: "pin-inside", ids: [clue.answer] },
         count: 1,

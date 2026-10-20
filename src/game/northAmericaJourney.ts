@@ -196,7 +196,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         label: "Southern border",
         title: "Across the southern border.",
         prompt: "Name a U.S. state that borders Mexico.",
-        instruction: "State borders are hidden. Name a state from memory.",
+        instruction: "State borders are hidden.",
         mode: "typed-regions",
         inputLabel: "State",
         count: 1,
@@ -249,7 +249,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         prompt:
           "What is the fewest number of state border crossings from California to Missouri?",
         instruction:
-          "State borders are hidden; count the crossings from memory. Stay within the United States. States meeting at a single point don’t count.",
+          "State borders are hidden. Stay in the U.S.; corner contacts don’t count.",
         mode: "number",
         inputLabel: "State border crossings",
         rule: {

@@ -157,7 +157,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       leadIn: "Begin in South America.",
       prompt:
         "The Sun of May has a face. Which two South American countries put it on their national flags?",
-      instruction: "Tap both countries on the globe.",
+      instruction: "Tap both countries.",
       mode: "map-multiple",
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
@@ -345,7 +345,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       prompt:
         "Here the sun becomes a simple red disc. Drop a pin on one of the four main islands of the country that flies this flag.",
       instruction:
-        "Country borders are hidden. Use the island shapes to estimate your pin.",
+        "Country borders are hidden; estimate using the island shapes.",
       mode: "pin",
       rule: { type: "pin-inside", ids: ["wurl:JPN"] },
       disclosure: { ...base.disclosure, namedChoices: false },

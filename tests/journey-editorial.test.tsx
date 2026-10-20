@@ -9,7 +9,8 @@ import { ELEVENTH_JOURNEY } from "../src/game/eleventhJourney";
 import { SECOND_JOURNEY } from "./fixtures/engine/secondJourney";
 import { JOURNEYS } from "../src/game/journeys";
 import { COUNTRY_FACTS } from "../src/game/countryFacts";
-import { correctAnswerSummary } from "../src/game/copy";
+import { correctAnswerCopy, correctAnswerSummary } from "../src/game/copy";
+import { SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsJourney";
 import { GameShell } from "../src/game/GameShell";
 import { createQuestionContext, matchingCapitals } from "../src/game/questions";
 import { gameReducer, initialGame, journeyScore } from "../src/game/state";
@@ -53,6 +54,48 @@ function render(journey: Journey, index: number, actions: Action[]) {
 }
 
 describe("connected Journey drafts and answer feedback", () => {
+  it("keeps every feedback heading to a brief reaction", () => {
+    for (const question of JOURNEYS.flatMap((journey) => journey.rounds)) {
+      const tiers =
+        question.rule.type === "pin-distance" ||
+        question.rule.type === "numeric-range"
+          ? (question.rule.tiers ?? [])
+          : [];
+      for (const line of [
+        correctAnswerCopy(question),
+        ...tiers.map((tier) => tier.feedback),
+        "Not quite.",
+      ]) {
+        expect(
+          line.trim().split(/\s+/).length,
+          question.id,
+        ).toBeLessThanOrEqual(4);
+        expect(line, question.id).not.toMatch(/[.!?]\s+\S/);
+      }
+    }
+  });
+
+  it("puts the live legend after selections and immediately before help actions", () => {
+    expect(render(SUN_FLAGS_JOURNEY, 0, [])).not.toContain(
+      'aria-label="Map color key"',
+    );
+    for (const actions of [
+      [{ type: "select", id: "wurl:URY" }] as Action[],
+      [
+        { type: "select", id: "wurl:URY" },
+        { type: "request-hint" },
+      ] as Action[],
+    ]) {
+      const html = render(SUN_FLAGS_JOURNEY, 0, actions);
+      const key = html.indexOf('aria-label="Map color key"');
+      expect(key).toBeGreaterThan(html.indexOf('class="committed-choices"'));
+      expect(key).toBeGreaterThan(html.indexOf('class="question-support"'));
+      expect(key).toBeGreaterThan(html.indexOf('class="question-guidance"'));
+      expect(key).toBeLessThan(html.indexOf('class="question-answer-actions"'));
+      expect(html.match(/aria-label="Map color key"/g)).toHaveLength(1);
+    }
+  });
+
   it.each(
     JOURNEYS.flatMap((j) =>
       j.rounds
@@ -68,14 +111,17 @@ describe("connected Journey drafts and answer feedback", () => {
         [{ type: "drop-pin", lat: 20, lng: 20 }],
       ] as Action[][]) {
         const html = render(journey, index, actions);
-        expect(html.match(/class="commit-note"/g)).toHaveLength(1);
+        expect(html.match(/class="question-support"/g)).toHaveLength(1);
+        expect(html).not.toContain('class="commit-note"');
         expect(html).not.toContain('class="question-instruction"');
         if (question.instruction) expect(html).toContain(question.instruction);
-        expect(html).toContain(
-          actions.length
-            ? "Pin placed. Tap another spot to move it."
-            : "You can move",
-        );
+        expect(html).not.toContain("You can move your pin");
+        expect(html).not.toContain("Tap another spot");
+        if (actions.length) expect(html).toContain("Pin placed.");
+        if (question.rule.type === "pin-distance")
+          expect(html).toContain(
+            `Aim for the bullseye (within ${question.rule.tiers![0].radiusKm.toLocaleString("en-US")} km)!`,
+          );
       }
     },
   );
