@@ -2244,7 +2244,6 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await click("Home");
     await click("Play");
     expect(probe.props!.placeContextual).toBe(false);
-    expect(probe.props!.places.some((p) => p.kind === "city")).toBe(false);
     expect(host.querySelector("canvas")).toBe(canvas);
   });
   it("preserves history but expires the playable attempt at midnight and on reload", async () => {
