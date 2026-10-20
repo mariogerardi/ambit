@@ -397,7 +397,10 @@ export function AnswerForm({
         </AnswerList>
       ) : (
         <>
-          <label htmlFor="written-answer">
+          <label
+            htmlFor="written-answer"
+            className={definition.control === "slider" ? "sr-only" : undefined}
+          >
             {question.inputLabel ?? "Your answer"}
           </label>
           {definition.control === "slider" &&

@@ -25,6 +25,9 @@ rounded from the engine's great-circle distance. The starting thumb is uncommitt
 until the player interacts. A 1,000 km circle centred on San Juan is an assist-only
 scale guide; the city-to-city line appears only after commitment. The guide
 disappears in feedback and completion. Neither city nor Colombia is graded.
+The committed slider remains in its input area as a read-only scale with colored
+accuracy ranges, the player's estimate and a dashed answer marker. The compact
+legend highlights the achieved band without repeating the control instructions.
 
 All rounds use standard 3-point rewards and independent hint/assist ceilings,
 for a 15-point total. Earlier discoveries remain references; completion retains

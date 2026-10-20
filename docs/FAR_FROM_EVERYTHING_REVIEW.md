@@ -1,12 +1,13 @@
 # Far From Everything authoring review
 
 Authored 19 October 2026 from the supplied five-stop specification. Registered as
-`far-from-everything`, **unlisted** pending editorial and visual review. No date
-assignment, publication, deployment, geography regeneration, or third-party media.
+`far-from-everything`, **unlisted**. First deployed 19 October 2026, without a
+Daily assignment, pool publication, geography regeneration, or third-party media.
 
 The sequence retains five distance pins: Rapa Nui → Ittoqqortoormiit → Tristan da
 Cunha → Bouvet Island → Point Nemo. The connections are thematic, with no invented
 travel route. Acceptance bands and independent help ceilings match the spec.
+Completion revisits all five destinations in story order, ending at Point Nemo.
 
 ## Reviewed point identities
 

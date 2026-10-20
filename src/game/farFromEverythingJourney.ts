@@ -164,7 +164,7 @@ const nemoComparisons: MapOverlay[] = nearestLand.map((land) => ({
   dashed: true,
 }));
 const nemoCaption =
-  "Great-circle comparisons to island reference points. The nearest shore is about 2,688 km away; the smaller rings show gameplay accuracy.";
+  "Dashed lines compare island reference points. The nearest shore is about 2,688 km away.";
 const parallel = (latitude: number): MapOverlay => ({
   id: `ffe:parallel:${latitude}`,
   type: "parallel",
@@ -265,7 +265,7 @@ const stops: Stop[] = [
     label: "Arctic",
     progress: "The Arctic edge",
     leadIn:
-      "On Greenland's eastern coast, a small town sits beside the entrance to one of the world's greatest fjord systems.",
+      "On Greenland's eastern coast, a small town sits beside the entrance to a vast fjord system.",
     prompt: "Where is Ittoqqortoormiit?",
     bands: [150, 300, 450],
     focus: { lat: 72, lng: -31, altitude: 0.85 },
@@ -302,7 +302,7 @@ const stops: Stop[] = [
     assistPlaces: [stHelena],
     revealPlaces: [edinburgh],
     explanation:
-      "This is Tristan da Cunha, home to Edinburgh of the Seven Seas. With no airport, reaching the community means travelling by sea—often from Cape Town. The pin marks the island at Queen Mary's Peak; the village is on its northern coast.",
+      "Tristan da Cunha is home to Edinburgh of the Seven Seas. With no airport, reaching the community means travelling by sea—often from Cape Town. The village sits on the island's northern coast beneath Queen Mary's Peak.",
     source: tristanLocation,
     sources: [
       tristanAccess,
@@ -342,9 +342,9 @@ const stops: Stop[] = [
     label: "Ocean",
     progress: "Farthest from land",
     leadIn:
-      "We've visited isolated communities and an island without permanent residents. Now remove the land entirely.",
+      "We've visited isolated communities and uninhabited land. Now head into the open ocean.",
     prompt:
-      "Somewhere in the South Pacific lies Point Nemo, the place farthest from any land. Where would you drop a pin?",
+      "Where is Point Nemo, the spot in the South Pacific farthest from any land?",
     bands: [300, 600, 900],
     focus: { lat: -37, lng: -112, altitude: 1.85 },
     revealFocus: { lat: -49, lng: -123, altitude: 1.25 },
@@ -357,7 +357,7 @@ const stops: Stop[] = [
     assistOverlays: [parallel(-50)],
     revealPlaces: nearestLand,
     explanation:
-      "Point Nemo is the oceanic pole of inaccessibility. The conventional location lies about 2,688 km from its nearest land—Ducie Island, Motu Nui near Rapa Nui, and Maher Island in Antarctica. Even the nearest shore is thousands of kilometres away.",
+      "Point Nemo is the oceanic pole of inaccessibility. Its nearest land is Ducie Island, Motu Nui near Rapa Nui, and Maher Island in Antarctica—each thousands of kilometres away.",
     source: noaa,
     sources: [
       gazetteer("4030717", "Ducie Island"),
@@ -377,13 +377,7 @@ export const FAR_FROM_EVERYTHING_JOURNEY: Journey = {
     "Five pins explore what remoteness means: an island across an ocean, an Arctic town, a village reached by sea, uninhabited land, and the emptiest part of the Pacific.",
   completion: {
     focus: { lat: -49, lng: -123, altitude: 1.3 },
-    views: [
-      { lat: rapaNui.lat, lng: rapaNui.lng, altitude: 0.85 },
-      { lat: -49, lng: -123, altitude: 1.3 },
-      { lat: 72, lng: -31, altitude: 0.85 },
-      { lat: -45, lng: -9, altitude: 1.4 },
-      { lat: -49, lng: -123, altitude: 1.3 },
-    ],
+    views: stops.map((stop) => stop.revealFocus),
     borders: true,
     physicalFeatures: [],
     places: [
@@ -395,9 +389,9 @@ export const FAR_FROM_EVERYTHING_JOURNEY: Journey = {
     ],
     overlays: nemoComparisons,
     mapCaption:
-      "Dashed great-circle lines compare Point Nemo with three nearby land references.",
+      "Dashed great-circle lines compare Point Nemo with three island reference points.",
     caption:
-      "An island thousands of kilometres offshore. A town at the edge of the Arctic. A village reached by sea. An island without permanent residents. And finally, a point in the Pacific where even the nearest land is nearly 2,700 kilometres away. Isolation has more than one meaning—and sometimes, there's nothing there at all.",
+      "Across oceans, along an Arctic coast and beyond the last inhabited island, distance shaped five different places. Point Nemo takes that isolation furthest: even the nearest land is nearly 2,700 km away.",
   },
   rounds: stops.map((stop, index) => {
     const target = targets[index];
@@ -433,7 +427,7 @@ export const FAR_FROM_EVERYTHING_JOURNEY: Journey = {
       ...(target === nemo
         ? {
             qualification:
-              "Grading uses NOAA's conventional Point Nemo coordinate. Coastline definitions and later recalculations can shift the calculated pole slightly. The dashed lines compare island reference points, rather than surveyed nearest-shore positions.",
+              "Point Nemo's conventional position can shift slightly with different coastline measurements.",
             feedbackMapCaption: nemoCaption,
           }
         : {}),

@@ -392,7 +392,9 @@ unit and target/tolerance are explicit; `numericEstimate.ts` owns numeric parsin
 absolute error and inclusive band lookup. Malformed, out-of-bounds and off-step
 responses cannot submit. Optional three error tiers receive the same 3 / 2 / 1
 rewards and independent help caps. Feedback shows the submitted estimate and error
-alongside the target and bands; reference locations keep their shared blue style.
+on the original slider scale, with nested accuracy bands, a colored submitted
+marker and a dashed answer marker. The read-only review replaces the input above
+the feedback story; reference locations keep their shared blue style.
 Assistance supplies reasoning or map context without changing the grading range.
 Missed distance pins use a shared adaptive overview when both locations fit on the
 visible globe. Feedback provides explicit **Show your pin** and **Show answer**

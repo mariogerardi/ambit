@@ -203,7 +203,7 @@ export const REGGAETON_JOURNEY: Journey = {
       resolvedLabel: "Puerto Rico · San Juan",
       topic: "reggaeton",
       leadIn:
-        "In Puerto Rico, DJs and rappers built an underground scene around homemade mixtapes, mixing hip-hop with Jamaican dancehall.",
+        "In Puerto Rico, DJs and rappers built an underground mixtape scene, mixing hip-hop with Jamaican dancehall.",
       prompt: "Find Puerto Rico on the globe.",
       instruction: "Tap the island.",
       mode: "map-single",
@@ -222,7 +222,7 @@ export const REGGAETON_JOURNEY: Journey = {
         },
       },
       explanation:
-        "In and around San Juan, DJs such as Playero and Negro cut dancehall rhythms and hip-hop into mixtapes for local rappers. The recordings circulated through parties and shops; police seizures in 1995 made the underground a public controversy. But the beats on those tapes had already travelled a long way. Follow their roots across the Caribbean.",
+        "San Juan's DJs, including Playero and Negro, mixed dancehall and hip-hop into tapes for local rappers. They circulated through parties and shops; police seizures in 1995 brought the underground into public controversy. The rhythms had already travelled far. Follow their roots across the Caribbean.",
       source: loopHistory,
       sources: [raids, folkways, locationSource("4568127", "San Juan")],
       scenes: {
@@ -252,7 +252,7 @@ export const REGGAETON_JOURNEY: Journey = {
       resolvedLabel: "Colón · reggae en español",
       topic: "reggaeton",
       leadIn:
-        "Long before Puerto Rico's mixtapes, Caribbean migration connected Jamaica with Panama. Workers and their families settled around Colón, near the canal's Caribbean entrance.",
+        "Caribbean migration connected Jamaica with Panama long before Puerto Rico's mixtapes. Workers and their families settled around Colón, near the canal's Caribbean entrance.",
       prompt: "Drop a pin on that coast, as close to Colón as you can.",
       instruction:
         "Land within 45 km of Colón. The bullseye is 15 km; the other accepted bands end at 30 km and 45 km.",
@@ -273,7 +273,7 @@ export const REGGAETON_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Colón faces the Caribbean; the canal crosses to the Pacific beyond it. In Afro-Panamanian communities, Jamaican reggae and dancehall took on Spanish lyrics. Renato, Nando Boom and El General helped carry reggae en español to new listeners. The next part of the recording story takes us far north of the Caribbean.",
+        "In Afro-Panamanian communities, Jamaican reggae and dancehall took on Spanish lyrics. Renato, Nando Boom and El General carried reggae en español to new listeners. Colón faces the Caribbean; the canal crosses to the Pacific. The recording story next takes us north.",
       feedbackMapCaption:
         "Panama Canal · course between the locks; sea entrances not shown.",
       source: folkways,
@@ -307,7 +307,7 @@ export const REGGAETON_JOURNEY: Journey = {
       resolvedLabel: "New York · Freeport",
       topic: "reggaeton",
       leadIn:
-        "Jamaican and Panamanian musicians also met in New York, where a Long Island studio produced an influential version of the dembow loop.",
+        "Near New York City, a Long Island studio brought Jamaican and Panamanian musicians together to record an influential version of the dembow loop.",
       prompt: "Which marker is New York City?",
       instruction: "Select one of the five anonymous city markers.",
       mode: "city-single",
@@ -322,7 +322,7 @@ export const REGGAETON_JOURNEY: Journey = {
         },
       },
       explanation:
-        "East of the city, Philip Smart's HC&F studio in Freeport brought Jamaican and Panamanian collaborators together. Dennis Thompson reworked a dancehall rhythm for Nando Boom; a released instrumental version became a widely reused loop in Puerto Rico. The island's underground was making something new from recordings that had crossed languages and borders.",
+        "In Freeport, Philip Smart's HC&F studio brought those musicians together. Dennis Thompson reworked a rhythm for Nando Boom; an instrumental version became a widely reused loop in Puerto Rico. The island's underground was making something new from recordings that crossed languages and borders.",
       source: loopHistory,
       sources: [
         source(
@@ -364,7 +364,7 @@ export const REGGAETON_JOURNEY: Journey = {
       resolvedLabel: "Puerto Rico · U.S. territory",
       topic: "reggaeton",
       leadIn:
-        "People and recordings moved between New York's Puerto Rican communities and the island, connecting hip-hop with the emerging underground.",
+        "People and recordings moved between New York's Puerto Rican communities and the island, connecting hip-hop with the underground.",
       prompt:
         "What is Puerto Rico's political relationship to the United States?",
       mode: "choice-single",
@@ -402,7 +402,7 @@ export const REGGAETON_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Puerto Rico is a U.S. territory, and people born there are U.S. citizens. Migration helped build a large Puerto Rican community in New York, linking the island to hip-hop's home city. Reggaetón grew through these exchanges, then broke into international pop with hits such as Daddy Yankee's Gasolina. Its next generation would also find a home in Colombia.",
+        "Puerto Rico is a U.S. territory, and people born there are U.S. citizens. Migration linked the island with New York and hip-hop. Reggaetón grew through those exchanges, reaching international pop through hits such as Daddy Yankee's Gasolina. Its next generation would also find a home in Colombia.",
       source: territory,
       sources: [
         migration,
@@ -434,11 +434,10 @@ export const REGGAETON_JOURNEY: Journey = {
       resolvedLabel: "San Juan–Medellín · 1,700 km",
       topic: "reggaeton",
       leadIn:
-        "Reggaetón was already reaching international audiences when Nicky Jam rebuilt his career in Medellín, Colombia. The two cities mark a new connection across the Caribbean.",
+        "As reggaetón reached international audiences, Nicky Jam rebuilt his career in Medellín, Colombia.",
       prompt:
         "Roughly how far apart are San Juan and Medellín in a straight line?",
-      instruction:
-        "Move the slider to estimate the distance. Land within 500 km; the bullseye is within 100 km, and the middle band within 300 km.",
+      instruction: "Aim within 500 km. Bullseye: 100 km · Close: 300 km.",
       inputLabel: "Distance in kilometres",
       mode: "slider",
       count: 1,
@@ -465,7 +464,7 @@ export const REGGAETON_JOURNEY: Journey = {
         },
       },
       explanation:
-        "About 1,700 km separate the two cities. In Medellín, Nicky Jam found an audience for his earlier music and rebuilt his career with a more melodic sound. J Balvin, Karol G, Maluma and the city's producers helped expand reggaetón's pop reach. A rhythm shaped by Caribbean exchange was finding new voices in an Andean city—and new listeners around the world.",
+        "In Medellín, Nicky Jam found listeners for his earlier music and developed a more melodic sound. J Balvin, Karol G, Maluma and the city's producers expanded reggaetón's pop reach. Shaped by Caribbean exchange, the rhythm was finding new voices—and listeners around the world.",
       feedbackMapCaption: `San Juan–Medellín · about ${relocationKm.toLocaleString("en-US")} km by great circle`,
       source: colombianScene,
       sources: [
@@ -542,6 +541,6 @@ export const REGGAETON_JOURNEY: Journey = {
     mapCaption:
       "Puerto Rico–Medellín · Nicky Jam's career move within a wider network of musical exchange",
     caption:
-      "Puerto Rico's mixtapes drew on Jamaican dancehall, Panamanian Spanish-language reggae and recordings made near New York. Migration and collaboration carried the beat between these places. Medellín's artists added new voices and pop possibilities to a sound already crossing borders. Reggaetón evolved because people kept making it their own.",
+      "Puerto Rican mixtapes drew on Jamaican dancehall, Panamanian reggae en español and recordings made near New York. Medellín added new voices and pop possibilities. Migration and collaboration kept transforming the sound: reggaetón evolved as people made it their own.",
   },
 };

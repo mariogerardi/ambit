@@ -29,7 +29,7 @@ import { questionMapPresentation } from "./presentation";
 
 import { AnswerReview } from "./AnswerReview";
 import { pinBands, pinReviewViews } from "./pinPresentation";
-import { estimateBands, estimateTier, formatEstimate } from "./numericEstimate";
+import { estimateTier } from "./numericEstimate";
 import { AnswerForm } from "./AnswerForm";
 import {
   correctAnswerCopy,
@@ -209,7 +209,6 @@ export function GameShell({
   const distance = pinDistance(round, game);
   const distanceTier = pinDistanceTier(round, game);
   const numericTier = estimateTier(round, game);
-  const numericBands = estimateBands(round, game);
   const pinViews = pinReviewViews(round, context, game);
   const feedbackText = explanation(round, context, game.selectedIds, !!correct);
   const correctAnswer = correctAnswerSummary(round, context, game);
@@ -306,6 +305,9 @@ export function GameShell({
               className={`round-feedback ${correct ? "answer-correct" : "answer-discovered"}`}
               role="status"
             >
+              {round.mode === "slider" && (
+                <AnswerReview question={round} context={context} game={game} />
+              )}
               <div className="feedback-point-summary">
                 <div className="feedback-label">
                   <span>{correct ? "✳" : "◎"}</span>
@@ -321,11 +323,19 @@ export function GameShell({
                   animate
                 />
               </div>
-              <p className="study-response study-correction journey-correct-answer">
-                <span>{correctAnswer.label}: </span>
-                <strong>{correctAnswer.value}</strong>
-              </p>
-              <AnswerReview question={round} context={context} game={game} />
+              {round.mode !== "slider" && (
+                <>
+                  <p className="study-response study-correction journey-correct-answer">
+                    <span>{correctAnswer.label}: </span>
+                    <strong>{correctAnswer.value}</strong>
+                  </p>
+                  <AnswerReview
+                    question={round}
+                    context={context}
+                    game={game}
+                  />
+                </>
+              )}
               {feedbackText && (
                 <p className="journey-explanation">{feedbackText}</p>
               )}
@@ -468,41 +478,6 @@ export function GameShell({
                   ))}
                 </ol>
               )}
-              {round.rule.type === "numeric-range" &&
-                numericBands.length > 0 && (
-                  <ol
-                    className="pin-accuracy-bands"
-                    aria-label="Estimate accuracy bands"
-                  >
-                    {numericBands.map((band) => (
-                      <li
-                        key={band.tolerance}
-                        data-achieved={band.achieved || undefined}
-                        style={
-                          {
-                            "--band-color": `var(--play-${band.index === 0 ? "correct" : band.index === band.count - 1 ? "hinted" : "selected"})`,
-                          } as import("react").CSSProperties
-                        }
-                      >
-                        <span aria-hidden="true">
-                          {band.achieved ? "✓" : "◎"}
-                        </span>
-                        <span>
-                          <strong>{band.label}</strong>
-                          <span>
-                            Within{" "}
-                            {formatEstimate(
-                              band.tolerance,
-                              round.rule.type === "numeric-range"
-                                ? round.rule.unit
-                                : "",
-                            )}
-                          </span>
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-                )}
               <MapKey entries={legend} />
               <button
                 className="primary-button"

@@ -10,6 +10,7 @@ import { answerPlace, pinDistance } from "../src/game/answerTargets";
 import { createQuestionContext } from "../src/game/questionPreparation";
 import { gameReducer, initialGame } from "../src/game/state";
 import { journeyWorld } from "../src/app/journeyWorld";
+import { geoDistance } from "d3-geo";
 import type { RegionFeature } from "../src/geography/types";
 import type { Action, GameState } from "../src/game/state";
 
@@ -37,6 +38,19 @@ const world = (game: GameState) =>
   journeyWorld(regions, journey, game, context);
 
 describe("Far From Everything", () => {
+  it("revisits every destination in story order during completion", () => {
+    const visitedIds = journey.completion!.views!.map((view) => {
+      const nearest = journey.rounds
+        .map((round, index) => ({ round, target: targetAt(index) }))
+        .sort(
+          (a, b) =>
+            geoDistance([view.lng, view.lat], [a.target.lng, a.target.lat]) -
+            geoDistance([view.lng, view.lat], [b.target.lng, b.target.lat]),
+        );
+      return nearest[0].round.id;
+    });
+    expect(visitedIds).toEqual(journey.rounds.map((round) => round.id));
+  });
   it("registers a separate unlisted edition without changing the daily pool", async () => {
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === journey.id),

@@ -20,9 +20,7 @@ export function EstimateSlider({
         aria-live="polite"
         data-selected={selected || undefined}
       >
-        {selected
-          ? formatEstimate(Number(value), rule.unit)
-          : "Choose an estimate"}
+        {selected ? formatEstimate(Number(value), rule.unit) : `— ${rule.unit}`}
       </output>
       <input
         id="written-answer"
@@ -59,8 +57,8 @@ export function EstimateSlider({
         <span>{formatEstimate(rule.min, rule.unit)}</span>
         <span>{formatEstimate(rule.max, rule.unit)}</span>
       </div>
-      <p id="estimate-slider-help">
-        Drag to estimate, or use the arrow keys. Each step is{" "}
+      <p id="estimate-slider-help" className="sr-only">
+        Use the arrow keys to adjust your estimate in steps of{" "}
         {formatEstimate(rule.step, rule.unit)}.
       </p>
     </div>

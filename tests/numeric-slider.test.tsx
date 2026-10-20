@@ -2,9 +2,11 @@
 import { readFileSync } from "node:fs";
 import { act, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { REGGAETON_JOURNEY as journey } from "../src/game/reggaetonJourney";
 import { AnswerForm } from "../src/game/AnswerForm";
+import { EstimateReview } from "../src/game/EstimateReview";
 import { canSubmit, isCorrect } from "../src/game/questionEvaluation";
 import { createQuestionContext } from "../src/game/questionPreparation";
 import { validateQuestionContract } from "../src/game/questionBuilder";
@@ -144,6 +146,81 @@ it("restores, edits and submits a numeric draft through the existing save regist
     points: 2,
   });
   expect(validGame(JSON.parse(JSON.stringify(submitted)), journey)).toBe(true);
+});
+
+describe("committed estimate review", () => {
+  it.each([
+    [1700, "correct", "Bullseye"],
+    [2000, "selected", "Close"],
+    [2200, "hinted", "Within range"],
+    [2250, "incorrect", undefined],
+    [0, "incorrect", undefined],
+    [5000, "incorrect", undefined],
+  ])(
+    "keeps estimate %s on the original scale with the achieved range",
+    (value, color, label) => {
+      const host = document.createElement("div");
+      host.innerHTML = renderToStaticMarkup(
+        <EstimateReview
+          question={question}
+          response={response(String(value))}
+        />,
+      );
+      expect(host.querySelector("input, button")).toBeNull();
+      expect(
+        host.querySelector(".estimate-review")?.getAttribute("style"),
+      ).toContain(`var(--play-${color})`);
+      expect(
+        host.querySelector<HTMLElement>(".estimate-review-guess")?.style.left,
+      ).toBe(`${Number(value) / 50}%`);
+      expect(
+        host.querySelector<HTMLElement>(".estimate-review-target")?.style.left,
+      ).toBe("34%");
+      expect(host.querySelector(".estimate-review-key")?.textContent).toContain(
+        "Answer: 1,700 km",
+      );
+      expect(
+        host.querySelector(".estimate-review-summary strong")?.textContent,
+      ).toBe(`${Number(value).toLocaleString("en-US")} km`);
+      expect(host.querySelectorAll(".estimate-review-band")).toHaveLength(3);
+      if (label)
+        expect(host.querySelector("li[data-achieved]")?.textContent).toContain(
+          label,
+        );
+      expect(host.querySelectorAll("li[data-achieved]")).toHaveLength(
+        label ? 1 : 0,
+      );
+      expect(host.textContent).toContain(
+        "Accepted estimates: 1,200 km to 2,200 km.",
+      );
+    },
+  );
+
+  it.each([0, 5000])(
+    "clips the accepted ranges to an endpoint target of %s",
+    (value) => {
+      const edgeQuestion = { ...question, rule: { ...rule, value } };
+      const host = document.createElement("div");
+      host.innerHTML = renderToStaticMarkup(
+        <EstimateReview
+          question={edgeQuestion}
+          response={response(String(value))}
+        />,
+      );
+      const bands = [
+        ...host.querySelectorAll<HTMLElement>(".estimate-review-band"),
+      ];
+      for (const band of bands) {
+        const left = parseFloat(band.style.left);
+        const width = parseFloat(band.style.width);
+        expect(left).toBeGreaterThanOrEqual(0);
+        expect(left + width).toBeLessThanOrEqual(100);
+        expect(width).toBeGreaterThan(0);
+      }
+      expect(bands[0].style.width).toBe("10%");
+      expect(bands[2].style.width).toBe("2%");
+    },
+  );
 });
 
 describe("numeric slider control without WebGL", () => {

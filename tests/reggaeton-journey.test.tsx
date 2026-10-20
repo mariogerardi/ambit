@@ -342,6 +342,11 @@ describe("The Sound of Somewhere: Reggaetón", () => {
       expect(reveal.places.some((p) => p.name === "Freeport")).toBe(false);
       expect(html(game)).toContain("Your estimate:");
       expect(html(game)).toContain("Estimate accuracy bands");
+      expect(html(game).indexOf('class="estimate-review"')).toBeLessThan(
+        html(game).indexOf('class="feedback-point-summary"'),
+      );
+      expect(html(game).match(/class="estimate-review"/g)).toHaveLength(1);
+      expect(html(game)).not.toContain('type="range"');
       expect(html(game)).not.toContain("Drop a pin");
     }
     const helped = reduce(
