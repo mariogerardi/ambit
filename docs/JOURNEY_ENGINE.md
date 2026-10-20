@@ -442,8 +442,9 @@ provide `legacyRoundLabels` for changed answers, keeping stored round IDs stable
 New submissions capture their receipt label. Save decoding/opening upgrades old
 attempts once: submitted grades remain intact, obsolete unsubmitted drafts and
 unused help are cleared, and already graded feedback advances to the next stop.
-Completed results retain their original receipt names; replay starts the current
-revision. The same upgrade runs for synced and archived attempt registers, so a
+Completed results retain their original receipt names; practice replay starts the current
+revision. Daily and Archive results have no replay control, including for admins;
+the Admin Tools reset is a separate explicit action. The same upgrade runs for synced and archived attempt registers, so a
 stale device cannot restore an obsolete draft. This metadata stores receipt
 names only, not archived questions or old grading rules.
 

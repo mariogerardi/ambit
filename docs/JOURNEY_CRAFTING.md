@@ -416,6 +416,12 @@ identified_, not always “Well spotted.”
 
 The completion screen is an **authored sixth visual state**, not merely “5/5 correct.” It should make the five answers intelligible together. Q5 earns an ending through a new task; completion then gathers the discoveries without asking another question.
 
+Author the completion geography, caption, media and cameras. The score-based
+closing heading and reward orbs are shared UI; do not prescribe a fixed headline
+per Journey. Daily and Archive results retain the saved run without a replay
+button, including for admins. Practice routes can replay; Admin Tools offers a
+separate explicit reset of today's attempt.
+
 A Journey about visual symbolism needs visual clues and visual explanations.
 Give the relevant motif enough room to inspect, retain its full visual context,
 and keep answer-bearing comparisons after submission. At completion, compare the

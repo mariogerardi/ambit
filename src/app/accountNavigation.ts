@@ -5,19 +5,32 @@ export interface ComparisonTarget {
   journeyId: string;
   version: number;
 }
+export type AdminSection = "schedule" | "feedback" | "tools";
+export type AccountSection = "dashboard" | "profile" | "friends" | "admin";
 export interface AccountIntent {
-  tab?: "friends";
+  tab?: AccountSection;
+  section?: AdminSection;
   friend?: string;
   player?: string;
   comparison?: ComparisonTarget;
 }
 export function accountIntent(url: string): AccountIntent {
   const parsed = new URL(url, "https://ambit.invalid");
-  if (parsed.pathname !== "/account") return {};
+  if (parsed.pathname !== "/account" && parsed.pathname !== "/admin") return {};
   const params = parsed.searchParams;
+  if (parsed.pathname === "/admin" || params.get("tab") === "admin") {
+    const section = params.get("section");
+    return {
+      tab: "admin",
+      section:
+        section === "feedback" || section === "tools" ? section : "schedule",
+    };
+  }
   const friend = params.get("friend");
   if (friend && /^[a-zA-Z][a-zA-Z0-9_]{2,23}$/.test(friend))
     return { tab: "friends", friend: friend.toLowerCase() };
+  if (params.get("tab") === "profile") return { tab: "profile" };
+  if (params.get("tab") === "dashboard") return { tab: "dashboard" };
   if (params.get("tab") !== "friends") return {};
   const player = params.get("player");
   if (player && player.length <= 200) return { tab: "friends", player };
@@ -47,4 +60,10 @@ export function friendProfileLink(id: string) {
 }
 export function invitationLink(handle: string) {
   return `/account?friend=${encodeURIComponent(handle)}`;
+}
+
+export function accountTabLink(tab: AccountSection, section?: AdminSection) {
+  const params = new URLSearchParams({ tab });
+  if (tab === "admin" && section) params.set("section", section);
+  return `/account?${params}`;
 }

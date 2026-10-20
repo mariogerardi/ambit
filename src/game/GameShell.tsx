@@ -459,7 +459,6 @@ export function GameShell({
                         <strong>{band.label}</strong>
                         <span>
                           Within {band.radiusKm.toLocaleString()} km
-                          {band.achieved ? " · Your band" : ""}
                         </span>
                       </span>
                     </li>

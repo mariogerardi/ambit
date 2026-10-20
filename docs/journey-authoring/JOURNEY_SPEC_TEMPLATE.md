@@ -89,6 +89,9 @@ guide rather than prescribing per-question colors or marker sizes.
 
 ## Completion
 
+The closing heading follows earned points and the orbs come from shared UI.
+Author the Journey's caption and visual payoff rather than a fixed score headline.
+
 - **Payoff and caption:**
 - **Map:** regions, stop markers, physical context, labels and color roles.
 - **Camera:** static focus / ordered flyover views; no false connecting routes.

@@ -41,6 +41,9 @@ still need player review; neither a source snapshot nor automated checks certify
 every rendered view. Current Dailies award 15 points: three per question, with
 3/2/1 distance-pin tiers and hint/assist ceilings of two/one. The crafting guide
 owns the full scoring contract; variable weights and timers are not implemented.
+Completion headings follow earned points through shared UI; authors supply the
+caption and geographic payoff. Daily and Archive results do not offer replay,
+including for admins; practice routes retain replay.
 The kit encourages consulting other Journeys for repeated mechanics, different
 structures and unusual geography. Edit
 [`scripts/journey-export.config.json`](../scripts/journey-export.config.json) to

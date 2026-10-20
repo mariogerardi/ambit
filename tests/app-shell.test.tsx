@@ -188,11 +188,20 @@ async function click(text: string) {
       (b) =>
         b.textContent?.trim() === text || b.getAttribute("aria-label") === text,
     ) ?? buttons.find((b) => b.textContent?.trim().startsWith(text));
+  if (!button && text === "Admin") {
+    // Existing Admin behavior fixtures enter its protected deep link. Dedicated
+    // account-navigation coverage exercises discovery through the Admin tab.
+    await act(async () => {
+      history.pushState(null, "", "/admin");
+      dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await settleLoads();
+    return;
+  }
   if (
     !button &&
     [
       "Home",
-      "Admin",
       "Journey",
       "Explore",
       "Study",
@@ -265,6 +274,7 @@ beforeEach(() => {
     },
   );
   localStorage.clear();
+  sessionStorage.clear();
   history.replaceState(null, "", "/");
   probe.mounts = 0;
   probe.props = undefined;
@@ -539,6 +549,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     await mount();
     // Let the initial account hydration run, without waiting for any real service.
     await act(async () => new Promise((resolve) => setTimeout(resolve, 30)));
+    await click("Tools");
     await click("Clear my Journey attempt");
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(host.textContent).toContain("Attempt cleared.");
@@ -558,14 +569,13 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   it("offers retained Journeys and the new sun and river Journeys in Admin", async () => {
     await mount();
     await click("Admin");
+    await click("Choose a Journey");
     const options = [
-      ...host.querySelectorAll<HTMLSelectElement>(".mode-incoming select"),
-    ][0].options;
-    expect([...options].map((option) => option.value)).toEqual([
-      "",
-      ...journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id),
-    ]);
-    expect(options).toHaveLength(18);
+      ...host.querySelectorAll<HTMLButtonElement>("[data-journey-id]"),
+    ].map((button) => button.dataset.journeyId);
+    expect(new Set(options)).toEqual(
+      new Set(journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id)),
+    );
     const preview = [...host.querySelectorAll<HTMLAnchorElement>("a")].find(
       (link) => link.textContent?.includes("Preview five questions"),
     );
@@ -585,7 +595,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       "pins-and-cities-v1",
       "the-z-trail-v1",
     ])
-      expect([...options].some((option) => option.value === id)).toBe(false);
+      expect(options.includes(id)).toBe(false);
   });
 
   it.each([CANADA_JOURNEY, ANDES_JOURNEY])(
@@ -867,7 +877,7 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       [true, false].map((admin) => ({ phase, admin })),
     ),
   )(
-    "restricts $phase daily Journey replay to admins (admin: $admin)",
+    "keeps $phase Daily results without replay (admin: $admin)",
     async ({ phase, admin }) => {
       vi.useFakeTimers({ toFake: ["Date"] });
       vi.setSystemTime(new Date(2026, 9, 6, 12));
@@ -910,32 +920,10 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
       await click("Open menu");
       expect(host.querySelector(".app-menu-caption")).toBeNull();
       await click("Close menu");
-      if (!admin) {
-        expect(host.querySelector(".journey-replay")).toBeNull();
-        expect(host.querySelector(".journey-receipt")).not.toBeNull();
-        expect(save.load().attempts[date].runId).toBe(attempt.runId);
-        return;
-      }
-      await click("Play again");
-      const replay = createDailySave(journeyRegistry.JOURNEY_INDEX).load()
-        .attempts[date];
-      expect(replay.runId).not.toBe(attempt.runId);
-      expect(replay.journeyId).toBe(attempt.journeyId);
-      expect(replay.game).toMatchObject({
-        phase: "playing",
-        roundIndex: 0,
-        answers: [],
-      });
-      await act(async () => root.unmount());
-      root = createRoot(host);
-      await mount();
-      expect(
-        host.querySelector(".mode-incoming .question-card"),
-      ).not.toBeNull();
-      expect(
-        createDailySave(journeyRegistry.JOURNEY_INDEX).load().attempts[date]
-          .runId,
-      ).toBe(replay.runId);
+      expect(host.querySelector(".journey-replay")).toBeNull();
+      expect(host.querySelector(".journey-receipt")).not.toBeNull();
+      expect(save.load().attempts[date].runId).toBe(attempt.runId);
+      expect(save.load().attempts[date].game.phase).toBe(phase);
     },
   );
   it("frames selected countries more closely on a phone and retains the framing on recenter", async () => {
@@ -1248,7 +1236,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     const attempts = JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts;
     await click("Admin");
     expect(host.querySelector(".mode-incoming .admin-panel")).not.toBeNull();
-    expect(location.pathname).toBe("/admin");
+    expect(location.pathname + location.search).toBe(
+      "/account?tab=admin&section=schedule",
+    );
     expect(
       host.querySelector(".page-layout .admin-content .admin-panel"),
     ).not.toBeNull();
@@ -1573,8 +1563,9 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Admin");
     expect(host.textContent).toContain("Daily Journey schedule");
+    await click("Choose a Journey");
     expect(
-      host.querySelector('option[value="north-america-v2"]'),
+      host.querySelector('[data-journey-id="north-america-v2"]'),
     ).not.toBeNull();
     expect(probe.mounts).toBe(1);
   });
@@ -2022,30 +2013,38 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   });
   it("publishes an assignment for new attempts without replacing a started Journey", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
-    vi.setSystemTime(new Date(2026, 9, 5, 12));
+    vi.setSystemTime(new Date(2026, 9, 11, 12));
+    scheduleState.assignments["2026-10-11"] = CANADA_JOURNEY.id;
+    scheduleState.records["2026-10-11"] = {
+      day: "2026-10-11",
+      journeyId: CANADA_JOURNEY.id,
+      source: "assigned",
+      revision: 2,
+    };
     await mount();
     await click("Play");
     await act(async () => probe.props!.onSelect(member("wurl:CAN")));
     const canvas = host.querySelector("canvas");
     await click("Admin");
-    const select = host.querySelector<HTMLSelectElement>(
-      ".mode-incoming select",
-    )!;
-    await act(async () => {
-      select.value = "mediterranean-v1";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    await click("Publish for Oct 5");
-    expect(scheduleState.assignments["2026-10-05"]).toBe("mediterranean-v1");
+    await click("Choose a Journey");
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>(
+          '[data-journey-id="mediterranean-v1"]',
+        )!
+        .click(),
+    );
+    await click("Assign for Oct 11");
+    expect(scheduleState.assignments["2026-10-11"]).toBe("mediterranean-v1");
     expect(host.textContent).toContain(
-      "Published Around the Mediterranean for Mon, Oct 5.",
+      "Published Around the Mediterranean for Sun, Oct 11.",
     );
     expect(host.querySelector("canvas")).toBe(canvas);
     await click("Home");
     await click("Resume");
     expect(host.textContent).toContain("Well spotted.");
     expect(
-      JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts["2026-10-05"]
+      JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts["2026-10-11"]
         .journeyId,
     ).toBe(CANADA_JOURNEY.id);
     await act(async () => {
@@ -2275,41 +2274,37 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
   });
   it("assigns a future calendar date and restores its rotation when cleared", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(new Date(2026, 9, 5, 12));
+    vi.setSystemTime(new Date(2026, 9, 11, 12));
     await mount();
+    const offeredTitle = host.querySelector(".daily-menu h2")?.textContent;
     await click("Admin");
-    await click("Tue, Oct 6");
-    const picker = host.querySelector<HTMLSelectElement>(
-      ".mode-incoming select",
-    )!;
-    await act(async () => {
-      picker.value = ANDES_JOURNEY.id;
-      picker.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    await click("Publish for Oct 6");
+    await click("Mon, Oct 12");
+    await click("Choose a Journey");
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>(
+          `[data-journey-id="${ANDES_JOURNEY.id}"]`,
+        )!
+        .click(),
+    );
+    await click("Assign for Oct 12");
     expect(scheduleState.assignments).toEqual({
-      "2026-10-06": ANDES_JOURNEY.id,
+      "2026-10-12": ANDES_JOURNEY.id,
     });
     expect(host.textContent).toContain(
-      "Published Along the Andes for Tue, Oct 6.",
+      "Published Along the Andes for Mon, Oct 12.",
     );
     await click("Home");
     expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
-      CANADA_JOURNEY.title,
+      offeredTitle,
     );
     await click("Admin");
-    await click("Tue, Oct 6");
-    const reset = host.querySelector<HTMLSelectElement>(
-      ".mode-incoming select",
-    )!;
-    await act(async () => {
-      reset.value = "";
-      reset.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    await click("Mon, Oct 12");
+    await click("Use automatic selection instead");
     await click("Restore automatic selection");
     expect(scheduleState.assignments).toEqual({});
     expect(host.textContent).toContain(
-      "Restored automatic selection for Tue, Oct 6.",
+      "Restored automatic selection for Mon, Oct 12.",
     );
   });
   it("blocks guessing today's edition when the shared schedule cannot load", async () => {
@@ -2804,6 +2799,154 @@ describe("persistent application shell (DOM only; no browser or WebGL)", () => {
     expect(location.pathname).toBe("/account");
     expect(host.textContent).toContain("Welcome to Ambit.");
     expect(host.querySelector(".app-menu-content")).toBeNull();
+  });
+  it.each([true, false])(
+    "places Admin alongside account sections only for admins (admin: %s)",
+    async (admin) => {
+      authProbe.admin = admin;
+      authProbe.subject = "owner";
+      await mount();
+      await click("Account");
+      const adminTab = host.querySelector<HTMLButtonElement>(
+        '[data-dd-action-name="Account Open Admin"]',
+      );
+      expect(!!adminTab).toBe(admin);
+      await click("Open menu");
+      expect(
+        host.querySelector('[data-dd-action-name="Menu Admin"]'),
+      ).toBeNull();
+      await click("Close menu");
+      if (!adminTab) return;
+      await act(async () => adminTab.click());
+      await settleLoads();
+      expect(location.pathname + location.search).toBe("/account?tab=admin");
+      expect(
+        host.querySelector('.account-tabs [aria-current="page"]')?.textContent,
+      ).toBe("Admin");
+      expect(host.querySelector(".admin-panel")).not.toBeNull();
+      await act(async () =>
+        host
+          .querySelector<HTMLButtonElement>(
+            '[data-dd-action-name="Account Open Profile"]',
+          )!
+          .click(),
+      );
+      await settleLoads();
+      expect(location.pathname + location.search).toBe("/account?tab=profile");
+      expect(
+        host.querySelector('.account-tabs [aria-current="page"]')?.textContent,
+      ).toBe("Profile");
+    },
+  );
+  it("keeps the account shell and admin draft mounted across URL-driven tabs and browser history", async () => {
+    authProbe.subject = "owner";
+    history.replaceState(null, "", "/account?tab=dashboard");
+    await mount();
+    const layer = host.querySelector(".mode-incoming");
+    const heading = host.querySelector(".account-heading");
+    const tabs = host.querySelector(".account-tabs");
+    async function section(label: string) {
+      await act(async () =>
+        host
+          .querySelector<HTMLButtonElement>(
+            `[data-dd-action-name="Account Open ${label}"]`,
+          )!
+          .click(),
+      );
+      await settleLoads();
+      expect(host.querySelector(".mode-incoming")).toBe(layer);
+      expect(host.querySelector(".account-heading")).toBe(heading);
+      expect(host.querySelector(".account-tabs")).toBe(tabs);
+      expect(host.querySelector(".mode-outgoing")).toBeNull();
+    }
+    await section("Profile");
+    expect(location.search).toBe("?tab=profile");
+    await section("Friends");
+    expect(location.search).toBe("?tab=friends");
+    await section("Admin");
+    expect(location.search).toBe("?tab=admin");
+    expect(host.querySelector(".admin-panel > h1")).toBeNull();
+    const editor = host.querySelector(".journey-date-editor");
+    await click("Choose a Journey");
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>(
+          '[data-journey-id="down-the-danube-v1"]',
+        )!
+        .click(),
+    );
+    await click("Feedback");
+    expect(location.search).toBe("?tab=admin&section=feedback");
+    await click("Tools");
+    expect(location.search).toBe("?tab=admin&section=tools");
+    await act(async () => {
+      history.back();
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    });
+    expect(location.search).toBe("?tab=admin&section=feedback");
+    expect(host.querySelector("#admin-feedback")?.hasAttribute("hidden")).toBe(
+      false,
+    );
+    await act(async () => {
+      history.forward();
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    });
+    expect(location.search).toBe("?tab=admin&section=tools");
+    expect(host.querySelector("#admin-tools")?.hasAttribute("hidden")).toBe(
+      false,
+    );
+    await section("Dashboard");
+    expect(location.search).toBe("?tab=dashboard");
+    await section("Admin");
+    expect(host.querySelector(".journey-date-editor")).toBe(editor);
+    expect(
+      host.querySelector(".scheduled-journey-preview.is-draft h4")?.textContent,
+    ).toBe("Down the Danube");
+    expect(probe.mounts).toBe(1);
+  });
+  it.each([true, false])(
+    "opens an admin subtab directly and preserves access protection (admin: %s)",
+    async (admin) => {
+      authProbe.subject = "owner";
+      authProbe.admin = admin;
+      history.replaceState(null, "", "/account?tab=admin&section=tools");
+      await mount();
+      if (admin) {
+        expect(host.querySelector("#admin-tools")?.hasAttribute("hidden")).toBe(
+          false,
+        );
+        expect(
+          host.querySelector("#admin-tab-tools")?.getAttribute("aria-selected"),
+        ).toBe("true");
+      } else {
+        expect(host.textContent).toContain("Admin access required.");
+        expect(host.querySelector(".admin-panel")).toBeNull();
+        expect(
+          host.querySelector('[data-dd-action-name="Account Open Admin"]'),
+        ).toBeNull();
+      }
+    },
+  );
+  it("nests Archive directly beneath Journey and preserves the shared globe when opening it", async () => {
+    await mount();
+    const canvas = host.querySelector("canvas");
+    await click("Open menu");
+    expect(
+      [...host.querySelectorAll(".app-menu-journeys button")].map((button) =>
+        button.textContent?.trim(),
+      ),
+    ).toEqual(["Journey", "Archive"]);
+    expect(
+      host.querySelector(".app-menu-journeys .app-menu-subitem")?.textContent,
+    ).toBe("Archive");
+    await click("Archive");
+    expect(location.pathname).toBe("/archive");
+    expect(host.querySelector(".app-menu-content")).toBeNull();
+    expect(host.querySelector("canvas")).toBe(canvas);
+    await click("Open menu");
+    expect(
+      host.querySelector('.app-menu-subitem[aria-current="page"]')?.textContent,
+    ).toBe("Archive");
   });
   it("shows a saved handle and flag in the header and ignores another player's profile", async () => {
     authProbe.subject = "a";

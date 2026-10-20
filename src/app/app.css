@@ -611,13 +611,7 @@
 }
 
 /* One continuous edge fade protects bare content without floating halos. */
-.experience:is(
-    .mode-home,
-    .mode-explore,
-    .mode-archive,
-    .mode-study,
-    .mode-admin
-  )::before,
+.experience:is(.mode-home, .mode-explore, .mode-archive, .mode-study)::before,
 .experience.phase-finished::before {
   content: "";
   position: absolute;
@@ -883,17 +877,22 @@
   height: 22px;
 }
 .app-menu-content {
+  box-sizing: border-box;
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: min(288px, calc(100vw - 32px));
+  width: min(304px, calc(100vw - 32px));
   max-height: calc(100dvh - 96px);
   overflow-y: auto;
   padding: 12px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.145);
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
   border-radius: 16px;
-  box-shadow: 0 12px 32px #0005;
-  background: rgb(var(--ui-surface-rgb) / 1);
+  box-shadow: 0 16px 48px rgb(var(--ui-shadow-rgb) / 0.4);
+  background: linear-gradient(
+    145deg,
+    rgb(var(--ui-raised-rgb)),
+    rgb(var(--ui-surface-rgb)) 65%
+  );
   pointer-events: auto;
   color: var(--ui-text, #fff);
   text-shadow: none;
@@ -907,7 +906,7 @@
   padding: 10px 12px;
   font-size: 14px;
   color: var(--ui-text, #fff);
-  border-radius: 6px;
+  border-radius: 9px;
   cursor: pointer;
   text-align: left;
 }
@@ -931,7 +930,39 @@
 }
 .experience .app-menu-content button:is(:hover, [aria-current]),
 .app-menu-credits > summary:hover {
-  background: rgb(var(--ui-line-rgb) / 0.066);
+  background: rgb(var(--ui-accent-rgb) / 0.1);
+}
+.experience .app-menu-content button[aria-current] {
+  color: var(--ui-accent);
+  box-shadow: inset 2px 0 var(--ui-accent);
+}
+.app-menu-primary {
+  display: grid;
+  gap: 3px;
+}
+.experience .app-menu-content .app-menu-subitem {
+  position: relative;
+  width: calc(100% - 22px);
+  margin-left: 22px;
+  padding-left: 22px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.app-menu-subitem::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 0;
+  width: 10px;
+  height: 22px;
+  border-left: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-bottom-left-radius: 5px;
+}
+.app-menu-primary .app-menu-subitem .action-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
 }
 .app-menu-credits p {
   padding: 0 12px 8px;
@@ -2397,16 +2428,93 @@
 .admin-panel > .muted {
   margin: 0 0 28px;
 }
+.admin-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 18px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  border-radius: 9px;
+  background: rgb(var(--ui-line-rgb) / 0.04);
+}
+.experience .admin-tabs [role="tab"] {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.experience .admin-tabs [aria-selected="true"] {
+  background: rgb(var(--ui-line-rgb) / 0.12);
+  color: var(--ui-accent);
+}
+.admin-tab-panel[hidden] {
+  display: none;
+}
+.admin-tools {
+  color: var(--ui-muted);
+}
+.admin-reset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.24);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb) / 0.8);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.admin-reset h2 {
+  margin: 0 0 4px;
+  color: var(--ui-text);
+  font-size: 19px;
+}
+.admin-reset p {
+  margin: 0;
+}
+.admin-reset > button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 9px;
+  font-size: 13px;
+}
+.admin-reset > [role="status"] {
+  flex-basis: 100%;
+}
 .admin-journey-card,
 .admin-content .feedback-review li {
   padding: 24px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.18);
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.24);
   border-radius: 16px;
-  background: rgb(var(--ui-surface-rgb) / 0.88);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--ui-raised-rgb) / 0.96),
+    rgb(var(--ui-surface-rgb) / 0.96) 65%
+  );
 }
 .admin-journey-card h2 {
-  margin: 0 0 18px;
+  margin: 0 0 14px;
   font-size: 24px;
+}
+.admin-journey-card > p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.admin-journey-card > .tertiary-action {
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 9px;
+  font-size: 13px;
+}
+.admin-journey-card > .tertiary-action:not(:disabled):hover {
+  background: rgb(var(--ui-line-rgb) / 0.08);
+  border-color: var(--ui-accent);
 }
 .admin-panel > .admin-journey-card + .admin-journey-card {
   margin-top: 24px;
@@ -2420,8 +2528,7 @@
   max-width: 620px;
 }
 .admin-content .feedback-review {
-  padding-top: 32px;
-  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+  padding-top: 0;
 }
 .feedback-review-heading {
   display: flex;
@@ -2481,7 +2588,7 @@
 .experience.page-layout .account-dashboard {
   margin-inline: auto;
 }
-.experience:is(.mode-account, .mode-admin)::after {
+.experience.mode-account::after {
   content: "";
   position: fixed;
   inset: 0;
@@ -2702,7 +2809,6 @@ body
 
 .admin-panel .journey-scheduler-card {
   padding: 24px;
-  background: rgb(var(--ui-surface-rgb));
 }
 .journey-scheduler-heading {
   display: flex;
@@ -2728,37 +2834,48 @@ body
   min-width: 0;
 }
 .journey-month-heading {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 16px;
   margin-bottom: 16px;
 }
 .journey-month-heading h3 {
   margin: 0;
   font: 19px var(--font-ui);
 }
-.journey-month-actions {
-  display: flex;
+.journey-month-navigation {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+}
+.journey-month-navigation h3 {
+  text-align: center;
 }
 .experience .admin-panel .scheduler-icon,
 .experience .admin-panel .scheduler-today {
   display: inline-grid;
   place-items: center;
-  width: auto;
-  min-height: 36px;
-  padding: 6px 10px;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
   border-radius: 8px;
   background: rgb(var(--ui-line-rgb) / 0.06);
   color: var(--ui-accent);
   font-size: 13px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 .experience .admin-panel .scheduler-icon {
-  width: 36px;
   font-size: 24px;
+}
+.experience .admin-panel .scheduler-today {
+  width: 64px;
 }
 .experience .admin-panel .scheduler-icon:hover,
 .experience .admin-panel .scheduler-today:hover {
@@ -2818,6 +2935,14 @@ body
 }
 .schedule-dot.is-assigned {
   background: var(--ui-accent);
+  border-radius: 1px;
+}
+.schedule-dot.is-locked {
+  background: var(--ui-muted);
+}
+.schedule-dot.is-provisional {
+  background: transparent;
+  outline: 1px dashed var(--ui-muted);
 }
 .experience .admin-panel .journey-calendar-day.is-outside-month {
   color: var(--ui-muted);
@@ -2836,6 +2961,10 @@ body
 .experience .admin-panel .journey-calendar-day[aria-pressed="true"] {
   background: rgb(var(--ui-accent-rgb) / 0.12);
   border-color: var(--ui-accent);
+}
+.experience .admin-panel .journey-calendar-day[aria-pressed="true"] {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
 }
 .journey-calendar-legend {
   display: flex;
@@ -2860,6 +2989,7 @@ body
 .journey-date-editor header h3 {
   margin: 6px 0 0;
   font: 18px/1.4 var(--font-ui);
+  scroll-margin-top: 24px;
 }
 .journey-date-editor .overline {
   font-size: 10px;
@@ -2874,6 +3004,114 @@ body
 .admin-panel .journey-date-editor .field {
   gap: 7px;
   font-size: 12px;
+}
+.journey-list-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.journey-catalog-list {
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 10px;
+  background: rgb(var(--ui-surface-rgb) / 0.6);
+}
+.journey-catalog-list li {
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.experience .journey-catalog-list button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  text-align: left;
+}
+.journey-catalog-list button:is(:hover, [aria-pressed="true"]) {
+  background: rgb(var(--ui-accent-rgb) / 0.12);
+}
+.journey-catalog-list button[aria-pressed="true"] {
+  box-shadow: inset 3px 0 var(--ui-accent);
+}
+.journey-catalog-list li + li {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+}
+.journey-catalog-list strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ui-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+.journey-catalog-list .muted {
+  display: block;
+}
+.journey-picker {
+  position: relative;
+}
+.experience .journey-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.5);
+  border-radius: 9px;
+  color: var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.08);
+  font-size: 14px;
+}
+.journey-picker-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline: 0;
+  z-index: 5;
+  display: grid;
+  gap: 12px;
+  max-height: min(480px, 65dvh);
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.35);
+  border-radius: 12px;
+  background: rgb(var(--ui-raised-rgb));
+  box-shadow: 0 12px 36px rgb(var(--ui-shadow-rgb) / 0.35);
+}
+.journey-picker-search {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+.journey-picker-search .field {
+  flex: 1;
+  min-width: 0;
+}
+.experience .journey-picker-search > button {
+  min-width: 32px;
+  min-height: 44px;
+  font-size: 24px;
+}
+.journey-picker-popover .journey-catalog-list {
+  max-height: 240px;
+  flex-shrink: 0;
+}
+.journey-assignment-actions {
+  display: grid;
+  gap: 8px;
+}
+.journey-assignment-actions .schedule-discard {
+  justify-self: start;
+}
+.schedule-current > span {
+  display: block;
+  margin-top: 4px;
 }
 .scheduled-journey-preview {
   padding: 16px;
@@ -2951,6 +3189,13 @@ body
   }
 }
 @media (max-width: 500px) {
+  .journey-month-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .journey-month-heading > .scheduler-today {
+    justify-self: end;
+  }
   .admin-panel .journey-scheduler-card {
     padding: 16px;
   }
