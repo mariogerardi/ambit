@@ -15,7 +15,11 @@ import { TENTH_JOURNEY } from "./tenthJourney";
 import { NINTH_JOURNEY } from "./ninthJourney";
 import { FOURTH_JOURNEY } from "./fourthJourney";
 import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
+import { FAR_FROM_EVERYTHING_JOURNEY } from "./farFromEverythingJourney";
+import { REGGAETON_JOURNEY } from "./reggaetonJourney";
 export const JOURNEYS = [
+  REGGAETON_JOURNEY,
+  FAR_FROM_EVERYTHING_JOURNEY,
   ACROSS_DIVIDE_JOURNEY,
   CANADA_JOURNEY,
   FOURTH_JOURNEY,
@@ -36,6 +40,8 @@ export const JOURNEYS = [
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [REGGAETON_JOURNEY.id]: "/journey/the-sound-of-somewhere-reggaeton",
+    [FAR_FROM_EVERYTHING_JOURNEY.id]: "/journey/far-from-everything",
     [ACROSS_DIVIDE_JOURNEY.id]: "/journey/across-the-divide",
     [MISSING_BORDERS_JOURNEY.id]: "/journey/missing-borders",
     [SHARED_NAMES_JOURNEY.id]: "/journey/same-name-different-place",

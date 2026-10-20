@@ -245,6 +245,46 @@ export const MECHANIC_RECIPES: Question[] = [
   }),
   defineQuestion({
     ...base,
+    id: "recipe:slider",
+    title: "slider example",
+    prompt: "Estimate the straight-line distance from London to Paris.",
+    instruction:
+      "Move the slider. Estimates within 100 km count; the closer bands end at 25 and 50 km.",
+    explanation:
+      "The two city centres are roughly 350 km apart by great circle.",
+    mode: "slider",
+    count: 1,
+    selection: { type: "none" },
+    commitment: "submit",
+    inputLabel: "Distance in kilometres",
+    rule: {
+      type: "numeric-range",
+      value: 350,
+      min: 0,
+      max: 1000,
+      step: 10,
+      unit: "km",
+      tolerance: 100,
+      tiers: [
+        { tolerance: 25, feedback: "Beautifully estimated." },
+        { tolerance: 50, feedback: "A close estimate." },
+        { tolerance: 100, feedback: "Within range." },
+      ],
+    },
+    guidance: {
+      hint: "Compare the gap to the width of southern England.",
+      assist: { text: "The distance is between 250 and 450 km." },
+    },
+    scenes: {
+      play: {
+        focus: { lat: 50, lng: 1, altitude: 0.45 },
+        places: [reference("place:2643743"), reference("place:2988507")],
+      },
+    },
+    source: mapSource,
+  }),
+  defineQuestion({
+    ...base,
     id: "recipe:number",
     title: "number example",
     prompt: "How many cities are named here: Canberra, Sydney and Melbourne?",

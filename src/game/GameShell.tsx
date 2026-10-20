@@ -29,6 +29,7 @@ import { questionMapPresentation } from "./presentation";
 
 import { AnswerReview } from "./AnswerReview";
 import { pinBands, pinReviewViews } from "./pinPresentation";
+import { estimateBands, estimateTier, formatEstimate } from "./numericEstimate";
 import { AnswerForm } from "./AnswerForm";
 import {
   correctAnswerCopy,
@@ -207,6 +208,8 @@ export function GameShell({
       : undefined;
   const distance = pinDistance(round, game);
   const distanceTier = pinDistanceTier(round, game);
+  const numericTier = estimateTier(round, game);
+  const numericBands = estimateBands(round, game);
   const pinViews = pinReviewViews(round, context, game);
   const feedbackText = explanation(round, context, game.selectedIds, !!correct);
   const correctAnswer = correctAnswerSummary(round, context, game);
@@ -307,7 +310,9 @@ export function GameShell({
                 <div className="feedback-label">
                   <span>{correct ? "✳" : "◎"}</span>
                   {correct
-                    ? (distanceTier?.feedback ?? correctAnswerCopy(round))
+                    ? (distanceTier?.feedback ??
+                      numericTier?.feedback ??
+                      correctAnswerCopy(round))
                     : "Not quite."}
                 </div>
                 <PointOrbs
@@ -457,14 +462,47 @@ export function GameShell({
                       </span>
                       <span>
                         <strong>{band.label}</strong>
-                        <span>
-                          Within {band.radiusKm.toLocaleString()} km
-                        </span>
+                        <span>Within {band.radiusKm.toLocaleString()} km</span>
                       </span>
                     </li>
                   ))}
                 </ol>
               )}
+              {round.rule.type === "numeric-range" &&
+                numericBands.length > 0 && (
+                  <ol
+                    className="pin-accuracy-bands"
+                    aria-label="Estimate accuracy bands"
+                  >
+                    {numericBands.map((band) => (
+                      <li
+                        key={band.tolerance}
+                        data-achieved={band.achieved || undefined}
+                        style={
+                          {
+                            "--band-color": `var(--play-${band.index === 0 ? "correct" : band.index === band.count - 1 ? "hinted" : "selected"})`,
+                          } as import("react").CSSProperties
+                        }
+                      >
+                        <span aria-hidden="true">
+                          {band.achieved ? "✓" : "◎"}
+                        </span>
+                        <span>
+                          <strong>{band.label}</strong>
+                          <span>
+                            Within{" "}
+                            {formatEstimate(
+                              band.tolerance,
+                              round.rule.type === "numeric-range"
+                                ? round.rule.unit
+                                : "",
+                            )}
+                          </span>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
               <MapKey entries={legend} />
               <button
                 className="primary-button"

@@ -3,6 +3,7 @@ import type { GameState } from "./state";
 import { answerItems, responseIds } from "./answerPresentation";
 import { answerPlace } from "./answerTargets";
 import { solutionIds } from "./questionPreparation";
+import { estimateError, formatEstimate } from "./numericEstimate";
 
 /** Keep response/slot identity visible instead of asking a map fill to explain everything. */
 export function AnswerReview({
@@ -31,6 +32,17 @@ export function AnswerReview({
   ].includes(q.mode);
   const picked = responseIds(q, context, game);
   const reviewItems = answerItems(q, context, game);
+  if (q.rule.type === "numeric-range") {
+    const error = estimateError(q, game);
+    return error === undefined ? null : (
+      <p className="submitted-answer">
+        Your estimate:{" "}
+        <strong>{formatEstimate(Number(game.text), q.rule.unit)}</strong>
+        {" · "}
+        {formatEstimate(error, q.rule.unit)} away
+      </p>
+    );
+  }
   if (q.mode === "land-path")
     return (
       <p className="submitted-answer">

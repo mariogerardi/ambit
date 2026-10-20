@@ -69,7 +69,7 @@ import { normalWorldView } from "./defaultViews";
 export interface GlobeHandle {
   focus(focus: Focus, fitToViewport?: boolean | "world"): void;
   cancelFocus(): void;
-  flyover(stops: Focus[]): void;
+  flyover(stops: Focus[], loop?: boolean): void;
   cancelFlyover(): void;
   fidget(): void;
   cancelFidget(): void;
@@ -584,7 +584,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             fitAltitude,
           );
         },
-        flyover(stops) {
+        flyover(stops, loop = true) {
           clearInspection();
           if (!globe.current) return;
           stop();
@@ -599,6 +599,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               altitude: (stop.altitude ?? 0.65) / ratio,
             })),
             current.current.reduced,
+            loop,
           );
         },
         cancelFlyover() {

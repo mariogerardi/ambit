@@ -5,6 +5,7 @@ import { matchingCapitals, solutionIds } from "./questionPreparation";
 import { pinBands } from "./pinPresentation";
 import { acceptsAlternatives } from "./answerPresentation";
 import { answerPlace } from "./answerTargets";
+import { formatEstimate } from "./numericEstimate";
 import {
   questionPlaces,
   questionRegions,
@@ -35,6 +36,7 @@ export function journeyResultCopy(points: number) {
 export function correctAnswerCopy(question: Question): string {
   if (question.correctFeedback) return question.correctFeedback;
   if (question.mode === "pin") return "Nicely placed.";
+  if (question.mode === "slider") return "Nicely estimated.";
   if (
     [
       "shortest-borders",
@@ -94,6 +96,8 @@ export function correctAnswerSummary(
       (slot, index) => `${slot.label}: ${name(expected[index])}`,
     );
   else if (rule.type === "manual-number") values = [String(rule.value)];
+  else if (rule.type === "numeric-range")
+    values = [formatEstimate(rule.value, rule.unit)];
   else if (rule.type === "manual-text") values = [rule.answers[0]];
   else if (rule.type === "capital-name") values = [capital(rule.countryId)];
   else if (rule.type === "text-fact")

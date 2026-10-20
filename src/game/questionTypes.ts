@@ -13,6 +13,7 @@ export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
   "place-ids": "Select city markers",
   "manual-text": "Authored text and aliases",
   "manual-number": "Authored number",
+  "numeric-range": "Estimate within a numeric tolerance",
   "merged-region": "One composite territory from canonical countries",
   "region-ids": "Authored region set",
   "choice-ids": "Reviewed choice set",

@@ -192,6 +192,42 @@
     ]
   },
   {
+    "id": "far-from-everything",
+    "addedAt": "2026-10-19",
+    "availability": "unlisted",
+    "title": "Far From Everything",
+    "description": "Five pins explore what remoteness means: an island across an ocean, an Arctic town, a village reached by sea, uninhabited land, and the emptiest part of the Pacific.",
+    "path": "/journey/far-from-everything",
+    "module": "./farFromEverythingJourney.ts",
+    "rounds": [
+      {
+        "id": "ffe-01-rapa-nui",
+        "label": "Pacific",
+        "progressLabel": "Across the Pacific"
+      },
+      {
+        "id": "ffe-02-ittoqqortoormiit",
+        "label": "Arctic",
+        "progressLabel": "The Arctic edge"
+      },
+      {
+        "id": "ffe-03-tristan",
+        "label": "South Atlantic",
+        "progressLabel": "The loneliest village"
+      },
+      {
+        "id": "ffe-04-bouvet",
+        "label": "Southern Ocean",
+        "progressLabel": "An island without neighbors"
+      },
+      {
+        "id": "ffe-05-point-nemo",
+        "label": "Ocean",
+        "progressLabel": "Farthest from land"
+      }
+    ]
+  },
+  {
     "id": "island-instincts-v1",
     "addedAt": "2026-10-10",
     "availability": "pool",
@@ -576,6 +612,53 @@
         "id": "pin-chile-colombia",
         "label": "Shared neighbor",
         "progressLabel": "Chile + Colombia"
+      }
+    ]
+  },
+  {
+    "id": "the-sound-of-somewhere-reggaeton",
+    "addedAt": "2026-10-19",
+    "availability": "unlisted",
+    "title": "The Sound of Somewhere: Reggaetón",
+    "saveRevision": 3,
+    "legacyRoundLabels": {
+      "reggaeton-01-jamaica": "Jamaica · Kingston",
+      "reggaeton-04-underground": "San Juan · the underground",
+      "reggaeton-05-medellin": "Medellín · the Colombian scene"
+    },
+    "description": "From Puerto Rico's underground to Colombian pop, trace reggaetón through Caribbean migration, Spanish-language reggae and an unexpected New York studio. A rhythm changes as people carry it between places.",
+    "path": "/journey/the-sound-of-somewhere-reggaeton",
+    "module": "./reggaetonJourney.ts",
+    "rounds": [
+      {
+        "id": "reggaeton-01-jamaica",
+        "label": "Underground",
+        "progressLabel": "An island underground",
+        "resolvedLabel": "Puerto Rico · San Juan"
+      },
+      {
+        "id": "reggaeton-02-colon",
+        "label": "Coast",
+        "progressLabel": "Across the Caribbean",
+        "resolvedLabel": "Colón · reggae en español"
+      },
+      {
+        "id": "reggaeton-03-new-york",
+        "label": "Studio",
+        "progressLabel": "The unexpected studio",
+        "resolvedLabel": "New York · Freeport"
+      },
+      {
+        "id": "reggaeton-04-underground",
+        "label": "Diaspora",
+        "progressLabel": "Two shores of one scene",
+        "resolvedLabel": "Puerto Rico · U.S. territory"
+      },
+      {
+        "id": "reggaeton-05-medellin",
+        "label": "Crossover",
+        "progressLabel": "A new home for the beat",
+        "resolvedLabel": "San Juan–Medellín · 1,700 km"
       }
     ]
   },

@@ -222,6 +222,60 @@ describe("camera travel", () => {
     expect(position).toEqual(stopped);
   });
 
+  it.each([1, 2])(
+    "finishes a finite %s-stop scene at its last view without looping and allows interruption",
+    (count) => {
+      let now = 0,
+        nextId = 0;
+      const callbacks = new Map<number, FrameRequestCallback>();
+      vi.stubGlobal("performance", { now: () => now });
+      vi.stubGlobal(
+        "requestAnimationFrame",
+        (callback: FrameRequestCallback) => {
+          callbacks.set(++nextId, callback);
+          return nextId;
+        },
+      );
+      vi.stubGlobal("cancelAnimationFrame", (id: number) =>
+        callbacks.delete(id),
+      );
+      let position: Required<Focus> = { lat: 0, lng: 0, altitude: 1.2 };
+      const port = {
+        pointOfView(next?: Focus) {
+          if (next) position = { ...position, ...next };
+          return position;
+        },
+      };
+      const stops = [
+        { lat: 10, lng: 20, altitude: 0.8 },
+        { lat: -20, lng: 100, altitude: 0.6 },
+      ].slice(0, count);
+      const advance = (duration: number) => {
+        for (let elapsed = 0; elapsed < duration; elapsed += 16) {
+          now += 16;
+          const pending = [...callbacks.values()];
+          callbacks.clear();
+          pending.forEach((callback) => callback(now));
+        }
+      };
+      const tour = new CameraFlyover();
+      tour.start(port, stops, false, false);
+      advance(25000);
+      expect(position).toEqual(stops.at(-1));
+      expect(tour.active).toBe(false);
+      expect(callbacks.size).toBe(0);
+      advance(20000);
+      expect(position).toEqual(stops.at(-1));
+      tour.start(port, stops, false, false);
+      advance(100);
+      tour.cancel();
+      const interrupted = { ...position };
+      advance(25000);
+      expect(position).toEqual(interrupted);
+      expect(callbacks.size).toBe(0);
+    },
+  );
+
   it("preserves camera velocity at arrival, departure and the return to the first stop", () => {
     let now = 0,
       nextId = 0;

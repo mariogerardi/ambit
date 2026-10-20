@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useCameraOrchestration } from "../src/app/useCameraOrchestration";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
+import { REGGAETON_JOURNEY } from "../src/game/reggaetonJourney";
 import { createQuestionContext } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
 import { worldAltitude } from "../src/globe/camera";
@@ -192,6 +193,90 @@ it("frames an authored assist once without restarting travel on response rerende
     },
   });
   expect(port.focus).toHaveBeenCalledTimes(1);
+});
+
+it("plays authored intros once, leaves answer edits alone, and ends the intro on help or reduced motion", async () => {
+  const round = REGGAETON_JOURNEY.rounds[4];
+  await render({
+    mode: "practice",
+    transitionKey: "/journey/reggaeton:4:playing",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition: REGGAETON_JOURNEY,
+      roundIndex: 4,
+      focus: round.focus,
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledExactlyOnceWith(round.introViews, false);
+  await render({ journey: { ...options.journey, focus: { ...round.focus } } });
+  expect(port.flyover).toHaveBeenCalledTimes(1);
+  await render({
+    journey: { ...options.journey, help: { [round.id]: "hinted" } },
+  });
+  expect(port.cancelFlyover).toHaveBeenCalledTimes(1);
+  expect(port.focus).toHaveBeenLastCalledWith(round.focus);
+  expect(port.flyover).toHaveBeenCalledTimes(1);
+  await act(async () => {
+    Object.defineProperty(media, "matches", { value: true });
+    mediaChange!();
+  });
+  expect(port.focus).toHaveBeenLastCalledWith(round.focus);
+  expect(port.flyover).toHaveBeenCalledTimes(1);
+  await render({
+    mode: "home",
+    transitionKey: "/",
+    journey: { ...options.journey, active: false },
+  });
+  expect(port.cancelFlyover).toHaveBeenCalledTimes(3);
+});
+
+it("uses reveal views only after commitment and preserves a missed pin's comparison framing", async () => {
+  const round = REGGAETON_JOURNEY.rounds[2];
+  await render({
+    mode: "practice",
+    transitionKey: "/journey/reggaeton:2:playing",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition: REGGAETON_JOURNEY,
+      roundIndex: 2,
+      focus: round.focus,
+    },
+  });
+  expect(port.flyover).not.toHaveBeenCalled();
+  await render({
+    transitionKey: "/journey/reggaeton:2:feedback",
+    journey: {
+      ...options.journey,
+      phase: "feedback",
+      focus: round.feedbackFocus,
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledExactlyOnceWith(
+    round.feedbackViews,
+    false,
+  );
+  const pin = REGGAETON_JOURNEY.rounds[1];
+  const comparison = { lat: 25, lng: -37, altitude: 2 };
+  await render({
+    transitionKey: "/journey/reggaeton:1:feedback",
+    journey: {
+      ...options.journey,
+      roundIndex: 1,
+      focus: comparison,
+      answers: [
+        {
+          ...initialGame,
+          roundId: pin.id,
+          correct: false,
+          pin: { lat: 0, lng: 0 },
+        },
+      ],
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledTimes(1);
+  expect(port.focus).toHaveBeenLastCalledWith(comparison);
 });
 
 it("starts completion only when saves are ready, cancels animated playback for reduced motion, and cleans up on exit", async () => {

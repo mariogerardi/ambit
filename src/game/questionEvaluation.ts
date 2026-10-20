@@ -8,6 +8,7 @@ import type { Question, QuestionContext, Response } from "./questionContracts";
 import { mechanicFor } from "./mechanics";
 import { pinDistance, pinInside } from "./answerTargets";
 import { isMinimumLandPath } from "./reasoning";
+import { estimateError } from "./numericEstimate";
 import {
   canSelect,
   selectableIds,
@@ -44,6 +45,10 @@ export function isCorrect(
     return distance !== undefined && distance <= rule.radiusKm + 1e-7;
   }
   if (rule.type === "pin-inside") return pinInside(question, context, response);
+  if (rule.type === "numeric-range") {
+    const error = estimateError(question, response);
+    return error !== undefined && error <= rule.tolerance + 1e-7;
+  }
   if (
     question.mode.startsWith("city-") &&
     response.selectedIds.some((id) => !canSelect(question, context, id))
