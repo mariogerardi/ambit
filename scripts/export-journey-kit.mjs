@@ -38,6 +38,8 @@ const MODE_NOTES = {
     "Pick the required number of countries/regions, then submit. A stronger assist can lock fewer than all correct selections while preserving the remaining task.",
   number:
     "Enter a nonnegative integer. The rule can use an authored value, feature membership count, shortest border path or capital-circle count.",
+  slider:
+    "Ask players to estimate a numeric value with a range control. Set the target, minimum, maximum, step, unit, input label and inclusive absolute-error tolerance; optionally author three ascending accuracy bands for 3/2/1 points. State what is being estimated and the accepted range clearly, and keep reference geography separate from grading.",
   text: "Type one answer in an immediately visible field. Use reviewed aliases or the supported capital/fact rules; do not hide a required input behind a fallback.",
   "typed-regions":
     "Enter the required list of region names. Canonical IDs and reviewed aliases determine correctness; this is not the draggable-card control.",

@@ -29,6 +29,7 @@ import { questionMapPresentation } from "./presentation";
 
 import { AnswerReview } from "./AnswerReview";
 import { pinBands, pinReviewViews } from "./pinPresentation";
+import { estimateTier } from "./numericEstimate";
 import { AnswerForm } from "./AnswerForm";
 import {
   correctAnswerCopy,
@@ -207,6 +208,7 @@ export function GameShell({
       : undefined;
   const distance = pinDistance(round, game);
   const distanceTier = pinDistanceTier(round, game);
+  const numericTier = estimateTier(round, game);
   const pinViews = pinReviewViews(round, context, game);
   const feedbackText = explanation(round, context, game.selectedIds, !!correct);
   const correctAnswer = correctAnswerSummary(round, context, game);
@@ -303,11 +305,16 @@ export function GameShell({
               className={`round-feedback ${correct ? "answer-correct" : "answer-discovered"}`}
               role="status"
             >
+              {round.mode === "slider" && (
+                <AnswerReview question={round} context={context} game={game} />
+              )}
               <div className="feedback-point-summary">
                 <div className="feedback-label">
                   <span>{correct ? "✳" : "◎"}</span>
                   {correct
-                    ? (distanceTier?.feedback ?? correctAnswerCopy(round))
+                    ? (distanceTier?.feedback ??
+                      numericTier?.feedback ??
+                      correctAnswerCopy(round))
                     : "Not quite."}
                 </div>
                 <PointOrbs
@@ -316,11 +323,19 @@ export function GameShell({
                   animate
                 />
               </div>
-              <p className="study-response study-correction journey-correct-answer">
-                <span>{correctAnswer.label}: </span>
-                <strong>{correctAnswer.value}</strong>
-              </p>
-              <AnswerReview question={round} context={context} game={game} />
+              {round.mode !== "slider" && (
+                <>
+                  <p className="study-response study-correction journey-correct-answer">
+                    <span>{correctAnswer.label}: </span>
+                    <strong>{correctAnswer.value}</strong>
+                  </p>
+                  <AnswerReview
+                    question={round}
+                    context={context}
+                    game={game}
+                  />
+                </>
+              )}
               {feedbackText && (
                 <p className="journey-explanation">{feedbackText}</p>
               )}
@@ -457,9 +472,7 @@ export function GameShell({
                       </span>
                       <span>
                         <strong>{band.label}</strong>
-                        <span>
-                          Within {band.radiusKm.toLocaleString()} km
-                        </span>
+                        <span>Within {band.radiusKm.toLocaleString()} km</span>
                       </span>
                     </li>
                   ))}

@@ -7,6 +7,7 @@ import type {
 } from "./questionContracts";
 import { validPin } from "./answerTargets";
 import { orderedCards } from "./ordering";
+import { estimateValue } from "./numericEstimate";
 
 export type AnswerControl =
   | "pin"
@@ -15,6 +16,7 @@ export type AnswerControl =
   | "cards"
   | "text"
   | "number"
+  | "slider"
   | "text-list";
 type Fail = (message: string) => never;
 type Submission = { count: number; eligible: string[] };
@@ -306,6 +308,55 @@ export const MECHANICS = {
         response.text.trim() !== "" &&
         Number.isInteger(Number(response.text)) &&
         Number(response.text) >= 0,
+    },
+  ),
+  slider: defineMechanic(
+    ["numeric-range"],
+    "Estimate with a slider",
+    "slider",
+    "text",
+    "none",
+    true,
+    {
+      canSubmit: (question, response) =>
+        question.rule.type === "numeric-range" &&
+        estimateValue(question.rule, response) !== undefined,
+      validate: (question, fail) => {
+        const rule = question.rule;
+        if (rule.type !== "numeric-range")
+          return fail("slider requires a numeric range");
+        const steps = (rule.max - rule.min) / rule.step;
+        if (
+          ![rule.min, rule.max, rule.step, rule.value, rule.tolerance].every(
+            Number.isFinite,
+          ) ||
+          rule.min >= rule.max ||
+          rule.step <= 0 ||
+          rule.tolerance <= 0 ||
+          rule.value < rule.min ||
+          rule.value > rule.max ||
+          Math.abs(steps - Math.round(steps)) > 1e-7 ||
+          !rule.unit.trim() ||
+          !question.inputLabel?.trim()
+        )
+          fail("invalid slider bounds, step, target, tolerance or label");
+        if (
+          rule.tiers &&
+          (rule.tiers.length !== 3 ||
+            rule.tiers.at(-1)?.tolerance !== rule.tolerance ||
+            rule.tiers.some(
+              (tier, index) =>
+                !Number.isFinite(tier.tolerance) ||
+                tier.tolerance <= (rule.tiers?.[index - 1]?.tolerance ?? 0) ||
+                !tier.feedback.trim(),
+            ))
+        )
+          fail(
+            "slider accuracy requires three ascending bands ending at the tolerance",
+          );
+        if (question.guidance?.assist?.candidateIds?.length)
+          fail("slider assistance cannot narrow choice candidates");
+      },
     },
   ),
   text: defineMechanic(

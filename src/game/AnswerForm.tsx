@@ -9,6 +9,7 @@ import { canSubmit } from "./questionEvaluation";
 import { responseCount, selectableIds } from "./questionPreparation";
 import { AnswerInput } from "./AnswerInput";
 import { AnswerCounter } from "./AnswerCounter";
+import { EstimateSlider } from "./EstimateSlider";
 import { QuestionActions } from "./QuestionActions";
 import {
   candidateAvailable,
@@ -396,10 +397,20 @@ export function AnswerForm({
         </AnswerList>
       ) : (
         <>
-          <label htmlFor="written-answer">
+          <label
+            htmlFor="written-answer"
+            className={definition.control === "slider" ? "sr-only" : undefined}
+          >
             {question.inputLabel ?? "Your answer"}
           </label>
-          {question.mode === "number" ? (
+          {definition.control === "slider" &&
+          question.rule.type === "numeric-range" ? (
+            <EstimateSlider
+              rule={question.rule}
+              value={game.text}
+              onChange={(value) => dispatch({ type: "text", value })}
+            />
+          ) : question.mode === "number" ? (
             <AnswerCounter
               value={game.text}
               onChange={(value) => dispatch({ type: "text", value })}

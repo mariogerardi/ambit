@@ -425,7 +425,12 @@ export function solutionIds(
       .map((f) => f.countryId);
   if (rule.type === "merged-region") return [rule.targetId];
   if (rule.type === "text-fact") return [rule.countryId];
-  if (rule.type === "manual-text" || rule.type === "manual-number") return [];
+  if (
+    rule.type === "manual-text" ||
+    rule.type === "manual-number" ||
+    rule.type === "numeric-range"
+  )
+    return [];
   if (
     rule.type === "country-ids" ||
     rule.type === "choice-ids" ||

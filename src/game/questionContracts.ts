@@ -20,6 +20,7 @@ export type AnswerMode =
   | "map-single"
   | "map-multiple"
   | "number"
+  | "slider"
   | "text"
   | "typed-regions"
   | "ordered-countries"
@@ -67,6 +68,17 @@ export type KnowledgeRule =
   | { type: "place-ids"; ids: string[]; match?: "all" | "any" }
   | { type: "manual-text"; answers: string[] }
   | { type: "manual-number"; value: number }
+  | {
+      type: "numeric-range";
+      value: number;
+      tolerance: number;
+      min: number;
+      max: number;
+      step: number;
+      unit: string;
+      /** Ascending inclusive error bands; optional 3 / 2 / 1 rewards. */
+      tiers?: { tolerance: number; feedback: string }[];
+    }
   | { type: "region-ids"; ids: string[]; match?: "all" | "any" }
   | { type: "choice-ids"; ids: string[] }
   | { type: "slot-matches"; matches: { slotId: string; choiceId: string }[] }
@@ -166,8 +178,12 @@ export interface Question {
   commitment: "immediate" | "submit";
   failure: "feedback" | "end-game";
   focus: Focus;
+  /** Finite orientation sequence; reduced motion uses focus directly. */
+  introViews?: Focus[];
   /** Optional camera reveal for questions linking geographically distant places. */
   feedbackFocus?: Focus;
+  /** Finite reveal sequence; distant missed pins retain their comparison view. */
+  feedbackViews?: Focus[];
   explanation: string;
   /** Optional praise matching the knowledge/skill, rather than the input widget. */
   correctFeedback?: string;
@@ -454,6 +470,12 @@ export type QuestionContract =
   | ({
       mode: "number";
       rule: Rule<"number">;
+      inputLabel: string;
+    } & Single &
+      NoMapSelection)
+  | ({
+      mode: "slider";
+      rule: Rule<"slider">;
       inputLabel: string;
     } & Single &
       NoMapSelection)

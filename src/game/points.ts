@@ -2,6 +2,7 @@ import type { Question, Response } from "./questionContracts";
 import type { Answer, GameState } from "./state";
 import type { HelpStage } from "./guidance";
 import { pinDistanceTier } from "./answerTargets";
+import { estimateTier } from "./numericEstimate";
 
 export const QUESTION_POINTS = 3;
 export const POINTS_VERSION = 1;
@@ -22,6 +23,13 @@ export function submittedPoints(
     question.rule.tiers?.length === 3
   ) {
     const tier = pinDistanceTier(question, response);
+    if (tier) earned -= question.rule.tiers.indexOf(tier);
+  }
+  if (
+    question.rule.type === "numeric-range" &&
+    question.rule.tiers?.length === 3
+  ) {
+    const tier = estimateTier(question, response);
     if (tier) earned -= question.rule.tiers.indexOf(tier);
   }
   return Math.min(earned, pointCeiling(help));

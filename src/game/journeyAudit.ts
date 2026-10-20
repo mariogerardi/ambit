@@ -72,7 +72,18 @@ function submitSample(
   }
   if (mechanic.response === "text") {
     response.text = correctAnswerSummary(question, context, initialGame).value;
-    if (!correct) {
+    if (question.rule.type === "numeric-range") {
+      const rule = question.rule;
+      response.text = String(
+        correct
+          ? rule.min +
+              Math.round((rule.value - rule.min) / rule.step) * rule.step
+          : Math.abs(rule.min - rule.value) > rule.tolerance
+            ? rule.min
+            : rule.max,
+      );
+    }
+    if (!correct && question.rule.type !== "numeric-range") {
       const names = [
         ...(question.guidance?.assist?.places ?? []),
         ...(question.feedbackPlaces ?? []),
@@ -359,16 +370,26 @@ export function auditJourney(
           (error) => `${error} / ${stage}`,
         ),
       );
+      const views = stage.startsWith("reveal:")
+        ? question.feedbackViews
+        : question.introViews;
       const focus = world.focus;
-      if (
-        !Number.isFinite(focus.lat) ||
-        Math.abs(focus.lat) > 90 ||
-        !Number.isFinite(focus.lng) ||
-        Math.abs(focus.lng) > 180 ||
-        (focus.altitude !== undefined &&
-          (!Number.isFinite(focus.altitude) || focus.altitude <= 0))
-      )
-        report.errors.push(`Invalid camera: ${question.id} / ${stage}`);
+      for (const [viewIndex, cameraFocus] of [
+        focus,
+        ...(views ?? []),
+      ].entries())
+        if (
+          !Number.isFinite(cameraFocus.lat) ||
+          Math.abs(cameraFocus.lat) > 90 ||
+          !Number.isFinite(cameraFocus.lng) ||
+          Math.abs(cameraFocus.lng) > 180 ||
+          (cameraFocus.altitude !== undefined &&
+            (!Number.isFinite(cameraFocus.altitude) ||
+              cameraFocus.altitude <= 0))
+        )
+          report.errors.push(
+            `Invalid camera: ${question.id} / ${stage}${viewIndex ? ` / view ${viewIndex}` : ""}`,
+          );
       if (
         new Set(world.places.map((place) => place.id)).size !==
         world.places.length

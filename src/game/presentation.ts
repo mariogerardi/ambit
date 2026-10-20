@@ -116,7 +116,7 @@ function resolveQuestionPlaces(
     const reveal = phase === "feedback" || phase === "failed";
     const result: PlaceFeature[] = (question.places ?? []).filter(
       (place) =>
-        place.markerHidden &&
+        (place.markerHidden || place.displayRole === "reference") &&
         (question.rule.type !== "pin-distance" ||
           place.id !== question.rule.targetId),
     );

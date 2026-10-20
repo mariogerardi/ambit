@@ -98,6 +98,13 @@ an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
 contract, not scene geometry.
 
+`scenes.play.views` and `scenes.reveal.views` optionally author a finite camera
+sequence, compiled as `introViews` / `feedbackViews`. End the sequence at the
+scene's `focus`: reduced motion uses that focus directly. Playback runs once,
+does not restart on response edits, and yields to globe input. Help ends an intro
+at its effective search focus; missed pins retain the shared answer/guess review
+instead of starting a reveal tour. Completion flyovers retain their looping behavior.
+
 `scenes.play.clueLocators` accepts `{ regionId, label }` annotations for supplied
 reference/candidate areas or highlighted fragments (`clue-part:<countryId>`).
 The builder requires a unique supplied area and a nonempty authored label; it does
@@ -379,6 +386,16 @@ children, including when leaving a Journey. Acceptance radii and boolean
 correctness remain unchanged: an accepted pin still counts as one correct answer.
 `points.ts` separately awards 3 / 2 / 1 for the standard three distance tiers and
 applies the hint/assist ceiling; colors never determine rewards.
+Numeric estimates use `slider` / `numeric-range`: a native range control writes
+the existing text response register after deliberate interaction. Bounds, step,
+unit and target/tolerance are explicit; `numericEstimate.ts` owns numeric parsing,
+absolute error and inclusive band lookup. Malformed, out-of-bounds and off-step
+responses cannot submit. Optional three error tiers receive the same 3 / 2 / 1
+rewards and independent help caps. Feedback shows the submitted estimate and error
+on the original slider scale, with nested accuracy bands, a colored submitted
+marker and a dashed answer marker. The read-only review replaces the input above
+the feedback story; reference locations keep their shared blue style.
+Assistance supplies reasoning or map context without changing the grading range.
 Missed distance pins use a shared adaptive overview when both locations fit on the
 visible globe. Feedback provides explicit **Show your pin** and **Show answer**
 camera controls for pin tasks; extremely distant or antipodal locations keep the

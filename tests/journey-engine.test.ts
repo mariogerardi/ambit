@@ -35,6 +35,7 @@ describe("Journey engine authoring boundaries", () => {
       "map-single": { selectedIds: ["wurl:CAN"] },
       "map-multiple": { selectedIds: ["wurl:CAN", "wurl:MEX"] },
       number: { text: "3" },
+      slider: { text: "350" },
       text: { text: "Ottawa" },
       "typed-regions": { ordered: ["Canada", "Mexico"] },
       "ordered-countries": { ordered: ["Canada", "United States", "Mexico"] },

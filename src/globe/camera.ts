@@ -128,7 +128,7 @@ export class CameraFlyover {
     cancelAnimationFrame(this.frame);
     this.frame = 0;
   }
-  start(port: CameraPort, stops: Focus[], reduced: boolean) {
+  start(port: CameraPort, stops: Focus[], reduced: boolean, loop = true) {
     this.cancel();
     if (reduced || !stops.length) return;
     const generation = this.generation;
@@ -139,8 +139,14 @@ export class CameraFlyover {
     // The incoming/outgoing bearings shape each stop's course. Speed stays low
     // near the country and respects nearby stops so short legs cannot overshoot.
     const velocities = destinations.map((stop, i) => {
-      const previous = destinations[(i + stops.length - 1) % stops.length];
-      const next = destinations[(i + 1) % stops.length];
+      const previous =
+        destinations[
+          loop ? (i + stops.length - 1) % stops.length : Math.max(0, i - 1)
+        ];
+      const next =
+        destinations[
+          loop ? (i + 1) % stops.length : Math.min(stops.length - 1, i + 1)
+        ];
       const longitudeScale = Math.max(
         0.2,
         Math.cos((stop.lat * Math.PI) / 180),
@@ -220,12 +226,17 @@ export class CameraFlyover {
       elapsed += Math.max(0, Math.min(32, now - previousTime));
       previousTime = now;
       while (elapsed >= duration) {
+        if (!loop && index === stops.length - 1) {
+          port.pointOfView(to, 0);
+          this.frame = 0;
+          return;
+        }
         elapsed -= duration;
         next();
       }
       const t = elapsed / duration;
       // A one-stop tour has no onward course; make a small, seamless orbit.
-      const orbit = !initial && stops.length === 1;
+      const orbit = loop && !initial && stops.length === 1;
       port.pointOfView(
         {
           lat:

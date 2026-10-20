@@ -3,6 +3,7 @@ import type { GameState } from "./state";
 import { answerItems, responseIds } from "./answerPresentation";
 import { answerPlace } from "./answerTargets";
 import { solutionIds } from "./questionPreparation";
+import { EstimateReview } from "./EstimateReview";
 
 /** Keep response/slot identity visible instead of asking a map fill to explain everything. */
 export function AnswerReview({
@@ -31,6 +32,9 @@ export function AnswerReview({
   ].includes(q.mode);
   const picked = responseIds(q, context, game);
   const reviewItems = answerItems(q, context, game);
+  if (q.rule.type === "numeric-range") {
+    return <EstimateReview question={q} response={game} />;
+  }
   if (q.mode === "land-path")
     return (
       <p className="submitted-answer">

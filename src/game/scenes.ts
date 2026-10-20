@@ -8,6 +8,8 @@ import type { Question } from "./questionContracts";
 
 export interface PlayScene {
   focus?: Focus;
+  /** One pass through broad orientation views, ending at the playable focus. */
+  views?: Focus[];
   contextIds?: string[];
   candidateRegionIds?: string[];
   /** Labels for already supplied area clues; never infer a withheld name. */
@@ -26,6 +28,8 @@ export interface AssistScene {
 }
 export interface RevealScene {
   focus?: Focus;
+  /** One pass through the revealed geography; interrupted by globe input. */
+  views?: Focus[];
   /** Known geography retains context color; answered regions are separate. */
   contextIds?: string[];
   answerIds?: string[];
@@ -56,6 +60,7 @@ export function compileQuestionScenes(
     if (value !== undefined) compiled[key] = value;
   };
   assign("contextIds", play?.contextIds);
+  assign("introViews", play?.views);
   assign("candidateRegionIds", play?.candidateRegionIds);
   assign("clueLocators", play?.clueLocators);
   assign("places", play?.places);
@@ -70,6 +75,7 @@ export function compileQuestionScenes(
       ...play.map,
     };
   assign("feedbackFocus", reveal?.focus);
+  assign("feedbackViews", reveal?.views);
   assign("feedbackHintIds", reveal?.contextIds);
   assign("feedbackContextIds", reveal?.answerIds);
   assign("feedbackPlaces", reveal?.places);

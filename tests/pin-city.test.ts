@@ -19,6 +19,7 @@ import { gameReducer, initialGame } from "../src/game/state";
 import { journeyWorld } from "../src/app/journeyWorld";
 import { validGame } from "../src/app/daily";
 import { SurfaceGesture } from "../src/globe/gesture";
+import { questionPlaces } from "../src/game/presentation";
 const regions = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
@@ -32,6 +33,27 @@ const at = (roundIndex: number) => ({
 const [distance, city, inside, multiple] = journey.rounds;
 const target = answerPlace(distance, solutionIds(distance, context)[0])!;
 describe("pins and cities remain playable without the authoring tool", () => {
+  it("shows explicit pin references while withholding the target even if marked as a reference", () => {
+    const reference = {
+      ...target,
+      id: "reference:outside",
+      lat: 0,
+      lng: 0,
+      displayRole: "reference" as const,
+      visualState: "hinted" as const,
+    };
+    const question = {
+      ...distance,
+      places: [
+        { ...target, displayRole: "reference" as const },
+        reference,
+        { ...reference, id: "ordinary:hidden", displayRole: undefined },
+      ],
+    };
+    expect(
+      questionPlaces(question, context, "playing").map((p) => p.id),
+    ).toEqual([reference.id]);
+  });
   it("requires a finite in-range pin and grades distance independently of any country", () => {
     expect(canSubmit(distance, context, response)).toBe(false);
     for (const pin of [

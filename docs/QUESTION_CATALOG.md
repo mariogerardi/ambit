@@ -13,25 +13,27 @@ published local packs are read-only compatibility data.
 
 ## Bundled Journeys
 
-| Title                       | Practice route                        | Definition                                                       |
-| --------------------------- | ------------------------------------- | ---------------------------------------------------------------- |
-| Beyond the maple leaf       | `/journey/beyond-the-maple-leaf`      | [canadaJourney.ts](../src/game/canadaJourney.ts)                 |
-| Around the Mediterranean    | `/journey/mediterranean`              | [fourthJourney.ts](../src/game/fourthJourney.ts)                 |
-| Shared neighbors            | `/journey/shared-neighbors`           | [ninthJourney.ts](../src/game/ninthJourney.ts)                   |
-| Along the Andes             | `/journey/along-the-andes`            | [andesJourney.ts](../src/game/andesJourney.ts)                   |
-| Not the obvious city        | `/journey/not-the-obvious-city`       | [eleventhJourney.ts](../src/game/eleventhJourney.ts)             |
-| Island instincts            | `/journey/island-instincts`           | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)         |
-| A Continent in Pieces       | `/journey/north-america`              | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)     |
-| Latitude surprises          | `/journey/latitude-surprises`         | [latitudeJourney.ts](../src/game/latitudeJourney.ts)             |
-| Pacific Landfalls           | `/journey/ring-of-fire`               | [tenthJourney.ts](../src/game/tenthJourney.ts)                   |
-| Exceptions to the rule      | `/journey/exceptions-to-the-rule`     | [twelfthJourney.ts](../src/game/twelfthJourney.ts)               |
-| On Russia’s doorstep        | `/journey/try-not-to-click-russia`    | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)           |
-| Chasing the sun             | `/journey/chasing-the-sun`            | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)             |
-| Down the Danube             | `/journey/down-the-danube`            | [danubeJourney.ts](../src/game/danubeJourney.ts)                 |
-| Same Hour, Different Worlds | `/journey/same-hour-different-worlds` | [sameHourJourney.ts](../src/game/sameHourJourney.ts)             |
-| Same Name, Different Place  | `/journey/same-name-different-place`  | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)       |
-| Missing Borders             | `/journey/missing-borders`            | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts) |
-| Across the Divide           | `/journey/across-the-divide`          | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)     |
+| Title                             | Practice route                              | Definition                                                             |
+| --------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------- |
+| Beyond the maple leaf             | `/journey/beyond-the-maple-leaf`            | [canadaJourney.ts](../src/game/canadaJourney.ts)                       |
+| Around the Mediterranean          | `/journey/mediterranean`                    | [fourthJourney.ts](../src/game/fourthJourney.ts)                       |
+| Shared neighbors                  | `/journey/shared-neighbors`                 | [ninthJourney.ts](../src/game/ninthJourney.ts)                         |
+| Along the Andes                   | `/journey/along-the-andes`                  | [andesJourney.ts](../src/game/andesJourney.ts)                         |
+| Not the obvious city              | `/journey/not-the-obvious-city`             | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                   |
+| Island instincts                  | `/journey/island-instincts`                 | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)               |
+| A Continent in Pieces             | `/journey/north-america`                    | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)           |
+| Latitude surprises                | `/journey/latitude-surprises`               | [latitudeJourney.ts](../src/game/latitudeJourney.ts)                   |
+| Pacific Landfalls                 | `/journey/ring-of-fire`                     | [tenthJourney.ts](../src/game/tenthJourney.ts)                         |
+| Exceptions to the rule            | `/journey/exceptions-to-the-rule`           | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                     |
+| On Russia’s doorstep              | `/journey/try-not-to-click-russia`          | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                 |
+| Chasing the sun                   | `/journey/chasing-the-sun`                  | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                   |
+| Down the Danube                   | `/journey/down-the-danube`                  | [danubeJourney.ts](../src/game/danubeJourney.ts)                       |
+| Same Hour, Different Worlds       | `/journey/same-hour-different-worlds`       | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                   |
+| Same Name, Different Place        | `/journey/same-name-different-place`        | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)             |
+| Missing Borders                   | `/journey/missing-borders`                  | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts)       |
+| Across the Divide                 | `/journey/across-the-divide`                | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)           |
+| Far From Everything               | `/journey/far-from-everything`              | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts) |
+| The Sound of Somewhere: Reggaetón | `/journey/the-sound-of-somewhere-reggaeton` | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                 |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.
@@ -65,6 +67,7 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `map-single`           | Single country pick        |
 | `map-multiple`         | Multiple country picks     |
 | `number`               | Number                     |
+| `slider`               | Estimate within a range    |
 | `text`                 | Free response              |
 | `typed-regions`        | Typed region names         |
 | `ordered-countries`    | Ordered country names      |
@@ -80,6 +83,15 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 requires an explicit design decision. Multiple-choice questions are capped at six
 options. The numeric counter supports nonnegative integers with explicit +/-
 controls and direct typing; a new numeric rule should respect that UI contract.
+
+For estimates, `slider` uses the `numeric-range` rule with explicit minimum,
+maximum, step, unit, target and inclusive absolute-error tolerance. Optional three
+ascending error tiers award 3 / 2 / 1 points, capped by hint/assist use. A native
+range input supports dragging and keyboard input without WebGL. Its initial thumb
+does not submit a guess until the player interacts; estimates use the existing
+saved `Response.text` register. Feedback shows the target, estimate, error and
+achieved band. Given locations remain blue reference geography. See
+`recipe:slider` and `npm run check:journey -- --recipe slider`.
 
 Map picking is derived from the answer mode and canonical candidate pool.
 `journeyWorld.selectableRegionIds` restricts region answers independently of fill;

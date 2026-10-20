@@ -264,6 +264,41 @@ export function useCameraOrchestration({
     session?.phase,
     frame,
   ]);
+  const sceneViews =
+    phase === "playing"
+      ? round?.introViews
+      : phase === "feedback" &&
+          (round?.mode !== "pin" || answers.at(-1)?.correct)
+        ? round?.feedbackViews
+        : undefined;
+  const sceneHelp = phase === "playing" ? help?.[round?.id] : undefined;
+  useEffect(() => {
+    if (
+      !ready ||
+      !isJourney ||
+      !sceneViews?.length ||
+      (mode === "daily" && !dailyReady)
+    )
+      return;
+    stop();
+    if (reduced || sceneHelp) frame(journeyFocus ?? sceneViews.at(-1)!);
+    else globe.current?.flyover(sceneViews, false);
+    return () => globe.current?.cancelFlyover();
+    // Response edits leave the player's orbit alone. The transition/help stage
+    // owns playback; reduced motion uses the current effective scene focus.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    ready,
+    isJourney,
+    cameraKey,
+    sceneViews,
+    sceneHelp,
+    reduced,
+    mode,
+    dailyReady,
+    frame,
+    stop,
+  ]);
   useEffect(() => {
     if (
       !ready ||
