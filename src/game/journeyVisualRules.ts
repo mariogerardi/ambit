@@ -20,6 +20,8 @@ export const SHARED_VISUAL_RULES = {
     "Anonymous shapes supplied for naming remain blue and noninteractive before submission.",
   "clue-locator":
     "Supplied area locators retain authored labels during play and clear when play ends.",
+  "bearing-disclosure":
+    "Compass play retains the origin but withholds its destination and outgoing comparison paths.",
   "pin-reference":
     "Supplied reference points cannot themselves earn a correct pin.",
   "point-answer-role":
@@ -66,6 +68,30 @@ export function auditVisualScene(
 ) {
   const errors: string[] = [];
   const live = game.phase === "playing";
+  if (live && q.rule.type === "bearing-angle") {
+    const { origin, destination } = q.rule;
+    if (
+      !world.places.some(
+        (p) => p.id === origin.id && p.visualState === "hinted",
+      ) ||
+      world.places.some(
+        (p) =>
+          p.id === destination.id ||
+          (Math.abs(p.lat - destination.lat) < 1e-8 &&
+            Math.abs(p.lng - destination.lng) < 1e-8),
+      ) ||
+      world.overlays?.some(
+        (o) =>
+          o.id.startsWith("bearing-route:") ||
+          o.id.startsWith("bearing-guess:"),
+      ) ||
+      world.selectableRegionIds.length ||
+      world.regionNames !== "none"
+    )
+      errors.push(
+        `[bearing-disclosure] Origin missing or concealed destination/path disclosed: ${q.id}`,
+      );
+  }
   for (const clue of q.clueLocators ?? [])
     if (
       live &&

@@ -1,3 +1,11 @@
+import {
+  constructionKind,
+  constructionRule,
+  brushSizeRange,
+  evaluateConstruction,
+  validConstruction,
+} from "./construction";
+import type { Construction } from "./constructionTypes";
 import { countryIdForName } from "./answerNames";
 import { mechanicFor, usesChoiceCards } from "./mechanics";
 import { orderedCards, swapOrderCard, isSlotAnswer } from "./ordering";
@@ -14,7 +22,11 @@ import type { Journey, QuestionContext, Response } from "./questionContracts";
 import { canSubmit, isCorrect } from "./questionEvaluation";
 import { cityIdForName } from "./answerTargets";
 import { submittedPoints, POINTS_VERSION } from "./points";
+import { bearingResult } from "./compassBearing";
+import type { BearingResult } from "./compassBearing";
 export interface Answer extends Response {
+  /** Frozen geographic/angle evidence for historical receipts; never regrade it. */
+  bearing?: BearingResult;
   roundId: string;
   /** Captured at submission so a later facelift cannot rename earned results. */
   receiptLabel?: string;
@@ -29,9 +41,16 @@ export interface GameState extends Response {
   answers: Answer[];
   inputError?: string;
   help?: HelpUsage;
+  showConstructionExample?: boolean;
+  brushRadiusKm?: number;
+  constructionTool?: "draw" | "move" | "erase";
 }
 export type Action =
   | { type: "start" }
+  | { type: "construction"; value?: Construction }
+  | { type: "show-construction-example" }
+  | { type: "brush-size"; value: number }
+  | { type: "construction-tool"; value: "draw" | "move" | "erase" }
   | { type: "home" }
   | { type: "select"; id: string }
   | { type: "drop-pin"; lat: number; lng: number }
@@ -66,36 +85,69 @@ export function gameReducer(
     };
   if (action.type === "home") return { ...initialGame };
   const round = journey.rounds[state.roundIndex];
-  const finish = (response: Response, correct: boolean): GameState => ({
-    ...state,
-    selectedIds: response.selectedIds,
-    text: response.text,
-    ordered: response.ordered,
-    pin: response.pin ? { ...response.pin } : undefined,
-    inputError: undefined,
-    phase: !correct && round.failure === "end-game" ? "failed" : "feedback",
-    answers: [
-      ...state.answers,
-      {
-        roundId: round.id,
-        ...(journey.saveRevision
-          ? { receiptLabel: round.resolvedLabel ?? round.label }
-          : {}),
-        selectedIds: [...response.selectedIds],
-        text: response.text,
-        ordered: [...response.ordered],
-        pin: response.pin ? { ...response.pin } : undefined,
-        correct,
-        points: submittedPoints(
-          round,
-          response,
+  if (action.type === "show-construction-example")
+    return state.phase === "feedback" && round.constructionExample
+      ? { ...state, showConstructionExample: !state.showConstructionExample }
+      : state;
+  const finish = (response: Response, correct: boolean): GameState => {
+    if (
+      constructionRule(round) &&
+      !response.construction &&
+      round.constructionInitial
+    )
+      response = {
+        ...response,
+        construction: structuredClone(round.constructionInitial),
+      };
+    const result = constructionRule(round)
+      ? evaluateConstruction(round, response)
+      : undefined;
+    if (result) {
+      correct = result.tier !== null;
+      response = { ...response, constructionResult: result };
+    }
+    return {
+      ...state,
+      selectedIds: response.selectedIds,
+      text: response.text,
+      ordered: response.ordered,
+      pin: response.pin ? { ...response.pin } : undefined,
+      construction: response.construction
+        ? structuredClone(response.construction)
+        : undefined,
+      constructionResult: result,
+      inputError: undefined,
+      phase: !correct && round.failure === "end-game" ? "failed" : "feedback",
+      answers: [
+        ...state.answers,
+        {
+          roundId: round.id,
+          ...(round.rule.type === "bearing-angle"
+            ? { bearing: bearingResult(round, response) }
+            : {}),
+          ...(journey.saveRevision
+            ? { receiptLabel: round.resolvedLabel ?? round.label }
+            : {}),
+          selectedIds: [...response.selectedIds],
+          text: response.text,
+          ordered: [...response.ordered],
+          pin: response.pin ? { ...response.pin } : undefined,
+          construction: response.construction
+            ? structuredClone(response.construction)
+            : undefined,
+          constructionResult: result,
           correct,
-          state.help?.[round.id],
-        ),
-        pointsVersion: POINTS_VERSION,
-      },
-    ],
-  });
+          points: submittedPoints(
+            round,
+            response,
+            correct,
+            state.help?.[round.id],
+          ),
+          pointsVersion: POINTS_VERSION,
+        },
+      ],
+    };
+  };
   if (action.type === "next") {
     if (state.phase !== "feedback") return state;
     return state.roundIndex === journey.rounds.length - 1
@@ -105,6 +157,11 @@ export function gameReducer(
           phase: "playing",
           roundIndex: state.roundIndex + 1,
           pin: undefined,
+          construction: undefined,
+          constructionResult: undefined,
+          constructionTool: "draw",
+          brushRadiusKm: undefined,
+          showConstructionExample: false,
           selectedIds: [],
           text: "",
           ordered: [
@@ -127,6 +184,35 @@ export function gameReducer(
       help: { ...state.help, [round.id]: "assisted" },
     };
     return withAssistanceLocks(round, helped);
+  }
+  if (action.type === "brush-size") {
+    const r = constructionRule(round);
+    if (r?.type !== "raster-overlap" || !Number.isFinite(action.value))
+      return state;
+    const range = brushSizeRange(r);
+    return action.value >= range.min && action.value <= range.max
+      ? { ...state, brushRadiusKm: action.value }
+      : state;
+  }
+  if (action.type === "construction-tool")
+    return constructionRule(round)
+      ? { ...state, constructionTool: action.value }
+      : state;
+  if (action.type === "construction") {
+    const rule = constructionRule(round);
+    if (
+      !rule ||
+      (action.value !== undefined &&
+        (!validConstruction(action.value) ||
+          action.value.kind !== constructionKind(rule)))
+    )
+      return state;
+    return {
+      ...state,
+      construction: action.value,
+      constructionResult: undefined,
+      inputError: undefined,
+    };
   }
   if (action.type === "drop-pin")
     return round.mode === "pin" && validPin(action)
@@ -170,6 +256,8 @@ export function gameReducer(
       : {
           ...state,
           pin: undefined,
+          construction: undefined,
+          constructionResult: undefined,
           selectedIds: [...lockedSelectionIds(round, state)],
           text: "",
           ordered: round.orderInitial
@@ -265,7 +353,7 @@ export function gameReducer(
           ? orderedCards(round, state)
           : state.ordered,
       },
-      isCorrect(round, context, state),
+      constructionRule(round) ? false : isCorrect(round, context, state),
     );
   return state;
 }

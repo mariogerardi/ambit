@@ -4,6 +4,11 @@ Status: draft / approved for implementation
 Authoring-kit revision / generated date / local-change indicator:
 Journey being created or edited (title, ID, source file):
 
+Record the intended experience and settled decisions. Fill technical identifiers
+only when known; the implementing agent resolves routine details from current
+examples and shared conventions. Optional blanks do not invalidate an otherwise
+approved spec. Use `IMPLEMENTING_A_SPEC.md` for the implementation handoff.
+
 ## Whole Journey
 
 - **Premise and throughline:**

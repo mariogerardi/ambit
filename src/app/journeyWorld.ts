@@ -1,8 +1,15 @@
+import { constructionScene } from "../game/constructionScene";
+import { intersectionOverlays } from "../game/bearingIntersection";
+import { geoDistance } from "d3-geo";
 import { isRegionAnswer } from "../game/questionBuilder";
 import { answerPlace } from "../game/answerTargets";
 import { pinBands, pinReviewViews } from "../game/pinPresentation";
 import { withAssistanceLocks } from "../game/guidance";
-import type { RegionFeature, RouteFeature } from "../geography/types";
+import type {
+  MapOverlay,
+  RegionFeature,
+  RouteFeature,
+} from "../geography/types";
 import type { GameState } from "../game/state";
 import type {
   Journey,
@@ -12,6 +19,8 @@ import type {
 import { solutionIds, selectableIds } from "../game/questionPreparation";
 import { candidateAvailable } from "../game/guidance";
 import { presentJourneyPlace } from "../game/authoredPlaces";
+import { greatCircleArc, pointAlongBearing } from "../game/geodesic";
+import { reviewedBearing } from "../game/compassBearing";
 import {
   journeyVisitedStates,
   questionMapPresentation,
@@ -101,8 +110,51 @@ export function journeyWorld(
   journey: Journey,
   game: GameState,
   context: QuestionContext,
+  constructionReviewIndex?: number,
 ) {
   const round = journey.rounds[game.roundIndex];
+  const constructionCompletion =
+    game.phase === "finished" && journey.completion?.constructionResults;
+  const reviewingConstruction =
+    constructionCompletion && constructionReviewIndex !== undefined;
+  const reviewIndex = Math.max(
+    0,
+    Math.min(
+      journey.rounds.length - 1,
+      constructionReviewIndex ?? journey.rounds.length - 1,
+    ),
+  );
+  const constructionQuestion = reviewingConstruction
+    ? journey.rounds[reviewIndex]
+    : round;
+  const constructionResponse = reviewingConstruction
+    ? (game.answers.find((a) => a.roundId === constructionQuestion.id) ?? game)
+    : game;
+  const shapeScene =
+    constructionCompletion && !reviewingConstruction
+      ? { overlays: [], places: [] }
+      : constructionScene(
+          constructionQuestion,
+          constructionResponse,
+          game.phase !== "playing",
+          !!reviewingConstruction,
+          !!game.showConstructionExample,
+        );
+  const retainedConstructions =
+    game.phase === "finished" && !constructionCompletion
+      ? journey.rounds.flatMap((q) => {
+          const answer = game.answers.find((a) => a.roundId === q.id);
+          return answer?.construction
+            ? [constructionScene(q, answer, true, true)]
+            : [];
+        })
+      : [];
+  const finalConstructionPlaces = retainedConstructions.flatMap(
+      (s) => s.places,
+    ),
+    finalConstructionOverlays = retainedConstructions.flatMap(
+      (s) => s.overlays,
+    );
   game = withAssistanceLocks(round, game);
   const correct = !!game.answers.at(-1)?.correct;
   const map = questionMapPresentation(
@@ -170,6 +222,63 @@ export function journeyWorld(
           }),
         )
       : [];
+  const compassArcs: Extract<MapOverlay, { type: "path" }>[] = (
+    game.phase === "finished"
+      ? journey.rounds.filter(
+          (q) =>
+            q.rule.type === "bearing-angle" &&
+            game.answers.some((a) => a.roundId === q.id),
+        )
+      : (game.phase === "feedback" || game.phase === "failed") &&
+          round.rule.type === "bearing-angle"
+        ? [round]
+        : []
+  ).flatMap((q) => {
+    const answer = game.answers.find((a) => a.roundId === q.id);
+    const result = answer && reviewedBearing(q, answer);
+    return result
+      ? [
+          {
+            id: `bearing-route:${q.id}`,
+            type: "path" as const,
+            visualState:
+              game.phase === "finished"
+                ? ("visited" as const)
+                : ("answer" as const),
+            coordinates: greatCircleArc(result.origin, result.destination),
+            label: game.phase === "finished" ? undefined : "Correct bearing",
+            opacity: game.phase === "finished" ? 0.5 : 0.85,
+          },
+        ]
+      : [];
+  });
+  if (
+    (game.phase === "feedback" || game.phase === "failed") &&
+    round.rule.type === "bearing-angle"
+  ) {
+    const result = reviewedBearing(round, game);
+    if (result) {
+      const length = Math.min(
+        (12 * Math.PI) / 180,
+        geoDistance(
+          [result.origin.lng, result.origin.lat],
+          [result.destination.lng, result.destination.lat],
+        ),
+      );
+      compassArcs.push({
+        id: `bearing-guess:${round.id}`,
+        type: "path",
+        arrowhead: true,
+        label: "Your bearing",
+        visualState: result.tier === null ? "incorrect" : "correct",
+        coordinates: greatCircleArc(
+          result.origin,
+          pointAlongBearing(result.origin, result.chosen, length),
+        ),
+        opacity: 0.9,
+      });
+    }
+  }
   const selected = catalog.get(game.selectedIds.at(-1) ?? "");
   const preferredFocus =
     completion?.focus ??
@@ -223,6 +332,28 @@ export function journeyWorld(
     game.phase === "finished"
       ? allRegions(regions, journey, game.answers)
       : questionRegions(regions, round, game.phase, game.help?.[round.id]);
+  const bearingOverlays = [
+    ...compassArcs,
+    ...(game.phase === "playing" ||
+    game.phase === "feedback" ||
+    game.phase === "failed"
+      ? intersectionOverlays(
+          round,
+          game.phase !== "playing",
+          game.help?.[round.id] === "assisted",
+        )
+      : []),
+  ];
+  const authoredOverlays =
+    completion?.overlays ??
+    (game.phase === "playing" || game.phase === "feedback"
+      ? [
+          ...(round.overlays ?? []),
+          ...(assist?.overlays ?? []),
+          ...(game.phase === "feedback" ? (round.feedbackOverlays ?? []) : []),
+          ...pinRings,
+        ]
+      : undefined);
   return {
     regions: displayedRegions,
     clueLocators:
@@ -253,11 +384,18 @@ export function journeyWorld(
             ]),
           )
         : states!,
-    places:
-      game.phase === "finished"
+    places: reviewingConstruction
+      ? [
+          ...(constructionQuestion.places ?? []).filter(
+            (p) => p.displayRole === "reference",
+          ),
+          ...shapeScene.places,
+        ]
+      : game.phase === "finished"
         ? [
             ...new Map(
               [
+                ...finalConstructionPlaces,
                 ...(completion?.places ?? []).map((place) =>
                   presentJourneyPlace({
                     ...place,
@@ -282,6 +420,7 @@ export function journeyWorld(
             ).values(),
           ]
         : [
+            ...shapeScene.places,
             ...questionPlaces(
               round,
               context,
@@ -311,20 +450,21 @@ export function journeyWorld(
             ).values(),
           ]
         : []),
-    overlays:
-      completion?.overlays ??
-      (game.phase === "playing" || game.phase === "feedback"
-        ? [
-            ...(round.overlays ?? []),
-            ...(game.phase === "playing" && game.help?.[round.id] === "assisted"
-              ? (round.guidance?.assist?.overlays ?? [])
-              : []),
-            ...(game.phase === "feedback"
-              ? (round.feedbackOverlays ?? [])
-              : []),
-            ...pinRings,
-          ]
-        : undefined),
+    overlays: reviewingConstruction
+      ? [
+          ...(constructionQuestion.overlays ?? []),
+          ...(constructionQuestion.feedbackOverlays ?? []),
+          ...shapeScene.overlays,
+        ]
+      : finalConstructionOverlays.length
+        ? [...(authoredOverlays ?? []), ...finalConstructionOverlays]
+        : shapeScene.overlays.length || bearingOverlays.length
+          ? [
+              ...bearingOverlays,
+              ...(authoredOverlays ?? []),
+              ...shapeScene.overlays,
+            ]
+          : authoredOverlays,
     showBorders: completion?.borders ?? map.borders,
     borderRegionIds:
       game.phase === "home" || game.phase === "finished"

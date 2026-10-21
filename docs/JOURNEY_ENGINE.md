@@ -170,6 +170,68 @@ and internal recipes. In particular:
 - A disclosed geographic pool need not be map-selectable. Input comes from the
   mode/selection contract; reference areas are excluded from region answers.
 
+## Compass example and independent questions
+
+`recipe:compass-bearing` demonstrates a complete question with its own origin,
+destination, tiers, help and scenes. A relay is ordinary Journey content: each
+question repeats its endpoints explicitly, and never depends on the previous
+answer. `geodesic.ts` supplies spherical bearing, circular error, direct-point
+and sampled great-circle utilities; the same endpoints feed grading and display.
+Coincident, antipodal and exactly polar-origin bearings are rejected.
+`CompassAnswer.tsx` owns an upright dial, pointer/touch rotation, keyboard input
+and optional numeric entry under “Type my answer”. The saved text register holds the chosen whole degree;
+an empty register remains unanswered. `compassBearing.ts` owns angular outcome
+calculation and frozen version-1 submission evidence. `Answer.bearing` retains
+coordinates, target, chosen angle, error, tier and reaction; save validation checks
+that evidence structurally without regrading against a changed question.
+`journeyWorld` adds the correct arc and short submitted-heading segment only on
+reveal, then retains reviewed comparison arcs at completion. Submitted lines carry
+a solid arrowhead and a “Your bearing” label aligned with their projected
+direction; the correct route has its own label. These noninteractive annotations
+clear with the reveal and follow the shared theme. No Journey-specific
+renderer or reducer branch is needed.
+
+## Bearing Intersection composition
+
+`PRESENTATION_RECIPES` in `recipes.ts` includes `recipe:bearing-intersection`.
+Run `npm run check:journey -- --recipe bearing-intersection`. This is independent
+of Compass Bearing: it reuses the `pin` response and `pin-distance` evaluator,
+with a question-level `bearingIntersection` presentation contract:
+
+```ts
+bearingIntersection: {
+  stations: [stationA, stationB], // canonical PlaceFeature records
+  assist: { stationId: stationA.id, halfWidthDegrees: 15, reachKm: 1200 },
+}
+```
+
+Supply the target through the ordinary pin rule/place records. Station identities
+and coordinates are explicit on each question; previous discoveries are optional
+story context. `bearingIntersection.ts` derives headings and validates distinct
+named stations, nondegenerate geometry, a unique forward intersection of rounded
+readings inside the bullseye, and stations outside the outer acceptance radius.
+Three ascending distance tiers are required. An optional assist requires authored
+help, a half-width between 0° and 90°, and a regional reach beyond the answer's
+accepted region. Do not compute the reach from target distance in content.
+
+`StationBearings.tsx` shows equally prominent read-only dials and headings;
+free Accuracy information explains initial great-circle bearings from true north.
+`presentation.ts` supplies blue station references while withholding the target.
+`journeyWorld` adds one `bearing-sector` overlay only during assist and two exact
+station-to-target arcs only during reveal, clearing them on advance/completion.
+`globe/bearingSector.ts` builds the sampled spherical swath without a centerline;
+its authored radius and width are explanatory display geometry, never pin limits.
+The sector follows semantic reference colors and does not intercept picking.
+
+Pin submission, distance bands, points, help caps and saves retain their shared
+owners. A new stable unlisted Journey ID and save revision protect this content;
+subsequent target/grade changes must follow existing edition policies. Completion
+for Silk Roads uses discoveries, actual wrong pins and six authored views,
+with separately attributed schematic overland corridors. Paths can declare
+`opacityByAltitude: { near, far, opacity }`: the renderer interpolates from their
+base `opacity` at `near` to the overview strength at `far`, updating material
+opacity in place. `visualState: "corridor"` supplies ungraded copper/gold context.
+
 ## Matching example
 
 Matching shares card movement with ordering but has a distinct rule and named roles.
@@ -484,3 +546,46 @@ Named map alternatives require `disclosure.namedChoices`. Use
 `map.candidateRole: "clue"` for a noninteractive area pool; reserve gold land for
 available globe answers. Eligibility still comes from the mechanic, never a
 color. Do not rely on help to introduce an initially required candidate field.
+
+## Constructed geographic answers
+
+Five independent explicit-submit contracts are available per question:
+`geo-brush` / `raster-overlap`, `geo-circle` / `point-coverage-max`, `geo-trace` /
+`line-following`, `geo-polygon` / `population-coverage-area-budget`, and `geo-cut` /
+`population-balance`. See `constructionRecipes.ts` for complete synthetic control
+examples and `drawingSaharaJourney.ts` for real source-backed content. These do
+not depend on a Journey flow.
+
+`Response.construction` stores versioned geographic geometry. The shared editor
+supports globe gestures and compact editing controls. An authored `constructionArea`
+chooses gesture ownership: starting inside edits, starting outside rotates the
+globe. A circle owns gestures starting inside its disk and preserves the grabbed
+offset. Ownership stays fixed until release. Legacy unbounded questions retain
+an explicit movement tool. `constructionInitial` can supply a neutral draft. Eligibility/readiness validates geometry; canonical source grids
+or lines grade it; raster patches and cell meshes only render. No live score is
+shown. Three authored quality bands award 3/2/1 points before help ceilings.
+
+`constructionResult` freezes source revision, tier, feedback and metrics at
+submission. Preserve it with the submitted geometry through saves and sync;
+never silently recompute historical rewards. An optional `constructionExample`
+is reveal-only and player-toggled. `completion.constructionResults` offers a traditional overview flyover and manual
+review of one saved construction at a time; camera movement does not change the
+selected construction. Generic completion also retains constructed submissions.
+
+`raster-patch` overlays are georeferenced local images; `cells` are display meshes
+of explicit geographic grid indices. Both are decorative and dispose geometry
+and textures on replacement. Geographic alpha masks clip cell fills to the same
+footprint as the imagery; rendered outlines are clipped to that footprint too. Neither supplies map-picking answers. Frozen data
+must include provenance/revision and disclosed resolution. Calibrate brush and
+trace bands with people before publishing. See the
+[Sahara implementation review](journey-authoring/SAHARA_IMPLEMENTATION_REVIEW.md).
+
+Brush questions expose a bounded size slider with the authored radius as the
+default. Each stroke retains its own radius; changing the slider does not alter
+existing paint. The brush/eraser cursor appears only over the editable footprint;
+elsewhere the cursor reflects globe movement. Painting updates the existing mesh
+without reloading its alpha mask. Trace input simplifies redundant samples on
+release while retaining endpoints and bends, and exposes at most twelve handles.
+Coordinate-entry disclosures are omitted from constructed-question controls.
+A polygon example can supply `constructionExampleFootprint` for a closed,
+country-clipped comparison outline; its original vertices still determine grade.

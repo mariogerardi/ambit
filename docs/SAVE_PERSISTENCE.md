@@ -65,6 +65,13 @@ receipt labels, clear obsolete unsubmitted drafts/help, and skip already graded
 feedback. Completed results are not regraded. New runs capture receipt names
 and the current content revision. Synced register merges apply the same upgrade.
 
+Compass submissions additionally capture optional `Answer.bearing` version-1
+evidence: locked origin/destination records, chosen angle, target, circular error,
+tier and reaction. Historical compass feedback and receipts use this snapshot;
+changes to coordinates or thresholds never recalculate an earned result. The
+existing text register holds pending whole-degree input, including deliberate
+zero, so help and restoration preserve drafts without a separate storage key.
+
 New Journey answers also capture `points` (0–3) and `pointsVersion: 1`.
 Correctness and receipt names remain independent. Answers without point snapshots
 retain their old full credit (three for correct, zero for incorrect), including
@@ -156,3 +163,11 @@ Study tests also cover final-unanswered completion, exact review replay coverage
 and eligible typed answers with and without WebGL, rejecting typed names already
 given by map prompts, city distractor round trips, and Journey replay across devices. These are unit/DOM tests, not browser or
 GPU verification.
+
+Constructed answers save versioned geographic strokes/center/vertices/endpoints
+in `construction`, plus a submission-time `constructionResult` with source
+revision, quality tier and metrics. The existing Journey registers retain these
+fields for pending drafts and completed receipts. Do not regrade restored
+constructions or replace their geometry with an authored example. Geometry and
+metric validation rejects corrupt or excessive payloads. Changes to frozen
+scoring sources require an explicit edition/save-continuity decision.

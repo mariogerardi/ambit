@@ -55,6 +55,16 @@ export function QuestionActions({
                 <strong>Assist</strong>
                 {guidance.content.assist.text}
               </p>
+              {guidance.content.assist.images?.length && (
+                <div className="construction-comparison-images">
+                  {guidance.content.assist.images.map((image) => (
+                    <figure key={image.src}>
+                      <img src={image.src} alt={image.alt} />
+                      <figcaption>{image.caption}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
               {guidance.preservedSelection && (
                 <p className="assist-selection-note">
                   Your earlier selection is kept. You can remove it to leave

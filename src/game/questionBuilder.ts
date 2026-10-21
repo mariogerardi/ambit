@@ -1,3 +1,4 @@
+import { validateBearingIntersection } from "./bearingIntersection";
 import { compileQuestionScenes } from "./scenes";
 import { mechanicFor, usesChoiceCards } from "./mechanics";
 import type {
@@ -34,6 +35,10 @@ export function definePresentation<T extends QuestionPresentation>(
     "orderInitial",
     "shuffleChoices",
     "guidance",
+    "bearingIntersection",
+    "constructionExample",
+    "constructionExampleFootprint",
+    "constructionInitial",
   ];
   if (forbidden.some((key) => key in presentation))
     throw Error(
@@ -120,6 +125,9 @@ export function validateQuestionContract(q: Question): void {
     !q.inputLabel?.trim()
   )
     fail("typed answers require a field label");
+  if (q.guidance?.assist?.compassSector && q.mode !== "compass-bearing")
+    fail("compass sectors require the compass answer mode");
+  validateBearingIntersection(q, fail);
   definition.validate?.(q, fail);
   for (const choice of q.choices ?? [])
     if (

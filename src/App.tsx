@@ -316,12 +316,33 @@ export function App() {
     mode === "daily"
       ? (activeAttempt?.game ?? { ...initialGame, phase: "playing" as const })
       : (practice[journey.id] ?? { ...initialGame, phase: "playing" as const });
+  const [constructionReviewIndex, setConstructionReviewIndex] = useState<
+    number | undefined
+  >(undefined);
+  useEffect(
+    () => setConstructionReviewIndex(undefined),
+    [journey.id, game.phase],
+  );
   const world = useMemo(
     () =>
       isJourney && context && loaded
-        ? loaded.runtime.journeyWorld(namedRegions, journey, game, context)
+        ? loaded.runtime.journeyWorld(
+            namedRegions,
+            journey,
+            game,
+            context,
+            constructionReviewIndex,
+          )
         : undefined,
-    [isJourney, context, namedRegions, journey, game, loaded],
+    [
+      isJourney,
+      context,
+      namedRegions,
+      journey,
+      game,
+      loaded,
+      constructionReviewIndex,
+    ],
   );
   const session = study.session;
   const [studyReview, setStudyReview] = useState<StudyAnswer>();
@@ -963,6 +984,20 @@ export function App() {
       </section>
     ) : context ? (
       <GameShell
+        constructionReviewIndex={constructionReviewIndex}
+        onConstructionReview={(index) => {
+          setConstructionReviewIndex(index);
+          if (index === undefined) {
+            if (journey.completion) {
+              frame(journey.completion.focus);
+              if (!reduced && journey.completion.views?.length)
+                globe.current?.flyover(journey.completion.views);
+            }
+          } else {
+            const question = journey.rounds[index];
+            if (question) frame(question.feedbackFocus ?? question.focus);
+          }
+        }}
         canReplay={mode === "practice"}
         contextNavigation={
           archiveDate ? (
@@ -1152,6 +1187,20 @@ export function App() {
                 placeInteraction={
                   isJourney &&
                   journey.rounds[game.roundIndex].mode.startsWith("city-")
+                }
+                constructionInput={
+                  isJourney &&
+                  game.phase === "playing" &&
+                  journey.rounds[game.roundIndex].mode.startsWith("geo-")
+                    ? {
+                        question: journey.rounds[game.roundIndex],
+                        value: game.construction,
+                        brushRadiusKm: game.brushRadiusKm,
+                        tool: game.constructionTool ?? "draw",
+                        onChange: (value) =>
+                          dispatch({ type: "construction", value }),
+                      }
+                    : undefined
                 }
                 onCoordinateTap={
                   isJourney &&
