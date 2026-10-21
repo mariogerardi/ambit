@@ -275,7 +275,7 @@ text to `questionText.ts`. `questions.ts` remains a compatibility import surface
    keep that naming pattern or update discovery deliberately.
 5. Regenerate `npm run prepare:journeys` when definitions or registration change
    index metadata. Run relevant checks while authoring, TypeScript for typed changes,
-   and `npm run check:catalog` before pushing catalog changes, following
+   and rely on CI for the full suites/build before merge, following
    [AGENTS.md](../AGENTS.md). Update the table when titles/routes/registration change;
    do not regenerate geography or run a full build for routine copy edits.
    Authorized releases use the normal CI checks and supported nonblocking deployment.
