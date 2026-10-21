@@ -1,12 +1,10 @@
-import importlib.util
+"""Staging demo safety and save continuity at the offline AWS boundary."""
 import json
 import unittest
 from unittest.mock import patch
-from pathlib import Path
 
-spec = importlib.util.spec_from_file_location("seed", Path(__file__).resolve().parents[1] / "backend/staging_demo.py")
-seed = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(seed)
+import offline_aws  # installs the offline AWS boundary
+import staging_demo as seed
 
 
 class SeedTests(unittest.TestCase):

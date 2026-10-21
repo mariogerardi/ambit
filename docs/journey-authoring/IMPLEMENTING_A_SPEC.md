@@ -19,8 +19,10 @@ experience or the amount of new engineering. Continue independent work meanwhile
 
 ## 2. Familiarize yourself with the current suite
 
-Read `JOURNEY_CRAFTING.md` for editorial and visual standards, then skim the
-catalog of all current Journeys. Inspect existing examples that match the spec's
+Read the editorial, visual and engine sections relevant to the approved experience.
+In the repository, use the [task-to-section map](../README.md#find-the-relevant-section);
+in a portable kit, use the guide and references listed in `AUTHORING_KIT.md`.
+Skim the catalog's **Bundled Journeys** table, then inspect examples that match the spec's
 mechanics and storytelling or geography challenges. Review each chosen example's
 prompt, play scene, hint, assist, actual answer contract, reveal and completion.
 Featured examples are starting points; consult the broader suite as needed.

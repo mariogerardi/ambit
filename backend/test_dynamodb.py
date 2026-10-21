@@ -1,7 +1,7 @@
 """Exercise the native-value adapter at the shared SDK boundary, without AWS."""
 import unittest
 from unittest.mock import MagicMock, patch
-import test_services  # supplies the offline SDK boundary
+from offline_aws import ClientError
 import dynamodb
 
 
@@ -23,8 +23,8 @@ class DynamoTests(unittest.TestCase):
 
     def test_conditional_errors_are_preserved_for_idempotent_save_retries(self):
         client = MagicMock()
-        error = test_services.ClientError({"Error": {"Code": "ConditionalCheckFailedException"}})
+        error = ClientError({"Error": {"Code": "ConditionalCheckFailedException"}})
         client.put_item.side_effect = error
-        with patch.object(dynamodb, "client", client), self.assertRaises(test_services.ClientError) as raised:
+        with patch.object(dynamodb, "client", client), self.assertRaises(ClientError) as raised:
             dynamodb.Table("saves").put_item(Item={"clock": 7})
         self.assertIs(raised.exception, error)

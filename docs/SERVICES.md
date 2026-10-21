@@ -409,7 +409,7 @@ does not change the deploy result; without a key it is silently skipped.
 Run offline checks before deploying:
 
 ```sh
-python3 -m unittest discover -s backend -p 'test_*.py'
+python3 scripts/run-python-tests.py
 npm run test:all
 npm run build
 ```
@@ -417,7 +417,7 @@ npm run build
 To deploy the backend and enable Datadog with the locally supplied API key:
 
 ```sh
-python3 scripts/deploy-backend.py --profile personal --with-datadog
+python3 scripts/deploy-backend.py --profile personal --with-datadog --no-wait
 ```
 
 The script stores the private key in `ambit/production/datadog-api-key` in Secrets

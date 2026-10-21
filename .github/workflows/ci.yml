@@ -54,6 +54,8 @@ jobs:
           fi
       - name: Check portable Journey exporter
         run: npm run test:journey-export
+      - name: Check runtime selection tooling
+        run: npm run test:tooling
       - name: Type-check and build
         env:
           VITE_DATADOG_APPLICATION_ID: ${{ vars.VITE_DATADOG_APPLICATION_ID }}

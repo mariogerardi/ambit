@@ -577,8 +577,8 @@ of explicit geographic grid indices. Both are decorative and dispose geometry
 and textures on replacement. Geographic alpha masks clip cell fills to the same
 footprint as the imagery; rendered outlines are clipped to that footprint too. Neither supplies map-picking answers. Frozen data
 must include provenance/revision and disclosed resolution. Calibrate brush and
-trace bands with people before publishing. See the
-[Sahara implementation review](journey-authoring/SAHARA_IMPLEMENTATION_REVIEW.md).
+trace bands with people before publishing. See [Sahara preparation](DEVELOPMENT.md#sahara-data-preparation)
+and the [release acceptance checks](HOSTING.md#release-acceptance).
 
 Brush questions expose a bounded size slider with the authored radius as the
 default. Each stroke retains its own radius; changing the slider does not alter

@@ -11,7 +11,7 @@ small device-local preference stores. Guest saves belong to the current browser
 origin; signed-in players synchronize progress to their account. Legacy `wurl.*`
 key names remain for compatibility. Reviewed October 10, 2026.
 See [Architecture](ARCHITECTURE.md) for application owners and
-[Release readiness](RELEASE_READINESS.md) for remaining durability work.
+[Remaining limits](#remaining-limits) for durability work.
 
 ## Storage and migration
 

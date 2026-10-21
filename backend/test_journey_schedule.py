@@ -5,7 +5,7 @@ from datetime import date
 from unittest.mock import patch
 from unittest.mock import MagicMock
 
-import test_services  # installs the offline AWS boundary
+import offline_aws  # installs the offline AWS boundary
 import journey_schedule as schedule
 import community
 from infrastructure import template

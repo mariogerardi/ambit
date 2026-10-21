@@ -8,23 +8,23 @@ and DNS are managed through Route 53.
 
 Pushes to `main` run the [CI workflow](../.github/workflows/ci.yml). After locked
 dependency installation, documentation checks, tests, the production build, and
-the dependency audit pass, GitHub retains the exact `dist/` artifact and deploys
-it to Amplify. Pull requests validate and retain their artifact without deploying.
-A manual workflow run on `main` can redeploy the current source.
+the dependency audit pass, GitHub retains the exact `dist/` artifact. Deployment
+to Amplify also requires `DAILY_SCHEDULE_CUTOVER_READY=true`; see
+[Schedule cutover](SERVICES.md#schedule-cutover). Pull requests validate and retain
+their artifact without deploying. A manual workflow run on `main` can redeploy
+the current source when the cutover gate is enabled.
 
 `main` requires a pull request and an up-to-date, passing **Tests and production
 build** check. The rule applies to administrators, blocks force pushes and branch
 deletion, and requires no reviewer approval. This check runs the frontend and
 backend tests; the production deploy job depends on it.
 
-For a Journey catalog change, run the full frontend and backend test suites before
-pushing the branch. Cover Journey IDs rather than positions or catalog totals.
-After merging a green pull request, check the production workflow and watch site
-availability during the frontend deployment; a previous deploy caused a roughly
-five-minute home-page outage. Backend releases are separate: deploy the tested
-`main` commit on a stable connection using the procedure in [Services](SERVICES.md),
-then confirm the production CloudFormation stack reaches `UPDATE_COMPLETE` and
-the Datadog deployment event appears.
+For a Journey catalog change, run `npm run check:catalog` before pushing the branch.
+Cover Journey IDs rather than positions or catalog totals. Backend releases are
+separate; use the tested commit and procedure in [Services](SERVICES.md).
+Local deployments use the supported `--no-wait` path and report the job/stack ID
+and status link promptly. Wait for completion or verify hosted behavior only when
+the task explicitly requires it.
 
 AWS credentials are issued through GitHub OIDC. The IAM role trusts only this
 repository's immutable GitHub identity and `main` branch, and permits deployment operations on Ambit's production
@@ -45,12 +45,19 @@ deployment completion. Omitting `--no-wait` retains CI's completion checks.
 
 ## Hosting behavior
 
+- Deploy the built `dist/` artifact, not the source tree. `npm run preview` is a
+  local inspection server. Asset paths are root-relative; subpath hosting requires
+  deliberate code/path changes.
 - [Redirect rules](../deployment/amplify-rules.json) serve `index.html` for
   extensionless application routes. Missing files with extensions retain HTTP
   errors instead of receiving the app's HTML.
 - [HTTP headers](../customHttp.yml) make HTML and public data revalidate, and
   cache hashed `/assets/` files immutably. They also set basic HTTPS, framing,
   content-type, referrer, and browser-permission controls.
+- Stable `*.v1.json` names do not guarantee immutable content. Keep HTML, deferred
+  chunks and geography consistent across releases; retain the prior artifact for
+  rollback and account for older open tabs requesting deferred chunks. Runtime
+  loaders do not verify every manifest SHA-256 hash on fetch.
 - The build includes `/NOTICE.txt`, linked from World credits, and `/release.json`
   containing the source commit and build time.
 - Rules and headers are configured on the Amplify app. Editing their repository
@@ -62,6 +69,42 @@ aws amplify update-app --region us-east-1 --app-id d2s965d1nr8fn6 \
   --custom-rules file://deployment/amplify-rules.json \
   --custom-headers "$(cat customHttp.yml)"
 ```
+
+## Release acceptance
+
+Use the pinned runtime and the exact artifact validated by CI. Record the commit,
+checks and scope in the PR/release handoff; do not regenerate committed geography
+as a deployment step. CI covers installs, frontend/backend/tooling tests, the
+production build, documentation formatting and dependency advisories.
+
+When hosted or device verification is requested, scope it to the changed risks:
+
+- Direct links, missing-asset errors, HTTPS, compression/content types, headers,
+  `/release.json`, `/NOTICE.txt`, font notices, favicon/social metadata and rollback.
+- First/failed loads, old open tabs, storage failures and actual monitoring events.
+  Never clear real player saves to make a check pass.
+- Cold/warm Journey entry, heavy subdivisions, Fidget, close borders, keyboard,
+  touch/mobile layouts, WebGL failure, focus/dialog navigation, screen-reader
+  feedback, contrast and reduced motion. Mocked globe tests do not establish GPU
+  appearance or device performance; written controls cannot replace every clue.
+
+Save retention/export and storage growth remain documented in
+[Save persistence](SAVE_PERSISTENCE.md#remaining-limits); WebGL context recovery
+and geographic source limitations remain in [Architecture](ARCHITECTURE.md) and
+[Explore data](EXPLORE_DATA.md). These are product limits, not completed checks.
+
+### Journey acceptance checks
+
+The following unverified checks were carried forward from implementation reviews.
+Use them when reviewing the affected edition; deleting a review is not evidence
+that its visual checks passed.
+
+| Journey                    | Checks to resolve                                                                                                                                                                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Drawing the Sahara         | Before pool publication, trial 3–5 human brush samples on desktop/mobile; calibrate brush/river tolerances, touch gestures and imagery readability. Automated feasible shapes do not establish human usability.                                                 |
+| Same Name, Different Place | London/Chatham equal pickability among four candidates, named Toronto/Detroit references and Thames assist; suppressed Caucasus hover names and actual taps; continuous Zambezi/pin input; Congo/Tripoli labels, lakes, feedback and reduced-motion completion. |
+| Far From Everything        | Calibrate bands and broad/off-target cameras on desktop/mobile; inspect Greenland coastline/70°N assist, Tristan-to-Bouvet progression and the wide Rapa Nui reveal. Verify rights, credit and alt text before adding photography.                              |
+| Reggaetón                  | Anonymous Puerto Rico field, Colón coastline, U.S. city-marker spacing and the finale scale guide on narrow screens.                                                                                                                                            |
 
 ## Link previews and icons
 
@@ -87,7 +130,7 @@ to this Amplify app:
 gh run download RUN_ID --repo mariogerardi/ambit \
   --name production-site --dir /tmp/ambit-rollback
 python3 scripts/deploy-production.py --directory /tmp/ambit-rollback \
-  --expected-commit FULL_COMMIT_SHA
+  --expected-commit FULL_COMMIT_SHA --no-wait
 ```
 
 Use a fresh download directory. A rollback changes the served application; it does
@@ -96,21 +139,14 @@ newer source, so coordinate rollback with ongoing development.
 
 ## Operations and costs
 
-At setup, Route 53 quoted `.com` registration and renewal at **USD 16/year**.
-One hosted zone adds **USD 0.50/month**. Amplify delivery and deployment usage,
-taxes, and any future monitoring are separate. Registration uses the existing
-domain contacts with privacy protection and annual auto-renewal enabled.
-
-No new budget threshold was selected, and no budget alert was created. Review
-billing in AWS; an alert would notify rather than impose a spending cap.
+Review current Route 53, Amplify and monitoring usage and billing in AWS. Budget
+alerts notify; they do not impose spending caps.
 
 Domain registration, contact verification, DNS propagation, and certificate
 issuance can complete at different times. The managed Amplify URL can serve a
 release before the custom domain becomes available. Check the AWS registration
 email if contact verification is requested.
 
-Browser-origin-local saves do not transfer between the managed URL, `www`, and
-the canonical domain. Share the canonical domain with players. Actual mobile/GPU
-behavior, observability, active Study recovery, and old open tabs requesting
-chunks removed by a newer deployment remain covered by
-[Release readiness](RELEASE_READINESS.md).
+Guest and unsynced local saves do not transfer between the managed URL, `www`,
+and the canonical domain. Share the canonical domain with players; signed-in
+players can restore synced account progress after signing in at the new origin.

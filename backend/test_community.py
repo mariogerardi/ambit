@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from unittest.mock import MagicMock
 
-from test_services import ClientError
+from offline_aws import ClientError
 import community
 from infrastructure import template
 

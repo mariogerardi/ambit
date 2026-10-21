@@ -1,0 +1,135 @@
+/* Answer and hint share the same two-column rhythm as multiple-choice answers. */
+.experience .question-answer-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-top: 18px;
+}
+.experience .question-answer-actions > .primary-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 12px 10px;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.experience .question-answer-actions .answer-hint-button {
+  background: rgb(var(--ui-accent-rgb) / 0.12);
+  color: var(--ui-accent);
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.3);
+  box-shadow: none;
+}
+.experience .question-answer-actions .answer-hint-button:not(:disabled):hover {
+  background: rgb(var(--ui-accent-rgb) / 0.22);
+}
+.experience .question-answer-actions .answer-assist-button {
+  background: rgb(var(--ui-line-rgb) / 0.14);
+  border-color: rgb(var(--ui-line-rgb) / 0.45);
+  color: var(--ui-text);
+}
+.experience
+  .question-answer-actions
+  .answer-assist-button:not(:disabled):hover {
+  background: rgb(var(--ui-line-rgb) / 0.24);
+}
+.experience .question-answer-actions .answer-hint-button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.question-guidance {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.25);
+  border-radius: 10px;
+  background: rgb(var(--ui-surface-rgb));
+  text-align: left;
+}
+.experience .question-guidance p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ui-text);
+}
+.question-guidance strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ui-accent);
+}
+.experience .question-guidance .question-assist-copy {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+}
+.question-assist-copy strong {
+  color: var(--ui-muted);
+}
+.experience .question-guidance .assist-selection-note {
+  margin-top: 8px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.experience .candidate-grid button:disabled {
+  opacity: 0.45;
+  text-decoration: line-through;
+  cursor: default;
+}
+.experience .journey-result-summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+.experience .journey-help-summary {
+  color: var(--ui-muted);
+}
+.journey-round-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+.journey-row-help {
+  display: inline-flex;
+  color: var(--ui-muted);
+}
+.journey-row-help .action-icon {
+  width: 16px;
+  height: 16px;
+}
+.question-answer-actions .action-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.study-map-answer:has(> .typed-country-guess[open]) > .question-answer-actions {
+  display: none;
+}
+.experience .pin-answer-actions > .question-answer-actions {
+  margin-top: 0;
+}
+.pin-answer-actions > .question-guidance {
+  flex-basis: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 700px) {
+  .experience .question-card h1.journey-question-copy {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+  .experience .round-overline .question-help-button {
+    position: relative;
+  }
+  .experience .round-overline .question-help-button::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+}
+

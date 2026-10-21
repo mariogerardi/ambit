@@ -45,8 +45,7 @@ Play/Resume/View result action. Daily dates change at midnight in New York.
 Unassigned future dates show a provisional, seeded choice from the `pool`
 Journeys; a date becomes permanent when it is locked or assigned. The previous
 rotation is preserved only for cutover history in
-[`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). See the historical
-[Journey review](JOURNEY_REVIEW.md) for earlier keep/scrap decisions; current IDs,
+[`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). Current IDs,
 availability and routes come from `journeyIndex.json`. Results use Home/Study as primary exits,
 with replay available only on practice routes. Daily and Archive results retain the
 saved run for all players, including admins; Admin Tools provides the separate
@@ -304,51 +303,12 @@ Evaluator fixtures in
 `tests/fixtures/engine` provide isolated rule coverage and are never runtime
 Journey content. Do not treat the index as an independently authored source.
 
-## Crafting a daily
+## Editorial review
 
-See [Journey crafting](JOURNEY_CRAFTING.md) for the full editorial and interaction
-review. Answer validation alone does not verify that globe taps are enabled or
-that clue and reveal displays support the task. Review inherited map settings
-whenever changing answer modes, and make borderless difficulty explicit.
-
-Use the compact five-stop outline and review checklist in the crafting guide.
-The input format should fit the task; repeated mechanics and varied controls are
-both supported. `leadIn` is optional context joined to `prompt`, not a second
-heading. `QuestionSupport` owns a single 14px supporting paragraph with muted
-instructions and inline accent-colored commitment notices. Leave `instruction`
-empty unless it supplies a missing interaction cue or meaningful exception. Do
-not repeat an action already in the prompt or visible control. Distance pins and
-numeric sliders derive the short bullseye line from their rules; full acceptance
-bands are available in the free question-information **Accuracy** section before
-submission. Do not hand-author band numbers or pin movement boilerplate.
-
-Feedback displays the canonical answer once, with a short explanation. Submitted
-mistakes can be reviewed without listing unused distractors. Assignment controls
-retain role/position identity; accepted alternatives are distinct from missed
-required answers. At completion, purple denotes reviewed discoveries, including
-solutions revealed after misses. Actual mistaken areas, cities, assignments and
-pins remain red; containing countries do not inherit a city's grade. Custom
-completion decoration cannot overwrite a mistake. The maintained rules are in
-[the visual grammar](JOURNEY_CRAFTING.md#5-give-the-globe-purposeful-question-state-information)
-and [reveal design](JOURNEY_CRAFTING.md#8-design-the-reveal-before-declaring-the-question-finished).
-
-## Review checklist
-
-- Keep the prompt central. Use authored `title` for internal identity; add
-  instructions only for exceptional rules, units, ordering, or tolerances.
-- State the country/territory convention, primary-capital convention, or relevant
-  date when it affects the answer. Accept reviewed aliases and distinguish
-  boundary contact from shared-edge adjacency.
-- Keep eligibility separate from correct answers. Hide future progress labels
-  until a stage is active/completed; avoid cached tooltips leaking old disclosure.
-- Use canonical geometry for grading, display footprints for presentation, and
-  source links for attribution. Do not fetch unchecked facts during gameplay.
-- After submission, reveal useful geography and reasoning. Sources and reporting belong in the question-mark popover in the top-right
-  question row; avoid repeating the question as an answer recap.
-
-Reviewed facts, explanations, source links, and disclosure settings live with the
-Journey definitions linked above. Use those definitions and the current guides
-when maintaining content.
+Use the [crafting guide](JOURNEY_CRAFTING.md) for the five-stop outline, supporting
+copy, visual grammar, help, reveals, completion and final author checklist.
+Reviewed facts, explanations, source links and disclosure settings live with
+Journey definitions. This catalog owns registration and technical data contracts.
 
 ## Authored map narrative and completion
 

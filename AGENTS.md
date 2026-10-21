@@ -8,6 +8,11 @@ These instructions apply to every coding agent working in this repository.
   refactors, speculative infrastructure, and cleanup outside the task.
 - Read only the relevant docs and code. Use `rg` and batch independent reads;
   reuse what you have already learned instead of repeating discovery.
+- Start with the task-to-section map in `docs/README.md`; the owner/test map in
+  `docs/DEVELOPMENT.md` identifies focused checks. Do not read every linked guide.
+- List code with `rg --files src tests scripts backend`. Search code and docs with
+  `rg -n -g '*.{ts,tsx,mjs,py,css,md}' 'pattern' src tests scripts backend docs`.
+  Inspect JSON/assets by explicit path; broad searches can emit megabytes per line.
 - Preserve existing user changes, including untracked files. Never regenerate
   catalogs or geography unless the task requires it.
 - Continue authorized work without unnecessary permission checks. Ask only when
@@ -17,9 +22,11 @@ These instructions apply to every coding agent working in this repository.
 
 ## Focus verification: get in, get out
 
-- Run only tests relevant to the changed behavior. Prefer named files or focused
-  test filters. Add regression coverage for meaningful behavior and failure modes,
-  not tests that merely repeat the implementation.
+- Select relevant test files before running checks. For mechanical moves, preserve
+  existing cases; add regression coverage for changed behavior and meaningful
+  failure modes, not file layout or assertions that repeat the implementation.
+- Local checks stay focused even when CI will later run the full suite. Use static
+  inspection or saved reports to inventory tests; do not run the suite to count them.
 - Use `npm test -- tests/<file>.test.ts` for local frontend checks; put test files
   before options such as `-t <test-name>`. The command refuses unscoped runs.
   `npm run test:all` explicitly runs the full frontend suite. Passing test logs
@@ -27,6 +34,9 @@ These instructions apply to every coding agent working in this repository.
   command just to obtain more output.
 - Use a TypeScript check when changing typed code. Do not routinely run the full
   test suite, production build, dependency audit, or all preparation scripts.
+- For backend changes, use Python >=3.11 and
+  `python3 scripts/run-python-tests.py backend/test_<area>.py` (or a dotted test
+  name). No arguments intentionally runs the full backend suite for CI/releases.
 - Broaden checks only when a failure, shared-contract change, explicit request,
   or release requirement makes them necessary. Once relevant checks pass, stop
   testing; do not repeat them without a new reason.
@@ -78,5 +88,7 @@ These instructions apply to every coding agent working in this repository.
 - Start with `docs/ARCHITECTURE.md`, `docs/QUESTION_CATALOG.md`,
   `docs/JOURNEY_CRAFTING.md`, `docs/SAVE_PERSISTENCE.md`, or `docs/SERVICES.md`
   as relevant. Code and tests establish current behavior when docs disagree.
-- Use the pinned Node version in `.nvmrc`. Typical focused checks are
+- Run `npm run check:env` once when setting up the workspace; it checks the pinned
+  Node/npm and identifies a supported Python executable. Use that interpreter for
+  Python commands. Use the pinned Node version in `.nvmrc`. Typical focused checks are
   `npm test -- tests/<relevant-file>` and `./node_modules/.bin/tsc --noEmit`.

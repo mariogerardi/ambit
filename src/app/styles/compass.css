@@ -1,0 +1,159 @@
+/* The compass is always upright; north belongs to the origin, not the camera. */
+.compass-answer,
+.compass-review {
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+.compass-guide {
+  margin: 0;
+  text-align: center;
+}
+.compass-guide,
+.compass-review-key {
+  font-size: 14px;
+}
+.compass-dial {
+  width: min(100%, 190px);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: grab;
+  border-radius: 50%;
+}
+.compass-dial:active {
+  cursor: grabbing;
+}
+.compass-dial:focus-visible {
+  outline: 2px solid var(--play-selected);
+  outline-offset: 3px;
+}
+.compass-face {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  overflow: visible;
+}
+.compass-rim {
+  fill: none;
+  stroke: currentColor;
+  opacity: 0.3;
+}
+.compass-tick {
+  stroke: currentColor;
+  opacity: 0.4;
+  stroke-width: 1;
+}
+.compass-cardinal {
+  fill: currentColor;
+  font-size: 12px;
+  font-weight: 650;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.compass-needle {
+  fill: var(--play-selected);
+  stroke: var(--play-selected);
+}
+.compass-miss {
+  fill: var(--play-incorrect);
+  stroke: var(--play-incorrect);
+}
+.compass-target {
+  fill: var(--play-answer);
+  stroke: var(--play-answer);
+  stroke-width: 2;
+}
+.compass-target line {
+  stroke-dasharray: 4 3;
+}
+.compass-hub {
+  fill: currentColor;
+}
+.compass-sector {
+  fill: var(--play-hinted);
+  opacity: 0.23;
+}
+.compass-answer output {
+  font-size: 1.8rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+.compass-manual-entry input {
+  width: 110px;
+  padding: 0.5rem;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+}
+.experience .round-feedback .compass-review {
+  gap: 0;
+  margin-bottom: 24px;
+}
+.experience .round-feedback p.compass-review-key {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  margin: 0;
+  line-height: 1.4;
+}
+.compass-review-key > span:first-child {
+  border-bottom: 2px solid var(--play-selected);
+}
+.compass-review-key > span:last-child {
+  border-bottom: 2px dashed var(--play-answer);
+}
+.compass-review:has(.compass-miss) .compass-review-key > span:first-child {
+  border-color: var(--play-incorrect);
+}
+.compass-receipt {
+  overflow-wrap: anywhere;
+}
+.compass-review .compass-needle:not(.compass-miss) {
+  fill: var(--play-correct);
+  stroke: var(--play-correct);
+}
+.compass-review:not(:has(.compass-miss))
+  .compass-review-key
+  > span:first-child {
+  border-color: var(--play-correct);
+}
+
+.compass-manual-entry[open] > label {
+  margin-top: 15px;
+}
+
+.bearing-observations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 8px 0 18px;
+}
+.bearing-observations figure {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  margin: 0;
+}
+.bearing-observations .compass-face {
+  max-width: 130px;
+}
+.bearing-observations .compass-needle {
+  fill: var(--play-hinted);
+  stroke: var(--play-hinted);
+}
+.bearing-observations figcaption {
+  display: grid;
+  gap: 3px;
+  text-align: center;
+  font-size: 14px;
+}
+.bearing-observations figcaption span {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+

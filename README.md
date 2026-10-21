@@ -4,8 +4,8 @@ A geography game built around one shared, interactive globe. Play a five-questio
 Journey, explore places, or build a Study session. React, TypeScript, Vite, and
 Three.js power a static web app; geography, flags, and fonts are bundled locally.
 Guest play uses local assets and saves. Optional Cognito accounts and a feedback
-API run on AWS; Datadog monitors configured releases. Cross-device saves are not
-yet implemented.
+API run on AWS; Datadog monitors configured releases. Signed-in players synchronize
+Journey progress and Study settings, active sessions, and results across devices.
 
 ## Quick start
 
@@ -13,6 +13,7 @@ Use **Node.js 24.21.0** (pinned in [.nvmrc](.nvmrc)) and its bundled npm 11.19.0
 With nvm installed, run `nvm install` and `nvm use` in this directory first.
 
 ```sh
+npm run check:env
 npm ci
 npm run dev
 ```
@@ -28,9 +29,8 @@ npm run build    # Strict TypeScript checks, then the production build in dist/
 npm run preview  # Inspect dist/ locally; this is not a production server
 ```
 
-See [Development](docs/DEVELOPMENT.md) for preparation commands and troubleshooting,
-and [Release readiness](docs/RELEASE_READINESS.md) before deploying.
-Production hosting and rollback are documented in [Hosting](docs/HOSTING.md).
+See [Development](docs/DEVELOPMENT.md) for preparation commands and troubleshooting.
+[Hosting](docs/HOSTING.md) covers release acceptance, deployment, and rollback.
 
 ## What is included
 
@@ -64,9 +64,10 @@ or Mixed. **Cover everything once** exhausts the selected country/topic pairs.
 Ordinary fixed-length/continuous decks reshuffle after exhausting their pool;
 that can revisit a country even with mistake reviews disabled.
 
-Study settings and results persist; the active attempt does not survive refresh
-or tab closure. Leaving Study through app navigation clears it and archives any
-submitted answers. Past sessions can be viewed or replayed, including the exact
+Study settings, results, active sessions, and draft answers persist through
+navigation, refresh, and tab closure. Use **Resume session** to continue; explicitly
+finishing or replacing a run archives its submitted answers. Past sessions can be
+viewed or replayed, including the exact
 coverage of targeted reviews. [Save persistence](docs/SAVE_PERSISTENCE.md) explains
 recovery, tab synchronization, and remaining durability limits.
 
@@ -110,8 +111,7 @@ Start with the [documentation index](docs/README.md).
 - [Implement a Journey from a spec](docs/journey-authoring/IMPLEMENTING_A_SPEC.md): Familiarize yourself with the current suite, preserve approved decisions, implement and verify.
 - [Geographic catalog policy](docs/CATALOG_POLICY.md) and [Explore data](docs/EXPLORE_DATA.md): identities, source conventions, and display limits.
 - [Save persistence](docs/SAVE_PERSISTENCE.md): migration, recovery, and conflicts.
-- [Release readiness](docs/RELEASE_READINESS.md): current gaps and deployment handoff.
-- [Hosting](docs/HOSTING.md): production deployment, domain, HTTP configuration, and rollback.
+- [Hosting](docs/HOSTING.md): release acceptance, production deployment, domain, HTTP configuration, and rollback.
 - [Attribution](NOTICE.md): source notices, licenses, and transformations.
 
 ## Product language
@@ -134,5 +134,6 @@ own notices in [NOTICE.md](NOTICE.md).
 requests using the pinned Node version. It installs locked dependencies, checks
 documentation formatting, runs tests, builds the app, and checks dependency
 advisories. Validation has read-only repository permissions. Successful main-branch
-builds deploy their verified artifact to Amplify using short-lived AWS credentials
-scoped to Ambit's production app; pull requests do not deploy.
+builds can deploy their verified artifact to Amplify using short-lived AWS credentials
+scoped to Ambit's production app when the schedule-cutover flag is enabled;
+pull requests do not deploy. See [Schedule cutover](docs/SERVICES.md#schedule-cutover).

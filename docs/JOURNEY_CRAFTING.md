@@ -4,8 +4,7 @@ _Authoritative editorial and player-experience guide · consolidated October 202
 
 A **Journey** is five questions that develop one geographic premise. It might follow a route, investigate a physical feature, connect historical or cultural ideas, or repeat one satisfying reasoning mechanic. The point is not five facts about the same topic: **each round should advance an experience that is worth completing as a whole.**
 
-This is the single maintained Journey crafting guide, incorporating the former
-`Crafting_a_Journey_Revised.md` and the implementation lessons from Andes.
+This is the single maintained Journey crafting guide.
 [AGENTS.md](../AGENTS.md) governs working efficiency, verification, and deployment.
 
 This guide covers what authors design and what players actually experience. [Question catalog and authoring](QUESTION_CATALOG.md) remains the reference for registration, data contracts, supported modes, and technical mechanics. These are current authoring standards. The engine may support additional legacy or internal configurations; that does not make them the default for new Journeys. Label proposed features explicitly and agree on their scope before relying on a new API.

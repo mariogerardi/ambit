@@ -3,9 +3,9 @@
 This file records provenance and transformations for the shipped assets. The
 current product uses decorative geography; the Earth JPEG and hand-entered demo
 point below remain legacy assets. Preserve original source notices and this file
-when redistributing. The full file is not automatically copied by Vite; see
-[Release readiness](docs/RELEASE_READINESS.md#static-hosting-contract) for the
-publication handoff and [Explore data](docs/EXPLORE_DATA.md) for current scope.
+when redistributing. The build publishes the full file as `/NOTICE.txt`; see
+[Hosting](docs/HOSTING.md#hosting-behavior) for the publication handoff and
+[Explore data](docs/EXPLORE_DATA.md) for current scope.
 
 ## Fonts
 
@@ -388,6 +388,8 @@ Elevation maxima above 900 m anchor the symbols inside the display window
 symbols are generalized terrain illustrations, not surveyed ridges, exact peak
 locations, political boundaries, or grading geometry.
 
+## Drawing the Sahara
+
 Drawing the Sahara uses NASA GIBS/EarthKAM imagery, Gunn 2026 dune presence data
 (MIT), WorldPop 2024 R2025A v1 modeled counts (CC BY 4.0), geoBoundaries /
 OpenStreetMap / Wambacher boundaries (ODbL 1.0), Natural Earth river data (public
@@ -396,3 +398,22 @@ changes, source links and licenses are in
 `public/journeys/drawing-the-sahara/SOURCES.md`. The derived Algeria footprint and
 population database is supplied as `algeria-model.v1.json` under ODbL 1.0, with
 WorldPop attribution retained.
+
+## Question-local point provenance
+
+Far From Everything uses the GeoNames island reference for
+[Rapa Nui, 4030726](https://www.geonames.org/4030726/) and town reference for
+[Ittoqqortoormiit, 3422891](https://www.geonames.org/3422891/), rather than rounded
+specification coordinates. Other reviewed point sources and the SCAR/Australian
+Antarctic Data Centre CC BY 4.0 credit are retained in the Journey definition.
+Reveal lines connect island reference points, not surveyed closest shorelines.
+
+Where the Silk Roads Met adds local GeoNames city records for
+[Dunhuang, 1529531](https://www.geonames.org/1529531/dunhuang.html),
+[Hami, 1529484](https://www.geonames.org/1529484/hami.html),
+[Gilgit, 1178338](https://www.geonames.org/1178338/gilgit.html), and
+[Termez/Tirmiz, 1215957](https://www.geonames.org/1215957/tirmiz.html), under CC BY 4.0.
+These are modern city reference points, not archaeological footprints; Hami's
+record is a populated place, not administrative-region record 1529482. Other
+stations reuse bundled city/capital records. Schematic corridor provenance lives
+with `src/game/silkRoadCorridors.ts`; factual source links live with the Journey.

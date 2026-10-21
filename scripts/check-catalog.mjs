@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { supportedPython } from "./check-runtime.mjs";
 
 function run(command, args) {
   const env = { ...process.env };
@@ -10,28 +11,9 @@ function run(command, args) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-function supportedPython() {
-  for (const command of [
-    process.env.PYTHON,
-    "python3",
-    "python3.13",
-    "python3.12",
-    "python3.11",
-  ].filter(Boolean)) {
-    const result = spawnSync(
-      command,
-      ["-c", "import sys; print(sys.version_info[:2] >= (3, 11))"],
-      { encoding: "utf8" },
-    );
-    if (result.status === 0 && result.stdout.trim() === "True") return command;
-  }
-  throw Error(
-    "Catalog checks need Python 3.11 or newer. Set PYTHON to its executable.",
-  );
-}
-
+const python = supportedPython();
 run(process.execPath, ["scripts/catalog-reference-report.mjs"]);
 // Full-catalog geometry checks share CPU with the rest of the release suite.
 run("npm", ["run", "test:all", "--", "--testTimeout=15000"]);
-run(supportedPython(), ["scripts/run-python-tests.py"]);
+run(python, ["scripts/run-python-tests.py"]);
 run("./node_modules/.bin/tsc", ["--noEmit"]);

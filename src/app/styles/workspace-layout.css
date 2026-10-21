@@ -1,0 +1,487 @@
+/* Every desktop view begins below the same header clearance. */
+.experience {
+  --page-content-top: 112px;
+  --page-content-padding: 8px;
+  --page-content-bottom: 64px;
+}
+.experience :is(.home-story, .info-view, .question-card, .finish-story) {
+  top: var(--page-content-top);
+  max-height: calc(
+    100dvh - var(--page-content-top) - var(--page-content-bottom)
+  );
+  padding-top: var(--page-content-padding);
+  margin-top: 0;
+  transform: none;
+  overflow-y: auto;
+}
+.experience
+  :is(.home-story, .info-view, .question-card, .finish-story)
+  > :first-child:not(.study-editor-scroll) {
+  margin-top: 0;
+}
+.experience .info-view.study-landing > h1.editorial-heading {
+  margin-top: 10px;
+}
+.experience .home-story.home-menu > h1:first-child,
+.experience .finish-story > h1.journey-result-heading:first-child {
+  margin-top: 10px;
+}
+.experience .finish-story > h1.journey-result-heading {
+  margin-bottom: 8px;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.6px;
+  white-space: nowrap;
+}
+.experience .finish-story > h1.journey-result-heading em {
+  margin-left: 0;
+}
+/* Questions need a little more space inside the panel than the open page views. */
+.experience .question-card {
+  --page-content-padding: 20px;
+}
+.experience .round-feedback > .info-note-button {
+  margin-top: 8px;
+  min-height: 28px;
+  padding: 5px 0;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.experience .study-editor {
+  height: calc(100dvh - var(--page-content-top) - var(--page-content-bottom));
+  overflow: hidden;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.feedback-dialog {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  gap: 14px;
+}
+.feedback-dialog form {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.feedback-dialog .field {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+}
+.feedback-dialog textarea,
+.feedback-dialog select,
+.feedback-review select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 8px;
+  background: rgb(var(--ui-surface-rgb) / 1);
+  color: var(--ui-text);
+  font: inherit;
+}
+.feedback-dialog textarea {
+  height: 160px;
+  resize: none;
+  line-height: 1.5;
+}
+.feedback-character-count {
+  color: var(--ui-muted);
+  font-size: 12px;
+  text-align: right;
+}
+.feedback-dialog .study-options-close {
+  flex-shrink: 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgb(var(--ui-line-rgb) / 0.06);
+}
+.feedback-dialog .study-options-close:hover {
+  background: rgb(var(--ui-line-rgb) / 0.14);
+  color: var(--ui-text);
+}
+.feedback-dialog .primary-button {
+  font-size: 14px;
+}
+.feedback-dialog .muted {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.feedback-review {
+  margin-top: 32px;
+}
+.feedback-review ul {
+  padding: 0;
+  list-style: none;
+}
+.feedback-review li {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+  padding-block: 20px;
+}
+.feedback-review small {
+  display: block;
+  margin-top: 8px;
+}
+.feedback-review dl {
+  font-size: 12px;
+}
+.feedback-review dl div {
+  display: flex;
+  gap: 8px;
+}
+.feedback-review dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.feedback-message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.experience.panel-only .game-scene {
+  opacity: 0;
+  pointer-events: none;
+}
+.experience.experience.panel-only .game-scene {
+  /* Keep the mounted renderer at a stable viewport while its page is hidden. */
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+}
+.experience.panel-only
+  :is(.mobile-map-tools, .globe-controls, .mobile-gesture-hint) {
+  visibility: hidden;
+  pointer-events: none;
+}
+.experience.experience.panel-only .mode-layer {
+  position: absolute;
+  top: var(--header-height, 90px);
+  left: 0;
+  right: 0;
+  max-width: none;
+  overflow-y: auto;
+  pointer-events: auto;
+  background: rgb(var(--ui-surface-rgb) / 1);
+}
+.experience.panel-only .study-editor {
+  width: min(100%, 920px);
+  margin-inline: auto;
+}
+
+/* Account, Admin and the Study builder use the document's scrollbar. */
+.experience.experience.page-layout {
+  position: relative;
+  top: auto;
+  height: auto;
+  min-height: 100dvh;
+  overflow: clip;
+  padding: var(--header-height, 120px) 0 70px;
+}
+.experience.experience.page-layout .mode-layer {
+  display: block;
+  position: relative;
+  inset: auto;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  padding: 20px 24px 40px;
+}
+.experience.experience.page-layout .mode-outgoing {
+  display: none;
+}
+.experience.page-layout .info-view {
+  position: static;
+  inset: auto;
+  max-height: none;
+  overflow: visible;
+  margin: 0;
+}
+.experience.page-layout .study-editor {
+  width: min(100%, 920px);
+  height: auto;
+  display: block;
+  margin-inline: auto;
+  padding: 0;
+  overflow: visible;
+}
+.experience.page-layout .study-editor-scroll {
+  overflow: visible;
+}
+.admin-content {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+}
+.experience .admin-content .admin-panel {
+  width: 100%;
+  padding: 0;
+}
+.admin-panel form {
+  max-width: 620px;
+}
+.admin-panel > h1 {
+  margin: 10px 0 8px;
+  font-size: clamp(32px, 3vw, 44px);
+}
+.admin-panel > .muted {
+  margin: 0 0 28px;
+}
+.admin-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 18px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  border-radius: 9px;
+  background: rgb(var(--ui-line-rgb) / 0.04);
+}
+.experience .admin-tabs [role="tab"] {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.experience .admin-tabs [aria-selected="true"] {
+  background: rgb(var(--ui-line-rgb) / 0.12);
+  color: var(--ui-accent);
+}
+.admin-tab-panel[hidden] {
+  display: none;
+}
+.admin-tools {
+  color: var(--ui-muted);
+}
+.admin-reset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.24);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb) / 0.8);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.admin-reset h2 {
+  margin: 0 0 4px;
+  color: var(--ui-text);
+  font-size: 19px;
+}
+.admin-reset p {
+  margin: 0;
+}
+.admin-reset > button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 9px;
+  font-size: 13px;
+}
+.admin-reset > [role="status"] {
+  flex-basis: 100%;
+}
+.admin-journey-card,
+.admin-content .feedback-review li {
+  padding: 24px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.24);
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--ui-raised-rgb) / 0.96),
+    rgb(var(--ui-surface-rgb) / 0.96) 65%
+  );
+}
+.admin-journey-card h2 {
+  margin: 0 0 14px;
+  font-size: 24px;
+}
+.admin-journey-card > p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.admin-journey-card > .tertiary-action {
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 9px;
+  font-size: 13px;
+}
+.admin-journey-card > .tertiary-action:not(:disabled):hover {
+  background: rgb(var(--ui-line-rgb) / 0.08);
+  border-color: var(--ui-accent);
+}
+.admin-panel > .admin-journey-card + .admin-journey-card {
+  margin-top: 24px;
+}
+.admin-journey-card .field {
+  align-content: start;
+  margin: 0;
+}
+.admin-journey-card > small {
+  line-height: 1.6;
+  max-width: 620px;
+}
+.admin-content .feedback-review {
+  padding-top: 0;
+}
+.feedback-review-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.feedback-review-heading h2 {
+  margin: 0;
+  font-size: 28px;
+}
+.admin-content .feedback-review ul {
+  display: grid;
+  gap: 16px;
+}
+.admin-content .feedback-review li > strong {
+  font-size: 14px;
+  text-transform: capitalize;
+}
+.admin-content .feedback-review small {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.admin-content .feedback-message {
+  font-size: 14px;
+  line-height: 1.65;
+  margin-block: 18px;
+}
+.admin-content .feedback-review dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 10px 20px;
+  padding-block: 16px;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.12);
+}
+.admin-content .feedback-review dt {
+  color: var(--ui-muted);
+  min-width: 55px;
+}
+.admin-content .feedback-review .field {
+  max-width: 240px;
+  margin-bottom: 0;
+}
+.account-earth {
+  position: fixed;
+  top: 8vh;
+  right: -25vw;
+  width: min(135vw, 1600px);
+  aspect-ratio: 1;
+  background: url("/brand/account-globe.svg") center / contain no-repeat;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}
+.experience.page-layout .account-dashboard {
+  margin-inline: auto;
+}
+.experience.mode-account::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to right, var(--ui-bg), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.experience button.study-back,
+.study-options-dialog button.study-back {
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 8px;
+  margin-left: -8px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+.study-back svg {
+  flex: none;
+}
+.experience button.study-back:hover,
+.study-options-dialog button.study-back:hover {
+  background: rgb(var(--ui-accent-rgb) / 0.07);
+  text-decoration: none;
+}
+.experience button.study-back:focus-visible,
+.study-options-dialog button.study-back:focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+
+/* Native selects keep their keyboard/mobile picker; only the closed caret changes. */
+body
+  :is(.experience, .study-options-dialog, .review-main)
+  select:not([multiple]):not([size]) {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23a6bfba' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 16px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+[data-theme="paper"]
+  body
+  :is(.experience, .study-options-dialog, .review-main)
+  select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2347635b' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+}
+
+.experience .round-feedback[role="status"] .feedback-label {
+  font-size: clamp(17px, 1.5vw, 19px);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.experience .round-feedback[role="status"] p {
+  font-size: 15px;
+  line-height: 1.65;
+}
+.experience .round-feedback .study-response {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--ui-muted);
+  border-radius: 0 8px 8px 0;
+  background: rgb(var(--ui-line-rgb) / 0.045);
+  margin-block: 12px;
+}
+.experience .study-response > span {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.experience .round-feedback .study-response strong {
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ui-text);
+}
+.experience
+  .round-feedback.answer-discovered
+  .study-response:not(.study-correction) {
+  border-left-color: var(--ui-incorrect);
+}
+.experience .round-feedback .study-correction,
+.experience .round-feedback.answer-correct .study-response {
+  border-left-color: var(--ui-correct);
+}
+.experience .round-feedback .study-correction strong {
+  color: var(--ui-correct);
+}
+
