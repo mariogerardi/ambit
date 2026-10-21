@@ -15,18 +15,27 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 
 | Export                     | Purpose                                                                                                                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GPT_GUIDE.md`             | Single-file GPT knowledge upload: current instructions, implementation workflow, guide, mechanics, specification template and all compact Journey walkthroughs.                |
 | `AUTHORING_KIT.md`         | Game overview, editorial sections copied from the crafting guide, generated mechanic capabilities, semantic map colors and all current Journey references.                     |
 | `PROJECT_INSTRUCTIONS.md`  | Instructions to paste into a ChatGPT Project or other AI workspace.                                                                                                            |
+| `IMPLEMENTING_A_SPEC.md`   | Coding-agent entry point: read the approved brief, inspect relevant Journeys, inherit shared conventions, implement and verify.                                                |
 | `JOURNEY_SPEC_TEMPLATE.md` | Record the approved design for implementation, including scenes, help, answer contracts, completion and sources.                                                               |
 | `FEATURED_EXAMPLES.md`     | One upload containing the preferred examples: Andes, Chasing the sun (flags), Mediterranean and Not the obvious city.                                                          |
 | `examples/*.md`            | Every current Journey individually, including copy, rules, candidates, help, effective stage changes, sources, media descriptions and completion. Load only relevant examples. |
 | `references/*.md`          | Full crafting guide, engine, architecture, question catalog and geographic policy. Consult as needed rather than loading all at once.                                          |
 | `manifest.json`            | Repository revision, local-change indicator, highlighted IDs, and SHA-256 hashes/sizes of inputs and outputs.                                                                  |
 
+For a GPT in another thread, upload `GPT_GUIDE.md`. It includes the context and
+walkthroughs in one file; the smaller files remain available for selective loading.
+Paste `PROJECT_INSTRUCTIONS.md` into the GPT's instructions when available.
+
 Create one conversation per Journey. Start with the authoring kit, add relevant
 examples, and keep settled decisions in the specification rather than relying on
 conversation history. Give the approved specification to a coding agent with
-access to the current repository.
+access to the current repository and
+[the implementation workflow](journey-authoring/IMPLEMENTING_A_SPEC.md).
+Design requests develop the outline first; implementation requests preserve an
+approved spec and resolve routine technical details from current conventions.
 
 The crafting guide owns authoring standards; the catalog/engine references explain
 supported APIs, and the specification records the design. Generated capability
@@ -34,7 +43,7 @@ metadata can include compatibility/internal behavior that is not the recommended
 standard. Historical review notes are not exported as current policy.
 
 The highlights identify our most complete experiences, not a compulsory template.
-The 17 current Journeys are the reviewed reference set for new authoring; the
+The current Journeys are the reference set for new authoring; the
 four highlighted examples are convenient starting points. Preserve their
 established contracts and styles when proposing new content. Fresh local changes
 still need player review; neither a source snapshot nor automated checks certify
@@ -102,6 +111,10 @@ refuses to overwrite unrelated files or follow output symlinks. Artifacts are lo
 snapshots; commit the exporter and maintained docs rather than its generated output.
 
 ## What to upload after a refresh
+
+For the single-file workflow, replace the previous `GPT_GUIDE.md` upload with the
+new export. It includes the implementation entry point and every compact Journey
+walkthrough, including Journeys added since the previous snapshot.
 
 Replace the previous uploaded copies of `AUTHORING_KIT.md` and
 `FEATURED_EXAMPLES.md` with the new files. Paste the refreshed

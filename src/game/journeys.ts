@@ -1,3 +1,6 @@
+import { DRAWING_SAHARA_JOURNEY } from "./drawingSaharaJourney";
+import { SILK_ROAD_INTERSECTIONS_JOURNEY } from "./silkRoadIntersectionsJourney";
+import { VACCINE_EXPEDITION_JOURNEY } from "./vaccineExpeditionJourney";
 import { MISSING_BORDERS_JOURNEY } from "./missingBordersJourney";
 import { DANUBE_JOURNEY } from "./danubeJourney";
 import { SHARED_NAMES_JOURNEY } from "./sharedNamesJourney";
@@ -18,6 +21,9 @@ import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
 import { FAR_FROM_EVERYTHING_JOURNEY } from "./farFromEverythingJourney";
 import { REGGAETON_JOURNEY } from "./reggaetonJourney";
 export const JOURNEYS = [
+  DRAWING_SAHARA_JOURNEY,
+  SILK_ROAD_INTERSECTIONS_JOURNEY,
+  VACCINE_EXPEDITION_JOURNEY,
   REGGAETON_JOURNEY,
   FAR_FROM_EVERYTHING_JOURNEY,
   ACROSS_DIVIDE_JOURNEY,
@@ -40,6 +46,10 @@ export const JOURNEYS = [
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [DRAWING_SAHARA_JOURNEY.id]: "/journey/drawing-the-sahara",
+    [SILK_ROAD_INTERSECTIONS_JOURNEY.id]: "/journey/where-the-silk-roads-met",
+    [VACCINE_EXPEDITION_JOURNEY.id]:
+      "/journey/the-vaccine-that-crossed-the-world",
     [REGGAETON_JOURNEY.id]: "/journey/the-sound-of-somewhere-reggaeton",
     [FAR_FROM_EVERYTHING_JOURNEY.id]: "/journey/far-from-everything",
     [ACROSS_DIVIDE_JOURNEY.id]: "/journey/across-the-divide",

@@ -59,6 +59,8 @@ These instructions apply to every coding agent working in this repository.
 - Use `docs/JOURNEY_CRAFTING.md` as the single editorial guide. Review a compact
   five-stop outline before redesigning questions; keep route questions moving
   forward and reserve recap for completion.
+- For an approved spec, start with `docs/journey-authoring/IMPLEMENTING_A_SPEC.md`.
+  Reuse the approved outline, inspect relevant current Journeys and preserve settled decisions.
 - Before extending a Journey mechanic, read `docs/JOURNEY_ENGINE.md`, inspect
   `src/game/mechanics.ts` and the corresponding `src/game/recipes.ts` example.
   Prefer grouped scene authoring; use `npm run check:journey -- <id-or-slug>` for

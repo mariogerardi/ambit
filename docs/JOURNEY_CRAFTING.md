@@ -179,7 +179,7 @@ When a round asks for _some_ members of a larger valid set, author the acceptanc
 ### Point rewards
 
 The current five-question Daily is worth **15 points**: three per question.
-All 17 reviewed Journeys use this uniform budget. Variable question weights are
+Current Journeys use this uniform budget. Variable question weights are
 not implemented; agree a new scoring/display contract before authoring them.
 
 - Discrete answers and territory-inside pins earn three points when correct,
@@ -202,6 +202,10 @@ not implemented; agree a new scoring/display contract before authoring them.
   answers retain full credit (three for a correct answer) under their original
   rules, without recomputing old pin distances or retroactively charging for help.
   Mixed/legacy receipts identify that earlier credit. The save data is not reset.
+
+Compass bearings use the same 3 / 2 / 1 reward structure for three inclusive
+circular angular-error bands. Their targets and tolerances belong to each
+question; a relay is optional. Hints and assists retain the same help ceilings.
 
 There is no time limit or speed-based reward.
 

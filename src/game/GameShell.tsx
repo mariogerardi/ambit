@@ -1,3 +1,5 @@
+import { ConstructionReview } from "./ConstructionAnswer";
+import { constructionRule, reviewedConstruction } from "./construction";
 import { QuestionSources } from "./QuestionSources";
 import { QuestionHelp } from "../app/QuestionHelp";
 import { ActionIcon } from "../app/ActionIcon";
@@ -30,6 +32,7 @@ import { questionMapPresentation } from "./presentation";
 import { AnswerReview } from "./AnswerReview";
 import { pinBands, pinReviewViews } from "./pinPresentation";
 import { estimateTier } from "./numericEstimate";
+import { reviewedBearing, bearingReceipt } from "./compassBearing";
 import { AnswerForm } from "./AnswerForm";
 import { QuestionAccuracy } from "./QuestionSupport";
 import {
@@ -130,7 +133,11 @@ export function GameShell({
   canReplay = false,
   social,
   contextNavigation,
+  constructionReviewIndex,
+  onConstructionReview,
 }: {
+  constructionReviewIndex?: number;
+  onConstructionReview?(index?: number): void;
   social?: ReactNode;
   contextNavigation?: ReactNode;
   onReport?(questionId: string): void;
@@ -160,7 +167,8 @@ export function GameShell({
     heading.current?.focus({ preventScroll: true });
   }, [round.id, game.phase]);
   const inGame =
-    (game.phase === "playing" && webgl) || game.phase === "feedback";
+    (game.phase === "playing" && (webgl || !!constructionRule(round))) ||
+    game.phase === "feedback";
   const ended = game.phase === "finished" || game.phase === "failed";
   const navigation = (
     <div className="finish-actions result-actions completion-navigation">
@@ -185,6 +193,12 @@ export function GameShell({
   const helpCounts = helpCountCopy(helpSummary(game));
   const points = journeyPoints(game);
   const closing = journeyResultCopy(points);
+  const constructed = !!constructionRule(round);
+  const construction = reviewedConstruction(round, game);
+  const constructionFeedback =
+    construction?.tier !== null && construction?.tier !== undefined
+      ? constructionRule(round)?.tiers[construction.tier].feedback
+      : construction?.feedback;
   const feedback = game.answers.at(-1),
     correct = feedback?.correct;
   const mapPresentation = questionMapPresentation(round, game.phase, !!correct);
@@ -210,6 +224,10 @@ export function GameShell({
   const distance = pinDistance(round, game);
   const distanceTier = pinDistanceTier(round, game);
   const numericTier = estimateTier(round, game);
+  const compass =
+    round.rule.type === "bearing-angle"
+      ? reviewedBearing(round, game)
+      : undefined;
   const pinViews = pinReviewViews(round, context, game);
   const feedbackText = explanation(round, context, game.selectedIds, !!correct);
   const correctAnswer = correctAnswerSummary(round, context, game);
@@ -306,17 +324,21 @@ export function GameShell({
               className={`round-feedback ${correct ? "answer-correct" : "answer-discovered"}`}
               role="status"
             >
-              {round.mode === "slider" && (
+              {["slider", "compass-bearing"].includes(round.mode) && (
                 <AnswerReview question={round} context={context} game={game} />
               )}
               <div className="feedback-point-summary">
                 <div className="feedback-label">
                   <span>{correct ? "✳" : "◎"}</span>
                   {correct
-                    ? (distanceTier?.feedback ??
+                    ? (constructionFeedback ??
+                      compass?.feedback ??
+                      distanceTier?.feedback ??
                       numericTier?.feedback ??
                       correctAnswerCopy(round))
-                    : "Not quite."}
+                    : (constructionFeedback ??
+                      compass?.feedback ??
+                      "Not quite.")}
                 </div>
                 <PointOrbs
                   earned={answerPoints(feedback, game.help?.[round.id])}
@@ -324,19 +346,42 @@ export function GameShell({
                   animate
                 />
               </div>
-              {round.mode !== "slider" && (
+              {constructed && (
                 <>
-                  <p className="study-response study-correction journey-correct-answer">
-                    <span>{correctAnswer.label}: </span>
-                    <strong>{correctAnswer.value}</strong>
-                  </p>
-                  <AnswerReview
-                    question={round}
-                    context={context}
-                    game={game}
-                  />
+                  <ConstructionReview question={round} response={game} />
+                  {round.constructionExample && (
+                    <button
+                      type="button"
+                      className="quiet-button construction-solution-link"
+                      aria-expanded={!!game.showConstructionExample}
+                      onClick={() =>
+                        dispatch({ type: "show-construction-example" })
+                      }
+                    >
+                      {game.showConstructionExample
+                        ? "Hide solution"
+                        : "See our solution"}{" "}
+                      <span aria-hidden="true">
+                        {game.showConstructionExample ? "↑" : "→"}
+                      </span>
+                    </button>
+                  )}
                 </>
               )}
+              {!constructed &&
+                !["slider", "compass-bearing"].includes(round.mode) && (
+                  <>
+                    <p className="study-response study-correction journey-correct-answer">
+                      <span>{correctAnswer.label}: </span>
+                      <strong>{correctAnswer.value}</strong>
+                    </p>
+                    <AnswerReview
+                      question={round}
+                      context={context}
+                      game={game}
+                    />
+                  </>
+                )}
               {feedbackText && (
                 <p className="journey-explanation">{feedbackText}</p>
               )}
@@ -550,6 +595,54 @@ export function GameShell({
           )}
           {game.phase === "failed" && <p>{feedbackText}</p>}
 
+          {journey.completion?.constructionResults &&
+            game.phase === "finished" && (
+              <>
+                <div
+                  className="construction-recap-controls"
+                  aria-label="Review your constructions"
+                >
+                  <button
+                    type="button"
+                    className="quiet-button"
+                    aria-pressed={constructionReviewIndex === undefined}
+                    onClick={() => onConstructionReview?.()}
+                  >
+                    Overview
+                  </button>
+                  {journey.rounds.map((q, i) => (
+                    <button
+                      type="button"
+                      className="quiet-button"
+                      aria-pressed={constructionReviewIndex === i}
+                      key={q.id}
+                      onClick={() => onConstructionReview?.(i)}
+                    >
+                      {q.progressLabel ?? q.label}
+                    </button>
+                  ))}
+                </div>
+                {constructionReviewIndex !== undefined && (
+                  <ConstructionReview
+                    question={
+                      journey.rounds[
+                        constructionReviewIndex ?? journey.rounds.length - 1
+                      ]
+                    }
+                    response={{
+                      ...game,
+                      ...game.answers.find(
+                        (a) =>
+                          a.roundId ===
+                          journey.rounds[
+                            constructionReviewIndex ?? journey.rounds.length - 1
+                          ].id,
+                      ),
+                    }}
+                  />
+                )}
+              </>
+            )}
           <ol className="journey-receipt">
             {journey.rounds.map((question, i) => {
               const answer = game.answers.find(
@@ -583,6 +676,11 @@ export function GameShell({
                           resolvedRoundIdentity(question))
                         : roundIdentity(question)}
                     </strong>
+                    {answer?.bearing && (
+                      <span className="compass-receipt">
+                        {bearingReceipt(answer.bearing)}
+                      </span>
+                    )}
                     {journey.completion?.photoResults &&
                       recapDistance !== undefined && (
                         <span>

@@ -387,3 +387,12 @@ Elevation maxima above 900 m anchor the symbols inside the display window
 20°–25.5°E, 42.5°–46.5°N. This window is not a mountain-range boundary. The
 symbols are generalized terrain illustrations, not surveyed ridges, exact peak
 locations, political boundaries, or grading geometry.
+
+Drawing the Sahara uses NASA GIBS/EarthKAM imagery, Gunn 2026 dune presence data
+(MIT), WorldPop 2024 R2025A v1 modeled counts (CC BY 4.0), geoBoundaries /
+OpenStreetMap / Wambacher boundaries (ODbL 1.0), Natural Earth river data (public
+domain), and bundled GeoNames city coordinates (CC BY 4.0). Full attribution,
+changes, source links and licenses are in
+`public/journeys/drawing-the-sahara/SOURCES.md`. The derived Algeria footprint and
+population database is supplied as `algeria-model.v1.json` under ODbL 1.0, with
+WorldPop attribution retained.

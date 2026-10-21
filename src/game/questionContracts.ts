@@ -1,3 +1,10 @@
+import type {
+  ConstructionArea,
+  Construction,
+  ConstructionMode,
+  ConstructionResult,
+  ConstructionRule,
+} from "./constructionTypes";
 /** Shared authored and runtime data shapes. All dependencies are type-only. */
 import type { QuestionScenes, PlayScene } from "./scenes";
 import type { MECHANICS } from "./mechanics";
@@ -13,7 +20,9 @@ import type { GeographicCircle } from "./spatial";
 import type { BorderGraph, Coordinate, CountryInterval } from "./reasoning";
 
 export type AnswerMode =
+  | ConstructionMode
   | "pin"
+  | "compass-bearing"
   | "city-single"
   | "city-multiple"
   | "merged-region-single"
@@ -51,6 +60,14 @@ export interface CountryFact {
   source: FactSource;
 }
 export type KnowledgeRule =
+  | ConstructionRule
+  | {
+      type: "bearing-angle";
+      origin: PlaceFeature;
+      destination: PlaceFeature;
+      /** Three ascending inclusive circular-error bands, in degrees. */
+      tiers: { degrees: number; feedback: string }[];
+    }
   | {
       type: "merged-region";
       targetId: string;
@@ -140,6 +157,9 @@ export interface Question {
     hintMap?: { regionIds: readonly string[]; focus?: Focus };
     assist?: {
       text: string;
+      images?: { src: string; alt: string; caption: string }[];
+      /** Display-only dial guide, measured clockwise from true north; may wrap through zero. */
+      compassSector?: { start: number; end: number };
       /** Optional narrower regions to highlight in place of the hint regions. */
       regionIds?: readonly string[];
       /** Authored survivors, including every correct answer and plausible alternatives. */
@@ -159,8 +179,21 @@ export interface Question {
       fixedSelections?: string[];
     };
   };
+  /** Optional reviewed example, disclosed only by an explicit reveal action. */
+  constructionExample?: Construction;
+  /** Country-clipped display footprint of a reviewed polygon example. */
+  constructionExampleFootprint?: RegionFeature["geometry"];
+  /** Visible edit footprint; a gesture starting outside it moves the globe. */
+  constructionArea?: ConstructionArea;
+  /** Neutral draft supplied before the first edit, e.g. a draggable circle. */
+  constructionInitial?: Construction;
   instruction: string;
   inputLabel?: string;
+  /** Two given compass observations supporting a location answer; headings are derived. */
+  bearingIntersection?: {
+    stations: [PlaceFeature, PlaceFeature];
+    assist?: { stationId: string; halfWidthDegrees: number; reachKm: number };
+  };
   mode: AnswerMode;
   rule: KnowledgeRule;
   count: number;
@@ -341,6 +374,8 @@ export interface Journey {
     caption?: string;
     /** Reviewed flag/motif comparison, shown only after the Journey ends. */
     flags?: FlagDisplay[];
+    /** Offer a traditional overview plus manual review of one saved construction at a time. */
+    constructionResults?: boolean;
     /** Resolved photo-and-distance recap for pin Journeys. */
     photoResults?: boolean;
   };
@@ -362,6 +397,8 @@ export interface QuestionContext {
   capitalMatches: Map<Question, Capital[]>;
 }
 export interface Response {
+  construction?: Construction;
+  constructionResult?: ConstructionResult;
   pin?: { lat: number; lng: number };
   selectedIds: string[];
   text: string;
@@ -389,6 +426,10 @@ export type QuestionPresentation = Partial<
     | "orderInitial"
     | "shuffleChoices"
     | "guidance"
+    | "bearingIntersection"
+    | "constructionExample"
+    | "constructionExampleFootprint"
+    | "constructionInitial"
   >
 >;
 
@@ -405,11 +446,41 @@ type Choices = { choices: NonNullable<Question["choices"]> };
 /** Discriminated authoring contracts; the engine's read model stays stable. */
 export type QuestionContract =
   | ({
+      mode: "geo-brush";
+      rule: Extract<ConstructionRule, { type: "raster-overlap" }>;
+    } & Single &
+      NoMapSelection)
+  | ({
+      mode: "geo-circle";
+      rule: Extract<ConstructionRule, { type: "point-coverage-max" }>;
+    } & Single &
+      NoMapSelection)
+  | ({
+      mode: "geo-trace";
+      rule: Extract<ConstructionRule, { type: "line-following" }>;
+    } & Single &
+      NoMapSelection)
+  | ({
+      mode: "geo-polygon";
+      rule: Extract<
+        ConstructionRule,
+        { type: "population-coverage-area-budget" }
+      >;
+    } & Single &
+      NoMapSelection)
+  | ({
+      mode: "geo-cut";
+      rule: Extract<ConstructionRule, { type: "population-balance" }>;
+    } & Single &
+      NoMapSelection)
+  | ({
       mode: "merged-region-single";
       rule: Rule<"merged-region-single">;
       selection: { type: "ids"; ids: string[] };
       commitment: Question["commitment"];
     } & Single)
+  | ({ mode: "compass-bearing"; rule: Rule<"compass-bearing"> } & Single &
+      NoMapSelection)
   | ({ mode: "pin"; rule: Rule<"pin"> } & Single & NoMapSelection)
   | ({
       mode: "city-single";

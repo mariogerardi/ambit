@@ -128,7 +128,13 @@ export class CameraFlyover {
     cancelAnimationFrame(this.frame);
     this.frame = 0;
   }
-  start(port: CameraPort, stops: Focus[], reduced: boolean, loop = true) {
+  start(
+    port: CameraPort,
+    stops: Focus[],
+    reduced: boolean,
+    loop = true,
+    onStep?: (index: number) => void,
+  ) {
     this.cancel();
     if (reduced || !stops.length) return;
     const generation = this.generation;
@@ -188,6 +194,7 @@ export class CameraFlyover {
       lng: shortestLongitude(origin.lng, destinations[i].lng),
     });
     let to = destination(from, index);
+    onStep?.(index);
     let fromVelocity = { lat: 0, lng: 0 },
       toVelocity = velocities[0];
     const distance = () =>
@@ -217,6 +224,7 @@ export class CameraFlyover {
       fromVelocity = toVelocity;
       initial = false;
       index = (index + 1) % stops.length;
+      onStep?.(index);
       to = destination(from, index);
       toVelocity = velocities[index];
       duration = Math.max(6000, Math.min(10000, distance() * 70));

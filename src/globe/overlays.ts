@@ -1,6 +1,9 @@
+import { patchGeometry, cellsGeometry } from "./constructionOverlays";
+import { bearingSectorGeometry } from "./bearingSector";
 import { geoCircle, geoDistance, geoInterpolate } from "d3-geo";
 import {
   Group,
+  DoubleSide,
   Color,
   Mesh,
   MeshBasicMaterial,
@@ -9,13 +12,22 @@ import {
   SRGBColorSpace,
   TextureLoader,
   Vector3,
+  Sprite,
 } from "three";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
+import type { PerspectiveCamera } from "three";
+import {
+  pathArrowhead,
+  pathLabel,
+  viewPathLabel,
+  viewPathArrowhead,
+} from "./pathAnnotations";
+import type { GeoPoint } from "../game/geodesic";
 import type { MapOverlay } from "../geography/types";
 import type { ThemeId } from "../theme/themes";
-import { pinBandColor } from "../theme/playColors";
+import { pinBandColor, playColors } from "../theme/playColors";
 import { EARTH_KM } from "../game/spatial";
 
 export interface OverlayLayer {
@@ -38,7 +50,10 @@ function surfacePoint(lng: number, lat: number, radius = 1.005) {
   ];
 }
 export function overlayPositions(
-  overlay: Exclude<MapOverlay, { type: "texture" }>,
+  overlay: Exclude<
+    MapOverlay,
+    { type: "texture" | "bearing-sector" | "raster-patch" | "cells" }
+  >,
 ) {
   const coordinates: number[][] = [];
   if (overlay.type === "circle")
@@ -75,6 +90,13 @@ export function overlayPositions(
     );
   return new Float32Array(positions);
 }
+function cellsColor(
+  overlay: Extract<MapOverlay, { type: "cells" }>,
+  palette: ThemeId,
+) {
+  const color = new Color(playColors(palette)[overlay.visualState]);
+  return overlay.prominent ? color.offsetHSL(0, 0.3, -0.04) : color;
+}
 export function makeMapOverlay(
   overlay: MapOverlay,
   globeRadius: number,
@@ -82,6 +104,86 @@ export function makeMapOverlay(
 ) {
   const group = new Group();
   group.scale.setScalar(globeRadius);
+  if (overlay.type === "raster-patch") {
+    const material = new MeshBasicMaterial({
+      transparent: true,
+      opacity: overlay.opacity,
+      depthWrite: false,
+      side: DoubleSide,
+    });
+    const mesh = new Mesh(patchGeometry(overlay.bounds), material);
+    mesh.visible = false;
+    mesh.renderOrder = 2;
+    mesh.raycast = () => {};
+    let disposed = false;
+    group.userData.dispose = () => {
+      disposed = true;
+    };
+    const texture = new TextureLoader().load(overlay.assetUrl, (loaded) => {
+      if (disposed) {
+        loaded.dispose();
+        return;
+      }
+      mesh.visible = true;
+    });
+    texture.colorSpace = SRGBColorSpace;
+    material.map = texture;
+    group.add(mesh);
+    group.raycast = () => {};
+    return group;
+  }
+  if (overlay.type === "cells") {
+    const mesh = new Mesh(
+      cellsGeometry(overlay.grid, overlay.indices, overlay.mask?.bounds),
+      new MeshBasicMaterial({
+        color: cellsColor(overlay, palette),
+        transparent: true,
+        opacity: overlay.opacity ?? 0.38,
+        depthWrite: false,
+        side: DoubleSide,
+      }),
+    );
+    if (overlay.mask) {
+      const material = mesh.material;
+      let disposed = false;
+      mesh.visible = false;
+      material.alphaTest = 0.5;
+      const mask = new TextureLoader().load(overlay.mask.assetUrl, (loaded) => {
+        if (disposed) {
+          loaded.dispose();
+          return;
+        }
+        mesh.visible = true;
+      });
+      material.alphaMap = mask;
+      group.userData.dispose = () => {
+        disposed = true;
+      };
+    }
+    mesh.renderOrder = 5;
+    mesh.raycast = () => {};
+    group.add(mesh);
+    group.raycast = () => {};
+    return group;
+  }
+  if (overlay.type === "bearing-sector") {
+    const mesh = new Mesh(
+      bearingSectorGeometry(overlay),
+      new MeshBasicMaterial({
+        color: playColors(palette).hinted,
+        opacity: 0.18,
+        transparent: true,
+        depthWrite: false,
+        depthTest: true,
+        side: DoubleSide,
+      }),
+    );
+    mesh.renderOrder = 3;
+    mesh.raycast = () => {};
+    group.add(mesh);
+    group.raycast = () => {};
+    return group;
+  }
   if (overlay.type === "texture") {
     // Match the globe's longitude convention; Three's default sphere starts at
     // −90°, while the texture's left edge is the −180° antimeridian.
@@ -123,8 +225,15 @@ export function makeMapOverlay(
               overlay.accuracyBand.count,
               palette,
             )
-          : "#efd18f",
-      linewidth: overlay.type === "circle" && overlay.active ? 3 : 1.8,
+          : (overlay.type === "path" || overlay.type === "circle") &&
+              overlay.visualState
+            ? playColors(palette)[overlay.visualState]
+            : "#efd18f",
+      linewidth:
+        (overlay.type === "path" && overlay.visualState === "corridor") ||
+        (overlay.type === "circle" && overlay.active)
+          ? 3
+          : 1.8,
       transparent: true,
       depthWrite: false,
       depthTest: true,
@@ -135,10 +244,27 @@ export function makeMapOverlay(
       gapSize: 0.005,
     }),
   );
-  line.renderOrder = 4;
+  line.renderOrder = overlay.type === "path" && overlay.foreground ? 6 : 4;
   if (overlay.type === "path" && overlay.dashed) line.computeLineDistances();
   line.raycast = () => {};
   group.add(line);
+  if (overlay.type === "path") {
+    const color = overlay.visualState
+      ? playColors(palette)[overlay.visualState]
+      : "#efd18f";
+    if (overlay.arrowhead) {
+      const arrow = pathArrowhead(
+        overlay.coordinates,
+        color,
+        overlay.opacity ?? 1,
+      );
+      if (arrow) group.add(arrow);
+    }
+    if (overlay.label) {
+      const label = pathLabel(overlay.coordinates, overlay.label, color);
+      if (label) group.add(label);
+    }
+  }
   if (overlay.type === "circle" && overlay.shade) {
     // Shade a geodesic disk in globe coordinates. The fragment test also works
     // at poles and across the antimeridian without a projected polygon seam.
@@ -161,7 +287,9 @@ export function makeMapOverlay(
                   overlay.accuracyBand.count,
                   palette,
                 )
-              : "#efd18f",
+              : overlay.visualState
+                ? playColors(palette)[overlay.visualState]
+                : "#efd18f",
           ),
         },
         bandOpacity: { value: overlay.active ? 0.13 : 0.045 },
@@ -184,6 +312,60 @@ export function makeMapOverlay(
 export class MapOverlays {
   /** Only this stable root is owned by the globe's custom-data mapper. */
   readonly group = new Group();
+  private brush?: { group: Group; radiusKm: number };
+  /** Transient hover feedback, independent of authored clues and saved answers. */
+  previewBrush(
+    center?: GeoPoint,
+    radiusKm = 160,
+    radius = 100,
+    palette: ThemeId = "atlas",
+  ) {
+    if (!center) {
+      if (this.brush) this.brush.group.visible = false;
+      this.group.visible = this.objects.size > 0;
+      return;
+    }
+    if (!this.brush || this.brush.radiusKm !== radiusKm) {
+      if (this.brush) {
+        this.brush.group.removeFromParent();
+        this.disposeGroup(this.brush.group);
+      }
+      const group = makeMapOverlay(
+        {
+          id: "brush-preview",
+          type: "circle",
+          center: { lat: 90, lng: 0 },
+          radiusKm,
+          visualState: "selected",
+          shade: true,
+          active: true,
+        },
+        radius,
+        palette,
+      );
+      this.brush = { group, radiusKm };
+      this.group.add(group);
+    }
+    const group = this.brush.group;
+    // Rotate reusable geometry instead of allocating a circle on every move.
+    group.quaternion.setFromUnitVectors(
+      new Vector3(0, 1, 0),
+      new Vector3(...surfacePoint(center.lng, center.lat, 1)),
+    );
+    group.scale.setScalar(radius);
+    group.visible = this.group.visible = true;
+    this.colorBand(
+      group,
+      {
+        id: "brush-preview",
+        type: "circle",
+        center,
+        radiusKm,
+        visualState: "selected",
+      },
+      palette,
+    );
+  }
   private objects = new Map<
     string,
     { signature: string; group: Group; overlay: MapOverlay }
@@ -200,21 +382,74 @@ export class MapOverlays {
       const group = this.get(overlay, radius, layer.palette);
       if (group.parent !== this.group) this.group.add(group);
     }
-    this.group.visible = active.size > 0;
+    this.group.visible = active.size > 0 || !!this.brush?.group.visible;
+  }
+  view(camera: PerspectiveCamera, width: number, height: number) {
+    for (const { group, overlay } of this.objects.values()) {
+      if (overlay.type === "path" && overlay.opacityByAltitude) {
+        group.updateWorldMatrix(true, false);
+        const radius = group.getWorldScale(new Vector3()).x;
+        const altitude =
+          camera
+            .getWorldPosition(new Vector3())
+            .distanceTo(group.getWorldPosition(new Vector3())) /
+            radius -
+          1;
+        const ramp = overlay.opacityByAltitude;
+        const t = Math.max(
+          0,
+          Math.min(1, (altitude - ramp.near) / (ramp.far - ramp.near)),
+        );
+        const opacity = (overlay.opacity ?? 1) * (1 - t) + ramp.opacity * t;
+        for (const child of group.children) {
+          if (child instanceof LineSegments2) child.material.opacity = opacity;
+          else if (
+            child instanceof Sprite ||
+            (child instanceof Mesh &&
+              child.material instanceof MeshBasicMaterial)
+          )
+            child.material.opacity = opacity;
+        }
+      }
+      for (const child of group.children)
+        if (child instanceof Sprite)
+          viewPathLabel(child, group, camera, width, height);
+        else if (child instanceof Mesh && child.name === "path-arrowhead")
+          viewPathArrowhead(child, group, camera, width, height);
+    }
   }
   setPalette(palette: ThemeId) {
     for (const { group, overlay } of this.objects.values())
       this.colorBand(group, overlay, palette);
   }
   private colorBand(group: Group, overlay: MapOverlay, palette: ThemeId) {
-    if (overlay.type !== "circle" || !overlay.accuracyBand) return;
-    const color = pinBandColor(
-      overlay.accuracyBand.index,
-      overlay.accuracyBand.count,
-      palette,
-    );
+    const color =
+      overlay.type === "cells"
+        ? cellsColor(overlay, palette)
+        : overlay.type === "circle" && overlay.visualState
+          ? playColors(palette)[overlay.visualState]
+          : overlay.type === "bearing-sector"
+            ? playColors(palette).hinted
+            : overlay.type === "path"
+              ? overlay.visualState
+                ? playColors(palette)[overlay.visualState]
+                : "#efd18f"
+              : overlay.type === "circle" && overlay.accuracyBand
+                ? pinBandColor(
+                    overlay.accuracyBand.index,
+                    overlay.accuracyBand.count,
+                    palette,
+                  )
+                : undefined;
+    if (!color) return;
     for (const child of group.children) {
-      if (child instanceof LineSegments2)
+      if (child instanceof Sprite) child.material.color.set(color);
+      else if (
+        child instanceof Mesh &&
+        child.material instanceof MeshBasicMaterial
+      )
+        child.material.color.set(color);
+      else if (child instanceof LineSegments2)
         (child.material as LineMaterial).color.set(color);
       else if (
         child instanceof Mesh &&
@@ -225,24 +460,76 @@ export class MapOverlays {
   }
   get(overlay: MapOverlay, radius: number, palette: ThemeId = "atlas") {
     const signature = JSON.stringify(
-      overlay.type === "texture"
-        ? [overlay.type, overlay.assetUrl, overlay.opacity]
-        : overlay.type === "path"
-          ? [overlay.type, overlay.coordinates, overlay.dashed, overlay.opacity]
-          : overlay.type === "circle"
+      overlay.type === "raster-patch"
+        ? [overlay.type, overlay.bounds, overlay.assetUrl, overlay.opacity]
+        : overlay.type === "cells"
+          ? [
+              overlay.type,
+              overlay.grid,
+              overlay.indices,
+              overlay.opacity,
+              overlay.mask,
+              overlay.prominent,
+            ]
+          : overlay.type === "bearing-sector"
             ? [
                 overlay.type,
                 overlay.center,
+                overlay.bearing,
+                overlay.halfWidthDegrees,
                 overlay.radiusKm,
-                overlay.shade,
-                overlay.accuracyBand,
-                overlay.active,
               ]
-            : overlay.type === "parallel"
-              ? [overlay.type, overlay.latitude]
-              : [overlay.type, overlay.longitude],
+            : overlay.type === "texture"
+              ? [overlay.type, overlay.assetUrl, overlay.opacity]
+              : overlay.type === "path"
+                ? [
+                    overlay.type,
+                    overlay.coordinates,
+                    overlay.foreground,
+                    overlay.dashed,
+                    overlay.opacity,
+                    overlay.opacityByAltitude,
+                    overlay.arrowhead,
+                    overlay.label,
+                  ]
+                : overlay.type === "circle"
+                  ? [
+                      overlay.type,
+                      overlay.center,
+                      overlay.radiusKm,
+                      overlay.shade,
+                      overlay.accuracyBand,
+                      overlay.active,
+                    ]
+                  : overlay.type === "parallel"
+                    ? [overlay.type, overlay.latitude]
+                    : [overlay.type, overlay.longitude],
     );
     let entry = this.objects.get(overlay.id);
+    // Growing paint changes geometry, not the mask or material. Keep the loaded
+    // mesh visible instead of reloading its texture for every pointer sample.
+    if (
+      entry &&
+      entry.signature !== signature &&
+      overlay.type === "cells" &&
+      entry.overlay.type === "cells" &&
+      JSON.stringify([overlay.grid, overlay.mask]) ===
+        JSON.stringify([entry.overlay.grid, entry.overlay.mask])
+    ) {
+      const mesh = entry.group.children[0] as Mesh<
+        ReturnType<typeof cellsGeometry>,
+        MeshBasicMaterial
+      >;
+      const previous = mesh.geometry;
+      mesh.geometry = cellsGeometry(
+        overlay.grid,
+        overlay.indices,
+        overlay.mask?.bounds,
+      );
+      previous.dispose();
+      mesh.material.opacity = overlay.opacity ?? 0.38;
+      entry.signature = signature;
+    }
     if (!entry || entry.signature !== signature) {
       if (entry) {
         entry.group.removeFromParent();
@@ -255,6 +542,7 @@ export class MapOverlays {
       };
       this.objects.set(overlay.id, entry);
     }
+    entry.overlay = overlay;
     this.colorBand(entry.group, overlay, palette);
     entry.group.scale.setScalar(radius);
     return entry.group;
@@ -262,12 +550,20 @@ export class MapOverlays {
   private disposeGroup(group: Group) {
     group.userData.dispose?.();
     group.traverse((obj) => {
+      if (obj instanceof Sprite) {
+        obj.material.map?.dispose();
+        obj.material.dispose();
+        return;
+      }
       if (!(obj instanceof Mesh)) return;
       obj.geometry.dispose();
       for (const material of Array.isArray(obj.material)
         ? obj.material
         : [obj.material]) {
-        if (material instanceof MeshBasicMaterial) material.map?.dispose();
+        if (material instanceof MeshBasicMaterial) {
+          material.map?.dispose();
+          material.alphaMap?.dispose();
+        }
         material.dispose();
       }
     });
@@ -275,6 +571,8 @@ export class MapOverlays {
   dispose() {
     for (const { group } of this.objects.values()) this.disposeGroup(group);
     this.objects.clear();
+    if (this.brush) this.disposeGroup(this.brush.group);
+    this.brush = undefined;
     this.group.clear();
     this.group.visible = false;
   }

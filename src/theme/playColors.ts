@@ -33,6 +33,7 @@ export function playColors(theme: ThemeId = "atlas") {
     correct: paper ? "#216d4e" : PLAY_FEEDBACK.correct,
     answer: paper ? "#176e81" : PLAY_FEEDBACK.answer,
     incorrect: paper ? "#ac3346" : PLAY_FEEDBACK.incorrect,
+    corridor: paper ? "#a36708" : "#ffd34e",
     visited: paper ? "#73539e" : PLAY_FEEDBACK.visited,
     disabled: paper
       ? "#d9dacd"

@@ -76,6 +76,9 @@
     "src/game/journeyIndex.json",
     "src/game/answerPresentation.ts",
     "src/game/AnswerReview.tsx",
+    "src/game/CompassAnswer.tsx",
+    "src/game/compassBearing.ts",
+    "src/game/geodesic.ts",
     "src/game/pinPresentation.ts",
     "src/game/points.ts",
     "src/game/PointOrbs.tsx",
@@ -85,6 +88,22 @@
     "src/globe/clueLocators.ts",
     "src/globe/interaction.ts",
     "src/globe/outlines.ts",
-    "src/globe/overlays.ts"
+    "src/globe/overlays.ts",
+    "src/globe/pathAnnotations.ts",
+    "src/game/bearingIntersection.ts",
+    "src/game/StationBearings.tsx",
+    "src/globe/bearingSector.ts",
+    "src/game/silkRoadCorridors.ts",
+    "src/game/constructionTypes.ts",
+    "src/game/construction.ts",
+    "src/game/constructionEditing.ts",
+    "src/game/constructionScene.ts",
+    "src/game/constructionRecipes.ts",
+    "src/game/constructionAudit.ts",
+    "src/game/ConstructionAnswer.tsx",
+    "src/globe/constructionOverlays.ts",
+    "scripts/prepare-sahara-construction.py",
+    "src/game/constructionInteraction.ts",
+    "scripts/prepare-sahara-display.py"
   ]
 }

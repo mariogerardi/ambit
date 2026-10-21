@@ -1,0 +1,38 @@
+{
+  "inputSHA256": {
+    "north-africa.jpg": "58561f9ac0e6560fb85d40b479096bed839858bc0a8251b4c61fb09271335c97",
+    "egypt.jpg": "1b51eec5cb82cc9171d9b588b9acfcb039ec9c2739f5f026c20dc7a804ebd536",
+    "lights.png": "e202af1531c9d7640ee6d8204252f07cae6fac5b444c2f89eca75919f36963a9",
+    "world.v1.json": "166de024583822a0e82a4ce4b809d20c898c5f4fc24dda1ebae351ab7da43ad6",
+    "sahara-construction.v1.json": "f2b036c71f228a7f6b82ac573070f702dcef4562a878ac3c6e57e0ef3869e9bd"
+  },
+  "areas": {
+    "africa": {
+      "bounds": [
+        -18,
+        10,
+        52,
+        38
+      ],
+      "mask": "/journeys/drawing-the-sahara/africa-mask.png"
+    },
+    "egypt": {
+      "bounds": [
+        24,
+        21,
+        37,
+        33
+      ],
+      "mask": "/journeys/drawing-the-sahara/egypt-mask.png"
+    },
+    "algeria": {
+      "bounds": [
+        -9,
+        18,
+        12,
+        38
+      ],
+      "mask": "/journeys/drawing-the-sahara/algeria-mask.png"
+    }
+  }
+}

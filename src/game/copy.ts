@@ -6,6 +6,7 @@ import { pinBands } from "./pinPresentation";
 import { acceptsAlternatives } from "./answerPresentation";
 import { answerPlace } from "./answerTargets";
 import { formatEstimate } from "./numericEstimate";
+import { formatBearing, reviewedBearing } from "./compassBearing";
 import {
   questionPlaces,
   questionRegions,
@@ -37,6 +38,7 @@ export function correctAnswerCopy(question: Question): string {
   if (question.correctFeedback) return question.correctFeedback;
   if (question.mode === "pin") return "Nicely placed.";
   if (question.mode === "slider") return "Nicely estimated.";
+  if (question.mode === "compass-bearing") return "Right on course.";
   if (
     [
       "shortest-borders",
@@ -91,7 +93,24 @@ export function correctAnswerSummary(
     context.capitals.find((place) => place.countryId === countryId)?.name ?? "";
   let values: string[];
   let alternatives = false;
-  if (rule.type === "slot-matches")
+  if (rule.type === "bearing-angle") {
+    const result = reviewedBearing(question, game);
+    values = [
+      `${result?.destination.name ?? rule.destination.name} · ${result ? formatBearing(result.target) : ""}`,
+    ];
+  } else if (rule.type === "raster-overlap" || rule.type === "line-following")
+    values = [resolvedRoundIdentity(question)];
+  else if (rule.type === "point-coverage-max")
+    values = [
+      `${rule.maximum} locations within ${rule.radiusKm.toLocaleString("en-US")} km`,
+    ];
+  else if (rule.type === "population-coverage-area-budget")
+    values = [
+      `At least ${rule.tiers[0].population}% of the population within ${rule.tiers[0].area}% of the land`,
+    ];
+  else if (rule.type === "population-balance")
+    values = ["Half the population on each side"];
+  else if (rule.type === "slot-matches")
     values = (question.matchSlots ?? []).map(
       (slot, index) => `${slot.label}: ${name(expected[index])}`,
     );

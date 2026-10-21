@@ -1,5 +1,10 @@
+import {
+  validConstruction,
+  validConstructionResult,
+} from "../game/construction";
 import { RETIRED_JOURNEY_IDS } from "../game/retiredJourneys";
 import { validPin } from "../game/answerTargets";
+import { validBearingResult, bearingValue } from "../game/compassBearing";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import type { JourneySummary } from "../game/journeyRegistry";
 import type { GameState } from "../game/state";
@@ -48,8 +53,9 @@ export function seededJourney<T extends JourneySummary>(
   catalog: T[],
   records: Record<string, string> = {},
 ): T {
-  const candidates = catalog.filter((journey) => journey.availability === "pool")
-    .sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  const candidates = catalog
+    .filter((journey) => journey.availability === "pool")
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   if (!candidates.length) throw Error("No pool Journeys are available");
   const first = dateOrdinal(FIRST_DAILY_DATE);
   const target = dateOrdinal(date);
@@ -58,14 +64,27 @@ export function seededJourney<T extends JourneySummary>(
     const day = new Date(ordinal * 86400000).toISOString().slice(0, 10);
     const stored = records[day];
     if (stored) {
-      memo.set(day, catalog.find((journey) => journey.supersedes === stored)?.id ?? stored);
+      memo.set(
+        day,
+        catalog.find((journey) => journey.supersedes === stored)?.id ?? stored,
+      );
       continue;
     }
     const recent: string[] = [];
-    for (let offset = 1; offset <= Math.min(NO_REPEAT_DAYS, ordinal - first); offset++)
-      recent.push(memo.get(new Date((ordinal - offset) * 86400000).toISOString().slice(0, 10))!);
+    for (
+      let offset = 1;
+      offset <= Math.min(NO_REPEAT_DAYS, ordinal - first);
+      offset++
+    )
+      recent.push(
+        memo.get(
+          new Date((ordinal - offset) * 86400000).toISOString().slice(0, 10),
+        )!,
+      );
     for (let window = recent.length; window >= 0; window--) {
-      const eligible = candidates.filter((journey) => !recent.slice(0, window).includes(journey.id));
+      const eligible = candidates.filter(
+        (journey) => !recent.slice(0, window).includes(journey.id),
+      );
       if (eligible.length >= (candidates.length > 2 ? 2 : 1)) {
         const id = eligible[dailyHash(day) % eligible.length].id;
         memo.set(day, id);
@@ -93,7 +112,9 @@ export function dailyJourney(
   catalog: JourneySummary[] = JOURNEY_INDEX,
   assignments?: Record<string, string>,
 ): JourneySummary {
-  const assignedId = assignments ? assignments[date] : progress?.overrides?.[date];
+  const assignedId = assignments
+    ? assignments[date]
+    : progress?.overrides?.[date];
   const selected =
     catalog.find(
       (journey) => journey.supersedes === assignedId && !!assignedId,
@@ -152,6 +173,18 @@ export function validGame(
     Number(value.roundIndex) < 0 ||
     Number(value.roundIndex) >= journey.rounds.length ||
     (value.pin !== undefined && !validPin(value.pin)) ||
+    (value.construction !== undefined &&
+      !validConstruction(value.construction)) ||
+    (value.constructionResult !== undefined &&
+      !validConstructionResult(value.constructionResult)) ||
+    (value.brushRadiusKm !== undefined &&
+      (!Number.isFinite(value.brushRadiusKm) ||
+        Number(value.brushRadiusKm) < 1 ||
+        Number(value.brushRadiusKm) > 500)) ||
+    (value.constructionTool !== undefined &&
+      !["draw", "move", "erase"].includes(String(value.constructionTool))) ||
+    (value.showConstructionExample !== undefined &&
+      typeof value.showConstructionExample !== "boolean") ||
     !strings(value.selectedIds) ||
     !strings(value.ordered) ||
     typeof value.text !== "string" ||
@@ -174,10 +207,21 @@ export function validGame(
       isRecord(a) &&
       journey.rounds.some((q) => q.id === a.roundId) &&
       (a.pin === undefined || validPin(a.pin)) &&
+      (a.construction === undefined) === (a.constructionResult === undefined) &&
+      (a.construction === undefined || validConstruction(a.construction)) &&
+      (a.constructionResult === undefined ||
+        (validConstructionResult(a.constructionResult) &&
+          a.construction?.kind === a.constructionResult.kind &&
+          a.correct === (a.constructionResult.tier !== null))) &&
       strings(a.selectedIds) &&
       strings(a.ordered) &&
       typeof a.text === "string" &&
       typeof a.correct === "boolean" &&
+      (a.bearing === undefined ||
+        (validBearingResult(a.bearing) &&
+          a.correct === (a.bearing.tier !== null) &&
+          bearingValue({ text: a.text, selectedIds: [], ordered: [] }) ===
+            a.bearing.chosen)) &&
       ((a.points === undefined && a.pointsVersion === undefined) ||
         (a.pointsVersion === 1 &&
           Number.isInteger(a.points) &&
@@ -195,7 +239,8 @@ function validAttempt(
   try {
     dateOrdinal(date);
     if (isRecord(value) && value.completedOn !== undefined) {
-      if (typeof value.completedOn !== "string" || value.completedOn < date) return false;
+      if (typeof value.completedOn !== "string" || value.completedOn < date)
+        return false;
       dateOrdinal(value.completedOn);
     }
   } catch {
@@ -218,15 +263,33 @@ function validAttempt(
   return !!journey && validGame(value.game, journey);
 }
 /** Retain an edition removed from the catalog as opaque, hidden history. */
-function unavailableAttempt(value: unknown, date: string, catalog: JourneySummary[]): value is DailyAttempt {
-  try { dateOrdinal(date); } catch { return false; }
-  return isRecord(value) && value.date === date &&
-    typeof value.journeyId === "string" && value.journeyId.length > 0 && value.journeyId.length <= 160 &&
-    !RETIRED_JOURNEY_IDS.has(value.journeyId) && !catalog.some((journey) => journey.id === value.journeyId) &&
+function unavailableAttempt(
+  value: unknown,
+  date: string,
+  catalog: JourneySummary[],
+): value is DailyAttempt {
+  try {
+    dateOrdinal(date);
+  } catch {
+    return false;
+  }
+  return (
+    isRecord(value) &&
+    value.date === date &&
+    typeof value.journeyId === "string" &&
+    value.journeyId.length > 0 &&
+    value.journeyId.length <= 160 &&
+    !RETIRED_JOURNEY_IDS.has(value.journeyId) &&
+    !catalog.some((journey) => journey.id === value.journeyId) &&
     [1, SCHEDULE_VERSION].includes(value.scheduleVersion as number) &&
-    isRecord(value.game) && ["home", "playing", "feedback", "finished", "failed"].includes(String(value.game.phase)) &&
-    Array.isArray(value.game.answers) && value.game.answers.length <= 100 &&
-    JSON.stringify(value).length <= 100000;
+    isRecord(value.game) &&
+    ["home", "playing", "feedback", "finished", "failed"].includes(
+      String(value.game.phase),
+    ) &&
+    Array.isArray(value.game.answers) &&
+    value.game.answers.length <= 100 &&
+    JSON.stringify(value).length <= 100000
+  );
 }
 export function validDaily(
   value: unknown,
@@ -266,7 +329,8 @@ export function validDaily(
           isRecord(a) &&
           typeof a.date === "string" &&
           key === `${a.date}/${a.journeyId}` &&
-          (validAttempt(a, a.date, catalog) || unavailableAttempt(a, a.date, catalog)),
+          (validAttempt(a, a.date, catalog) ||
+            unavailableAttempt(a, a.date, catalog)),
       ))
   )
     return false;
@@ -466,7 +530,8 @@ export function recoverDaily(
             isRecord(a) &&
             typeof a.date === "string" &&
             key === `${a.date}/${a.journeyId}` &&
-            (validAttempt(a, a.date, catalog) || unavailableAttempt(a, a.date, catalog)),
+            (validAttempt(a, a.date, catalog) ||
+              unavailableAttempt(a, a.date, catalog)),
         )
       : [],
   );

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   Mesh,
+  PerspectiveCamera,
   Group,
   MeshBasicMaterial,
   Raycaster,
@@ -16,6 +17,35 @@ import { MapOverlays, overlayPositions } from "../src/globe/overlays";
 import type { MapOverlay } from "../src/geography/types";
 
 describe("decorative map overlays", () => {
+  it("previews the brush's geographic radius without rebuilding on hover, and clears it on exit", () => {
+    const overlays = new MapOverlays();
+    overlays.previewBrush({ lat: 25, lng: 15 }, 160);
+    const brush = overlays.group.children[0] as Group;
+    const line = brush.children[0] as LineSegments2;
+    const geometry = line.geometry;
+    const dispose = vi.spyOn(geometry, "dispose");
+    const north = new Vector3(0, 1, 0).applyQuaternion(brush.quaternion);
+    const edge = new Vector3()
+      .fromBufferAttribute(geometry.getAttribute("instanceStart"), 0)
+      .normalize()
+      .applyQuaternion(brush.quaternion);
+    expect(north.angleTo(edge) * 6371).toBeCloseTo(160, 2);
+    overlays.previewBrush({ lat: 30, lng: -10 }, 160);
+    expect(overlays.group.children[0]).toBe(brush);
+    expect(line.geometry).toBe(geometry);
+    expect(dispose).not.toHaveBeenCalled();
+    overlays.update({ id: "map", kind: "map-overlays", overlays: [] }, 100);
+    expect(overlays.group.visible).toBe(true);
+    overlays.previewBrush({ lat: 30, lng: -10 }, 240);
+    expect(dispose).toHaveBeenCalledOnce();
+    expect(overlays.group.children).toHaveLength(1);
+    overlays.previewBrush();
+    expect(overlays.group.visible).toBe(false);
+    expect(overlays.group.children[0].visible).toBe(false);
+    overlays.dispose();
+    expect(overlays.group.children).toHaveLength(0);
+  });
+
   it("keeps the same attached guide when answer changes supply fresh overlay records", () => {
     const overlays = new MapOverlays();
     const scene = new Group();
@@ -223,4 +253,44 @@ describe("decorative map overlays", () => {
       ).toBeGreaterThan(178.9);
     }
   });
+});
+
+it("fades corridor context with camera altitude without rebuilding geometry or intercepting pins", () => {
+  const overlays = new MapOverlays();
+  const path: MapOverlay = {
+    id: "corridor",
+    type: "path",
+    visualState: "corridor",
+    coordinates: [
+      [80, 40],
+      [90, 40],
+    ],
+    opacity: 0.28,
+    opacityByAltitude: { near: 0.55, far: 1.85, opacity: 0.75 },
+  };
+  overlays.update({ id: "map", kind: "map-overlays", overlays: [path] }, 100);
+  const group = overlays.group.children[0],
+    line = group.children[0] as LineSegments2;
+  const geometry = line.geometry;
+  expect(line.material.linewidth).toBe(3);
+  expect(line.material.dashed).toBe(false);
+  expect(line.material.color.getHexString()).toBe("ffd34e");
+  const camera = new PerspectiveCamera();
+  for (const [altitude, expected] of [
+    [0.3, 0.28],
+    [0.55, 0.28],
+    [1.2, 0.515],
+    [1.85, 0.75],
+    [3, 0.75],
+  ]) {
+    camera.position.set(0, 0, 100 * (1 + altitude));
+    camera.updateMatrixWorld();
+    overlays.view(camera, 800, 600);
+    expect(line.material.opacity).toBeCloseTo(expected, 6);
+    expect(line.geometry).toBe(geometry);
+  }
+  expect(new Raycaster().intersectObject(group, true)).toEqual([]);
+  overlays.setPalette("paper");
+  expect(line.material.color.getHexString()).toBe("a36708");
+  overlays.dispose();
 });

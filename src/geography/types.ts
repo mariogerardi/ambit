@@ -1,3 +1,4 @@
+import type { GridShape } from "../game/constructionTypes";
 import type { Polygon, MultiPolygon } from "geojson";
 export type AdminLevel = "ADM0" | "ADM1" | "ADM2" | "ADM3" | "ADM4" | "ADM5";
 export type VisualState =
@@ -93,10 +94,42 @@ export interface RouteFeature {
 export type MapOverlay =
   | {
       id: string;
+      type: "raster-patch";
+      bounds: [number, number, number, number];
+      assetUrl: string;
+      opacity: number;
+    }
+  | {
+      id: string;
+      type: "cells";
+      mask?: { assetUrl: string; bounds: [number, number, number, number] };
+      prominent?: boolean;
+      grid: GridShape;
+      indices: number[];
+      visualState:
+        | "selected"
+        | "correct"
+        | "answer"
+        | "incorrect"
+        | "visited"
+        | "hinted";
+      opacity?: number;
+    }
+  | {
+      id: string;
+      type: "bearing-sector";
+      center: { lat: number; lng: number };
+      bearing: number;
+      halfWidthDegrees: number;
+      radiusKm: number;
+    }
+  | {
+      id: string;
       type: "circle";
       center: { lat: number; lng: number };
       radiusKm: number;
       shade?: boolean;
+      visualState?: "selected" | "correct" | "answer" | "incorrect" | "visited";
       /** Reveal-only accuracy bands share the pin's display palette. */
       accuracyBand?: { index: number; count: number };
       active?: boolean;
@@ -106,9 +139,24 @@ export type MapOverlay =
   | {
       id: string;
       type: "path";
+      /** Draw above translucent construction fills. */
+      foreground?: boolean;
+      visualState?:
+        | "selected"
+        | "correct"
+        | "answer"
+        | "incorrect"
+        | "visited"
+        | "hinted"
+        | "corridor";
       coordinates: number[][];
+      /** Noninteractive direction and along-path annotation. */
+      arrowhead?: boolean;
+      label?: string;
       dashed?: boolean;
       opacity?: number;
+      /** Fade explanatory context toward overview strength as the camera pulls back. */
+      opacityByAltitude?: { near: number; far: number; opacity: number };
     }
   | {
       id: string;

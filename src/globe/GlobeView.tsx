@@ -1,4 +1,23 @@
 import {
+  automaticConstructionNavigation,
+  currentConstruction,
+  dragConstructionCircle,
+  inConstructionArea,
+  startsConstruction,
+  constructionCursor,
+} from "../game/constructionInteraction";
+import {
+  brushSize,
+  constructionRule,
+  snapToBoundary,
+} from "../game/construction";
+import type { GeoPoint } from "../game/geodesic";
+import { geoDistance, geoInterpolate } from "d3-geo";
+import { editConstruction, simplifyTrace } from "../game/constructionEditing";
+import { constructionHandleEntries } from "../game/constructionScene";
+import type { Construction } from "../game/constructionTypes";
+import type { Question } from "../game/questionContracts";
+import {
   forwardRef,
   useCallback,
   useEffect,
@@ -103,6 +122,14 @@ interface Props {
   onInteraction?(): void;
   onSurfaceTap?(region?: RegionFeature): void;
   onCoordinateTap?(point: Focus): void;
+  onFlyoverStep?(index: number): void;
+  constructionInput?: {
+    question: Question;
+    value?: Construction;
+    brushRadiusKm?: number;
+    tool: "draw" | "move" | "erase";
+    onChange(value: Construction | undefined): void;
+  };
   placeInteraction?: boolean;
   placeLabels?: boolean;
   placeMarkers?: boolean;
@@ -134,6 +161,30 @@ const pointAltitude = 0.003;
 export const GlobeView = forwardRef<GlobeHandle, Props>(
   function GlobeView(props, ref) {
     const globe = useRef<GlobeMethods | undefined>(undefined);
+    const constructionPanning = useRef(false);
+    const constructionGesture = useRef<
+      | {
+          pointerId: number;
+          value?: Construction;
+          before?: Construction;
+          handle?: number;
+          last: number;
+          grab: GeoPoint;
+          gap: boolean;
+        }
+      | undefined
+    >(undefined);
+    useEffect(() => {
+      constructionGesture.current = undefined;
+      constructionPanning.current = false;
+      if (host.current) {
+        if (props.constructionInput)
+          host.current.dataset.constructionCursor = "grab";
+        else delete host.current.dataset.constructionCursor;
+      }
+      const controls = globe.current?.controls();
+      if (controls) controls.enableRotate = true;
+    }, [props.constructionInput?.tool, props.constructionInput?.question.id]);
     const host = useRef<HTMLDivElement>(null),
       travel = useRef(new CameraTravel());
     const flyover = useRef(new CameraFlyover());
@@ -184,6 +235,26 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     const placeLabels = useMemo(() => new PlaceLabels(), []);
     const physical = useMemo(() => new PhysicalFeatures(), []);
     const mapOverlays = useMemo(() => new MapOverlays(), []);
+    const brushHover = useRef<GeoPoint | undefined>(undefined);
+    useEffect(() => {
+      brushHover.current = undefined;
+      mapOverlays.previewBrush();
+    }, [
+      mapOverlays,
+      props.constructionInput?.tool,
+      props.constructionInput?.question.id,
+    ]);
+    useEffect(() => {
+      const input = props.constructionInput;
+      const rule = input && constructionRule(input.question);
+      if (rule?.type === "raster-overlap")
+        mapOverlays.previewBrush(
+          brushHover.current,
+          brushSize(rule, input?.brushRadiusKm),
+          globe.current?.getGlobeRadius() ?? 100,
+          props.palette,
+        );
+    }, [mapOverlays, props.constructionInput?.brushRadiusKm, props.palette]);
     const clueLocators = useMemo(() => new ClueLocators(), []);
     useEffect(() => {
       host.current?.append(clueLocators.element);
@@ -205,6 +276,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       const camera = g.camera() as PerspectiveCamera;
       // Geographic context gets first claim on space; city names then avoid it.
       physical.view(camera, rendererSize.x, rendererSize.y);
+      mapOverlays.view(camera, rendererSize.x, rendererSize.y);
       const panel = document
         .querySelector(".question-card")
         ?.getBoundingClientRect();
@@ -253,7 +325,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         if (position.z < 0)
           object.scale.x = object.scale.y = -position.z * pixelScale * 6;
       }
-    }, [placeLabels, physical, clueLocators]);
+    }, [placeLabels, physical, clueLocators, mapOverlays]);
     useEffect(() => {
       clueLocators.update(
         props.active === false ? [] : (props.clueLocators ?? []),
@@ -600,6 +672,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             })),
             current.current.reduced,
             loop,
+            (index) => current.current.onFlyoverStep?.(index),
           );
         },
         cancelFlyover() {
@@ -905,6 +978,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         }
         if (isOverlayLayer(obj)) {
           mapOverlays.update(obj, globe.current?.getGlobeRadius() ?? 100);
+          refreshLabels();
           return;
         }
         const r = region(obj),
@@ -979,6 +1053,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         }
         if (isOverlayLayer(obj)) {
           mapOverlays.update(obj, globe.current?.getGlobeRadius() ?? 100);
+          refreshLabels();
           return mapOverlays.group;
         }
         const r = region(obj);
@@ -1090,6 +1165,199 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           : [size.width > 900 ? 155 : 0, size.width < 700 ? -55 : 0],
       [size, props.compact],
     );
+    const constructionPointer = (
+      event: React.PointerEvent<HTMLDivElement>,
+      phase: "start" | "move" | "end" | "cancel",
+    ) => {
+      const input = current.current.constructionInput,
+        g = globe.current;
+      if (
+        !input ||
+        !g ||
+        !host.current ||
+        (input.tool === "move" &&
+          !automaticConstructionNavigation(input.question))
+      )
+        return false;
+      const gesture = constructionGesture.current;
+      if (
+        phase !== "start" &&
+        (!gesture || gesture.pointerId !== event.pointerId)
+      )
+        return false;
+      if (phase === "start" && (event.button !== 0 || gesture)) return false;
+      const box = host.current.getBoundingClientRect(),
+        x = event.clientX - box.left,
+        y = event.clientY - box.top,
+        point = g.toGlobeCoords(x, y);
+      const value = currentConstruction(input.question, {
+          construction: input.value,
+        }),
+        handles = constructionHandleEntries(value);
+      const handle = point
+        ? handles.findIndex(({ point: p }) => {
+            const screen = g.getScreenCoords(p.lat, p.lng);
+            return (
+              Math.hypot(screen.x - x, screen.y - y) < 22 &&
+              geoDistance([p.lng, p.lat], [point.lng, point.lat]) < 0.06
+            );
+          })
+        : -1;
+      if (
+        phase === "start" &&
+        (!point ||
+          (handle < 0 && !startsConstruction(input.question, value, point)))
+      ) {
+        g.controls().enableRotate = true;
+        return false;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      const handleIndex = handle < 0 ? undefined : handles[handle].index;
+      if (phase === "start") {
+        stop();
+        clearInspection();
+        g.controls().enableRotate = false;
+        const edited =
+          value?.kind === "circle"
+            ? value
+            : editConstruction(
+                input.question,
+                value,
+                point!,
+                true,
+                handleIndex,
+                input.tool === "erase",
+                input.brushRadiusKm,
+              );
+        constructionGesture.current = {
+          pointerId: event.pointerId,
+          before: input.value,
+          value: edited,
+          handle: handleIndex,
+          last: performance.now(),
+          grab: point!,
+          gap: false,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+        input.onChange(edited);
+        return true;
+      }
+      if (phase === "cancel") input.onChange(gesture!.before);
+      else if (
+        point &&
+        gesture &&
+        (phase === "end" || performance.now() - gesture.last > 30)
+      ) {
+        let next = gesture.value;
+        if (next?.kind === "circle")
+          next = dragConstructionCircle(next, gesture.grab, point);
+        else if (inConstructionArea(input.question, point))
+          next = editConstruction(
+            input.question,
+            next,
+            point,
+            gesture.gap && next?.kind === "brush",
+            gesture.handle,
+            input.tool === "erase",
+            input.brushRadiusKm,
+          );
+        else if (
+          (next?.kind === "polygon" || next?.kind === "cut") &&
+          input.question.constructionArea
+        ) {
+          const geometry = input.question.constructionArea.geometry,
+            rings =
+              geometry.type === "Polygon"
+                ? [geometry.coordinates[0]]
+                : geometry.coordinates.map((p) => p[0]);
+          const candidates = rings.map((r) =>
+            snapToBoundary(
+              point,
+              r.map(([lng, lat]) => ({ lng, lat })),
+            ),
+          );
+          const snapped = candidates.sort(
+            (a, b) =>
+              geoDistance([a.lng, a.lat], [point.lng, point.lat]) -
+              geoDistance([b.lng, b.lat], [point.lng, point.lat]),
+          )[0];
+          // Numerical edge membership can differ at the last bit; inset toward the last inside location.
+          const interpolate = geoInterpolate(
+              [snapped.lng, snapped.lat],
+              [gesture.grab.lng, gesture.grab.lat],
+            ),
+            [lng, lat] = interpolate(0.00001);
+          next = editConstruction(
+            input.question,
+            next,
+            { lng, lat },
+            false,
+            gesture.handle,
+            input.tool === "erase",
+            input.brushRadiusKm,
+          );
+        }
+        gesture.gap = !inConstructionArea(input.question, point);
+        gesture.value = next;
+        if (
+          next?.kind === "circle" ||
+          inConstructionArea(input.question, point)
+        )
+          gesture.grab = point;
+        gesture.last = performance.now();
+        input.onChange(next);
+      }
+      if (phase === "end" && gesture?.value?.kind === "trace")
+        input.onChange(simplifyTrace(gesture.value));
+      if (phase === "end" || phase === "cancel") {
+        constructionGesture.current = undefined;
+        g.controls().enableRotate = true;
+        if (event.currentTarget.hasPointerCapture(event.pointerId))
+          event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+      return true;
+    };
+    const updateConstructionCursor = (
+      event: React.PointerEvent<HTMLDivElement>,
+    ) => {
+      const input = current.current.constructionInput,
+        g = globe.current,
+        element = host.current;
+      if (!input || !g || !element) return;
+      const active = !!constructionGesture.current,
+        box = element.getBoundingClientRect(),
+        point = g.toGlobeCoords(
+          event.clientX - box.left,
+          event.clientY - box.top,
+        );
+      const rule = constructionRule(input.question);
+      brushHover.current =
+        rule?.type === "raster-overlap" &&
+        input.tool !== "move" &&
+        event.pointerType === "mouse" &&
+        !constructionPanning.current &&
+        point &&
+        inConstructionArea(input.question, point)
+          ? point
+          : undefined;
+      mapOverlays.previewBrush(
+        brushHover.current,
+        rule?.type === "raster-overlap"
+          ? brushSize(rule, input.brushRadiusKm)
+          : undefined,
+        g.getGlobeRadius(),
+        current.current.palette,
+      );
+      element.dataset.constructionCursor = constructionCursor(
+        input.question,
+        currentConstruction(input.question, { construction: input.value }),
+        point ?? undefined,
+        input.tool,
+        active,
+        constructionPanning.current,
+      );
+    };
     const hoveredRegion = props.regions.find((r) => r.id === props.hovered);
     const cityHover = props.placeInteraction
       ? props.places.find((p) => p.id === hoverPlaceId)?.hoverName
@@ -1106,18 +1374,33 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       <div
         className="globe-canvas"
         data-pin-input={!!props.onCoordinateTap || undefined}
+        data-construction-input={props.constructionInput?.tool}
         data-scene-instance={sceneId}
         ref={host}
         onPointerDownCapture={(event) => {
+          if (constructionPointer(event, "start")) {
+            updateConstructionCursor(event);
+            return;
+          }
+          constructionPanning.current = true;
+          updateConstructionCursor(event);
           inspection.current.pointer(event.pointerType);
           if (event.pointerType !== "mouse") clearInspection();
           gesture.current.down(event.pointerId, event.clientX, event.clientY);
         }}
         onPointerMoveCapture={(event) => {
+          updateConstructionCursor(event);
+          if (constructionPointer(event, "move")) return;
           inspection.current.pointer(event.pointerType);
           gesture.current.move(event.pointerId, event.clientX, event.clientY);
         }}
         onPointerUpCapture={(event) => {
+          constructionPanning.current = false;
+          if (constructionPointer(event, "end")) {
+            updateConstructionCursor(event);
+            return;
+          }
+          updateConstructionCursor(event);
           gesture.current.up(event.pointerId, event.clientX, event.clientY);
           // Fingers can hit a visible city within a 44px target, even when the
           // renderer's ray misses its small dot. Consume here to avoid double picks.
@@ -1138,7 +1421,13 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             }
           }
         }}
-        onPointerCancelCapture={() => {
+        onPointerCancelCapture={(event) => {
+          constructionPanning.current = false;
+          if (constructionPointer(event, "cancel")) {
+            updateConstructionCursor(event);
+            return;
+          }
+          if (host.current) host.current.dataset.constructionCursor = "grab";
           gesture.current.cancel();
           clearInspection();
         }}
@@ -1157,6 +1446,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           tooltip.current.style.top = `${Math.max(8, Math.min(event.clientY - box.top + 14, box.height - 38))}px`;
         }}
         onPointerLeave={() => {
+          brushHover.current = undefined;
+          mapOverlays.previewBrush();
           clearInspection();
         }}
         aria-label={
@@ -1175,11 +1466,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           enablePointerInteraction={
             props.regionInteraction !== false ||
             !!props.onCoordinateTap ||
+            !!props.constructionInput ||
             props.placeInteraction
           }
           showPointerCursor={(_type, obj) => {
             const p = current.current;
-            if (p.onCoordinateTap) return false;
+            if (p.onCoordinateTap || p.constructionInput) return false;
             if ("level" in obj) return canPickRegion(obj as RegionFeature, p);
             if ("region" in obj && obj.region)
               return canPickRegion(obj.region as RegionFeature, p);
