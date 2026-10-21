@@ -19,8 +19,9 @@ build** check. The rule applies to administrators, blocks force pushes and branc
 deletion, and requires no reviewer approval. This check runs the frontend and
 backend tests; the production deploy job depends on it.
 
-For a Journey catalog change, run `npm run check:catalog` before pushing the branch.
-Cover Journey IDs rather than positions or catalog totals. Backend releases are
+For a Journey catalog change, run relevant Journey/catalog tests and TypeScript
+locally. CI runs the full suites and build before merge; a duplicate full local
+run is not required. Cover Journey IDs rather than positions or catalog totals. Backend releases are
 separate; use the tested commit and procedure in [Services](SERVICES.md).
 Local deployments use the supported `--no-wait` path and report the job/stack ID
 and status link promptly. Wait for completion or verify hosted behavior only when

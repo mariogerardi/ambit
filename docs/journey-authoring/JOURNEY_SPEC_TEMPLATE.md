@@ -128,7 +128,7 @@ Author the Journey's caption and visual payoff rather than a fixed score headlin
 - **Focused verification:** Journey audit, relevant behavior checks and TypeScript
   for typed changes. Check actual wrong responses, partial assignments, repeated
   objects and recap precedence when affected; empty synthetic misses are insufficient.
-  Run `npm run check:catalog` before pushing catalog changes; test identities by ID.
+  CI owns the full-suite/build gate before merge; keep local checks focused and test identities by ID.
   Browser testing only when explicitly requested or for a specific unresolved
   rendering/input risk. Record actual versus automated verification separately.
 - **Authoring handoff:** refresh the kit after relevant source/docs changes and

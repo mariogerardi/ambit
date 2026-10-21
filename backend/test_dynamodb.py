@@ -6,6 +6,14 @@ import dynamodb
 
 
 class DynamoTests(unittest.TestCase):
+    def test_batch_reads_preserve_types_and_report_unprocessed_keys(self):
+        client = MagicMock()
+        client.batch_get_item.return_value = {"Responses": {"saves": [{"clock": {"native": 7}}]}, "UnprocessedKeys": {"saves": {"Keys": [{"pk": {"native": "user#a"}}]}}}
+        with patch.object(dynamodb, "client", client), patch.object(dynamodb.serializer, "serialize", side_effect=lambda v: {"native": v}), patch.object(dynamodb.deserializer, "deserialize", side_effect=lambda v: v["native"]):
+            result = dynamodb.Table("saves").get_many([{"pk": "user#a"}])
+            self.assertEqual(result, {"Items": [{"clock": 7}], "unprocessed": True})
+            self.assertTrue(client.batch_get_item.call_args.kwargs["RequestItems"]["saves"]["ConsistentRead"])
+
     def test_attributes_and_pagination_cross_the_sdk_boundary_without_changing_expressions(self):
         client = MagicMock()
         client.query.return_value = {"Items": [{"clock": {"native": 7}}], "LastEvaluatedKey": {"pk": {"native": "user#a"}}}

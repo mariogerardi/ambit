@@ -5,13 +5,14 @@ import { AccountProvider } from "./services/accounts";
 import { PlayerWorkspace } from "./App";
 import { applyTheme, readTheme } from "./theme/themes";
 import { waitForStyles } from "./app/waitForStyles";
+import { registerStorage } from "./app/registerStorage";
 import "./fonts.css";
 import "./style.css";
 import "./game/game.css";
 import "./app/app.css";
 import "./app/mobile.css";
 import "./theme/themes.css";
-void waitForStyles()
+void Promise.all([waitForStyles(), registerStorage.initialize()])
   .then(() => {
     applyTheme(readTheme());
     trackView(modeForPath(location.pathname));

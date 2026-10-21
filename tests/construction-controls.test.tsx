@@ -3,7 +3,7 @@ import { act, useReducer } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { it, expect } from "vitest";
-import { ConstructionAnswer } from "../src/game/ConstructionAnswer";
+import { AnswerForm } from "../src/game/AnswerForm";
 import { CONSTRUCTION_RECIPES } from "../src/game/constructionRecipes";
 import { initialGame, gameReducer, type GameState } from "../src/game/state";
 import { createQuestionContext } from "../src/game/questionPreparation";
@@ -35,7 +35,7 @@ it("keeps paint, erase, size and edit actions in one row without coordinate entr
     );
     latest = game;
     return (
-      <ConstructionAnswer
+      <AnswerForm
         question={q}
         game={game}
         dispatch={dispatch}

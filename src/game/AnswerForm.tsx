@@ -60,7 +60,8 @@ function AnswerControls({
   game = withAssistanceLocks(question, game);
   const locked = lockedSelectionIds(question, game);
   const items = answerItems(question, context, game);
-  if (question.mode.startsWith("geo-"))
+  const definition = mechanicFor(question);
+  if (definition.control === "construction")
     return (
       <ConstructionAnswer
         key={question.id}
@@ -95,7 +96,6 @@ function AnswerControls({
         onAssist: () => dispatch({ type: "request-assist" }),
       }
     : undefined;
-  const definition = mechanicFor(question);
   const city = definition.mapSelection === "places";
   const pointNoun = pointAnswerNoun(question);
   const single = definition.single;

@@ -28,10 +28,11 @@ npm run preview
 For local frontend changes, name existing test files before any options:
 `npm test -- tests/themes.test.ts`, or add `-t "test name"` to narrow further.
 Bare `npm test` and options-only invocations refuse to run the entire suite.
-Use `npm run test:all` for an intentional full frontend run. CI uses that command;
-`npm run check:catalog` retains the full frontend/backend suites and TypeScript
-check required before pushing Journey catalog changes. Shared contract changes
-may also justify a broad run. Stop after relevant checks pass.
+CI owns the complete frontend/backend suites and production build gate before
+merge. Keep local checks focused, including for Journey catalog changes.
+`npm run test:all` and `npm run check:catalog` remain available for explicitly
+requested full local verification; neither is a routine pre-push step. Broaden
+local checks only for an identified shared-contract risk. Stop once they pass.
 
 Backend checks accept one or more existing `backend/test_*.py` files or dotted
 module/class/method names. Missing targets and empty selections fail. For example:
@@ -119,7 +120,7 @@ backend files go after `python3 scripts/run-python-tests.py`.
 | Scenes/disclosure: `presentation.ts`, `scenes.ts`                                                          | `tests/presentation.test.ts`, `tests/journey-visual-grammar.test.ts`, `tests/journey-review-lifecycle.test.tsx`.                                                        |
 | Loading: `useJourneyContent.ts`, `useWorldGeography.ts`                                                    | `tests/app-loading-hooks.test.tsx`, `tests/journey-loading.test.ts`, `tests/loader.test.ts`.                                                                            |
 | Camera/input: `useCameraOrchestration.ts`, `src/globe/camera.ts`, `interaction.ts`                         | `tests/camera-orchestration.test.tsx`, `tests/camera.test.ts`, `tests/globe-interaction.test.ts`. These do not verify real WebGL.                                       |
-| Saves/sync: `recordSave.ts`, `progressSaves.ts`, `progressSync.ts`                                         | `tests/progress-saves.test.ts`, `tests/progress-sync.test.ts`, `tests/journey-revision-saves.test.ts`.                                                                  |
+| Saves/sync: `registerStorage.ts`, `recordSave.ts`, `progressSaves.ts`, `progressSync.ts`                   | `tests/register-storage.test.ts`, `tests/progress-saves.test.ts`, `tests/progress-sync.test.ts`, `tests/journey-revision-saves.test.ts`.                                |
 | Study: `src/study/engine.ts`, `useStudyPresentation.ts`, `StudySetup.tsx`                                  | `tests/study-regressions.test.tsx`, `tests/study-presentation.test.tsx`, `tests/study-setup.test.tsx`; select history/results tests when changing those flows.          |
 | Shell navigation/accounts: `App.tsx`, `AccountPanel.tsx`                                                   | `tests/app-shell.test.tsx`; prefer `tests/accounts.test.tsx` for isolated authentication behavior.                                                                      |
 | Daily/archive/schedule shell integration                                                                   | `tests/app-daily-shell.test.tsx`; prefer `tests/admin-panel.test.tsx` or `tests/journey-archive.test.ts` for isolated behavior.                                         |
@@ -130,9 +131,9 @@ backend files go after `python3 scripts/run-python-tests.py`.
 | Backend APIs/SDK: `backend/handler.py`, `community.py`, `dynamodb.py`                                      | `backend/test_services.py`, `backend/test_community.py`, `backend/test_dynamodb.py`.                                                                                    |
 | Schedule/staging: `journey_schedule.py`, `journey_lock.py`, `staging_demo.py`                              | `backend/test_journey_schedule.py`, `backend/test_journey_lock.py`, `backend/test_staging_demo.py`.                                                                     |
 
-Use TypeScript checks for typed changes. Journey catalog changes still require
-`npm run check:catalog` before pushing; focused checks do not replace that release
-requirement.
+Use TypeScript checks for typed changes. For catalog metadata/registration changes,
+include `tests/catalog-invariants.test.ts` locally. CI runs the complete suites
+and build before merge; do not repeat that full run locally by default.
 
 ## Prepared data
 
@@ -247,7 +248,7 @@ checks; deploying does not require regenerating committed geography.
 - Update the root overview and affected guide when public behavior changes.
 - After a Journey change, regenerate the index only if its metadata inputs changed;
   update the catalog table when titles, routes or registration change. Run focused
-  checks during authoring and `npm run check:catalog` before pushing catalog changes.
+  checks during authoring; CI supplies the complete suite/build gate before merge.
 - Keep authoring standards in `JOURNEY_CRAFTING.md` and capability/API details in
   the catalog and engine guide. Keep completed implementation history in Git/PRs;
   retain only actionable acceptance checks and unique provenance in current guides.

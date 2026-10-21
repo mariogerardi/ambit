@@ -42,7 +42,10 @@ def handle(event):
         return response(401, {"error": "Sign in to sync your progress."})
     owner = "user#" + subject
     if event["routeKey"] == "GET /account/saves":
-        options = {"KeyConditionExpression": "pk = :owner", "ExpressionAttributeValues": {":owner": owner}, "ConsistentRead": True, "Limit": 100}
+        manifest = (event.get("queryStringParameters") or {}).get("manifest") == "1"
+        options = {"KeyConditionExpression": "pk = :owner", "ExpressionAttributeValues": {":owner": owner}, "ConsistentRead": True, "Limit": 1000 if manifest else 100}
+        if manifest:
+            options.update(ProjectionExpression="#ns, #field, writer, #clock", ExpressionAttributeNames={"#ns": "namespace", "#field": "field", "#clock": "clock"})
         cursor = (event.get("queryStringParameters") or {}).get("cursor")
         if cursor:
             try:
@@ -55,7 +58,7 @@ def handle(event):
             except (ValueError, TypeError):
                 return response(400, {"error": "Invalid page cursor."})
         page = table().query(**options)
-        result = {"entries": [{"version": 2, "namespace": item["namespace"], "field": item["field"], "writer": item["writer"], "clock": int(item["clock"]), "value": json.loads(item["valueJson"])} for item in page.get("Items", [])]}
+        result = {"entries": [{"version": 2, "namespace": item["namespace"], "field": item["field"], "writer": item["writer"], "clock": int(item["clock"]), **({} if manifest else {"value": json.loads(item["valueJson"])})} for item in page.get("Items", [])]}
         if page.get("LastEvaluatedKey"):
             result["cursor"] = base64.urlsafe_b64encode(json.dumps(page["LastEvaluatedKey"]).encode()).decode()
         return response(200, result)
@@ -73,6 +76,16 @@ def handle(event):
         if len(raw.encode()) > 1000000:
             return response(413, {"error": "Save batch is too large."})
         data = json.loads(raw)
+        if isinstance(data, dict) and set(data) == {"read"}:
+            if not isinstance(data["read"], list) or not 1 <= len(data["read"]) <= 10:
+                raise ValueError()
+            keys = [{"pk": owner, "sk": validate({**entry, "version": 2, "clock": 0, "value": None})["sk"]} for entry in data["read"] if isinstance(entry, dict)]
+            if len(keys) != len(data["read"]) or len({key["sk"] for key in keys}) != len(keys):
+                raise ValueError()
+            page = table().get_many(keys)
+            if page.get("unprocessed"):
+                return response(503, {"error": "Couldn’t restore all progress. Please retry."})
+            return response(200, {"entries": [{"version": 2, "namespace": item["namespace"], "field": item["field"], "writer": item["writer"], "clock": int(item["clock"]), "value": json.loads(item["valueJson"])} for item in page.get("Items", [])]})
         if not isinstance(data, dict) or not isinstance(data.get("entries"), list) or not 1 <= len(data["entries"]) <= 25:
             raise ValueError()
         items = [validate(entry) for entry in data["entries"]]

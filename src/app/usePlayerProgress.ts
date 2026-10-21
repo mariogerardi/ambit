@@ -60,14 +60,13 @@ export function usePlayerProgress({
     if (!dailyLoaded || !dailyStore.current) return;
     const saved = dailyStore.current.save(daily);
     setDailySaveOk(saved.ok);
-    if (JSON.stringify(saved.value) !== JSON.stringify(daily))
+    if (!dailyStore.current.equivalent(saved.value, daily))
       setDaily(saved.value);
   }, [daily, dailyLoaded]);
   useEffect(() => {
     const saved = studyStore.save(study);
     setStudySaveOk(saved.ok);
-    if (JSON.stringify(saved.value) !== JSON.stringify(study))
-      setStudy(saved.value);
+    if (!studyStore.equivalent(saved.value, study)) setStudy(saved.value);
   }, [study, studyStore]);
   useEffect(() => {
     const change = (event: Event) => {
@@ -80,7 +79,7 @@ export function usePlayerProgress({
           const merge = dailyStore.current.incoming();
           setDaily((current) => {
             const value = merge(current);
-            return JSON.stringify(current) === JSON.stringify(value)
+            return dailyStore.current!.equivalent(current, value)
               ? current
               : value;
           });
@@ -93,9 +92,7 @@ export function usePlayerProgress({
           const merge = studyStore.incoming();
           setStudy((current) => {
             const value = merge(current);
-            return JSON.stringify(current) === JSON.stringify(value)
-              ? current
-              : value;
+            return studyStore.equivalent(current, value) ? current : value;
           });
         } catch {
           setStudySaveOk(false);

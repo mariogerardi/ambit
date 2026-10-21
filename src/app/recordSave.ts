@@ -1,4 +1,5 @@
 import { isRecord, readSave } from "./storage";
+import { registerStorage } from "./registerStorage";
 
 type Fields = Record<string, unknown>;
 export interface SaveEntry {
@@ -11,6 +12,8 @@ export interface SaveEntry {
 export interface SaveCodec<T> {
   empty: T;
   valid(value: unknown): value is T;
+  /** Immutable React updates can validate only the parts that changed. */
+  validUpdate?(value: T, previous: T, lastInput?: T): boolean;
   recover(value: unknown): T | undefined;
   encode(value: T): Fields;
   decode(fields: Fields): T;
@@ -20,8 +23,15 @@ export interface SaveCodec<T> {
   projection?(value: T): unknown;
   retain?(field: string): boolean;
 }
-const equal = (a: unknown, b: unknown) =>
-  JSON.stringify(a) === JSON.stringify(b);
+// State and decoded records are immutable. Reuse serialization of old results
+// when comparing a draft against an independently restored copy of its history.
+const serialized = new WeakMap<object, string | undefined>();
+const json = (value: unknown) => {
+  if (!value || typeof value !== "object") return JSON.stringify(value);
+  if (!serialized.has(value)) serialized.set(value, JSON.stringify(value));
+  return serialized.get(value);
+};
+const equal = (a: unknown, b: unknown) => a === b || json(a) === json(b);
 
 /** Independent writer/field registers avoid the read-modify-write race of a
  * shared LocalStorage blob. The v1 value is a compatibility projection only;
@@ -30,16 +40,30 @@ const equal = (a: unknown, b: unknown) =>
 export class RecordSave<T> {
   readonly prefix: string;
   readonly writer = crypto.randomUUID();
+  prepare?: () => Promise<void>;
+  get ready() {
+    return this.prepare?.() ?? Promise.resolve();
+  }
   writable: boolean;
   readonly recovered: boolean;
   private baseline: T;
   private clock = 0;
+  private parsed = new Map<string, { raw: string; entry?: SaveEntry }>();
+  private snapshotRevision?: number;
+  private snapshotValue?: T;
+  private validatedInput?: T;
 
   constructor(
     readonly key: string,
     private codec: SaveCodec<T>,
   ) {
     this.prefix = `${key}.records.v2/`;
+    if (!registerStorage.available) {
+      this.baseline = codec.empty;
+      this.writable = false;
+      this.recovered = false;
+      return;
+    }
     try {
       if (localStorage.getItem(`${this.prefix}migrated`) === "2") {
         this.baseline = codec.empty;
@@ -63,8 +87,8 @@ export class RecordSave<T> {
           codec.encode(saved.value),
         )) {
           const address = this.address(field, "legacy");
-          if (localStorage.getItem(address) === null)
-            localStorage.setItem(
+          if (registerStorage.getItem(address) === null)
+            registerStorage.setItem(
               address,
               JSON.stringify({
                 version: 2,
@@ -100,11 +124,17 @@ export class RecordSave<T> {
   }
   entries(): SaveEntry[] {
     const entries: SaveEntry[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key?.startsWith(this.prefix)) continue;
+    const present = new Set<string>();
+    for (const [key, raw] of registerStorage.entries(this.prefix)) {
+      present.add(key);
+      const cached = this.parsed.get(key);
+      if (cached?.raw === raw) {
+        if (cached.entry) entries.push(cached.entry);
+        continue;
+      }
+      this.parsed.set(key, { raw });
       try {
-        const entry: unknown = JSON.parse(localStorage.getItem(key)!);
+        const entry: unknown = JSON.parse(raw);
         if (
           !isRecord(entry) ||
           entry.version !== 2 ||
@@ -116,12 +146,16 @@ export class RecordSave<T> {
           !this.codec.accepts(entry.field, entry.value)
         )
           continue;
-        entries.push(entry as unknown as SaveEntry);
+        const valid = entry as unknown as SaveEntry;
+        this.parsed.set(key, { raw, entry: valid });
+        entries.push(valid);
         this.clock = Math.max(this.clock, Number(entry.clock));
       } catch {
         /* Leave a damaged register intact; other records still load. */
       }
     }
+    for (const key of this.parsed.keys())
+      if (!present.has(key)) this.parsed.delete(key);
     return entries;
   }
   /** Keep the React baseline intact until incoming() captures queued edits. */
@@ -140,7 +174,7 @@ export class RecordSave<T> {
       )
         continue;
       const address = this.address(entry.field, entry.writer);
-      const raw = localStorage.getItem(address);
+      const raw = registerStorage.getItem(address);
       if (raw) {
         try {
           const previous = JSON.parse(raw);
@@ -157,11 +191,43 @@ export class RecordSave<T> {
           /* Repair a damaged register. */
         }
       }
-      localStorage.setItem(address, JSON.stringify(entry));
+      registerStorage.setItem(address, JSON.stringify(entry));
       this.clock = Math.max(this.clock, entry.clock);
     }
   }
+  async mergeEntriesDurably(entries: SaveEntry[]) {
+    if (!registerStorage.persistent) {
+      this.mergeEntries(entries);
+      return;
+    }
+    if (!this.writable) throw Error("Local saving is unavailable.");
+    const valid = entries.filter(
+      (entry) =>
+        entry.version === 2 &&
+        Number.isSafeInteger(entry.clock) &&
+        entry.clock >= 0 &&
+        typeof entry.writer === "string" &&
+        !!entry.writer &&
+        !entry.writer.includes("/") &&
+        typeof entry.field === "string" &&
+        this.codec.accepts(entry.field, entry.value),
+    );
+    await registerStorage.import(
+      valid.map((entry) => [
+        this.address(entry.field, entry.writer),
+        JSON.stringify(entry),
+      ]),
+    );
+    for (const entry of valid) this.clock = Math.max(this.clock, entry.clock);
+  }
   private snapshot(): T {
+    const revision = registerStorage.revision(this.prefix);
+    if (
+      revision !== undefined &&
+      revision === this.snapshotRevision &&
+      this.snapshotValue !== undefined
+    )
+      return this.snapshotValue;
     const entries = this.entries();
     entries.sort(
       (a, b) => a.clock - b.clock || a.writer.localeCompare(b.writer),
@@ -172,11 +238,24 @@ export class RecordSave<T> {
         entry.field in fields && this.codec.resolve
           ? this.codec.resolve(entry.field, fields[entry.field], entry.value)
           : entry.value;
-    return this.codec.decode(fields);
+    const value = this.codec.decode(fields);
+    this.snapshotRevision = revision;
+    this.snapshotValue = value;
+    return value;
   }
   load(): T {
     if (this.writable) this.baseline = this.snapshot();
     return this.baseline;
+  }
+  equivalent(a: T, b: T) {
+    if (a === b) return true;
+    const left = this.codec.encode(a),
+      right = this.codec.encode(b);
+    const keys = Object.keys(left);
+    return (
+      keys.length === Object.keys(right).length &&
+      keys.every((field) => equal(left[field], right[field]))
+    );
   }
   /** Capture the pre-event baseline before React applies queued local actions.
    * The returned merge is pure, including when React invokes an updater twice. */
@@ -206,7 +285,15 @@ export class RecordSave<T> {
     };
   }
   save(value: T): { value: T; ok: boolean } {
-    if (!this.writable || !this.codec.valid(value)) return { value, ok: false };
+    if (
+      !this.writable ||
+      !(
+        this.codec.validUpdate?.(value, this.baseline, this.validatedInput) ??
+        this.codec.valid(value)
+      )
+    )
+      return { value, ok: false };
+    this.validatedInput = value;
     const before = this.codec.encode(this.baseline),
       after = this.codec.encode(value);
     const changed = [
@@ -227,7 +314,7 @@ export class RecordSave<T> {
           field,
           value: after[field] ?? null,
         };
-        localStorage.setItem(this.address(field), JSON.stringify(entry));
+        registerStorage.setItem(this.address(field), JSON.stringify(entry));
       }
       const merged = this.snapshot();
       this.baseline = merged;

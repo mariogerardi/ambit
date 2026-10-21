@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { mechanicFor } from "../src/game/mechanics";
 import { geoDistance } from "d3-geo";
 import { DRAWING_SAHARA_JOURNEY as journey } from "../src/game/drawingSaharaJourney";
 import { CONSTRUCTION_RECIPES } from "../src/game/constructionRecipes";
@@ -384,6 +385,33 @@ it("preserves shapes, help ceilings and frozen metrics through saves and complet
       "hinted",
     ),
   ).toBe(2);
+});
+
+it("evaluates one canonical outcome for grading, rewards and evidence, ignoring a supplied old grade", () => {
+  const q = journey.rounds[1],
+    single = { ...journey, rounds: [q] };
+  const current = {
+    ...response(sample(1)),
+    constructionResult: { ...grade(1, sample(1)), tier: null },
+  };
+  const evaluate = vi.spyOn(mechanicFor(q), "outcome");
+  try {
+    const saved = gameReducer(
+      current,
+      { type: "submit" },
+      single,
+      createQuestionContext(regions, [], single),
+    );
+    expect(evaluate).toHaveBeenCalledTimes(1);
+    expect(saved.answers[0]).toMatchObject({
+      correct: true,
+      points: 3,
+      constructionResult: { tier: 0 },
+    });
+    expect(saved.answers[0].constructionResult).toBe(saved.constructionResult);
+  } finally {
+    evaluate.mockRestore();
+  }
 });
 
 it("shares edits between gesture and coordinate input; locks trace endpoints and snaps cuts", () => {

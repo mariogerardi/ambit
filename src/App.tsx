@@ -1,4 +1,4 @@
-import { supportsWebGL } from "./globe/support";
+import { useGlobeRecovery } from "./app/useGlobeRecovery";
 import { useJourneyContent } from "./app/useJourneyContent";
 import { useWorldGeography } from "./app/useWorldGeography";
 import { useCameraOrchestration } from "./app/useCameraOrchestration";
@@ -219,11 +219,16 @@ export function App() {
     physicalFeatures,
     physicalError,
   } = useWorldGeography({ mode, retry, breakdown, layers: displayLayers });
-  const [ready, setReady] = useState(false),
-    [webgl, setWebgl] = useState(supportsWebGL);
+  const globe = useRef<GlobeHandle>(null);
+  const recovery = useGlobeRecovery(globe);
+  const { ready, enabled: webgl, fail } = recovery;
   const [globePresented, setGlobePresented] = useState(false);
   useEffect(() => {
-    if (!ready || !regions.length || globePresented) return;
+    if (!ready) {
+      setGlobePresented(false);
+      return;
+    }
+    if (!regions.length || globePresented) return;
     // Allow the populated scene to paint before revealing it. Keep the canvas
     // mounted and measurable throughout; mode changes never repeat the entrance.
     let frame = requestAnimationFrame(() => {
@@ -233,8 +238,7 @@ export function App() {
   }, [ready, regions.length, globePresented]);
   const [rotationSpeed, setRotationSpeed] = useState(1);
   const [globeInteracted, setGlobeInteracted] = useState(false);
-  const globe = useRef<GlobeHandle>(null),
-    scene = useRef<HTMLDivElement>(null);
+  const scene = useRef<HTMLDivElement>(null);
   const namedRegions = useMemo(
     () =>
       regions.map((r) => ({
@@ -475,17 +479,14 @@ export function App() {
     world?.regionNames ??
     studyPresentation.regionNames ??
     (displayLayers?.names ? "all" : "none");
-  const fail = useCallback(() => {
-      setWebgl(false);
-    }, []),
-    contextLost = useCallback(() => {
-      setWebgl(false);
+  const contextLost = useCallback(() => {
+      recovery.contextLost();
       reportFailure("globe rendering", { failureType: "webglcontextlost" });
-    }, []),
+    }, [recovery.contextLost]),
     onReady = useCallback(() => {
       clearGlobeChunkReload();
-      setReady(true);
-    }, []);
+      recovery.onReady();
+    }, [recovery.onReady]);
   const selectExplore = useCallback(
     (id?: string) => {
       stop();
@@ -1127,12 +1128,12 @@ export function App() {
         onKeyDownCapture={() => setGlobeInteracted(true)}
       >
         {webgl && (
-          <BoardBoundary onError={fail}>
+          <BoardBoundary key={recovery.generation} onError={fail}>
             <Suspense fallback={<LoadingScreen />}>
               <GlobeView
                 active={!panelOnly}
                 ref={globe}
-                initialFocus={initialFocus}
+                initialFocus={recovery.focus ?? initialFocus}
                 theme="play"
                 palette={theme}
                 compact={mobile.enabled}
@@ -1423,15 +1424,27 @@ export function App() {
           </span>
         </footer>
       )}
-      {(error || contextError || (!webgl && mode !== "study")) && (
+      {(error ||
+        contextError ||
+        recovery.failed ||
+        (!webgl && mode !== "study")) && (
         <div className="experience-status" role="status">
           <p>
             {error ||
               contextError ||
-              "The 3D globe is required to play Ambit on this device."}
+              (recovery.failed
+                ? recovery.recovering
+                  ? "Restoring the globe… Your progress is kept."
+                  : "The globe is unavailable. Your progress is kept."
+                : "The 3D globe is required to play Ambit on this device.")}
           </p>
           {error && (
             <button onClick={() => setRetry((v) => v + 1)}>Try again ↻</button>
+          )}
+          {recovery.failed && (
+            <button onClick={recovery.retry} disabled={recovery.recovering}>
+              Retry globe
+            </button>
           )}
         </div>
       )}

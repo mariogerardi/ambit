@@ -13,6 +13,13 @@ import { validPin } from "./answerTargets";
 import { orderedCards } from "./ordering";
 import { estimateValue } from "./numericEstimate";
 import { bearingValue } from "./compassBearing";
+import {
+  constructionOutcome,
+  compassOutcome,
+  pinOutcome,
+  estimateOutcome,
+} from "./answerOutcome";
+import type { OutcomeEvaluator } from "./answerOutcome";
 import { initialBearing, normalizeBearing } from "./geodesic";
 
 export type AnswerControl =
@@ -39,6 +46,8 @@ export interface MechanicDefinition<
   single: boolean;
   editableCommitment: boolean;
   visible: boolean;
+  /** Tiered mechanics evaluate acceptance, rewards and evidence together. */
+  outcome?: OutcomeEvaluator;
   canSubmit(
     question: Question,
     response: Response,
@@ -213,7 +222,7 @@ export const MECHANICS = {
     "construction",
     "none",
     true,
-    { validate: validateConstructionQuestion },
+    { validate: validateConstructionQuestion, outcome: constructionOutcome },
   ),
   "geo-circle": defineMechanic(
     ["point-coverage-max"],
@@ -222,7 +231,7 @@ export const MECHANICS = {
     "construction",
     "none",
     true,
-    { validate: validateConstructionQuestion },
+    { validate: validateConstructionQuestion, outcome: constructionOutcome },
   ),
   "geo-trace": defineMechanic(
     ["line-following"],
@@ -231,7 +240,7 @@ export const MECHANICS = {
     "construction",
     "none",
     true,
-    { validate: validateConstructionQuestion },
+    { validate: validateConstructionQuestion, outcome: constructionOutcome },
   ),
   "geo-polygon": defineMechanic(
     ["population-coverage-area-budget"],
@@ -240,7 +249,7 @@ export const MECHANICS = {
     "construction",
     "none",
     true,
-    { validate: validateConstructionQuestion },
+    { validate: validateConstructionQuestion, outcome: constructionOutcome },
   ),
   "geo-cut": defineMechanic(
     ["population-balance"],
@@ -249,7 +258,7 @@ export const MECHANICS = {
     "construction",
     "none",
     true,
-    { validate: validateConstructionQuestion },
+    { validate: validateConstructionQuestion, outcome: constructionOutcome },
   ),
   "compass-bearing": defineMechanic(
     ["bearing-angle"],
@@ -259,6 +268,7 @@ export const MECHANICS = {
     "none",
     true,
     {
+      outcome: compassOutcome,
       canSubmit: (_, response) => bearingValue(response) !== undefined,
       validate: (question, fail) => {
         if (question.rule.type !== "bearing-angle")
@@ -321,6 +331,7 @@ export const MECHANICS = {
     "pin",
     "none",
     true,
+    { outcome: pinOutcome },
   ),
   "city-single": defineMechanic(
     ["place-ids"],
@@ -435,6 +446,7 @@ export const MECHANICS = {
     "none",
     true,
     {
+      outcome: estimateOutcome,
       canSubmit: (question, response) =>
         question.rule.type === "numeric-range" &&
         estimateValue(question.rule, response) !== undefined,

@@ -38,6 +38,10 @@ class Table:
     def get_item(self, **options):
         return self.call("get_item", **options)
 
+    def get_many(self, keys):
+        result = client.batch_get_item(RequestItems={self.name: {"Keys": [encode(key) for key in keys], "ConsistentRead": True}})
+        return {"Items": [decode(item) for item in result.get("Responses", {}).get(self.name, [])], "unprocessed": bool(result.get("UnprocessedKeys", {}).get(self.name, {}).get("Keys"))}
+
     def query(self, **options):
         return self.call("query", **options)
 

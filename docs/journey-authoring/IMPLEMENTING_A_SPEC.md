@@ -56,7 +56,7 @@ redundancy and stale objects. Check correct, actual wrong and partial responses
 where relevant, plus the final recap.
 
 Follow repository `AGENTS.md`: focused Journey/behavior checks and TypeScript for
-typed changes; full catalog checks before pushing catalog changes. Use a browser
+typed changes; CI owns the full-suite/build gate before merge. Use a browser
 only when requested or needed to resolve a specific critical rendering/input risk.
 Report what changed, what was verified and any material limitation. Publish or
 deploy only when the user's request authorizes it. Refresh the portable kit after
