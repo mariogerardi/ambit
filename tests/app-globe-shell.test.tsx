@@ -7,6 +7,7 @@ import {
   mount,
   panelObservers,
   probe,
+  savedStudy,
   settleLoads,
 } from "./helpers/appShell";
 import { act } from "react";
@@ -15,8 +16,84 @@ import { DAILY_KEY } from "../src/app/dailyProgress";
 import { MOBILE_LAYOUT_QUERY } from "../src/app/useMobileLayout";
 import * as journeyRegistry from "../src/game/journeyRegistry";
 import { supportsWebGL } from "../src/globe/support";
+import { defaultSettings, emptyStudy, STUDY_KEY } from "../src/study/engine";
 
 describe("app globe shell (DOM only; no browser or WebGL)", () => {
+  it("recovers the renderer once without losing a Study draft and offers manual retry after repeated loss", async () => {
+    localStorage.setItem(
+      STUDY_KEY,
+      JSON.stringify({
+        ...emptyStudy,
+        settings: {
+          ...defaultSettings,
+          styles: { ...defaultSettings.styles, countries: "typing" },
+        },
+      }),
+    );
+    await mount();
+    await click("Study");
+    await click("Custom");
+    await click("Start studying");
+    const input = host.querySelector<HTMLInputElement>(
+      ".study-question input",
+    )!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!.call(input, "Bra");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    const prompt = host.querySelector(".study-question h1")!.textContent;
+    const view = { lat: -15, lng: 133, altitude: 1.7 };
+    probe.currentView = view;
+    await act(async () => probe.props!.onFailure());
+    expect(host.querySelector("canvas")).toBeNull();
+    expect(host.textContent).toContain("Restoring the globe");
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 650));
+    });
+    await settleLoads();
+    expect(probe.mounts).toBe(2);
+    expect(probe.props!.initialFocus).toEqual(view);
+    expect(
+      host.querySelector<HTMLInputElement>(".study-question input")!.value,
+    ).toBe("Bra");
+    expect(host.querySelector(".study-question h1")!.textContent).toBe(prompt);
+    expect(savedStudy().session?.text).toBe("Bra");
+
+    await act(async () => probe.props!.onFailure());
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 650));
+    });
+    expect(probe.mounts).toBe(2);
+    expect(host.querySelector("canvas")).toBeNull();
+    expect(host.textContent).toContain("The globe is unavailable");
+    await click("Retry globe");
+    expect(probe.mounts).toBe(3);
+    expect(
+      host.querySelector<HTMLInputElement>(".study-question input")!.value,
+    ).toBe("Bra");
+    expect(host.querySelector(".experience-status")).toBeNull();
+  });
+
+  it("keeps navigation usable when the recovery probe fails and retries only on player request", async () => {
+    await mount();
+    vi.mocked(supportsWebGL).mockReturnValue(false);
+    await act(async () => probe.props!.onFailure());
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 650));
+    });
+    expect(probe.mounts).toBe(1);
+    expect(host.querySelector("canvas")).toBeNull();
+    expect(host.textContent).toContain("The globe is unavailable");
+    await click("Explore");
+    expect(location.pathname).toBe("/explore");
+    vi.mocked(supportsWebGL).mockReturnValue(true);
+    await click("Retry globe");
+    expect(probe.mounts).toBe(2);
+  });
+
   it("reveals the globe after painting geography and keeps it presented across modes", async () => {
     const frames = new Map<number, FrameRequestCallback>();
     let nextFrame = 0;

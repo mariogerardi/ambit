@@ -44,6 +44,7 @@ interface GlobeProps {
   showBorders: boolean;
   physicalFeatures?: PhysicalFeature[];
   onReady(): void;
+  onFailure(): void;
   onInteraction(): void;
   onSelect(region: RegionFeature): void;
   onPlace(place: PlaceFeature): void;

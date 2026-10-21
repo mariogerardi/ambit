@@ -122,10 +122,20 @@ Reduced motion removes that animation. Regional caps are built in short frame
 batches and cached by renderer instance; country backing stays visible while a
 new branch is prepared. Cold heavy-geometry entry still needs device profiling.
 
-Deferred globe/geometry bundles remain substantial. WebGL context loss reports
-failure and disables the globe rather than automatically rebuilding it; Study's
-written alternative does not replace every visual clue. Neither a successful
-build nor mocked renderer tests establish GPU performance or recovery.
+Deferred globe/geometry bundles remain substantial. `useGlobeRecovery.ts` reports
+WebGL context loss, unmounts the failed renderer and attempts one rebuild after
+500 ms. A second loss requires the player's Retry globe action. Sessions, drafts
+and saves remain mounted; recovery captures the last readable camera view. A
+renderer exception also exposes manual retry. Study's written alternative does
+not replace every visual clue.
+
+A narrow October 2026 check in headless Chrome with actual Apple M1 Max/Metal
+WebGL kept one connected canvas across four Explore/Study/Home cycles. Median
+and p95 frame intervals stayed near 16.7 ms; buffer/program counts stabilized
+after warmup. Forced context loss rebuilt one live canvas within the 1.8-second
+observation window, preserving the page, with no uncaught errors. These are local
+development measurements with a mocked schedule, not mobile/heavy-region GPU
+benchmarks. Neither a build nor mocked renderer tests establish GPU performance.
 
 ## Trustworthy globe state
 
