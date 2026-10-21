@@ -509,6 +509,51 @@ reward fields display full prior credit and are identified as earlier scoring.
 6. Document the supported behavior and current limits in the catalog. Run focused
    checks. Update scheduling metadata only if its authored inputs changed.
 
+### Extension cost audit
+
+Tracing the compass, bearing-intersection and construction implementations in
+October 2026 gives four different extension paths. Choose the smallest one before
+editing shared code; a new premise does not itself require a new mode.
+
+| Change                                                         | Expected implementation boundary                                                                                                       | Focused verification                                                                                                        |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Another task using an existing contract                        | Journey definition, registration/index only when adding content, assets/sources as needed                                              | `check:journey -- <id>`, relevant content test, TypeScript                                                                  |
+| A new clue/reveal composition using existing input and grading | Question presentation contract/validation, scene adapter and recipe; reuse existing response and save fields                           | Composition test and `check:journey -- --recipe <name>`                                                                     |
+| A new knowledge rule using an existing input                   | Rule union, canonical preparation/evaluator, registry's allowed rules, rule label and recipe                                           | Domain failures/boundaries and existing recipe integration test                                                             |
+| A new input or response shape                                  | Above plus control routing, reducer actions, readiness, feedback/receipts, save validation; renderer input only for new globe gestures | Domain and control tests, draft/receipt round trip, TypeScript; GPU check only for unresolved real rendering/input behavior |
+
+Bearing intersection is a useful composition example: it uses `pin` plus
+`pin-distance`. It adds supplied observations, validation and presentation, but
+needs no new answer mode, reducer action or save format. The existing pin is the
+answer. Compass instead adds an independent input and angular rule; it reuses
+`Response.text` for drafts but adds versioned submitted evidence. Construction
+adds five modes sharing one editor/response family, canonical scoring and new
+globe gestures. Its grids, provenance and frozen metrics are real additional
+costs that a choice or pin composition does not incur.
+
+The registry successfully centralizes capabilities, compatibility, readiness and
+validation. Recipes cover every registered mode, and authoring contracts derive
+allowed rules from the registry. TypeScript catches missing mode/rule entries;
+the recipe integration test catches unsupported examples. UI routing uses the
+registered control, including construction, rather than a `geo-` name prefix.
+
+It is still a cross-cutting extension, not a plug-in interface. A search for
+compass-specific identifiers finds 22 non-Journey source files, spanning controls,
+grading, points, saves, receipts and scene adapters. This is source fanout, not
+22 mandatory edits for every new mechanic. The type union, registry, recipe and
+rule labels are explicit registration sites. `state.ts`, `points.ts`,
+`GameShell.tsx`, `copy.ts`, `presentation.ts` and `journeyWorld.ts` still contain
+family branches; save validation must recognize new frozen evidence independently
+of today's question. A new control should not add Journey-ID checks to these files.
+
+Before the next genuinely new response family, consider a typed submission
+outcome shared by grading, reward calculation and frozen feedback. That would
+reduce repeated family dispatch without merging eligibility, disclosure, grading
+or camera framing. Do this against an actual second use case with compatibility
+coverage, rather than introducing a generic plug-in framework now. Historical
+storage growth is a more immediate scaling constraint; see
+[the one-year measurement](SAVE_PERSISTENCE.md#one-year-of-play).
+
 Current Journeys use grouped scenes. Shared presentation
 presets can still supply defaults; scene overrides compile into the renderer's
 existing fields. This is one engine and one current catalog, without archived
