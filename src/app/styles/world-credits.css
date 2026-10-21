@@ -1,0 +1,49 @@
+.world-credits-dialog {
+  box-sizing: border-box;
+  width: min(100%, 520px);
+  text-shadow: none;
+}
+.world-credits-dialog dl {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.world-credits-dialog dt {
+  color: var(--ui-text);
+  margin-bottom: 2px;
+}
+.world-credits-dialog dd,
+.world-credits-dialog p {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.world-credits-links {
+  display: grid;
+  gap: 12px;
+  font-size: 13px;
+}
+.world-credits-links a {
+  color: var(--ui-accent);
+  text-underline-offset: 3px;
+}
+.world-credits-dialog .study-options-close {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--ui-muted);
+  background: rgb(var(--ui-line-rgb) / 0.06);
+  cursor: pointer;
+}
+.world-credits-dialog .study-options-close:hover {
+  color: var(--ui-text);
+  background: rgb(var(--ui-line-rgb) / 0.14);
+}
+

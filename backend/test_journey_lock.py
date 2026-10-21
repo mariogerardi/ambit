@@ -3,7 +3,7 @@ import unittest
 from datetime import date
 from unittest.mock import patch
 
-import test_services  # installs the offline AWS boundary
+import offline_aws  # installs the offline AWS boundary
 import journey_lock
 
 

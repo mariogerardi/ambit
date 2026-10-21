@@ -1,15 +1,23 @@
 # Documentation
 
-The Journey authoring set was reconciled with the local implementation on
-**October 18, 2026**. This is a documentation review date, not deployment or browser
-verification. The [root README](../README.md) provides setup and a product overview.
+The [root README](../README.md) provides setup and a product overview.
 
-For Journey work, read [Crafting a Journey](JOURNEY_CRAFTING.md) for current
-editorial and interaction standards, [the catalog](QUESTION_CATALOG.md) for
-supported formats and registration, and [the engine guide](JOURNEY_ENGINE.md) for
-implementation contracts. The [specification template](journey-authoring/JOURNEY_SPEC_TEMPLATE.md)
-records those decisions. Engine support is broader than the recommended authoring
-standards; examples do not override the standards.
+Start with the task below and read the relevant sections, then the owning code.
+The [development owner/test map](DEVELOPMENT.md#choose-focused-checks) identifies
+focused verification. Engine support is broader than recommended authoring
+standards; examples do not override the crafting guide.
+
+## Find the relevant section
+
+| Task                                   | Start here                                                                                                                        | Then inspect                                                                                                                                                  |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Implement an approved Journey spec     | [Implementation workflow](journey-authoring/IMPLEMENTING_A_SPEC.md)                                                               | Approved brief, relevant crafting sections, catalog's **Bundled Journeys** table, and matching examples/recipes.                                              |
+| Design a new Journey                   | [Crafting](JOURNEY_CRAFTING.md), sections 1–2                                                                                     | Sections relevant to the proposed controls, help, reveal and completion; record decisions in the [spec template](journey-authoring/JOURNEY_SPEC_TEMPLATE.md). |
+| Edit question copy or help             | [Crafting](JOURNEY_CRAFTING.md), sections 3 and 7–9                                                                               | The affected Journey; `questionText.ts` and `QuestionSupport.tsx` if changing shared copy.                                                                    |
+| Change clues, scenes or camera framing | [Engine: Explicit scenes](JOURNEY_ENGINE.md#explicit-scenes); crafting sections 5–6                                               | `presentation.ts`, `scenes.ts`, and the relevant presentation/camera owner in [Architecture](ARCHITECTURE.md#module-map).                                     |
+| Change grading or add a mechanic       | [Engine: Responsibilities](JOURNEY_ENGINE.md#responsibilities) and [Extending the engine](JOURNEY_ENGINE.md#extending-the-engine) | `questionContracts.ts`, preparation/evaluation owner, `mechanics.ts` and the matching `recipes.ts` example.                                                   |
+| Register or retire a Journey           | [Catalog: Add or change a Journey](QUESTION_CATALOG.md#add-or-change-a-journey)                                                   | `journeys.ts`, generated index, retired IDs and save recovery.                                                                                                |
+| Change saves, accounts or backend APIs | [Architecture: Module map](ARCHITECTURE.md#module-map)                                                                            | Relevant sections of [Save persistence](SAVE_PERSISTENCE.md) or [Services](SERVICES.md), then the owning module and focused tests.                            |
 
 ## Current guides
 
@@ -24,22 +32,14 @@ standards; examples do not override the standards.
 | [Geographic catalog policy](CATALOG_POLICY.md)        | Stable IDs, hierarchy, eligibility, and territorial conventions.                                       |
 | [Explore data](EXPLORE_DATA.md)                       | Country details, subdivisions, physical features, and asset provenance.                                |
 | [Save persistence](SAVE_PERSISTENCE.md)               | Local save registers, migration, recovery, and concurrent tabs.                                        |
-| [Release readiness](RELEASE_READINESS.md)             | Remaining launch work and static-hosting requirements.                                                 |
 | [Services](SERVICES.md)                               | Accounts, guest feedback, private review, Datadog configuration, and backend deployment.               |
-| [Hosting](HOSTING.md)                                 | Production deployment, domain, HTTP configuration, and rollback.                                       |
+| [Hosting](HOSTING.md)                                 | Release acceptance, production deployment, HTTP configuration, and rollback.                           |
 | [Attribution](../NOTICE.md)                           | Source licenses, transformations, and redistribution notices.                                          |
 
 Source code, generated catalogs, and source metadata are authoritative when a
 summary disagrees with implementation. Update the relevant guide when changing a
 public behavior, data convention, save format, preparation workflow, or release
 requirement. Keep this index focused on maintained guides.
-
-## Historical review records
-
-[Journey review](JOURNEY_REVIEW.md) and the
-[Shared Names implementation review](journey-authoring/SHARED_NAMES_REVIEW.md)
-record earlier decisions and verification scope. They are historical evidence,
-not current authoring instructions or confirmation of current rendered behavior.
 
 ## Source notices and generated records
 

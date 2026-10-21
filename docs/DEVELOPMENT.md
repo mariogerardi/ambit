@@ -8,11 +8,19 @@ version. If you use nvm, run `nvm install` and `nvm use` before installing.
 Python 3.11 or newer runs offline backend tests and the optional preparation/deployment
 scripts.
 
+Run `npm run check:env` before installing or testing. It checks Node against
+`.nvmrc`, npm against `packageManager`, and finds Python >=3.11 without installing
+anything. It reports the Python command to use; substitute that command for
+`python3` below if your default is older. `PYTHON=/path/to/python` explicitly
+selects the interpreter for preflight and catalog checks; an invalid override
+fails instead of silently selecting another runtime.
+
 ```sh
+npm run check:env
 npm ci
 npm run dev
 npm test -- tests/themes.test.ts
-python3 scripts/run-python-tests.py
+python3 scripts/run-python-tests.py backend/test_services.py
 npm run build
 npm run preview
 ```
@@ -24,6 +32,27 @@ Use `npm run test:all` for an intentional full frontend run. CI uses that comman
 `npm run check:catalog` retains the full frontend/backend suites and TypeScript
 check required before pushing Journey catalog changes. Shared contract changes
 may also justify a broad run. Stop after relevant checks pass.
+
+Backend checks accept one or more existing `backend/test_*.py` files or dotted
+module/class/method names. Missing targets and empty selections fail. For example:
+
+```sh
+python3 scripts/run-python-tests.py backend/test_staging_demo.py
+python3 scripts/run-python-tests.py test_staging_demo.SeedTests.test_refuses_production_resources
+python3 scripts/run-python-tests.py  # Intentional full backend suite, also used by CI
+```
+
+Backend tests import `backend/offline_aws.py` before AWS-dependent application
+modules. This shared test boundary requires no SDK, credentials, or other test
+module to be imported first. New backend tests belong in `backend/test_*.py` so
+the full runner discovers them. `npm run test:tooling` checks runtime selection;
+`backend/test_test_runner.py` checks test selection and reporting.
+
+Shell integration tests share the mocked globe/account setup in
+`tests/helpers/appShell.tsx`; import it before application modules. Choose the
+feature file below instead of running every shell test. Preserve existing cases
+for file moves, and reserve new cases for changed behavior or a missing failure
+mode. A test count alone does not justify a full run.
 
 Frontend and backend runners suppress successful test logs while preserving
 failure diagnostics. CI retains JUnit files separately. The catalog-wide Journey
@@ -50,12 +79,10 @@ Journeys. Non-read API requests are blocked, and the fixture grants no server
 permissions. Review entry points stay
 outside the production bundle. See [Services](SERVICES.md) for release steps.
 
-Full implementation verification on October 10, 2026 passed **478 frontend tests in
-46 files**, 25 offline backend tests, and the production build. That is a dated result, not a promise about
-later changes. Vitest covers logic, local assets, and DOM integration with a
+Vitest covers logic, local assets, and DOM integration with a
 mocked globe. It does not exercise browser/WebGL rendering or actual mobile input.
-Browser testing is a separate, explicitly scoped activity; it was not run for
-this implementation pass.
+Browser testing is a separate, explicitly scoped activity. Record verification
+scope in the change's PR or commit rather than adding a completed audit page.
 
 For a focused check, name the relevant test files:
 
@@ -67,21 +94,53 @@ npm test -- tests/progress-saves.test.ts tests/study-regressions.test.tsx
 runs the complete test suite, builds, and fails on high/critical dependency
 advisories. It runs for main pushes, pull requests, and manual dispatches, with
 read-only validation permissions and commit-pinned official actions. Successful
-main-branch runs publish their verified artifact through a scoped GitHub OIDC
-deployment role. Pull requests do not deploy. See [Hosting](HOSTING.md).
+main-branch runs can publish their verified artifact through a scoped GitHub OIDC
+deployment role when the [schedule-cutover flag](SERVICES.md#schedule-cutover) is
+enabled. Pull requests do not deploy. See [Hosting](HOSTING.md).
 
 Run `npm run check:docs` to check documentation formatting. There is no source lint
 gate yet. Format files you change with the local executable:
 
 ```sh
-./node_modules/.bin/prettier --write README.md docs/*.md
+./node_modules/.bin/prettier --write docs/<changed-guide>.md
 ```
+
+## Choose focused checks
+
+Use this map to select checks for the changed behavior; run the matching row's
+relevant files, not every test listed here. The [architecture map](ARCHITECTURE.md#module-map)
+describes ownership in more detail. Named frontend files go after `npm test --`;
+backend files go after `python3 scripts/run-python-tests.py`.
+
+| Area and owners                                                                                            | Relevant checks                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Journey copy/help: `src/game/*Journey.ts`, `questionText.ts`, `QuestionSupport.tsx`                        | `npm run check:journey -- <id-or-slug>`; matching `tests/*-journey.test.*`; `tests/question-support.test.tsx` or `tests/journey-guidance.test.tsx` for shared behavior. |
+| Contracts/grading: `questionBuilder.ts`, `questionPreparation.ts`, `questionEvaluation.ts`, `mechanics.ts` | `tests/question-contracts.test.ts`, `tests/game.test.ts`, matching control/rule tests; `tests/journey-engine.test.ts` for engine changes.                               |
+| Scenes/disclosure: `presentation.ts`, `scenes.ts`                                                          | `tests/presentation.test.ts`, `tests/journey-visual-grammar.test.ts`, `tests/journey-review-lifecycle.test.tsx`.                                                        |
+| Loading: `useJourneyContent.ts`, `useWorldGeography.ts`                                                    | `tests/app-loading-hooks.test.tsx`, `tests/journey-loading.test.ts`, `tests/loader.test.ts`.                                                                            |
+| Camera/input: `useCameraOrchestration.ts`, `src/globe/camera.ts`, `interaction.ts`                         | `tests/camera-orchestration.test.tsx`, `tests/camera.test.ts`, `tests/globe-interaction.test.ts`. These do not verify real WebGL.                                       |
+| Saves/sync: `recordSave.ts`, `progressSaves.ts`, `progressSync.ts`                                         | `tests/progress-saves.test.ts`, `tests/progress-sync.test.ts`, `tests/journey-revision-saves.test.ts`.                                                                  |
+| Study: `src/study/engine.ts`, `useStudyPresentation.ts`, `StudySetup.tsx`                                  | `tests/study-regressions.test.tsx`, `tests/study-presentation.test.tsx`, `tests/study-setup.test.tsx`; select history/results tests when changing those flows.          |
+| Shell navigation/accounts: `App.tsx`, `AccountPanel.tsx`                                                   | `tests/app-shell.test.tsx`; prefer `tests/accounts.test.tsx` for isolated authentication behavior.                                                                      |
+| Daily/archive/schedule shell integration                                                                   | `tests/app-daily-shell.test.tsx`; prefer `tests/admin-panel.test.tsx` or `tests/journey-archive.test.ts` for isolated behavior.                                         |
+| Journey shell controls/reveal/recap                                                                        | `tests/app-journey-shell.test.tsx`; use matching Journey/control tests for local changes.                                                                               |
+| Explore and display-preference shell integration                                                           | `tests/app-explore-shell.test.tsx` or `tests/app-preferences-shell.test.tsx`.                                                                                           |
+| Study shell navigation/session integration                                                                 | `tests/app-study-shell.test.tsx`; use the Study unit/DOM files above for isolated behavior.                                                                             |
+| Shared globe lifetime, viewport and motion in the shell                                                    | `tests/app-globe-shell.test.tsx`; use camera/loading files above when changing those owners.                                                                            |
+| Backend APIs/SDK: `backend/handler.py`, `community.py`, `dynamodb.py`                                      | `backend/test_services.py`, `backend/test_community.py`, `backend/test_dynamodb.py`.                                                                                    |
+| Schedule/staging: `journey_schedule.py`, `journey_lock.py`, `staging_demo.py`                              | `backend/test_journey_schedule.py`, `backend/test_journey_lock.py`, `backend/test_staging_demo.py`.                                                                     |
+
+Use TypeScript checks for typed changes. Journey catalog changes still require
+`npm run check:catalog` before pushing; focused checks do not replace that release
+requirement.
 
 ## Prepared data
 
 All generated runtime assets are included. Preparation is for intentional data
 changes or regeneration, not ordinary installation/build. Node tools use the
-installed npm dependencies; Python tools use the standard library.
+installed npm dependencies. Most Python tools use the standard library;
+terrain and construction preparation have additional dependencies documented below
+or in the [terrain appendix](JOURNEY_CRAFTING.md#appendix-render-mountain-context-from-terrain).
 
 | Command                                 | Inputs/prerequisites                                                                              | Outputs and behavior                                                                                                                                                      |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -120,8 +179,8 @@ npm run prepare:regional-display -- --great-lakes-only
 `npm run prepare:geography -- --download` explicitly re-downloads its pinned raw
 snapshots. Other scripts have their own cache behavior; do not assume this flag
 applies to them. Raw `sources/*.geojson`, `.cache/`, `node_modules/`, and `dist/`
-are ignored by `.gitignore`; source metadata, mappings, generated assets, and the
-lockfile must be included in a future version-controlled release.
+are ignored by `.gitignore`; keep source metadata, mappings, generated assets,
+and the lockfile tracked when deliberately updating data.
 
 Preparation is not an automatic update to current geography or statistics.
 Snapshot dates, versions, checksums, and curated conventions belong together.
@@ -132,6 +191,40 @@ needed to reproduce inputs that are no longer available at their old URLs.
 Review generated differences before treating them as a release: not every script
 stages all outputs atomically, and Node locale differences can affect labels.
 
+### Sahara data preparation
+
+This is an optional Journey-only rebuild, not part of installation or release.
+Use a separate Python environment with numpy 2.0.2, pillow 11.3.0, rasterio 1.4.3,
+shapely 2.0.7, scipy 1.13.1 and pyproj 3.6.1. Cache the frozen inputs below under
+`.cache/constructive/`; retain hashes recorded in
+`public/journeys/drawing-the-sahara/data-audit.json`.
+
+| Cached name                                     | Frozen input                                                                                                                                                                     |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dune-world/…/dune-mask-rev1.tif` and `LICENSE` | [Zenodo release archive](https://zenodo.org/api/records/20054674/files/geomorphlab/dune-world-v1.0.0.zip/content), unzip into `dune-world/`.                                     |
+| `algeria-population.tif`                        | [WorldPop 2024 R2025A v1 raster](https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/2024/DZA/v1/100m/constrained/dza_pop_2024_CN_100m_R2025A_v1.tif).              |
+| `algeria-boundary.geojson`                      | [geoBoundaries revision 9469f09](https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/DZA/ADM0/geoBoundaries-DZA-ADM0.geojson).                              |
+| `erg-oriental.jpg`                              | [NASA EarthKAM CCFID_152293_2017304121045](https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/92000/92232/CCFID_152293_2017304121045_IMAGE_LRG.jpg). |
+
+Other cached images use the [NASA GIBS WMS endpoint](https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi)
+with `SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG:4326` and these parameters:
+
+| File         | LAYERS                      | FORMAT       | WIDTH×HEIGHT | BBOX           |
+| ------------ | --------------------------- | ------------ | ------------ | -------------- |
+| `sahara.jpg` | `BlueMarble_NextGeneration` | `image/jpeg` | 4096×2048    | `-18,10,38,38` |
+| `nile.jpg`   | `BlueMarble_NextGeneration` | `image/jpeg` | 2048×3072    | `29,23,34,31`  |
+| `lights.png` | `VIIRS_CityLights_2012`     | `image/png`  | 2048×2048    | `-9,18,12,38`  |
+
+Run `python3 scripts/prepare-sahara-construction.py` for scoring inputs, then
+`python3 scripts/prepare-sahara-display.py` for current imagery, masks and
+footprints. The display step downloads fixed Blue Marble patches if absent and
+writes `display-audit.json`. Compare recorded hashes before accepting a changed
+upstream response; neither command regenerates shared geography. Preserve
+submitted source revisions and metrics rather than regrading old answers.
+The shipped [source notes](../public/journeys/drawing-the-sahara/SOURCES.md) own
+licenses and modeling limitations; [Hosting](HOSTING.md#journey-acceptance-checks)
+retains human calibration requirements.
+
 ## Common problems
 
 | Symptom                                       | Check                                                                                                                                                                                 |
@@ -140,7 +233,7 @@ stages all outputs atomically, and Node locale differences can affect labels.
 | Missing/changed preparation input             | Cache path and committed checksum; distinguish an absent snapshot from an intentional source update.                                                                                  |
 | Subdivisions disappear after base preparation | Run `prepare:explore` to restore the extended manifest and reconciled footprints.                                                                                                     |
 | Journey metadata test fails                   | Run `prepare:journeys` after editing definitions or registration.                                                                                                                     |
-| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Release readiness](RELEASE_READINESS.md).                                                                                       |
+| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Hosting](HOSTING.md#hosting-behavior).                                                                                          |
 | Save warning or missing active Study attempt  | Storage availability/quota and the documented [save lifecycle](SAVE_PERSISTENCE.md). Avoid clearing storage as a first troubleshooting step.                                          |
 | Globe unavailable                             | WebGL/context availability; supported written fallbacks remain, but merged-territory questions require WebGL. Study offers Answer by name. Actual renderer recovery is separate work. |
 | Large-chunk build warning                     | Deferred globe/geometry bundles are still substantial. A successful build does not establish device performance.                                                                      |
@@ -155,8 +248,9 @@ checks; deploying does not require regenerating committed geography.
 - After a Journey change, regenerate the index only if its metadata inputs changed;
   update the catalog table when titles, routes or registration change. Run focused
   checks during authoring and `npm run check:catalog` before pushing catalog changes.
-- Keep authoring standards in `JOURNEY_CRAFTING.md`, capability/API details in the
-  catalog and engine guide, and historical verification in clearly dated reviews.
+- Keep authoring standards in `JOURNEY_CRAFTING.md` and capability/API details in
+  the catalog and engine guide. Keep completed implementation history in Git/PRs;
+  retain only actionable acceptance checks and unique provenance in current guides.
   Refresh the authoring kit after relevant code/docs changes; check its manifest
   rather than assuming an old export or uploaded copy is current.
 - After a data change, review mappings, metadata, manifest, hashes, attribution,

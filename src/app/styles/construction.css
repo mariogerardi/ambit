@@ -1,0 +1,181 @@
+.construction-toolbar,
+.construction-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 12px;
+}
+.construction-toolbar button {
+  border: 1px solid var(--ui-muted);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.construction-toolbar button[aria-pressed="true"] {
+  border-color: var(--play-selected);
+  background: color-mix(in srgb, var(--play-selected) 16%, transparent);
+}
+.construction-tool-help,
+.construction-dimension {
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.construction-review dl {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+.construction-review dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.construction-review dt {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.construction-review dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.experience .round-feedback .construction-model-note {
+  font-size: 11px;
+}
+.construction-share-bars > div {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 8px;
+  margin-block: 8px;
+  font-size: 12px;
+}
+.construction-share-bars > div > div {
+  display: flex;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.construction-share-bars i {
+  background: var(--play-correct);
+}
+.construction-share-bars b {
+  background: var(--play-answer);
+}
+.globe-canvas[data-construction-input="draw"],
+.globe-canvas[data-construction-input="erase"] {
+  touch-action: none;
+}
+.construction-recap-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 16px;
+}
+.construction-comparison-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.construction-comparison-images figure {
+  margin: 0;
+}
+.construction-comparison-images img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.construction-comparison-images figcaption {
+  font-size: 12px;
+}
+
+.construction-brush-row {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+}
+.construction-brush-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 8px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.construction-brush-row .action-icon,
+.construction-icon-button .action-icon {
+  width: 17px;
+  height: 17px;
+}
+.construction-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  padding: 6px;
+}
+.construction-brush-size {
+  flex: 1;
+  min-width: 65px;
+  padding-inline: 4px;
+}
+.construction-brush-size > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--ui-muted);
+  white-space: nowrap;
+}
+.construction-brush-size output {
+  font-variant-numeric: tabular-nums;
+}
+.construction-brush-size input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 3px 0 0;
+  accent-color: var(--play-selected);
+}
+.construction-edit-actions {
+  align-items: center;
+}
+.experience .construction-solution-link {
+  font-size: 15px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding-block: 8px;
+  text-underline-offset: 4px;
+}
+.experience .construction-solution-link:hover,
+.experience .construction-solution-link:focus-visible {
+  text-decoration: underline;
+}
+.globe-canvas[data-construction-cursor="grab"] {
+  cursor: grab;
+}
+.globe-canvas[data-construction-cursor="grabbing"] {
+  cursor: grabbing;
+}
+.globe-canvas[data-construction-cursor="crosshair"] {
+  cursor: crosshair;
+}
+.globe-canvas[data-construction-cursor="paint"] {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M10 21 24 4Q27 1 29 5L15 24Z' fill='%23f6bc46' stroke='%23152330' stroke-width='2'/%3E%3Cpath d='M4 28Q3 20 10 20L15 24Q12 30 4 28Z' fill='white' stroke='%23152330' stroke-width='2'/%3E%3C/svg%3E")
+      4 28,
+    crosshair;
+}
+.globe-canvas[data-construction-cursor="erase"] {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='m4 20 15-16q2-2 4 0l6 6q2 2 0 4L15 28H10Z' fill='%23f18c96' stroke='%23152330' stroke-width='2'/%3E%3Cpath d='m4 20 8-8 11 10-8 6H10Z' fill='white' stroke='%23152330' stroke-width='2'/%3E%3C/svg%3E")
+      4 24,
+    crosshair;
+}
+.globe-canvas[data-construction-cursor] canvas {
+  cursor: inherit !important;
+}
