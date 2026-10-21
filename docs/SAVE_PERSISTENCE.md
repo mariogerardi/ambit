@@ -150,6 +150,53 @@ in source, and Admin's calendar publishes date assignments rather than new packs
 
 ## Remaining limits
 
+### One year of play
+
+`npm run measure:saves` runs an offline diagnostic using the real reducers,
+codecs and register reader/writer with instrumented in-memory storage. It seeds
+one completed Journey and one 20-question, worldwide country-map Study session
+per day, with a fresh writer per visit and retained per-prompt drafts. Journey
+receipts are synthetic valid answers, without drawn geometry. It checks restored
+history counts and an active typing draft. Nothing reaches AWS or player data.
+
+An October 2026 run on Node 24/Apple M1 Max measured:
+
+| Days | Local keys | Key/value UTF-8 bytes | Initial reads, both stores | Study keystroke |
+| ---- | ---------: | --------------------: | -------------------------: | --------------: |
+| 1    |         47 |                27,364 |                     1.3 ms |          1.0 ms |
+| 30   |        801 |               740,709 |                     7.2 ms |         14.7 ms |
+| 365  |      9,511 |             8,995,041 |                    77.6 ms |        169.2 ms |
+
+Timings are single diagnostic samples, not budgets or browser latency claims.
+At a year, one keystroke enumerated 19,028 keys and read 16,832 values despite
+writing only two values/588 UTF-8 bytes. Both snapshots in `RecordSave.save()`
+scan and validate retained records. Completed Study sessions are retained twice
+(`session.*` and `history.*`, about 2.9 MB each); 7,300 old draft registers add
+about 2.0 MB. Journey registers and their compatibility projection account for
+most of the remainder. Account imports, other writers, long sessions and drawn
+answers can grow this further.
+
+The year fixture contains 9,507 cloud records/about 7.78 MB of JSON: at least
+96 sequential read pages (100 records per page) or 381 batches to upload the
+entire locally accumulated history. Ordinary acknowledged edits upload only pending changes;
+the five-minute refresh still downloads the history. These counts exclude
+network headers, DynamoDB overhead and account import duplicates.
+
+An isolated headless Chrome profile rejected the year fixture with
+`QuotaExceededError` after approximately 5.24 million stored characters. Fixture
+insertion order is not a prediction of the exact day saving fails; the complete
+year does not fit in that browser. UTF-16 size estimates and UTF-8 transfer sizes
+are different measures; quota accounting is browser-specific.
+
+The next storage work should address both retained history size and synchronous
+reads: move historical payloads to a larger transactional store, avoid rescanning
+unchanged records per keystroke, and design acknowledged compaction that cannot
+resurrect stale devices' records. This diagnostic does not delete or compact
+player saves. Use `npm run measure:saves -- --storage /tmp/ambit-saves.json` to
+export the synthetic fixture for a separate browser check.
+
+### Durability
+
 There is no guarantee against clearing site data before pending work uploads. History and writer registers
 are not automatically pruned; retention/export controls or a larger transactional
 history store remain follow-up work. On quota/write failure, existing committed

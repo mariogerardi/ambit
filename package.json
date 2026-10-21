@@ -13,6 +13,7 @@
     "prepare:quiz": "python3 scripts/prepare-quiz-data.py",
     "test": "node scripts/test-focused.mjs",
     "test:all": "vitest run --silent=passed-only",
+    "measure:saves": "node scripts/measure-save-growth.mjs",
     "prepare:flags": "python3 scripts/prepare-flags.py",
     "prepare:cities": "python3 scripts/prepare-cities.py",
     "prepare:explore": "node scripts/prepare-explore.mjs",
