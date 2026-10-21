@@ -1,4 +1,3 @@
-import { constructionRule, evaluateConstruction } from "./construction";
 import {
   normalizeAnswer,
   countryIdForName,
@@ -7,10 +6,8 @@ import {
 /** Submission readiness and grading consume canonical answers, never display geometry. */
 import type { Question, QuestionContext, Response } from "./questionContracts";
 import { mechanicFor } from "./mechanics";
-import { pinDistance, pinInside } from "./answerTargets";
+import { pinInside } from "./answerTargets";
 import { isMinimumLandPath } from "./reasoning";
-import { estimateError } from "./numericEstimate";
-import { bearingResult } from "./compassBearing";
 import {
   canSelect,
   selectableIds,
@@ -34,10 +31,8 @@ export function isCorrect(
   context: QuestionContext,
   response: Response,
 ) {
-  if (constructionRule(question)) {
-    const result = evaluateConstruction(question, response);
-    return !!result && result.tier !== null;
-  }
+  const outcome = mechanicFor(question).outcome?.(question, response);
+  if (outcome) return outcome.correct;
   const rule = question.rule,
     expected = solutionIds(question, context);
   const controlGrade = mechanicFor(question).grade;
@@ -46,19 +41,7 @@ export function isCorrect(
       count: responseCount(question, context),
       eligible: selectableIds(question, context),
     });
-  if (rule.type === "bearing-angle") {
-    const result = bearingResult(question, response);
-    return result !== undefined && result.tier !== null;
-  }
-  if (rule.type === "pin-distance") {
-    const distance = pinDistance(question, response);
-    return distance !== undefined && distance <= rule.radiusKm + 1e-7;
-  }
   if (rule.type === "pin-inside") return pinInside(question, context, response);
-  if (rule.type === "numeric-range") {
-    const error = estimateError(question, response);
-    return error !== undefined && error <= rule.tolerance + 1e-7;
-  }
   if (
     question.mode.startsWith("city-") &&
     response.selectedIds.some((id) => !canSelect(question, context, id))

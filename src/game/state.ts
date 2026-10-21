@@ -2,7 +2,6 @@ import {
   constructionKind,
   constructionRule,
   brushSizeRange,
-  evaluateConstruction,
   validConstruction,
 } from "./construction";
 import type { Construction } from "./constructionTypes";
@@ -22,7 +21,6 @@ import type { Journey, QuestionContext, Response } from "./questionContracts";
 import { canSubmit, isCorrect } from "./questionEvaluation";
 import { cityIdForName } from "./answerTargets";
 import { submittedPoints, POINTS_VERSION } from "./points";
-import { bearingResult } from "./compassBearing";
 import type { BearingResult } from "./compassBearing";
 export interface Answer extends Response {
   /** Frozen geographic/angle evidence for historical receipts; never regrade it. */
@@ -89,7 +87,7 @@ export function gameReducer(
     return state.phase === "feedback" && round.constructionExample
       ? { ...state, showConstructionExample: !state.showConstructionExample }
       : state;
-  const finish = (response: Response, correct: boolean): GameState => {
+  const finish = (response: Response, accepted?: boolean): GameState => {
     if (
       constructionRule(round) &&
       !response.construction &&
@@ -99,11 +97,11 @@ export function gameReducer(
         ...response,
         construction: structuredClone(round.constructionInitial),
       };
-    const result = constructionRule(round)
-      ? evaluateConstruction(round, response)
-      : undefined;
+    const outcome = mechanicFor(round).outcome?.(round, response);
+    const correct =
+      outcome?.correct ?? accepted ?? isCorrect(round, context, response);
+    const result = outcome?.constructionResult;
     if (result) {
-      correct = result.tier !== null;
       response = { ...response, constructionResult: result };
     }
     return {
@@ -122,9 +120,7 @@ export function gameReducer(
         ...state.answers,
         {
           roundId: round.id,
-          ...(round.rule.type === "bearing-angle"
-            ? { bearing: bearingResult(round, response) }
-            : {}),
+          ...(outcome?.bearing ? { bearing: outcome.bearing } : {}),
           ...(journey.saveRevision
             ? { receiptLabel: round.resolvedLabel ?? round.label }
             : {}),
@@ -142,6 +138,7 @@ export function gameReducer(
             response,
             correct,
             state.help?.[round.id],
+            outcome,
           ),
           pointsVersion: POINTS_VERSION,
         },
@@ -346,15 +343,10 @@ export function gameReducer(
     return { ...state, ...response, inputError: undefined };
   }
   if (action.type === "submit" && canSubmit(round, context, state))
-    return finish(
-      {
-        ...state,
-        ordered: isSlotAnswer(round)
-          ? orderedCards(round, state)
-          : state.ordered,
-      },
-      constructionRule(round) ? false : isCorrect(round, context, state),
-    );
+    return finish({
+      ...state,
+      ordered: isSlotAnswer(round) ? orderedCards(round, state) : state.ordered,
+    });
   return state;
 }
 export const journeyScore = (state: GameState) =>

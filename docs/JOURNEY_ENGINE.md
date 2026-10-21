@@ -25,22 +25,23 @@ published catalog, scheduling index and runtime discovery.
 
 ## Responsibilities
 
-| Responsibility                                                   | Owner                                                       | Boundary                                                                                                     |
-| ---------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Premise, five stops, copy, help, reveal, completion              | `src/game/*Journey.ts`                                      | Content records; no custom React or reducer per Journey.                                                     |
-| Mode capabilities, allowed rules, submission and control grading | `mechanics.ts`                                              | Single registry; TypeScript rule compatibility and answer type names derive from it.                         |
-| Authored and runtime data contracts                              | `questionContracts.ts`                                      | Type-only question/rule/response/context shapes, presentation presets and discriminated authoring contracts. |
-| Authoring entry point and common validation                      | `questionBuilder.ts`                                        | `defineQuestion` compiles scenes and validates; `definePresentation` accepts presentation only.              |
-| Scene contracts and runtime compiler                             | `scenes.ts`                                                 | Group authored state; compile once into existing runtime fields.                                             |
-| Canonical preparation and answer resolution                      | `questionPreparation.ts`                                    | Validate local data/help, resolve candidates and solutions, prepare paths and own context caches.            |
-| Submission readiness and knowledge predicates                    | `questionEvaluation.ts`, `answerTargets.ts`, `reasoning.ts` | Consume canonical answers and registered control grading independently of presentation.                      |
-| Pending responses, edits and transitions                         | `state.ts`                                                  | Consume registered response capabilities; preserve shared save shape.                                        |
-| Help and immutable assist locks                                  | `guidance.ts`                                               | `withAssistanceLocks` reapplies locks after clearing and stale draft restoration.                            |
-| Controls                                                         | `AnswerForm.tsx`, `OrderAnswer.tsx`                         | Route by registered control capability; pointer dragging has button/keyboard alternatives.                   |
-| Effective map and feedback                                       | `presentation.ts`, `src/app/journeyWorld.ts`, `copy.ts`     | Resolve authored geography and canonical answers into semantic renderer props.                               |
-| Equal city references                                            | `authoredPlaces.ts`                                         | Preserve source identity/coordinates while suppressing capital-specific shape, size and priority.            |
-| Local review                                                     | `journeyAudit.ts`, `scripts/check-journey.mjs`              | Review one Journey's contracts, cameras, visible objects, sources and local media.                           |
-| Discovery, scheduling and retirement                             | `journeys.ts`, `journeyRegistry.ts`, `journeyIndex.json`    | Keep definitions deferred; regenerate metadata only when its inputs change.                                  |
+| Responsibility                                                   | Owner                                                       | Boundary                                                                                                      |
+| ---------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Premise, five stops, copy, help, reveal, completion              | `src/game/*Journey.ts`                                      | Content records; no custom React or reducer per Journey.                                                      |
+| Mode capabilities, allowed rules, submission and control grading | `mechanics.ts`                                              | Single registry; TypeScript rule compatibility and answer type names derive from it.                          |
+| Authored and runtime data contracts                              | `questionContracts.ts`                                      | Type-only question/rule/response/context shapes, presentation presets and discriminated authoring contracts.  |
+| Authoring entry point and common validation                      | `questionBuilder.ts`                                        | `defineQuestion` compiles scenes and validates; `definePresentation` accepts presentation only.               |
+| Scene contracts and runtime compiler                             | `scenes.ts`                                                 | Group authored state; compile once into existing runtime fields.                                              |
+| Canonical preparation and answer resolution                      | `questionPreparation.ts`                                    | Validate local data/help, resolve candidates and solutions, prepare paths and own context caches.             |
+| Submission readiness and knowledge predicates                    | `questionEvaluation.ts`, `answerTargets.ts`, `reasoning.ts` | Consume canonical answers and registered control grading independently of presentation.                       |
+| Tiered submission outcome                                        | `answerOutcome.ts`, registered through `mechanics.ts`       | One canonical evaluation supplies acceptance, accuracy points and frozen evidence; help caps remain separate. |
+| Pending responses, edits and transitions                         | `state.ts`                                                  | Consume registered response capabilities; preserve shared save shape.                                         |
+| Help and immutable assist locks                                  | `guidance.ts`                                               | `withAssistanceLocks` reapplies locks after clearing and stale draft restoration.                             |
+| Controls                                                         | `AnswerForm.tsx`, `OrderAnswer.tsx`                         | Route by registered control capability; pointer dragging has button/keyboard alternatives.                    |
+| Effective map and feedback                                       | `presentation.ts`, `src/app/journeyWorld.ts`, `copy.ts`     | Resolve authored geography and canonical answers into semantic renderer props.                                |
+| Equal city references                                            | `authoredPlaces.ts`                                         | Preserve source identity/coordinates while suppressing capital-specific shape, size and priority.             |
+| Local review                                                     | `journeyAudit.ts`, `scripts/check-journey.mjs`              | Review one Journey's contracts, cameras, visible objects, sources and local media.                            |
+| Discovery, scheduling and retirement                             | `journeys.ts`, `journeyRegistry.ts`, `journeyIndex.json`    | Keep definitions deferred; regenerate metadata only when its inputs change.                                   |
 
 The globe remains shared with Explore and Study. Display emphasis cannot change
 grading. New controls reuse saved `Response` data when its semantics fit; do not
@@ -537,22 +538,25 @@ allowed rules from the registry. TypeScript catches missing mode/rule entries;
 the recipe integration test catches unsupported examples. UI routing uses the
 registered control, including construction, rather than a `geo-` name prefix.
 
-It is still a cross-cutting extension, not a plug-in interface. A search for
-compass-specific identifiers finds 22 non-Journey source files, spanning controls,
+It is still a cross-cutting extension, not a plug-in interface. The initial audit's search for
+compass-specific identifiers found 22 non-Journey source files, spanning controls,
 grading, points, saves, receipts and scene adapters. This is source fanout, not
 22 mandatory edits for every new mechanic. The type union, registry, recipe and
-rule labels are explicit registration sites. `state.ts`, `points.ts`,
-`GameShell.tsx`, `copy.ts`, `presentation.ts` and `journeyWorld.ts` still contain
+rule labels are explicit registration sites. `GameShell.tsx`, `copy.ts`,
+`presentation.ts` and `journeyWorld.ts` still contain
 family branches; save validation must recognize new frozen evidence independently
 of today's question. A new control should not add Journey-ID checks to these files.
 
-Before the next genuinely new response family, consider a typed submission
-outcome shared by grading, reward calculation and frozen feedback. That would
-reduce repeated family dispatch without merging eligibility, disclosure, grading
-or camera framing. Do this against an actual second use case with compatibility
-coverage, rather than introducing a generic plug-in framework now. Historical
-storage growth is a more immediate scaling constraint; see
-[the one-year measurement](SAVE_PERSISTENCE.md#one-year-of-play).
+Tiered mechanics now register an `outcome` evaluator. `answerOutcome.ts` supplies
+implementations for compass, construction, distance pins and numeric estimates.
+The reducer evaluates once, freezes evidence and passes the same accuracy reward
+to scoring; `isCorrect` uses that registered evaluator for standalone checks.
+Help ceilings apply afterwards. Canonical grading ignores supplied historical
+grades; the standalone reward helper may explicitly reuse already submitted
+construction evidence. Historical receipts continue to use saved points/evidence
+without regrading. New tiered mechanics add their evaluator at this registration
+point instead of duplicating family branches in evaluation, submission and points.
+This does not combine eligibility, disclosure or camera framing with grading.
 
 Current Journeys use grouped scenes. Shared presentation
 presets can still supply defaults; scene overrides compile into the renderer's

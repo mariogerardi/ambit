@@ -41,6 +41,7 @@
     "src/app/archiveDates.ts",
     "src/app/useProgressSync.ts",
     "src/game/mechanics.ts",
+    "src/game/answerOutcome.ts",
     "src/game/answerNames.ts",
     "src/game/questionText.ts",
     "src/game/questionTypes.ts",
