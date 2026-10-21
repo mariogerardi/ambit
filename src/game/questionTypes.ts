@@ -8,6 +8,12 @@ export const ANSWER_TYPES: Partial<Record<AnswerMode, string>> =
       .map(([mode, mechanic]) => [mode, mechanic.label]),
   );
 export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
+  "raster-overlap": "Painted overlap with a reviewed area mask",
+  "point-coverage-max": "Maximum point coverage with a fixed circle",
+  "line-following": "Reviewed path coverage and deviation",
+  "population-coverage-area-budget": "Population captured within a land budget",
+  "population-balance": "Population shares across a geodesic cut",
+  "bearing-angle": "Initial great-circle bearing",
   "pin-distance": "Place a pin near a local place",
   "pin-inside": "Place a pin inside a territory",
   "place-ids": "Select city markers",

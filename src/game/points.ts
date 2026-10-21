@@ -1,8 +1,10 @@
+import { constructionRule, evaluateConstruction } from "./construction";
 import type { Question, Response } from "./questionContracts";
 import type { Answer, GameState } from "./state";
 import type { HelpStage } from "./guidance";
 import { pinDistanceTier } from "./answerTargets";
 import { estimateTier } from "./numericEstimate";
+import { bearingResult } from "./compassBearing";
 
 export const QUESTION_POINTS = 3;
 export const POINTS_VERSION = 1;
@@ -18,6 +20,17 @@ export function submittedPoints(
 ) {
   if (!correct) return 0;
   let earned = QUESTION_POINTS;
+  if (constructionRule(question)) {
+    const result =
+      response.constructionResult ?? evaluateConstruction(question, response);
+    if (!result || result.tier === null) return 0;
+    earned = 3 - result.tier;
+  }
+  if (question.rule.type === "bearing-angle") {
+    const tier = bearingResult(question, response)?.tier;
+    if (tier === null || tier === undefined) return 0;
+    earned -= tier;
+  }
   if (
     question.rule.type === "pin-distance" &&
     question.rule.tiers?.length === 3

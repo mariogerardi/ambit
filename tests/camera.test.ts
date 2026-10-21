@@ -649,3 +649,46 @@ describe("semantic visual states", () => {
     expect(regionStyle("default", true).fill).toBe(stateStyles.hover.fill);
   });
 });
+
+it("reports flyover stops once and stops reporting after cancellation", () => {
+  let now = 0,
+    id = 0;
+  const frames = new Map<number, FrameRequestCallback>();
+  vi.stubGlobal("performance", { now: () => now });
+  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+    frames.set(++id, cb);
+    return id;
+  });
+  vi.stubGlobal("cancelAnimationFrame", (n: number) => frames.delete(n));
+  let position = { lat: 0, lng: 0, altitude: 0.6 };
+  const port = {
+    pointOfView(target?: Focus) {
+      if (target) position = { ...position, ...target };
+      return position;
+    },
+  };
+  const onStep = vi.fn(),
+    flyover = new CameraFlyover();
+  flyover.start(
+    port,
+    [
+      { lat: 0, lng: 0, altitude: 0.6 },
+      { lat: 1, lng: 1, altitude: 0.6 },
+    ],
+    false,
+    false,
+    onStep,
+  );
+  expect(onStep.mock.calls).toEqual([[0]]);
+  for (let i = 0; i < 110; i++) {
+    now += 32;
+    const callbacks = [...frames.values()];
+    frames.clear();
+    callbacks.forEach((cb) => cb(now));
+  }
+  expect(onStep.mock.calls).toEqual([[0], [1]]);
+  flyover.cancel();
+  expect(frames.size).toBe(0);
+  flyover.start(port, [position], true, false, onStep);
+  expect(onStep.mock.calls).toEqual([[0], [1]]);
+});

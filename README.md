@@ -107,6 +107,7 @@ Start with the [documentation index](docs/README.md).
 - [Journey engine and extension contracts](docs/JOURNEY_ENGINE.md): reusable mechanics, matching, and extension boundaries.
 - [Journey crafting](docs/JOURNEY_CRAFTING.md): Throughlines, difficulty, globe interaction, and meaningful reveals.
 - [Portable Journey authoring kit](docs/JOURNEY_AUTHORING_KIT.md): Export current context and examples for AI-assisted design.
+- [Implement a Journey from a spec](docs/journey-authoring/IMPLEMENTING_A_SPEC.md): Familiarize yourself with the current suite, preserve approved decisions, implement and verify.
 - [Geographic catalog policy](docs/CATALOG_POLICY.md) and [Explore data](docs/EXPLORE_DATA.md): identities, source conventions, and display limits.
 - [Save persistence](docs/SAVE_PERSISTENCE.md): migration, recovery, and conflicts.
 - [Release readiness](docs/RELEASE_READINESS.md): current gaps and deployment handoff.

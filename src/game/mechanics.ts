@@ -1,3 +1,7 @@
+import {
+  constructionReady,
+  validateConstructionQuestion,
+} from "./construction";
 import type {
   AnswerMode,
   KnowledgeRule,
@@ -8,8 +12,12 @@ import type {
 import { validPin } from "./answerTargets";
 import { orderedCards } from "./ordering";
 import { estimateValue } from "./numericEstimate";
+import { bearingValue } from "./compassBearing";
+import { initialBearing, normalizeBearing } from "./geodesic";
 
 export type AnswerControl =
+  | "construction"
+  | "compass"
   | "pin"
   | "map"
   | "choice"
@@ -26,7 +34,7 @@ export interface MechanicDefinition<
   rules: R;
   label: string;
   control: AnswerControl;
-  response: "pin" | "selected" | "text" | "ordered";
+  response: "pin" | "selected" | "text" | "ordered" | "construction";
   mapSelection: "none" | "regions" | "places";
   single: boolean;
   editableCommitment: boolean;
@@ -56,6 +64,7 @@ const submissionChecks: Record<
   MechanicDefinition["canSubmit"]
 > = {
   pin: (_, response) => validPin(response.pin),
+  construction: (question, response) => constructionReady(question, response),
   text: (_, response) => response.text.trim() !== "",
   selected: (_, response, { count }) => response.selectedIds.length === count,
   ordered: (_, response, { count }) =>
@@ -197,6 +206,114 @@ const cards = {
 };
 /** One registry owns answer capabilities, allowed rules, validation and control grading. */
 export const MECHANICS = {
+  "geo-brush": defineMechanic(
+    ["raster-overlap"],
+    "Paint a geographic area",
+    "construction",
+    "construction",
+    "none",
+    true,
+    { validate: validateConstructionQuestion },
+  ),
+  "geo-circle": defineMechanic(
+    ["point-coverage-max"],
+    "Fit a geographic circle",
+    "construction",
+    "construction",
+    "none",
+    true,
+    { validate: validateConstructionQuestion },
+  ),
+  "geo-trace": defineMechanic(
+    ["line-following"],
+    "Trace a geographic path",
+    "construction",
+    "construction",
+    "none",
+    true,
+    { validate: validateConstructionQuestion },
+  ),
+  "geo-polygon": defineMechanic(
+    ["population-coverage-area-budget"],
+    "Construct a population region",
+    "construction",
+    "construction",
+    "none",
+    true,
+    { validate: validateConstructionQuestion },
+  ),
+  "geo-cut": defineMechanic(
+    ["population-balance"],
+    "Divide a population",
+    "construction",
+    "construction",
+    "none",
+    true,
+    { validate: validateConstructionQuestion },
+  ),
+  "compass-bearing": defineMechanic(
+    ["bearing-angle"],
+    "Compass bearing",
+    "compass",
+    "text",
+    "none",
+    true,
+    {
+      canSubmit: (_, response) => bearingValue(response) !== undefined,
+      validate: (question, fail) => {
+        if (question.rule.type !== "bearing-angle")
+          return fail("compass requires angular grading");
+        const { origin, destination, tiers } = question.rule;
+        try {
+          initialBearing(origin, destination);
+        } catch {
+          fail("invalid compass endpoints");
+        }
+        if (
+          !origin.id?.trim() ||
+          !destination.id?.trim() ||
+          origin.id === destination.id ||
+          !origin.name?.trim() ||
+          !destination.name?.trim() ||
+          !origin.sourceId?.trim() ||
+          !destination.sourceId?.trim() ||
+          tiers.length !== 3 ||
+          tiers.some(
+            (tier, i) =>
+              !Number.isFinite(tier.degrees) ||
+              tier.degrees <= (tiers[i - 1]?.degrees ?? 0) ||
+              tier.degrees >= 180 ||
+              !tier.feedback.trim(),
+          )
+        )
+          fail(
+            "compass requires named endpoints and three ascending angular bands below 180 degrees",
+          );
+        const sector = question.guidance?.assist?.compassSector;
+        if (sector) {
+          const width = normalizeBearing(sector.end - sector.start);
+          const target = initialBearing(origin, destination);
+          if (
+            ![sector.start, sector.end].every(
+              (n) => Number.isFinite(n) && n >= 0 && n < 360,
+            ) ||
+            width < 60 ||
+            width > 180 ||
+            normalizeBearing(target - sector.start) > width
+          )
+            fail(
+              "compass assist requires a broad sector containing the target",
+            );
+        }
+        if (
+          question.guidance?.assist?.candidateIds ||
+          question.guidance?.assist?.fixedSlots ||
+          question.guidance?.assist?.fixedSelections
+        )
+          fail("compass assistance cannot change answer eligibility");
+      },
+    },
+  ),
   pin: defineMechanic(
     ["pin-distance", "pin-inside"],
     "Drop a pin",

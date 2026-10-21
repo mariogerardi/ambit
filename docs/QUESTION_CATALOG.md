@@ -11,29 +11,34 @@ records supported capabilities; capability alone does not make a format the
 recommended product behavior. Previously
 published local packs are read-only compatibility data.
 
+For an approved specification, start with
+[Implement a Journey from a spec](journey-authoring/IMPLEMENTING_A_SPEC.md).
+
 ## Bundled Journeys
 
-| Title                             | Practice route                              | Definition                                                             |
-| --------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------- |
-| Beyond the maple leaf             | `/journey/beyond-the-maple-leaf`            | [canadaJourney.ts](../src/game/canadaJourney.ts)                       |
-| Around the Mediterranean          | `/journey/mediterranean`                    | [fourthJourney.ts](../src/game/fourthJourney.ts)                       |
-| Shared neighbors                  | `/journey/shared-neighbors`                 | [ninthJourney.ts](../src/game/ninthJourney.ts)                         |
-| Along the Andes                   | `/journey/along-the-andes`                  | [andesJourney.ts](../src/game/andesJourney.ts)                         |
-| Not the obvious city              | `/journey/not-the-obvious-city`             | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                   |
-| Island instincts                  | `/journey/island-instincts`                 | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)               |
-| A Continent in Pieces             | `/journey/north-america`                    | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)           |
-| Latitude surprises                | `/journey/latitude-surprises`               | [latitudeJourney.ts](../src/game/latitudeJourney.ts)                   |
-| Pacific Landfalls                 | `/journey/ring-of-fire`                     | [tenthJourney.ts](../src/game/tenthJourney.ts)                         |
-| Exceptions to the rule            | `/journey/exceptions-to-the-rule`           | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                     |
-| On Russia’s doorstep              | `/journey/try-not-to-click-russia`          | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                 |
-| Chasing the sun                   | `/journey/chasing-the-sun`                  | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                   |
-| Down the Danube                   | `/journey/down-the-danube`                  | [danubeJourney.ts](../src/game/danubeJourney.ts)                       |
-| Same Hour, Different Worlds       | `/journey/same-hour-different-worlds`       | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                   |
-| Same Name, Different Place        | `/journey/same-name-different-place`        | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)             |
-| Missing Borders                   | `/journey/missing-borders`                  | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts)       |
-| Across the Divide                 | `/journey/across-the-divide`                | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)           |
-| Far From Everything               | `/journey/far-from-everything`              | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts) |
-| The Sound of Somewhere: Reggaetón | `/journey/the-sound-of-somewhere-reggaeton` | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                 |
+| Title                                         | Practice route                                | Definition                                                                     |
+| --------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
+| Where the Silk Roads Met (unlisted)           | `/journey/where-the-silk-roads-met`           | [silkRoadIntersectionsJourney.ts](../src/game/silkRoadIntersectionsJourney.ts) |
+| The Vaccine That Crossed the World (unlisted) | `/journey/the-vaccine-that-crossed-the-world` | [vaccineExpeditionJourney.ts](../src/game/vaccineExpeditionJourney.ts)         |
+| Beyond the maple leaf                         | `/journey/beyond-the-maple-leaf`              | [canadaJourney.ts](../src/game/canadaJourney.ts)                               |
+| Around the Mediterranean                      | `/journey/mediterranean`                      | [fourthJourney.ts](../src/game/fourthJourney.ts)                               |
+| Shared neighbors                              | `/journey/shared-neighbors`                   | [ninthJourney.ts](../src/game/ninthJourney.ts)                                 |
+| Along the Andes                               | `/journey/along-the-andes`                    | [andesJourney.ts](../src/game/andesJourney.ts)                                 |
+| Not the obvious city                          | `/journey/not-the-obvious-city`               | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                           |
+| Island instincts                              | `/journey/island-instincts`                   | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)                       |
+| A Continent in Pieces                         | `/journey/north-america`                      | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)                   |
+| Latitude surprises                            | `/journey/latitude-surprises`                 | [latitudeJourney.ts](../src/game/latitudeJourney.ts)                           |
+| Pacific Landfalls                             | `/journey/ring-of-fire`                       | [tenthJourney.ts](../src/game/tenthJourney.ts)                                 |
+| Exceptions to the rule                        | `/journey/exceptions-to-the-rule`             | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                             |
+| On Russia’s doorstep                          | `/journey/try-not-to-click-russia`            | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                         |
+| Chasing the sun                               | `/journey/chasing-the-sun`                    | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                           |
+| Down the Danube                               | `/journey/down-the-danube`                    | [danubeJourney.ts](../src/game/danubeJourney.ts)                               |
+| Same Hour, Different Worlds                   | `/journey/same-hour-different-worlds`         | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                           |
+| Same Name, Different Place                    | `/journey/same-name-different-place`          | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)                     |
+| Missing Borders                               | `/journey/missing-borders`                    | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts)               |
+| Across the Divide                             | `/journey/across-the-divide`                  | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)                   |
+| Far From Everything                           | `/journey/far-from-everything`                | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts)         |
+| The Sound of Somewhere: Reggaetón             | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.
@@ -58,24 +63,25 @@ The modes below describe supported controls, not catalog totals.
 The type and rule contracts live in [`questionContracts.ts`](../src/game/questionContracts.ts);
 user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts).
 
-| Mode                   | Control                    |
-| ---------------------- | -------------------------- |
-| `pin`                  | Drop a pin                 |
-| `city-single`          | Single city pick           |
-| `city-multiple`        | Multiple city picks        |
-| `merged-region-single` | Single anonymous territory |
-| `map-single`           | Single country pick        |
-| `map-multiple`         | Multiple country picks     |
-| `number`               | Number                     |
-| `slider`               | Estimate within a range    |
-| `text`                 | Free response              |
-| `typed-regions`        | Typed region names         |
-| `ordered-countries`    | Ordered country names      |
-| `ordered-capitals`     | Ordered capital names      |
-| `choice-single`        | Single choice              |
-| `choice-multiple`      | Multiple choices           |
-| `choice-order`         | Order cards with spares    |
-| `choice-match`         | Match cards to roles       |
+| Mode                   | Control                     |
+| ---------------------- | --------------------------- |
+| `pin`                  | Drop a pin                  |
+| `compass-bearing`      | Rotate a true-north compass |
+| `city-single`          | Single city pick            |
+| `city-multiple`        | Multiple city picks         |
+| `merged-region-single` | Single anonymous territory  |
+| `map-single`           | Single country pick         |
+| `map-multiple`         | Multiple country picks      |
+| `number`               | Number                      |
+| `slider`               | Estimate within a range     |
+| `text`                 | Free response               |
+| `typed-regions`        | Typed region names          |
+| `ordered-countries`    | Ordered country names       |
+| `ordered-capitals`     | Ordered capital names       |
+| `choice-single`        | Single choice               |
+| `choice-multiple`      | Multiple choices            |
+| `choice-order`         | Order cards with spares     |
+| `choice-match`         | Match cards to roles        |
 
 `land-path` remains an internal supported mode/evaluator, with an executable
 `recipe:land-path` example and no playable catalog question. Inspect it with
@@ -83,6 +89,34 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 requires an explicit design decision. Multiple-choice questions are capped at six
 options. The numeric counter supports nonnegative integers with explicit +/-
 controls and direct typing; a new numeric rule should respect that UI contract.
+
+`compass-bearing` is a standalone question control with a `bearing-angle` rule.
+Each question owns reviewed `origin` and `destination` place records and three
+ascending inclusive error tiers (`degrees`, `feedback`); no prior Journey stop is
+required. The upright dial, optional degree entry under “Type my answer” and keyboard input select a
+whole-degree initial spherical bearing clockwise from true north. An untouched
+dial is unanswered; 360° normalizes to 0°. Submission is explicit. Circular error
+selects 3/2/1 points, capped independently by help. The vaccine Journey uses
+8°/18°/35°; a 36° error misses. Free Accuracy information discloses the bands.
+Optional `guidance.assist.compassSector: { start, end }` highlights a broad
+clockwise dial sector (including wraparound), without constraining input or
+changing grading. Choose guides whose placement does not systematically disclose
+the answer through their midpoint. The origin is shown automatically; the
+destination and comparison arcs appear only after submission. Feedback compares
+the correct route and a short segment of the chosen heading. Submission snapshots
+preserve coordinates, target, chosen angle, error, tier and feedback for receipts.
+See `recipe:compass-bearing`.
+
+**Bearing Intersection** is a distinct location-inference mechanic, composed with
+`mode: "pin"` / `pin-distance`, not the editable Compass Bearing control.
+`bearingIntersection` declares exactly two station records and an optional
+single-station sector assist. Readings are computed from canonical coordinates
+and shown on two fixed true-north dials. The target and rays remain withheld
+until submission; assist adds one broad geographic sector. Existing pin tiers,
+confirmation, help ceilings and saves are unchanged. Each question is complete
+without earlier Journey state. See `recipe:bearing-intersection`,
+`npm run check:journey -- --recipe bearing-intersection`, and the unlisted
+_Where the Silk Roads Met_ for five linked examples.
 
 For estimates, `slider` uses the `numeric-range` rule with explicit minimum,
 maximum, step, unit, target and inclusive absolute-error tolerance. Optional three
@@ -167,6 +201,7 @@ A rule describes correctness independently of its answer control:
 | Family                 | Rule IDs                                                                                                                | Authority/limits                                                                                        |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `slot-matches`, `country-ids`, `region-ids`, `place-ids`, `merged-region` | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
+| Compass direction      | `bearing-angle`                                                                                                         | Reviewed endpoints, initial spherical azimuth and circular angular error.                               |
 | Pin placement          | `pin-inside`, `pin-distance`                                                                                            | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
 | Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                                              | Sourced fact context or the explicit common-English-name UN roster.                                     |
 | Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                                         | Bundled capital/flag records; capital-order checks the specified route.                                 |
@@ -174,7 +209,7 @@ A rule describes correctness independently of its answer control:
 | Reviewed relationships | `territory-owner`, `feature-count`, `language-family`, `official-languages`, `physical-feature`                         | Curated sets/profiles, not universal relationships inferred from display metadata.                      |
 | Spatial predicates     | `capital-coordinate`, `capital-circle`, `country-circle`                                                                | Pinned coordinates, geodesic disks, and full country geometry. `country-circle` has no bundled example. |
 
-There are 26 declared knowledge-rule variants. Support for a rule does not imply
+Support for a declared knowledge rule does not imply
 complete factual coverage or that every mode/rule combination is valid.
 [`createQuestionContext`](../src/game/questionPreparation.ts) prepares and validates the
 required targets/answers. Inspect an existing question with the same rule before
@@ -419,3 +454,12 @@ The Mediterranean opening now has six equally styled, named country candidates
 across Africa and Europe, keeping the gateway name until reveal. Q4’s six
 candidates are Slovenia, Croatia, Bosnia and Herzegovina, Montenegro, Albania
 and Greece; the deciding condition is former Yugoslav republic membership.
+
+Constructed answers also work independently per question: `geo-brush` paints
+geographic disks against an area-weighted target raster; `geo-circle` moves a
+fixed-radius circle over explicit candidates; `geo-trace` follows a withheld
+reference corridor; `geo-polygon` balances population coverage against land cost;
+`geo-cut` divides a frozen population grid with one boundary-to-boundary geodesic.
+All submit explicitly and disclose three quality bands before play. Coordinate
+entry edits the same geometry as globe gestures. See `constructionRecipes.ts`
+and the constructed-answer section of `JOURNEY_ENGINE.md`.

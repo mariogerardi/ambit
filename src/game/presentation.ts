@@ -21,7 +21,8 @@ import {
 } from "./answerPresentation";
 import { pinBands } from "./pinPresentation";
 import { interiorAnchor } from "../geography/interiorAnchor";
-import { presentJourneyPlace } from "./authoredPlaces";
+import { presentJourneyPlace, cityReference } from "./authoredPlaces";
+import { reviewedBearing } from "./compassBearing";
 import { mechanicFor } from "./mechanics";
 
 export function questionPlaces(
@@ -51,6 +52,32 @@ function resolveQuestionPlaces(
   response?: GameState,
 ): PlaceFeature[] {
   if (phase === "home" || phase === "finished") return [];
+  if (question.rule.type === "bearing-angle") {
+    const reveal = phase === "feedback" || phase === "failed";
+    const snapshot = response && reviewedBearing(question, response);
+    const origin = snapshot?.origin ?? question.rule.origin;
+    const destination = snapshot?.destination ?? question.rule.destination;
+    const references = (question.places ?? [])
+      .filter((p) => p.id !== origin.id && p.id !== destination.id)
+      .map(cityReference);
+    return [
+      cityReference(origin),
+      ...references,
+      ...(reveal
+        ? [
+            {
+              ...destination,
+              displayRole: undefined,
+              visualState: correct ? ("correct" as const) : ("answer" as const),
+              answerTarget: false,
+            },
+            ...(question.feedbackPlaces ?? []).filter(
+              (p) => p.id !== origin.id && p.id !== destination.id,
+            ),
+          ]
+        : []),
+    ];
+  }
   const items =
     context && response ? answerItems(question, context, response) : [];
   const projectPlaces = (places: PlaceFeature[]) =>
@@ -114,7 +141,11 @@ function resolveQuestionPlaces(
   }
   if (question.mode === "pin") {
     const reveal = phase === "feedback" || phase === "failed";
-    const result: PlaceFeature[] = (question.places ?? []).filter(
+    const result: PlaceFeature[] = (
+      question.bearingIntersection
+        ? question.bearingIntersection.stations.map(cityReference)
+        : (question.places ?? [])
+    ).filter(
       (place) =>
         (place.markerHidden || place.displayRole === "reference") &&
         (question.rule.type !== "pin-distance" ||
@@ -678,6 +709,7 @@ export function questionVisualStates(
   const placeAnswer =
     question.mode.startsWith("city-") ||
     question.mode === "ordered-capitals" ||
+    question.mode === "compass-bearing" ||
     ["capital-name", "capital-coordinate", "capital-circle"].includes(
       question.rule.type,
     );

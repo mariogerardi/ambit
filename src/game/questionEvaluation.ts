@@ -1,3 +1,4 @@
+import { constructionRule, evaluateConstruction } from "./construction";
 import {
   normalizeAnswer,
   countryIdForName,
@@ -9,6 +10,7 @@ import { mechanicFor } from "./mechanics";
 import { pinDistance, pinInside } from "./answerTargets";
 import { isMinimumLandPath } from "./reasoning";
 import { estimateError } from "./numericEstimate";
+import { bearingResult } from "./compassBearing";
 import {
   canSelect,
   selectableIds,
@@ -32,6 +34,10 @@ export function isCorrect(
   context: QuestionContext,
   response: Response,
 ) {
+  if (constructionRule(question)) {
+    const result = evaluateConstruction(question, response);
+    return !!result && result.tier !== null;
+  }
   const rule = question.rule,
     expected = solutionIds(question, context);
   const controlGrade = mechanicFor(question).grade;
@@ -40,6 +46,10 @@ export function isCorrect(
       count: responseCount(question, context),
       eligible: selectableIds(question, context),
     });
+  if (rule.type === "bearing-angle") {
+    const result = bearingResult(question, response);
+    return result !== undefined && result.tier !== null;
+  }
   if (rule.type === "pin-distance") {
     const distance = pinDistance(question, response);
     return distance !== undefined && distance <= rule.radiusKm + 1e-7;

@@ -1,3 +1,4 @@
+import { ConstructionAnswer } from "./ConstructionAnswer";
 import { answerItems } from "./answerPresentation";
 import { mechanicFor } from "./mechanics";
 import { pointAnswerNoun, answerPlace } from "./answerTargets";
@@ -10,6 +11,8 @@ import { responseCount, selectableIds } from "./questionPreparation";
 import { AnswerInput } from "./AnswerInput";
 import { AnswerCounter } from "./AnswerCounter";
 import { EstimateSlider } from "./EstimateSlider";
+import { StationBearings } from "./StationBearings";
+import { CompassAnswer, CompassEntry } from "./CompassAnswer";
 import { QuestionActions } from "./QuestionActions";
 import {
   candidateAvailable,
@@ -57,6 +60,18 @@ function AnswerControls({
   game = withAssistanceLocks(question, game);
   const locked = lockedSelectionIds(question, game);
   const items = answerItems(question, context, game);
+  if (question.mode.startsWith("geo-"))
+    return (
+      <ConstructionAnswer
+        key={question.id}
+        question={question}
+        context={context}
+        game={game}
+        dispatch={dispatch}
+        webgl={webgl}
+        mapKey={mapKey}
+      />
+    );
   if (isSlotAnswer(question))
     return (
       <OrderAnswer
@@ -102,6 +117,35 @@ function AnswerControls({
     context.names.get(id) ??
     context.choiceNames.get(id) ??
     id;
+  if (definition.control === "compass")
+    return (
+      <form
+        className="answer-form compass-answer-form"
+        autoComplete="off"
+        onSubmit={(event) => {
+          event.preventDefault();
+          dispatch({ type: "submit" });
+        }}
+      >
+        <CompassAnswer
+          question={question}
+          response={game}
+          onChange={(value) => dispatch({ type: "text", value })}
+        />
+        <QuestionActions
+          mapKey={mapKey}
+          pointScoring
+          guidance={guidance}
+          label="Set bearing"
+          submitType="submit"
+          disabled={!canSubmit(question, context, game)}
+        />
+        <CompassEntry
+          response={game}
+          onChange={(value) => dispatch({ type: "text", value })}
+        />
+      </form>
+    );
   if (definition.control === "pin" && !webgl)
     return (
       <p className="pin-unavailable" role="status">
@@ -112,6 +156,7 @@ function AnswerControls({
   if (definition.control === "pin")
     return (
       <div className="pin-answer">
+        <StationBearings question={question} />
         <span className="sr-only" role="status">
           {game.pin ? "Pin placed." : ""}
         </span>

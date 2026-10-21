@@ -1,3 +1,4 @@
+import { constructionRule } from "./construction";
 /** Resolve and validate canonical data, eligibility and expected answers before play. */
 import type {
   CountryFact,
@@ -364,11 +365,13 @@ export function solutionIds(
   context: QuestionContext,
 ): string[] {
   const rule = question.rule;
+  if (constructionRule(question)) return [];
   if (rule.type === "slot-matches")
     return (question.matchSlots ?? []).map(
       (slot) =>
         rule.matches.find((match) => match.slotId === slot.id)?.choiceId ?? "",
     );
+  if (rule.type === "bearing-angle") return [rule.destination.id];
   if (rule.type === "pin-distance") return [rule.targetId];
   if (rule.type === "pin-inside" || rule.type === "place-ids") return rule.ids;
   const cached = context.solutions.get(question);

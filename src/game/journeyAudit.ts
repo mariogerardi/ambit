@@ -1,3 +1,4 @@
+import { constructionAuditSample } from "./constructionAudit";
 import {
   SHARED_VISUAL_RULES,
   auditVisualExceptions,
@@ -29,6 +30,7 @@ import { answerPlace, responsePlaceForName } from "./answerTargets";
 import { canSubmit, isCorrect } from "./questionEvaluation";
 import { interiorAnchor } from "../geography/interiorAnchor";
 import { acceptsAlternatives, responseIds } from "./answerPresentation";
+import { initialBearing, normalizeBearing } from "./geodesic";
 
 /** Exercise real input actions; no empty response with a fabricated grade. */
 function submitSample(
@@ -43,6 +45,8 @@ function submitSample(
   const count = responseCount(question, context);
   const eligible = selectableIds(question, context);
   const response: Response = { ...initialGame };
+  if (mechanic.response === "construction")
+    response.construction = constructionAuditSample(question, correct);
   if (mechanic.response === "selected")
     response.selectedIds = correct
       ? expected.slice(0, count)
@@ -83,7 +87,20 @@ function submitSample(
             : rule.max,
       );
     }
-    if (!correct && question.rule.type !== "numeric-range") {
+    if (question.rule.type === "bearing-angle") {
+      const target = initialBearing(
+        question.rule.origin,
+        question.rule.destination,
+      );
+      response.text = String(
+        normalizeBearing(Math.round(target + (correct ? 0 : 180))),
+      );
+    }
+    if (
+      !correct &&
+      question.rule.type !== "numeric-range" &&
+      question.rule.type !== "bearing-angle"
+    ) {
       const names = [
         ...(question.guidance?.assist?.places ?? []),
         ...(question.feedbackPlaces ?? []),
@@ -131,6 +148,8 @@ function submitSample(
       );
   if (mechanic.response === "text")
     dispatch({ type: "text", value: response.text });
+  if (response.construction)
+    dispatch({ type: "construction", value: response.construction });
   if (response.pin) dispatch({ type: "drop-pin", ...response.pin });
   if (game.phase === "playing") dispatch({ type: "submit" });
   return (game.phase === "feedback" || game.phase === "failed") &&
@@ -199,6 +218,12 @@ export function auditJourney(
     assets: [
       ...new Set([
         ...journey.rounds.flatMap(mediaPaths),
+        ...journey.rounds.flatMap((q) =>
+          q.constructionArea?.mask ? [q.constructionArea.mask.assetUrl] : [],
+        ),
+        ...journey.rounds.flatMap(
+          (q) => q.guidance?.assist?.images?.map((i) => i.src) ?? [],
+        ),
         ...journey.rounds
           .flatMap((q) => [
             ...(q.overlays ?? []),
@@ -206,7 +231,11 @@ export function auditJourney(
             ...(q.guidance?.assist?.overlays ?? []),
           ])
           .concat(journey.completion?.overlays ?? [])
-          .flatMap((o) => (o.type === "texture" ? [o.assetUrl] : [])),
+          .flatMap((o) =>
+            ["texture", "raster-patch"].includes(o.type) && "assetUrl" in o
+              ? [o.assetUrl]
+              : [],
+          ),
         ...(journey.completion?.flags ?? [])
           .flatMap((flag) => [flag.src, flag.detail?.src])
           .filter((value): value is string => !!value),
@@ -430,7 +459,13 @@ export function auditJourney(
       (r) => r.game.answers.at(-1)?.correct === correct,
     );
     const answers = outcomes.flatMap((r) => r.game.answers);
-    const completed = journeyWorld(
+    const completedGame: GameState = {
+      ...initialGame,
+      phase: "finished",
+      roundIndex: journey.rounds.length - 1,
+      answers,
+    };
+    const allCompleted = journeyWorld(
       regions,
       journey,
       {
@@ -442,6 +477,15 @@ export function auditJourney(
       context,
     );
     for (const { question, game, world } of outcomes) {
+      const completed = journey.completion?.constructionResults
+        ? journeyWorld(
+            regions,
+            journey,
+            completedGame,
+            context,
+            journey.rounds.findIndex((q) => q.id === question.id),
+          )
+        : allCompleted;
       const example =
         acceptsAlternatives(question) && question.mode !== "number"
           ? new Set(

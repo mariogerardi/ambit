@@ -81,6 +81,19 @@ test("geometry summaries retain answer points, identity and source without bulky
   assert.equal(result.geometry.coordinates, undefined);
   assert.equal(result.paths.groups, 1);
   assert.deepEqual(result.rule, original.rule);
+  const scoring = summarizeGeometry({
+    grid: {
+      revision: "frozen-v1",
+      cells: [
+        [1, 2, 3],
+        [2, 4, 5],
+      ],
+    },
+    indices: [1, 2],
+  });
+  assert.equal(scoring.grid.revision, "frozen-v1");
+  assert.equal(scoring.grid.cells.count, 2);
+  assert.equal(scoring.indices.count, 2);
   assert.equal(JSON.stringify(original), before);
 });
 
@@ -185,6 +198,35 @@ test(
       assert.match(kit, /### choice-order/);
       assert.match(kit, /city-multiple/);
       assert.match(kit, /not the only models/);
+      const workflow = await readFile(
+        path.join(ROOT, "docs/journey-authoring/IMPLEMENTING_A_SPEC.md"),
+        "utf8",
+      );
+      assert.equal(
+        await readFile(path.join(directory, "IMPLEMENTING_A_SPEC.md"), "utf8"),
+        workflow,
+      );
+      assert.ok(kit.includes(workflow));
+      const gptGuide = await readFile(
+        path.join(directory, "GPT_GUIDE.md"),
+        "utf8",
+      );
+      for (const file of [
+        "PROJECT_INSTRUCTIONS.md",
+        "AUTHORING_KIT.md",
+        "JOURNEY_SPEC_TEMPLATE.md",
+      ])
+        assert.ok(
+          gptGuide.includes(await readFile(path.join(directory, file), "utf8")),
+        );
+      assert.equal(
+        (gptGuide.match(/^### \d\./gm) ?? []).length,
+        index.reduce((sum, journey) => sum + journey.rounds.length, 0),
+      );
+      for (const journey of index)
+        assert.ok(gptGuide.includes(`## ${journey.title}\n`));
+      const sliderNotes = kit.match(/### slider[^]*?(?=\n###|\n##)/)[0];
+      assert.match(sliderNotes, /free Accuracy information/);
       const featured = await readFile(
         path.join(directory, "FEATURED_EXAMPLES.md"),
         "utf8",

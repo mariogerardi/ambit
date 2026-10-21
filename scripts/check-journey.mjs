@@ -20,7 +20,7 @@ const entry = index.find(
 );
 if (!entry && !recipeMode && !all) {
   console.error(
-    "Usage: npm run check:journey -- <journey-id-or-slug> [--json]\nUse --all for a catalog sweep, --list to list Journeys, or --recipe <answer-mode> for a complete mechanic example.",
+    "Usage: npm run check:journey -- <journey-id-or-slug> [--json]\nUse --all for a catalog sweep, --list to list Journeys, or --recipe <answer-mode-or-composition> for a complete mechanic example.",
   );
   process.exit(1);
 }
@@ -41,11 +41,10 @@ try {
   for (const selected of all ? index : [entry]) {
     let journey;
     if (recipeMode) {
-      const { MECHANIC_RECIPES } = await server.ssrLoadModule(
-        "/src/game/recipes.ts",
-      );
-      const question = MECHANIC_RECIPES.find(
-        (question) => question.mode === recipeMode,
+      const { MECHANIC_RECIPES, PRESENTATION_RECIPES } =
+        await server.ssrLoadModule("/src/game/recipes.ts");
+      const question = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES].find(
+        (question) => question.id === `recipe:${recipeMode}`,
       );
       if (!question) throw Error(`Unknown recipe: ${recipeMode}`);
       journey = {

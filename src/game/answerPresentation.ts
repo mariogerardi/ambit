@@ -49,6 +49,7 @@ export function answerItems(
   context: QuestionContext,
   game: GameState,
 ): AnswerItem[] {
+  if (q.rule.type === "bearing-angle") return [];
   const expected = solutionIds(q, context);
   const picked = responseIds(q, context, game);
   const reveal = game.phase === "feedback" || game.phase === "failed";

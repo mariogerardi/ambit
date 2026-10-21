@@ -1,3 +1,4 @@
+import { CONSTRUCTION_RECIPES } from "./constructionRecipes";
 import { defineQuestion, definePresentation } from "./questionBuilder";
 import { ANSWER_PLACES } from "./answerTargets";
 import { capitalSource } from "./quizData";
@@ -29,6 +30,43 @@ const africaSource = {
 // Complete control examples, deliberately absent from the published Journey catalog.
 // These demonstrate contracts; use the crafting guide to design an engaging task.
 export const MECHANIC_RECIPES: Question[] = [
+  ...CONSTRUCTION_RECIPES,
+  defineQuestion({
+    ...base,
+    id: "recipe:compass-bearing",
+    title: "compass-bearing example",
+    prompt: "From Sydney, aim your compass toward Canberra.",
+    explanation:
+      "The shortest great-circle direction begins southwest, rather than following a fixed compass heading throughout.",
+    mode: "compass-bearing",
+    count: 1,
+    selection: { type: "none" },
+    commitment: "submit",
+    rule: {
+      type: "bearing-angle",
+      origin: reference("place:2147714"),
+      destination: reference("place:2172517"),
+      tiers: [
+        { degrees: 8, feedback: "Right on course." },
+        { degrees: 18, feedback: "A close heading." },
+        { degrees: 35, feedback: "Within range." },
+      ],
+    },
+    guidance: {
+      hint: "Canberra lies inland and south of Sydney.",
+      assist: {
+        text: "The western half of the dial is highlighted; refine your direction.",
+        compassSector: { start: 180, end: 0 },
+      },
+    },
+    scenes: {
+      play: {
+        focus: { lat: -34, lng: 148, altitude: 0.7 },
+        contextIds: ["wurl:AUS"],
+      },
+      reveal: { focus: { lat: -35, lng: 149, altitude: 0.4 } },
+    },
+  }),
   defineQuestion({
     ...base,
     id: "recipe:merged-region-single",
@@ -687,5 +725,55 @@ export const MECHANIC_RECIPES: Question[] = [
       },
     },
     source: mapSource,
+  }),
+];
+
+/** Independent presentation composition: pin response, not the compass angle control. */
+export const PRESENTATION_RECIPES: Question[] = [
+  defineQuestion({
+    ...base,
+    id: "recipe:bearing-intersection",
+    title: "bearing-intersection example",
+    prompt: "Lanzhou and Datong report two bearings. Where do they meet?",
+    instruction: "Drop a pin where the two bearings meet.",
+    explanation:
+      "The two initial great-circle bearings converge at Xi’an. The rays explain modern geometry rather than a traveled route.",
+    mode: "pin",
+    count: 1,
+    selection: { type: "none" },
+    commitment: "submit",
+    rule: {
+      type: "pin-distance",
+      targetId: "place:1790630",
+      radiusKm: 240,
+      tiers: [
+        { radiusKm: 70, feedback: "Bullseye!" },
+        { radiusKm: 145, feedback: "Very close." },
+        { radiusKm: 240, feedback: "In range." },
+      ],
+    },
+    bearingIntersection: {
+      stations: [reference("place:1804430"), reference("place:2037799")],
+      assist: {
+        stationId: "place:1804430",
+        halfWidthDegrees: 15,
+        reachKm: 1200,
+      },
+    },
+    guidance: {
+      hint: "Look inland, south of the northern station.",
+      assist: {
+        text: "One broad sector from Lanzhou is now shown. Combine it with Datong’s reading.",
+      },
+    },
+    map: { ...base.map, feedbackRegions: "neutral" },
+    scenes: {
+      play: { focus: { lat: 38, lng: 108.5, altitude: 0.6 }, contextIds: [] },
+      reveal: {
+        focus: { lat: 35, lng: 109, altitude: 0.5 },
+        contextIds: ["wurl:CHN"],
+      },
+    },
+    feedbackMapCaption: "Modern bearing geometry · not historical routes",
   }),
 ];

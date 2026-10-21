@@ -26,6 +26,27 @@ describe("Journey engine authoring boundaries", () => {
       Object.keys(MECHANICS).sort(),
     );
     const responses = {
+      "geo-brush": {
+        construction: MECHANIC_RECIPES.find((q) => q.mode === "geo-brush")!
+          .constructionExample,
+      },
+      "geo-circle": {
+        construction: MECHANIC_RECIPES.find((q) => q.mode === "geo-circle")!
+          .constructionExample,
+      },
+      "geo-trace": {
+        construction: MECHANIC_RECIPES.find((q) => q.mode === "geo-trace")!
+          .constructionExample,
+      },
+      "geo-polygon": {
+        construction: MECHANIC_RECIPES.find((q) => q.mode === "geo-polygon")!
+          .constructionExample,
+      },
+      "geo-cut": {
+        construction: MECHANIC_RECIPES.find((q) => q.mode === "geo-cut")!
+          .constructionExample,
+      },
+      "compass-bearing": { text: "230" },
       pin: { pin: { lat: -35.28346, lng: 149.12807 } },
       "city-single": { selectedIds: ["place:2172517"] },
       "city-multiple": {

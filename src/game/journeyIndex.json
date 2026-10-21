@@ -161,6 +161,48 @@
     ]
   },
   {
+    "id": "drawing-the-sahara-v1",
+    "addedAt": "2026-10-20",
+    "availability": "unlisted",
+    "title": "Drawing the Sahara",
+    "saveRevision": 1,
+    "description": "Look beyond the dunes: follow water, find cities and discover where people make their homes across the Sahara.",
+    "path": "/journey/drawing-the-sahara",
+    "module": "./drawingSaharaJourney.ts",
+    "rounds": [
+      {
+        "id": "sahara-01-sand-or-stone",
+        "label": "Sand seas",
+        "progressLabel": "Sand or Stone?",
+        "resolvedLabel": "Dune seas"
+      },
+      {
+        "id": "sahara-02-capitals-at-edge",
+        "label": "Desert margins",
+        "progressLabel": "Capitals",
+        "resolvedLabel": "Capital cluster"
+      },
+      {
+        "id": "sahara-03-green-thread",
+        "label": "The Nile",
+        "progressLabel": "Lifeline",
+        "resolvedLabel": "The Nile corridor"
+      },
+      {
+        "id": "sahara-04-northern-ribbon",
+        "label": "Algeria at night",
+        "progressLabel": "Settlement",
+        "resolvedLabel": "Algeria’s population belt"
+      },
+      {
+        "id": "sahara-05-half-the-people",
+        "label": "Finding balance",
+        "progressLabel": "Half the People",
+        "resolvedLabel": "People and land"
+      }
+    ]
+  },
+  {
     "id": "exceptions-to-the-rule-v1",
     "addedAt": "2026-10-10",
     "availability": "pool",
@@ -663,6 +705,48 @@
     ]
   },
   {
+    "id": "the-vaccine-that-crossed-the-world-v1",
+    "addedAt": "2026-10-20",
+    "availability": "unlisted",
+    "title": "The Vaccine That Crossed the World",
+    "saveRevision": 1,
+    "description": "Set five compass bearings between milestones of a vaccination expedition, from Galicia to the Philippines.",
+    "path": "/journey/the-vaccine-that-crossed-the-world",
+    "module": "./vaccineExpeditionJourney.ts",
+    "rounds": [
+      {
+        "id": "vaccine-01-tenerife",
+        "label": "Compass",
+        "progressLabel": "Departure",
+        "resolvedLabel": "Santa Cruz de Tenerife"
+      },
+      {
+        "id": "vaccine-02-san-juan",
+        "label": "Compass",
+        "progressLabel": "Atlantic",
+        "resolvedLabel": "San Juan"
+      },
+      {
+        "id": "vaccine-03-caracas",
+        "label": "Compass",
+        "progressLabel": "Venezuela",
+        "resolvedLabel": "Caracas"
+      },
+      {
+        "id": "vaccine-04-acapulco",
+        "label": "Compass",
+        "progressLabel": "To the Pacific",
+        "resolvedLabel": "Acapulco"
+      },
+      {
+        "id": "vaccine-05-manila",
+        "label": "Compass",
+        "progressLabel": "The Pacific",
+        "resolvedLabel": "Manila"
+      }
+    ]
+  },
+  {
     "id": "try-not-to-click-russia-v1",
     "addedAt": "2026-10-10",
     "availability": "pool",
@@ -695,6 +779,48 @@
         "id": "russia-neighbor-est",
         "label": "Neighbor",
         "progressLabel": "Estonia"
+      }
+    ]
+  },
+  {
+    "id": "where-the-silk-roads-met-v1",
+    "addedAt": "2026-10-20",
+    "availability": "unlisted",
+    "title": "Where the Silk Roads Met",
+    "saveRevision": 1,
+    "description": "Two compass readings, one hidden city. Discover five meeting places across the Silk Roads.",
+    "path": "/journey/where-the-silk-roads-met",
+    "module": "./silkRoadIntersectionsJourney.ts",
+    "rounds": [
+      {
+        "id": "silk-intersection-01-xian",
+        "label": "Bearings",
+        "progressLabel": "Imperial center",
+        "resolvedLabel": "Xi’an"
+      },
+      {
+        "id": "silk-intersection-02-dunhuang",
+        "label": "Bearings",
+        "progressLabel": "Oasis gateway",
+        "resolvedLabel": "Dunhuang"
+      },
+      {
+        "id": "silk-intersection-03-kashgar",
+        "label": "Bearings",
+        "progressLabel": "Desert routes",
+        "resolvedLabel": "Kashgar"
+      },
+      {
+        "id": "silk-intersection-04-samarkand",
+        "label": "Bearings",
+        "progressLabel": "Central Asian crossroads",
+        "resolvedLabel": "Samarkand"
+      },
+      {
+        "id": "silk-intersection-05-baghdad",
+        "label": "Bearings",
+        "progressLabel": "Western exchange",
+        "resolvedLabel": "Baghdad"
       }
     ]
   }

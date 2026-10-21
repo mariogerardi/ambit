@@ -13,6 +13,10 @@ export const ANSWER_PLACES = new Map<string, PlaceFeature>(
   ]),
 );
 export function answerPlace(question: Question, id: string) {
+  if (question.rule.type === "bearing-angle") {
+    if (question.rule.origin.id === id) return question.rule.origin;
+    if (question.rule.destination.id === id) return question.rule.destination;
+  }
   return question.places?.find((p) => p.id === id) ?? ANSWER_PLACES.get(id);
 }
 /** Display lookup only: never turn an unknown or ambiguous typed name into a coordinate. */
