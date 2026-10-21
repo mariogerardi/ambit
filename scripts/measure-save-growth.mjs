@@ -4,11 +4,14 @@ import assert from "node:assert/strict";
 
 // Offline diagnostic, not a CI timing gate. Never opens a player's storage or AWS.
 // Optional --storage <path> exports the final synthetic fixture for browser checks.
-const output = process.argv.indexOf("--storage");
-if (process.argv.length > 2 && (output !== 2 || process.argv.length !== 4))
-  throw Error("Usage: npm run measure:saves -- [--storage <path>]");
+const args = process.argv.slice(2).filter((arg) => arg !== "--indexeddb");
+const output = args[0] === "--storage" ? args[1] : undefined;
+if (args.length && (!output || args.length !== 2))
+  throw Error(
+    "Usage: npm run measure:saves -- [--indexeddb] [--storage <path>]",
+  );
 const server = await createServer({
-  server: { middlewareMode: true },
+  server: { middlewareMode: true, hmr: false },
   logLevel: "error",
 });
 try {
@@ -53,9 +56,14 @@ try {
       io.writes++;
       io.writtenBytes += Buffer.byteLength(key + value);
     },
+    removeItem(key) {
+      if (values.delete(key)) addresses.splice(addresses.indexOf(key), 1);
+    },
   };
   const events = new EventTarget();
   globalThis.dispatchEvent = events.dispatchEvent.bind(events);
+  globalThis.addEventListener = events.addEventListener.bind(events);
+  globalThis.removeEventListener = events.removeEventListener.bind(events);
   let clock = 0;
   const put = (namespace, field, value, writer) => {
     assert(codecs[namespace].accepts(field, value), `Invalid fixture ${field}`);
@@ -215,8 +223,59 @@ try {
     addresses.length = 0;
     for (const [key, value] of fixture) localStorage.setItem(key, value);
   }
-  if (output === 2)
-    await writeFile(process.argv[3], JSON.stringify([...values]));
+  if (output) await writeFile(output, JSON.stringify([...values]));
+  if (process.argv.includes("--indexeddb")) {
+    const { IDBFactory } = await import("fake-indexeddb");
+    globalThis.indexedDB = new IDBFactory();
+    globalThis.BroadcastChannel = undefined;
+    const { registerStorage } = await server.ssrLoadModule(
+      "/src/app/registerStorage.ts",
+    );
+    await registerStorage.initialize();
+    const loaded = measure(() => new RecordSave(keys.study, codecs.study));
+    const store = loaded.result;
+    assert.equal(store.load().history.length, 365);
+    assert(
+      store.save({
+        ...store.load(),
+        session: {
+          ...study.startStudy(
+            {
+              ...settings,
+              styles: { ...settings.styles, countries: "typing" },
+            },
+            2000,
+          ),
+          id: "measurement-active",
+        },
+      }).ok,
+    );
+    await registerStorage.flush();
+    let input = store.load();
+    const edit = measure(() => {
+      input = { ...input, session: { ...input.session, text: "Bra" } };
+      const saved = store.save(input);
+      assert(saved.ok);
+      assert(store.equivalent(saved.value, input));
+      return saved;
+    });
+    await registerStorage.flush();
+    assert.equal(store.load().history.length, 365);
+    console.log(
+      JSON.stringify({
+        mode: "indexeddb-emulated",
+        days: 365,
+        localStorageBytes: [...values].reduce(
+          (n, [k, v]) => n + Buffer.byteLength(k + v),
+          0,
+        ),
+        localStorageKeys: values.size,
+        load: loaded.cost,
+        studyKeystroke: edit.cost,
+      }),
+    );
+    registerStorage.close();
+  }
 } finally {
   await server.close();
 }

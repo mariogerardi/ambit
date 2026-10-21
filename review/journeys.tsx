@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { PlayerWorkspace } from "../src/App";
 import { AccountContext, type AccountAccess } from "../src/services/accounts";
 import { applyTheme } from "../src/theme/themes";
+import { registerStorage } from "../src/app/registerStorage";
 import "../src/fonts.css";
 import "../src/style.css";
 import "../src/game/game.css";
@@ -37,8 +38,10 @@ applyTheme("ocean");
 const slug =
   new URLSearchParams(location.search).get("journey") ?? "down-the-danube";
 history.replaceState(null, "", `/journey/${slug}`);
-createRoot(document.getElementById("root")!).render(
-  <AccountContext.Provider value={account}>
-    <PlayerWorkspace />
-  </AccountContext.Provider>,
+void registerStorage.initialize().then(() =>
+  createRoot(document.getElementById("root")!).render(
+    <AccountContext.Provider value={account}>
+      <PlayerWorkspace />
+    </AccountContext.Provider>,
+  ),
 );

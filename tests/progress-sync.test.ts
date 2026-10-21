@@ -32,6 +32,7 @@ function cloud() {
     token: string;
     body?: { entries: CloudEntry[] };
     cursor?: string;
+    manifest?: boolean;
   }[] = [];
   let failure = false;
   let beforeWrite: (() => void) | undefined;
@@ -40,11 +41,22 @@ function cloud() {
     signal: AbortSignal,
     raw?: unknown,
     cursor?: string,
+    manifest?: boolean,
   ): Promise<T> => {
     if (signal.aborted) throw new DOMException("Aborted", "AbortError");
     if (failure) throw new TypeError("Network failed");
     const body = raw as { entries: CloudEntry[] } | undefined;
-    calls.push({ token, body, cursor });
+    calls.push({ token, body, cursor, manifest });
+    if (raw && typeof raw === "object" && "read" in raw) {
+      const read = (
+        raw as { read: Pick<CloudEntry, "namespace" | "writer" | "field">[] }
+      ).read;
+      return {
+        entries: [...records.values()].filter((entry) =>
+          read.some((wanted) => key(entry) === key(wanted as CloudEntry)),
+        ),
+      } as T;
+    }
     if (body) {
       beforeWrite?.();
       beforeWrite = undefined;
@@ -57,7 +69,11 @@ function cloud() {
     const all = [...records.values()];
     const offset = Number(cursor ?? 0);
     return {
-      entries: all.slice(offset, offset + 4),
+      entries: all
+        .slice(offset, offset + 4)
+        .map((entry) =>
+          manifest ? (({ value: _, ...revision }) => revision)(entry) : entry,
+        ),
       ...(all.length > offset + 4 ? { cursor: String(offset + 4) } : {}),
     } as T;
   };
@@ -201,7 +217,7 @@ it("aborts and ignores an old account's response when its workspace closes", asy
   const sync = new ProgressSync(stores, async () => "a-token", status, request);
   clients.push(sync);
   const flush = sync.flush();
-  await Promise.resolve();
+  await vi.waitFor(() => expect(request).toHaveBeenCalled());
   sync.stop();
   resolve({
     entries: [
@@ -405,4 +421,97 @@ it("keeps malformed response contents out of player-facing sync errors", async (
   await expect(
     progressRequest("token", new AbortController().signal),
   ).rejects.toThrow("Couldn’t read cloud progress");
+});
+
+it("refreshes revisions without downloading unchanged values, including after reopening a device", async () => {
+  const remote = cloud(),
+    a = device("cached-history", remote);
+  a.study.save({
+    ...emptyStudy,
+    session: { ...startStudy(defaultSettings, 42), id: "active" },
+  });
+  await a.sync.flush();
+  remote.calls.length = 0;
+  const reopened = device("cached-history", remote);
+  await reopened.sync.flush();
+  expect(remote.calls.every((call) => call.manifest && !call.body)).toBe(true);
+  const changed: CloudEntry = {
+    namespace: "study",
+    version: 2,
+    clock: 100,
+    writer: "remote",
+    field: "settings.length",
+    value: 50,
+  };
+  remote.records.set(key(changed), changed);
+  remote.calls.length = 0;
+  await reopened.sync.flush();
+  const reads = remote.calls.filter((call) => call.body && "read" in call.body);
+  expect(reads).toHaveLength(1);
+  expect(reads[0].body).toEqual({
+    read: [{ namespace: "study", field: "settings.length", writer: "remote" }],
+  });
+  expect(reopened.study.load().settings.length).toBe(50);
+});
+
+it("does not upload or acknowledge revisions when a selected restore is incomplete", async () => {
+  const remote = cloud();
+  const stores = {
+    daily: createDailySave(JOURNEY_INDEX, "incomplete"),
+    study: createStudySave("incomplete"),
+  };
+  stores.study.save({
+    ...emptyStudy,
+    session: { ...startStudy(defaultSettings, 42), id: "active" },
+  });
+  const changed: CloudEntry = {
+    namespace: "study",
+    version: 2,
+    clock: 100,
+    writer: "remote",
+    field: "settings.length",
+    value: 50,
+  };
+  remote.records.set(key(changed), changed);
+  let incomplete = true;
+  const request: typeof progressRequest = async (...args) =>
+    args[2] && "read" in (args[2] as object) && incomplete
+      ? ({ entries: [null] } as never)
+      : remote.request(...args);
+  const status = vi.fn();
+  const sync = new ProgressSync(stores, async () => "token", status, request);
+  clients.push(sync);
+  await sync.flush();
+  expect(status).toHaveBeenLastCalledWith(
+    "error",
+    "Couldn’t read cloud progress. Please try again.",
+  );
+  expect(remote.calls.some((call) => call.body && "entries" in call.body)).toBe(
+    false,
+  );
+  incomplete = false;
+  await sync.flush();
+  expect(stores.study.load().settings.length).toBe(50);
+  expect(status).toHaveBeenLastCalledWith("saved", expect.any(String));
+});
+
+it("accepts full-value responses from a backend without manifest support", async () => {
+  const remote = cloud(),
+    a = device("old-server", remote);
+  a.study.save({
+    ...emptyStudy,
+    session: { ...startStudy(defaultSettings, 42), id: "active" },
+  });
+  const request: typeof progressRequest = (...args) =>
+    remote.request(args[0], args[1], args[2], args[3], false);
+  const sync = new ProgressSync(
+    { daily: a.daily, study: a.study },
+    async () => "token",
+    a.status,
+    request,
+  );
+  clients.push(sync);
+  await sync.flush();
+  await sync.flush();
+  expect(a.status).toHaveBeenLastCalledWith("saved", expect.any(String));
 });

@@ -7,14 +7,17 @@ export type SyncStatus = "syncing" | "saved" | "offline" | "error";
 export interface CloudEntry extends SaveEntry {
   namespace: "daily" | "study";
 }
+type CloudRevision = Omit<CloudEntry, "value">;
 export interface SyncStore {
   readonly prefix: string;
   readonly writable: boolean;
+  readonly ready?: Promise<void>;
   entries(): SaveEntry[];
   mergeEntries(entries: SaveEntry[]): void;
+  mergeEntriesDurably?(entries: SaveEntry[]): Promise<void>;
 }
 export type ProgressStores = Record<CloudEntry["namespace"], SyncStore>;
-const address = (entry: CloudEntry) =>
+const address = (entry: CloudRevision) =>
   JSON.stringify([entry.namespace, entry.field, entry.writer]);
 
 export async function progressRequest<T>(
@@ -22,27 +25,29 @@ export async function progressRequest<T>(
   signal: AbortSignal,
   body?: unknown,
   cursor?: string,
+  manifest = false,
 ): Promise<T> {
   const timeout = AbortSignal.timeout(15000);
   const requestSignal = AbortSignal.any([signal, timeout]);
   const started = performance.now();
+  const query = new URLSearchParams();
+  if (cursor) query.set("cursor", cursor);
+  if (manifest) query.set("manifest", "1");
+  const url = `${serviceConfig.apiUrl}/account/saves${query.size ? `?${query}` : ""}`;
   let httpStatus = 0;
   let attempt = 0;
   try {
     for (attempt = 0; ; attempt++) {
       httpStatus = 0;
-      const response = await fetch(
-        `${serviceConfig.apiUrl}/account/saves${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
-        {
-          method: body ? "POST" : "GET",
-          signal: requestSignal,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            ...(body ? { "Content-Type": "application/json" } : {}),
-          },
-          ...(body ? { body: JSON.stringify(body) } : {}),
+      const response = await fetch(url, {
+        method: body ? "POST" : "GET",
+        signal: requestSignal,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(body ? { "Content-Type": "application/json" } : {}),
         },
-      );
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      });
       httpStatus = response.status;
       if (response.status === 429 && attempt < 3) {
         await new Promise<void>((resolve, reject) => {
@@ -187,6 +192,7 @@ export class ProgressSync {
     this.dirty = false;
     const signal = this.controller.signal;
     try {
+      await Promise.all(Object.values(this.stores).map((store) => store.ready));
       if (!Object.values(this.stores).every((store) => store.writable))
         throw new Error(
           "Saving on this device is unavailable. Cloud progress has not been changed.",
@@ -200,14 +206,19 @@ export class ProgressSync {
       if (signal.aborted) return;
       if (pull || this.pullRequested || Date.now() - this.lastPull >= 300000) {
         this.pullRequested = false;
-        const remote: CloudEntry[] = [];
+        const revisions: (CloudEntry | CloudRevision)[] = [];
         let cursor: string | undefined;
         const cursors = new Set<string>();
+        const manifest =
+          this.acknowledged.size > 0 ||
+          this.entries().some((entry) =>
+            /^(run|history|session)\./.test(entry.field),
+          );
         do {
           const page = await this.request<{
-            entries: CloudEntry[];
+            entries: (CloudEntry | CloudRevision)[];
             cursor?: string;
-          }>(token, signal, undefined, cursor);
+          }>(token, signal, undefined, cursor, manifest);
           if (signal.aborted) return;
           if (
             !Array.isArray(page.entries) ||
@@ -223,7 +234,7 @@ export class ProgressSync {
             )
           )
             throw new Error("Couldn’t read cloud progress. Please try again.");
-          remote.push(...page.entries);
+          revisions.push(...page.entries);
           cursor = page.cursor;
           if (cursor) {
             if (typeof cursor !== "string" || cursors.has(cursor))
@@ -233,11 +244,63 @@ export class ProgressSync {
             cursors.add(cursor);
           }
         } while (cursor);
+        // Old servers return full values for manifest requests; both deployment
+        // orders remain safe. New servers return only revisions on refresh.
+        const local = new Map(
+          this.entries().map((entry) => [address(entry), entry]),
+        );
+        const remote: CloudEntry[] = [];
+        const missing: CloudRevision[] = [];
+        for (const revision of revisions) {
+          if ("value" in revision) remote.push(revision);
+          else if ((local.get(address(revision))?.clock ?? -1) < revision.clock)
+            missing.push(revision);
+        }
+        while (missing.length) {
+          const batch = missing.splice(0, 10);
+          const result = await this.request<{ entries: CloudEntry[] }>(
+            token,
+            signal,
+            {
+              read: batch.map(({ namespace, writer, field }) => ({
+                namespace,
+                writer,
+                field,
+              })),
+            },
+          );
+          if (signal.aborted) return;
+          if (
+            !Array.isArray(result.entries) ||
+            result.entries.length !== batch.length ||
+            result.entries.some(
+              (entry) =>
+                typeof entry !== "object" ||
+                entry === null ||
+                !("value" in entry) ||
+                entry.version !== 2 ||
+                !Number.isSafeInteger(entry.clock) ||
+                !batch.some(
+                  (revision) =>
+                    address(revision) === address(entry) &&
+                    entry.clock >= revision.clock,
+                ),
+            ) ||
+            new Set(result.entries.map(address)).size !== batch.length
+          )
+            throw Error("Couldn’t read cloud progress. Please try again.");
+          remote.push(...result.entries);
+        }
         for (const namespace of ["daily", "study"] as const) {
           const store = this.stores[namespace];
-          store.mergeEntries(
-            remote.filter((entry) => entry.namespace === namespace),
+          const entries = remote.filter(
+            (entry) => entry.namespace === namespace,
           );
+          if (!entries.length) continue;
+          if (store.mergeEntriesDurably)
+            await store.mergeEntriesDurably(entries);
+          else store.mergeEntries(entries);
+          if (signal.aborted) return;
           dispatchEvent(
             new CustomEvent("ambit-progress-received", {
               detail: store.prefix,
@@ -245,7 +308,7 @@ export class ProgressSync {
           );
         }
         this.restored();
-        for (const entry of remote)
+        for (const entry of [...revisions, ...remote])
           this.acknowledged.set(address(entry), entry.clock);
         this.lastPull = Date.now();
       }

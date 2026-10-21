@@ -124,7 +124,7 @@ def template(environment="production"):
         "AssumeRolePolicyDocument": trust, "ManagedPolicyArns": [logging_policy],
         "Policies": [{"PolicyName": "FeedbackData", "PolicyDocument": {"Version": "2012-10-17", "Statement": [
             {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:Query"], "Resource": [arn("Feedback"), sub("${Feedback.Arn}/index/feedback-by-date")]},
-            {"Effect": "Allow", "Action": ["dynamodb:PutItem", "dynamodb:Query"], "Resource": arn("Saves")},
+            {"Effect": "Allow", "Action": ["dynamodb:PutItem", "dynamodb:Query", "dynamodb:BatchGetItem"], "Resource": arn("Saves")},
             {"Effect": "Allow", "Action": ["dynamodb:GetItem", "dynamodb:BatchGetItem", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:Query", "dynamodb:ConditionCheckItem"], "Resource": arn("Community")},
             datadog_secret_access,
         ]}}],

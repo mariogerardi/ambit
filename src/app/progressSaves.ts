@@ -1,4 +1,5 @@
 import { RecordSave } from "./recordSave";
+import { registerStorage } from "./registerStorage";
 import type { SaveCodec } from "./recordSave";
 import { isRecord } from "./storage";
 import { mergeHelp } from "../game/guidance";
@@ -31,6 +32,17 @@ const optionalSettings = new Set([
 export const studySaveCodec: SaveCodec<StudySave> = {
   empty: emptyStudy,
   valid: validStudy,
+  validUpdate(value, previous, lastInput) {
+    if (!isRecord(value)) return false;
+    return validStudy({
+      ...value,
+      history:
+        value.history === previous.history ||
+        value.history === lastInput?.history
+          ? undefined
+          : value.history,
+    });
+  },
   recover: recoverStudy,
   encode(save) {
     const persistent = save;
@@ -273,7 +285,8 @@ export function dailySaveCodec(
       }
       for (const [date, attempt] of Object.entries(save.attempts))
         if (!catalog.some((journey) => journey.id === attempt.journeyId)) {
-          (save.archivedAttempts ??= {})[`${date}/${attempt.journeyId}`] = attempt;
+          (save.archivedAttempts ??= {})[`${date}/${attempt.journeyId}`] =
+            attempt;
           delete save.attempts[date];
         }
       // Keep readers compatible with the first record format and expose newer
@@ -337,10 +350,17 @@ export function dailySaveCodec(
             (validDaily(
               { version: 1, attempts: { [value.date]: value } },
               catalog,
-            ) || validDaily(
-              { version: 1, attempts: {}, archivedAttempts: { [`${value.date}/${value.journeyId}`]: value } },
-              catalog,
-            )))
+            ) ||
+              validDaily(
+                {
+                  version: 1,
+                  attempts: {},
+                  archivedAttempts: {
+                    [`${value.date}/${value.journeyId}`]: value,
+                  },
+                },
+                catalog,
+              )))
         );
       if (field.startsWith("selection.")) {
         try {
@@ -351,7 +371,9 @@ export function dailySaveCodec(
         return (
           value === null ||
           (isRecord(value) &&
-            typeof value.journeyId === "string" && value.journeyId.length > 0 && value.journeyId.length <= 160 &&
+            typeof value.journeyId === "string" &&
+            value.journeyId.length > 0 &&
+            value.journeyId.length <= 160 &&
             (value.runId === undefined || typeof value.runId === "string"))
         );
       }
@@ -424,15 +446,34 @@ function accountStore<T>(key: string, codec: SaveCodec<T>, subject?: string) {
     localStorage.setItem("ambit.guest-import-device", device);
     // Claim before copying so a partial import cannot leak into another account.
     localStorage.setItem("ambit.guest-progress-owner", subject);
-    store.mergeEntries(
-      entries
-        .filter((entry) => !entry.field.startsWith("override."))
-        .map((entry) => ({
-          ...entry,
-          writer: `zguest.${device}.${entry.writer}`,
-        })),
-    );
-    localStorage.setItem(marker, "1");
+    const imported = entries
+      .filter((entry) => !entry.field.startsWith("override."))
+      .map((entry) => ({
+        ...entry,
+        writer: `zguest.${device}.${entry.writer}`,
+      }));
+    if (registerStorage.persistent) {
+      let importing: Promise<void> | undefined;
+      store.prepare = () =>
+        (importing ??= store
+          .mergeEntriesDurably(imported)
+          .then(() => {
+            localStorage.setItem(marker, "1");
+            dispatchEvent(
+              new CustomEvent("ambit-progress-received", {
+                detail: store.prefix,
+              }),
+            );
+          })
+          .catch((error: unknown) => {
+            importing = undefined;
+            throw error;
+          }));
+      void store.ready.catch(() => {}); // Sync observes failure; guest source stays intact.
+    } else {
+      store.mergeEntries(imported);
+      localStorage.setItem(marker, "1");
+    }
   } catch {
     /* Keep the original guest save and retry the import next time. */
   }

@@ -257,6 +257,33 @@ class SaveTests(unittest.TestCase):
         self.assertIn("baggage", resources["Api"]["Properties"]["CorsConfiguration"]["AllowHeaders"])
         self.assertEqual(resources["Saves"]["DeletionPolicy"], "Retain")
 
+    def test_manifest_omits_payloads_and_projects_only_private_revisions(self):
+        item = {"pk": "user#player-a", **self.saves.validate({"namespace": "study", "version": 2, "clock": 2, "writer": "a", "field": "history.one", "value": {"text": "private"}})}
+        item["valueJson"] = "not even parsed"
+        self.db.query.return_value = {"Items": [item]}
+        event = self.event("GET /account/saves")
+        event["queryStringParameters"] = {"manifest": "1"}
+        page = json.loads(self.saves.handle(event)["body"])
+        self.assertEqual(page["entries"], [{"version": 2, "namespace": "study", "clock": 2, "writer": "a", "field": "history.one"}])
+        self.assertNotIn("valueJson", self.db.query.call_args.kwargs["ProjectionExpression"])
+        self.assertTrue(self.db.query.call_args.kwargs["ConsistentRead"])
+
+    def test_selected_reads_cannot_choose_an_owner_and_incomplete_batches_are_retryable(self):
+        entry = {"namespace": "study", "writer": "a", "field": "history.one"}
+        item = {"pk": "user#player-a", **self.saves.validate({**entry, "version": 2, "clock": 2, "value": {"text": "private"}})}
+        self.db.get_many.return_value = {"Items": [item]}
+        event = self.event()
+        event["body"] = json.dumps({"read": [{**entry, "pk": "user#player-b"}]})
+        page = json.loads(self.saves.handle(event)["body"])
+        self.assertEqual(page["entries"][0]["value"], {"text": "private"})
+        self.assertEqual(self.db.get_many.call_args.args[0], [{"pk": "user#player-a", "sk": item["sk"]}])
+        self.db.get_many.return_value = {"Items": [item], "unprocessed": True}
+        self.assertEqual(self.saves.handle(event)["statusCode"], 503)
+        for read in ([], [entry] * 11, [entry, entry], [None], [{**entry, "namespace": "other"}]):
+            event["body"] = json.dumps({"read": read})
+            self.assertEqual(self.saves.handle(event)["statusCode"], 400)
+        self.db.put_item.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

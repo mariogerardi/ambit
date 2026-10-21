@@ -7,7 +7,7 @@ authorization-code/PKCE sessions with persistent user storage and tab-scoped
 redirect state. `src/services/feedback.ts`
 connects reports and admin review to API Gateway/Lambda/DynamoDB.
 `src/services/progressSync.ts` synchronizes account-scoped Journey and Study
-registers, using local storage as an offline upload queue.
+registers in IndexedDB, with a LocalStorage journal for synchronous offline writes.
 `src/services/monitoring.ts` initializes Datadog RUM with the React plugin.
 Backend infrastructure and handlers live in `backend/`; deployment and secret
 provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
@@ -20,6 +20,7 @@ provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
 | [`src/app/modes.ts`](../src/app/modes.ts), [`ModePanels.tsx`](../src/app/ModePanels.tsx)                                           | Route-to-mode mapping and overlapping panel transitions.                                      |
 | [`src/app/dailyProgress.ts`](../src/app/dailyProgress.ts)                                                                          | New York daily scheduling and date-pinned Journey progress.                                   |
 | [`src/app/recordSave.ts`](../src/app/recordSave.ts), [`progressSaves.ts`](../src/app/progressSaves.ts)                             | Independent save registers and domain-specific merges.                                        |
+| [`src/app/registerStorage.ts`](../src/app/registerStorage.ts)                                                                      | Transactional history storage, durable edit journal and cross-tab cache updates.              |
 | [`src/game/journeyRegistry.ts`](../src/game/journeyRegistry.ts)                                                                    | Lightweight Journey metadata and lazy module loading.                                         |
 | [`src/game/questionContracts.ts`](../src/game/questionContracts.ts), [`questionBuilder.ts`](../src/game/questionBuilder.ts)        | Type-only schemas, authoring entry point and structural validation.                           |
 | [`src/game/questionPreparation.ts`](../src/game/questionPreparation.ts)                                                            | Canonical data validation, eligibility, answer resolution, topology and context caches.       |
@@ -136,6 +137,15 @@ after warmup. Forced context loss rebuilt one live canvas within the 1.8-second
 observation window, preserving the page, with no uncaught errors. These are local
 development measurements with a mocked schedule, not mobile/heavy-region GPU
 benchmarks. Neither a build nor mocked renderer tests establish GPU performance.
+
+A follow-up exercised an actual Sahara brush stroke and cold/warm US subdivision
+toggles on the same GPU. Drawing changed the shape, warm drawing/toggles retained
+about 16.7 ms median/p95 intervals, and three subdivision cycles held stable at
+3,926 buffers, 70 textures and six programs in one connected context. Cold work
+showed 60–135 ms stalls; a repeat drawing sample was smooth after warmup. A narrow
+390×844 viewport used this desktop GPU and does not establish phone performance.
+No uncaught errors occurred. Cold preparation and device profiling remain open;
+the observations do not justify rebuilding rendering infrastructure.
 
 ## Trustworthy globe state
 
