@@ -26,6 +26,7 @@
     "src/app/HomePanel.tsx",
     "src/study/useStudyPresentation.ts",
     "src/game/GameShell.tsx",
+    "src/game/CompletionMapViews.tsx",
     "src/game/AnswerForm.tsx",
     "src/game/questions.ts",
     "src/game/questionContracts.ts",
@@ -105,6 +106,8 @@
     "src/globe/constructionOverlays.ts",
     "scripts/prepare-sahara-construction.py",
     "src/game/constructionInteraction.ts",
-    "scripts/prepare-sahara-display.py"
+    "scripts/prepare-sahara-display.py",
+    "scripts/prepare-within-reach.py",
+    "src/globe/surface.ts"
   ]
 }

@@ -1989,3 +1989,15 @@
 .experience .order-card.chosen i {
   color: inherit;
 }
+.completion-map-views {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block: 16px;
+}
+.completion-map-views [role="status"] {
+  flex-basis: 100%;
+  color: var(--ui-muted);
+  font-size: 14px;
+}

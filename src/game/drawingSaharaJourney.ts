@@ -162,7 +162,6 @@ const algeriaDisplay = { "wurl:DZA": frozen.algeriaGeometry };
 export const DRAWING_SAHARA_JOURNEY: Journey = {
   id: "drawing-the-sahara-v1",
   addedAt: "2026-10-20",
-  availability: "unlisted",
   saveRevision: 1,
   title: "Drawing the Sahara",
   description:

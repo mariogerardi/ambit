@@ -9,7 +9,6 @@ import type { DailyAttempt } from "./dailyProgress";
 import { ARCHIVE_START_DATE } from "./archiveDates";
 
 type JourneySort = "alphabetical" | "newest" | "last" | "never";
-type JourneyFilter = "all" | "pool" | "unlisted";
 const ADMIN_SECTIONS = ["schedule", "feedback", "tools"] as const;
 const DRAFT_KEY = "ambit.admin.schedule-draft";
 type ScheduleDraft = { day: string; value: string; saved: string };
@@ -190,21 +189,13 @@ export function AdminPanel({
       "alphabetical",
     ),
   );
-  const [filter, setFilter] = useState<JourneyFilter>(() =>
-    storedChoice(
-      "ambit.admin.journey-filter",
-      ["all", "pool", "unlisted"],
-      "all",
-    ),
-  );
   useEffect(() => {
     try {
       localStorage.setItem("ambit.admin.journey-sort", sort);
-      localStorage.setItem("ambit.admin.journey-filter", filter);
     } catch {
       /* Display preferences remain optional. */
     }
-  }, [sort, filter]);
+  }, [sort]);
   useEffect(() => setResetMessage(""), [date]);
   // Refresh published dates without erasing a Journey the admin is still choosing.
   useEffect(() => {
@@ -261,12 +252,10 @@ export function AdminPanel({
       )
       .map(([scheduled]) => scheduled)
       .sort();
-  const displayedJourneys = JOURNEY_INDEX.filter(
-    (journey) =>
-      (filter === "all" || journey.availability === filter) &&
-      journey.title
-        .toLocaleLowerCase()
-        .includes(search.trim().toLocaleLowerCase()),
+  const displayedJourneys = JOURNEY_INDEX.filter((journey) =>
+    journey.title
+      .toLocaleLowerCase()
+      .includes(search.trim().toLocaleLowerCase()),
   ).sort((a, b) => {
     if (sort === "newest")
       return b.addedAt.localeCompare(a.addedAt) || a.id.localeCompare(b.id);
@@ -683,19 +672,6 @@ export function AdminPanel({
                           <option value="never">Never scheduled</option>
                         </select>
                       </label>
-                      <label className="field">
-                        <span>Show Journeys</span>
-                        <select
-                          value={filter}
-                          onChange={(event) =>
-                            setFilter(event.target.value as JourneyFilter)
-                          }
-                        >
-                          <option value="all">All</option>
-                          <option value="pool">In pool</option>
-                          <option value="unlisted">Unlisted</option>
-                        </select>
-                      </label>
                     </div>
 
                     <ul
@@ -735,10 +711,7 @@ export function AdminPanel({
                             >
                               <strong>{journey.title}</strong>
                               <span className="muted">
-                                {journey.availability === "pool"
-                                  ? "In pool"
-                                  : "Unlisted"}{" "}
-                                · Last:{" "}
+                                Last:{" "}
                                 {dates.filter((item) => item <= date).at(-1) ??
                                   "Never"}{" "}
                                 · Next: {nextAssigned ?? "None"}
@@ -750,7 +723,7 @@ export function AdminPanel({
                     </ul>
                     {!displayedJourneys.length && (
                       <p className="schedule-notice" role="status">
-                        No Journeys match your search and filters.
+                        No Journeys match your search.
                       </p>
                     )}
                   </div>

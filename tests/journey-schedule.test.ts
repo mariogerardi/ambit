@@ -34,6 +34,18 @@ describe("shared Journey dates", () => {
       openDaily(started, day, false, JOURNEY_INDEX, {}).attempts[day],
     ).toEqual(started.attempts[day]);
   });
+  it("keeps stored dates and started answers when the shared catalog expands", () => {
+    const original = [edition];
+    const expanded = [...original, { ...edition, id: "new-journey" }];
+    const started = openDaily(emptyDaily, day, false, original);
+    started.attempts[day].game.text = "saved answer";
+    expect(
+      dailyJourney(day, undefined, expanded, { [day]: edition.id }).id,
+    ).toBe(edition.id);
+    expect(openDaily(started, day, false, expanded).attempts[day]).toEqual(
+      started.attempts[day],
+    );
+  });
   it("recognizes the fifth feedback answer as complete and opens its result", () => {
     const attempt = {
       date: day,
@@ -103,18 +115,18 @@ describe("shared Journey dates", () => {
     ])
       expect(validJourneySchedule(value)).toBe(false);
   });
-  it("uses the same versioned date hash as the backend and never selects an unlisted edition", () => {
+  it("uses the same versioned date hash as the backend for the shared catalog", () => {
     expect(seededJourney("2026-10-05", JOURNEY_INDEX).id).toBe(
-      "island-instincts-v1",
+      "exceptions-to-the-rule-v1",
     );
     expect(seededJourney("2026-10-18", JOURNEY_INDEX).id).toBe(
-      "same-name-different-place-v1",
+      "the-vaccine-that-crossed-the-world-v1",
     );
     expect(seededJourney("2026-11-03", JOURNEY_INDEX).id).toBe(
-      "mediterranean-v1",
+      "far-from-everything",
     );
     expect(seededJourney("2027-01-01", JOURNEY_INDEX).id).toBe(
-      "along-the-andes-v1",
+      "shared-neighbors-v1",
     );
     expect(
       dailyJourney("2027-01-01", undefined, JOURNEY_INDEX, {
@@ -129,15 +141,7 @@ describe("shared Journey dates", () => {
   });
 });
 
-it("includes each newly promoted Journey in automatic picks while retaining started attempts", () => {
-  const promoted = [
-    "across-the-divide-v1",
-    "chasing-the-sun-v2",
-    "down-the-danube-v1",
-    "missing-borders-v1",
-    "same-hour-different-worlds",
-    "same-name-different-place-v1",
-  ];
+it("includes every registered Journey in automatic picks while retaining started attempts", () => {
   const picked = new Set(
     Array.from(
       { length: 90 },
@@ -148,10 +152,7 @@ it("includes each newly promoted Journey in automatic picks while retaining star
         ).id,
     ),
   );
-  for (const id of promoted) {
-    expect(JOURNEY_INDEX.find((j) => j.id === id)?.availability).toBe("pool");
-    expect(picked.has(id), id).toBe(true);
-  }
+  for (const { id } of JOURNEY_INDEX) expect(picked.has(id), id).toBe(true);
   const date = "2026-10-18";
   const old = openDaily(emptyDaily, date, false, JOURNEY_INDEX, {
     [date]: "try-not-to-click-russia-v1",

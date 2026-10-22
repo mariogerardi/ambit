@@ -23,7 +23,6 @@ describe("catalog identity", () => {
       const entry = JOURNEY_INDEX.find((item) => item.id === journey.id)!;
       expect(entry.path).toBe(journeyPath(journey.id));
       expect(entry.addedAt).toBe(journey.addedAt);
-      expect(entry.availability).toBe(journey.availability ?? "unlisted");
       expect(entry.rounds.map((round) => round.id)).toEqual(
         journey.rounds.map((round) => round.id),
       );
@@ -32,13 +31,8 @@ describe("catalog identity", () => {
     expect(journeyPath("missing-journey")).toBe("/");
   });
 
-  it("changes no current rotation date when registrations are reordered or an unlisted Journey is added", () => {
+  it("keeps automatic choices independent of registration order", () => {
     const reordered = [...JOURNEYS].reverse();
-    const unlisted = {
-      ...JOURNEYS[0],
-      id: "test-unlisted",
-      availability: "unlisted" as const,
-    };
     const start = Date.UTC(2026, 9, 5);
     for (let offset = 0; offset < 365; offset++) {
       const date = new Date(start + offset * 86400000)
@@ -46,13 +40,10 @@ describe("catalog identity", () => {
         .slice(0, 10);
       const expected = dailyJourney(date, undefined, JOURNEYS).id;
       expect(dailyJourney(date, undefined, reordered).id).toBe(expected);
-      expect(dailyJourney(date, undefined, [...reordered, unlisted]).id).toBe(
-        expected,
-      );
     }
   });
 
-  it("audits every current Journey, including unlisted editions", () => {
+  it("audits every registered Journey", () => {
     const world = JSON.parse(
       readFileSync("public/geography/world.v1.json", "utf8"),
     ) as RegionFeature[];

@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useCameraOrchestration } from "../src/app/useCameraOrchestration";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
+import { DANUBE_JOURNEY } from "../src/game/danubeJourney";
 import { REGGAETON_JOURNEY } from "../src/game/reggaetonJourney";
 import { createQuestionContext } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
@@ -57,6 +58,7 @@ beforeEach(() => {
     cancelFocus: vi.fn(),
     flyover: vi.fn(),
     cancelFlyover: vi.fn(),
+    pulseIslands: vi.fn(),
     fidget: vi.fn(),
     cancelFidget: vi.fn(),
     view: () => view,
@@ -277,6 +279,29 @@ it("uses reveal views only after commitment and preserves a missed pin's compari
   });
   expect(port.flyover).toHaveBeenCalledTimes(1);
   expect(port.focus).toHaveBeenLastCalledWith(comparison);
+});
+
+it("flies over the Danube's authored river stops on completion", async () => {
+  await render({
+    mode: "daily",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition: DANUBE_JOURNEY,
+      context: createQuestionContext(regions, [], DANUBE_JOURNEY),
+      phase: "finished",
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledOnce();
+  const views = vi.mocked(port.flyover).mock.calls[0][0];
+  expect(views.length).toBeGreaterThan(1);
+  expect(views).toEqual(DANUBE_JOURNEY.completion!.views);
+  // The route advances eastward before returning to its full-river overview.
+  const stops = views.slice(0, -1);
+  expect(stops.map((view) => view.lng)).toEqual(
+    stops.map((view) => view.lng).sort((a, b) => a - b),
+  );
+  expect(views.at(-1)).toEqual(DANUBE_JOURNEY.completion!.focus);
 });
 
 it("starts completion only when saves are ready, cancels animated playback for reduced motion, and cleans up on exit", async () => {

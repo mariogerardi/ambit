@@ -45,9 +45,8 @@ See [Development](docs/DEVELOPMENT.md) for preparation commands and troubleshoot
 | **Admin** (`/admin`)     | Verified owner only: review feedback and publish shared date-to-Journey assignments.                            |
 
 Daily dates use New York midnight. Unassigned future dates use provisional seeded
-selection from Journeys marked `pool`; locking or an Admin assignment makes the
-date permanent. Any current Journey, including `unlisted` editions, can be assigned
-in Admin. The old eleven-ID rotation is migration history, not the current
+selection from all registered Journeys; locking or an Admin assignment makes the
+date permanent. Any current Journey can be assigned in Admin. The old eleven-ID rotation is migration history, not the current
 selection algorithm. Started attempts keep their edition and progress when an
 assignment changes. The public archive starts on October 11, 2026 and uses stored
 historical assignments. Past attempts can be resumed through `/archive/YYYY-MM-DD`;

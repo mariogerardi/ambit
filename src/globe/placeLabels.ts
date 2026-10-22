@@ -12,6 +12,7 @@ import type { ThemeId } from "../theme/themes";
 import { pinBandColor } from "../theme/playColors";
 import { playStateColor } from "./themes";
 import { playColors } from "../theme/playColors";
+import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { areaSymbolSize } from "./areaSymbols";
 export interface PlaceLabelLayer {
   id: string;
@@ -149,8 +150,10 @@ export interface LabelBox {
   bottom: number;
 }
 /** Answer cities share one style so a capital's typography cannot disclose it. */
-export const placeLabelStyle = (place: PlaceFeature) =>
-  placeStyle(place.answerTarget ? "city" : place.kind);
+export const placeLabelStyle = (place: PlaceFeature) => {
+  const style = placeStyle(place.answerTarget ? "city" : place.kind);
+  return { ...style, textHeight: style.textHeight * (place.labelScale ?? 1) };
+};
 
 /** Try nearby screen anchors before dropping an authored city's name. */
 export function placeLabelPlacement(
@@ -162,17 +165,20 @@ export function placeLabelPlacement(
   height: number,
   occupied: readonly LabelBox[],
   answerTarget = false,
+  surfaceAligned = false,
 ) {
-  const centers = answerTarget
-    ? [
-        [0.5, -0.5],
-        [0.5, 1.5],
-        [-14 / w, 0.5],
-        [1 + 14 / w, 0.5],
-        [-14 / w, -0.5],
-        [1 + 14 / w, -0.5],
-      ]
-    : [[0.5, -0.32]];
+  const centers = surfaceAligned
+    ? [[0.5, 0.5]]
+    : answerTarget
+      ? [
+          [0.5, -0.5],
+          [0.5, 1.5],
+          [-14 / w, 0.5],
+          [1 + 14 / w, 0.5],
+          [-14 / w, -0.5],
+          [1 + 14 / w, -0.5],
+        ]
+      : [[0.5, -0.32]];
   for (const [cx, cy] of centers) {
     const box = {
       left: x - cx * w,
@@ -474,7 +480,9 @@ export class PlaceLabels {
         Math.cos(lat) * Math.sin(lng),
         Math.sin(lat),
         Math.cos(lat) * Math.cos(lng),
-      ).multiplyScalar(radius * 1.002);
+      ).multiplyScalar(
+        radius * (1 + (place.surfaceAligned ? MAP_ANNOTATION_ALTITUDE : 0.002)),
+      );
       const label =
           layer.visible && !place.labelHidden && place.name && !this.contextual
             ? this.label(place)
@@ -703,6 +711,7 @@ export class PlaceLabels {
             .map((marker) => marker.box),
         ],
         !!place.answerTarget || !!place.labelFlexible,
+        !!place.surfaceAligned,
       );
       if (!placement) continue;
       const { box } = placement;

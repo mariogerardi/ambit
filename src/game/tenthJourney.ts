@@ -31,7 +31,6 @@ const base = definePresentation({
 export const TENTH_JOURNEY: Journey = {
   id: "ring-of-fire-v1",
   addedAt: "2026-10-10",
-  availability: "pool",
   title: "Pacific Landfalls",
   description:
     "Island chains, narrow straits, a mountain-lined continent: follow the changing shores of the Pacific to a final harbor in New Zealand.",

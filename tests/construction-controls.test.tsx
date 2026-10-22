@@ -2,7 +2,7 @@
 import { act, useReducer } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
-import { it, expect } from "vitest";
+import { it, expect, vi } from "vitest";
 import { AnswerForm } from "../src/game/AnswerForm";
 import { CONSTRUCTION_RECIPES } from "../src/game/constructionRecipes";
 import { initialGame, gameReducer, type GameState } from "../src/game/state";
@@ -207,4 +207,97 @@ it("refreshes editorial feedback without changing frozen population metrics or p
   expect(markup).not.toContain("People, not land.");
   expect(markup).not.toContain("construction-model-note");
   expect(JSON.stringify(game)).toBe(before);
+});
+
+it("keeps the island target in play and explains scoring with each question result", async () => {
+  const { WITHIN_REACH_JOURNEY: journey } = await import(
+    "../src/game/withinReachJourney"
+  );
+  const { GameShell } = await import("../src/game/GameShell");
+  const { readFileSync } = await import("node:fs");
+  const context = createQuestionContext(
+    JSON.parse(readFileSync("public/geography/world.v1.json", "utf8")),
+    [],
+    journey,
+  );
+  const game: GameState = {
+    ...initialGame,
+    phase: "playing",
+    construction: {
+      version: 1,
+      kind: "circle",
+      center: { lat: 42.31, lng: -70.95 },
+    },
+  };
+  const before = JSON.stringify(game),
+    pulse = vi.fn(),
+    frame = vi.fn(),
+    dispatch = vi.fn();
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  const props = {
+    journey,
+    context,
+    game,
+    dispatch,
+    webgl: true,
+    frame,
+    onPulseIslands: pulse,
+    onHome: () => {},
+    onStudy: () => {},
+  };
+  await act(async () => root.render(<GameShell {...props} />));
+  expect(host.querySelector('[aria-label="Reset shape"]')).toBeNull();
+  const buttons = [...host.querySelectorAll("button")];
+  await act(async () =>
+    buttons.find((b) => b.textContent?.includes("Pulse islands"))!.click(),
+  );
+  await act(async () =>
+    buttons.find((b) => b.textContent?.includes("Recenter view"))!.click(),
+  );
+  expect(pulse).toHaveBeenCalledOnce();
+  expect(frame).toHaveBeenCalledWith(journey.rounds[0].focus);
+  expect(dispatch).not.toHaveBeenCalled();
+  expect(JSON.stringify(game)).toBe(before);
+  expect(
+    host.querySelector('[aria-label="Best possible: 16 islands"]')?.textContent,
+  ).toMatch(/16\s+islands/);
+  expect(host.querySelector('[aria-label="Island scoring"]')).toBeNull();
+  expect(host.textContent).not.toContain("1–2 fewer");
+  expect(host.textContent).not.toContain("or fewer: 0 points");
+  const answered = gameReducer(game, { type: "submit" }, journey, context);
+  await act(async () => root.render(<GameShell {...props} game={answered} />));
+  const scoring = host.querySelector('[aria-label="Island scoring"]')!;
+  expect(host.textContent).not.toContain("Whole islands enclosed");
+  expect(host.querySelector('[aria-label="Your construction result"]')).toBeNull();
+  expect(scoring.querySelectorAll("tbody tr")).toHaveLength(1);
+  expect(scoring.textContent).toContain("Boston Harbor");
+  expect(scoring.textContent).toContain("14–15");
+  expect(scoring.textContent).toContain("11–13");
+  expect(scoring.textContent).not.toContain("Isles of Scilly");
+  expect(scoring.querySelectorAll('[role="img"]')).toHaveLength(3);
+  expect(scoring.textContent).not.toContain("or fewer");
+  const finished: GameState = {
+    ...game,
+    phase: "finished",
+    roundIndex: 4,
+    help: { [journey.rounds[0].id]: "assisted" },
+  };
+  await act(async () => root.render(<GameShell {...props} game={finished} />));
+  expect(host.querySelector('[aria-label="Island scoring"]')).toBeNull();
+  await act(async () =>
+    root.render(
+      <GameShell {...props} game={finished} constructionReviewIndex={0} />,
+    ),
+  );
+  expect(
+    host.querySelectorAll('[aria-label="Island scoring"] tbody tr'),
+  ).toHaveLength(1);
+  expect(host.querySelector('[aria-label="Your construction result"]')).toBeNull();
+  expect(
+    host.querySelector('[aria-label="Island scoring"]')?.textContent,
+  ).toContain("Assist cap: 1 point");
+  await act(async () => root.unmount());
+  host.remove();
 });

@@ -225,7 +225,7 @@ export const MECHANICS = {
     { validate: validateConstructionQuestion, outcome: constructionOutcome },
   ),
   "geo-circle": defineMechanic(
-    ["point-coverage-max"],
+    ["point-coverage-max", "island-coverage-max"],
     "Fit a geographic circle",
     "construction",
     "construction",

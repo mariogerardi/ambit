@@ -129,7 +129,10 @@ export function constructionScene(
       );
     } else cells("paint", displayGrid, [...displayPaint], "selected");
   }
-  if (c?.kind === "circle" && rule.type === "point-coverage-max")
+  if (
+    c?.kind === "circle" &&
+    (rule.type === "point-coverage-max" || rule.type === "island-coverage-max")
+  )
     overlays.push({
       id: `construction:${q.id}:circle`,
       type: "circle",
@@ -245,11 +248,29 @@ export function constructionScene(
               : "correct"
             : "hinted",
         answerTarget: false,
-        markerSize: 24,
+        markerSize: p.markerSize ?? 24,
         labelFlexible: true,
       });
   }
-  if (!reveal && c) {
+  if (rule.type === "island-coverage-max") {
+    for (const island of rule.candidates.filter((i) => !i.labelHidden))
+      places.push({
+        id: `${island.id}:label`,
+        name: island.name,
+        ...island.focus,
+        kind: "other",
+        sourceId: "island-shore",
+        priority: island.priority,
+        surfaceAligned: true,
+        labelScale: 0.8,
+        markerHidden: true,
+        labelFlexible: false,
+        displayRole: "reference",
+        visualState: "hinted",
+        answerTarget: false,
+      });
+  }
+  if (!reveal && c && rule.type !== "island-coverage-max") {
     constructionHandleEntries(c).forEach(({ point: p, index: i }) =>
       places.push({
         ...p,
@@ -268,7 +289,10 @@ export function constructionScene(
     );
   }
   const example = showExample && reveal ? q.constructionExample : undefined;
-  if (example?.kind === "circle" && rule.type === "point-coverage-max")
+  if (
+    example?.kind === "circle" &&
+    (rule.type === "point-coverage-max" || rule.type === "island-coverage-max")
+  )
     overlays.push({
       id: `construction:${q.id}:example`,
       type: "circle",

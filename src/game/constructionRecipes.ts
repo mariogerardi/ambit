@@ -1,5 +1,7 @@
 import { definePresentation, defineQuestion } from "./questionBuilder";
 import type { Question } from "./questionContracts";
+import type { RegionFeature } from "../geography/types";
+import type { ConstructionIsland } from "./constructionTypes";
 import type { ConstructionGrid } from "./constructionTypes";
 
 // Small synthetic fixtures demonstrate contracts, not claims about real geography.
@@ -49,6 +51,26 @@ const boundary = [
   { lat: 2, lng: -2 },
   { lat: -2, lng: -2 },
 ];
+const islands: (RegionFeature & ConstructionIsland)[] = [-1, 0, 1].map(
+  (lng, i) => {
+    const boundary = [
+      { lat: -0.1, lng: lng - 0.1 },
+      { lat: 0.1, lng: lng - 0.1 },
+      { lat: 0.1, lng: lng + 0.1 },
+      { lat: -0.1, lng: lng + 0.1 },
+    ];
+    const ring = [...boundary, boundary[0]].map((p) => [p.lng, p.lat]);
+    return {
+      id: `recipe-island:${i}`,
+      name: `Island ${i + 1}`,
+      level: "ADM0",
+      sourceId: "synthetic",
+      focus: { lat: 0, lng },
+      boundary,
+      geometry: { type: "Polygon", coordinates: [ring] },
+    };
+  },
+);
 export const CONSTRUCTION_RECIPES: Question[] = [
   defineQuestion({
     ...base,
@@ -236,6 +258,41 @@ export const CONSTRUCTION_RECIPES: Question[] = [
         { lat: -2.001218097652768, lng: 0 },
         { lat: 2.001218097652768, lng: 0 },
       ],
+    },
+  }),
+  defineQuestion({
+    ...base,
+    guidance,
+    id: "recipe:geo-circle-islands",
+    title: "Whole-island circle",
+    prompt: "Enclose all three islands, including every shore.",
+    explanation:
+      "Canonical island boundaries determine full enclosure; labels and display shapes do not grade it.",
+    mode: "geo-circle",
+    count: 1,
+    selection: { type: "none" },
+    commitment: "submit",
+    rule: {
+      type: "island-coverage-max",
+      radiusKm: 200,
+      maximum: 3,
+      sourceRevision: "synthetic-islands-v1",
+      candidates: islands,
+      tiers: [
+        { count: 3, feedback: "All shores within." },
+        { count: 2, feedback: "Two together." },
+        { count: 1, feedback: "One within reach." },
+      ],
+    },
+    importedRegions: islands,
+    scenes: {
+      play: { contextIds: islands.map((i) => i.id) },
+      reveal: { contextIds: islands.map((i) => i.id) },
+    },
+    constructionExample: {
+      version: 1,
+      kind: "circle",
+      center: { lat: 0, lng: 0 },
     },
   }),
 ];

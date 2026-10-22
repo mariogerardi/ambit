@@ -1,3 +1,4 @@
+import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { patchGeometry, cellsGeometry } from "./constructionOverlays";
 import { bearingSectorGeometry } from "./bearingSector";
 import { geoCircle, geoDistance, geoInterpolate } from "d3-geo";
@@ -13,6 +14,8 @@ import {
   TextureLoader,
   Vector3,
   Sprite,
+  BufferGeometry,
+  Float32BufferAttribute,
 } from "three";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
@@ -83,10 +86,18 @@ export function overlayPositions(
         coordinates.push(interpolate(step / steps));
     }
   const positions: number[] = [];
+  // Local circles sit just above the shore shell, including over water.
+  const radius =
+    (overlay.type === "path" && overlay.surfaceAligned) ||
+    (overlay.type === "circle" &&
+      !overlay.accuracyBand &&
+      overlay.radiusKm <= 100)
+      ? 1 + MAP_ANNOTATION_ALTITUDE
+      : 1.005;
   for (let i = 1; i < coordinates.length; i++)
     positions.push(
-      ...surfacePoint(...(coordinates[i - 1] as [number, number])),
-      ...surfacePoint(...(coordinates[i] as [number, number])),
+      ...surfacePoint(...(coordinates[i - 1] as [number, number]), radius),
+      ...surfacePoint(...(coordinates[i] as [number, number]), radius),
     );
   return new Float32Array(positions);
 }
@@ -266,6 +277,7 @@ export function makeMapOverlay(
     }
   }
   if (overlay.type === "circle" && overlay.shade) {
+    const construction = !overlay.accuracyBand && overlay.radiusKm <= 100;
     // Shade a geodesic disk in globe coordinates. The fragment test also works
     // at poles and across the antimeridian without a projected polygon seam.
     const material = new ShaderMaterial({
@@ -296,10 +308,36 @@ export function makeMapOverlay(
       },
       vertexShader:
         "varying vec3 surface; void main() { surface = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
-      fragmentShader:
-        "varying vec3 surface; uniform vec3 center; uniform float threshold; uniform vec3 bandColor; uniform float bandOpacity; void main() { if(dot(normalize(surface), center) < threshold) discard; gl_FragColor = vec4(bandColor, bandOpacity);\n#include <colorspace_fragment>\n}",
+      fragmentShader: construction
+        ? "uniform vec3 bandColor; uniform float bandOpacity; void main() { gl_FragColor = vec4(bandColor, bandOpacity);\n#include <colorspace_fragment>\n}"
+        : "varying vec3 surface; uniform vec3 center; uniform float threshold; uniform vec3 bandColor; uniform float bandOpacity; void main() { if(dot(normalize(surface), center) < threshold) discard; gl_FragColor = vec4(bandColor, bandOpacity);\n#include <colorspace_fragment>\n}",
+      ...(construction ? { side: DoubleSide } : {}),
     });
-    const disk = new Mesh(new SphereGeometry(1.004, 128, 96), material);
+    let geometry: BufferGeometry;
+    if (construction) {
+      // A small cap needs its own mesh. A coarse whole-sphere mesh can dip under
+      // local land, and a cosine shader loses precision for kilometer-scale caps.
+      const ring = geoCircle()
+        .center([overlay.center.lng, overlay.center.lat])
+        .radius(overlay.radiusKm / EARTH_KM / radians)
+        .precision(2)().coordinates[0];
+      const vertices = surfacePoint(
+        overlay.center.lng,
+        overlay.center.lat,
+        1 + MAP_ANNOTATION_ALTITUDE,
+      );
+      for (const [lng, lat] of ring)
+        vertices.push(...surfacePoint(lng, lat, 1 + MAP_ANNOTATION_ALTITUDE));
+      const indices: number[] = [];
+      for (let i = 1; i < ring.length; i++) indices.push(0, i, i + 1);
+      geometry = new BufferGeometry();
+      geometry.setAttribute(
+        "position",
+        new Float32BufferAttribute(vertices, 3),
+      );
+      geometry.setIndex(indices);
+    } else geometry = new SphereGeometry(1.004, 128, 96);
+    const disk = new Mesh(geometry, material);
     disk.renderOrder = 3;
     disk.raycast = () => {};
     group.add(disk);

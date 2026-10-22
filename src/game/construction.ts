@@ -19,6 +19,7 @@ export const constructionRule = (
   [
     "raster-overlap",
     "point-coverage-max",
+    "island-coverage-max",
     "line-following",
     "population-coverage-area-budget",
     "population-balance",
@@ -31,6 +32,7 @@ export const constructionKind = (
   ({
     "raster-overlap": "brush",
     "point-coverage-max": "circle",
+    "island-coverage-max": "circle",
     "line-following": "trace",
     "population-coverage-area-budget": "polygon",
     "population-balance": "cut",
@@ -436,6 +438,23 @@ export function evaluateConstruction(
       { label: "Paint on dunes", value: precision * 100, unit: "%" },
       { label: "Overlap score", value: f1 * 100, unit: "%" },
     ];
+  } else if (rule.type === "island-coverage-max" && c.kind === "circle") {
+    containedIds = rule.candidates
+      .filter((island) =>
+        island.boundary.every(
+          (p) =>
+            geoDistance(ll(c.center), ll(p)) * EARTH_KM <= rule.radiusKm + 1e-6,
+        ),
+      )
+      .map((island) => island.id);
+    tier = rule.tiers.findIndex((t) => containedIds!.length >= t.count);
+    metrics = [
+      {
+        label: "Whole islands enclosed",
+        value: containedIds.length,
+        unit: `of ${rule.candidates.length}`,
+      },
+    ];
   } else if (rule.type === "point-coverage-max" && c.kind === "circle") {
     containedIds = rule.candidates
       .filter(
@@ -444,9 +463,10 @@ export function evaluateConstruction(
       )
       .map((p) => p.id);
     tier = rule.tiers.findIndex((t) => containedIds!.length >= t.count);
+    const pointLabel = rule.pointLabel ?? "capitals";
     metrics = [
       {
-        label: "Capitals enclosed",
+        label: `${pointLabel[0].toUpperCase()}${pointLabel.slice(1)} enclosed`,
         value: containedIds.length,
         unit: `of ${rule.candidates.length}`,
       },
@@ -545,7 +565,7 @@ export function evaluateConstruction(
     sourceRevision:
       "grid" in rule
         ? rule.grid.revision
-        : rule.type === "line-following"
+        : rule.type === "line-following" || rule.type === "island-coverage-max"
           ? rule.sourceRevision
           : `points-v1:${rule.candidates.map((p) => `${p.id}:${p.lat}:${p.lng}`).join("|")}`,
     tier: tier < 0 ? null : tier,
@@ -640,16 +660,28 @@ export function validateConstructionQuestion(
   )
     fail("invalid brush thresholds");
   if (
-    r.type === "point-coverage-max" &&
+    (r.type === "point-coverage-max" || r.type === "island-coverage-max") &&
     (!Number.isFinite(r.radiusKm) ||
       r.radiusKm <= 0 ||
       r.radiusKm > Math.PI * EARTH_KM ||
       r.candidates.length < 2 ||
       new Set(r.candidates.map((p) => p.id)).size !== r.candidates.length ||
-      r.candidates.some((p) => !validGeoPoint(p)) ||
+      (r.type === "point-coverage-max"
+        ? r.candidates.some((p) => !validGeoPoint(p))
+        : !r.sourceRevision ||
+          r.radiusKm >= (Math.PI * EARTH_KM) / 2 ||
+          r.candidates.some(
+            (island) =>
+              !validGeoPoint(island.focus) ||
+              island.boundary.length < 3 ||
+              island.boundary.some((p) => !validGeoPoint(p)),
+          )) ||
       !Number.isInteger(r.maximum) ||
       r.maximum < 1 ||
       r.maximum > r.candidates.length ||
+      (r.type === "point-coverage-max" &&
+        r.pointLabel !== undefined &&
+        (typeof r.pointLabel !== "string" || !r.pointLabel.trim())) ||
       r.tiers[0].count !== r.maximum ||
       r.tiers.some(
         (t, i) =>

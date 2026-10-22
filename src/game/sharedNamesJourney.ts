@@ -93,7 +93,6 @@ const base = definePresentation({
 export const SHARED_NAMES_JOURNEY: Journey = {
   id: "same-name-different-place-v1",
   addedAt: "2026-10-12",
-  availability: "pool",
   saveRevision: 2,
   title: "Same Name, Different Place",
   description:

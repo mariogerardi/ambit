@@ -31,7 +31,6 @@ try {
       return {
         id: journey.id,
         addedAt: journey.addedAt,
-        availability: journey.availability ?? "unlisted",
         title: journey.title,
         ...(journey.supersedes ? { supersedes: journey.supersedes } : {}),
         ...(journey.saveRevision

@@ -37,7 +37,7 @@ try {
   );
   const publicRoot = path.resolve("public");
   const reports = [];
-  // No rendering, downloads, preparation or deployment. Unlisted editions are checked too.
+  // No rendering, downloads, preparation or deployment. Every registered Journey is checked.
   for (const selected of all ? index : [entry]) {
     let journey;
     if (recipeMode) {

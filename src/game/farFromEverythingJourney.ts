@@ -371,7 +371,6 @@ const stops: Stop[] = [
 export const FAR_FROM_EVERYTHING_JOURNEY: Journey = {
   id: "far-from-everything",
   addedAt: "2026-10-19",
-  availability: "unlisted",
   title: "Far From Everything",
   description:
     "Five pins explore what remoteness means: an island across an ocean, an Arctic town, a village reached by sea, uninhabited land, and the emptiest part of the Pacific.",

@@ -175,7 +175,6 @@ const definitions = [
 export const FOURTEENTH_JOURNEY: Journey = {
   id: "island-instincts-v1",
   addedAt: "2026-10-10",
-  availability: "pool",
   title: "Island instincts",
   description:
     "Island-hop around the world and resist the nearest-coast guess. Five islands reveal how distance and belonging can disagree.",

@@ -9,6 +9,7 @@ export const ANSWER_TYPES: Partial<Record<AnswerMode, string>> =
   );
 export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
   "raster-overlap": "Painted overlap with a reviewed area mask",
+  "island-coverage-max": "Whole islands enclosed by a fixed geodesic circle",
   "point-coverage-max": "Maximum point coverage with a fixed circle",
   "line-following": "Reviewed path coverage and deviation",
   "population-coverage-area-budget": "Population captured within a land budget",

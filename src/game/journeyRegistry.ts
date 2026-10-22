@@ -5,7 +5,6 @@ import type { Journey, Question } from "./questionContracts";
 /** Enough to route, schedule and validate saves without loading clue geometry. */
 export interface JourneySummary {
   addedAt?: string;
-  availability?: "pool" | "unlisted";
   saveRevision?: number;
   legacyRoundLabels?: Partial<Record<string, string>>;
   id: string;
@@ -16,7 +15,6 @@ export interface JourneySummary {
 }
 export const JOURNEY_INDEX = index as (JourneySummary & {
   addedAt: string;
-  availability: "pool" | "unlisted";
   path: string;
   module: string;
 })[];

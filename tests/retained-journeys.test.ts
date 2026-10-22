@@ -71,7 +71,7 @@ describe("retained daily rotation", () => {
   it("resolves pool Journeys by ID and permanently rejects removed editions", async () => {
     for (let index = 0; index < 22; index++) {
       const date = `2026-10-${String(index + 5).padStart(2, "0")}`;
-      expect(JOURNEY_INDEX.find((entry) => entry.id === dailyJourney(date).id)?.availability).toBe("pool");
+      expect(JOURNEY_INDEX.find((entry) => entry.id === dailyJourney(date).id)?.id).toBeDefined();
     }
     await expect(loadJourney("enclosed-territories-v1")).rejects.toThrow(
       "Unknown Journey",

@@ -48,7 +48,8 @@ import type {
   MapOverlay,
   PhysicalFeature,
 } from "../geography/types";
-import { canPickRegion } from "./interaction";
+import { MAP_ANNOTATION_ALTITUDE } from "./surface";
+import { canPickRegion, raisedSurfacePoint } from "./interaction";
 import { ClueLocators } from "./clueLocators";
 import type { ClueLocator } from "./clueLocators";
 import { MapOverlays, isOverlayLayer } from "./overlays";
@@ -59,6 +60,8 @@ import {
   CameraScale,
   viewportProjection,
   worldAltitude,
+  cameraNearPlane,
+  localZoomFloor,
   focusAltitude,
 } from "./camera";
 import { pinBandColor } from "../theme/playColors";
@@ -90,6 +93,7 @@ export interface GlobeHandle {
   cancelFocus(): void;
   flyover(stops: Focus[], loop?: boolean): void;
   cancelFlyover(): void;
+  pulseIslands(): void;
   fidget(): void;
   cancelFidget(): void;
   view(): Focus | undefined;
@@ -274,6 +278,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       if (!g) return;
       const rendererSize = g.renderer().getSize(new Vector2());
       const camera = g.camera() as PerspectiveCamera;
+      const near =
+        cameraNearPlane(g.pointOfView().altitude) * g.getGlobeRadius();
+      if (Math.abs(camera.near - near) > 0.000001) {
+        camera.near = near;
+        camera.updateProjectionMatrix();
+      }
       // Geographic context gets first claim on space; city names then avoid it.
       physical.view(camera, rendererSize.x, rendererSize.y);
       mapOverlays.view(camera, rendererSize.x, rendererSize.y);
@@ -298,13 +308,16 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         rendererSize.y,
         g.getGlobeRadius(),
         [...physical.labelBoxes(), ...panelBoxes],
+        !travel.current.active && !flyover.current.active,
       );
       placeLabels.view(camera, rendererSize.x, rendererSize.y, [
         ...physical.labelBoxes(),
         ...clueBoxes,
       ]);
       if (
-        (placeLabels.needsRefresh() || physical.needsRefresh()) &&
+        (placeLabels.needsRefresh() ||
+          physical.needsRefresh() ||
+          clueLocators.needsRefresh()) &&
         !labelFrame.current
       )
         labelFrame.current = requestAnimationFrame(() => {
@@ -414,7 +427,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       c.dampingFactor = 0.065;
       c.rotateSpeed = 0.55;
       c.zoomSpeed = 0.7;
-      c.minDistance = g.getGlobeRadius() * 1.012;
+      c.minDistance = g.getGlobeRadius() * 1.005;
       c.maxDistance = g.getGlobeRadius() * 6.5;
       c.autoRotateSpeed = 0.24;
       c.enablePan = false;
@@ -452,7 +465,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       // frustum to our actual orbit range so small outline offsets survive at
       // the default world zoom, while still allowing close regional views.
       const camera = g.camera() as PerspectiveCamera;
-      camera.near = g.getGlobeRadius() * 0.005;
+      camera.near =
+        cameraNearPlane(g.pointOfView().altitude) * g.getGlobeRadius();
       camera.far = g.getGlobeRadius() * 12;
       const viewport = readViewport() ?? size;
       camera.fov = viewportProjection(
@@ -648,11 +662,25 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               !!current.current.compact,
               fitToViewport,
             );
+          const setZoomFloor = () => {
+            if (!globe.current) return;
+            const floor = localZoomFloor({
+              ...target,
+              altitude: fitAltitude(),
+            });
+            globe.current.controls().minDistance =
+              globe.current.getGlobeRadius() *
+              (1 + Math.min(floor, globe.current.pointOfView().altitude));
+          };
+          setZoomFloor();
           travel.current.move(
             globe.current,
             target,
             current.current.reduced,
-            resumeRotation,
+            () => {
+              setZoomFloor();
+              resumeRotation();
+            },
             fitAltitude,
           );
         },
@@ -662,6 +690,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           stop();
           resizing.current.cancel();
           travel.current.cancel();
+          globe.current.controls().minDistance =
+            globe.current.getGlobeRadius() * 1.005;
           fidget.current.cancel();
           const ratio = Math.min(1, size.width / size.frameHeight);
           flyover.current.start(
@@ -674,6 +704,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             loop,
             (index) => current.current.onFlyoverStep?.(index),
           );
+        },
+        pulseIslands() {
+          clueLocators.pulse();
+          refreshLabels();
         },
         cancelFlyover() {
           flyover.current.cancel();
@@ -1030,6 +1064,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         const emphasis = outlineEmphasis(
           p.states[r.id],
           p.hovered === r.id && canPickRegion(r, p) && !p.onCoordinateTap,
+          r.level === "ADM0" && (!!r.displayGeometry || !!r.parentId),
         );
         line.material.linewidth = emphasis.width;
         line.renderOrder = emphasis.order;
@@ -1188,8 +1223,27 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       if (phase === "start" && (event.button !== 0 || gesture)) return false;
       const box = host.current.getBoundingClientRect(),
         x = event.clientX - box.left,
-        y = event.clientY - box.top,
-        point = g.toGlobeCoords(x, y);
+        y = event.clientY - box.top;
+      const circleRule = constructionRule(input.question);
+      const localCircle =
+        (circleRule?.type === "point-coverage-max" ||
+          circleRule?.type === "island-coverage-max") &&
+        circleRule.radiusKm <= 100;
+      const onShell = localCircle
+        ? raisedSurfacePoint(
+            g.camera(),
+            x,
+            y,
+            box.width,
+            box.height,
+            g.getGlobeRadius() * (1 + MAP_ANNOTATION_ALTITUDE),
+          )
+        : null;
+      const point = localCircle
+        ? onShell
+          ? g.toGeoCoords(onShell)
+          : null
+        : g.toGlobeCoords(x, y);
       const value = currentConstruction(input.question, {
           construction: input.value,
         }),

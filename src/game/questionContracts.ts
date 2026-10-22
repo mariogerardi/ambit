@@ -289,7 +289,7 @@ export interface Question {
     feedbackRegions?: "neutral";
   };
   /** Optional play-only orientation for small, explicitly supplied area clues. */
-  clueLocators?: { regionId: string; label: string }[];
+  clueLocators?: { regionId: string; label: string; pulseOnly?: boolean }[];
   highlightParts?: {
     countryId: string;
     point: { lat: number; lng: number };
@@ -346,8 +346,6 @@ export interface Question {
 export interface Journey {
   /** Date this edition joined the catalog; drives Admin's newest-first view. */
   addedAt?: string;
-  /** Omitted means unlisted, so registration alone never changes daily picks. */
-  availability?: "pool" | "unlisted";
   /** In-place answer-contract revision; no archived question definitions required. */
   saveRevision?: number;
   /** Receipt names for pre-revision answers, without restoring their grading rules. */
@@ -363,7 +361,7 @@ export interface Journey {
     focus: Focus;
     /** Explicit country recap uses the same visited style as ordinary Journeys. */
     regionIds?: string[];
-    /** Separate views for widely dispersed destinations; never implies a connecting route. */
+    /** Required by the authoring audit; also available as manual reduced-motion views. */
     views?: Focus[];
     physicalFeatures: PhysicalFeature[];
     overlays?: MapOverlay[];
@@ -380,6 +378,8 @@ export interface Journey {
     photoResults?: boolean;
   };
   mapAttribution?: { label: string; url: string };
+  /** Keep previously visited display geography during subsequent camera travel. */
+  retainMapDetails?: boolean;
 }
 export interface QuestionContext {
   regions: RegionFeature[];
@@ -452,7 +452,10 @@ export type QuestionContract =
       NoMapSelection)
   | ({
       mode: "geo-circle";
-      rule: Extract<ConstructionRule, { type: "point-coverage-max" }>;
+      rule: Extract<
+        ConstructionRule,
+        { type: "point-coverage-max" | "island-coverage-max" }
+      >;
     } & Single &
       NoMapSelection)
   | ({

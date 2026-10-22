@@ -9,12 +9,107 @@ import {
   viewportProjection,
   ViewportResize,
   CameraScale,
+  cameraNearPlane,
+  localZoomFloor,
 } from "../src/globe/camera";
 import { PerspectiveCamera, Vector3 } from "three";
 import type { Focus } from "../src/geography/types";
 import { regionStyle, stateStyles } from "../src/globe/visualStates";
 afterEach(() => vi.unstubAllGlobals());
 describe("camera travel", () => {
+  it("keeps raised geography beyond the near plane at the permitted local zoom", () => {
+    for (const altitude of [0.005, 0.008, 0.018, 0.06]) {
+      const floor = localZoomFloor({ lat: 0, lng: 0, altitude });
+      expect(floor).toBeGreaterThanOrEqual(0.005);
+      expect(floor - cameraNearPlane(floor)).toBeGreaterThan(0.003);
+    }
+    expect(localZoomFloor({ lat: 0, lng: 0, altitude: 0.04 })).toBeCloseTo(
+      0.028,
+    );
+    expect(localZoomFloor({ lat: 0, lng: 0, altitude: 1.2 })).toBe(0.005);
+  });
+  it("uses slow curved transitions, brief hovers and gentle island dips without changing ordinary travel", () => {
+    let now = 0,
+      nextId = 0;
+    const callbacks = new Map<number, FrameRequestCallback>();
+    vi.stubGlobal("performance", { now: () => now });
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callbacks.set(++nextId, callback);
+      return nextId;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => callbacks.delete(id));
+    const boston = { lat: 42.3, lng: -70.96, altitude: 0.008 };
+    const stockholm = { lat: 59.4, lng: 18.6, altitude: 0.018 };
+    let position = { ...boston };
+    const samples: (typeof position)[] = [];
+    const port = {
+      pointOfView(target?: Focus) {
+        if (target) {
+          position = { ...position, ...target };
+          samples.push({ ...position });
+        }
+        return position;
+      },
+    };
+    const advance = (ms: number) => {
+      for (let i = 0; i < ms; i += 10) {
+        now += 10;
+        const pending = [...callbacks.values()];
+        callbacks.clear();
+        pending.forEach((fn) => fn(now));
+      }
+    };
+    const tour = new CameraFlyover();
+    tour.start(port, [boston, stockholm], false, false);
+    advance(6500);
+    expect(position.lat).toBe(boston.lat);
+    expect(position.altitude).toBeCloseTo(boston.altitude * 2.2);
+    const overhead = position.altitude;
+    advance(300);
+    expect(position.altitude).toBe(overhead);
+    advance(1800);
+    expect(position.altitude).toBeGreaterThan(boston.altitude);
+    expect(position.altitude).toBeLessThan(overhead);
+    advance(1750);
+    expect(position).toEqual(boston);
+    advance(300);
+    expect(position).toEqual(boston);
+    advance(1800);
+    expect(position.altitude).toBeGreaterThan(boston.altitude);
+    expect(position.altitude).toBeLessThan(overhead);
+    advance(1750 + 6500);
+    expect(position.lat).toBe(stockholm.lat);
+    expect(position.lng).toBeCloseTo(stockholm.lng, 10);
+    expect(position.altitude).toBeCloseTo(stockholm.altitude * 2.2);
+    const crossing = samples.filter((p) => p.lng > -65 && p.lng < 12);
+    expect(crossing.length).toBeGreaterThan(100);
+    expect(Math.min(...crossing.map((p) => p.altitude))).toBeGreaterThan(0.05);
+    expect(Math.max(...crossing.map((p) => p.lat))).toBeGreaterThan(
+      stockholm.lat,
+    );
+    const aligned = samples.find(
+      (p) =>
+        Math.abs(p.lat - stockholm.lat) < 0.00001 &&
+        Math.abs(p.lng - stockholm.lng) < 0.00001,
+    )!;
+    expect(aligned.altitude).toBeGreaterThan(0.12);
+    advance(350 + 3500 + 350);
+    expect(position.lat).toBe(stockholm.lat);
+    expect(position.altitude).toBe(stockholm.altitude);
+    expect(tour.active).toBe(false);
+    expect(callbacks.size).toBe(0);
+    // Manual review can interrupt a dip without a delayed pullback or next stop.
+    tour.start(port, [boston, stockholm], false);
+    advance(7500);
+    tour.cancel();
+    const stopped = { ...position },
+      count = samples.length;
+    advance(20000);
+    expect(position).toEqual(stopped);
+    expect(samples).toHaveLength(count);
+    expect(callbacks.size).toBe(0);
+  });
+
   it("fits an overview to the restored map height without retaining a hidden page's zoom distance", () => {
     const hidden = { width: 390, frameHeight: 844 };
     const home = { width: 390, frameHeight: 272 };

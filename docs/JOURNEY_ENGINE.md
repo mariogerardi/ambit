@@ -104,7 +104,10 @@ sequence, compiled as `introViews` / `feedbackViews`. End the sequence at the
 scene's `focus`: reduced motion uses that focus directly. Playback runs once,
 does not restart on response edits, and yields to globe input. Help ends an intro
 at its effective search focus; missed pins retain the shared answer/guess review
-instead of starting a reveal tour. Completion flyovers retain their looping behavior.
+instead of starting a reveal tour. Completion flyovers retain their looping behavior. Close views (altitude below
+0.1) use slow transitions to a wider view, a brief 350 ms hover, a 3.5-second dip,
+another brief hover and a 3.5-second pullback. Manual review cancels every queued
+phase. Broader tours keep their continuous course.
 
 `scenes.play.clueLocators` accepts `{ regionId, label }` annotations for supplied
 reference/candidate areas or highlighted fragments (`clue-part:<countryId>`).
@@ -225,7 +228,7 @@ its authored radius and width are explanatory display geometry, never pin limits
 The sector follows semantic reference colors and does not intercept picking.
 
 Pin submission, distance bands, points, help caps and saves retain their shared
-owners. A new stable unlisted Journey ID and save revision protect this content;
+owners. A new stable Journey ID and save revision protect this content;
 subsequent target/grade changes must follow existing edition policies. Completion
 for Silk Roads uses discoveries, actual wrong pins and six authored views,
 with separately attributed schematic overland corridors. Paths can declare
@@ -300,7 +303,8 @@ The current control requires WebGL and pointer/touch input, without letter label
 or silhouette button alternatives. Names, original member outlines and typing remain
 unavailable before submission. The current reveal is immediate, with identical
 reduced-motion behavior. Completion uses the existing automatic flyover; reduced
-motion shows the authored completion focus.
+motion starts at the authored completion focus and offers manual navigation
+through every authored view.
 
 ## Focused review commands
 
@@ -329,7 +333,9 @@ partial assignments, repeated objects, and alternate spellings still need focuse
 behavior coverage. An unavailable missed sample is reported as a warning rather
 than replaced with an empty response carrying a fabricated grade. It never fetches data, regenerates
 assets, opens a browser or deploys. Failure exits nonzero. Missing authored completion
-is reported as a note because legacy Journeys may use the generic recap.
+is reported as a note because legacy Journeys may use the generic recap. A custom
+completion must include nonempty flyover views and valid completion cameras;
+omitting its views would suppress the default answer-stop tour.
 
 The consistency check has two levels: mechanic-independent role rules in
 `journeyVisualRules.ts`, and narrow authored exceptions reviewed against those
@@ -598,12 +604,35 @@ color. Do not rely on help to introduce an initially required candidate field.
 
 ## Constructed geographic answers
 
-Five independent explicit-submit contracts are available per question:
-`geo-brush` / `raster-overlap`, `geo-circle` / `point-coverage-max`, `geo-trace` /
-`line-following`, `geo-polygon` / `population-coverage-area-budget`, and `geo-cut` /
-`population-balance`. See `constructionRecipes.ts` for complete synthetic control
-examples and `drawingSaharaJourney.ts` for real source-backed content. These do
-not depend on a Journey flow.
+Five independent explicit-submit controls are available per question:
+`geo-brush` / `raster-overlap`, `geo-circle` / `point-coverage-max` or
+`island-coverage-max`, `geo-trace` / `line-following`, `geo-polygon` /
+`population-coverage-area-budget`, and `geo-cut` / `population-balance`.
+See `constructionRecipes.ts` for complete synthetic examples and
+`drawingSaharaJourney.ts` for real source-backed content. These do not depend
+on a Journey flow. `point-coverage-max.pointLabel` supplies the plural point
+noun in accuracy and frozen result metrics; omitting it preserves `"capitals"`.
+`island-coverage-max` supplies named candidates with a source revision and a
+canonical spherical convex hull (`boundary`). For radii below a hemisphere,
+every hull vertex must fit; convexity then guarantees the entire sourced island
+fits. Display simplification and label anchors never grade. Within Reach uses
+this contract with separately simplified shores and verified spherical maxima.
+`ConstructionIsland.labelHidden` omits secondary names without changing circle
+eligibility. Local construction circles and `PlaceFeature.surfaceAligned` text
+share the shore shell; `labelScale` reduces text size, and surface labels keep
+fixed screen anchors instead of switching sides during movement. Decorative
+`path.surfaceAligned` overlays can outline assist references without changing
+those regions into selectable answers.
+
+`Journey.retainMapDetails` keeps previously reached imported regions and display
+patches through later rounds, without exposing future fields or previous labels.
+
+A supplied `clueLocators` entry can set `pulseOnly: true` to emit one ripple at
+its region anchor, without an additional name or leader line. These pulses work
+for large islands as well as tiny clues, wait for camera travel to settle, and
+can be replayed through `GlobeHandle.pulseIslands()`. Reduced motion uses a short
+opacity fade. Pulse projection uses only the anchor, avoiding repeated shoreline
+projection for large island fields.
 
 `Response.construction` stores versioned geographic geometry. The shared editor
 supports globe gestures and compact editing controls. An authored `constructionArea`

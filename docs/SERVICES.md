@@ -458,7 +458,7 @@ increments the day's revision and records its previous and new Journey; conditio
 writes reject concurrent edits with 409. Each date has its own record, with no
 fixed total-date cap.
 
-Pool picks use a versioned FNV-1a date hash and a shrinking 14-day no-repeat
+All registered Journeys share one automatic-selection pool. Picks use a versioned FNV-1a date hash and a shrinking 14-day no-repeat
 window. With a small pool, the window shrinks until at least two choices remain,
 so the pick does not become a fixed cycle. Future unassigned dates remain provisional. EventBridge Scheduler locks
 the day's choice at 00:05 `America/New_York`; the first public read locks it if

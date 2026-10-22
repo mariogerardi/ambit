@@ -21,6 +21,24 @@ const world = read("world"),
   states = read("usa-adm1"),
   counties = read("ny-adm2");
 describe("actual spherical renderer inputs", () => {
+  it("reuses a detailed cap across stage wrappers without leaking a stage's name", () => {
+    const prepare = createGlobeRegionPreparer();
+    const source = world.find((r) => r.id === "wurl:SWE")!;
+    const first = prepare([{ ...source, displayGeometry: source.geometry }])[0];
+    Object.assign(first, { __threeObjPolygon: "existing mesh" });
+    const next = prepare([{ ...source, displayGeometry: source.geometry }])[0];
+    expect(next).toBe(first);
+    const named = prepare([
+      { ...source, name: "Reviewed coast", displayGeometry: source.geometry },
+    ])[0];
+    expect(named).not.toBe(first);
+    expect(named.name).toBe("Reviewed coast");
+    expect(next.name).toBe(source.name);
+    expect(
+      (next as RegionFeature & { __threeObjPolygon: string }).__threeObjPolygon,
+    ).toBe("existing mesh");
+    expect(source.name).not.toBe("Reviewed coast");
+  });
   it("preserves renderer identities across question and feedback transitions, including borderless rounds", () => {
     const prepare = createGlobeRegionPreparer();
     const first = prepare(world);

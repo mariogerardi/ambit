@@ -35,6 +35,40 @@ const recapRegions = new WeakMap<
   Journey,
   WeakMap<RegionFeature[], Map<string, RegionFeature[]>>
 >();
+const travelRegions = new WeakMap<
+  Journey,
+  WeakMap<RegionFeature[], Map<number, RegionFeature[]>>
+>();
+/** Retain reached coastlines without revealing future maps, labels or answers. */
+function reachedRegions(
+  regions: RegionFeature[],
+  journey: Journey,
+  index: number,
+) {
+  if (!journey.retainMapDetails || index === 0) return regions;
+  let worlds = travelRegions.get(journey);
+  if (!worlds) travelRegions.set(journey, (worlds = new WeakMap()));
+  let steps = worlds.get(regions);
+  if (!steps) worlds.set(regions, (steps = new Map()));
+  const cached = steps.get(index);
+  if (cached) return cached;
+  const previous = journey.rounds.slice(0, index);
+  const result = questionRegions(
+    regions,
+    {
+      ...journey.rounds[0],
+      importedRegions: previous.flatMap((q) => q.importedRegions ?? []),
+      displayGeometries: Object.assign(
+        {},
+        ...previous.map((q) => q.displayGeometries ?? {}),
+      ),
+      highlightParts: [],
+    },
+    "finished",
+  );
+  steps.set(index, result);
+  return result;
+}
 function allRegions(
   regions: RegionFeature[],
   journey: Journey,
@@ -318,6 +352,11 @@ export function journeyWorld(
     game.phase === "finished"
       ? undefined
       : questionVisualStates(round, context, game);
+  if (states && journey.retainMapDetails) {
+    for (const q of journey.rounds.slice(0, game.roundIndex))
+      for (const region of q.importedRegions ?? [])
+        states[region.id] ??= "disabled";
+  }
   // Reference and committed answer boundaries survive narrower authored border lists.
   const outlinedIds = Object.keys(states ?? {}).filter((id) =>
     ["hinted", "clue", "selected", "correct", "answer", "incorrect"].includes(
@@ -331,7 +370,12 @@ export function journeyWorld(
   const displayedRegions =
     game.phase === "finished"
       ? allRegions(regions, journey, game.answers)
-      : questionRegions(regions, round, game.phase, game.help?.[round.id]);
+      : questionRegions(
+          reachedRegions(regions, journey, game.roundIndex),
+          round,
+          game.phase,
+          game.help?.[round.id],
+        );
   const bearingOverlays = [
     ...compassArcs,
     ...(game.phase === "playing" ||
@@ -354,6 +398,22 @@ export function journeyWorld(
           ...pinRings,
         ]
       : undefined);
+  const islandStates =
+    constructionQuestion.rule.type === "island-coverage-max" &&
+    (game.phase === "feedback" || reviewingConstruction)
+      ? (Object.fromEntries(
+          constructionQuestion.rule.candidates.map((island) => [
+            island.id,
+            constructionResponse.constructionResult?.containedIds?.includes(
+              island.id,
+            )
+              ? reviewingConstruction
+                ? "visited"
+                : "correct"
+              : "hinted",
+          ]),
+        ) as Record<string, import("../geography/types").VisualState>)
+      : {};
   return {
     regions: displayedRegions,
     clueLocators:
@@ -365,14 +425,15 @@ export function journeyWorld(
                   {
                     id: `${journey.id}:${round.id}:${clue.regionId}`,
                     label: clue.label,
+                    pulseOnly: clue.pulseOnly,
                     region,
                   },
                 ]
               : [];
           })
         : [],
-    states:
-      game.phase === "finished"
+    states: {
+      ...(game.phase === "finished"
         ? Object.fromEntries(
             allRegions(regions, journey, game.answers).map((region) => [
               region.id,
@@ -383,7 +444,9 @@ export function journeyWorld(
                   : (visited?.[region.id] ?? "disabled"),
             ]),
           )
-        : states!,
+        : states!),
+      ...islandStates,
+    },
     places: reviewingConstruction
       ? [
           ...(constructionQuestion.places ?? []).filter(

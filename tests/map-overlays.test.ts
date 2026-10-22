@@ -10,6 +10,7 @@ import {
   TextureLoader,
   Vector3,
 } from "three";
+import { MAP_ANNOTATION_ALTITUDE } from "../src/globe/surface";
 import { pinBandColor } from "../src/theme/playColors";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
@@ -17,6 +18,40 @@ import { MapOverlays, overlayPositions } from "../src/globe/overlays";
 import type { MapOverlay } from "../src/geography/types";
 
 describe("decorative map overlays", () => {
+  it("aligns kilometer-scale construction rings and fills with the shore surface", () => {
+    const circle: MapOverlay = {
+      id: "local-circle",
+      type: "circle",
+      active: true,
+      shade: true,
+      center: { lat: 42.3, lng: -70.94 },
+      radiusKm: 4,
+    };
+    const points = overlayPositions(circle);
+    expect(
+      overlayPositions({ ...circle, active: false, visualState: "answer" }),
+    ).toEqual(points);
+    for (let i = 0; i < points.length; i += 3)
+      expect(Math.hypot(points[i], points[i + 1], points[i + 2])).toBeCloseTo(
+        1 + MAP_ANNOTATION_ALTITUDE,
+        6,
+      );
+    const overlays = new MapOverlays();
+    const group = overlays.get(circle, 100);
+    const disk = group.children.find(
+      (c) => c instanceof Mesh && !(c instanceof LineSegments2),
+    ) as Mesh;
+    const positions = disk.geometry.getAttribute("position");
+    expect(positions.count).toBeLessThan(200);
+    for (let i = 0; i < positions.count; i++)
+      expect(
+        Math.hypot(positions.getX(i), positions.getY(i), positions.getZ(i)),
+      ).toBeCloseTo(1 + MAP_ANNOTATION_ALTITUDE, 6);
+    expect((disk.material as ShaderMaterial).fragmentShader).not.toContain(
+      "threshold",
+    );
+    overlays.dispose();
+  });
   it("previews the brush's geographic radius without rebuilding on hover, and clears it on exit", () => {
     const overlays = new MapOverlays();
     overlays.previewBrush({ lat: 25, lng: 15 }, 160);

@@ -51,11 +51,10 @@ describe("Far From Everything", () => {
     });
     expect(visitedIds).toEqual(journey.rounds.map((round) => round.id));
   });
-  it("registers a separate unlisted edition without changing the daily pool", async () => {
+  it("registers a separate edition in the shared catalog", async () => {
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === journey.id),
     ).toMatchObject({
-      availability: "unlisted",
       path: "/journey/far-from-everything",
     });
     expect(journeyPath(journey.id)).toBe("/journey/far-from-everything");

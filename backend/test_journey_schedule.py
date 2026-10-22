@@ -52,16 +52,24 @@ class JourneyScheduleTests(unittest.TestCase):
         self.assertIn("2026-10-20", result["records"])
 
     def test_pool_selection_is_order_independent_and_shrinks_no_repeat_window(self):
-        pool = {f"id-{i}": {"id": f"id-{i}", "availability": "pool"} for i in range(3)}
-        pool["hidden"] = {"id": "hidden", "availability": "unlisted"}
+        pool = {f"id-{i}": {"id": f"id-{i}"} for i in range(3)}
         days = [(date(2026, 10, 5).toordinal() + n) for n in range(30)]
         choices = [schedule.choose(date.fromordinal(day).isoformat(), {}, pool) for day in days]
-        self.assertTrue(all(choice != "hidden" for choice in choices))
+        self.assertEqual(set(choices), set(pool))
         self.assertTrue(all(choices[index] != choices[index + 1] for index in range(len(choices) - 1)))
         self.assertEqual(choices, [schedule.choose(date.fromordinal(day).isoformat(), {}, dict(reversed(list(pool.items())))) for day in days])
 
+    def test_expanding_catalog_preserves_locked_and_assigned_choices(self):
+        original = {"one": {"id": "one"}}
+        expanded = {**original, "two": {"id": "two"}, "three": {"id": "three"}}
+        day = "2026-10-20"
+        selected = schedule.choose(day, {}, original)
+        for source in ("auto", "assigned"):
+            records = {day: {"journeyId": selected, "source": source, "lockedAt": "locked"}}
+            self.assertEqual(schedule.choose(day, records, expanded), selected)
+
     def test_frontend_hash_vectors_and_missing_historical_record(self):
-        expected = {'2026-10-05': 'island-instincts-v1', '2026-10-18': 'same-name-different-place-v1', '2026-11-03': 'mediterranean-v1', '2027-01-01': 'along-the-andes-v1'}
+        expected = {'2026-10-05': 'exceptions-to-the-rule-v1', '2026-10-18': 'the-vaccine-that-crossed-the-world-v1', '2026-11-03': 'far-from-everything', '2027-01-01': 'shared-neighbors-v1'}
         for day, journey in expected.items():
             self.assertEqual(schedule.choose(day, {}), journey)
         missing = {"2026-10-05": {"journeyId": "removed-id", "source": "auto"}}

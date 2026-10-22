@@ -341,7 +341,6 @@ const stops = [
 export const ACROSS_DIVIDE_JOURNEY: Journey = {
   id: "across-the-divide-v1",
   addedAt: "2026-10-17",
-  availability: "pool",
   title: "Across the Divide",
   description:
     "A tidal strait, a busy harbor, a city river: five photographs reveal how bridges connect the land across water. How close can you get to each crossing?",

@@ -2,7 +2,6 @@
   {
     "id": "across-the-divide-v1",
     "addedAt": "2026-10-17",
-    "availability": "pool",
     "title": "Across the Divide",
     "description": "A tidal strait, a busy harbor, a city river: five photographs reveal how bridges connect the land across water. How close can you get to each crossing?",
     "path": "/journey/across-the-divide",
@@ -38,7 +37,6 @@
   {
     "id": "along-the-andes-v1",
     "addedAt": "2026-10-11",
-    "availability": "pool",
     "title": "Along the Andes",
     "description": "Follow South America’s mountain spine: a highland capital, an equatorial surprise, a shared lake, the highest peak, and coastal wildlife in Tierra del Fuego.",
     "path": "/journey/along-the-andes",
@@ -69,7 +67,6 @@
   {
     "id": "beyond-the-maple-leaf-v1",
     "addedAt": "2026-10-11",
-    "availability": "pool",
     "title": "Beyond the maple leaf",
     "description": "Begin with a familiar flag, then look beyond it: two official languages, a bilingual province, a capital between communities, and a northern ocean shore.",
     "path": "/journey/beyond-the-maple-leaf",
@@ -100,7 +97,6 @@
   {
     "id": "chasing-the-sun-v2",
     "addedAt": "2026-10-11",
-    "availability": "pool",
     "title": "Chasing the sun",
     "supersedes": "chasing-the-sun-v1",
     "description": "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
@@ -132,9 +128,8 @@
   {
     "id": "down-the-danube-v1",
     "addedAt": "2026-10-11",
-    "availability": "pool",
     "title": "Down the Danube",
-    "description": "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
+    "description": "Follow a river with a disappearing act, two capitals, and a passage through the mountains. Five stops take the Danube from its upper reaches to the sea.",
     "path": "/journey/down-the-danube",
     "module": "./danubeJourney.ts",
     "rounds": [
@@ -163,7 +158,6 @@
   {
     "id": "drawing-the-sahara-v1",
     "addedAt": "2026-10-20",
-    "availability": "unlisted",
     "title": "Drawing the Sahara",
     "saveRevision": 1,
     "description": "Look beyond the dunes: follow water, find cities and discover where people make their homes across the Sahara.",
@@ -205,7 +199,6 @@
   {
     "id": "exceptions-to-the-rule-v1",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "Exceptions to the rule",
     "description": "A country need not fit on one continent, a coastline need not last, and land need not stand above the sea. Follow five places that complicate a familiar map.",
     "path": "/journey/exceptions-to-the-rule",
@@ -236,7 +229,6 @@
   {
     "id": "far-from-everything",
     "addedAt": "2026-10-19",
-    "availability": "unlisted",
     "title": "Far From Everything",
     "description": "Five pins explore what remoteness means: an island across an ocean, an Arctic town, a village reached by sea, uninhabited land, and the emptiest part of the Pacific.",
     "path": "/journey/far-from-everything",
@@ -272,7 +264,6 @@
   {
     "id": "island-instincts-v1",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "Island instincts",
     "description": "Island-hop around the world and resist the nearest-coast guess. Five islands reveal how distance and belonging can disagree.",
     "path": "/journey/island-instincts",
@@ -308,7 +299,6 @@
   {
     "id": "latitude-surprises-v1",
     "addedAt": "2026-10-11",
-    "availability": "pool",
     "title": "Latitude surprises",
     "description": "Take one latitude line around the world at a time. Across five continents, familiar cities turn out to be farther north—or south—than you expect.",
     "path": "/journey/latitude-surprises",
@@ -344,7 +334,6 @@
   {
     "id": "mediterranean-v1",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "Around the Mediterranean",
     "saveRevision": 2,
     "legacyRoundLabels": {
@@ -391,7 +380,6 @@
   {
     "id": "missing-borders-v1",
     "addedAt": "2026-10-12",
-    "availability": "pool",
     "title": "Missing Borders",
     "saveRevision": 1,
     "description": "Five maps have been altered. Spot the territories hiding two—or three—countries, then watch their real boundaries return.",
@@ -433,7 +421,6 @@
   {
     "id": "north-america-v2",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "A Continent in Pieces",
     "description": "Familiar countries, unfamiliar pieces. Explore the territories, provinces, and states within North America—and the surprises hidden in their boundaries and names.",
     "path": "/journey/north-america",
@@ -469,7 +456,6 @@
   {
     "id": "not-the-obvious-city-v1",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "Not the obvious city",
     "description": "Fame, compromise, relocation and divided government: discover the decisions behind five unexpected capitals.",
     "path": "/journey/not-the-obvious-city",
@@ -505,7 +491,6 @@
   {
     "id": "ring-of-fire-v1",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "Pacific Landfalls",
     "description": "Island chains, narrow straits, a mountain-lined continent: follow the changing shores of the Pacific to a final harbor in New Zealand.",
     "path": "/journey/ring-of-fire",
@@ -536,7 +521,6 @@
   {
     "id": "same-hour-different-worlds",
     "addedAt": "2026-10-12",
-    "availability": "pool",
     "title": "Same Hour, Different Worlds",
     "saveRevision": 5,
     "legacyRoundLabels": {
@@ -582,7 +566,6 @@
   {
     "id": "same-name-different-place-v1",
     "addedAt": "2026-10-12",
-    "availability": "pool",
     "title": "Same Name, Different Place",
     "saveRevision": 2,
     "description": "One name can cross borders, borrow a history, or mean something entirely different. Explore five pairs of namesakes around the world.",
@@ -624,7 +607,6 @@
   {
     "id": "shared-neighbors-v1",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "Shared neighbors",
     "description": "Two countries can point to a third. Follow five pairs of neighbors across inland frontiers, long coasts, and mountain borders to find the land between them.",
     "path": "/journey/shared-neighbors",
@@ -660,7 +642,6 @@
   {
     "id": "the-sound-of-somewhere-reggaeton",
     "addedAt": "2026-10-19",
-    "availability": "unlisted",
     "title": "The Sound of Somewhere: Reggaetón",
     "saveRevision": 3,
     "legacyRoundLabels": {
@@ -707,7 +688,6 @@
   {
     "id": "the-vaccine-that-crossed-the-world-v1",
     "addedAt": "2026-10-20",
-    "availability": "unlisted",
     "title": "The Vaccine That Crossed the World",
     "saveRevision": 1,
     "description": "Set five compass bearings between milestones of a vaccination expedition, from Galicia to the Philippines.",
@@ -749,7 +729,6 @@
   {
     "id": "try-not-to-click-russia-v1",
     "addedAt": "2026-10-10",
-    "availability": "pool",
     "title": "On Russia’s doorstep",
     "description": "From the Baltic to the Pacific, Russia meets neighbors of very different shapes and sizes. Find five of them using coastlines and geography, with political borders hidden.",
     "path": "/journey/try-not-to-click-russia",
@@ -785,7 +764,6 @@
   {
     "id": "where-the-silk-roads-met-v1",
     "addedAt": "2026-10-20",
-    "availability": "unlisted",
     "title": "Where the Silk Roads Met",
     "saveRevision": 1,
     "description": "Two compass readings, one hidden city. Discover five meeting places across the Silk Roads.",
@@ -821,6 +799,42 @@
         "label": "Bearings",
         "progressLabel": "Western exchange",
         "resolvedLabel": "Baghdad"
+      }
+    ]
+  },
+  {
+    "id": "within-reach-v2",
+    "addedAt": "2026-10-21",
+    "title": "Within Reach",
+    "supersedes": "within-reach-v1",
+    "description": "From Boston Harbor to the Cyclades, explore islands large and small. Move one circle across five island groups and see how many complete shores you can bring within reach.",
+    "path": "/journey/within-reach",
+    "module": "./withinReachJourney.ts",
+    "rounds": [
+      {
+        "id": "within-reach:boston",
+        "label": "Island circle",
+        "progressLabel": "Boston Harbor"
+      },
+      {
+        "id": "within-reach:scilly",
+        "label": "Island circle",
+        "progressLabel": "Isles of Scilly"
+      },
+      {
+        "id": "within-reach:singapore",
+        "label": "Island circle",
+        "progressLabel": "Southern Islands"
+      },
+      {
+        "id": "within-reach:hauraki",
+        "label": "Island circle",
+        "progressLabel": "Hauraki Gulf"
+      },
+      {
+        "id": "within-reach:cyclades",
+        "label": "Island circle",
+        "progressLabel": "The Cyclades"
       }
     ]
   }

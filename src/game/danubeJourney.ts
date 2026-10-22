@@ -68,16 +68,23 @@ const base = definePresentation({
 export const DANUBE_JOURNEY: Journey = {
   id: "down-the-danube-v1",
   addedAt: "2026-10-11",
-  availability: "pool",
   title: "Down the Danube",
   description:
-    "Follow a river that can vanish underground, divide a city, and squeeze between mountains. Five stops carry us from its upper reaches to the sea.",
+    "Follow a river with a disappearing act, two capitals, and a passage through the mountains. Five stops take the Danube from its upper reaches to the sea.",
   mapAttribution: {
     label: "© OpenStreetMap contributors",
     url: "https://www.openstreetmap.org/copyright",
   },
   completion: {
     focus: { lat: 46.7, lng: 19.2, altitude: 0.5 },
+    views: [
+      { lat: 47.936, lng: 8.76635, altitude: 0.2 },
+      { lat: vienna.lat, lng: vienna.lng, altitude: 0.16 },
+      { lat: budapest.lat, lng: budapest.lng, altitude: 0.16 },
+      { lat: 44.65, lng: 22.3, altitude: 0.2 },
+      { lat: 45.15, lng: 29.6, altitude: 0.3 },
+      { lat: 46.7, lng: 19.2, altitude: 0.5 },
+    ],
     physicalFeatures: [
       ...route("delta"),
       ...segments.branches,
@@ -91,7 +98,7 @@ export const DANUBE_JOURNEY: Journey = {
       { ...landmark("delta", "Danube Delta", 45.15, 29.6), markerHidden: true },
     ],
     caption:
-      "A hidden diversion, two capitals, a mountain gorge, and a delta: the Danube reaches the Black Sea through landscapes that divide people, connect cities, and carry life downstream.",
+      "An underground escape, two capitals, a mountain passage, and a delta: one river keeps changing roles. The Danube shapes the places along its banks—and the people living there reshape the river in return.",
   },
   rounds: [
     defineQuestion({
@@ -116,8 +123,8 @@ export const DANUBE_JOURNEY: Journey = {
       correctFeedback: "Nice connection.",
       title: "The river takes a shortcut.",
       leadIn:
-        "In southern Germany, some Danube water disappears underground and resurfaces at a spring.",
-      prompt: "Which other river system does that water join?",
+        "In southern Germany, the Danube pulls a disappearing act. Some water sinks underground and resurfaces at a spring.",
+      prompt: "Which other river system receives it?",
       rule: { type: "choice-ids", ids: ["river:rhine"] },
       choices: [
         { id: "river:elbe", label: "Elbe" },
@@ -127,7 +134,7 @@ export const DANUBE_JOURNEY: Journey = {
       ],
       feedbackMapCaption: "Danube route so far · local Rhine context",
       explanation:
-        "Limestone caves carry it to the Aach spring, then toward Lake Constance and a different drainage basin. We stay with the Danube above ground.",
+        "Hidden limestone passages carry the water to the Aach spring, then toward Lake Constance. Part of the Danube slips into another river system, crossing a watershed underground.",
       source: source(
         "UNESCO Global Geopark Swabian Alb · Danube seepage",
         "https://www.geopark-alb.de/en/experience-geopark/journey-into-earths-history/detail/the-danube-seepage",
@@ -171,8 +178,9 @@ export const DANUBE_JOURNEY: Journey = {
       label: "Capital",
       resolvedLabel: "Vienna",
       title: "The first capital downstream.",
-      leadIn: "Follow the river east into Austria.",
-      prompt: "Drop a pin in Vienna.",
+      leadIn:
+        "Stay with the water flowing east into Austria, toward our first capital.",
+      prompt: "Drop a pin as close to Vienna as you can.",
       instruction: "",
       mode: "pin",
       rule: {
@@ -187,11 +195,14 @@ export const DANUBE_JOURNEY: Journey = {
       },
       disclosure: { ...base.disclosure, namedChoices: false },
       explanation:
-        "The river runs through the eastern side of the city. Continue downstream: this is only the first capital on our route.",
-      source: source(
-        "City of Vienna · Danube Island",
-        "https://www.wien.gv.at/en/environment/danube-island",
-      ),
+        "Vienna has reshaped its river. The New Danube carries floodwater beside the main channel, with a long artificial island between them. That island is part of the capital’s flood defenses.",
+      source: {
+        ...source(
+          "City of Vienna · how Danube flood protection works",
+          "https://www.wien.gv.at/umwelt/donau-hochwasserschutz-funktion",
+        ),
+        reviewedOn: "2026-10-21",
+      },
       sources: [capitalSource, riverSource],
       scenes: {
         play: {
@@ -230,7 +241,8 @@ export const DANUBE_JOURNEY: Journey = {
       label: "Two banks",
       resolvedLabel: "Budapest",
       title: "A city made across the river.",
-      leadIn: "Downstream, Buda and Pest face each other across the river.",
+      leadIn:
+        "Farther downstream, Buda stands on one bank and Pest on the other.",
       prompt: "What capital brings the two banks together?",
       mode: "text",
       inputLabel: "Capital city",
@@ -242,7 +254,7 @@ export const DANUBE_JOURNEY: Journey = {
         eastBank: "Pest",
       },
       explanation:
-        "The river separates Buda on the west bank from Pest on the east. Their 1873 union also included Óbuda: the familiar name leaves one founding town out.",
+        "Not a trick question—Buda and Pest really did become one capital. Their 1873 union also included Óbuda: three towns came together, though only two made it into the familiar name.",
       source: source(
         "Óbuda municipality · the 1873 city union",
         "https://obuda.hu/pest-buda-es-obuda-egyesitesenek-150-evfordulojat-unnepeljuk-november-17-budapest-napja/",
@@ -305,8 +317,9 @@ export const DANUBE_JOURNEY: Journey = {
       resolvedLabel: "Iron Gates",
       correctFeedback: "Exactly right.",
       title: "A river between two countries.",
-      leadIn: "Travel southeast into the Iron Gates gorge.",
-      prompt: "Which two countries border this stretch of the Danube?",
+      leadIn:
+        "At the Iron Gates, mountains crowd the river—and the water doubles as an international border.",
+      prompt: "Which two countries face each other across it?",
       instruction: "",
       mode: "choice-multiple",
       count: 2,
@@ -321,7 +334,7 @@ export const DANUBE_JOURNEY: Journey = {
       ],
       rule: { type: "country-ids", ids: ["wurl:SRB", "wurl:ROU"] },
       explanation:
-        "Dams at the gorge generate power, but block an ancient upstream route for sturgeon. The river is a border for people and a corridor for fish.",
+        "The river marks a border for people and an ancient migration corridor for sturgeon. At the Iron Gates, dams generate electricity while blocking the fish’s passage upstream.",
       source: source(
         "ICPDR · restoring fish migration at the Iron Gates",
         "https://www.icpdr.org/tasks-topics/tasks/river-basin-management/sturgeon-conservation/we-pass-facilitating-fish-migration",
@@ -375,8 +388,9 @@ export const DANUBE_JOURNEY: Journey = {
       resolvedLabel: "Danube Delta",
       correctFeedback: "Exactly right.",
       title: "One river becomes many channels.",
-      leadIn: "Follow the lower river toward its delta.",
-      prompt: "Which sea does the Danube flow into?",
+      leadIn:
+        "Near the end of its journey, one river becomes a maze of channels, lakes, and wetlands.",
+      prompt: "Which sea receives the Danube?",
       rule: { type: "choice-ids", ids: ["sea:black"] },
       choices: [
         { id: "sea:adriatic", label: "Adriatic Sea" },
@@ -388,7 +402,7 @@ export const DANUBE_JOURNEY: Journey = {
       ],
       feedbackMapCaption: "Danube · full route to the sea",
       explanation:
-        "Three main branches spread into a maze of channels, lakes, and wetlands. Our above-ground route ends here; the opening detour eventually reaches the North Sea instead.",
+        "Three main branches carry the Danube through its delta to the sea. Remember the water that vanished underground at our first stop? That diversion eventually reaches the North Sea—a different ending for the same river.",
       sources: [riverSource],
       scenes: {
         play: {

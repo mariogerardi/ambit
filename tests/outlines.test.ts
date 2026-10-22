@@ -21,6 +21,14 @@ const regions = prepareGlobeRegions(
   ),
 );
 describe("independent boundary outlines", () => {
+  it("keeps detailed country and island outlines on their cap instead of projecting a second coast", () => {
+    for (const state of ["hinted", "clue"] as const) {
+      expect(outlineEmphasis(state, false, true).lift).toBe(0);
+      expect(outlineEmphasis(state, false, true).order).toBe(
+        outlineEmphasis(state).order,
+      );
+    }
+  });
   it("uses the same quiet outline for clues and references independently of hover", () => {
     const clue = outlineEmphasis("clue");
     expect(clue).toEqual(outlineEmphasis("hinted"));

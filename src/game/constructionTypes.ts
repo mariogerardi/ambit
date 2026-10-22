@@ -40,7 +40,26 @@ export type Construction = { version: 1 } & (
 export interface ConstructionBand {
   feedback: string;
 }
+export interface ConstructionIsland {
+  id: string;
+  name: string;
+  focus: GeoPoint;
+  /** Display importance when nearby island labels compete for space. */
+  priority?: number;
+  /** Omit secondary island names without changing eligibility. */
+  labelHidden?: boolean;
+  /** Exact spherical convex hull of the sourced shore; never a display simplification. */
+  boundary: GeoPoint[];
+}
 export type ConstructionRule =
+  | {
+      type: "island-coverage-max";
+      radiusKm: number;
+      candidates: ConstructionIsland[];
+      sourceRevision: string;
+      maximum: number;
+      tiers: (ConstructionBand & { count: number })[];
+    }
   | {
       type: "raster-overlap";
       grid: ConstructionGrid;
@@ -51,6 +70,8 @@ export type ConstructionRule =
       type: "point-coverage-max";
       radiusKm: number;
       candidates: PlaceFeature[];
+      /** Plural noun used in accuracy and results; defaults to capitals. */
+      pointLabel?: string;
       maximum: number;
       tiers: (ConstructionBand & { count: number })[];
     }

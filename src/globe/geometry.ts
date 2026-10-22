@@ -1,3 +1,4 @@
+import { MAP_SURFACE_ALTITUDE } from "./surface";
 import type { RegionFeature } from "../geography/types";
 import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
 import { geoDistance, geoInterpolate } from "d3-geo";
@@ -49,6 +50,10 @@ export function prepareGlobeRegions(regions: RegionFeature[]): RegionFeature[] {
 // Each mounted renderer owns its cache: two globes must never share bindings.
 export function createGlobeRegionPreparer() {
   const objects = new WeakMap<RegionFeature, RegionFeature>();
+  const variants = new Map<
+    string,
+    WeakMap<RegionFeature["geometry"], RegionFeature>
+  >();
   const arrays = new WeakMap<RegionFeature[], RegionFeature[]>();
   return (regions: RegionFeature[]) => {
     const cached = arrays.get(regions);
@@ -58,7 +63,24 @@ export function createGlobeRegionPreparer() {
       .map((region) => {
         let rendered = objects.get(region);
         if (!rendered) {
-          rendered = prepareGlobeRegions([region])[0];
+          // Stage wrappers can change while the footprint is identical. Keep
+          // Kapsule's mesh binding instead of synchronously triangulating again.
+          const identity = JSON.stringify([
+            region.id,
+            region.name,
+            region.level,
+            region.parentId,
+            region.sourceId,
+            region.focus,
+          ]);
+          let footprints = variants.get(identity);
+          if (!footprints) variants.set(identity, (footprints = new WeakMap()));
+          const footprint = region.displayGeometry ?? region.geometry;
+          rendered = footprints.get(footprint);
+          if (!rendered) {
+            rendered = prepareGlobeRegions([region])[0];
+            footprints.set(footprint, rendered);
+          }
           objects.set(region, rendered);
         }
         return rendered;
@@ -72,8 +94,8 @@ export function boundaryAltitude(obj: object) {
   return region.sourceId.startsWith("studio:")
     ? 0.0022
     : region.level === "ADM0"
-      ? 0.0015
-      : 0.0015 + Number(region.level.slice(3)) * 0.00015;
+      ? MAP_SURFACE_ALTITUDE
+      : MAP_SURFACE_ALTITUDE + Number(region.level.slice(3)) * 0.00015;
 }
 export function boundaryResolution(obj: object) {
   const region = obj as RegionFeature;

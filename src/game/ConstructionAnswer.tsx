@@ -12,6 +12,7 @@ import {
   brushSizeRange,
 } from "./construction";
 import { undoConstruction } from "./constructionEditing";
+import { PointOrbs } from "./PointOrbs";
 import { QuestionActions } from "./QuestionActions";
 import { ActionIcon } from "../app/ActionIcon";
 export function ConstructionAnswer({
@@ -20,12 +21,16 @@ export function ConstructionAnswer({
   dispatch,
   webgl,
   mapKey,
+  onPulseIslands,
+  onRecenter,
 }: {
   question: Question;
   context: QuestionContext;
   game: GameState;
   dispatch: (a: Action) => void;
   webgl: boolean;
+  onPulseIslands?(): void;
+  onRecenter?(): void;
   mapKey?: React.ReactNode;
 }) {
   const rule = constructionRule(q);
@@ -73,7 +78,34 @@ export function ConstructionAnswer({
   );
   return (
     <div className="construction-answer">
-      {rule.type === "raster-overlap" ? (
+      {rule.type === "island-coverage-max" ? (
+        <div
+          className="island-map-actions"
+          role="group"
+          aria-label="Island map controls"
+        >
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={!webgl || !onPulseIslands}
+            onClick={onPulseIslands}
+            title="Pulse every island once"
+          >
+            <span className="island-pulse-icon" aria-hidden="true">
+              <i />
+            </span>
+            Pulse islands
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={!webgl || !onRecenter}
+            onClick={onRecenter}
+          >
+            <span aria-hidden="true">◎</span> Recenter view
+          </button>
+        </div>
+      ) : rule.type === "raster-overlap" ? (
         <div
           className="construction-toolbar construction-brush-row"
           role="group"
@@ -173,6 +205,17 @@ export function ConstructionAnswer({
         !constructionReady(q, game) && (
           <p role="status">Keep a simple outline: edges must not cross.</p>
         )}
+      {rule.type === "island-coverage-max" && (
+        <aside
+          className="island-best"
+          aria-label={`Best possible: ${rule.maximum} islands`}
+        >
+          <span>Best possible:</span>
+          <strong>
+            {rule.maximum} <small>islands</small>
+          </strong>
+        </aside>
+      )}
       <QuestionActions
         guidance={guidance}
         mapKey={mapKey}
@@ -192,7 +235,8 @@ export function ConstructionReview({
   response: GameState;
 }) {
   const result = reviewedConstruction(question, response);
-  if (!result) return null;
+  if (!result || constructionRule(question)?.type === "island-coverage-max")
+    return null;
   return (
     <section
       className="construction-review"
@@ -231,6 +275,81 @@ export function ConstructionReview({
           ))}
         </div>
       )}
+    </section>
+  );
+}
+
+/** Results-only reference; grades and help ceilings remain frozen in the save. */
+export function IslandScoring({
+  questions,
+  help,
+}: {
+  questions: Question[];
+  help: GameState["help"];
+}) {
+  const rows = questions.flatMap((question) => {
+    const rule = constructionRule(question);
+    return rule?.type === "island-coverage-max" ? [{ question, rule }] : [];
+  });
+  if (!rows.length) return null;
+  return (
+    <section className="island-scoring" aria-label="Island scoring">
+      <table>
+        <caption>Scoring for this island group</caption>
+        <thead>
+          <tr>
+            <th scope="col">Islands</th>
+            {rows[0].rule.tiers.map((tier, index) => {
+              const upper = index
+                ? rows[0].rule.tiers[index - 1].count - 1
+                : tier.count;
+              const low = rows[0].rule.maximum - upper,
+                high = rows[0].rule.maximum - tier.count;
+              return (
+                <th scope="col" key={index}>
+                  <PointOrbs
+                    earned={3 - index}
+                    label={`${3 - index} ${index === 2 ? "point" : "points"}`}
+                  />
+                  <small>
+                    {index === 0
+                      ? "Best fit"
+                      : `${low === high ? low : `${low}–${high}`} fewer`}
+                  </small>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ question, rule }) => (
+            <tr key={question.id}>
+              <th scope="row">
+                {question.progressLabel ?? question.title}
+                <small>
+                  {help?.[question.id] === "assisted"
+                    ? "Assist cap: 1 point"
+                    : help?.[question.id] === "hinted"
+                      ? "Hint cap: 2 points"
+                      : ""}
+                </small>
+              </th>
+              {rule.tiers.map((tier, index) => {
+                const upper = index
+                  ? rule.tiers[index - 1].count - 1
+                  : tier.count;
+                return (
+                  <td key={index}>
+                    {tier.count === upper
+                      ? tier.count
+                      : `${tier.count}–${upper}`}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </section>
   );
 }

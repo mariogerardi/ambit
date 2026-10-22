@@ -5,7 +5,7 @@ import {
   auditVisualScene,
   type VisualException,
 } from "./journeyVisualRules";
-import type { RegionFeature, PlaceFeature } from "../geography/types";
+import type { RegionFeature, PlaceFeature, Focus } from "../geography/types";
 import type {
   Journey,
   Question,
@@ -31,6 +31,17 @@ import { canSubmit, isCorrect } from "./questionEvaluation";
 import { interiorAnchor } from "../geography/interiorAnchor";
 import { acceptsAlternatives, responseIds } from "./answerPresentation";
 import { initialBearing, normalizeBearing } from "./geodesic";
+
+function invalidCamera(focus: Focus) {
+  return (
+    !Number.isFinite(focus.lat) ||
+    Math.abs(focus.lat) > 90 ||
+    !Number.isFinite(focus.lng) ||
+    Math.abs(focus.lng) > 180 ||
+    (focus.altitude !== undefined &&
+      (!Number.isFinite(focus.altitude) || focus.altitude <= 0))
+  );
+}
 
 /** Exercise real input actions; no empty response with a fabricated grade. */
 function submitSample(
@@ -407,15 +418,7 @@ export function auditJourney(
         focus,
         ...(views ?? []),
       ].entries())
-        if (
-          !Number.isFinite(cameraFocus.lat) ||
-          Math.abs(cameraFocus.lat) > 90 ||
-          !Number.isFinite(cameraFocus.lng) ||
-          Math.abs(cameraFocus.lng) > 180 ||
-          (cameraFocus.altitude !== undefined &&
-            (!Number.isFinite(cameraFocus.altitude) ||
-              cameraFocus.altitude <= 0))
-        )
+        if (invalidCamera(cameraFocus))
           report.errors.push(
             `Invalid camera: ${question.id} / ${stage}${viewIndex ? ` / view ${viewIndex}` : ""}`,
           );
@@ -533,7 +536,18 @@ export function auditJourney(
       }
     }
   }
-  if (!journey.completion)
+  if (journey.completion) {
+    if (!journey.completion.views?.length)
+      report.errors.push("Authored completion is missing flyover views.");
+    for (const [index, focus] of [
+      journey.completion.focus,
+      ...(journey.completion.views ?? []),
+    ].entries())
+      if (invalidCamera(focus))
+        report.errors.push(
+          `Invalid camera: ${journey.id} / completion${index ? ` / view ${index}` : ""}`,
+        );
+  } else
     report.warnings.push(
       "No authored completion scene; generic recap will be used.",
     );

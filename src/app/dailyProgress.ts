@@ -53,10 +53,10 @@ export function seededJourney<T extends JourneySummary>(
   catalog: T[],
   records: Record<string, string> = {},
 ): T {
-  const candidates = catalog
-    .filter((journey) => journey.availability === "pool")
-    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  if (!candidates.length) throw Error("No pool Journeys are available");
+  const candidates = [...catalog].sort((a, b) =>
+    a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
+  );
+  if (!candidates.length) throw Error("No Journeys are available");
   const first = dateOrdinal(FIRST_DAILY_DATE);
   const target = dateOrdinal(date);
   const memo = new Map<string, string>();

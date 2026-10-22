@@ -417,3 +417,28 @@ These are modern city reference points, not archaeological footprints; Hami's
 record is a populated place, not administrative-region record 1529482. Other
 stations reuse bundled city/capital records. Schematic corridor provenance lives
 with `src/game/silkRoadCorridors.ts`; factual source links live with the Journey.
+
+## Within Reach local shorelines and island names
+
+Within Reach uses question-local **© OpenStreetMap contributors** shoreline and
+island-name data, frozen October 21–22, 2026, under the
+[Open Database License 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
+Directed coastlines become canonical island hulls for whole-island circle grades.
+Separate display shores are simplified with topology preservation at 8–65 m in
+latitude. Named eligible islands are retained; tiny background rocks are omitted.
+Only local display patches change the shared globe. Public-domain Natural Earth
+5.1.2 geometry supplies 1:10 million context shores and country shapes farther away.
+
+Hauraki island names and anchors also use the [GeoNames New Zealand export](https://download.geonames.org/export/dump/NZ.zip),
+retrieved October 22, 2026, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Names are matched to OSM island footprints; anchors do not grade answers.
+National Park Service factsheets supply supplementary Raccoon and Sheep island
+name anchors; their source URLs are preserved in the preparation configuration.
+
+The shipped [source notes](public/journeys/within-reach/SOURCES.md),
+[frozen source database](public/journeys/within-reach/osm-source.v1.json.gz),
+[derived database](public/journeys/within-reach/map-data.v1.json.gz) and
+[data audit](public/journeys/within-reach/data-audit.json) provide attribution,
+versions, transformations and reproducible circle benchmarks. OSM source and
+derived databases are distributed under ODbL 1.0; GeoNames attribution and its
+CC BY 4.0 license apply to the incorporated names.

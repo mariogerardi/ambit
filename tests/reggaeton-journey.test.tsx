@@ -58,11 +58,10 @@ const html = (game: GameState) =>
   );
 
 describe("The Sound of Somewhere: Reggaetón", () => {
-  it("loads an unlisted edition with finite scene cameras and no audio/media dependency", async () => {
+  it("loads a registered edition with finite scene cameras and no audio/media dependency", async () => {
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === journey.id),
     ).toMatchObject({
-      availability: "unlisted",
       path: "/journey/the-sound-of-somewhere-reggaeton",
     });
     expect((await loadJourney(journey.id)).id).toBe(journey.id);

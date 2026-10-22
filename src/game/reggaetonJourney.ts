@@ -179,7 +179,6 @@ export const REGGAETON_JOURNEY: Journey = {
   id: "the-sound-of-somewhere-reggaeton",
   title: "The Sound of Somewhere: Reggaetón",
   addedAt: "2026-10-19",
-  availability: "unlisted",
   saveRevision: 3,
   legacyRoundLabels: {
     "reggaeton-01-jamaica": "Jamaica · Kingston",

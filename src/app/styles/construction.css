@@ -179,3 +179,101 @@
 .globe-canvas[data-construction-cursor] canvas {
   cursor: inherit !important;
 }
+
+.island-map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.2rem;
+  align-items: center;
+}
+.island-map-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+}
+.island-pulse-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.island-pulse-icon i {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.island-map-actions button:active .island-pulse-icon i {
+  transform: scale(1.6);
+}
+.island-best {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 1.2rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--ui-accent) 45%, transparent);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--ui-accent) 9%, transparent);
+}
+.island-best > span {
+  font-size: 0.85rem;
+}
+.island-best > strong {
+  font-size: 1.8rem;
+  line-height: 1.1;
+  color: var(--ui-accent);
+  white-space: nowrap;
+}
+.island-best small {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.island-scoring {
+  margin: 1rem 0 1.2rem;
+}
+.island-scoring table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.island-scoring caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+.island-scoring th,
+.island-scoring td {
+  padding: 0.65rem 0.35rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+}
+.island-scoring th {
+  font-weight: 500;
+  text-align: left;
+}
+.island-scoring thead th:not(:first-child),
+.island-scoring td {
+  text-align: center;
+}
+.island-scoring td {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.island-scoring small {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.8;
+  margin-top: 0.3rem;
+}
+.island-scoring .point-orbs {
+  gap: 0.2rem;
+}
+.island-scoring .point-orb {
+  width: 12px;
+  height: 12px;
+}

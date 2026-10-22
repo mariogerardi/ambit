@@ -110,7 +110,7 @@ Author the Journey's caption and visual payoff rather than a fixed score headlin
 ### Catalog impact
 
 - **Stable Journey ID and added date:**
-- **Availability:** `unlisted` by default; explain any decision to enter the `pool`.
+- **Registration:** Every registered Journey joins the shared automatic-selection pool.
 - **Assignments and locked dates:** list references to a superseded or removed ID.
 - **Save continuity:** preserve the pinned edition of started attempts; identify
   any answer-contract revision, retirement or recovery handling.
