@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { PerspectiveCamera, SRGBColorSpace, Raycaster, Vector3 } from "three";
+import {
+  PerspectiveCamera,
+  SRGBColorSpace,
+  Raycaster,
+  Vector3,
+  Sprite,
+} from "three";
 import {
   PlaceLabels,
   placeStyle,
@@ -11,6 +17,10 @@ import {
   physicalNameLimit,
   placeLabelStyle,
 } from "../src/globe/placeLabels";
+import {
+  MAP_ANNOTATION_ALTITUDE,
+  MAP_SURFACE_ALTITUDE,
+} from "../src/globe/surface";
 import { ANSWER_PLACES } from "../src/game/answerTargets";
 import {
   PLAY_HIGHLIGHTS,
@@ -1104,4 +1114,56 @@ it("uses contrasting river ink and casing, including after a palette change with
     expect(ink.renderOrder).toBeGreaterThan(casing.renderOrder);
   }
   physical.dispose();
+});
+
+it("keeps smaller local island labels fixed to the shore as the camera pans", () => {
+  canvasFactory();
+  const labels = new PlaceLabels();
+  const place: PlaceFeature = {
+    ...places[0],
+    id: "key-island",
+    kind: "other",
+    name: "Key island",
+    lng: 0.03,
+    markerHidden: true,
+    surfaceAligned: true,
+    labelScale: 0.8,
+  };
+  labels.update(
+    {
+      id: "islands",
+      kind: "place-labels",
+      places: [place],
+      visible: true,
+      markers: false,
+    },
+    100,
+  );
+  const c = new PerspectiveCamera(50, 1, 0.001, 1000);
+  for (const offset of [-0.01, 0, 0.01]) {
+    const a = (offset * Math.PI) / 180;
+    c.position.set(Math.sin(a) * 100.6, 0, Math.cos(a) * 100.6);
+    c.lookAt(0, 0, 0);
+    c.updateMatrixWorld();
+    labels.view(c, 1000, 1000);
+    const label = labels.group.children.find(
+      (s) => s.userData.role === "label",
+    )! as Sprite;
+    expect(label.visible).toBe(true);
+    expect(label.position.length()).toBeCloseTo(
+      100 * (1 + MAP_ANNOTATION_ALTITUDE),
+      6,
+    );
+    const shore = label.position
+      .clone()
+      .normalize()
+      .multiplyScalar(100 * (1 + MAP_SURFACE_ALTITUDE))
+      .project(c);
+    const actual = label.position.clone().project(c);
+    expect(actual.distanceTo(shore) * 500).toBeLessThan(2);
+    expect(label.center.x).toBe(0.5);
+    expect(label.center.y).toBe(0.5);
+  }
+  expect(placeLabelStyle(place).textHeight).toBeCloseTo(19.2);
+  labels.dispose();
 });

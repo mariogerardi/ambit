@@ -192,6 +192,18 @@ needed to reproduce inputs that are no longer available at their old URLs.
 Review generated differences before treating them as a release: not every script
 stages all outputs atomically, and Node locale differences can affect labels.
 
+### Within Reach data preparation
+
+`public/journeys/within-reach/` contains frozen OSM coastlines, GeoNames island
+names and source notes. Rebuild only this Journey with Python >=3.11,
+Shapely 2.1.2 and NumPy: `python3 scripts/prepare-within-reach.py`.
+The offline command extracts all named closed islands in the configured fields,
+computes canonical spherical hulls, partitions simplified display highlights,
+certifies circle maxima and checks attainable bands with margin. It writes
+Journey data, a downloadable derived database and audit metadata. Name aliases,
+review boxes and minimum island areas live in
+`sources/within-reach.locations.json`. It never regenerates shared geography.
+
 ### Sahara data preparation
 
 This is an optional Journey-only rebuild, not part of installation or release.

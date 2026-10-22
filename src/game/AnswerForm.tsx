@@ -29,6 +29,8 @@ type AnswerFormProps = {
   game: GameState;
   dispatch: Dispatch<Action>;
   webgl: boolean;
+  onPulseIslands?(): void;
+  onRecenter?(): void;
   mapKey?: ReactNode;
 };
 export function AnswerForm(props: AnswerFormProps) {
@@ -46,6 +48,8 @@ function AnswerControls({
   game,
   dispatch,
   webgl,
+  onPulseIslands,
+  onRecenter,
   mapKey,
 }: AnswerFormProps) {
   const choices = useMemo(() => {
@@ -70,6 +74,8 @@ function AnswerControls({
         game={game}
         dispatch={dispatch}
         webgl={webgl}
+        onPulseIslands={onPulseIslands}
+        onRecenter={onRecenter}
         mapKey={mapKey}
       />
     );

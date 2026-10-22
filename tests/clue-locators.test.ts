@@ -126,3 +126,33 @@ describe("supplied small-area clue locators", () => {
     ).toThrow("authored labels");
   });
 });
+
+it("pulses every supplied island once after travel, including large ones, and can replay without labels", () => {
+  const layer = new ClueLocators(),
+    c = camera(102),
+    islands = [{ ...clue(1), pulseOnly: true }];
+  layer.update(islands);
+  expect(layer.view(c, 800, 600, 100, [], false)).toEqual([]);
+  const group = layer.element.querySelector("g")!;
+  expect(group.classList.contains("is-pulsing")).toBe(false);
+  expect(layer.needsRefresh()).toBe(true);
+  layer.view(c, 800, 600, 100, [], true);
+  expect(group.classList.contains("is-pulsing")).toBe(true);
+  expect(layer.needsRefresh()).toBe(false);
+  expect(layer.element.querySelectorAll("text,path")).toHaveLength(0);
+  group.classList.remove("is-pulsing");
+  layer.update([...islands]);
+  layer.view(c, 800, 600, 100);
+  expect(group.classList.contains("is-pulsing")).toBe(false);
+  layer.pulse();
+  layer.view(c, 800, 600, 100);
+  expect(group.classList.contains("is-pulsing")).toBe(true);
+  layer.update(islands, "paper", true);
+  layer.pulse();
+  layer.view(c, 800, 600, 100);
+  expect(layer.element.dataset.reduced).toBe("true");
+  expect(group.classList.contains("is-pulsing")).toBe(true); // CSS uses opacity only.
+  layer.update([]);
+  expect(layer.element.children).toHaveLength(0);
+  layer.dispose();
+});

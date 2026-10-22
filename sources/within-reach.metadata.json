@@ -1,0 +1,116 @@
+{
+  "reviewedOn": "2026-10-22",
+  "generator": "scripts/prepare-within-reach.py",
+  "license": "ODbL-1.0 + CC-BY-4.0",
+  "nameAttributions": [
+    {
+      "name": "GeoNames",
+      "url": "https://www.geonames.org/",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "name": "National Park Service",
+      "url": "https://www.nps.gov/boha/learn/historyculture/facts-intro.htm"
+    }
+  ],
+  "sourceSnapshotSha256": "ea2aca3fdfb34481218bc4e09185dd4b950c077adc28c376fc2507e403fce560",
+  "contextSnapshotSha256": "62a04b9549460faaac110861d005bd2972f2f9b7a28c70542e50b9f122f63ae9",
+  "outputSha256": "58ed8f77c09358ef72789a3e7cf403cc51809aa0d33785f0409f0fb737a3d41b",
+  "sites": [
+    {
+      "id": "boston",
+      "timestamp": "2026-10-22T03:21:34Z",
+      "islands": 30,
+      "coastlineSegments": 96895,
+      "maximum": 16,
+      "certifiedUpperBound": 16,
+      "radiusKm": 4.5,
+      "tierClearanceKm": [
+        0.084035,
+        0.343577,
+        0.629708
+      ],
+      "displayToleranceMeters": 18,
+      "minimumIslandKm2": 0.002,
+      "excludedAttachedOrClippedNames": []
+    },
+    {
+      "id": "scilly",
+      "timestamp": "2026-10-22T17:00:06Z",
+      "islands": 39,
+      "coastlineSegments": 34895,
+      "maximum": 19,
+      "certifiedUpperBound": 19,
+      "radiusKm": 3.675,
+      "tierClearanceKm": [
+        0.197964,
+        0.177133,
+        0.272948
+      ],
+      "displayToleranceMeters": 8,
+      "minimumIslandKm2": 0.005,
+      "excludedAttachedOrClippedNames": []
+    },
+    {
+      "id": "singapore",
+      "timestamp": "2026-10-22T17:06:21Z",
+      "islands": 27,
+      "coastlineSegments": 6468,
+      "maximum": 19,
+      "certifiedUpperBound": 19,
+      "radiusKm": 7,
+      "tierClearanceKm": [
+        0.118001,
+        0.303128,
+        1.593044
+      ],
+      "displayToleranceMeters": 12,
+      "minimumIslandKm2": 0.002,
+      "excludedAttachedOrClippedNames": []
+    },
+    {
+      "id": "hauraki",
+      "timestamp": "2026-10-22T02:57:51Z",
+      "islands": 46,
+      "coastlineSegments": 80987,
+      "maximum": 24,
+      "certifiedUpperBound": 24,
+      "radiusKm": 25.2,
+      "tierClearanceKm": [
+        0.436573,
+        1.316705,
+        1.477074
+      ],
+      "displayToleranceMeters": 55,
+      "minimumIslandKm2": 0.01,
+      "excludedAttachedOrClippedNames": [
+        "Brazier Rock",
+        "Herald Island",
+        "Honepoto Rock",
+        "Mahurangi Island",
+        "Panetiki Island (The Outpost)",
+        "Tokaroa Rock"
+      ]
+    },
+    {
+      "id": "cyclades",
+      "timestamp": "2026-10-22T16:59:06Z",
+      "islands": 134,
+      "coastlineSegments": 320966,
+      "maximum": 42,
+      "certifiedUpperBound": 42,
+      "radiusKm": 35,
+      "tierClearanceKm": [
+        0.505146,
+        1.126058,
+        1.037726
+      ],
+      "displayToleranceMeters": 65,
+      "minimumIslandKm2": 0.02,
+      "excludedAttachedOrClippedNames": [
+        "Icaria"
+      ]
+    }
+  ],
+  "notes": "Source hulls grade whole islands. Named islands in documented fields are eligible; mainland, clipped geometry and tiny rocks are context only. Display geometry never grades."
+}

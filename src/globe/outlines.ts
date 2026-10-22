@@ -13,7 +13,11 @@ const radians = Math.PI / 180;
 const cache = new WeakMap<RegionFeature["geometry"], Float32Array>();
 
 /** Draw committed highlights after ordinary and hovered borders, still depth-tested. */
-export function outlineEmphasis(state?: VisualState, hovered = false) {
+export function outlineEmphasis(
+  state?: VisualState,
+  hovered = false,
+  surfaceAligned = false,
+) {
   const committed = ["selected", "correct", "answer", "incorrect"].includes(
     state ?? "",
   );
@@ -27,7 +31,8 @@ export function outlineEmphasis(state?: VisualState, hovered = false) {
         : 1,
     width: committed ? 1.8 : candidateHover ? 1.75 : 1.35,
     // Clear country/state/county caps while keeping blue borders close to land.
-    lift: state === "hinted" || state === "clue" ? 0.00035 : 0,
+    lift:
+      !surfaceAligned && (state === "hinted" || state === "clue") ? 0.00035 : 0,
   };
 }
 

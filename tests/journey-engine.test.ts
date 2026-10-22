@@ -22,7 +22,7 @@ const world = JSON.parse(
 
 describe("Journey engine authoring boundaries", () => {
   it("provides a complete, gradable recipe with help and reveal for every registered mode", () => {
-    expect(MECHANIC_RECIPES.map((q) => q.mode).sort()).toEqual(
+    expect([...new Set(MECHANIC_RECIPES.map((q) => q.mode))].sort()).toEqual(
       Object.keys(MECHANICS).sort(),
     );
     const responses = {
@@ -85,6 +85,9 @@ describe("Journey engine authoring boundaries", () => {
         isCorrect(question, context, {
           ...initialGame,
           ...responses[question.mode],
+          ...(question.constructionExample
+            ? { construction: question.constructionExample }
+            : {}),
         }),
       ).toBe(true);
       expect(
@@ -280,5 +283,31 @@ describe("Journey engine authoring boundaries", () => {
     };
     // Candidate generation suppresses names by contract, even if a raw place carried one.
     expect(auditJourney(leaked, world).errors).toEqual([]);
+  });
+
+  it("rejects custom completions that suppress the default tour without usable authored views", () => {
+    for (const views of [undefined, []]) {
+      const journey = {
+        ...ELEVENTH_JOURNEY,
+        completion: { ...ELEVENTH_JOURNEY.completion!, views },
+      };
+      expect(auditJourney(journey, world).errors).toContain(
+        "Authored completion is missing flyover views.",
+      );
+    }
+    const journey = {
+      ...ELEVENTH_JOURNEY,
+      completion: {
+        ...ELEVENTH_JOURNEY.completion!,
+        focus: { lat: 91, lng: 0 },
+        views: [{ lat: 0, lng: NaN }],
+      },
+    };
+    expect(auditJourney(journey, world).errors).toEqual(
+      expect.arrayContaining([
+        `Invalid camera: ${journey.id} / completion`,
+        `Invalid camera: ${journey.id} / completion / view 1`,
+      ]),
+    );
   });
 });

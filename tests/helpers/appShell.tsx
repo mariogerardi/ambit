@@ -95,6 +95,7 @@ vi.mock("../../src/globe/GlobeView", () => ({
           probe.tourCancellations++;
         },
         cancelFidget() {},
+        pulseIslands() {},
         fidget() {
           probe.fidgets++;
         },

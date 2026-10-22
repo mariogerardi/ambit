@@ -14,7 +14,8 @@ import { DAILY_KEY, openDaily } from "../src/app/dailyProgress";
 import { createDailySave } from "../src/app/progressSaves";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
 import { CANADA_JOURNEY } from "../src/game/canadaJourney";
-import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
+import { DANUBE_JOURNEY } from "../src/game/danubeJourney";
+import { SHARED_NAMES_JOURNEY } from "../src/game/sharedNamesJourney";
 import { ADRIATIC_REPUBLICS, FOURTH_JOURNEY } from "../src/game/fourthJourney";
 import * as journeyRegistry from "../src/game/journeyRegistry";
 import { NORTH_AMERICA_JOURNEY as FIFTH_JOURNEY } from "../src/game/northAmericaJourney";
@@ -160,13 +161,13 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
           attempts: {
             [date]: {
               date,
-              journeyId: FIFTEENTH_JOURNEY.id,
+              journeyId: SHARED_NAMES_JOURNEY.id,
               scheduleVersion: 1,
               game: {
                 ...initialGame,
                 phase: "finished",
                 roundIndex: 4,
-                answers: FIFTEENTH_JOURNEY.rounds.map((round) => ({
+                answers: SHARED_NAMES_JOURNEY.rounds.map((round) => ({
                   roundId: round.id,
                   correct: true,
                   selectedIds: [],
@@ -195,16 +196,46 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
       if (reduced) {
         expect(probe.tours).toHaveLength(0);
         expect(probe.focus.at(-1)).toMatchObject(
-          FIFTEENTH_JOURNEY.completion!.focus,
+          SHARED_NAMES_JOURNEY.completion!.focus,
         );
+        const controls = host.querySelector(
+          '[aria-label="Completion map views"]',
+        )!;
+        expect(controls.textContent).toContain("Map overview");
+        expect(
+          controls.querySelector<HTMLButtonElement>("button:nth-of-type(2)")
+            ?.disabled,
+        ).toBe(true);
+        const views = SHARED_NAMES_JOURNEY.completion!.views!;
+        for (const [index, view] of views.entries()) {
+          await click("Next view");
+          expect(probe.focus.at(-1)).toMatchObject(view);
+          expect(controls.textContent).toContain(
+            `Map view ${index + 1} of ${views.length}`,
+          );
+        }
+        expect(
+          controls.querySelector<HTMLButtonElement>("button:last-of-type")
+            ?.disabled,
+        ).toBe(true);
+        await click("Previous view");
+        expect(probe.focus.at(-1)).toMatchObject(views.at(-2)!);
+        await click("Overview");
+        expect(probe.focus.at(-1)).toMatchObject(
+          SHARED_NAMES_JOURNEY.completion!.focus,
+        );
+        expect(probe.tours).toHaveLength(0);
         await click("Study");
         expect(location.pathname).toBe("/study");
         expect(
           host.querySelector('.mode-incoming [aria-label="Study setup"]'),
         ).not.toBeNull();
       } else {
+        expect(
+          host.querySelector('[aria-label="Completion map views"]'),
+        ).toBeNull();
         expect(probe.tours).toHaveLength(1);
-        expect(probe.tours[0]).toEqual(FIFTEENTH_JOURNEY.completion!.views);
+        expect(probe.tours[0]).toEqual(SHARED_NAMES_JOURNEY.completion!.views);
         const before = probe.tourCancellations;
         await click("Home");
         expect(probe.tourCancellations).toBeGreaterThan(before);
@@ -393,12 +424,9 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
     );
     const toursBeforeCompletion = probe.tours.length;
     await click("See results");
-    expect(probe.tours.length).toBe(toursBeforeCompletion);
-    expect(probe.focus.at(-1)).toMatchObject({
-      lat: 46.7,
-      lng: 19.2,
-      altitude: 0.5,
-    });
+    expect(probe.tours.length).toBe(toursBeforeCompletion + 1);
+    expect(probe.tours.at(-1)).toEqual(DANUBE_JOURNEY.completion!.views);
+    expect(probe.tours.at(-1)!.length).toBeGreaterThan(1);
     expect(
       host.querySelector(".mode-incoming .journey-score")?.textContent,
     ).toContain("13/15");

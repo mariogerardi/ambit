@@ -1,9 +1,18 @@
 import type { Focus } from "../geography/types";
 import { normalWorldView } from "./defaultViews";
+import { geoInterpolate } from "d3-geo";
 export interface CameraPort {
   pointOfView(): Required<Focus>;
   pointOfView(focus: Focus, duration: number): unknown;
 }
+export const MIN_CAMERA_ALTITUDE = 0.005;
+/** Keep the near plane in front of the raised coast/circle shells at local zoom. */
+export const cameraNearPlane = (altitude: number) =>
+  Math.min(0.005, Math.max(0.00005, (altitude - 0.003) * 0.15));
+export const localZoomFloor = (focus?: Focus) =>
+  focus?.altitude !== undefined && focus.altitude < 0.1
+    ? Math.max(MIN_CAMERA_ALTITUDE, Math.min(0.03, focus.altitude * 0.7))
+    : MIN_CAMERA_ALTITUDE;
 export function shortestLongitude(from: number, to: number) {
   return from + ((((to - from + 540) % 360) + 360) % 360) - 180;
 }
@@ -49,17 +58,24 @@ export class CameraTravel {
     reduced: boolean,
     done?: () => void,
     targetAltitude?: () => number,
+    durationMs?: number,
   ) {
     this.cancel();
     const from = port.pointOfView(),
       to = {
         ...target,
-        altitude: Math.max(0.012, Math.min(5.5, target.altitude ?? 0.8)),
+        altitude: Math.max(
+          MIN_CAMERA_ALTITUDE,
+          Math.min(5.5, target.altitude ?? 0.8),
+        ),
       };
     const lng = shortestLongitude(from.lng, to.lng);
     this.finish = done;
     const fitAltitude = () =>
-      Math.max(0.012, Math.min(5.5, targetAltitude?.() ?? to.altitude));
+      Math.max(
+        MIN_CAMERA_ALTITUDE,
+        Math.min(5.5, targetAltitude?.() ?? to.altitude),
+      );
     to.altitude = fitAltitude();
     this.finalPosition = () =>
       port.pointOfView({ ...to, altitude: fitAltitude() }, 0);
@@ -68,8 +84,31 @@ export class CameraTravel {
       this.cancel();
       return;
     }
-    const start = performance.now(),
-      duration = 1100;
+    const local = Math.min(from.altitude, to.altitude) < 0.1;
+    const distance = Math.hypot(
+      to.lat - from.lat,
+      (lng - from.lng) * Math.cos(((from.lat + to.lat) * Math.PI) / 360),
+    );
+    const nearby = distance < 0.5;
+    const duration =
+      durationMs ??
+      (local ? (nearby ? 1800 : 4400 + Math.min(1200, distance * 12)) : 1100);
+    const cruise = Math.max(
+      from.altitude,
+      to.altitude,
+      Math.min(1.8, distance / 45),
+    );
+    const ease = (t: number) => {
+      const x = Math.max(0, Math.min(1, t));
+      return x * x * x * (10 + x * (-15 + 6 * x));
+    };
+    const zoom = (a: number, b: number, t: number) => {
+      const u = ease(t);
+      // A soft distance curve, rather than a logarithmic crawl near the coast.
+      return (Math.cbrt(a) * (1 - u) + Math.cbrt(b) * u) ** 3;
+    };
+    const start = performance.now();
+    const arc = geoInterpolate([from.lng, from.lat], [to.lng, to.lat]);
     let previousTime = start,
       elapsed = 0;
     const tick = (now: number) => {
@@ -91,6 +130,26 @@ export class CameraTravel {
         // Avoid accumulated interpolation roundoff at the final position.
         port.pointOfView({ ...to, lng }, 0);
         this.cancel();
+        return;
+      }
+      if (local) {
+        // Establish the coordinates early along a great-circle arc, then let
+        // the close approach finish. Ascent/descent share one smooth profile.
+        const pan = nearby ? ease(t) : 1 - (1 - ease(t / 0.62)) ** 2;
+        const [arcLng, arcLat] = arc(pan);
+        port.pointOfView(
+          {
+            lat: arcLat,
+            lng: shortestLongitude(from.lng, arcLng),
+            altitude: nearby
+              ? zoom(from.altitude, to.altitude, t)
+              : t < 0.24
+                ? zoom(from.altitude, cruise, t / 0.24)
+                : zoom(cruise, to.altitude, (t - 0.24) / 0.76),
+          },
+          0,
+        );
+        this.frame = requestAnimationFrame(tick);
         return;
       }
       // Pull back slightly during long travel so a close regional view never
@@ -120,13 +179,15 @@ export class CameraTravel {
 export class CameraFlyover {
   private frame = 0;
   private generation = 0;
+  private localTravel = new CameraTravel();
   get active() {
-    return this.frame !== 0;
+    return this.frame !== 0 || this.localTravel.active;
   }
   cancel() {
     this.generation++;
     cancelAnimationFrame(this.frame);
     this.frame = 0;
+    this.localTravel.cancel();
   }
   start(
     port: CameraPort,
@@ -140,8 +201,65 @@ export class CameraFlyover {
     const generation = this.generation;
     const destinations = stops.map((stop) => ({
       ...stop,
-      altitude: Math.max(0.012, Math.min(5.5, stop.altitude ?? 0.65)),
+      altitude: Math.max(
+        MIN_CAMERA_ALTITUDE,
+        Math.min(5.5, stop.altitude ?? 0.65),
+      ),
     }));
+    if (destinations.some((stop) => stop.altitude < 0.1)) {
+      // Slow travel, a brief look from above, then a gentle dip and pullback.
+      // Only the overview tour uses this rhythm; question framing stays separate.
+      const move = (target: Focus, duration: number, done: () => void) =>
+        this.localTravel.move(
+          port,
+          target,
+          false,
+          () => {
+            if (generation === this.generation) done();
+          },
+          undefined,
+          duration,
+        );
+      const hover = (done: () => void) => {
+        let elapsed = 0,
+          previous = performance.now();
+        const tick = (now: number) => {
+          if (generation !== this.generation) return;
+          elapsed += Math.max(0, Math.min(32, now - previous));
+          previous = now;
+          if (elapsed >= 350) {
+            this.frame = 0;
+            done();
+            return;
+          }
+          this.frame = requestAnimationFrame(tick);
+        };
+        this.frame = requestAnimationFrame(tick);
+      };
+      const visit = (index: number) => {
+        if (generation !== this.generation) return;
+        const close = destinations[index],
+          overview = {
+            ...close,
+            altitude: Math.min(0.2, close.altitude * 2.2),
+          };
+        move(overview, 6500, () => {
+          onStep?.(index);
+          hover(() =>
+            move(close, 3500, () =>
+              hover(() => {
+                if (!loop && index === destinations.length - 1) return;
+                move(overview, 3500, () =>
+                  visit((index + 1) % destinations.length),
+                );
+              }),
+            ),
+          );
+        });
+      };
+      visit(0);
+      return;
+    }
     // The incoming/outgoing bearings shape each stop's course. Speed stays low
     // near the country and respects nearby stops so short legs cannot overshoot.
     const velocities = destinations.map((stop, i) => {
@@ -417,7 +535,7 @@ export class ViewportResize {
       port.pointOfView(
         {
           ...port.pointOfView(),
-          altitude: Math.max(0.012, Math.min(5.5, altitude)),
+          altitude: Math.max(MIN_CAMERA_ALTITUDE, Math.min(5.5, altitude)),
         },
         0,
       );

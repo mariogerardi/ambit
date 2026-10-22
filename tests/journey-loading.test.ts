@@ -30,7 +30,7 @@ describe("deferred Journey content", () => {
     }
     const progress = openDaily(emptyDaily, "2026-10-07");
     expect(progress.attempts["2026-10-07"].journeyId).toBe(dailyJourney("2026-10-07").id);
-    expect(JOURNEY_INDEX.find((entry) => entry.id === progress.attempts["2026-10-07"].journeyId)?.availability).toBe("pool");
+    expect(JOURNEY_INDEX.find((entry) => entry.id === progress.attempts["2026-10-07"].journeyId)?.id).toBeDefined();
     expect(validDaily(JSON.parse(JSON.stringify(progress)))).toBe(true);
     progress.attempts["2026-10-07"].game.answers.push({
       roundId: "unknown",

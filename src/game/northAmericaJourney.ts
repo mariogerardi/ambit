@@ -59,7 +59,6 @@ const base = definePresentation({
 export const NORTH_AMERICA_JOURNEY: Journey = {
   id: "north-america-v2",
   addedAt: "2026-10-10",
-  availability: "pool",
   title: "A Continent in Pieces",
   description:
     "Familiar countries, unfamiliar pieces. Explore the territories, provinces, and states within North America—and the surprises hidden in their boundaries and names.",

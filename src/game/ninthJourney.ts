@@ -130,7 +130,6 @@ export const SHARED_NEIGHBOR_CLUES: {
 export const NINTH_JOURNEY: Journey = {
   id: "shared-neighbors-v1",
   addedAt: "2026-10-10",
-  availability: "pool",
   title: "Shared neighbors",
   description:
     "Two countries can point to a third. Follow five pairs of neighbors across inland frontiers, long coasts, and mountain borders to find the land between them.",

@@ -635,8 +635,8 @@ describe("Same Hour, Different Worlds", () => {
       "/journey/same-hour-different-worlds",
     );
     expect(
-      JOURNEY_INDEX.find((entry) => entry.id === journey.id)?.availability,
-    ).toBe("pool");
+      JOURNEY_INDEX.find((entry) => entry.id === journey.id)?.id,
+    ).toBe(journey.id);
     expect(await loadJourney(journey.id)).toBe(journey);
     expect(auditJourney(journey, world).errors).toEqual([]);
   });

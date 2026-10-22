@@ -99,7 +99,6 @@ const destinations = [
 export const FIFTEENTH_JOURNEY: Journey = {
   id: "try-not-to-click-russia-v1",
   addedAt: "2026-10-10",
-  availability: "pool",
   title: "On Russia’s doorstep",
   description:
     "From the Baltic to the Pacific, Russia meets neighbors of very different shapes and sizes. Find five of them using coastlines and geography, with political borders hidden.",

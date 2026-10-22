@@ -1,4 +1,5 @@
-import { ConstructionReview } from "./ConstructionAnswer";
+import { ConstructionReview, IslandScoring } from "./ConstructionAnswer";
+import { CompletionMapViews } from "./CompletionMapViews";
 import { constructionRule, reviewedConstruction } from "./construction";
 import { QuestionSources } from "./QuestionSources";
 import { QuestionHelp } from "../app/QuestionHelp";
@@ -126,6 +127,7 @@ export function GameShell({
   hover,
   webgl,
   frame,
+  onPulseIslands,
   onHome,
   onStudy,
   onReport,
@@ -135,7 +137,9 @@ export function GameShell({
   contextNavigation,
   constructionReviewIndex,
   onConstructionReview,
+  reduced = false,
 }: {
+  reduced?: boolean;
   constructionReviewIndex?: number;
   onConstructionReview?(index?: number): void;
   social?: ReactNode;
@@ -151,6 +155,7 @@ export function GameShell({
   hover?: RegionFeature;
   webgl: boolean;
   frame(focus: Focus): void;
+  onPulseIslands?(): void;
   onHome(): void;
   onStudy(): void;
 }) {
@@ -310,6 +315,8 @@ export function GameShell({
                 game={game}
                 dispatch={dispatch}
                 webgl={webgl}
+                onPulseIslands={onPulseIslands}
+                onRecenter={() => frame(round.focus)}
                 mapKey={
                   <MapKey
                     entries={legend.filter((entry) =>
@@ -349,6 +356,7 @@ export function GameShell({
               {constructed && (
                 <>
                   <ConstructionReview question={round} response={game} />
+                  <IslandScoring questions={[round]} help={game.help} />
                   {round.constructionExample && (
                     <button
                       type="button"
@@ -595,6 +603,18 @@ export function GameShell({
           )}
           {game.phase === "failed" && <p>{feedbackText}</p>}
 
+          {game.phase === "finished" &&
+            reduced &&
+            webgl &&
+            constructionReviewIndex === undefined &&
+            !!journey.completion?.views?.length && (
+              <CompletionMapViews
+                key={journey.id}
+                overview={journey.completion.focus}
+                views={journey.completion.views}
+                frame={frame}
+              />
+            )}
           {journey.completion?.constructionResults &&
             game.phase === "finished" && (
               <>
@@ -639,6 +659,12 @@ export function GameShell({
                           ].id,
                       ),
                     }}
+                  />
+                )}
+                {constructionReviewIndex !== undefined && (
+                  <IslandScoring
+                    questions={[journey.rounds[constructionReviewIndex]]}
+                    help={game.help}
                   />
                 )}
               </>

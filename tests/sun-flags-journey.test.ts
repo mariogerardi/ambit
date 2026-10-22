@@ -203,8 +203,8 @@ describe("Chasing the sun", () => {
     ).toBe("/journey/chasing-the-sun");
     expect(
       JOURNEY_INDEX.find((entry) => entry.id === SUN_FLAGS_JOURNEY.id)
-        ?.availability,
-    ).toBe("pool");
+        ?.id,
+    ).toBeDefined();
   });
   it("retires the archived Sun edition while resolving old published assignments", async () => {
     const day = "2026-10-11";

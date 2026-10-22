@@ -322,31 +322,19 @@ it("keeps an unsaved selection when a refreshed schedule changes in another sess
   ).toBe(true);
 });
 
-it("searches and filters the actionable picker, then assigns only after confirmation", async () => {
+it("searches every registered Journey, then assigns only after confirmation", async () => {
   await render();
   await click("Choose a Journey");
   expect(document.activeElement).toBe(
     host.querySelector('input[type="search"]'),
   );
-  const filter = host.querySelectorAll<HTMLSelectElement>(
-    ".journey-list-controls select",
-  )[1];
-  await act(async () => {
-    filter.value = "unlisted";
-    filter.dispatchEvent(new Event("change", { bubbles: true }));
-  });
   expect(
     [...host.querySelectorAll<HTMLElement>("[data-journey-id]")]
       .map((el) => el.dataset.journeyId)
       .sort(),
-  ).toEqual(
-    JOURNEY_INDEX.filter((journey) => journey.availability === "unlisted")
-      .map((journey) => journey.id)
-      .sort(),
-  );
+  ).toEqual(JOURNEY_INDEX.map((journey) => journey.id).sort());
+  expect(host.textContent).not.toContain("Show Journeys");
   await act(async () => {
-    filter.value = "all";
-    filter.dispatchEvent(new Event("change", { bubbles: true }));
     const input = host.querySelector<HTMLInputElement>('input[type="search"]')!;
     Object.getOwnPropertyDescriptor(
       HTMLInputElement.prototype,

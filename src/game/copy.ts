@@ -100,6 +100,8 @@ export function correctAnswerSummary(
     ];
   } else if (rule.type === "raster-overlap" || rule.type === "line-following")
     values = [resolvedRoundIdentity(question)];
+  else if (rule.type === "island-coverage-max")
+    values = [`${rule.maximum} whole islands`];
   else if (rule.type === "point-coverage-max")
     values = [
       `${rule.maximum} locations within ${rule.radiusKm.toLocaleString("en-US")} km`,

@@ -172,7 +172,6 @@ const stops = [
 export const SILK_ROAD_INTERSECTIONS_JOURNEY: Journey = {
   id: "where-the-silk-roads-met-v1",
   addedAt: "2026-10-20",
-  availability: "unlisted",
   saveRevision: 1,
   title: "Where the Silk Roads Met",
   description:

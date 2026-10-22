@@ -175,7 +175,6 @@ const puertoCabello = city(
 export const VACCINE_EXPEDITION_JOURNEY: Journey = {
   id: "the-vaccine-that-crossed-the-world-v1",
   addedAt: "2026-10-20",
-  availability: "unlisted",
   saveRevision: 1,
   title: "The Vaccine That Crossed the World",
   description:

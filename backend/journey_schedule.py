@@ -50,9 +50,9 @@ def choose(day, records, catalog=CATALOG, memo=None):
         memo = {}
     if day in memo:
         return memo[day]
-    candidates = sorted(item["id"] for item in catalog.values() if item.get("availability") == "pool")
+    candidates = sorted(catalog)
     if not candidates:
-        raise ValueError("No pool Journeys are available")
+        raise ValueError("No Journeys are available")
     target = parse_day(day)
     today = current_day().isoformat()
     current = min(FIRST_DAY, target)

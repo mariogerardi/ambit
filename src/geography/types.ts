@@ -56,6 +56,10 @@ export interface PlaceFeature {
   labelHidden?: boolean;
   /** Authored context can try alternate anchors without becoming an answer target. */
   labelFlexible?: boolean;
+  /** Keep local map labels on the shore shell with a fixed geographic anchor. */
+  surfaceAligned?: boolean;
+  /** Display-only text size multiplier. */
+  labelScale?: number;
   /** Label-only geographic context must never create a city/capital marker. */
   markerHidden?: boolean;
   /** Authored reveal marker diameter, including texture padding, in screen pixels. */
@@ -141,6 +145,8 @@ export type MapOverlay =
       type: "path";
       /** Draw above translucent construction fills. */
       foreground?: boolean;
+      /** Local decorative shore paths share the map shell. */
+      surfaceAligned?: boolean;
       visualState?:
         | "selected"
         | "correct"

@@ -140,6 +140,22 @@ strong {
     animation: none;
   }
 }
+.island-locator.is-pulsing > .clue-locator-pulse {
+  animation: clue-locator-pulse 1.4s ease-out 1 both;
+}
+.clue-locators[data-reduced="true"]
+  .island-locator.is-pulsing
+  > .clue-locator-pulse {
+  animation: island-locator-fade 0.9s ease-out 1 both;
+}
+@keyframes island-locator-fade {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0;
+  }
+}
 .ambit-wordmark {
   --logo-spacing: -0.02em;
   position: relative;

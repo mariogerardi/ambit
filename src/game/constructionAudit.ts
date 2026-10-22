@@ -27,13 +27,21 @@ export function constructionAuditSample(
       kind: "trace",
       points: correct ? r.reference : [...r.reference].reverse(),
     };
-  else if (r.type === "point-coverage-max")
+  else if (r.type === "point-coverage-max" || r.type === "island-coverage-max")
     c = {
       version: 1,
       kind: "circle",
       center: {
-        lat: -r.candidates[0].lat,
-        lng: ((r.candidates[0].lng + 540) % 360) - 180,
+        lat: -(r.type === "island-coverage-max"
+          ? r.candidates[0].focus.lat
+          : r.candidates[0].lat),
+        lng:
+          (((r.type === "island-coverage-max"
+            ? r.candidates[0].focus.lng
+            : r.candidates[0].lng) +
+            540) %
+            360) -
+          180,
       },
     };
   else if (r.type === "population-coverage-area-budget")

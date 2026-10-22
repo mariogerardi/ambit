@@ -25,7 +25,7 @@ try {
   const { JOURNEY_INDEX } = await server.ssrLoadModule(
     "/src/game/journeyRegistry.ts",
   );
-  const catalog = JOURNEY_INDEX.filter((j) => j.availability === "pool");
+  const catalog = JOURNEY_INDEX;
   const settings = { ...study.defaultSettings, length: 20 };
   const codecs = {
     study: studySaveCodec,

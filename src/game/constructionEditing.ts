@@ -27,7 +27,7 @@ export function editConstruction(
     lat: Math.max(-90, Math.min(90, point.lat)),
     lng: ((point.lng + 540) % 360) - 180,
   };
-  if (rule.type === "point-coverage-max")
+  if (rule.type === "point-coverage-max" || rule.type === "island-coverage-max")
     return { version: 1, kind: "circle", center: p };
   if (rule.type === "raster-overlap") {
     const c =

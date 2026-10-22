@@ -1,3 +1,4 @@
+import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { Vector3 } from "three";
 import type { PerspectiveCamera } from "three";
 import type { RegionFeature } from "../geography/types";
@@ -10,6 +11,8 @@ import type { LabelBox } from "./placeLabels";
 export interface ClueLocator {
   id: string;
   label: string;
+  /** A finite ripple at the island itself; no extra name or leader line. */
+  pulseOnly?: boolean;
   region: RegionFeature;
 }
 const svg = <K extends keyof SVGElementTagNameMap>(tag: K) =>
@@ -29,10 +32,14 @@ export function prepareClueLocator(clue: ClueLocator) {
   const geometry = clue.region.displayGeometry ?? clue.region.geometry;
   const parts =
     geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
-  const anchor = interiorAnchor(clue.region);
+  const anchor = clue.pulseOnly
+    ? clue.region.focus
+    : interiorAnchor(clue.region);
   return {
     anchor: position(anchor.lng, anchor.lat),
-    polygons: parts.map((rings) =>
+    pulseOnly: !!clue.pulseOnly,
+    altitude: clue.pulseOnly ? MAP_ANNOTATION_ALTITUDE : 0.002,
+    polygons: (clue.pulseOnly ? [] : parts).map((rings) =>
       rings.map((ring) => ring.map(([lng, lat]) => position(lng, lat))),
     ),
   };
@@ -53,7 +60,7 @@ export function projectClueLocator(
   const screen = (point: Vector3) => {
     const p = point
       .clone()
-      .multiplyScalar(radius * 1.002)
+      .multiplyScalar(radius * (1 + clue.altitude))
       .project(camera);
     return { x: ((p.x + 1) * width) / 2, y: ((1 - p.y) * height) / 2, z: p.z };
   };
@@ -67,6 +74,7 @@ export function projectClueLocator(
     anchor.y > height
   )
     return;
+  if (clue.pulseOnly) return { x: anchor.x, y: anchor.y };
   const area = clue.polygons.reduce(
     (sum, rings) =>
       sum +
@@ -142,6 +150,10 @@ export class ClueLocators {
   readonly element = svg("svg");
   private entries = new Map<string, Entry>();
   private reduced = false;
+  private pendingPulses = false;
+  needsRefresh() {
+    return this.pendingPulses;
+  }
   constructor() {
     this.element.classList.add("clue-locators");
     this.element.setAttribute("aria-hidden", "true");
@@ -159,6 +171,7 @@ export class ClueLocators {
       "--clue-label-stroke",
       THEMES[palette].globe.ocean,
     );
+    this.element.dataset.reduced = String(reduced);
     const active = new Set(clues.map((c) => c.id));
     for (const [id, entry] of this.entries)
       if (!active.has(id)) {
@@ -173,10 +186,12 @@ export class ClueLocators {
           line = svg("path"),
           text = svg("text");
         group.style.display = "none";
-        pulse.setAttribute("r", "18");
+        group.classList.toggle("island-locator", !!clue.pulseOnly);
+        pulse.setAttribute("r", clue.pulseOnly ? "12" : "18");
         pulse.classList.add("clue-locator-pulse");
-        text.textContent = clue.label;
-        group.append(pulse, line, text);
+        text.textContent = clue.pulseOnly ? "" : clue.label;
+        group.append(pulse);
+        if (!clue.pulseOnly) group.append(line, text);
         this.element.append(group);
         entry = {
           clue,
@@ -194,10 +209,19 @@ export class ClueLocators {
         )
           entry.prepared = prepareClueLocator(clue);
         entry.clue = clue;
-        entry.text.textContent = clue.label;
+        entry.text.textContent = clue.pulseOnly ? "" : clue.label;
       }
-      if (reduced) entry.group.classList.remove("is-pulsing");
+      if (reduced && !clue.pulseOnly)
+        entry.group.classList.remove("is-pulsing");
     }
+  }
+  /** Explicit replay never changes a circle, camera, help stage or score. */
+  pulse() {
+    for (const entry of this.entries.values())
+      entry.group.classList.remove("is-pulsing");
+    // Flush the finite CSS animation before replaying it, once per button press.
+    this.element.getBoundingClientRect();
+    for (const entry of this.entries.values()) entry.pulsed = false;
   }
   view(
     camera: PerspectiveCamera,
@@ -205,7 +229,9 @@ export class ClueLocators {
     height: number,
     radius: number,
     reserved: readonly LabelBox[] = [],
+    settled = true,
   ): LabelBox[] {
+    this.pendingPulses = false;
     this.element.setAttribute("viewBox", `0 0 ${width} ${height}`);
     const occupied = [...reserved],
       boxes: LabelBox[] = [];
@@ -217,6 +243,30 @@ export class ClueLocators {
         height,
         radius,
       );
+      if (entry.clue.pulseOnly) {
+        const behindPanel =
+          point &&
+          reserved.some(
+            (b) =>
+              point.x >= b.left &&
+              point.x <= b.right &&
+              point.y >= b.top &&
+              point.y <= b.bottom,
+          );
+        entry.group.style.display = point && !behindPanel ? "" : "none";
+        if (point && !behindPanel) {
+          entry.group.setAttribute(
+            "transform",
+            `translate(${point.x} ${point.y})`,
+          );
+          if (!settled && !entry.pulsed) this.pendingPulses = true;
+          if (settled && !entry.pulsed) {
+            entry.group.classList.add("is-pulsing");
+            entry.pulsed = true;
+          }
+        }
+        continue;
+      }
       const label =
         point &&
         placement(point.x, point.y, entry.clue.label, width, height, occupied);

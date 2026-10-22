@@ -47,7 +47,7 @@ describe("New York daily schedule and persistence", () => {
     );
     expect(new Set(choices).size).toBeGreaterThan(1);
     expect(choices.every((id, index) => index === 0 || id !== choices[index - 1])).toBe(true);
-    expect(choices.every((id) => JOURNEY_INDEX.find((entry) => entry.id === id)?.availability === "pool")).toBe(true);
+    expect(choices.every((id) => JOURNEY_INDEX.some((entry) => entry.id === id))).toBe(true);
     expect(() => dateOrdinal("2026-02-30")).toThrow();
     expect(dateOrdinal("2026-11-02") - dateOrdinal("2026-11-01")).toBe(1);
   });
@@ -62,7 +62,7 @@ describe("New York daily schedule and persistence", () => {
     expect(switched.archivedAttempts?.[`${date}/${CANADA_JOURNEY.id}`]?.game.text).toBe("saved input");
     const selected = openDaily(switched, date);
     expect(selected.attempts[date].journeyId).toBe(ACROSS_DIVIDE_JOURNEY.id);
-    expect(dailyJourney("2026-10-06", selected).availability).toBe("pool");
+    expect(JOURNEY_INDEX.some((j) => j.id === dailyJourney("2026-10-06", selected).id)).toBe(true);
     const restored = setDailyPuzzle(selected, date, CANADA_JOURNEY.id);
     expect(restored.attempts[date].game.text).toBe("saved input");
     expect(validDaily(JSON.parse(JSON.stringify(restored)))).toBe(true);
@@ -86,7 +86,7 @@ describe("New York daily schedule and persistence", () => {
     const started = openDaily(emptyDaily, "2026-10-05");
     const persisted = JSON.parse(JSON.stringify(started));
     expect(validDaily(persisted)).toBe(true);
-    expect(dailyJourney("2026-10-06").availability).toBe("pool");
+    expect(JOURNEY_INDEX.some((j) => j.id === dailyJourney("2026-10-06").id)).toBe(true);
     expect(persisted.activeDate).toBe("2026-10-05");
     const nextDay = openDaily(persisted, "2026-10-06");
     expect(Object.keys(nextDay.attempts)).toHaveLength(2);

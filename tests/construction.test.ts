@@ -314,6 +314,8 @@ describe("five independent constructed answer contracts", () => {
       if ("grid" in invalid.rule) invalid.rule.grid.west = NaN;
       else if (invalid.rule.type === "point-coverage-max")
         invalid.rule.radiusKm = NaN;
+      else if (invalid.rule.type === "island-coverage-max")
+        invalid.rule.candidates[0].boundary[0].lat = NaN;
       else if (invalid.rule.type === "line-following")
         invalid.rule.tiers[0].coverage = NaN;
       expect(() => validateQuestionContract(invalid)).toThrow();

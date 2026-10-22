@@ -2,8 +2,7 @@
 
 The bundled catalog is keyed by stable Journey IDs; registration order has no
 meaning. Each Journey has five rounds. Admin can assign any bundled Journey to
-any date. Journeys marked `pool` are eligible for automatic selection; those
-marked `unlisted` can still be assigned and previewed. Direct practice routes are
+any date. All registered Journeys share one automatic-selection pool. Direct practice routes are
 Admin-only. There is no current in-app authoring or AI generator. Follow
 [Crafting a Journey](JOURNEY_CRAFTING.md) for current authoring standards and
 [JOURNEY_ENGINE.md](JOURNEY_ENGINE.md) for implementation details. This catalog
@@ -16,41 +15,45 @@ For an approved specification, start with
 
 ## Bundled Journeys
 
-| Title                                         | Practice route                                | Definition                                                                     |
-| --------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
-| Where the Silk Roads Met (unlisted)           | `/journey/where-the-silk-roads-met`           | [silkRoadIntersectionsJourney.ts](../src/game/silkRoadIntersectionsJourney.ts) |
-| The Vaccine That Crossed the World (unlisted) | `/journey/the-vaccine-that-crossed-the-world` | [vaccineExpeditionJourney.ts](../src/game/vaccineExpeditionJourney.ts)         |
-| Beyond the maple leaf                         | `/journey/beyond-the-maple-leaf`              | [canadaJourney.ts](../src/game/canadaJourney.ts)                               |
-| Around the Mediterranean                      | `/journey/mediterranean`                      | [fourthJourney.ts](../src/game/fourthJourney.ts)                               |
-| Shared neighbors                              | `/journey/shared-neighbors`                   | [ninthJourney.ts](../src/game/ninthJourney.ts)                                 |
-| Along the Andes                               | `/journey/along-the-andes`                    | [andesJourney.ts](../src/game/andesJourney.ts)                                 |
-| Not the obvious city                          | `/journey/not-the-obvious-city`               | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                           |
-| Island instincts                              | `/journey/island-instincts`                   | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)                       |
-| A Continent in Pieces                         | `/journey/north-america`                      | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)                   |
-| Latitude surprises                            | `/journey/latitude-surprises`                 | [latitudeJourney.ts](../src/game/latitudeJourney.ts)                           |
-| Pacific Landfalls                             | `/journey/ring-of-fire`                       | [tenthJourney.ts](../src/game/tenthJourney.ts)                                 |
-| Exceptions to the rule                        | `/journey/exceptions-to-the-rule`             | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                             |
-| On Russia’s doorstep                          | `/journey/try-not-to-click-russia`            | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                         |
-| Chasing the sun                               | `/journey/chasing-the-sun`                    | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                           |
-| Down the Danube                               | `/journey/down-the-danube`                    | [danubeJourney.ts](../src/game/danubeJourney.ts)                               |
-| Same Hour, Different Worlds                   | `/journey/same-hour-different-worlds`         | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                           |
-| Same Name, Different Place                    | `/journey/same-name-different-place`          | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)                     |
-| Missing Borders                               | `/journey/missing-borders`                    | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts)               |
-| Across the Divide                             | `/journey/across-the-divide`                  | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)                   |
-| Far From Everything                           | `/journey/far-from-everything`                | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts)         |
-| The Sound of Somewhere: Reggaetón             | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
+| Title                              | Practice route                                | Definition                                                                     |
+| ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
+| Within Reach                       | `/journey/within-reach`                       | [withinReachJourney.ts](../src/game/withinReachJourney.ts)                     |
+| Drawing the Sahara                 | `/journey/drawing-the-sahara`                 | [drawingSaharaJourney.ts](../src/game/drawingSaharaJourney.ts)                 |
+| Where the Silk Roads Met           | `/journey/where-the-silk-roads-met`           | [silkRoadIntersectionsJourney.ts](../src/game/silkRoadIntersectionsJourney.ts) |
+| The Vaccine That Crossed the World | `/journey/the-vaccine-that-crossed-the-world` | [vaccineExpeditionJourney.ts](../src/game/vaccineExpeditionJourney.ts)         |
+| Beyond the maple leaf              | `/journey/beyond-the-maple-leaf`              | [canadaJourney.ts](../src/game/canadaJourney.ts)                               |
+| Around the Mediterranean           | `/journey/mediterranean`                      | [fourthJourney.ts](../src/game/fourthJourney.ts)                               |
+| Shared neighbors                   | `/journey/shared-neighbors`                   | [ninthJourney.ts](../src/game/ninthJourney.ts)                                 |
+| Along the Andes                    | `/journey/along-the-andes`                    | [andesJourney.ts](../src/game/andesJourney.ts)                                 |
+| Not the obvious city               | `/journey/not-the-obvious-city`               | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                           |
+| Island instincts                   | `/journey/island-instincts`                   | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)                       |
+| A Continent in Pieces              | `/journey/north-america`                      | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)                   |
+| Latitude surprises                 | `/journey/latitude-surprises`                 | [latitudeJourney.ts](../src/game/latitudeJourney.ts)                           |
+| Pacific Landfalls                  | `/journey/ring-of-fire`                       | [tenthJourney.ts](../src/game/tenthJourney.ts)                                 |
+| Exceptions to the rule             | `/journey/exceptions-to-the-rule`             | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                             |
+| On Russia’s doorstep               | `/journey/try-not-to-click-russia`            | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                         |
+| Chasing the sun                    | `/journey/chasing-the-sun`                    | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                           |
+| Down the Danube                    | `/journey/down-the-danube`                    | [danubeJourney.ts](../src/game/danubeJourney.ts)                               |
+| Same Hour, Different Worlds        | `/journey/same-hour-different-worlds`         | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                           |
+| Same Name, Different Place         | `/journey/same-name-different-place`          | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)                     |
+| Missing Borders                    | `/journey/missing-borders`                    | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts)               |
+| Across the Divide                  | `/journey/across-the-divide`                  | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)                   |
+| Far From Everything                | `/journey/far-from-everything`                | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts)         |
+| The Sound of Somewhere: Reggaetón  | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.
-Unassigned future dates show a provisional, seeded choice from the `pool`
+Unassigned future dates show a provisional, seeded choice from all registered
 Journeys; a date becomes permanent when it is locked or assigned. The previous
 rotation is preserved only for cutover history in
 [`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). Current IDs,
-availability and routes come from `journeyIndex.json`. Results use Home/Study as primary exits,
+titles and routes come from `journeyIndex.json`. Results use Home/Study as primary exits,
 with replay available only on practice routes. Daily and Archive results retain the
 saved run for all players, including admins; Admin Tools provides the separate
 explicit current-day reset. A results flyover follows answer stops in round order and
-loops; player interaction or reduced motion interrupts it.
+loops; player interaction or reduced motion interrupts it. With reduced motion,
+completion offers Overview, Previous view and Next view controls to inspect every
+authored destination without automatic travel.
 
 The Russia-neighbor Journey asks for pins in Finland, North Korea, Mongolia,
 Georgia, and Estonia. Broad playable cameras are deliberately centered outside
@@ -114,7 +117,7 @@ and shown on two fixed true-north dials. The target and rays remain withheld
 until submission; assist adds one broad geographic sector. Existing pin tiers,
 confirmation, help ceilings and saves are unchanged. Each question is complete
 without earlier Journey state. See `recipe:bearing-intersection`,
-`npm run check:journey -- --recipe bearing-intersection`, and the unlisted
+`npm run check:journey -- --recipe bearing-intersection`, and
 _Where the Silk Roads Met_ for five linked examples.
 
 For estimates, `slider` uses the `numeric-range` rule with explicit minimum,
@@ -292,9 +295,9 @@ assignments resolve to the current edition. The original ID is retired: save
 recovery drops its old attempts while preserving progress on retained Journeys.
 The index generator includes only current definitions.
 
-Adding a bundled edition defaults to `unlisted` and changes no automatic date.
-Opting it into the pool can change provisional future dates, while locked dates
-remain fixed.
+Registering a bundled Journey includes it in automatic selection. Adding or
+removing a Journey can change provisional dates; locked and assigned dates remain
+fixed. There is no separate listed/unlisted designation.
 Retained attempts remain pinned to their stored Journey. Removed editions are
 absent from Admin and practice routes. Their IDs are recorded
 only for save recovery: discard their attempts and overrides, while preserving
@@ -423,3 +426,22 @@ reference corridor; `geo-polygon` balances population coverage against land cost
 All submit explicitly and disclose three quality bands before play. Coordinate
 entry edits the same geometry as globe gestures. See `constructionRecipes.ts`
 and the constructed-answer section of `JOURNEY_ENGINE.md`.
+
+Within Reach’s whole-island edition (`within-reach-v2`, superseding the marker
+edition) uses a fixed-radius geodesic circle across Boston Harbor, the Isles of
+Scilly, Singapore’s Southern Islands, the Hauraki Gulf and the Cyclades. Entire
+source shorelines must fit. The fields contain 30, 39, 27, 46 and 134 named islands,
+respectively; source boxes and minimum areas are documented with the data.
+Only key islands have smaller, surface-aligned labels. Every eligible island can
+pulse once on arrival or on request. An assist outlines three islands from one
+optimal fit in gold. Highlights are partitioned out of the
+background, and previously reached detailed shores remain during travel.
+Canonical source hulls grade answers independently of simplified display maps.
+Every round has a certified maximum and a neutral start. The results scoring
+table explains 3 points for that maximum, 2 for one–two fewer islands and 1 for
+three–five fewer; six or more fewer earns zero. Submitted grades stay frozen.
+Play shows a prominent best-possible count; each question's result and individual
+review show its detailed ranges. The completion overview omits the scoring table.
+Results offer a curved five-view flyover with brief hovers and gentle dips, plus manual
+review of each saved circle. Source snapshots, licenses and benchmark
+certificates ship in `public/journeys/within-reach/`.

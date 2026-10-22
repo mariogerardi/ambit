@@ -1050,7 +1050,9 @@ export function App() {
         dispatch={dispatch}
         hover={hover}
         webgl={webgl}
+        reduced={reduced}
         frame={frame}
+        onPulseIslands={() => globe.current?.pulseIslands()}
         onHome={() => navigate("/")}
         onStudy={() => navigate("/study")}
       />

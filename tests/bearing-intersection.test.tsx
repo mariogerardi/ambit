@@ -185,7 +185,6 @@ describe("Bearing Intersection geometry and contracts", () => {
       expect(auditJourney(single, regions).errors).toEqual([]);
     }
     expect(JOURNEY_INDEX.find((j) => j.id === journey.id)).toMatchObject({
-      availability: "unlisted",
       path: "/journey/where-the-silk-roads-met",
     });
   });

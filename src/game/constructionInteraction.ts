@@ -85,7 +85,9 @@ export function inConstructionArea(q: Question, p: GeoPoint) {
   return !q.constructionArea || areaQuery(q)(p);
 }
 export const automaticConstructionNavigation = (q: Question) =>
-  !!q.constructionArea || q.rule.type === "point-coverage-max";
+  !!q.constructionArea ||
+  q.rule.type === "point-coverage-max" ||
+  q.rule.type === "island-coverage-max";
 /** Gesture ownership is decided at pointer-down and retained until release. */
 export function startsConstruction(
   q: Question,
@@ -93,7 +95,7 @@ export function startsConstruction(
   p: GeoPoint,
 ) {
   const r = constructionRule(q);
-  if (r?.type === "point-coverage-max")
+  if (r?.type === "point-coverage-max" || r?.type === "island-coverage-max")
     return (
       c?.kind === "circle" &&
       geoDistance([p.lng, p.lat], [c.center.lng, c.center.lat]) * EARTH_KM <=
