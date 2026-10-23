@@ -33,6 +33,18 @@ export function AnswerReview({
   ].includes(q.mode);
   const picked = responseIds(q, context, game);
   const reviewItems = answerItems(q, context, game);
+  if (q.mode === "country-recall") {
+    const entries = game.recall?.entries ?? [];
+    const wrong = entries.filter((e) => e.result === "wrong");
+    if (!wrong.length) return null;
+    return (
+      <div className="answer-review">
+        {wrong.length > 0 && (
+          <p>Incorrect guesses: {wrong.map((e) => name(e.id)).join(", ")}.</p>
+        )}
+      </div>
+    );
+  }
   if (q.rule.type === "bearing-angle")
     return <CompassReview question={q} response={game} />;
   if (q.rule.type === "numeric-range") {

@@ -46,6 +46,20 @@ describe("Journey engine authoring boundaries", () => {
         construction: MECHANIC_RECIPES.find((q) => q.mode === "geo-cut")!
           .constructionExample,
       },
+      "geo-multipin": {
+        construction: MECHANIC_RECIPES.find((q) => q.mode === "geo-multipin")!
+          .constructionExample,
+      },
+      "country-recall": {
+        recall: {
+          version: 1 as const,
+          entries: ["wurl:CAN", "wurl:USA", "wurl:MEX"].map((id) => ({
+            id,
+            input: id,
+            result: "accepted" as const,
+          })),
+        },
+      },
       "compass-bearing": { text: "230" },
       pin: { pin: { lat: -35.28346, lng: 149.12807 } },
       "city-single": { selectedIds: ["place:2172517"] },

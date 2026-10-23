@@ -3,6 +3,7 @@ import { registerStorage } from "./registerStorage";
 import type { SaveCodec } from "./recordSave";
 import { isRecord } from "./storage";
 import { mergeHelp } from "../game/guidance";
+import { mergeCountryRecall } from "../game/countryRecall";
 import {
   DAILY_KEY,
   emptyDaily,
@@ -204,7 +205,20 @@ export function dailySaveCodec(
     const completedOn = [a.completedOn, b.completedOn]
       .filter((d): d is string => !!d)
       .sort()[0];
-    const preferred = completedOn ? { ...selected, completedOn } : selected;
+    let preferred = completedOn ? { ...selected, completedOn } : selected;
+    if (
+      a.game.phase === "playing" &&
+      b.game.phase === "playing" &&
+      a.game.roundIndex === b.game.roundIndex &&
+      (a.game.recall || b.game.recall)
+    )
+      preferred = {
+        ...preferred,
+        game: {
+          ...preferred.game,
+          recall: mergeCountryRecall(a.game.recall, b.game.recall),
+        },
+      };
     return a.game.help || b.game.help
       ? {
           ...preferred,

@@ -1,4 +1,8 @@
-import type { GridShape } from "../game/constructionTypes";
+import type {
+  GridShape,
+  Construction,
+  ConstructionArea,
+} from "../game/constructionTypes";
 import type { Polygon, MultiPolygon } from "geojson";
 export type AdminLevel = "ADM0" | "ADM1" | "ADM2" | "ADM3" | "ADM4" | "ADM5";
 export type VisualState =
@@ -100,7 +104,20 @@ export interface RouteFeature {
 export type MapOverlay =
   | {
       id: string;
+      type: "paint";
+      bounds: [number, number, number, number];
+      strokes: Extract<Construction, { kind: "brush" }>["strokes"];
+      mask: NonNullable<ConstructionArea["mask"]>;
+      targetMask?: NonNullable<ConstructionArea["mask"]>;
+      coverage: "paint" | "inside" | "outside" | "missed";
+      visualState: "selected" | "correct" | "answer" | "incorrect" | "visited";
+      opacity: number;
+    }
+  | {
+      id: string;
       type: "raster-patch";
+      /** Place explanatory shading above base imagery. */
+      foreground?: boolean;
       bounds: [number, number, number, number];
       assetUrl: string;
       opacity: number;

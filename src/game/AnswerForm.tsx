@@ -1,4 +1,6 @@
 import { ConstructionAnswer } from "./ConstructionAnswer";
+import { MultiPinAnswer } from "./MultiPinAnswer";
+import { CountryRecallAnswer } from "./CountryRecallAnswer";
 import { answerItems } from "./answerPresentation";
 import { mechanicFor } from "./mechanics";
 import { pointAnswerNoun, answerPlace } from "./answerTargets";
@@ -21,7 +23,7 @@ import {
 } from "./guidance";
 import { OrderAnswer } from "./OrderAnswer";
 import { isSlotAnswer } from "./ordering";
-import { QuestionSupport } from "./QuestionSupport";
+import { QuestionSupport, RasterLegend } from "./QuestionSupport";
 
 type AnswerFormProps = {
   question: Question;
@@ -37,6 +39,7 @@ export function AnswerForm(props: AnswerFormProps) {
   return (
     <>
       <QuestionSupport question={props.question} webgl={props.webgl} />
+      <RasterLegend question={props.question} />
       <AnswerControls {...props} />
     </>
   );
@@ -65,6 +68,27 @@ function AnswerControls({
   const locked = lockedSelectionIds(question, game);
   const items = answerItems(question, context, game);
   const definition = mechanicFor(question);
+  if (question.mode === "geo-multipin")
+    return (
+      <MultiPinAnswer
+        key={question.id}
+        question={question}
+        game={game}
+        dispatch={dispatch}
+        mapKey={mapKey}
+      />
+    );
+  if (definition.control === "recall")
+    return (
+      <CountryRecallAnswer
+        key={question.id}
+        question={question}
+        context={context}
+        game={game}
+        dispatch={dispatch}
+        mapKey={mapKey}
+      />
+    );
   if (definition.control === "construction")
     return (
       <ConstructionAnswer

@@ -56,6 +56,27 @@ function submitSample(
   const count = responseCount(question, context);
   const eligible = selectableIds(question, context);
   const response: Response = { ...initialGame };
+  if (question.rule.type === "country-set-recall") {
+    const rule = question.rule;
+    response.recall = {
+      version: 1,
+      entries: (correct
+        ? rule.ids
+        : [...context.members]
+            .filter(
+              (id) =>
+                !rule.ids.includes(id) &&
+                !rule.exceptions?.some((e) => e.id === id),
+            )
+            .slice(0, 3)
+      ).map((id) => ({
+        id,
+        input: context.names.get(id) ?? id,
+        result: correct ? "accepted" : "wrong",
+      })),
+      ended: correct ? "all-found" : "third-wrong",
+    };
+  }
   if (mechanic.response === "construction")
     response.construction = constructionAuditSample(question, correct);
   if (mechanic.response === "selected")
@@ -157,7 +178,12 @@ function submitSample(
           ? { type: "order-card", index, id: value }
           : { type: "ordered", index, value },
       );
-  if (mechanic.response === "text")
+  if (question.mode === "country-recall") {
+    for (const e of response.recall?.entries ?? []) {
+      dispatch({ type: "text", value: context.names.get(e.id) ?? e.input });
+      dispatch({ type: "recall-country" });
+    }
+  } else if (mechanic.response === "text")
     dispatch({ type: "text", value: response.text });
   if (response.construction)
     dispatch({ type: "construction", value: response.construction });

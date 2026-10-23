@@ -23,6 +23,7 @@ export const constructionRule = (
     "line-following",
     "population-coverage-area-budget",
     "population-balance",
+    "labeled-region-pin-set",
   ].includes(q.rule.type)
     ? (q.rule as ConstructionRule)
     : undefined;
@@ -36,10 +37,21 @@ export const constructionKind = (
     "line-following": "trace",
     "population-coverage-area-budget": "polygon",
     "population-balance": "cut",
+    "labeled-region-pin-set": "pins",
   })[rule.type] as Construction["kind"];
 export function validConstruction(value: unknown): value is Construction {
   const c = value as Construction;
   if (!c || c.version !== 1) return false;
+  if (c.kind === "pins")
+    return (
+      !!c.pins &&
+      typeof c.pins === "object" &&
+      !Array.isArray(c.pins) &&
+      Object.keys(c.pins).length <= 12 &&
+      Object.entries(c.pins).every(
+        ([id, p]) => !!id && id.length <= 100 && validGeoPoint(p),
+      )
+    );
   if (c.kind === "circle") return validGeoPoint(c.center);
   if (c.kind === "brush")
     return (
@@ -72,7 +84,7 @@ export function validConstructionResult(
   return (
     !!r &&
     r.version === 1 &&
-    ["brush", "circle", "trace", "polygon", "cut"].includes(r.kind) &&
+    ["brush", "circle", "trace", "polygon", "cut", "pins"].includes(r.kind) &&
     typeof r.sourceRevision === "string" &&
     r.sourceRevision.length > 0 &&
     (r.tier === null ||
@@ -80,7 +92,7 @@ export function validConstructionResult(
     typeof r.feedback === "string" &&
     Array.isArray(r.metrics) &&
     r.metrics.length ===
-      { brush: 3, circle: 1, trace: 2, polygon: 2, cut: 4 }[r.kind] &&
+      { brush: 3, circle: 1, trace: 2, polygon: 2, cut: 4, pins: 1 }[r.kind] &&
     r.metrics.every(
       (m) =>
         !!m &&
@@ -365,6 +377,12 @@ export function constructionReady(q: Question, response: Response) {
     c = response.construction ?? q.constructionInitial;
   if (!rule || !validConstruction(c) || c.kind !== constructionKind(rule))
     return false;
+  if (c.kind === "pins")
+    return (
+      rule.type === "labeled-region-pin-set" &&
+      Object.keys(c.pins).length === rule.slots.length &&
+      rule.slots.every((s) => validGeoPoint(c.pins[s.id]))
+    );
   if (c.kind === "brush")
     return (
       rule.type === "raster-overlap" &&
@@ -412,7 +430,21 @@ export function evaluateConstruction(
   let tier = -1,
     metrics: ConstructionResult["metrics"] = [],
     containedIds: string[] | undefined;
-  if (rule.type === "raster-overlap" && c.kind === "brush") {
+  if (rule.type === "labeled-region-pin-set" && c.kind === "pins") {
+    containedIds = rule.slots
+      .filter((s) =>
+        geoContains(sphericalGeometry(s.geometry), ll(c.pins[s.id])),
+      )
+      .map((s) => s.id);
+    tier = rule.tiers.findIndex((t) => containedIds!.length >= t.count);
+    metrics = [
+      {
+        label: "Landscapes located",
+        value: containedIds.length,
+        unit: `of ${rule.slots.length}`,
+      },
+    ];
+  } else if (rule.type === "raster-overlap" && c.kind === "brush") {
     const cells = paintedCells(rule.grid, c);
     let tp = 0,
       painted = 0,
@@ -434,8 +466,20 @@ export function evaluateConstruction(
       (t) => f1 + 1e-9 >= t.f1 && precision + 1e-9 >= t.precision,
     );
     metrics = [
-      { label: "Dune coverage", value: recall * 100, unit: "%" },
-      { label: "Paint on dunes", value: precision * 100, unit: "%" },
+      {
+        label: rule.targetLabel
+          ? `${rule.targetLabel} coverage`
+          : "Dune coverage",
+        value: recall * 100,
+        unit: "%",
+      },
+      {
+        label: rule.targetLabel
+          ? `Paint on ${rule.targetLabel}`
+          : "Paint on dunes",
+        value: precision * 100,
+        unit: "%",
+      },
       { label: "Overlap score", value: f1 * 100, unit: "%" },
     ];
   } else if (rule.type === "island-coverage-max" && c.kind === "circle") {
@@ -565,11 +609,16 @@ export function evaluateConstruction(
     sourceRevision:
       "grid" in rule
         ? rule.grid.revision
-        : rule.type === "line-following" || rule.type === "island-coverage-max"
+        : rule.type === "line-following" ||
+            rule.type === "island-coverage-max" ||
+            rule.type === "labeled-region-pin-set"
           ? rule.sourceRevision
           : `points-v1:${rule.candidates.map((p) => `${p.id}:${p.lat}:${p.lng}`).join("|")}`,
     tier: tier < 0 ? null : tier,
-    feedback: tier < 0 ? "A different pattern." : rule.tiers[tier].feedback,
+    feedback:
+      tier < 0
+        ? (q.incorrectFeedback ?? "A different pattern.")
+        : rule.tiers[tier].feedback,
     metrics,
     ...(containedIds ? { containedIds } : {}),
   };
@@ -599,7 +648,10 @@ export function validateConstructionQuestion(
   )
     fail("invalid initial construction");
   if (
-    q.mode !== `geo-${constructionKind(r)}` ||
+    q.mode !==
+      (r.type === "labeled-region-pin-set"
+        ? "geo-multipin"
+        : `geo-${constructionKind(r)}`) ||
     q.count !== 1 ||
     q.commitment !== "submit" ||
     q.selection.type !== "none"
@@ -607,6 +659,22 @@ export function validateConstructionQuestion(
     fail("construction mode and rule disagree");
   if (r.tiers.length !== 3 || r.tiers.some((t) => !t.feedback.trim()))
     fail("construction needs three quality bands");
+  if (
+    r.type === "labeled-region-pin-set" &&
+    (!r.sourceRevision ||
+      r.slots.length < 3 ||
+      r.slots.length > 12 ||
+      new Set(r.slots.map((s) => s.id)).size !== r.slots.length ||
+      r.slots.some(
+        (s) =>
+          !s.id ||
+          !s.label.trim() ||
+          !validGeoPoint(s.example) ||
+          !geoContains(sphericalGeometry(s.geometry), ll(s.example)),
+      ) ||
+      r.tiers.some((t, i) => t.count !== r.slots.length - i))
+  )
+    fail("invalid labeled region pin set");
   if ("grid" in r) {
     const g = r.grid;
     if (

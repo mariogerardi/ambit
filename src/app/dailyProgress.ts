@@ -1,3 +1,4 @@
+import { validCountryRecall, hasRecallCredit } from "../game/countryRecall";
 import {
   validConstruction,
   validConstructionResult,
@@ -173,6 +174,9 @@ export function validGame(
     Number(value.roundIndex) < 0 ||
     Number(value.roundIndex) >= journey.rounds.length ||
     (value.pin !== undefined && !validPin(value.pin)) ||
+    (value.recall !== undefined && !validCountryRecall(value.recall)) ||
+    (value.activePinSlot !== undefined &&
+      typeof value.activePinSlot !== "string") ||
     (value.construction !== undefined &&
       !validConstruction(value.construction)) ||
     (value.constructionResult !== undefined &&
@@ -207,6 +211,7 @@ export function validGame(
       isRecord(a) &&
       journey.rounds.some((q) => q.id === a.roundId) &&
       (a.pin === undefined || validPin(a.pin)) &&
+      (a.recall === undefined || validCountryRecall(a.recall)) &&
       (a.construction === undefined) === (a.constructionResult === undefined) &&
       (a.construction === undefined || validConstruction(a.construction)) &&
       (a.constructionResult === undefined ||
@@ -227,7 +232,9 @@ export function validGame(
           Number.isInteger(a.points) &&
           Number(a.points) >= 0 &&
           Number(a.points) <= 3 &&
-          (a.correct || a.points === 0))) &&
+          (a.correct ||
+            a.points === 0 ||
+            (Number(a.points) <= 2 && hasRecallCredit(a.recall))))) &&
       (a.receiptLabel === undefined || typeof a.receiptLabel === "string"),
   );
 }

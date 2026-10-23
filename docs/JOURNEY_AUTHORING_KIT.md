@@ -123,6 +123,12 @@ Replace the previous uploaded copies of `AUTHORING_KIT.md` and
 individual `examples/*.md` or references only when relevant. `SOURCE_REVIEW.md`
 is optional for engine/architecture work; ordinary puzzle design does not need it.
 The folder includes all current examples so you can consult more than the highlights.
+For repeated-mechanic additions, consult the original and sequel together:
+`examples/shared-neighbors.md` / `examples/shared-neighbors-two.md` and
+`examples/missing-borders.md` / `examples/missing-borders-two.md`. They demonstrate
+new question sets with independent IDs and routes while keeping the original
+Journeys playable. The Missing Borders sequel also shows continent-wide play
+framing with closer reveals.
 
 Run the scoped exporter checks with:
 

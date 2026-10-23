@@ -64,18 +64,6 @@ export function ConstructionAnswer({
       <ActionIcon name="undo" />
     </button>
   );
-  const reset = (
-    <button
-      type="button"
-      className="quiet-button construction-icon-button"
-      aria-label="Reset shape"
-      title="Reset shape"
-      disabled={!c}
-      onClick={() => dispatch({ type: "clear" })}
-    >
-      <ActionIcon name="repeat" />
-    </button>
-  );
   return (
     <div className="construction-answer">
       {rule.type === "island-coverage-max" ? (
@@ -152,7 +140,6 @@ export function ConstructionAnswer({
             />
           </label>
           {undo}
-          {reset}
         </div>
       ) : (
         <div
@@ -174,8 +161,9 @@ export function ConstructionAnswer({
               {tool === "move" ? "Draw / edit" : "Move globe"}
             </button>
           )}
-          {!(q.constructionInitial && c?.kind === "circle") && undo}
-          {reset}
+          {q.mode !== "geo-cut" &&
+            !(q.constructionInitial && c?.kind === "circle") &&
+            undo}
           {q.mode === "geo-polygon" && (
             <span className="construction-dimension">
               {points.length}/
@@ -197,8 +185,8 @@ export function ConstructionAnswer({
               : q.mode === "geo-polygon"
                 ? "Tap to add corners; drag a corner to reshape. Drag outside the outline to turn the globe."
                 : q.mode === "geo-trace"
-                  ? "Follow the river in one stroke. Drag outside Egypt to turn the globe."
-                  : "Place two ends, then slide them along the border. Drag outside Algeria to turn the globe."}
+                  ? `Follow the river in one stroke. Drag outside ${q.constructionArea?.name ?? "the outline"} to turn the globe.`
+                  : `Place two ends, then slide them along the border. Drag outside ${q.constructionArea?.name ?? "the outline"} to turn the globe.`}
       </p>
       {c?.kind === "polygon" &&
         points.length >= 4 &&
@@ -235,7 +223,11 @@ export function ConstructionReview({
   response: GameState;
 }) {
   const result = reviewedConstruction(question, response);
-  if (!result || constructionRule(question)?.type === "island-coverage-max")
+  if (
+    !result ||
+    result.kind === "cut" ||
+    constructionRule(question)?.type === "island-coverage-max"
+  )
     return null;
   return (
     <section
@@ -259,22 +251,6 @@ export function ConstructionReview({
           </div>
         ))}
       </dl>
-      {result.kind === "cut" && (
-        <div
-          className="construction-share-bars"
-          aria-label="Population and land comparison"
-        >
-          {[0, 2].map((i) => (
-            <div key={i}>
-              <span>{i === 0 ? "People" : "Land"}</span>
-              <div>
-                <i style={{ width: `${result.metrics[i].value}%` }} />
-                <b style={{ width: `${100 - result.metrics[i].value}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </section>
   );
 }

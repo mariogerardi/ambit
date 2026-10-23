@@ -77,8 +77,48 @@ export function QuestionSupport({
   );
 }
 
+export function RasterLegend({ question }: { question: Question }) {
+  const legend = question.rasterLegend;
+  if (!legend) return null;
+  return (
+    <figure className="raster-legend" aria-label={legend.label}>
+      <figcaption>{legend.label}</figcaption>
+      <div
+        className="raster-legend-bar"
+        style={{
+          background: `linear-gradient(to right, ${legend.stops.map((s) => s.color).join(", ")})`,
+        }}
+      />
+      <div className="raster-legend-labels">
+        {legend.stops.map((s) => (
+          <span key={s.label}>{s.label}</span>
+        ))}
+      </div>
+    </figure>
+  );
+}
+
 /** Full acceptance bands stay available through the free question-information menu. */
 export function QuestionAccuracy({ question }: { question: Question }) {
+  if (question.rule.type === "country-set-recall")
+    return (
+      <details className="question-help-sources">
+        <summary>Accuracy</summary>
+        <div className="question-accuracy">
+          <p>
+            All {question.count} countries: 3 points. At least{" "}
+            {Math.ceil((question.count * 2) / 3)}: 2 points. Any correct
+            country: 1 point.
+          </p>
+          <p>
+            One incorrect country caps the score at 2; two cap it at 1; a third
+            ends the round at zero. Duplicate names and unrecognized spelling
+            cost no guess. Help applies its usual ceiling. Only a complete list
+            counts as a fully correct answer.
+          </p>
+        </div>
+      </details>
+    );
   const rule = constructionRule(question);
   if (rule)
     return (
@@ -91,19 +131,21 @@ export function QuestionAccuracy({ question }: { question: Question }) {
               <li key={i}>
                 {3 - i} {i === 2 ? "point" : "points"}:{" "}
                 {rule.type === "raster-overlap" && "f1" in tier
-                  ? `overlap score at least ${tier.f1 * 100}%, with at least ${tier.precision * 100}% of scored paint on mapped dunes.`
-                  : rule.type === "island-coverage-max" && "count" in tier
-                    ? `enclose at least ${tier.count} entire islands, including every shore.`
-                    : rule.type === "point-coverage-max" && "count" in tier
-                      ? `enclose at least ${tier.count} of the marked ${rule.pointLabel ?? "capitals"}.`
-                      : rule.type === "line-following" && "coverage" in tier
-                        ? `follow at least ${tier.coverage * 100}% of the river within ${tier.referenceKm} km, with ${tier.coverage * 100}% of your stroke within ${tier.strokeKm} km of it.`
-                        : rule.type === "population-coverage-area-budget" &&
-                            "population" in tier
-                          ? `capture at least ${tier.population}% of modeled residents in at most ${tier.area}% of country land.`
-                          : "error" in tier
-                            ? `each side contains ${50 - tier.error}% to ${50 + tier.error}% of modeled residents.`
-                            : ""}
+                  ? `overlap score at least ${tier.f1 * 100}%, with at least ${tier.precision * 100}% of scored paint on ${rule.targetLabel ?? "mapped dunes"}.`
+                  : rule.type === "labeled-region-pin-set" && "count" in tier
+                    ? `locate at least ${tier.count} correctly labeled landscapes.`
+                    : rule.type === "island-coverage-max" && "count" in tier
+                      ? `enclose at least ${tier.count} entire islands, including every shore.`
+                      : rule.type === "point-coverage-max" && "count" in tier
+                        ? `enclose at least ${tier.count} of the ${rule.hideCandidatesUntilReveal ? "named" : "marked"} ${rule.pointLabel ?? "capitals"}.`
+                        : rule.type === "line-following" && "coverage" in tier
+                          ? `follow at least ${tier.coverage * 100}% of the river within ${tier.referenceKm} km, with ${tier.coverage * 100}% of your stroke within ${tier.strokeKm} km of it.`
+                          : rule.type === "population-coverage-area-budget" &&
+                              "population" in tier
+                            ? `capture at least ${tier.population}% of modeled residents in at most ${tier.area}% of country land.`
+                            : "error" in tier
+                              ? `each side contains ${50 - tier.error}% to ${50 + tier.error}% of modeled residents.`
+                              : ""}
               </li>
             ))}
           </ul>

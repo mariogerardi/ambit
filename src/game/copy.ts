@@ -98,7 +98,11 @@ export function correctAnswerSummary(
     values = [
       `${result?.destination.name ?? rule.destination.name} · ${result ? formatBearing(result.target) : ""}`,
     ];
-  } else if (rule.type === "raster-overlap" || rule.type === "line-following")
+  } else if (
+    rule.type === "raster-overlap" ||
+    rule.type === "line-following" ||
+    rule.type === "labeled-region-pin-set"
+  )
     values = [resolvedRoundIdentity(question)];
   else if (rule.type === "island-coverage-max")
     values = [`${rule.maximum} whole islands`];

@@ -8,6 +8,7 @@ export interface ConstructionArea {
 }
 export type ConstructionMode =
   | "geo-brush"
+  | "geo-multipin"
   | "geo-circle"
   | "geo-trace"
   | "geo-polygon"
@@ -30,6 +31,7 @@ export interface ConstructionGrid extends GridShape {
   cells: [number, number, number][];
 }
 export type Construction = { version: 1 } & (
+  | { kind: "pins"; pins: Record<string, GeoPoint> }
   | {
       kind: "brush";
       strokes: { points: GeoPoint[]; radiusKm: number; erase: boolean }[];
@@ -53,6 +55,17 @@ export interface ConstructionIsland {
 }
 export type ConstructionRule =
   | {
+      type: "labeled-region-pin-set";
+      sourceRevision: string;
+      slots: {
+        id: string;
+        label: string;
+        geometry: RegionFeature["geometry"];
+        example: GeoPoint;
+      }[];
+      tiers: (ConstructionBand & { count: number })[];
+    }
+  | {
       type: "island-coverage-max";
       radiusKm: number;
       candidates: ConstructionIsland[];
@@ -64,6 +77,10 @@ export type ConstructionRule =
       type: "raster-overlap";
       grid: ConstructionGrid;
       brushRadiusKm: number;
+      /** Human-readable subject for overlap results; defaults to dunes. */
+      targetLabel?: string;
+      /** Display-only target footprint; never used for grading. */
+      targetMask?: NonNullable<ConstructionArea["mask"]>;
       tiers: (ConstructionBand & { f1: number; precision: number })[];
     }
   | {
@@ -72,6 +89,8 @@ export type ConstructionRule =
       candidates: PlaceFeature[];
       /** Plural noun used in accuracy and results; defaults to capitals. */
       pointLabel?: string;
+      /** Target names may be given while their coordinates remain withheld. */
+      hideCandidatesUntilReveal?: boolean;
       maximum: number;
       tiers: (ConstructionBand & { count: number })[];
     }
@@ -109,6 +128,7 @@ export interface ConstructionResult {
 }
 export const CONSTRUCTION_MODES: ConstructionMode[] = [
   "geo-brush",
+  "geo-multipin",
   "geo-circle",
   "geo-trace",
   "geo-polygon",

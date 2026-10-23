@@ -201,17 +201,30 @@ export function GameShell({
   const constructed = !!constructionRule(round);
   const construction = reviewedConstruction(round, game);
   const constructionFeedback =
-    construction?.tier !== null && construction?.tier !== undefined
-      ? constructionRule(round)?.tiers[construction.tier].feedback
-      : construction?.feedback;
+    round.mode === "country-recall"
+      ? game.recall?.ended === "third-wrong"
+        ? "Three incorrect entries."
+        : game.recall?.ended === "all-found"
+          ? (round.correctFeedback ?? "All countries found.")
+          : (game.recall?.entries.filter((e) => e.result === "accepted")
+                .length ?? 0) >= Math.ceil((round.count * 2) / 3)
+            ? "Almost all found."
+            : "Borders remembered."
+      : construction?.tier !== null && construction?.tier !== undefined
+        ? constructionRule(round)?.tiers[construction.tier].feedback
+        : construction?.feedback;
   const feedback = game.answers.at(-1),
     correct = feedback?.correct;
   const mapPresentation = questionMapPresentation(round, game.phase, !!correct);
+  const reviewedRound =
+    game.phase === "finished" && constructionReviewIndex !== undefined
+      ? journey.rounds[constructionReviewIndex]
+      : round;
   const mapCaption =
     game.phase === "finished"
       ? (journey.completion?.mapCaption ??
-        round.feedbackMapCaption ??
-        round.mapCaption)
+        reviewedRound.feedbackMapCaption ??
+        reviewedRound.mapCaption)
       : game.phase === "feedback"
         ? (round.feedbackMapCaption ?? round.mapCaption)
         : round.mapCaption;
@@ -661,6 +674,24 @@ export function GameShell({
                     }}
                   />
                 )}
+                {constructionReviewIndex !== undefined &&
+                  journey.rounds[constructionReviewIndex].mode ===
+                    "country-recall" && (
+                    <AnswerReview
+                      question={journey.rounds[constructionReviewIndex]}
+                      context={context}
+                      game={{
+                        ...game,
+                        ...game.answers.find(
+                          (a) =>
+                            a.roundId ===
+                            journey.rounds[constructionReviewIndex].id,
+                        ),
+                        phase: "feedback",
+                        roundIndex: constructionReviewIndex,
+                      }}
+                    />
+                  )}
                 {constructionReviewIndex !== undefined && (
                   <IslandScoring
                     questions={[journey.rounds[constructionReviewIndex]]}

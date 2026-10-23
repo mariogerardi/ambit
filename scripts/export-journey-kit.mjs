@@ -26,6 +26,10 @@ const DOCS = [
   "docs/journey-authoring/JOURNEY_SPEC_TEMPLATE.md",
 ];
 const MODE_NOTES = {
+  "geo-multipin":
+    "Place independently labeled pins in reviewed geographic regions, then submit together. Each slot retains its identity, coordinates and per-region containment result. Three quality bands reward independently located regions; answer footprints remain reveal-only. A three-pin tray supports pickup, tap-to-place, repositioning, removal and undo; placed pins leave hollow tray slots.",
+  "country-recall":
+    "Enter countries progressively using local canonical identities and reviewed aliases. Distinct recognized wrong countries reduce the three-point ceiling; a third ends the round. Unknown spelling, duplicates and authored convention exceptions are non-penalizing. Finish early for partial points or complete the set. Help can supply one missing answer and caps rewards normally. Only a complete set counts as fully correct; partial points remain separate. History persists across reload and results.",
   "geo-brush":
     "Paint and erase geographic disks. An explicit frozen raster owns target fractions and clipped cell areas. Area-weighted F1 and minimum precision determine three quality bands; no live score. Record source revision and frozen metrics. Human-calibrate against actual imagery before publication.",
   "geo-circle":
@@ -35,7 +39,7 @@ const MODE_NOTES = {
   "geo-polygon":
     "Edit a simple bounded-vertex polygon. Sum modeled residents and clipped land only within a frozen equal-area source grid. Three bands combine minimum population and maximum land shares. Display/nightlight data are clues, never the grading input.",
   "geo-cut":
-    "Place two ends on a frozen country boundary. A geodesic half-plane divides the population grid; any orientation with balanced totals is valid. Three error bands reward closeness to 50/50. Reveal actual population and land shares without presuming unequal land.",
+    "Place two ends on a frozen country boundary. A geodesic half-plane divides the population grid; any orientation with balanced totals is valid. Three error bands reward closeness to 50/50. Reveal each side’s letter and frozen population percentage on the map, without presuming unequal land.",
   "compass-bearing":
     "Standalone initial spherical bearing question with explicit origin/destination records and three circular-error tiers. Rotate an upright true-north dial or use optional degree entry under “Type my answer” and keyboard input; an untouched dial is unanswered. Submit explicitly. Optional broad compass sectors guide without restricting input or changing tolerance. Destination and comparison arcs stay reveal-only. Three tiers earn 3/2/1 before help ceilings; frozen submission evidence preserves historical receipts. A relay is optional content, not an engine dependency.",
   pin: "Place a point near a reviewed target or inside canonical territory, then confirm. The shared supporting row derives a concise bullseye sentence from the rule; all inclusive acceptance bands remain available before answering in the free Accuracy information. Do not hand-write numeric bands or movement boilerplate in instruction. Bearing Intersection composes this pin response with question.bearingIntersection: two explicit station records, computed read-only compass headings, an optional single broad geographic assist sector, and reveal-only great-circle arcs. It works independently per question; see recipe:bearing-intersection and JOURNEY_ENGINE.md. The schema also supports legacy single-radius questions. Territory-inside pins use containment without invented distance bands. Accepted pins still count as one correct answer; three distance tiers award 3/2/1 points and help caps rewards at two (hint) or one (assist). Territory-inside pins award three points before help. Help cannot change tolerance; target rings belong to reveal.",
@@ -619,6 +623,29 @@ export async function exportJourneyKit(options) {
             const constructionResult = construction
               ? evaluateConstruction(question, { ...initialGame, construction })
               : undefined;
+            const recall =
+              question.rule.type === "country-set-recall"
+                ? {
+                    version: 1,
+                    entries: (correct
+                      ? question.rule.ids
+                      : [...context.members]
+                          .filter(
+                            (id) =>
+                              !question.rule.ids.includes(id) &&
+                              !question.rule.exceptions?.some(
+                                (e) => e.id === id,
+                              ),
+                          )
+                          .slice(0, 3)
+                    ).map((id) => ({
+                      id,
+                      input: context.names.get(id) ?? id,
+                      result: correct ? "accepted" : "wrong",
+                    })),
+                    ended: correct ? "all-found" : "third-wrong",
+                  }
+                : undefined;
             return [
               `reveal:${correct ? "correct" : "miss"}`,
               {
@@ -627,6 +654,7 @@ export async function exportJourneyKit(options) {
                 roundIndex,
                 construction,
                 constructionResult,
+                recall,
                 selectedIds:
                   correct && mechanic.response === "selected"
                     ? expected.slice(0, count)
@@ -638,6 +666,7 @@ export async function exportJourneyKit(options) {
                     ...initialGame,
                     construction,
                     constructionResult,
+                    recall,
                     roundId: question.id,
                     correct,
                   },
@@ -735,6 +764,7 @@ export async function exportJourneyKit(options) {
             summarizeGeometry({
               explanation: question.explanation,
               correctFeedback: question.correctFeedback,
+              incorrectFeedback: question.incorrectFeedback,
               qualification: question.qualification,
               highlightParts: question.highlightParts,
               importedRegions: question.importedRegions,
@@ -743,6 +773,7 @@ export async function exportJourneyKit(options) {
               feedbackImage: question.feedbackImage,
               feedbackDiagram: question.feedbackDiagram,
               mapCaption: question.mapCaption,
+              rasterLegend: question.rasterLegend,
               feedbackMapCaption: question.feedbackMapCaption,
               source: question.source,
               sources: question.sources,

@@ -175,6 +175,12 @@ correct location privileged at the center or hide all plausible alternatives.
 
 When a round asks for _some_ members of a larger valid set, author the acceptance rule and reveal carefully. A set of three arbitrary countries out of seven may be technically easy to grade but too broad to make an engaging question. Prefer a specific spatial or conceptual relationship over “any three” when the narrower task offers a clearer learning payoff.
 
+For shared-neighbor questions, check the intersection of both countries' neighbors
+in the canonical land-border graph. A familiar intended answer does not establish
+uniqueness. If several countries qualify, accept every valid answer or choose a
+different pair before authoring a singular prompt. State any border convention
+that affects the task; display geometry does not establish adjacency.
+
 ### Point rewards
 
 The current five-question Daily is worth **15 points**: three per question.
@@ -184,6 +190,12 @@ not implemented; agree a new scoring/display contract before authoring them.
 - Discrete answers and territory-inside pins earn three points when correct,
   otherwise zero. Multi-answer, ordered and matching questions retain their
   all-or-nothing correctness contract; no new partial credit is implied.
+- Progressive country recall is an explicit exception: an incomplete list can
+  earn partial points without counting as a fully correct question. A distinct
+  wrong-country budget caps rewards and ends the round on the third error;
+  duplicates, spelling problems and reviewed geographic-convention exceptions
+  do not consume another guess. Keep the input progress and remaining ceiling
+  visible. This does not change ordinary typed-region grading.
 - Distance pins with the standard three tiers earn 3 / 2 / 1 from the innermost
   to outermost accepted band, or zero outside acceptance. Legacy single-radius
   pins retain three points for an accepted answer.
@@ -363,6 +375,9 @@ Design **question camera → answer action → feedback camera → next question
 - The question focus should orient the player **without pinpointing a withheld target**. Being near the subject is not inherently a leak; centering the sole correct marker or precisely identifying the only relevant pair of polygons often is.
 - The feedback focus should make the insight visually understandable at an appropriate scale. A close camera that shows nothing but uniform land color is not informative; a distant camera that puts both subjects at the globe's edges is not a real comparison.
 - A route Journey should feel like movement. A feature-based Journey (Danube, Andes) should retain a geographic throughline where useful. A conceptual Journey spanning continents may instead use deliberate, clearly separated views.
+- A continent-wide play view can establish a fair search field, followed by a
+  closer reveal that explains the relationship. Missing Borders II uses this
+  pattern; play and reveal need not share a camera or fit only the answer countries.
 - Account for desktop and narrow-screen viewports. The panel changes the useful map area; latitude, longitude, and altitude alone do not establish visual quality. Use the scoped verification policy in section 11 when an actual rendering uncertainty needs resolution.
 
 Rivers use the shared theme’s cerulean ink and thin light casing so they remain
@@ -518,6 +533,13 @@ in proportion to the change:
    State the reason first and check the smallest affected flow/device. A Journey
    facelift does not automatically require a complete desktop/mobile playthrough.
    Use practice without changing shared dates or clearing real player saves.
+
+The [implementation workflow's acceptance gates](journey-authoring/IMPLEMENTING_A_SPEC.md#acceptance-gates)
+turn these standards into a required handoff review: concise outcome feedback,
+player-facing copy, explicit object lifecycles, visible wrong-answer teaching,
+useful assistance without future-answer leakage, and deliberate completion and
+controls. Apply them to the effective scenes and outcome states; evidence that a
+field exists is not evidence that a player can see or use it.
 
 ### Two levels of consistency checks
 

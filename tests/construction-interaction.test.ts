@@ -97,9 +97,7 @@ it("makes brush paint prominent throughout its footprint and retains older narro
     false,
   ).overlays;
   expect(
-    layers.some(
-      (o) => o.type === "cells" && o.prominent && o.mask && o.opacity! >= 0.65,
-    ),
+    layers.some((o) => o.type === "paint" && o.mask && o.opacity >= 0.65),
   ).toBe(true);
   const result = evaluateConstruction(q, { ...initialGame, construction });
   const reveal = constructionScene(

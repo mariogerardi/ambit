@@ -1,4 +1,5 @@
 import { WITHIN_REACH_JOURNEY } from "./withinReachJourney";
+import { SHAPE_OF_INDIA_JOURNEY } from "./shapeOfIndiaJourney";
 import { DRAWING_SAHARA_JOURNEY } from "./drawingSaharaJourney";
 import { SILK_ROAD_INTERSECTIONS_JOURNEY } from "./silkRoadIntersectionsJourney";
 import { VACCINE_EXPEDITION_JOURNEY } from "./vaccineExpeditionJourney";
@@ -18,11 +19,13 @@ import { TWELFTH_JOURNEY } from "./twelfthJourney";
 import { ELEVENTH_JOURNEY } from "./eleventhJourney";
 import { TENTH_JOURNEY } from "./tenthJourney";
 import { NINTH_JOURNEY } from "./ninthJourney";
+import { SHARED_NEIGHBORS_TWO_JOURNEY } from "./sharedNeighborsTwoJourney";
 import { FOURTH_JOURNEY } from "./fourthJourney";
 import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
 import { FAR_FROM_EVERYTHING_JOURNEY } from "./farFromEverythingJourney";
 import { REGGAETON_JOURNEY } from "./reggaetonJourney";
 export const JOURNEYS = [
+  SHAPE_OF_INDIA_JOURNEY,
   WITHIN_REACH_JOURNEY,
   DRAWING_SAHARA_JOURNEY,
   SILK_ROAD_INTERSECTIONS_JOURNEY,
@@ -33,6 +36,7 @@ export const JOURNEYS = [
   CANADA_JOURNEY,
   FOURTH_JOURNEY,
   NINTH_JOURNEY,
+  SHARED_NEIGHBORS_TWO_JOURNEY,
   ANDES_JOURNEY,
   ELEVENTH_JOURNEY,
   FOURTEENTH_JOURNEY,
@@ -50,6 +54,7 @@ export const JOURNEYS = [
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [SHAPE_OF_INDIA_JOURNEY.id]: "/journey/the-shape-of-india",
     [WITHIN_REACH_JOURNEY.id]: "/journey/within-reach",
     [DRAWING_SAHARA_JOURNEY.id]: "/journey/drawing-the-sahara",
     [SILK_ROAD_INTERSECTIONS_JOURNEY.id]: "/journey/where-the-silk-roads-met",
@@ -74,6 +79,7 @@ export function journeyPath(id: string) {
     [ELEVENTH_JOURNEY.id]: "/journey/not-the-obvious-city",
     [TENTH_JOURNEY.id]: "/journey/ring-of-fire",
     [NINTH_JOURNEY.id]: "/journey/shared-neighbors",
+    [SHARED_NEIGHBORS_TWO_JOURNEY.id]: "/journey/shared-neighbors-two",
     [FOURTH_JOURNEY.id]: "/journey/mediterranean",
   };
   return paths[id] ?? "/";

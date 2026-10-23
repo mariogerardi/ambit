@@ -21,6 +21,7 @@ import {
 } from "./answerOutcome";
 import type { OutcomeEvaluator } from "./answerOutcome";
 import { initialBearing, normalizeBearing } from "./geodesic";
+import { recallOutcome } from "./countryRecall";
 
 export type AnswerControl =
   | "construction"
@@ -32,7 +33,8 @@ export type AnswerControl =
   | "text"
   | "number"
   | "slider"
-  | "text-list";
+  | "text-list"
+  | "recall";
 type Fail = (message: string) => never;
 type Submission = { count: number; eligible: string[] };
 export interface MechanicDefinition<
@@ -215,6 +217,46 @@ const cards = {
 };
 /** One registry owns answer capabilities, allowed rules, validation and control grading. */
 export const MECHANICS = {
+  "country-recall": defineMechanic(
+    ["country-set-recall"],
+    "Recall a set of countries",
+    "recall",
+    "text",
+    "none",
+    false,
+    {
+      canSubmit: () => true,
+      outcome: recallOutcome,
+      validate: (q, fail) => {
+        if (q.rule.type !== "country-set-recall") return;
+        const r = q.rule;
+        if (
+          !q.inputLabel?.trim() ||
+          r.ids.length !== q.count ||
+          r.ids.length < 3 ||
+          new Set(r.ids).size !== r.ids.length ||
+          r.assistOrder.length !== r.ids.length ||
+          new Set(r.assistOrder).size !== r.ids.length ||
+          r.assistOrder.some((id) => !r.ids.includes(id)) ||
+          r.exceptions?.some(
+            (e) => r.ids.includes(e.id) || !e.message.trim(),
+          ) ||
+          new Set(r.exceptions?.map((e) => e.id)).size !==
+            (r.exceptions?.length ?? 0)
+        )
+          fail("invalid progressive recall answer set");
+      },
+    },
+  ),
+  "geo-multipin": defineMechanic(
+    ["labeled-region-pin-set"],
+    "Place labeled landscape pins",
+    "construction",
+    "construction",
+    "none",
+    true,
+    { validate: validateConstructionQuestion, outcome: constructionOutcome },
+  ),
   "geo-brush": defineMechanic(
     ["raster-overlap"],
     "Paint a geographic area",

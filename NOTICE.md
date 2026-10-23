@@ -401,6 +401,17 @@ WorldPop attribution retained.
 
 ## Question-local point provenance
 
+The Shape of India uses Natural Earth 5.1.2 administered/disputed geography
+(public domain), NASA GIBS Blue Marble shaded relief, RESOLVE / Esri Ecoregions
+2017 and GeoNames city coordinates (CC BY 4.0), and WorldPop India 2025 R2025A v1
+modeled counts. Exact inputs, transformations, dispute/island scoring exclusions
+and licenses are recorded in
+[its source notes](public/journeys/the-shape-of-india/SOURCES.md).
+The derived India footprint and population database is supplied as
+`public/journeys/the-shape-of-india/india-model.v1.json` under ODbL 1.0,
+retaining WorldPop attribution and applicable source rights. The displayed
+landscape zones are broad teaching regions rather than official boundaries.
+
 Far From Everything uses the GeoNames island reference for
 [Rapa Nui, 4030726](https://www.geonames.org/4030726/) and town reference for
 [Ittoqqortoormiit, 3422891](https://www.geonames.org/3422891/), rather than rounded

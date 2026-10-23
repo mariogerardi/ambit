@@ -646,6 +646,41 @@
     ]
   },
   {
+    "id": "shared-neighbors-two-v1",
+    "addedAt": "2026-10-23",
+    "title": "Shared Neighbors II",
+    "description": "Five new pairs point to five shared neighbors. Follow inland extensions, Balkan borders and a long peninsula to place each missing country on the globe.",
+    "path": "/journey/shared-neighbors-two",
+    "module": "./sharedNeighborsTwoJourney.ts",
+    "rounds": [
+      {
+        "id": "shared-neighbors-two-suriname-colombia",
+        "label": "Shared neighbor",
+        "progressLabel": "Suriname + Colombia"
+      },
+      {
+        "id": "shared-neighbors-two-tanzania-namibia",
+        "label": "Shared neighbor",
+        "progressLabel": "Tanzania + Namibia"
+      },
+      {
+        "id": "shared-neighbors-two-croatia-north-macedonia",
+        "label": "Shared neighbor",
+        "progressLabel": "Croatia + North Macedonia"
+      },
+      {
+        "id": "shared-neighbors-two-senegal-liberia",
+        "label": "Shared neighbor",
+        "progressLabel": "Senegal + Liberia"
+      },
+      {
+        "id": "shared-neighbors-two-laos-malaysia",
+        "label": "Shared neighbor",
+        "progressLabel": "Laos + Malaysia"
+      }
+    ]
+  },
+  {
     "id": "shared-neighbors-v1",
     "addedAt": "2026-10-10",
     "title": "Shared neighbors",
@@ -677,6 +712,36 @@
         "id": "pin-chile-colombia",
         "label": "Shared neighbor",
         "progressLabel": "Chile + Colombia"
+      }
+    ]
+  },
+  {
+    "id": "the-shape-of-india-v1",
+    "addedAt": "2026-10-23",
+    "title": "The Shape of India",
+    "description": "A coastline becomes a country; mountains give way to crowded plains. Explore India through five shapes, ending with a line that divides its people in half.",
+    "path": "/journey/the-shape-of-india",
+    "module": "./shapeOfIndiaJourney.ts",
+    "rounds": [
+      {
+        "id": "india-01-paint-the-country",
+        "label": "The outline"
+      },
+      {
+        "id": "india-02-three-landscapes",
+        "label": "Three landscapes"
+      },
+      {
+        "id": "india-03-name-the-neighbors",
+        "label": "The neighbors"
+      },
+      {
+        "id": "india-04-golden-triangle",
+        "label": "The Golden Triangle"
+      },
+      {
+        "id": "india-05-half-the-population",
+        "label": "Half the population"
       }
     ]
   },

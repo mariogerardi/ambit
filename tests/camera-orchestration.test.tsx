@@ -343,6 +343,26 @@ it("starts completion only when saves are ready, cancels animated playback for r
   expect(result.motion).toBe(true);
 });
 
+it("ends an authored finite completion tour at its last view", async () => {
+  const definition = {
+    ...ANDES_JOURNEY,
+    completion: { ...ANDES_JOURNEY.completion!, loopViews: false },
+  };
+  await render({
+    mode: "daily",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      phase: "finished",
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledExactlyOnceWith(
+    definition.completion.views,
+    false,
+  );
+});
+
 it("retains Home-tap entry intent while consuming its camera request, including delayed globe readiness", async () => {
   await render({ ready: false });
   const country = regions.find((r) => r.id === "wurl:CAN")!;

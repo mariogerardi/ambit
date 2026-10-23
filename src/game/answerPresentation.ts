@@ -4,6 +4,7 @@ import type { VisualState } from "../geography/types";
 import { capitalForName, countryIdForName } from "./answerNames";
 import { solutionIds, selectableIds } from "./questionPreparation";
 import { lockedOrderSlots, lockedSelectionIds } from "./guidance";
+import { recalledIds, recallMistakes } from "./countryRecall";
 
 /** These are response roles, not colors or new grading/scoring rules. */
 export interface AnswerItem {
@@ -30,6 +31,11 @@ export function responseIds(
   context: QuestionContext,
   response: Response,
 ) {
+  if (q.mode === "country-recall")
+    return [
+      ...recalledIds(response.recall),
+      ...recallMistakes(response.recall),
+    ];
   if (q.mode === "typed-regions" || q.mode === "ordered-countries")
     return response.ordered.map(
       (name) => countryIdForName(context, name) ?? "",
@@ -53,6 +59,23 @@ export function answerItems(
   const expected = solutionIds(q, context);
   const picked = responseIds(q, context, game);
   const reveal = game.phase === "feedback" || game.phase === "failed";
+  if (q.mode === "country-recall")
+    return [...new Set([...expected, ...picked])].map((id) => ({
+      id,
+      geographyIds: [id],
+      selected: picked.includes(id),
+      eliminated: false,
+      supplied: game.recall?.assistedId === id,
+      state: reveal
+        ? recalledIds(game.recall).includes(id)
+          ? "correct"
+          : expected.includes(id)
+            ? "answer"
+            : "incorrect"
+        : recalledIds(game.recall).includes(id)
+          ? "visited"
+          : "disabled",
+    }));
   const ordered = [
     "ordered-countries",
     "ordered-capitals",

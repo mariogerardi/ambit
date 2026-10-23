@@ -204,6 +204,22 @@ Journey data, a downloadable derived database and audit metadata. Name aliases,
 review boxes and minimum island areas live in
 `sources/within-reach.locations.json`. It never regenerates shared geography.
 
+### India Journey data preparation
+
+`python3 scripts/prepare-india-journey.py` writes only The Shape of India's
+scoring inputs, image masks, density layer and numerical audit. Use Python 3.13
+with numpy 2.2.6, Pillow 11.3.0, rasterio 1.4.3, shapely 2.1.1, pyproj 3.7.1 and
+scipy 1.15.3 in a separate environment. Missing explicit inputs download into
+`.cache/india/`; existing input hashes must match before rebuilding. No shared
+geography is regenerated. Use `--display-only` to refresh supersampled land/lake
+masks, the two georeferenced relief crops and landscape reveal shading without
+rewriting scoring data.
+The shipped
+[source notes](../public/journeys/the-shape-of-india/SOURCES.md) explain the
+administered footprint, ignored painting areas, broad landscape zones, modeled
+population and database redistribution. The audit compares multiple great-circle
+cuts against original source-resolution counts; it does not replace player review.
+
 ### Sahara data preparation
 
 This is an optional Journey-only rebuild, not part of installation or release.

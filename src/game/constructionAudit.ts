@@ -21,6 +21,14 @@ export function constructionAuditSample(
   if (!r) return;
   let c: Construction | undefined;
   if (correct && q.constructionExample) c = q.constructionExample;
+  else if (r.type === "labeled-region-pin-set")
+    c = {
+      version: 1,
+      kind: "pins",
+      pins: Object.fromEntries(
+        r.slots.map((s) => [s.id, correct ? s.example : { lat: 0, lng: -140 }]),
+      ),
+    };
   else if (r.type === "line-following")
     c = {
       version: 1,

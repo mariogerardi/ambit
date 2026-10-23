@@ -318,9 +318,11 @@ export function useCameraOrchestration({
     stop();
     clearHover();
     if (phase === "finished" && journey.completion) {
-      if (!reduced && journey.completion.views?.length)
-        globe.current?.flyover(journey.completion.views);
-      else frame(journey.completion.focus);
+      if (!reduced && journey.completion.views?.length) {
+        if (journey.completion.loopViews === false)
+          globe.current?.flyover(journey.completion.views, false);
+        else globe.current?.flyover(journey.completion.views);
+      } else frame(journey.completion.focus);
       return () => globe.current?.cancelFlyover();
     }
     const stops = journeyStops(journey, context, answers);

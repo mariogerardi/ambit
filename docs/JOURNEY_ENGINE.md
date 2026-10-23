@@ -306,6 +306,27 @@ reduced-motion behavior. Completion uses the existing automatic flyover; reduced
 motion starts at the authored completion focus and offers manual navigation
 through every authored view.
 
+Missing Borders II uses the same mechanic with continent-wide play framing and
+closer reveal views. Its separate Journey and question IDs preserve the original
+as another playable set; it does not retire or supersede Missing Borders.
+
+## Shared-neighbor example
+
+[Shared neighbors](../src/game/ninthJourney.ts) and
+[Shared Neighbors II](../src/game/sharedNeighborsTwoJourney.ts) use `mode: "pin"`
+with a `pin-inside` rule. The two given countries are outlined references;
+the answer footprint and surrounding political borders remain hidden until
+submission. Help adds indirect references and broader geographic reasoning,
+without revealing the target boundary or changing containment grading.
+
+Verify each pair against `QuestionContext.graph`: intersect the two neighbor
+sets and check that the complete result agrees with the answer contract. The
+focused tests in `tests/ninth-journey.test.ts` and
+`tests/shared-neighbors-two.test.ts` cover uniqueness, containment, hidden-answer
+presentation and reference-city assists. Country geometry supplies containment;
+the graph supplies land adjacency. Neither camera framing nor display geometry
+defines the answer.
+
 ## Focused review commands
 
 ```sh
@@ -425,7 +446,10 @@ The implementation keeps those decisions independent:
 - Matching locations retain slot numbers during feedback. Revealed point answers
   promote containing geography as context. `journeyDiscoveryPlaces` retains reviewed
   point discoveries in generic and custom recaps; custom scenes add framing and
-  context. Unrelated geography stays muted; mistakes retain their separate status.
+  context. This cumulative recap is the default; `completion.mapMode: "authored"`
+  instead limits its overview to explicit `regionIds` and `places`, on canonical
+  background geography. Saved responses and manual round review remain intact.
+  Unrelated geography stays muted; mistakes retain their separate status.
   Recap mistakes use graded answer identities, including linked choice geography,
   merged-region picks, city assignments, and submitted pins. Incorrect status wins
   over custom completion decoration; a revealed solution remains a discovery even
@@ -604,14 +628,58 @@ color. Do not rely on help to introduce an initially required candidate field.
 
 ## Constructed geographic answers
 
-Five independent explicit-submit controls are available per question:
+Independent explicit-submit controls are available per question:
 `geo-brush` / `raster-overlap`, `geo-circle` / `point-coverage-max` or
 `island-coverage-max`, `geo-trace` / `line-following`, `geo-polygon` /
-`population-coverage-area-budget`, and `geo-cut` / `population-balance`.
+`population-coverage-area-budget`, `geo-cut` / `population-balance`, and
+`geo-multipin` / `labeled-region-pin-set`.
 See `constructionRecipes.ts` for complete synthetic examples and
 `drawingSaharaJourney.ts` for real source-backed content. These do not depend
 on a Journey flow. `point-coverage-max.pointLabel` supplies the plural point
 noun in accuracy and frozen result metrics; omitting it preserves `"capitals"`.
+`hideCandidatesUntilReveal` withholds those point locations while their names
+can be given in the prompt. The Shape of India's Golden Triangle uses this
+contract; its assist supplies only Jaipur. Circle containment still grades the
+same reviewed point set and fixed radius.
+
+`geo-multipin` stores `Construction.kind: "pins"` with coordinates keyed by slot
+ID. Each `labeled-region-pin-set.slots` entry owns a label, canonical geometry and
+a reviewed example for structural checks. Slots grade independently by containment;
+three count thresholds award 3/2/1 points. Pins retain their labels, actual
+coordinates and individual correct/mistake roles through reveal and recap.
+The shared tray holds one visible pin per slot. Pick up a pin, tap the globe to
+place it, and pick it up again to move it; placing clears the active slot. A hollow
+indent marks a pin that is on the map. Tapping the held slot cancels pickup without
+losing its previous position. Removal and undo remain available. Coordinate taps
+leave globe rotation available; answer polygons stay withheld until reveal.
+Construction controls expose neither coordinate editors nor reset buttons.
+`raster-overlap.targetLabel` replaces dune-specific overlap copy. An optional
+`targetMask` supplies a display-only target footprint for smooth paint comparison;
+it never changes scoring. Geographic brush disks render to an antialiased texture,
+clipped by a land mask, independently of the frozen evaluation grid. Grayscale
+mask images must contain black water and white land in RGB (alpha maps sample the
+green channel). Population-cut reveals label each side with its letter and frozen
+population percentage directly on the map, instead of duplicating metrics in the
+panel. Completion defaults to the overview unless explicitly authored otherwise.
+
+`country-recall` / `country-set-recall` is a separate progressive text control,
+not a replacement for `typed-regions`. The rule declares sovereign-country IDs,
+an assist priority order, and optional non-penalizing convention exceptions.
+Local canonical aliases resolve entries; unrecognized text asks for spelling
+correction, and duplicate IDs consume no additional guess. Three distinct wrong
+countries end the round at zero. Full recall earns three base points, at least
+two-thirds earns two, any valid entry earns one; the mistake ceiling is `3 - errors`.
+Apply the minimum of that base, the mistake ceiling and the usual help ceiling.
+Only a full set counts as a fully correct question; partial points remain
+independent. `Response.recall` preserves accepted/wrong/exception history and the
+supplied assist identity. Stale playing drafts merge irreversible entries;
+completed rewards stay frozen. See both new recipes and `countryRecall.ts`.
+
+`rasterLegend` describes an authored display-only density scale. Raster colors
+never grade; population counts and country-clipped land areas do. India's
+reproducible inputs and limitations are in its
+[source notes](../public/journeys/the-shape-of-india/SOURCES.md).
+
 `island-coverage-max` supplies named candidates with a source revision and a
 canonical spherical convex hull (`boundary`). For radii below a hemisphere,
 every hull vertex must fit; convexity then guarantees the entire sourced island
@@ -648,9 +716,16 @@ submission. Preserve it with the submitted geometry through saves and sync;
 never silently recompute historical rewards. An optional `constructionExample`
 is reveal-only and player-toggled. `completion.constructionResults` offers a traditional overview flyover and manual
 review of one saved construction at a time; camera movement does not change the
-selected construction. Generic completion also retains constructed submissions.
+selected construction. `initialConstructionRoundId` can begin with a particular
+saved response, and `loopViews: false` makes a completion tour finish at its final
+authored view. The Shape of India uses an authored overview of India and the
+Golden Triangle cities, retaining access to all five responses through manual
+review. Generic cumulative completion also retains constructed submissions.
 
-`raster-patch` overlays are georeferenced local images; `cells` are display meshes
+`raster-patch` overlays are georeferenced local images. `foreground: true` places
+explanatory shading above base imagery; pins and labels remain above the shading.
+The India landscape reveal uses this for its three labeled region fills.
+`cells` are display meshes
 of explicit geographic grid indices. Both are decorative and dispose geometry
 and textures on replacement. Geographic alpha masks clip cell fills to the same
 footprint as the imagery; rendered outlines are clipped to that footprint too. Neither supplies map-picking answers. Frozen data

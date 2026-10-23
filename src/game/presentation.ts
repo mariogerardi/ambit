@@ -24,6 +24,7 @@ import { interiorAnchor } from "../geography/interiorAnchor";
 import { presentJourneyPlace, cityReference } from "./authoredPlaces";
 import { reviewedBearing } from "./compassBearing";
 import { mechanicFor } from "./mechanics";
+import { recalledIds, recallMistakes } from "./countryRecall";
 
 export function questionPlaces(
   question: Question,
@@ -573,6 +574,17 @@ export function questionVisualStates(
     ]),
   );
   if (game.phase === "home") return {};
+  if (question.rule.type === "country-set-recall") {
+    for (const id of question.contextIds ?? []) states[id] = "hinted";
+    for (const id of recalledIds(game.recall))
+      states[id] = game.phase === "playing" ? "visited" : "correct";
+    if (game.phase !== "playing") {
+      for (const id of question.rule.ids)
+        if (!recalledIds(game.recall).includes(id)) states[id] = "answer";
+      for (const id of recallMistakes(game.recall)) states[id] = "incorrect";
+    }
+    return states;
+  }
   if (question.rule.type === "merged-region") {
     if (game.phase === "playing") {
       for (const id of selectableIds(question, context))
