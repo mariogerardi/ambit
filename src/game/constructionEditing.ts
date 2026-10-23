@@ -23,6 +23,7 @@ export function editConstruction(
   if (!inConstructionArea(q, point)) return current;
   const rule = constructionRule(q);
   if (!rule) return current;
+  if (rule.type === "labeled-region-pin-set") return current;
   const p = {
     lat: Math.max(-90, Math.min(90, point.lat)),
     lng: ((point.lng + 540) % 360) - 180,
@@ -103,6 +104,11 @@ export function undoConstruction(
 ): Construction | undefined {
   if (!c || c.kind === "circle") return undefined;
   if (c.kind === "brush") return { ...c, strokes: c.strokes.slice(0, -1) };
+  if (c.kind === "pins")
+    return {
+      ...c,
+      pins: Object.fromEntries(Object.entries(c.pins).slice(0, -1)),
+    };
   if (c.kind === "trace")
     return c.points.length > 2
       ? { ...c, points: [...c.points.slice(0, -2), c.points.at(-1)!] }

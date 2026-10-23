@@ -17,6 +17,7 @@ import type {
 } from "../geography/types";
 import type { Capital } from "./quizData";
 import type { GeographicCircle } from "./spatial";
+import type { CountryRecall } from "./countryRecall";
 import type { BorderGraph, Coordinate, CountryInterval } from "./reasoning";
 
 export type AnswerMode =
@@ -32,6 +33,7 @@ export type AnswerMode =
   | "slider"
   | "text"
   | "typed-regions"
+  | "country-recall"
   | "ordered-countries"
   | "ordered-capitals"
   | "land-path"
@@ -61,6 +63,13 @@ export interface CountryFact {
 }
 export type KnowledgeRule =
   | ConstructionRule
+  | {
+      type: "country-set-recall";
+      ids: string[];
+      /** Recognized answers using another geographic convention incur no error. */
+      exceptions?: { id: string; message: string }[];
+      assistOrder: string[];
+    }
   | {
       type: "bearing-angle";
       origin: PlaceFeature;
@@ -220,6 +229,8 @@ export interface Question {
   explanation: string;
   /** Optional praise matching the knowledge/skill, rather than the input widget. */
   correctFeedback?: string;
+  /** Authored reaction for a miss; the reveal body supplies the explanation. */
+  incorrectFeedback?: string;
   /** Full flags replace the clue image on reveal, with visible country labels. */
   feedbackFlags?: FlagDisplay[];
   /** Documentary image shown only after submission, with visible attribution. */
@@ -310,6 +321,8 @@ export interface Question {
   feedbackPlaces?: PlaceFeature[];
   /** Short cartographic qualification shown beside the map. */
   mapCaption?: string;
+  /** Display scale for a thematic raster; never used to grade answers. */
+  rasterLegend?: { label: string; stops: { color: string; label: string }[] };
   feedbackMapCaption?: string;
   /** Reviewed physical context; omit answer-bearing features until feedback. */
   physicalFeatures?: PhysicalFeature[];
@@ -359,10 +372,14 @@ export interface Journey {
   /** Authored geographic payoff, independent of generic answer-country flyovers. */
   completion?: {
     focus: Focus;
+    /** Default cumulative; authored uses only the specified countries and places on the overview. */
+    mapMode?: "cumulative" | "authored";
     /** Explicit country recap uses the same visited style as ordinary Journeys. */
     regionIds?: string[];
     /** Required by the authoring audit; also available as manual reduced-motion views. */
     views?: Focus[];
+    /** Default true; false ends the completion tour at its last authored view. */
+    loopViews?: boolean;
     physicalFeatures: PhysicalFeature[];
     overlays?: MapOverlay[];
     mapCaption?: string;
@@ -374,6 +391,8 @@ export interface Journey {
     flags?: FlagDisplay[];
     /** Offer a traditional overview plus manual review of one saved construction at a time. */
     constructionResults?: boolean;
+    /** Start the completed map on this saved response; Overview remains available. */
+    initialConstructionRoundId?: string;
     /** Resolved photo-and-distance recap for pin Journeys. */
     photoResults?: boolean;
   };
@@ -397,6 +416,7 @@ export interface QuestionContext {
   capitalMatches: Map<Question, Capital[]>;
 }
 export interface Response {
+  recall?: CountryRecall;
   construction?: Construction;
   constructionResult?: ConstructionResult;
   pin?: { lat: number; lng: number };
@@ -445,6 +465,17 @@ type Single = { count: 1 };
 type Choices = { choices: NonNullable<Question["choices"]> };
 /** Discriminated authoring contracts; the engine's read model stays stable. */
 export type QuestionContract =
+  | ({
+      mode: "country-recall";
+      rule: Rule<"country-recall">;
+      count: number;
+      inputLabel: string;
+    } & NoMapSelection)
+  | ({
+      mode: "geo-multipin";
+      rule: Extract<ConstructionRule, { type: "labeled-region-pin-set" }>;
+    } & Single &
+      NoMapSelection)
   | ({
       mode: "geo-brush";
       rule: Extract<ConstructionRule, { type: "raster-overlap" }>;

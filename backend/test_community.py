@@ -181,6 +181,17 @@ class CommunityTests(unittest.TestCase):
         self.assertEqual(community.journey_points([{ "correct": True, "points": 99, "pointsVersion": 1 }], {}), (0, False))
         self.assertEqual(community.journey_points([{ "correct": True, "points": True, "pointsVersion": 1 }], {}), (0, False))
 
+    def test_partial_recall_rewards_remain_separate_from_correctness(self):
+        recall = {"version": 1, "ended": "finish", "entries": [{"id": "wurl:CHN", "input": "China", "result": "accepted"}]}
+        answer = {"roundId": "recall", "correct": False, "points": 2, "pointsVersion": 1, "recall": recall}
+        self.assertEqual(community.journey_points([answer], {}), (2, False))
+        self.assertEqual(community.journey_points([answer], {"recall": "assisted"}), (1, False))
+        wrong = [{"id": name, "input": name, "result": "wrong"} for name in ["wurl:LKA", "wurl:MDV", "wurl:THA"]]
+        ended = {**answer, "recall": {**recall, "entries": recall["entries"] + wrong, "ended": "third-wrong"}}
+        self.assertEqual(community.journey_points([ended], {}), (0, False))
+        self.assertEqual(community.journey_points([{**answer, "recall": {"version": 1, "entries": []}}], {}), (0, False))
+        self.assertEqual(community.journey_points([{**answer, "points": 3}], {}), (2, False))
+
     def test_scores_unlock_only_for_mutual_friends_who_finished_the_same_journey_version(self):
         self.friends()
         self.db.saves = [self.daily_record("b")]

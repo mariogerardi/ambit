@@ -151,6 +151,9 @@ export function journeyWorld(
     game.phase === "finished" && journey.completion?.constructionResults;
   const reviewingConstruction =
     constructionCompletion && constructionReviewIndex !== undefined;
+  const completion = game.phase === "finished" ? journey.completion : undefined;
+  const authoredMap = completion?.mapMode === "authored";
+  const authoredOverview = authoredMap && !reviewingConstruction;
   const reviewIndex = Math.max(
     0,
     Math.min(
@@ -165,7 +168,7 @@ export function journeyWorld(
     ? (game.answers.find((a) => a.roundId === constructionQuestion.id) ?? game)
     : game;
   const shapeScene =
-    constructionCompletion && !reviewingConstruction
+    authoredOverview || (constructionCompletion && !reviewingConstruction)
       ? { overlays: [], places: [] }
       : constructionScene(
           constructionQuestion,
@@ -175,7 +178,7 @@ export function journeyWorld(
           !!game.showConstructionExample,
         );
   const retainedConstructions =
-    game.phase === "finished" && !constructionCompletion
+    game.phase === "finished" && !constructionCompletion && !authoredMap
       ? journey.rounds.flatMap((q) => {
           const answer = game.answers.find((a) => a.roundId === q.id);
           return answer?.construction
@@ -197,7 +200,6 @@ export function journeyWorld(
     correct,
     game.help?.[round.id],
   );
-  const completion = game.phase === "finished" ? journey.completion : undefined;
   const assist =
     game.phase === "playing" && game.help?.[round.id] === "assisted"
       ? round.guidance?.assist
@@ -369,7 +371,11 @@ export function journeyWorld(
       : undefined;
   const displayedRegions =
     game.phase === "finished"
-      ? allRegions(regions, journey, game.answers)
+      ? authoredMap
+        ? reviewingConstruction
+          ? questionRegions(regions, constructionQuestion, "feedback")
+          : regions
+        : allRegions(regions, journey, game.answers)
       : questionRegions(
           reachedRegions(regions, journey, game.roundIndex),
           round,
@@ -377,7 +383,7 @@ export function journeyWorld(
           game.help?.[round.id],
         );
   const bearingOverlays = [
-    ...compassArcs,
+    ...(authoredMap ? [] : compassArcs),
     ...(game.phase === "playing" ||
     game.phase === "feedback" ||
     game.phase === "failed"
@@ -434,70 +440,109 @@ export function journeyWorld(
         : [],
     states: {
       ...(game.phase === "finished"
-        ? Object.fromEntries(
-            allRegions(regions, journey, game.answers).map((region) => [
-              region.id,
-              visited?.[region.id] === "incorrect"
-                ? "incorrect"
-                : completion?.regionIds?.includes(region.id)
-                  ? "visited"
-                  : (visited?.[region.id] ?? "disabled"),
-            ]),
-          )
+        ? authoredMap && reviewingConstruction
+          ? Object.fromEntries(
+              Object.entries(
+                questionVisualStates(constructionQuestion, context, {
+                  ...game,
+                  ...constructionResponse,
+                  phase: "feedback",
+                  roundIndex: reviewIndex,
+                }),
+              ).map(([id, state]) => [
+                id,
+                state === "correct" || state === "answer" ? "visited" : state,
+              ]),
+            )
+          : Object.fromEntries(
+              displayedRegions.map((region) => [
+                region.id,
+                authoredOverview
+                  ? completion?.regionIds?.includes(region.id)
+                    ? "visited"
+                    : "disabled"
+                  : visited?.[region.id] === "incorrect"
+                    ? "incorrect"
+                    : completion?.regionIds?.includes(region.id)
+                      ? "visited"
+                      : (visited?.[region.id] ?? "disabled"),
+              ]),
+            )
         : states!),
       ...islandStates,
     },
     places: reviewingConstruction
       ? [
           ...(constructionQuestion.places ?? []).filter(
-            (p) => p.displayRole === "reference",
+            (p) =>
+              p.displayRole === "reference" &&
+              !shapeScene.places.some((existing) => existing.id === p.id),
           ),
           ...shapeScene.places,
+          ...(constructionQuestion.feedbackPlaces ?? [])
+            .filter(
+              (p) =>
+                !shapeScene.places.some((existing) => existing.id === p.id),
+            )
+            .map(presentJourneyPlace),
         ]
-      : game.phase === "finished"
-        ? [
-            ...new Map(
-              [
-                ...finalConstructionPlaces,
-                ...(completion?.places ?? []).map((place) =>
-                  presentJourneyPlace({
-                    ...place,
-                    displayRole: reviewedPointStates.has(place.id)
-                      ? undefined
-                      : place.displayRole,
-                    // Authored references add context; they cannot demote a discovery
-                    // or erase a mistake when the same city serves both roles.
-                    visualState:
-                      reviewedPointStates.get(place.id) ??
-                      place.visualState ??
-                      "visited",
-                  }),
-                ),
-                ...discoveries.filter(
-                  (place) =>
-                    !completion?.places?.some(
-                      (authored) => authored.id === place.id,
-                    ),
-                ),
-              ].map((place) => [place.id, place]),
-            ).values(),
-          ]
-        : [
-            ...shapeScene.places,
-            ...questionPlaces(
-              round,
-              context,
-              game.phase,
-              game.text,
-              correct,
-              game,
-            ),
-            ...questionRegionMarkers(round, context, game),
-            ...(game.phase === "playing" && game.help?.[round.id] === "assisted"
-              ? (round.guidance?.assist?.places ?? []).map(presentJourneyPlace)
-              : []),
-          ],
-    routes,
+      : authoredOverview
+        ? (completion?.places ?? []).map((p) =>
+            presentJourneyPlace({
+              ...p,
+              visualState: p.visualState ?? "visited",
+            }),
+          )
+        : game.phase === "finished"
+          ? [
+              ...new Map(
+                [
+                  ...finalConstructionPlaces,
+                  ...(completion?.places ?? []).map((place) =>
+                    presentJourneyPlace({
+                      ...place,
+                      displayRole: reviewedPointStates.has(place.id)
+                        ? undefined
+                        : place.displayRole,
+                      // Authored references add context; they cannot demote a discovery
+                      // or erase a mistake when the same city serves both roles.
+                      visualState:
+                        reviewedPointStates.get(place.id) ??
+                        place.visualState ??
+                        "visited",
+                    }),
+                  ),
+                  ...discoveries.filter(
+                    (place) =>
+                      !completion?.places?.some(
+                        (authored) => authored.id === place.id,
+                      ),
+                  ),
+                ].map((place) => [place.id, place]),
+              ).values(),
+            ]
+          : [
+              ...shapeScene.places,
+              ...questionPlaces(
+                round,
+                context,
+                game.phase,
+                game.text,
+                correct,
+                game,
+              ).filter(
+                (p) =>
+                  !shapeScene.places.some((existing) => existing.id === p.id),
+              ),
+              ...questionRegionMarkers(round, context, game),
+              ...(game.phase === "playing" &&
+              game.help?.[round.id] === "assisted"
+                ? (round.guidance?.assist?.places ?? []).map(
+                    presentJourneyPlace,
+                  )
+                : []),
+            ],
+    routes: authoredOverview ? [] : routes,
     physicalFeatures:
       completion?.physicalFeatures ??
       (game.phase === "playing" || game.phase === "feedback"
@@ -547,14 +592,24 @@ export function journeyWorld(
           )
         : [],
     regionNames:
-      round.mode.startsWith("city-") || (!isRegionAnswer(round) && !map.hover)
-        ? ("none" as const)
-        : game.phase !== "playing" || round.disclosure.hoverNames
-          ? ("all" as const)
-          : round.disclosure.committedNames
-            ? ("committed" as const)
-            : ("none" as const),
-    namedRegionIds: game.selectedIds,
+      round.mode === "country-recall"
+        ? game.phase === "playing"
+          ? ("committed" as const)
+          : ("all" as const)
+        : round.mode.startsWith("city-") ||
+            (!isRegionAnswer(round) && !map.hover)
+          ? ("none" as const)
+          : game.phase !== "playing" || round.disclosure.hoverNames
+            ? ("all" as const)
+            : round.disclosure.committedNames
+              ? ("committed" as const)
+              : ("none" as const),
+    namedRegionIds:
+      round.mode === "country-recall"
+        ? game.recall?.entries
+            .filter((e) => e.result === "accepted")
+            .map((e) => e.id)
+        : game.selectedIds,
     focus,
   };
 }

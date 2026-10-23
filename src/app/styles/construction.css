@@ -43,25 +43,6 @@
 .experience .round-feedback .construction-model-note {
   font-size: 11px;
 }
-.construction-share-bars > div {
-  display: grid;
-  grid-template-columns: 48px 1fr;
-  gap: 8px;
-  margin-block: 8px;
-  font-size: 12px;
-}
-.construction-share-bars > div > div {
-  display: flex;
-  height: 12px;
-  overflow: hidden;
-  border-radius: 4px;
-}
-.construction-share-bars i {
-  background: var(--play-correct);
-}
-.construction-share-bars b {
-  background: var(--play-answer);
-}
 .globe-canvas[data-construction-input="draw"],
 .globe-canvas[data-construction-input="erase"] {
   touch-action: none;
@@ -276,4 +257,156 @@
 .island-scoring .point-orb {
   width: 12px;
   height: 12px;
+}
+.raster-legend {
+  margin: 0.6rem 0 1rem;
+  font-size: 0.78rem;
+  color: var(--ui-muted);
+}
+.raster-legend-bar {
+  height: 0.55rem;
+  border-radius: 999px;
+  margin: 0.35rem 0;
+}
+.raster-legend-labels {
+  display: flex;
+  justify-content: space-between;
+}
+.recall-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+}
+.recall-chips li {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+.country-recall-answer .answer-input-row input {
+  min-width: 0;
+}
+
+.recall-status {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  padding: 0.85rem 0;
+  margin-bottom: 0.8rem;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+  font-size: 0.75rem;
+  color: var(--ui-muted);
+}
+.recall-status strong {
+  display: block;
+  color: var(--ui-text);
+  font-size: 1.05rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.country-recall-answer .answer-input-row {
+  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+}
+.country-recall-answer .answer-input-row .primary-button {
+  width: auto;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  white-space: nowrap;
+}
+.pin-tray {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 1.2rem 0;
+}
+.pin-tray .landscape-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.6rem 0.15rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0.5rem;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: grab;
+}
+.landscape-pin[aria-pressed="true"] {
+  background: rgb(var(--ui-line-rgb) / 0.12);
+  color: var(--play-selected);
+  cursor: grabbing;
+}
+.landscape-pin > span:not(.pin-tray-well) {
+  min-height: 2.5em;
+  text-align: center;
+}
+.landscape-pin small {
+  color: var(--ui-muted);
+  font-size: 0.7rem;
+}
+.pin-tray-well {
+  position: relative;
+  width: 40px;
+  height: 62px;
+}
+.pin-tray-well svg {
+  position: absolute;
+  inset: 0;
+  width: 40px;
+  height: 56px;
+  stroke-width: 2;
+}
+.pin-indent {
+  fill: rgb(var(--ui-surface-rgb) / 0.6);
+  stroke: rgb(var(--ui-line-rgb) / 0.45);
+  stroke-dasharray: 3 3;
+}
+.pin-token {
+  fill: var(--play-selected);
+  stroke: var(--ui-text);
+  filter: drop-shadow(0 3px 2px #0004);
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+.pin-token circle {
+  fill: rgb(var(--ui-surface-rgb));
+  stroke: none;
+}
+.landscape-pin[data-placed="true"] .pin-token {
+  opacity: 0;
+}
+.landscape-pin[aria-pressed="true"] .pin-token {
+  opacity: 1;
+  transform: translateY(-12px) rotate(-10deg);
+}
+.multipin-edit-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+.multipin-edit-actions button {
+  font-size: 0.75rem;
+  text-align: left;
+}
+.multipin-edit-actions button:last-child {
+  margin-left: auto;
+  text-align: right;
+}
+
+.globe-canvas[data-pin-held] canvas {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='40' viewBox='0 0 40 56'%3E%3Cpath d='M20 53C17 43 5 30 5 19a15 15 0 0 1 30 0c0 11-12 24-15 34Z' fill='%23f6bc46' stroke='%23152330' stroke-width='2'/%3E%3Ccircle cx='20' cy='19' r='5' fill='%23152330'/%3E%3C/svg%3E")
+      16 38,
+    crosshair;
 }

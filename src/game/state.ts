@@ -22,6 +22,7 @@ import { canSubmit, isCorrect } from "./questionEvaluation";
 import { cityIdForName } from "./answerTargets";
 import { submittedPoints, POINTS_VERSION } from "./points";
 import type { BearingResult } from "./compassBearing";
+import { enterRecall, assistRecall } from "./countryRecall";
 export interface Answer extends Response {
   /** Frozen geographic/angle evidence for historical receipts; never regrade it. */
   bearing?: BearingResult;
@@ -41,6 +42,7 @@ export interface GameState extends Response {
   help?: HelpUsage;
   showConstructionExample?: boolean;
   brushRadiusKm?: number;
+  activePinSlot?: string;
   constructionTool?: "draw" | "move" | "erase";
 }
 export type Action =
@@ -52,6 +54,10 @@ export type Action =
   | { type: "home" }
   | { type: "select"; id: string }
   | { type: "drop-pin"; lat: number; lng: number }
+  | { type: "pin-slot"; id: string }
+  | { type: "drop-labeled-pin"; lat: number; lng: number }
+  | { type: "remove-labeled-pin"; id: string }
+  | { type: "recall-country" }
   | { type: "guess-country" }
   | { type: "text"; value: string }
   | { type: "ordered"; index: number; value: string }
@@ -114,6 +120,7 @@ export function gameReducer(
         ? structuredClone(response.construction)
         : undefined,
       constructionResult: result,
+      recall: response.recall ? structuredClone(response.recall) : undefined,
       inputError: undefined,
       phase: !correct && round.failure === "end-game" ? "failed" : "feedback",
       answers: [
@@ -132,6 +139,9 @@ export function gameReducer(
             ? structuredClone(response.construction)
             : undefined,
           constructionResult: result,
+          recall: response.recall
+            ? structuredClone(response.recall)
+            : undefined,
           correct,
           points: submittedPoints(
             round,
@@ -154,6 +164,8 @@ export function gameReducer(
           phase: "playing",
           roundIndex: state.roundIndex + 1,
           pin: undefined,
+          activePinSlot: undefined,
+          recall: undefined,
           construction: undefined,
           constructionResult: undefined,
           constructionTool: "draw",
@@ -169,6 +181,8 @@ export function gameReducer(
   }
   if (state.phase !== "playing") return state;
   state = withAssistanceLocks(round, state);
+  if (round.mode === "country-recall" && state.recall?.ended)
+    return finish(state);
   if (action.type === "request-hint")
     return round.guidance && !state.help?.[round.id]
       ? { ...state, help: { ...state.help, [round.id]: "hinted" } }
@@ -180,7 +194,72 @@ export function gameReducer(
       ...state,
       help: { ...state.help, [round.id]: "assisted" },
     };
+    if (round.mode === "country-recall") {
+      const recall = assistRecall(round, state.recall);
+      const next = { ...helped, recall };
+      if (recall?.ended) {
+        state = next;
+        return finish(next);
+      }
+      return next;
+    }
     return withAssistanceLocks(round, helped);
+  }
+  if (
+    action.type === "pin-slot" &&
+    round.rule.type === "labeled-region-pin-set"
+  )
+    return round.rule.slots.some((s) => s.id === action.id)
+      ? {
+          ...state,
+          activePinSlot:
+            state.activePinSlot === action.id ? undefined : action.id,
+        }
+      : state;
+  if (
+    action.type === "drop-labeled-pin" &&
+    round.rule.type === "labeled-region-pin-set" &&
+    validPin(action)
+  ) {
+    const id = round.rule.slots.find((s) => s.id === state.activePinSlot)?.id;
+    if (!id) return state;
+    const pins =
+      state.construction?.kind === "pins" ? state.construction.pins : {};
+    return {
+      ...state,
+      activePinSlot: undefined,
+      construction: {
+        version: 1,
+        kind: "pins",
+        pins: { ...pins, [id]: { lat: action.lat, lng: action.lng } },
+      },
+    };
+  }
+  if (
+    action.type === "remove-labeled-pin" &&
+    state.construction?.kind === "pins"
+  ) {
+    const pins = { ...state.construction.pins };
+    delete pins[action.id];
+    return {
+      ...state,
+      activePinSlot: undefined,
+      construction: { ...state.construction, pins },
+    };
+  }
+  if (action.type === "recall-country" && round.mode === "country-recall") {
+    const entered = enterRecall(round, context, state.recall, state.text);
+    const next = {
+      ...state,
+      recall: entered.recall,
+      text: "",
+      inputError: entered.message,
+    };
+    if (entered.recall.ended) {
+      state = next;
+      return finish(next);
+    }
+    return next;
   }
   if (action.type === "brush-size") {
     const r = constructionRule(round);
@@ -248,7 +327,8 @@ export function gameReducer(
     return { ...state, ordered, inputError: undefined };
   }
   if (action.type === "clear")
-    return round.commitment === "immediate" && !mechanicFor(round).single
+    return round.mode === "country-recall" ||
+      (round.commitment === "immediate" && !mechanicFor(round).single)
       ? state
       : {
           ...state,
@@ -345,6 +425,14 @@ export function gameReducer(
   if (action.type === "submit" && canSubmit(round, context, state))
     return finish({
       ...state,
+      ...(round.mode === "country-recall"
+        ? {
+            recall: {
+              ...(state.recall ?? { version: 1 as const, entries: [] }),
+              ended: state.recall?.ended ?? ("finish" as const),
+            },
+          }
+        : {}),
       ordered: isSlotAnswer(round) ? orderedCards(round, state) : state.ordered,
     });
   return state;

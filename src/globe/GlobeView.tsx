@@ -135,6 +135,7 @@ interface Props {
     onChange(value: Construction | undefined): void;
   };
   placeInteraction?: boolean;
+  pinHeld?: boolean;
   placeInspection?: boolean;
   placeLabels?: boolean;
   placeMarkers?: boolean;
@@ -1375,6 +1376,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       <div
         className="globe-canvas"
         data-pin-input={!!props.onCoordinateTap || undefined}
+        data-pin-held={props.pinHeld || undefined}
         data-construction-input={props.constructionInput?.tool}
         data-scene-instance={sceneId}
         ref={host}

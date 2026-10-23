@@ -1,3 +1,4 @@
+import { makePaintOverlay } from "./paintOverlay";
 import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { patchGeometry, cellsGeometry } from "./constructionOverlays";
 import { bearingSectorGeometry } from "./bearingSector";
@@ -55,7 +56,7 @@ function surfacePoint(lng: number, lat: number, radius = 1.005) {
 export function overlayPositions(
   overlay: Exclude<
     MapOverlay,
-    { type: "texture" | "bearing-sector" | "raster-patch" | "cells" }
+    { type: "texture" | "bearing-sector" | "raster-patch" | "cells" | "paint" }
   >,
 ) {
   const coordinates: number[][] = [];
@@ -113,6 +114,8 @@ export function makeMapOverlay(
   globeRadius: number,
   palette: ThemeId = "atlas",
 ) {
+  if (overlay.type === "paint")
+    return makePaintOverlay(overlay, globeRadius, palette);
   const group = new Group();
   group.scale.setScalar(globeRadius);
   if (overlay.type === "raster-patch") {
@@ -124,7 +127,9 @@ export function makeMapOverlay(
     });
     const mesh = new Mesh(patchGeometry(overlay.bounds), material);
     mesh.visible = false;
-    mesh.renderOrder = 2;
+    if (overlay.foreground)
+      mesh.geometry.scale(1.006 / 1.004, 1.006 / 1.004, 1.006 / 1.004);
+    mesh.renderOrder = overlay.foreground ? 3 : 2;
     mesh.raycast = () => {};
     let disposed = false;
     group.userData.dispose = () => {
@@ -462,23 +467,25 @@ export class MapOverlays {
   }
   private colorBand(group: Group, overlay: MapOverlay, palette: ThemeId) {
     const color =
-      overlay.type === "cells"
-        ? cellsColor(overlay, palette)
-        : overlay.type === "circle" && overlay.visualState
-          ? playColors(palette)[overlay.visualState]
-          : overlay.type === "bearing-sector"
-            ? playColors(palette).hinted
-            : overlay.type === "path"
-              ? overlay.visualState
-                ? playColors(palette)[overlay.visualState]
-                : "#efd18f"
-              : overlay.type === "circle" && overlay.accuracyBand
-                ? pinBandColor(
-                    overlay.accuracyBand.index,
-                    overlay.accuracyBand.count,
-                    palette,
-                  )
-                : undefined;
+      overlay.type === "paint"
+        ? playColors(palette)[overlay.visualState]
+        : overlay.type === "cells"
+          ? cellsColor(overlay, palette)
+          : overlay.type === "circle" && overlay.visualState
+            ? playColors(palette)[overlay.visualState]
+            : overlay.type === "bearing-sector"
+              ? playColors(palette).hinted
+              : overlay.type === "path"
+                ? overlay.visualState
+                  ? playColors(palette)[overlay.visualState]
+                  : "#efd18f"
+                : overlay.type === "circle" && overlay.accuracyBand
+                  ? pinBandColor(
+                      overlay.accuracyBand.index,
+                      overlay.accuracyBand.count,
+                      palette,
+                    )
+                  : undefined;
     if (!color) return;
     for (const child of group.children) {
       if (child instanceof Sprite) child.material.color.set(color);
@@ -498,50 +505,65 @@ export class MapOverlays {
   }
   get(overlay: MapOverlay, radius: number, palette: ThemeId = "atlas") {
     const signature = JSON.stringify(
-      overlay.type === "raster-patch"
-        ? [overlay.type, overlay.bounds, overlay.assetUrl, overlay.opacity]
-        : overlay.type === "cells"
+      overlay.type === "paint"
+        ? [
+            overlay.type,
+            overlay.bounds,
+            overlay.mask,
+            overlay.targetMask,
+            overlay.coverage,
+            overlay.opacity,
+          ]
+        : overlay.type === "raster-patch"
           ? [
               overlay.type,
-              overlay.grid,
-              overlay.indices,
+              overlay.bounds,
+              overlay.assetUrl,
               overlay.opacity,
-              overlay.mask,
-              overlay.prominent,
+              overlay.foreground,
             ]
-          : overlay.type === "bearing-sector"
+          : overlay.type === "cells"
             ? [
                 overlay.type,
-                overlay.center,
-                overlay.bearing,
-                overlay.halfWidthDegrees,
-                overlay.radiusKm,
+                overlay.grid,
+                overlay.indices,
+                overlay.opacity,
+                overlay.mask,
+                overlay.prominent,
               ]
-            : overlay.type === "texture"
-              ? [overlay.type, overlay.assetUrl, overlay.opacity]
-              : overlay.type === "path"
-                ? [
-                    overlay.type,
-                    overlay.coordinates,
-                    overlay.foreground,
-                    overlay.dashed,
-                    overlay.opacity,
-                    overlay.opacityByAltitude,
-                    overlay.arrowhead,
-                    overlay.label,
-                  ]
-                : overlay.type === "circle"
+            : overlay.type === "bearing-sector"
+              ? [
+                  overlay.type,
+                  overlay.center,
+                  overlay.bearing,
+                  overlay.halfWidthDegrees,
+                  overlay.radiusKm,
+                ]
+              : overlay.type === "texture"
+                ? [overlay.type, overlay.assetUrl, overlay.opacity]
+                : overlay.type === "path"
                   ? [
                       overlay.type,
-                      overlay.center,
-                      overlay.radiusKm,
-                      overlay.shade,
-                      overlay.accuracyBand,
-                      overlay.active,
+                      overlay.coordinates,
+                      overlay.foreground,
+                      overlay.dashed,
+                      overlay.opacity,
+                      overlay.opacityByAltitude,
+                      overlay.arrowhead,
+                      overlay.label,
                     ]
-                  : overlay.type === "parallel"
-                    ? [overlay.type, overlay.latitude]
-                    : [overlay.type, overlay.longitude],
+                  : overlay.type === "circle"
+                    ? [
+                        overlay.type,
+                        overlay.center,
+                        overlay.radiusKm,
+                        overlay.shade,
+                        overlay.accuracyBand,
+                        overlay.active,
+                      ]
+                    : overlay.type === "parallel"
+                      ? [overlay.type, overlay.latitude]
+                      : [overlay.type, overlay.longitude],
     );
     let entry = this.objects.get(overlay.id);
     // Growing paint changes geometry, not the mask or material. Keep the loaded
@@ -580,6 +602,8 @@ export class MapOverlays {
       };
       this.objects.set(overlay.id, entry);
     }
+    if (overlay.type === "paint" && entry.overlay !== overlay)
+      entry.group.userData.updatePaint(overlay);
     entry.overlay = overlay;
     this.colorBand(entry.group, overlay, palette);
     entry.group.scale.setScalar(radius);

@@ -1,8 +1,10 @@
 import { WITHIN_REACH_JOURNEY } from "./withinReachJourney";
+import { SHAPE_OF_INDIA_JOURNEY } from "./shapeOfIndiaJourney";
 import { DRAWING_SAHARA_JOURNEY } from "./drawingSaharaJourney";
 import { SILK_ROAD_INTERSECTIONS_JOURNEY } from "./silkRoadIntersectionsJourney";
 import { VACCINE_EXPEDITION_JOURNEY } from "./vaccineExpeditionJourney";
 import { MISSING_BORDERS_JOURNEY } from "./missingBordersJourney";
+import { MISSING_BORDERS_TWO_JOURNEY } from "./missingBordersTwoJourney";
 import { DANUBE_JOURNEY } from "./danubeJourney";
 import { SHARED_NAMES_JOURNEY } from "./sharedNamesJourney";
 import { SAME_HOUR_JOURNEY } from "./sameHourJourney";
@@ -17,11 +19,13 @@ import { TWELFTH_JOURNEY } from "./twelfthJourney";
 import { ELEVENTH_JOURNEY } from "./eleventhJourney";
 import { TENTH_JOURNEY } from "./tenthJourney";
 import { NINTH_JOURNEY } from "./ninthJourney";
+import { SHARED_NEIGHBORS_TWO_JOURNEY } from "./sharedNeighborsTwoJourney";
 import { FOURTH_JOURNEY } from "./fourthJourney";
 import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
 import { FAR_FROM_EVERYTHING_JOURNEY } from "./farFromEverythingJourney";
 import { REGGAETON_JOURNEY } from "./reggaetonJourney";
 export const JOURNEYS = [
+  SHAPE_OF_INDIA_JOURNEY,
   WITHIN_REACH_JOURNEY,
   DRAWING_SAHARA_JOURNEY,
   SILK_ROAD_INTERSECTIONS_JOURNEY,
@@ -32,6 +36,7 @@ export const JOURNEYS = [
   CANADA_JOURNEY,
   FOURTH_JOURNEY,
   NINTH_JOURNEY,
+  SHARED_NEIGHBORS_TWO_JOURNEY,
   ANDES_JOURNEY,
   ELEVENTH_JOURNEY,
   FOURTEENTH_JOURNEY,
@@ -45,9 +50,11 @@ export const JOURNEYS = [
   SAME_HOUR_JOURNEY,
   SHARED_NAMES_JOURNEY,
   MISSING_BORDERS_JOURNEY,
+  MISSING_BORDERS_TWO_JOURNEY,
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [SHAPE_OF_INDIA_JOURNEY.id]: "/journey/the-shape-of-india",
     [WITHIN_REACH_JOURNEY.id]: "/journey/within-reach",
     [DRAWING_SAHARA_JOURNEY.id]: "/journey/drawing-the-sahara",
     [SILK_ROAD_INTERSECTIONS_JOURNEY.id]: "/journey/where-the-silk-roads-met",
@@ -57,6 +64,7 @@ export function journeyPath(id: string) {
     [FAR_FROM_EVERYTHING_JOURNEY.id]: "/journey/far-from-everything",
     [ACROSS_DIVIDE_JOURNEY.id]: "/journey/across-the-divide",
     [MISSING_BORDERS_JOURNEY.id]: "/journey/missing-borders",
+    [MISSING_BORDERS_TWO_JOURNEY.id]: "/journey/missing-borders-two",
     [SHARED_NAMES_JOURNEY.id]: "/journey/same-name-different-place",
     [SAME_HOUR_JOURNEY.id]: "/journey/same-hour-different-worlds",
     [DANUBE_JOURNEY.id]: "/journey/down-the-danube",
@@ -71,6 +79,7 @@ export function journeyPath(id: string) {
     [ELEVENTH_JOURNEY.id]: "/journey/not-the-obvious-city",
     [TENTH_JOURNEY.id]: "/journey/ring-of-fire",
     [NINTH_JOURNEY.id]: "/journey/shared-neighbors",
+    [SHARED_NEIGHBORS_TWO_JOURNEY.id]: "/journey/shared-neighbors-two",
     [FOURTH_JOURNEY.id]: "/journey/mediterranean",
   };
   return paths[id] ?? "/";

@@ -24,7 +24,7 @@ it("keeps spherical image patches and scoring cells above the globe, with north-
       1.004,
       6,
     );
-  const q = CONSTRUCTION_RECIPES[0];
+  const q = CONSTRUCTION_RECIPES.find((q) => q.id === "recipe:geo-brush")!;
   if (!("grid" in q.rule)) throw Error();
   const cells = cellsGeometry(q.rule.grid, [12, 13]);
   expect(cells.getAttribute("position").count).toBe(12);
@@ -196,6 +196,51 @@ it("retains the loaded mask and visible mesh while a paint stroke grows", () => 
     expect(dispose).not.toHaveBeenCalled();
     layers.dispose();
     expect(dispose).toHaveBeenCalledOnce();
+  } finally {
+    layers.dispose();
+    load.mockRestore();
+  }
+});
+
+it("keeps explanatory region shading above satellite imagery", () => {
+  const load = vi
+    .spyOn(TextureLoader.prototype, "load")
+    .mockImplementation(() => new Texture());
+  const layers = new MapOverlays();
+  try {
+    const image = {
+      id: "relief",
+      type: "raster-patch" as const,
+      bounds: [66, 6, 99, 38] as [number, number, number, number],
+      assetUrl: "/relief.webp",
+      opacity: 1,
+    };
+    layers.update(
+      {
+        id: "map",
+        kind: "map-overlays",
+        overlays: [
+          image,
+          {
+            ...image,
+            id: "regions",
+            foreground: true,
+            assetUrl: "/regions.png",
+            opacity: 0.55,
+          },
+        ],
+      },
+      100,
+    );
+    const [base, shading] = layers.group.children.map(
+      (g) => g.children[0] as Mesh,
+    );
+    expect(shading.renderOrder).toBeGreaterThan(base.renderOrder);
+    const position = (mesh: Mesh) =>
+      new Vector3()
+        .fromBufferAttribute(mesh.geometry.getAttribute("position"), 0)
+        .length();
+    expect(position(shading)).toBeGreaterThan(position(base));
   } finally {
     layers.dispose();
     load.mockRestore();

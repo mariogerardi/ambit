@@ -146,6 +146,14 @@ export function defineQuestion(question: AuthoredQuestion): Question {
 }
 export function validateJourneyContracts(journey: Journey): void {
   if (
+    journey.completion?.initialConstructionRoundId &&
+    (!journey.completion.constructionResults ||
+      !journey.rounds.some(
+        (q) => q.id === journey.completion?.initialConstructionRoundId,
+      ))
+  )
+    throw Error(`Invalid initial construction review: ${journey.id}`);
+  if (
     journey.saveRevision !== undefined &&
     (!Number.isSafeInteger(journey.saveRevision) || journey.saveRevision < 1)
   )

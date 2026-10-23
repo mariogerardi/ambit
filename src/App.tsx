@@ -331,10 +331,14 @@ export function App() {
   const [constructionReviewIndex, setConstructionReviewIndex] = useState<
     number | undefined
   >(undefined);
-  useEffect(
-    () => setConstructionReviewIndex(undefined),
-    [journey.id, game.phase],
-  );
+  useEffect(() => {
+    const id =
+      game.phase === "finished"
+        ? journey.completion?.initialConstructionRoundId
+        : undefined;
+    const index = journey.rounds.findIndex((q) => q.id === id);
+    setConstructionReviewIndex(index >= 0 ? index : undefined);
+  }, [journey.id, game.phase, journey.completion?.initialConstructionRoundId]);
   const world = useMemo(
     () =>
       isJourney && context && loaded
@@ -1057,8 +1061,11 @@ export function App() {
           if (index === undefined) {
             if (journey.completion) {
               frame(journey.completion.focus);
-              if (!reduced && journey.completion.views?.length)
-                globe.current?.flyover(journey.completion.views);
+              if (!reduced && journey.completion.views?.length) {
+                if (journey.completion.loopViews === false)
+                  globe.current?.flyover(journey.completion.views, false);
+                else globe.current?.flyover(journey.completion.views);
+              }
             }
           } else {
             const question = journey.rounds[index];
@@ -1246,7 +1253,10 @@ export function App() {
                 onHover={setHover}
                 onSelect={choose}
                 interactionLabel={
-                  isJourney && journey.rounds[game.roundIndex].mode === "pin"
+                  isJourney &&
+                  ["pin", "geo-multipin"].includes(
+                    journey.rounds[game.roundIndex].mode,
+                  )
                     ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
                     : isJourney &&
                         journey.rounds[game.roundIndex].mode.startsWith("city-")
@@ -1256,12 +1266,19 @@ export function App() {
                 placeInteraction={
                   mode === "explore" ||
                   (isJourney &&
-                    journey.rounds[game.roundIndex].mode.startsWith("city-"))
+                    (journey.rounds[game.roundIndex].mode.startsWith("city-") ||
+                      (journey.rounds[game.roundIndex].mode ===
+                        "geo-multipin" &&
+                        !game.activePinSlot)))
+                }
+                pinHeld={
+                  isJourney && game.phase === "playing" && !!game.activePinSlot
                 }
                 placeInspection={mode === "explore"}
                 constructionInput={
                   isJourney &&
                   game.phase === "playing" &&
+                  journey.rounds[game.roundIndex].mode !== "geo-multipin" &&
                   journey.rounds[game.roundIndex].mode.startsWith("geo-")
                     ? {
                         question: journey.rounds[game.roundIndex],
@@ -1276,11 +1293,17 @@ export function App() {
                 onCoordinateTap={
                   isJourney &&
                   game.phase === "playing" &&
-                  journey.rounds[game.roundIndex].mode === "pin"
+                  ["pin", "geo-multipin"].includes(
+                    journey.rounds[game.roundIndex].mode,
+                  )
                     ? (point) => {
                         stop();
                         dispatch({
-                          type: "drop-pin",
+                          type:
+                            journey.rounds[game.roundIndex].mode ===
+                            "geo-multipin"
+                              ? "drop-labeled-pin"
+                              : "drop-pin",
                           lat: point.lat,
                           lng: point.lng,
                         });
@@ -1288,6 +1311,19 @@ export function App() {
                     : undefined
                 }
                 onPlace={(place) => {
+                  if (
+                    isJourney &&
+                    game.phase === "playing" &&
+                    journey.rounds[game.roundIndex].mode === "geo-multipin"
+                  ) {
+                    const prefix = `construction:${journey.rounds[game.roundIndex].id}:pin:`;
+                    if (place.id.startsWith(prefix))
+                      dispatch({
+                        type: "pin-slot",
+                        id: place.id.slice(prefix.length),
+                      });
+                    return;
+                  }
                   if (mode === "explore") {
                     selectExploreCity(place);
                     return;

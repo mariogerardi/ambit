@@ -282,6 +282,14 @@ export function createQuestionContext(
         );
     }
     const expected = solutionIds(round, context);
+    if (
+      round.rule.type === "country-set-recall" &&
+      [
+        ...round.rule.ids,
+        ...(round.rule.exceptions ?? []).map((e) => e.id),
+      ].some((id) => !context.members.has(id) || !context.targets.has(id))
+    )
+      throw Error(`Unknown recall country: ${round.id}`);
     context.solutions.set(round, expected);
     if (
       round.mode === "typed-regions" &&
@@ -436,6 +444,7 @@ export function solutionIds(
     return [];
   if (
     rule.type === "country-ids" ||
+    rule.type === "country-set-recall" ||
     rule.type === "choice-ids" ||
     rule.type === "region-ids"
   )

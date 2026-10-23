@@ -52,7 +52,7 @@ it("keeps paint, erase, size and edit actions in one row without coordinate entr
     slider = row.querySelector("input")!;
   expect(slider.value).toBe("160");
   expect(row.textContent).toContain("160 km");
-  expect(row.querySelectorAll("svg").length).toBe(4);
+  expect(row.querySelectorAll("svg").length).toBe(3);
   expect(host.querySelector("details")).toBeNull();
   expect(host.textContent).not.toContain("Brush radius");
   await act(async () => {
@@ -69,11 +69,14 @@ it("keeps paint, erase, size and edit actions in one row without coordinate entr
   )!;
   await act(async () => erase.click());
   expect(latest.constructionTool).toBe("erase");
-  const reset = row.querySelector(
-    '[aria-label="Reset shape"]',
+  expect(row.querySelector('[aria-label="Reset shape"]')).toBeNull();
+  const undo = row.querySelector(
+    '[aria-label="Undo stroke"]',
   ) as HTMLButtonElement;
-  await act(async () => reset.click());
-  expect(latest.construction).toBeUndefined();
+  await act(async () => undo.click());
+  expect(
+    latest.construction?.kind === "brush" && latest.construction.strokes,
+  ).toEqual([]);
   await act(async () => root.unmount());
   host.remove();
 });
@@ -270,7 +273,9 @@ it("keeps the island target in play and explains scoring with each question resu
   await act(async () => root.render(<GameShell {...props} game={answered} />));
   const scoring = host.querySelector('[aria-label="Island scoring"]')!;
   expect(host.textContent).not.toContain("Whole islands enclosed");
-  expect(host.querySelector('[aria-label="Your construction result"]')).toBeNull();
+  expect(
+    host.querySelector('[aria-label="Your construction result"]'),
+  ).toBeNull();
   expect(scoring.querySelectorAll("tbody tr")).toHaveLength(1);
   expect(scoring.textContent).toContain("Boston Harbor");
   expect(scoring.textContent).toContain("14–15");
@@ -294,7 +299,9 @@ it("keeps the island target in play and explains scoring with each question resu
   expect(
     host.querySelectorAll('[aria-label="Island scoring"] tbody tr'),
   ).toHaveLength(1);
-  expect(host.querySelector('[aria-label="Your construction result"]')).toBeNull();
+  expect(
+    host.querySelector('[aria-label="Your construction result"]'),
+  ).toBeNull();
   expect(
     host.querySelector('[aria-label="Island scoring"]')?.textContent,
   ).toContain("Assist cap: 1 point");

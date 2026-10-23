@@ -349,14 +349,22 @@ def journey_points(answers, usage):
             continue
         old = "pointsVersion" not in answer and "points" not in answer
         legacy = legacy or old
-        if answer.get("correct") is not True:
+        recall = answer.get("recall")
+        partial_recall = (
+            isinstance(recall, dict) and recall.get("version") == 1
+            and isinstance(recall.get("entries"), list)
+            and any(isinstance(e, dict) and e.get("result") == "accepted" for e in recall["entries"])
+            and sum(isinstance(e, dict) and e.get("result") == "wrong" for e in recall["entries"]) < 3
+            and recall.get("ended") != "third-wrong"
+        )
+        if answer.get("correct") is not True and not partial_recall:
             continue
-        if old:
+        if old and answer.get("correct") is True:
             points += 3
         elif answer.get("pointsVersion") == 1 and type(answer.get("points")) is int and 0 <= answer["points"] <= 3:
             stage = usage.get(answer.get("roundId")) if isinstance(usage, dict) else None
             ceiling = 1 if stage == "assisted" else 2 if stage == "hinted" else 3
-            points += min(answer["points"], ceiling)
+            points += min(answer["points"], ceiling, 3 if answer.get("correct") is True else 2)
     return min(15, points), legacy
 
 

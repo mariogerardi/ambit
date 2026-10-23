@@ -2,6 +2,7 @@
 import json
 import unittest
 from datetime import date
+from pathlib import Path
 from unittest.mock import patch
 from unittest.mock import MagicMock
 
@@ -10,6 +11,7 @@ import journey_schedule as schedule
 import community
 from infrastructure import template
 REAL_DATE_ROWS = community.date_rows
+SCHEDULE_VECTORS = json.loads((Path(__file__).resolve().parents[1] / "tests/fixtures/journey-schedule-vectors.json").read_text())
 
 
 class JourneyScheduleTests(unittest.TestCase):
@@ -68,13 +70,25 @@ class JourneyScheduleTests(unittest.TestCase):
             records = {day: {"journeyId": selected, "source": source, "lockedAt": "locked"}}
             self.assertEqual(schedule.choose(day, records, expanded), selected)
 
-    def test_frontend_hash_vectors_and_missing_historical_record(self):
-        expected = {'2026-10-05': 'exceptions-to-the-rule-v1', '2026-10-18': 'the-vaccine-that-crossed-the-world-v1', '2026-11-03': 'far-from-everything', '2027-01-01': 'shared-neighbors-v1'}
-        for day, journey in expected.items():
-            self.assertEqual(schedule.choose(day, {}), journey)
+    def test_shared_frontend_hash_and_selection_vectors_for_fixed_catalogs(self):
+        self.assertEqual(schedule.SCHEDULE_VERSION, SCHEDULE_VECTORS['scheduleVersion'])
+        self.assertEqual(schedule.FIRST_DAY.isoformat(), SCHEDULE_VECTORS['firstDay'])
+        self.assertEqual(schedule.NO_REPEAT_DAYS, SCHEDULE_VECTORS['noRepeatDays'])
+        for day, value in SCHEDULE_VECTORS['hashes'].items():
+            with self.subTest(day=day, kind='hash'):
+                self.assertEqual(schedule.hash_date(day), value)
+        for fixture in SCHEDULE_VECTORS['catalogs']:
+            catalog = {key: {'id': key} for key in fixture['ids']}
+            for day, journey in fixture['selections'].items():
+                with self.subTest(day=day, pool=fixture['ids']):
+                    self.assertEqual(schedule.choose(day, {}, catalog), journey)
+                    self.assertEqual(schedule.choose(day, {}, dict(reversed(list(catalog.items())))), journey)
+
+    def test_missing_historical_and_future_records(self):
         missing = {"2026-10-05": {"journeyId": "removed-id", "source": "auto"}}
         self.assertEqual(schedule.choose("2026-10-05", missing), "removed-id")
-        self.assertEqual(schedule.choose("2026-11-03", {"2026-11-03": {"journeyId": "removed-id", "source": "assigned"}}), expected["2026-11-03"])
+        future = "2026-11-03"
+        self.assertEqual(schedule.choose(future, {future: {"journeyId": "removed-id", "source": "assigned"}}), schedule.choose(future, {}))
         self.assertIn(schedule.choose("2035-01-01", {}), schedule.CATALOG)
 
     def test_lock_is_idempotent_and_never_overwrites_assigned(self):

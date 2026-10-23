@@ -1,6 +1,7 @@
 import type { Question } from "./questionContracts";
 import type { GameState } from "./state";
 import { orderedCards, swapOrderCard } from "./ordering";
+import { assistRecall } from "./countryRecall";
 
 export type HelpStage = "hinted" | "assisted";
 export type HelpUsage = Record<string, HelpStage>;
@@ -20,6 +21,13 @@ export function withAssistanceLocks(
   game: GameState,
 ): GameState {
   if (game.phase !== "playing") return game;
+  if (
+    question.mode === "country-recall" &&
+    game.help?.[question.id] === "assisted"
+  ) {
+    const recall = assistRecall(question, game.recall);
+    return recall === game.recall ? game : { ...game, recall };
+  }
   const missing = lockedSelectionIds(question, game).filter(
     (id) => !game.selectedIds.includes(id),
   );

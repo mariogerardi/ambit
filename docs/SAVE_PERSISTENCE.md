@@ -105,6 +105,17 @@ help merged from another tab caps a versioned reward without increasing it when
 help disappears. Friend summaries apply the same rule and retain correctness
 counts separately from the 15-point reward total.
 
+Progressive country recall stores version-1 `Response.recall` history with
+canonical accepted/wrong/exception IDs, original entered text, the assist-supplied
+country and completion reason. Playing drafts of the same round merge these
+irreversible entries across stale tabs; duplicates do not consume another guess.
+A third distinct wrong country ends at zero. A partial list can retain one or two
+frozen points while `Answer.correct` remains false. The frontend receipt and
+backend friend/activity summaries honor this explicit partial-credit evidence;
+ordinary incorrect answers still earn zero. Completed answers are not merged or
+regraded. Labeled multi-pins use the existing versioned construction save, with
+coordinates keyed by slot ID and a frozen per-slot containment result.
+
 Archive play uses the same date/edition/run registers as the Daily. The URL date,
 not the shared `activeDate` selection pointer, determines which attempt receives
 answers, so browsing history in another tab cannot redirect today's writes.

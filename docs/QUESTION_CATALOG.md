@@ -18,12 +18,14 @@ For an approved specification, start with
 | Title                              | Practice route                                | Definition                                                                     |
 | ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
 | Within Reach                       | `/journey/within-reach`                       | [withinReachJourney.ts](../src/game/withinReachJourney.ts)                     |
+| The Shape of India                 | `/journey/the-shape-of-india`                 | [shapeOfIndiaJourney.ts](../src/game/shapeOfIndiaJourney.ts)                   |
 | Drawing the Sahara                 | `/journey/drawing-the-sahara`                 | [drawingSaharaJourney.ts](../src/game/drawingSaharaJourney.ts)                 |
 | Where the Silk Roads Met           | `/journey/where-the-silk-roads-met`           | [silkRoadIntersectionsJourney.ts](../src/game/silkRoadIntersectionsJourney.ts) |
 | The Vaccine That Crossed the World | `/journey/the-vaccine-that-crossed-the-world` | [vaccineExpeditionJourney.ts](../src/game/vaccineExpeditionJourney.ts)         |
 | Beyond the maple leaf              | `/journey/beyond-the-maple-leaf`              | [canadaJourney.ts](../src/game/canadaJourney.ts)                               |
 | Around the Mediterranean           | `/journey/mediterranean`                      | [fourthJourney.ts](../src/game/fourthJourney.ts)                               |
 | Shared neighbors                   | `/journey/shared-neighbors`                   | [ninthJourney.ts](../src/game/ninthJourney.ts)                                 |
+| Shared Neighbors II                | `/journey/shared-neighbors-two`               | [sharedNeighborsTwoJourney.ts](../src/game/sharedNeighborsTwoJourney.ts)       |
 | Along the Andes                    | `/journey/along-the-andes`                    | [andesJourney.ts](../src/game/andesJourney.ts)                                 |
 | Not the obvious city               | `/journey/not-the-obvious-city`               | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                           |
 | Island instincts                   | `/journey/island-instincts`                   | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)                       |
@@ -37,6 +39,7 @@ For an approved specification, start with
 | Same Hour, Different Worlds        | `/journey/same-hour-different-worlds`         | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                           |
 | Same Name, Different Place         | `/journey/same-name-different-place`          | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)                     |
 | Missing Borders                    | `/journey/missing-borders`                    | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts)               |
+| Missing Borders II                 | `/journey/missing-borders-two`                | [missingBordersTwoJourney.ts](../src/game/missingBordersTwoJourney.ts)         |
 | Across the Divide                  | `/journey/across-the-divide`                  | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)                   |
 | Far From Everything                | `/journey/far-from-everything`                | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts)         |
 | The Sound of Somewhere: Reggaetón  | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
@@ -68,6 +71,13 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | Mode                   | Control                     |
 | ---------------------- | --------------------------- |
 | `pin`                  | Drop a pin                  |
+| `geo-brush`            | Paint a geographic area     |
+| `geo-circle`           | Place a fixed-radius circle |
+| `geo-trace`            | Trace a geographic line     |
+| `geo-polygon`          | Draw a bounded polygon      |
+| `geo-cut`              | Divide modeled population   |
+| `geo-multipin`         | Independently labeled pins  |
+| `country-recall`       | Progressive country recall  |
 | `compass-bearing`      | Rotate a true-north compass |
 | `city-single`          | Single city pick            |
 | `city-multiple`        | Multiple city picks         |
@@ -282,6 +292,16 @@ text to `questionText.ts`. `questions.ts` remains a compatibility import surface
    [AGENTS.md](../AGENTS.md). Update the table when titles/routes/registration change;
    do not regenerate geography or run a full build for routine copy edits.
    Authorized releases use the normal CI checks and supported nonblocking deployment.
+6. Refresh the [portable authoring kit](JOURNEY_AUTHORING_KIT.md) with
+   `npm run export:journeys` after relevant source/docs changes. Check the manifest
+   and replace any uploaded snapshot; regenerating the index alone does not
+   refresh the kit.
+
+A sequel that adds another set of questions uses fresh Journey and question IDs,
+its own route, and remains registered alongside the original. Missing Borders II
+and Shared Neighbors II follow this pattern. Do not retire or add a `supersedes`
+alias for an original that should remain independently playable. Editing an
+existing edition instead requires the save-continuity review below.
 
 The month calendar highlights scheduled dates and previews pending selections
 before publication. Automatic dates show either a locked choice or a provisional

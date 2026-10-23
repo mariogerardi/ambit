@@ -1,0 +1,97 @@
+{
+  "sourcePopulationTotal": 1457435337.9550705,
+  "retainedPopulation": 1444119393.9997041,
+  "aggregatedPopulation": 1444119394.0008,
+  "countryAreaKm2": 3156950.5765760783,
+  "gridAreaKm2": 3156950.576554,
+  "populationCellCount": 32501,
+  "paintingCellCount": 25730,
+  "disputedAreas": [
+    "Jammu and Kashmir",
+    "Aksai Chin",
+    "Arunachal Pradesh",
+    "Shaksam Valley",
+    "Gilgit-Baltistan",
+    "Near Om Parvat",
+    "Demchok",
+    "Samdu Valleys",
+    "Tirpani Valleys",
+    "Bara Hotii Valleys",
+    "Siachen Glacier",
+    "Azad Kashmir",
+    "Junagadh and Manavadar"
+  ],
+  "ignoredPaintingIslands": true,
+  "circleMinimumRadiusKm": 125.85524624211585,
+  "circleExample": {
+    "lat": 27.57912983153784,
+    "lng": 76.8224924756783
+  },
+  "balancedExamples": [
+    {
+      "orientation": "east-west",
+      "points": [
+        {
+          "lat": 23.59834498987647,
+          "lng": 68.23459148431724
+        },
+        {
+          "lat": 23.46516363505459,
+          "lng": 93.39558207780344
+        }
+      ],
+      "population": 49.99875176059716,
+      "sourcePopulation": 49.996713427416886,
+      "area": 45.27106974994335
+    },
+    {
+      "orientation": "north-south",
+      "points": [
+        {
+          "lat": 9.697356874584308,
+          "lng": 79.00529395320973
+        },
+        {
+          "lat": 33.32091950656624,
+          "lng": 79.00529395320973
+        }
+      ],
+      "population": 49.70664494690681,
+      "sourcePopulation": 50.0229221152564,
+      "area": 43.35872127944877
+    }
+  ],
+  "ecoregions": {
+    "0": "Rock and Ice",
+    "222": "Brahmaputra Valley semi-evergreen forests",
+    "233": "Himalayan subtropical broadleaf forests",
+    "238": "Lower Gangetic Plains moist deciduous forests",
+    "287": "Upper Gangetic Plains moist deciduous forests",
+    "302": "Himalayan subtropical pine forests",
+    "306": "Eastern Himalayan broadleaf forests",
+    "308": "Western Himalayan broadleaf forests",
+    "309": "Eastern Himalayan subalpine conifer forests",
+    "310": "Western Himalayan subalpine conifer forests",
+    "311": "Terai-Duar savanna and grasslands",
+    "314": "Aravalli west thorn scrub forests",
+    "318": "Thar desert",
+    "702": "Northeast Himalayan subalpine conifer forests",
+    "751": "Eastern Himalayan alpine shrub and meadows",
+    "754": "Karakoram-West Tibetan Plateau alpine steppe",
+    "760": "Northwestern Himalayan alpine shrub and meadows",
+    "769": "Western Himalayan alpine shrub and meadows"
+  },
+  "inputs": {
+    "ind-pop-2025.tif": "e188723030087fb8e90e1741199bd476a181c00b046fab7dd8e8358adb136b64",
+    "disputed.geojson": "9cafef8b7dfb6b164dc58f218f981f4ace9f716f6c03795d4c62d1ac9f3d50f5",
+    "india-ecoregions.geojson": "7df3cbff54d361dcffa12d3ec678066ada638902ab524ed41d26c9159c799135",
+    "south-asia.jpg": "ba608170b6eecde2388a5c7d8e6957ffd0ddf6828e4fa38797c718479257b026",
+    "world.v1.json": "d75294788428c0f6a454000f86809f9852ecb62d1c57407101af2e7a37bf3fcb",
+    "cities.v1.json": "34361b98572bc00ee9f2e01138a384227d87d4687a53e0ef30506a061d1e2945"
+  },
+  "outputSHA256": "da9db5d8c7be22ddc34d56cb6a8e44bb784bd77a6d8c100d4cf93288c07f4de1",
+  "cutValidation": {
+    "samples": 24,
+    "maximumErrorPercentagePoints": 0.23466968333833904
+  }
+}

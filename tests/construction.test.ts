@@ -318,6 +318,8 @@ describe("five independent constructed answer contracts", () => {
         invalid.rule.candidates[0].boundary[0].lat = NaN;
       else if (invalid.rule.type === "line-following")
         invalid.rule.tiers[0].coverage = NaN;
+      else if (invalid.rule.type === "labeled-region-pin-set")
+        invalid.rule.slots[0].example.lat = NaN;
       expect(() => validateQuestionContract(invalid)).toThrow();
     }
   });

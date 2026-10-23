@@ -104,10 +104,15 @@
     "src/game/constructionAudit.ts",
     "src/game/ConstructionAnswer.tsx",
     "src/globe/constructionOverlays.ts",
+    "src/globe/paintOverlay.ts",
     "scripts/prepare-sahara-construction.py",
     "src/game/constructionInteraction.ts",
     "scripts/prepare-sahara-display.py",
     "scripts/prepare-within-reach.py",
-    "src/globe/surface.ts"
+    "src/globe/surface.ts",
+    "src/game/countryRecall.ts",
+    "src/game/CountryRecallAnswer.tsx",
+    "src/game/MultiPinAnswer.tsx",
+    "scripts/prepare-india-journey.py"
   ]
 }

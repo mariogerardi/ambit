@@ -52,6 +52,7 @@ const coords = (points: { lat: number; lng: number }[]) =>
 export function constructionScene(
   q: Question,
   response: Response & {
+    activePinSlot?: string;
     answers?: {
       roundId: string;
       constructionResult?: Response["constructionResult"];
@@ -74,6 +75,28 @@ export function constructionScene(
         : "selected";
   const overlays: MapOverlay[] = [],
     places: PlaceFeature[] = [];
+  if (rule.type === "labeled-region-pin-set" && c?.kind === "pins") {
+    for (const slot of rule.slots) {
+      const point = c.pins[slot.id];
+      if (!point || (!reveal && response.activePinSlot === slot.id)) continue;
+      const inside = result?.containedIds?.includes(slot.id);
+      places.push({
+        ...point,
+        id: `construction:${q.id}:pin:${slot.id}`,
+        name: slot.label,
+        kind: "pin",
+        sourceId: "player",
+        answerTarget: false,
+        visualState: reveal
+          ? inside
+            ? completion
+              ? "visited"
+              : "correct"
+            : "incorrect"
+          : "selected",
+      });
+    }
+  }
   const cells = (
     suffix: string,
     grid: GridShape,
@@ -94,41 +117,66 @@ export function constructionScene(
       });
   };
   if (c?.kind === "brush" && rule.type === "raster-overlap") {
-    const displayGrid = brushDisplayGrid(q, rule.grid),
-      displayPaint = paintedCells(displayGrid, c);
-    if (reveal) {
-      const paint = paintedCells(rule.grid, c);
-      cells(
-        "submitted-paint",
-        displayGrid,
-        [...displayPaint],
-        completion ? "visited" : "selected",
-        0.35,
-      );
-      const positive = new Set(
-        rule.grid.cells.filter(([, v]) => v > 0).map(([i]) => i),
-      );
-      cells(
-        "dunes",
-        rule.grid,
-        [...positive].filter((i) => !paint.has(i)),
-        "answer",
-        0.6,
-      );
-      cells(
-        "paint-on-dunes",
-        rule.grid,
-        [...paint].filter((i) => positive.has(i)),
-        completion ? "visited" : "correct",
-      );
-      cells(
-        "overspray",
-        rule.grid,
-        [...paint].filter((i) => !positive.has(i)),
-        "incorrect",
-      );
-    } else cells("paint", displayGrid, [...displayPaint], "selected");
+    const mask = q.constructionArea?.mask;
+    if (mask && (!reveal || rule.targetMask)) {
+      const paint = (
+        coverage: Extract<MapOverlay, { type: "paint" }>["coverage"],
+        visualState: Extract<MapOverlay, { type: "paint" }>["visualState"],
+      ) =>
+        overlays.push({
+          id: `construction:${q.id}:${coverage}`,
+          type: "paint",
+          bounds: mask.bounds,
+          mask,
+          targetMask: reveal ? rule.targetMask : undefined,
+          strokes: c.strokes,
+          coverage,
+          visualState,
+          opacity: 0.72,
+        });
+      if (reveal) {
+        paint("missed", "answer");
+        paint("inside", completion ? "visited" : "correct");
+        paint("outside", "incorrect");
+      } else paint("paint", "selected");
+    } else {
+      const displayGrid = brushDisplayGrid(q, rule.grid),
+        displayPaint = paintedCells(displayGrid, c);
+      if (reveal) {
+        const paint = paintedCells(rule.grid, c),
+          positive = new Set(
+            rule.grid.cells.filter(([, v]) => v > 0).map(([i]) => i),
+          );
+        cells(
+          "submitted-paint",
+          displayGrid,
+          [...displayPaint],
+          completion ? "visited" : "selected",
+          0.35,
+        );
+        cells(
+          "dunes",
+          rule.grid,
+          [...positive].filter((i) => !paint.has(i)),
+          "answer",
+          0.6,
+        );
+        cells(
+          "paint-on-dunes",
+          rule.grid,
+          [...paint].filter((i) => positive.has(i)),
+          completion ? "visited" : "correct",
+        );
+        cells(
+          "overspray",
+          rule.grid,
+          [...paint].filter((i) => !positive.has(i)),
+          "incorrect",
+        );
+      } else cells("paint", displayGrid, [...displayPaint], "selected");
+    }
   }
+
   if (
     c?.kind === "circle" &&
     (rule.type === "point-coverage-max" || rule.type === "island-coverage-max")
@@ -209,18 +257,61 @@ export function constructionScene(
       );
     }
     if (reveal && rule.type === "population-balance" && c.kind === "cut") {
-      for (const side of [true, false])
+      for (const side of [true, false]) {
+        const sideCells = rule.grid.cells.filter(
+          ([i]) => cutSide(c.points, gridPoint(rule.grid, i)) === side,
+        );
         cells(
           `side-${side ? "a" : "b"}`,
           rule.grid,
-          rule.grid.cells
-            .filter(
-              ([i]) => cutSide(c.points, gridPoint(rule.grid, i)) === side,
-            )
-            .map(([i]) => i),
+          sideCells.map(([i]) => i),
           side ? "correct" : "answer",
           0.22,
         );
+        const share = result?.metrics[side ? 0 : 1]?.value;
+        if (!sideCells.length || share === undefined) continue;
+        // An area-weighted interior anchor avoids clustering both labels in the
+        // densely settled north. Choose an actual land point on the correct side.
+        const total = sideCells.reduce((n, cell) => n + cell[2], 0);
+        const center = sideCells.reduce(
+          (p, [i, , area]) => {
+            const point = gridPoint(rule.grid, i);
+            return {
+              lat: p.lat + (point.lat * area) / total,
+              lng: p.lng + (point.lng * area) / total,
+            };
+          },
+          { lat: 0, lng: 0 },
+        );
+        const shape =
+          q.constructionArea && sphericalGeometry(q.constructionArea.geometry);
+        const candidates = sideCells
+          .map(([i]) => gridPoint(rule.grid, i))
+          .sort(
+            (a, b) =>
+              (a.lat - center.lat) ** 2 +
+              (a.lng - center.lng) ** 2 -
+              (b.lat - center.lat) ** 2 -
+              (b.lng - center.lng) ** 2,
+          );
+        const anchor = candidates.find(
+          (p) => !shape || geoContains(shape, [p.lng, p.lat]),
+        );
+        if (anchor)
+          places.push({
+            ...anchor,
+            id: `construction:${q.id}:side-${side ? "a" : "b"}:label`,
+            name: `${side ? "A" : "B"} · ${share.toFixed(1)}% of people`,
+            kind: "other",
+            sourceId: "player",
+            markerHidden: true,
+            labelFlexible: true,
+            labelScale: 1.15,
+            priority: 100,
+            visualState: side ? "correct" : "answer",
+            answerTarget: false,
+          });
+      }
     }
   }
   if (reveal && rule.type === "line-following")
@@ -232,13 +323,18 @@ export function constructionScene(
       visualState: "answer",
       opacity: 0.85,
     });
-  if (rule.type === "point-coverage-max") {
+  if (
+    rule.type === "point-coverage-max" &&
+    (reveal || !rule.hideCandidatesUntilReveal)
+  ) {
     for (const p of rule.candidates)
       places.push({
         ...p,
         kind: "city",
         displayRole:
-          reveal && result?.containedIds?.includes(p.id)
+          reveal &&
+          (result?.containedIds?.includes(p.id) ||
+            rule.hideCandidatesUntilReveal)
             ? undefined
             : "reference",
         visualState:
@@ -246,7 +342,11 @@ export function constructionScene(
             ? completion
               ? "visited"
               : "correct"
-            : "hinted",
+            : reveal && rule.hideCandidatesUntilReveal
+              ? completion
+                ? "visited"
+                : "answer"
+              : "hinted",
         answerTarget: false,
         markerSize: p.markerSize ?? 24,
         labelFlexible: true,
@@ -270,7 +370,12 @@ export function constructionScene(
         answerTarget: false,
       });
   }
-  if (!reveal && c && rule.type !== "island-coverage-max") {
+  if (
+    !reveal &&
+    c &&
+    rule.type !== "island-coverage-max" &&
+    c.kind !== "pins"
+  ) {
     constructionHandleEntries(c).forEach(({ point: p, index: i }) =>
       places.push({
         ...p,
@@ -368,7 +473,7 @@ export function constructionScene(
   return { overlays: clipped, places };
 }
 export function constructionHandleEntries(c: Construction | undefined) {
-  if (!c || c.kind === "brush") return [];
+  if (!c || c.kind === "brush" || c.kind === "pins") return [];
   if (c.kind === "circle") return [{ point: c.center, index: 0 }];
   const indices =
     c.kind === "trace"

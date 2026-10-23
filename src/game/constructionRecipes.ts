@@ -75,6 +75,52 @@ export const CONSTRUCTION_RECIPES: Question[] = [
   defineQuestion({
     ...base,
     guidance,
+    id: "recipe:geo-multipin",
+    title: "Labeled pins example",
+    prompt: "Place each labeled pin in its own synthetic strip.",
+    explanation:
+      "Each label grades its own region, without matching to an unlabeled nearest point.",
+    mode: "geo-multipin",
+    count: 1,
+    selection: { type: "none" },
+    commitment: "submit",
+    rule: {
+      type: "labeled-region-pin-set",
+      sourceRevision: "synthetic-v1",
+      slots: [-1, 0, 1].map((lng, i) => ({
+        id: `strip-${i}`,
+        label: `Strip ${i + 1}`,
+        example: { lat: 0, lng },
+        geometry: {
+          type: "Polygon" as const,
+          coordinates: [
+            [
+              [lng - 0.4, -1],
+              [lng + 0.4, -1],
+              [lng + 0.4, 1],
+              [lng - 0.4, 1],
+              [lng - 0.4, -1],
+            ],
+          ],
+        },
+      })),
+      tiers: [
+        { count: 3, feedback: "Three located." },
+        { count: 2, feedback: "Two located." },
+        { count: 1, feedback: "One located." },
+      ],
+    },
+    constructionExample: {
+      version: 1,
+      kind: "pins",
+      pins: Object.fromEntries(
+        [-1, 0, 1].map((lng, i) => [`strip-${i}`, { lat: 0, lng }]),
+      ),
+    },
+  }),
+  defineQuestion({
+    ...base,
+    guidance,
     id: "recipe:geo-brush",
     title: "Brush example",
     prompt: "Paint the northern row of this synthetic grid.",

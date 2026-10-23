@@ -33,6 +33,28 @@ export const MECHANIC_RECIPES: Question[] = [
   ...CONSTRUCTION_RECIPES,
   defineQuestion({
     ...base,
+    id: "recipe:country-recall",
+    title: "Progressive recall example",
+    prompt: "Name the three North American countries in this example.",
+    explanation:
+      "Country identities are deduplicated; recognized wrong entries reduce the ceiling, while spelling and reviewed exceptions do not.",
+    mode: "country-recall",
+    count: 3,
+    inputLabel: "Country",
+    selection: { type: "none" },
+    commitment: "submit",
+    rule: {
+      type: "country-set-recall",
+      ids: ["wurl:CAN", "wurl:USA", "wurl:MEX"],
+      assistOrder: ["wurl:CAN", "wurl:USA", "wurl:MEX"],
+    },
+    guidance: {
+      hint: "Think of the mainland's northern and central countries.",
+      assist: { text: "One missing country has been added." },
+    },
+  }),
+  defineQuestion({
+    ...base,
     id: "recipe:compass-bearing",
     title: "compass-bearing example",
     prompt: "From Sydney, aim your compass toward Canberra.",
