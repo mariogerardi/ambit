@@ -517,6 +517,8 @@ export function questionRegions(
           : "Highlighted territory",
       parentId: owner.id,
       focus: highlight.point,
+      // These stage-specific parts must not inherit the whole country's cap.
+      displayGeometry: undefined,
       geometry:
         highlight.geometry ??
         (selectedParts.length === 1
@@ -530,6 +532,7 @@ export function questionRegions(
         ? [
             {
               ...owner,
+              displayGeometry: undefined,
               geometry: {
                 type: "MultiPolygon" as const,
                 coordinates: remaining,

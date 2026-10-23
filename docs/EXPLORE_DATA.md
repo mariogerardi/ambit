@@ -11,7 +11,7 @@ These assets do not all load at startup.
 
 | Data              | Coverage                                                             | Location/loading                                                                                         |
 | ----------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| World map         | 242 Natural Earth map units; 2,074,376 bytes                           | [`world.v1.json`](../public/geography/world.v1.json), startup.                                           |
+| World map         | 242 Natural Earth map units; 2,074,376 bytes                         | [`world.v1.json`](../public/geography/world.v1.json), startup.                                           |
 | Boundary manifest | 234 layers, including 232 ADM1 parent branches and New York ADM2     | [`manifest.json`](../public/geography/manifest.json), startup; child assets load on activation.          |
 | Regional index    | 4,579 indexed subdivisions                                           | [`regions.v1.json`](../src/geography/data/regions.v1.json), names/IDs/hierarchy.                         |
 | Country profiles  | All 242 map units, with source-dependent field coverage              | [`country-info.v1.json`](../src/geography/data/country-info.v1.json), bundled.                           |

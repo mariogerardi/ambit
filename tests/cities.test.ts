@@ -10,6 +10,7 @@ import {
 import { CAPITALS } from "../src/game/quizData";
 import roster from "../src/game/data/un-members.v1.json";
 import metadata from "../sources/cities.metadata.json";
+import checksums from "../sources/checksums.json";
 
 describe("local major-city catalog", () => {
   it("expands Explore to map territories with stable, sourced city records while preserving quiz capital conventions", () => {
@@ -50,11 +51,19 @@ describe("local major-city catalog", () => {
     expect(MAJOR_CITIES.find((c) => c.id === "place:57289")?.parentId).toBe(
       "wurl:SOM",
     );
-    for (const input of metadata.exploreInputs) {
-      expect(
-        createHash("sha256").update(readFileSync(input.path)).digest("hex"),
-      ).toBe(input.sha256);
-    }
+    // The raw Natural Earth download is an ignored preparation input. CI can
+    // verify its pin through the committed source manifest without downloading it.
+    const inputHashes: Record<string, string> = {
+      "sources/ne-countries.geojson": checksums["ne-countries.geojson"].sha256,
+      "sources/catalog-mapping.json": createHash("sha256")
+        .update(readFileSync("sources/catalog-mapping.json"))
+        .digest("hex"),
+    };
+    expect(metadata.exploreInputs).toHaveLength(
+      Object.keys(inputHashes).length,
+    );
+    for (const input of metadata.exploreInputs)
+      expect(inputHashes[input.path]).toBe(input.sha256);
   });
   it("has valid unique eligible-country points and no duplicate primary capitals", () => {
     const members = new Set(roster.members.map((c) => c.id));
