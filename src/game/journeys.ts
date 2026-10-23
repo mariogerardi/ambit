@@ -3,6 +3,7 @@ import { DRAWING_SAHARA_JOURNEY } from "./drawingSaharaJourney";
 import { SILK_ROAD_INTERSECTIONS_JOURNEY } from "./silkRoadIntersectionsJourney";
 import { VACCINE_EXPEDITION_JOURNEY } from "./vaccineExpeditionJourney";
 import { MISSING_BORDERS_JOURNEY } from "./missingBordersJourney";
+import { MISSING_BORDERS_TWO_JOURNEY } from "./missingBordersTwoJourney";
 import { DANUBE_JOURNEY } from "./danubeJourney";
 import { SHARED_NAMES_JOURNEY } from "./sharedNamesJourney";
 import { SAME_HOUR_JOURNEY } from "./sameHourJourney";
@@ -45,6 +46,7 @@ export const JOURNEYS = [
   SAME_HOUR_JOURNEY,
   SHARED_NAMES_JOURNEY,
   MISSING_BORDERS_JOURNEY,
+  MISSING_BORDERS_TWO_JOURNEY,
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
@@ -57,6 +59,7 @@ export function journeyPath(id: string) {
     [FAR_FROM_EVERYTHING_JOURNEY.id]: "/journey/far-from-everything",
     [ACROSS_DIVIDE_JOURNEY.id]: "/journey/across-the-divide",
     [MISSING_BORDERS_JOURNEY.id]: "/journey/missing-borders",
+    [MISSING_BORDERS_TWO_JOURNEY.id]: "/journey/missing-borders-two",
     [SHARED_NAMES_JOURNEY.id]: "/journey/same-name-different-place",
     [SAME_HOUR_JOURNEY.id]: "/journey/same-hour-different-worlds",
     [DANUBE_JOURNEY.id]: "/journey/down-the-danube",

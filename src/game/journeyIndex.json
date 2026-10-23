@@ -378,6 +378,47 @@
     ]
   },
   {
+    "id": "missing-borders-two-v1",
+    "addedAt": "2026-10-22",
+    "title": "Missing Borders II",
+    "saveRevision": 1,
+    "description": "Five more maps, five missing borders. Search across continents for apparent territories hiding two countries, then watch their boundaries return.",
+    "path": "/journey/missing-borders-two",
+    "module": "./missingBordersTwoJourney.ts",
+    "rounds": [
+      {
+        "id": "missing-borders-two-01-india-nepal",
+        "label": "Missing border",
+        "progressLabel": "Asia",
+        "resolvedLabel": "India + Nepal"
+      },
+      {
+        "id": "missing-borders-two-02-indonesia-papua-new-guinea",
+        "label": "Missing border",
+        "progressLabel": "Oceania",
+        "resolvedLabel": "Indonesia + Papua New Guinea"
+      },
+      {
+        "id": "missing-borders-two-03-costa-rica-panama",
+        "label": "Missing border",
+        "progressLabel": "North America",
+        "resolvedLabel": "Costa Rica + Panama"
+      },
+      {
+        "id": "missing-borders-two-04-moldova-romania",
+        "label": "Missing border",
+        "progressLabel": "Europe",
+        "resolvedLabel": "Moldova + Romania"
+      },
+      {
+        "id": "missing-borders-two-05-rwanda-burundi",
+        "label": "Missing border",
+        "progressLabel": "Africa",
+        "resolvedLabel": "Rwanda + Burundi"
+      }
+    ]
+  },
+  {
     "id": "missing-borders-v1",
     "addedAt": "2026-10-12",
     "title": "Missing Borders",

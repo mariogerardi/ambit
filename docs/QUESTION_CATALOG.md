@@ -37,6 +37,7 @@ For an approved specification, start with
 | Same Hour, Different Worlds        | `/journey/same-hour-different-worlds`         | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                           |
 | Same Name, Different Place         | `/journey/same-name-different-place`          | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)                     |
 | Missing Borders                    | `/journey/missing-borders`                    | [missingBordersJourney.ts](../src/game/missingBordersJourney.ts)               |
+| Missing Borders II                 | `/journey/missing-borders-two`                | [missingBordersTwoJourney.ts](../src/game/missingBordersTwoJourney.ts)         |
 | Across the Divide                  | `/journey/across-the-divide`                  | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)                   |
 | Far From Everything                | `/journey/far-from-everything`                | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts)         |
 | The Sound of Somewhere: Reggaetón  | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
