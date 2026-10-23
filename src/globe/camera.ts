@@ -91,13 +91,15 @@ export class CameraTravel {
     );
     const nearby = distance < 0.5;
     const duration =
-      durationMs ??
-      (local ? (nearby ? 1800 : 4400 + Math.min(1200, distance * 12)) : 1100);
+      durationMs ?? (nearby ? 1400 : 2600 + Math.min(600, distance * 6));
     const cruise = Math.max(
       from.altitude,
       to.altitude,
-      Math.min(1.8, distance / 45),
+      local ? Math.min(1.8, distance / 45) : 0,
     );
+    // A city-to-country pullback should occupy most of the flight, rather
+    // than covering the whole scale change in the short departure phase.
+    const ascentShare = from.altitude < 0.1 && to.altitude >= 0.25 ? 0.7 : 0.24;
     const ease = (t: number) => {
       const x = Math.max(0, Math.min(1, t));
       return x * x * x * (10 + x * (-15 + 6 * x));
@@ -120,52 +122,30 @@ export class CameraTravel {
       );
       previousTime = now;
       to.altitude = fitAltitude();
-      const t = Math.min(1, elapsed / duration),
-        // Soften just the first 90ms, with a nonzero starting speed so the
-        // globe responds immediately. Rejoin the original ease-out afterward.
-        ramp = Math.min(1, elapsed / 90),
-        easedTime = t * (1 - 0.65 * (1 - ramp) ** 2),
-        smooth = easedTime * (2 - easedTime);
+      const t = Math.min(1, elapsed / duration);
       if (t >= 1) {
         // Avoid accumulated interpolation roundoff at the final position.
         port.pointOfView({ ...to, lng }, 0);
         this.cancel();
         return;
       }
-      if (local) {
-        // Establish the coordinates early along a great-circle arc, then let
-        // the close approach finish. Ascent/descent share one smooth profile.
-        const pan = nearby ? ease(t) : 1 - (1 - ease(t / 0.62)) ** 2;
-        const [arcLng, arcLat] = arc(pan);
-        port.pointOfView(
-          {
-            lat: arcLat,
-            lng: shortestLongitude(from.lng, arcLng),
-            altitude: nearby
-              ? zoom(from.altitude, to.altitude, t)
-              : t < 0.24
-                ? zoom(from.altitude, cruise, t / 0.24)
-                : zoom(cruise, to.altitude, (t - 0.24) / 0.76),
-          },
-          0,
-        );
-        this.frame = requestAnimationFrame(tick);
-        return;
-      }
-      // Pull back slightly during long travel so a close regional view never
-      // scrapes along Earth's surface on its way to another region.
-      const lift =
-        Math.sin(Math.PI * easedTime) *
-        Math.min(
-          0.7,
-          Math.abs(lng - from.lng) / 120 + Math.abs(to.lat - from.lat) / 90,
-        );
+      // Use the original close-up flight at every scale: establish coordinates
+      // along a great-circle arc, then let the gentle approach finish.
+      const pan = nearby ? ease(t) : 1 - (1 - ease(t / 0.62)) ** 2;
+      const [arcLng, arcLat] = arc(pan);
       port.pointOfView(
         {
-          lat: from.lat + (to.lat - from.lat) * smooth,
-          lng: from.lng + (lng - from.lng) * smooth,
-          altitude:
-            from.altitude + (to.altitude - from.altitude) * smooth + lift,
+          lat: arcLat,
+          lng: shortestLongitude(from.lng, arcLng),
+          altitude: nearby
+            ? zoom(from.altitude, to.altitude, t)
+            : t < ascentShare
+              ? zoom(from.altitude, cruise, t / ascentShare)
+              : zoom(
+                  cruise,
+                  to.altitude,
+                  (t - ascentShare) / (1 - ascentShare),
+                ),
         },
         0,
       );

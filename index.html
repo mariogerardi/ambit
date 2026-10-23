@@ -59,10 +59,16 @@
         animation: ambit-loading-glow 3.2s ease-in-out infinite;
       }
       .ambit-loading-title {
-        font-size: clamp(44px, 9vw, 60px);
-        font-weight: 700;
-        line-height: 1;
-        letter-spacing: -0.075em;
+        display: block;
+        width: clamp(160px, 40vw, 220px);
+        height: auto;
+      }
+      html .ambit-logo-light,
+      html[data-theme="paper"] .ambit-logo-dark {
+        display: none;
+      }
+      html[data-theme="paper"] .ambit-logo-light {
+        display: block;
       }
       .ambit-loading-copy {
         color: var(--ui-muted, #b6c9bf);
@@ -223,7 +229,16 @@
             stroke-width="1.5"
           />
         </svg>
-        <strong class="ambit-loading-title">ambit</strong>
+        <img
+          class="ambit-loading-title ambit-logo-dark"
+          src="/ambitlogo.png"
+          alt="ambit"
+        />
+        <img
+          class="ambit-loading-title ambit-logo-light"
+          src="/ambitlogo2.png"
+          alt="ambit"
+        />
         <span class="ambit-loading-copy"
           >Loading your world<span class="ambit-loading-dots">…</span></span
         >

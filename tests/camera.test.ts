@@ -17,6 +17,47 @@ import type { Focus } from "../src/geography/types";
 import { regionStyle, stateStyles } from "../src/globe/visualStates";
 afterEach(() => vi.unstubAllGlobals());
 describe("camera travel", () => {
+  it.each([0.008, 0.06])(
+    "spreads a city-to-country pullback over the flight from altitude %s",
+    (altitude) => {
+      let now = 0,
+        callback: FrameRequestCallback = () => {},
+        position: Required<Focus> = { lat: 42, lng: -71, altitude };
+      vi.stubGlobal("performance", { now: () => now });
+      vi.stubGlobal("requestAnimationFrame", (fn: FrameRequestCallback) => {
+        callback = fn;
+        return 7;
+      });
+      vi.stubGlobal("cancelAnimationFrame", vi.fn());
+      const destination = { lat: 40, lng: -100, altitude: 0.8 },
+        travel = new CameraTravel();
+      travel.move(
+        {
+          pointOfView(target?: Focus) {
+            if (target) position = { ...position, ...target };
+            return position;
+          },
+        },
+        destination,
+        false,
+      );
+      for (now = 10; now <= 1000; now += 10) callback(now);
+      // The country view must not be reached in an abrupt first-second burst.
+      expect(position.altitude).toBeGreaterThan(altitude);
+      expect(position.altitude).toBeLessThan(destination.altitude / 2);
+      let previousAltitude = position.altitude;
+      for (; now <= 3200 && travel.active; now += 10) {
+        callback(now);
+        expect(position.altitude).toBeGreaterThanOrEqual(
+          previousAltitude - 1e-12,
+        );
+        previousAltitude = position.altitude;
+      }
+      expect(position).toEqual(destination);
+      expect(travel.active).toBe(false);
+    },
+  );
+
   it("keeps raised geography beyond the near plane at the permitted local zoom", () => {
     for (const altitude of [0.005, 0.008, 0.018, 0.06]) {
       const floor = localZoomFloor({ lat: 0, lng: 0, altitude });
@@ -28,7 +69,7 @@ describe("camera travel", () => {
     );
     expect(localZoomFloor({ lat: 0, lng: 0, altitude: 1.2 })).toBe(0.005);
   });
-  it("uses slow curved transitions, brief hovers and gentle island dips without changing ordinary travel", () => {
+  it("preserves the overview tour's slow curved transitions, brief hovers and gentle island dips", () => {
     let now = 0,
       nextId = 0;
     const callbacks = new Map<number, FrameRequestCallback>();
@@ -152,7 +193,7 @@ describe("camera travel", () => {
       () => 0.4 / Math.min(1, 390 / height),
     );
     let previousLongitude = 0;
-    for (let i = 0; i < 110; i++) {
+    for (let i = 0; i < 320; i++) {
       now += 10;
       height = 200 + Math.min(1, i / 72) * 350;
       const frame = [...callbacks.values()];
@@ -210,7 +251,7 @@ describe("camera travel", () => {
       }
       expect(position.lng).toBeGreaterThan(-110);
       expect(travel.active || flyover.active).toBe(true);
-      for (let i = 0; i < 220; i++) {
+      for (let i = 0; i < (kind === "travel" ? 240 : 220); i++) {
         now += 10;
         const frame = [...callbacks.values()];
         callbacks.clear();
@@ -491,7 +532,7 @@ describe("camera travel", () => {
     const newRadius = 800 * Math.tan(Math.asin(1 / (position.altitude + 1)));
     expect(newRadius).toBeCloseTo(oldRadius);
   });
-  it("softens the first 90ms without a pause and still settles exactly at the target", () => {
+  it("uses the gentle close-up flight for country selections without an extra pullback", () => {
     let callback: FrameRequestCallback = () => {};
     let position: Required<Focus> = { lat: 0, lng: 0, altitude: 1 };
     vi.stubGlobal("performance", { now: () => 0 });
@@ -508,16 +549,21 @@ describe("camera travel", () => {
     };
     new CameraTravel().move(port, { lat: 30, lng: 90, altitude: 0.8 }, false);
     callback(16);
-    // Still responds on frame one, but begins more gently than pure ease-out.
+    // Country selection now starts gently, just like the original close-up flight.
     const firstProgress = position.lng;
-    expect(firstProgress).toBeGreaterThan((90 * 16) / 1100 / 2);
-    expect(firstProgress).toBeLessThan(90 * (16 / 1100) * (2 - 16 / 1100));
+    expect(firstProgress).toBeGreaterThan(0);
+    expect(firstProgress).toBeLessThan((90 * 16) / 1100 / 4);
     expect(position.lat).toBeGreaterThan(0);
     callback(32);
     expect(position.lng - firstProgress).toBeGreaterThan(firstProgress);
     for (let time = 48; time <= 96; time += 16) callback(time);
-    expect(position.lng).toBeCloseTo(90 * (96 / 1100) * (2 - 96 / 1100), 10);
-    for (let time = 112; time <= 1120; time += 16) callback(time);
+    expect(position.lng).toBeGreaterThan(firstProgress);
+    let previousAltitude = position.altitude;
+    for (let time = 112; time <= 3200; time += 16) {
+      callback(time);
+      expect(position.altitude).toBeLessThanOrEqual(previousAltitude + 1e-12);
+      previousAltitude = position.altitude;
+    }
     expect(position.lat).toBe(30);
     expect(position.lng).toBe(90);
     expect(position.altitude).toBeCloseTo(0.8, 12);
@@ -654,7 +700,7 @@ describe("camera travel", () => {
     expect(cancel).toHaveBeenCalledWith(7);
     travel.move(port, { lat: -10, lng: 0, altitude: 1 }, false);
     const start = performance.now();
-    for (let time = 16; time <= 1120; time += 16) callback(start + time);
+    for (let time = 16; time <= 3200; time += 16) callback(start + time);
     expect(position.lat).toBe(-10);
     expect(travel.active).toBe(false);
   });

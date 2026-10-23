@@ -88,7 +88,16 @@ export function LoadingScreen({ active = true }: { active?: boolean }) {
           strokeWidth="1.5"
         />
       </svg>
-      <strong className="ambit-loading-title">ambit</strong>
+      <img
+        className="ambit-loading-title ambit-logo-dark"
+        src="/ambitlogo.png"
+        alt="ambit"
+      />
+      <img
+        className="ambit-loading-title ambit-logo-light"
+        src="/ambitlogo2.png"
+        alt="ambit"
+      />
       <span className="ambit-loading-copy">
         Loading your world<span className="ambit-loading-dots">…</span>
       </span>
