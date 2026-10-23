@@ -43,11 +43,10 @@ describe("catalog identity", () => {
     }
   });
 
-  it("audits every registered Journey", () => {
-    const world = JSON.parse(
-      readFileSync("public/geography/world.v1.json", "utf8"),
-    ) as RegionFeature[];
-    for (const journey of JOURNEYS)
-      expect(auditJourney(journey, world).errors, journey.id).toEqual([]);
+  const world = JSON.parse(
+    readFileSync("public/geography/world.v1.json", "utf8"),
+  ) as RegionFeature[];
+  it.each(JOURNEYS)("audits $id", (journey) => {
+    expect(auditJourney(journey, world).errors).toEqual([]);
   });
 });

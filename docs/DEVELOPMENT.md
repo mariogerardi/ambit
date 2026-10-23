@@ -135,6 +135,15 @@ Use TypeScript checks for typed changes. For catalog metadata/registration chang
 include `tests/catalog-invariants.test.ts` locally. CI runs the complete suites
 and build before merge; do not repeat that full run locally by default.
 
+Date-selection parity uses the frozen catalogs and vectors in
+`tests/fixtures/journey-schedule-vectors.json`, shared by
+`tests/journey-schedule.test.ts` and `backend/test_journey_schedule.py`. Test the
+raw hash and fixed-pool choices there; do not tie expected provisional picks to
+the expanding production catalog. Catalog additions may change unassigned picks;
+locked assignments and started attempts must retain their editions. The catalog
+invariant suite audits each Journey as a separate case so catalog growth does
+not put all geometry checks under one test's timeout.
+
 ## Prepared data
 
 All generated runtime assets are included. Preparation is for intentional data

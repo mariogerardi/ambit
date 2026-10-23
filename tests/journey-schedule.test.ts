@@ -1,14 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { validJourneySchedule } from "../src/services/journeySchedule";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 import {
   dailyJourney,
+  dailyHash,
+  FIRST_DAILY_DATE,
+  NO_REPEAT_DAYS,
+  SCHEDULE_VERSION,
   seededJourney,
   emptyDaily,
   openDaily,
   unfinished,
 } from "../src/app/dailyProgress";
 import { initialGame } from "../src/game/state";
+import vectors from "./fixtures/journey-schedule-vectors.json";
 
 describe("shared Journey dates", () => {
   const day = "2026-10-05";
@@ -115,29 +120,42 @@ describe("shared Journey dates", () => {
     ])
       expect(validJourneySchedule(value)).toBe(false);
   });
-  it("uses the same versioned date hash as the backend for the shared catalog", () => {
-    expect(seededJourney("2026-10-05", JOURNEY_INDEX).id).toBe(
-      "exceptions-to-the-rule-v1",
-    );
-    expect(seededJourney("2026-10-18", JOURNEY_INDEX).id).toBe(
-      "the-vaccine-that-crossed-the-world-v1",
-    );
-    expect(seededJourney("2026-11-03", JOURNEY_INDEX).id).toBe(
-      "far-from-everything",
-    );
-    expect(seededJourney("2027-01-01", JOURNEY_INDEX).id).toBe(
-      "shared-neighbors-v1",
-    );
-    expect(
-      dailyJourney("2027-01-01", undefined, JOURNEY_INDEX, {
-        "2027-01-01": "removed-id",
-      }).id,
-    ).toBe(seededJourney("2027-01-01", JOURNEY_INDEX).id);
-    expect(() =>
-      dailyJourney("2026-10-05", undefined, JOURNEY_INDEX, {
-        "2026-10-05": "removed-id",
-      }),
-    ).toThrow("Journey unavailable");
+  it("matches shared backend hash and selection vectors for fixed catalogs", () => {
+    expect(SCHEDULE_VERSION).toBe(vectors.scheduleVersion);
+    expect(FIRST_DAILY_DATE).toBe(vectors.firstDay);
+    expect(NO_REPEAT_DAYS).toBe(vectors.noRepeatDays);
+    for (const [day, hash] of Object.entries(vectors.hashes))
+      expect(dailyHash(day), day).toBe(hash);
+    for (const { ids, selections } of vectors.catalogs) {
+      const pool = ids.map((id) => ({
+        id,
+        title: id,
+        description: "Parity fixture",
+        rounds: [],
+      }));
+      for (const [day, id] of Object.entries(selections)) {
+        expect(seededJourney(day, pool).id, day).toBe(id);
+        expect(seededJourney(day, [...pool].reverse()).id, day).toBe(id);
+      }
+    }
+  });
+  it("falls back for unavailable future records while preserving historical unavailability", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(`${vectors.today}T12:00:00Z`));
+    try {
+      expect(
+        dailyJourney("2027-01-01", undefined, JOURNEY_INDEX, {
+          "2027-01-01": "removed-id",
+        }).id,
+      ).toBe(seededJourney("2027-01-01", JOURNEY_INDEX).id);
+      expect(() =>
+        dailyJourney("2026-10-05", undefined, JOURNEY_INDEX, {
+          "2026-10-05": "removed-id",
+        }),
+      ).toThrow("Journey unavailable");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
