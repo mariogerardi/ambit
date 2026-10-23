@@ -9,19 +9,24 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import type { RegionFeature } from "../geography/types";
-import { DISPLAY_CAPITALS, MAJOR_CITIES } from "../geography/places";
+import { EXPLORE_CITIES, exploreCapital } from "../geography/places";
+import type { ExploreCity } from "../geography/places";
 import { FLAGS, COUNTRIES } from "../study/engine";
-import info from "../geography/data/country-info.v1.json";
+import { COUNTRY_PROFILES } from "../geography/countryProfiles";
 import { languageName } from "../geography/languages";
 import { OFFICIAL_LANGUAGES, LANGUAGES } from "../game/quizData";
 import { PanelActive } from "./ModePanels";
 import { InfoTooltip } from "./InfoTooltip";
 import { normalizeAnswer, countryIdForName } from "../game/answerNames";
+import { CityDetails } from "./CityDetails";
 export type { GlobeLayers as ExploreSettings } from "./worldPreferences";
 export function ExplorePanel({
   regions,
   selected,
   selectedRegion,
+  selectedCity,
+  onCity,
+  onCityFocus,
   onSelect,
   onFocus,
   search,
@@ -38,6 +43,9 @@ export function ExplorePanel({
   regions: RegionFeature[];
   selected?: string;
   selectedRegion?: RegionFeature;
+  selectedCity?: ExploreCity;
+  onCity(city: ExploreCity): void;
+  onCityFocus(city: ExploreCity): void;
   onSelect(id?: string): void;
   onFocus(region: RegionFeature): void;
   breakdown?: string;
@@ -46,6 +54,18 @@ export function ExplorePanel({
   regionalLayers?: readonly { parentId: string; key: string; label: string }[];
 }) {
   const card = useRef<HTMLElement>(null);
+  const previousCity = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!selectedCity && previousCity.current) {
+      const link = [
+        ...(card.current?.querySelectorAll<HTMLButtonElement>(
+          "[data-city-id]",
+        ) ?? []),
+      ].find((button) => button.dataset.cityId === previousCity.current);
+      link?.focus({ preventScroll: true });
+    }
+    previousCity.current = selectedCity?.id;
+  }, [selectedCity?.id]);
   useLayoutEffect(() => {
     if (!onContentHeight || !card.current) return;
     const element = card.current;
@@ -90,18 +110,24 @@ export function ExplorePanel({
   const country =
     COUNTRIES.find((c) => c.id === selected) ??
     regions.find((r) => r.id === selected);
-  const capital = DISPLAY_CAPITALS.find((c) => c.countryId === selected),
+  const capital = exploreCapital(selected ?? ""),
     region = regions.find((r) => r.id === selected);
-  const profile = info.countries[selected as keyof typeof info.countries];
+  const profile = COUNTRY_PROFILES[selected ?? ""];
+  const exploreCountries = useMemo(
+    () => regions.filter((r) => r.level === "ADM0"),
+    [regions],
+  );
+  const rosterCountry = COUNTRIES.some((c) => c.id === selected);
+  const center = capital?.name ?? profile?.listedCapital;
   const results = search.trim()
-    ? COUNTRIES.filter(
+    ? exploreCountries.filter(
         (c) =>
           normalizeAnswer(c.name).includes(normalizeAnswer(search)) ||
           c.id ===
             countryIdForName(
               {
                 names: new Map(
-                  COUNTRIES.map((country) => [country.id, country.name]),
+                  exploreCountries.map((country) => [country.id, country.name]),
                 ),
               },
               search,
@@ -113,11 +139,16 @@ export function ExplorePanel({
   const languageIds = selected ? OFFICIAL_LANGUAGES[selected] : undefined;
   const cities = useMemo(
     () =>
-      MAJOR_CITIES.filter((c) => c.parentId === selected)
+      EXPLORE_CITIES.filter(
+        (c) => c.parentId === selected && c.id !== capital?.id,
+      )
         .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
         .slice(0, 3),
-    [selected],
+    [selected, capital?.id],
   );
+  useEffect(() => {
+    if (selectedCity) closeSearch();
+  }, [selectedCity?.id, closeSearch]);
   useEffect(() => {
     if (!open || !search.trim() || !active) return;
     const position = () => {
@@ -194,7 +225,7 @@ export function ExplorePanel({
           spellCheck={false}
           enterKeyHint="search"
           value={search}
-          placeholder="Search countries"
+          placeholder="Search countries and territories"
           aria-expanded={!!search.trim() && active}
           aria-controls="explore-search-results"
           onFocus={() => {
@@ -226,6 +257,21 @@ export function ExplorePanel({
       </button>
     </div>
   );
+  if (selectedCity)
+    return (
+      <section
+        ref={card}
+        className="info-view explore-card"
+        aria-label="City explorer"
+      >
+        <CityDetails
+          city={selectedCity}
+          regions={regions}
+          onBack={() => onSelect(selectedCity.parentId)}
+          onFocus={() => onCityFocus(selectedCity)}
+        />
+      </section>
+    );
   return (
     <section
       ref={card}
@@ -234,7 +280,7 @@ export function ExplorePanel({
     >
       <header className="explore-heading">
         <div className="explore-title">
-          {country && <div className="overline">COUNTRY</div>}
+          {country && <div className="overline">COUNTRY / TERRITORY</div>}
           <h1 className={country ? undefined : "editorial-heading"}>
             {country ? (
               country.name
@@ -260,7 +306,8 @@ export function ExplorePanel({
       {!country && (
         <>
           <p className="muted explore-introduction">
-            Tap a country to see its flag, capital, and more.{" "}
+            Tap a country or territory to see its details. Small places have
+            rings; zoom in to separate nearby targets.{" "}
             <button
               ref={searchButton}
               data-dd-action-name="Explore Open Search"
@@ -323,41 +370,102 @@ export function ExplorePanel({
       {country && (
         <div className="country-detail">
           <dl className="country-facts">
-            <dt>Capital</dt>
-            <dd>{capital?.name ?? "—"}</dd>
+            {center && (
+              <>
+                <dt>{rosterCountry ? "Capital" : "Listed capital"}</dt>
+                <dd>
+                  {capital ? (
+                    <button
+                      className="explore-fact-link"
+                      data-city-id={capital.id}
+                      onClick={() => onCity(capital)}
+                    >
+                      {center}
+                    </button>
+                  ) : (
+                    center
+                  )}
+                  {!rosterCountry && (
+                    <>
+                      {" "}
+                      <InfoTooltip label="Capital notes" compact>
+                        <p>
+                          GeoNames lists this capital. Source conventions may
+                          differ for disputed places and places with multiple
+                          seats of government.
+                        </p>
+                        <a
+                          href="https://www.geonames.org/"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          GeoNames ↗
+                        </a>
+                      </InfoTooltip>
+                    </>
+                  )}
+                </dd>
+              </>
+            )}
             {profile && (
               <>
                 <dt>Region</dt>
                 <dd>{profile.subregion || profile.continent}</dd>
-                <dt>Area</dt>
-                <dd>{profile.areaKm2.toLocaleString()} km²</dd>
-                <dt className="population-label">
-                  Population{" "}
-                  <InfoTooltip label="Data notes" compact>
-                    <p>
-                      Population estimates and language listings are from
-                      GeoNames, downloaded in October 2026. The download date is
-                      not a population census date.
-                    </p>
-                    <p>
-                      {languageIds?.length
-                        ? "Official languages are a curated list for the country or its regions."
-                        : "Language listings cover languages spoken in the country and may include languages without official status."}
-                    </p>
-                    <a
-                      href="https://www.geonames.org/"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      GeoNames ↗
-                    </a>
-                  </InfoTooltip>
-                </dt>
-                <dd>{profile.population.toLocaleString()}</dd>
-                <dt>Currency</dt>
-                <dd>
-                  {profile.currencyName} · {profile.currencyCode}
-                </dd>
+                {profile.areaKm2 != null && (
+                  <>
+                    <dt>Area</dt>
+                    <dd>{profile.areaKm2.toLocaleString()} km²</dd>
+                  </>
+                )}
+                {profile.population != null && (
+                  <>
+                    <dt className="population-label">
+                      Population{" "}
+                      <InfoTooltip label="Data notes" compact>
+                        <p>
+                          {profile.populationSource === "Natural Earth" ? (
+                            `Population is a Natural Earth source estimate${profile.populationYear ? ` for ${profile.populationYear}` : ""}.`
+                          ) : (
+                            <>
+                              Population estimates and language listings are
+                              from GeoNames, downloaded in October 2026. The
+                              download date is not a population census date.
+                            </>
+                          )}
+                        </p>
+                        {!!(
+                          languageIds?.length || profile.languages.length
+                        ) && (
+                          <p>
+                            {languageIds?.length
+                              ? "Official languages are a curated list for the country or its regions."
+                              : "Language listings cover languages spoken in the country and may include languages without official status."}
+                          </p>
+                        )}
+                        <a
+                          href={
+                            profile.populationSource === "Natural Earth"
+                              ? "https://www.naturalearthdata.com/"
+                              : "https://www.geonames.org/"
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {profile.populationSource ?? "GeoNames"} ↗
+                        </a>
+                      </InfoTooltip>
+                    </dt>
+                    <dd>{profile.population.toLocaleString()}</dd>
+                  </>
+                )}
+                {!!profile.currencyCode && (
+                  <>
+                    <dt>Currency</dt>
+                    <dd>
+                      {profile.currencyName} · {profile.currencyCode}
+                    </dd>
+                  </>
+                )}
               </>
             )}
             {!!languageIds?.length && (
@@ -381,7 +489,18 @@ export function ExplorePanel({
             {!!cities.length && (
               <>
                 <dt>Major cities</dt>
-                <dd>{cities.map((c) => c.name).join(", ")}</dd>
+                <dd className="explore-city-list">
+                  {cities.map((city) => (
+                    <button
+                      key={city.id}
+                      className="explore-fact-link"
+                      data-city-id={city.id}
+                      onClick={() => onCity(city)}
+                    >
+                      {city.name}
+                    </button>
+                  ))}
+                </dd>
               </>
             )}
           </dl>

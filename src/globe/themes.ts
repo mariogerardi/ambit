@@ -2,6 +2,7 @@ import type { VisualState } from "../geography/types";
 import { regionStyle } from "./visualStates";
 import { THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
+import mapColors from "../geography/data/map-colors.v1.json";
 import { playColors } from "../theme/playColors";
 export { PLAY_HIGHLIGHTS, PLAY_FEEDBACK } from "../theme/playColors";
 export type GlobeTheme = "natural" | "play";
@@ -31,7 +32,11 @@ export function playRegionStyle(
       ? colors["candidate-hover"]
       : state === "hinted"
         ? colors["context-land"]
-        : (playStateColor(state, palette) ?? land[hash % land.length]),
+        : (playStateColor(state, palette) ??
+          land[
+            ((mapColors.colors as Record<string, number>)[id] ?? hash) %
+              land.length
+          ]),
     stroke: candidateHover
       ? colors["candidate-hover-outline"]
       : state === "hinted"

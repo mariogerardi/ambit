@@ -256,6 +256,9 @@ describe("Same Hour, Different Worlds", () => {
   });
 
   it("replaces Samoa's coarse outlines without duplicate land or changed grading geometry", () => {
+    const originalDisplays = new Map(
+      world.map((r) => [r.id, r.displayGeometry]),
+    );
     const scenes = [
       view(at(3)),
       view(reduce(at(3), ...actions[3], { type: "submit" })),
@@ -272,7 +275,7 @@ describe("Same Hour, Different Worlds", () => {
         expect(visible.displayGeometry).toBe(
           journey.rounds[3].displayGeometries![id],
         );
-        expect(original.displayGeometry).toBeUndefined();
+        expect(original.displayGeometry).toBe(originalDisplays.get(id));
       }
     }
     const scene = scenes[0];
@@ -634,9 +637,9 @@ describe("Same Hour, Different Worlds", () => {
     expect(JOURNEY_INDEX.find((j) => j.id === journey.id)?.path).toBe(
       "/journey/same-hour-different-worlds",
     );
-    expect(
-      JOURNEY_INDEX.find((entry) => entry.id === journey.id)?.id,
-    ).toBe(journey.id);
+    expect(JOURNEY_INDEX.find((entry) => entry.id === journey.id)?.id).toBe(
+      journey.id,
+    );
     expect(await loadJourney(journey.id)).toBe(journey);
     expect(auditJourney(journey, world).errors).toEqual([]);
   });

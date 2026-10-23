@@ -135,7 +135,20 @@ describe("Explore local data and requested cleanup", () => {
     expect(physical.some((f: { name: string }) => f.name === "Danube")).toBe(
       true,
     );
-    expect(Object.keys(info.countries)).toHaveLength(193);
+    const world = validateRegions(
+      JSON.parse(readFileSync("public/geography/world.v1.json", "utf8")),
+    );
+    expect(Object.keys(info.countries).sort()).toEqual(
+      world.map((r) => r.id).sort(),
+    );
+    expect(info.countries["wurl:FRO"].listedCapital).toBe("Torshavn");
+    expect(info.countries["wurl:GRL"].languages).toContain("kl");
+    expect(info.countries["wurl:PSE"].population).toBeGreaterThan(0);
+    expect(info.countries["wurl:ESH"].population).toBeGreaterThan(0);
+    expect(info.countries["wurl:NE-SOL"].populationSource).toBe(
+      "Natural Earth",
+    );
+    expect(info.countries["wurl:NE-ATC"]).not.toHaveProperty("listedCapital");
     expect(info.source).toContain("undated");
   });
   it("rejects the old river snapshot and conflicting label identities", () => {

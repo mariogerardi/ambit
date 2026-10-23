@@ -64,7 +64,14 @@ import { canSelect, responseCount } from "./game/questionPreparation";
 import { questionPrompt } from "./game/questionText";
 import { gameReducer, initialGame } from "./game/state";
 import type { Action, GameState } from "./game/state";
-import { DISPLAY_CAPITALS, MAJOR_CITIES } from "./geography/places";
+import {
+  DISPLAY_CAPITALS,
+  MAJOR_CITIES,
+  EXPLORE_CAPITALS,
+  EXPLORE_MAJOR_CITIES,
+  EXPLORE_CITY_BY_ID,
+} from "./geography/places";
+import type { ExploreCity } from "./geography/places";
 import { modeForPath } from "./app/modes";
 import { ModePanels } from "./app/ModePanels";
 import { useMobileLayout } from "./app/useMobileLayout";
@@ -187,6 +194,7 @@ export function App() {
   const [defaultLayers, setDefaultLayers] = useState(readGlobeLayers);
   const [breakdown, setBreakdown] = useState<string>();
   const [selectedRegion, setSelectedRegion] = useState<RegionFeature>();
+  const [selectedCity, setSelectedCity] = useState<ExploreCity>();
   const [retry, setRetry] = useState(0);
   const [today, setToday] = useState(localDateKey),
     [studySetup, setStudySetup] = useState(true);
@@ -382,6 +390,7 @@ export function App() {
     frame,
     stop,
     focusExplore,
+    focusExploreCity,
     pendingExploreFocus,
     exploreEntryFromCountry,
     prepareNavigation,
@@ -418,7 +427,7 @@ export function App() {
       capitalFocus: studyPresentation.capitalFocus,
     },
   });
-  const mobileStep = `${path}:${isJourney ? `${journey.id}:${game.roundIndex}:${game.phase}` : studying ? `${session!.prompt.ordinal}:${session!.phase}` : mode === "explore" ? `${selected}:${selectedRegion?.id}` : "setup"}`;
+  const mobileStep = `${path}:${isJourney ? `${journey.id}:${game.roundIndex}:${game.phase}` : studying ? `${session!.prompt.ordinal}:${session!.phase}` : mode === "explore" ? `${selected}:${selectedRegion?.id}:${selectedCity?.id}` : "setup"}`;
   useEffect(() => {
     setGlobeExpanded(false);
     if (mobile.enabled && document.activeElement instanceof HTMLElement)
@@ -437,13 +446,19 @@ export function App() {
                 r.id === selectedRegion?.id ||
                 (!selectedRegion &&
                   (regional?.regionalRoot(r.id) ?? r.id) === selected)
-                  ? "selected"
+                  ? selectedCity
+                    ? "hinted"
+                    : "selected"
                   : "disabled",
               ]),
             ),
             // Once a subdivision is active, the country is coverage only.
             // Its backing surface and exterior outline must stay neutral.
-            [selected]: selectedRegion ? "disabled" : "selected",
+            [selected]: selectedRegion
+              ? "disabled"
+              : selectedCity
+                ? "hinted"
+                : "selected",
           }
         : {}),
     [
@@ -453,22 +468,50 @@ export function App() {
       mode,
       selected,
       selectedRegion,
+      selectedCity,
       exploreRegions,
       regional,
     ],
   );
-  const places: PlaceFeature[] = useMemo(
-    () =>
-      world?.places ??
-      studyPresentation.places ??
-      (displayLayers
-        ? [
-            ...(displayLayers.capitals ? DISPLAY_CAPITALS : []),
-            ...(displayLayers.cities ? MAJOR_CITIES : []),
-          ]
-        : []),
-    [world?.places, studyPresentation.places, displayLayers],
-  );
+  const places: PlaceFeature[] = useMemo(() => {
+    if (world?.places) return world.places;
+    if (studyPresentation.places) return studyPresentation.places;
+    const visible = displayLayers
+      ? [
+          ...(displayLayers.capitals
+            ? mode === "explore"
+              ? EXPLORE_CAPITALS
+              : DISPLAY_CAPITALS
+            : []),
+          ...(displayLayers.cities
+            ? mode === "explore"
+              ? EXPLORE_MAJOR_CITIES
+              : MAJOR_CITIES
+            : []),
+        ]
+      : [];
+    if (mode !== "explore") return visible;
+    const result: PlaceFeature[] = visible
+      .filter((city) => city.id !== selectedCity?.id)
+      .map((city) => ({ ...city, hoverName: city.name }));
+    if (selectedCity)
+      result.unshift({
+        ...selectedCity,
+        hoverName: selectedCity.name,
+        inspectionSelected: true,
+        visualState: "selected",
+        priority: 1e9,
+        markerSize: 24,
+        labelFlexible: true,
+      });
+    return result;
+  }, [
+    world?.places,
+    studyPresentation.places,
+    displayLayers,
+    mode,
+    selectedCity,
+  ]);
   const borders =
     world?.showBorders ??
     studyDisplay?.borders ??
@@ -497,11 +540,13 @@ export function App() {
       if (subdivision) {
         // Ignore taps from a subdivision layer that is being replaced.
         if (regional?.regionalRoot(subdivision.id) !== selected) return;
+        setSelectedCity(undefined);
         setSelectedRegion(subdivision);
         focusExplore(subdivision);
         return;
       }
       if (id && !namedRegions.some((region) => region.id === id)) return;
+      setSelectedCity(undefined);
       setSelectedRegion(undefined);
       setSelected(id);
       if (id !== selected) {
@@ -521,6 +566,23 @@ export function App() {
       clearBranches,
     ],
   );
+  const selectExploreCity = useCallback(
+    (place: PlaceFeature) => {
+      const city = EXPLORE_CITY_BY_ID.get(place.id);
+      if (!city || !namedRegions.some((region) => region.id === city.parentId))
+        return;
+      stop();
+      clearHover();
+      setExploreSearch("");
+      setSelectedRegion(undefined);
+      setBreakdown(undefined);
+      clearBranches();
+      setSelected(city.parentId);
+      setSelectedCity(city);
+      focusExploreCity(city);
+    },
+    [namedRegions, stop, clearHover, clearBranches, focusExploreCity],
+  );
   useEffect(() => {
     if (
       selectedRegion &&
@@ -536,6 +598,7 @@ export function App() {
     // Entry intent is captured during render, before the camera consumes its request.
     if (mode !== "explore" || exploreEntryFromCountry) return;
     setSelected(undefined);
+    setSelectedCity(undefined);
     setSelectedRegion(undefined);
     setBreakdown(undefined);
     clearBranches();
@@ -873,6 +936,9 @@ export function App() {
         onSelect={selectExplore}
         onFocus={focusExplore}
         selectedRegion={selectedRegion}
+        selectedCity={selectedCity}
+        onCity={selectExploreCity}
+        onCityFocus={focusExploreCity}
         breakdown={breakdown}
         onBreakdown={(id) => {
           setBreakdown(id);
@@ -1188,9 +1254,11 @@ export function App() {
                       : undefined
                 }
                 placeInteraction={
-                  isJourney &&
-                  journey.rounds[game.roundIndex].mode.startsWith("city-")
+                  mode === "explore" ||
+                  (isJourney &&
+                    journey.rounds[game.roundIndex].mode.startsWith("city-"))
                 }
+                placeInspection={mode === "explore"}
                 constructionInput={
                   isJourney &&
                   game.phase === "playing" &&
@@ -1220,6 +1288,10 @@ export function App() {
                     : undefined
                 }
                 onPlace={(place) => {
+                  if (mode === "explore") {
+                    selectExploreCity(place);
+                    return;
+                  }
                   if (
                     isJourney &&
                     journey.rounds[game.roundIndex].mode.startsWith("city-")
@@ -1241,11 +1313,6 @@ export function App() {
                 rotationSpeed={rotationSpeed}
                 motion={motion}
                 reduced={reduced}
-                markers={
-                  (studying && session!.prompt.style === "map") ||
-                  (isJourney &&
-                    journey.rounds[game.roundIndex].mode.startsWith("map-"))
-                }
                 onReady={onReady}
                 onInteraction={stop}
                 onFailure={contextLost}
@@ -1345,9 +1412,12 @@ export function App() {
             data-dd-action-name="Globe Recenter"
             disabled={!ready || !webgl}
             onClick={() =>
-              recenter(
-                selectedRegion ?? namedRegions.find((r) => r.id === selected),
-              )
+              selectedCity && mode === "explore"
+                ? focusExploreCity(selectedCity)
+                : recenter(
+                    selectedRegion ??
+                      namedRegions.find((r) => r.id === selected),
+                  )
             }
           >
             ◎ Recenter

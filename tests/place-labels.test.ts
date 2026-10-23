@@ -84,6 +84,49 @@ const camera = () => {
 };
 afterEach(() => vi.unstubAllGlobals());
 describe("cached readable place labels", () => {
+  it("keeps an inspected small city visible and selectable at world zoom without making it a quiz answer target", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    const inspected: PlaceFeature = {
+      id: "inspection",
+      name: "Small city",
+      kind: "city",
+      lat: 0,
+      lng: 0,
+      sourceId: "test",
+      population: 20,
+      inspectionSelected: true,
+      priority: 1e9,
+      visualState: "selected",
+      labelFlexible: true,
+    };
+    const normal = { ...inspected, id: "context", inspectionSelected: false };
+    expect(placeDetailVisible(normal, 2)).toBe(false);
+    expect(placeDetailVisible(inspected, 2)).toBe(true);
+    labels.update(
+      {
+        id: "places",
+        kind: "place-labels",
+        places: [inspected],
+        visible: true,
+        markers: true,
+        contextual: true,
+      },
+      100,
+    );
+    labels.view(camera(), 700, 700);
+    expect(
+      labels.group.children
+        .filter(
+          (child) => child.visible && child.userData.placeId === inspected.id,
+        )
+        .map((child) => child.userData.role)
+        .sort(),
+    ).toEqual(["label", "marker"]);
+    expect(labels.pick(350, 350)).toBe(inspected);
+    expect(inspected.answerTarget).toBeUndefined();
+    labels.dispose();
+  });
   it.each([0.42, 0.85, 1.35])(
     "keeps Pretoria and Johannesburg labels clear of both reference dots at altitude %s",
     (altitude) => {

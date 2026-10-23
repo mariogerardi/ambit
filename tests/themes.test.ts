@@ -11,6 +11,8 @@ import {
   THEMES,
 } from "../src/theme/themes";
 import { playColors } from "../src/theme/playColors";
+import { readFileSync } from "node:fs";
+import { validateRegions } from "../src/geography/loadLayer";
 import {
   PLAY_HIGHLIGHTS,
   playRegionStyle,
@@ -49,6 +51,47 @@ function contrast(a: string, b: string) {
 }
 
 describe("application themes", () => {
+  it("gives every shared-border country pair distinct base colors in every palette, including enclave boundaries", () => {
+    const world = validateRegions(
+      JSON.parse(readFileSync("public/geography/world.v1.json", "utf8")),
+    );
+    const owners = new Map<string, string[]>();
+    const pairs = new Set<string>();
+    for (const region of world) {
+      const polygons =
+        region.geometry.type === "Polygon"
+          ? [region.geometry.coordinates]
+          : region.geometry.coordinates;
+      for (const polygon of polygons)
+        for (const ring of polygon)
+          for (let i = 1; i < ring.length; i++) {
+            const a = ring[i - 1].join(","),
+              b = ring[i].join(",");
+            if (a === b) continue;
+            const edge = [a, b].sort().join("|");
+            for (const other of owners.get(edge) ?? []) {
+              if (other !== region.id)
+                pairs.add([other, region.id].sort().join("|"));
+            }
+            owners.set(edge, [...(owners.get(edge) ?? []), region.id]);
+          }
+    }
+    for (const [a, b] of [
+      ["DZA", "NER"],
+      ["EGY", "SDN"],
+      ["ZAF", "LSO"],
+      ["ITA", "SMR"],
+    ])
+      expect(pairs.has([`wurl:${a}`, `wurl:${b}`].sort().join("|"))).toBe(true);
+    for (const theme of THEME_IDS)
+      for (const pair of pairs) {
+        const [a, b] = pair.split("|");
+        expect(
+          playRegionStyle(a, "default", false, theme).fill,
+          `${theme}: ${pair}`,
+        ).not.toBe(playRegionStyle(b, "default", false, theme).fill);
+      }
+  });
   it("persists a versioned preference and safely rejects corrupt or unknown values", () => {
     expect(readTheme()).toBe(DEFAULT_THEME);
     saveTheme("paper");

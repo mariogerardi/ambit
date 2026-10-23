@@ -4,6 +4,7 @@ import json
 import pathlib
 import zipfile
 import unicodedata
+import subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 INPUTS = {
@@ -17,11 +18,13 @@ for name, (_, checksum) in INPUTS.items():
     if hashlib.sha256(path.read_bytes()).hexdigest() != checksum:
         raise ValueError(f'{name}: checksum mismatch')
 info = {}
+country_info = {}
 for line in (ROOT / '.cache/quiz/countryInfo.txt').read_text().splitlines():
     if not line.startswith('#'):
         columns = line.split('\t')
         if len(columns) > 9:
             info[columns[0]] = columns[1]
+            country_info[columns[0]] = columns
 roster = {c['id'] for c in json.loads((ROOT / 'src/game/data/un-members.v1.json').read_text())['members']}
 capitals = json.loads((ROOT / 'src/game/data/capitals.v1.json').read_text())['capitals']
 capital_ids = {c['id'].removeprefix('place:') for c in capitals}
@@ -51,6 +54,14 @@ out = {
     'capitalNames': {c['id']: unicodedata.normalize('NFC', by_id[c['id'].removeprefix('place:')][1]) for c in capitals},
     'capitalPopulations': {c['id']: int(by_id[c['id'].removeprefix('place:')][14]) for c in capitals},
 }
+explore = subprocess.run(
+    ['node', str(ROOT / 'scripts/prepare-explore-cities.mjs')],
+    input=json.dumps(dict(rows=rows, countryInfo=country_info, capitals=capitals)),
+    text=True, capture_output=True, cwd=ROOT,
+)
+if explore.returncode:
+    raise SystemExit(explore.stderr.strip() or 'Explore city preparation failed')
+out['explore'] = json.loads(explore.stdout)
 path = ROOT / 'src/geography/data/cities.v1.json'
 path.parent.mkdir(parents=True, exist_ok=True)
 path.write_text(json.dumps(out, ensure_ascii=False, separators=(',', ':')) + '\n')
@@ -58,5 +69,7 @@ metadata = {k: out[k] for k in ['version', 'license', 'source', 'policy']}
 metadata.update(inputs=[dict(url=url, sha256=sha) for url, sha in INPUTS.values()],
                 asset=str(path.relative_to(ROOT)), sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                 bytes=path.stat().st_size, cities=len(selected), capitalPopulations=len(capitals))
+metadata.update(exploreCities=len(out['explore']['cities']), explorePolicy=out['explore']['policy'],
+                exploreInputs=out['explore']['inputs'])
 (ROOT / 'sources/cities.metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
 print(f'Prepared {len(selected)} major cities and {len(capitals)} capital population estimates ({path.stat().st_size:,} bytes)')

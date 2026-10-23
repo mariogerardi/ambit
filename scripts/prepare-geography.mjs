@@ -166,6 +166,7 @@ function convert(f, table, sourceId, level) {
     geometry: f.geometry,
   };
 }
+// Preserve existing answer geometry; regional preparation supplies 75% display outlines.
 const world = (await simplify(worldRaw, 16)).features.map((f) =>
   convert(f, mapping.world, f.properties.NE_ID, "ADM0"),
 );
@@ -352,3 +353,6 @@ await fs.writeFile(
     2,
   ) + "\n",
 );
+
+// Stable base colors follow the shipped world topology.
+await import("./prepare-map-colors.mjs");

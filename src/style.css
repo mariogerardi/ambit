@@ -157,31 +157,9 @@ strong {
   }
 }
 .ambit-wordmark {
-  --logo-spacing: -0.02em;
-  position: relative;
-  isolation: isolate;
-  font-family: var(--font-ui);
-  font-weight: 700;
-  letter-spacing: var(--logo-spacing);
-  display: inline-block;
-  white-space: nowrap;
-}
-.ambit-letter-i {
-  position: relative;
-  display: inline-block;
-  letter-spacing: 0;
-  margin-right: var(--logo-spacing, -2.5px);
-}
-.ambit-orb {
-  position: absolute;
-  z-index: -1;
-  width: 0.72em;
-  height: 0.72em;
-  top: -0.21em;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  opacity: 0.85;
+  display: block;
+  width: 3.6em;
+  height: auto;
 }
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -197,4 +175,19 @@ strong {
     min-height: 44px;
     min-width: 44px;
   }
+}
+
+.small-region-locators {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+.small-region-locators circle {
+  stroke: currentColor;
+}
+.small-region-locators circle + circle {
+  fill: currentColor;
 }

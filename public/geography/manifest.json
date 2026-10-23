@@ -11,9 +11,14 @@
     "generatedAt": "2026-10-04T00:00:00Z",
     "filename": "world.v1.json",
     "features": 242,
-    "bytes": 563784,
-    "sha256": "166de024583822a0e82a4ce4b809d20c898c5f4fc24dda1ebae351ab7da43ad6",
-    "displayWaterSource": "Natural Earth v5.1.2 / 1:10m Great Lakes"
+    "bytes": 2074376,
+    "sha256": "d75294788428c0f6a454000f86809f9852ecb62d1c57407101af2e7a37bf3fcb",
+    "displayWaterSource": "Natural Earth v5.1.2 / 1:10m Great Lakes",
+    "displaySimplification": {
+      "method": "weighted",
+      "retainedPercent": 75,
+      "keepShapes": true
+    }
   },
   {
     "key": "USA/ADM1",
@@ -28,8 +33,8 @@
     "generatedAt": "2026-10-04T00:00:00Z",
     "filename": "usa-adm1.v1.json",
     "features": 56,
-    "bytes": 1024960,
-    "sha256": "5a9b8b00e5eead08ed93af44e5dbd2439bca0ab0489e2571c0786bd48bae1b32",
+    "bytes": 1252416,
+    "sha256": "f40099ccc1341d6cddadbc74d3ecac2b2ead1dc6ee164bfd25341e83fb8aed48",
     "displayGeometryVersion": 2
   },
   {
@@ -45,8 +50,8 @@
     "generatedAt": "2026-10-04T00:00:00Z",
     "filename": "ny-adm2.v1.json",
     "features": 62,
-    "bytes": 180952,
-    "sha256": "499fb9992d106acb39e05aada38e99504cae4dcdeae02a4d1e40fe72f3a48b61",
+    "bytes": 188692,
+    "sha256": "dc298467375d336db9b1617da670a02a3733858c62d47435bb207a1919c5b610",
     "displayGeometryVersion": 2
   },
   {
@@ -61,8 +66,8 @@
     "sourceUrl": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09/releaseData/gbOpen/CAN/ADM1/geoBoundaries-CAN-ADM1_simplified.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 13,
-    "bytes": 1114109,
-    "sha256": "ff2e05d2671da556cc1c30ff44de84081eb7caafa03d8f8403f2cbf72962de72",
+    "bytes": 1467070,
+    "sha256": "e97451099bc32510d70df90ae5357cabcbdfbf327e2fdc80570b952d7f917989",
     "displayGeometryVersion": 2
   },
   {
@@ -77,8 +82,8 @@
     "sourceUrl": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09/releaseData/gbOpen/MEX/ADM1/geoBoundaries-MEX-ADM1_simplified.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 32,
-    "bytes": 415941,
-    "sha256": "97704ca9bca409a5d56776139c05acf3caffa4cd95d68a742f440d2ed36c7bb2",
+    "bytes": 458423,
+    "sha256": "abbdf0cbf49149f415ab5de7b5ffdfb8aa853ffc6b9b9e3053d559d5012df85c",
     "displayGeometryVersion": 2
   },
   {
@@ -93,8 +98,8 @@
     "sourceUrl": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09/releaseData/gbOpen/AUS/ADM1/geoBoundaries-AUS-ADM1_simplified.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 426880,
-    "sha256": "356c70d6d5ae59e8cfd9b4412a2600f037b114941c7ad2f88f239c042520fe37",
+    "bytes": 540764,
+    "sha256": "22a36c226d8c42b8252cd773605e9ed695bccffae6499daa4bc5e154b4921da5",
     "displayGeometryVersion": 2
   },
   {
@@ -109,8 +114,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 24,
-    "bytes": 196726,
-    "sha256": "f51304c7adfe1f1df92070debfad0dc73cd024a96956b017b092e96bfd65fc20",
+    "bytes": 213536,
+    "sha256": "f81cb4895b42ea44b91e57f06a53e5cca596e59fcdd577e8adbbddc13877b3e8",
     "displayGeometryVersion": 2
   },
   {
@@ -125,8 +130,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 19,
-    "bytes": 51131,
-    "sha256": "d195828e6ccefca6f912ac7d9df04d74be01d3c8203b459bd25c734b1d7d5d2e",
+    "bytes": 49472,
+    "sha256": "e2d0d410fd24046153ca812f1487918747f029238561334c1d0f0269632a996f",
     "displayGeometryVersion": 2
   },
   {
@@ -141,8 +146,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 33,
-    "bytes": 403468,
-    "sha256": "f3209db449420dd60a5a0b5d4abca5609daaf1ea17fd677d5eee2dd8f1cffad6",
+    "bytes": 522893,
+    "sha256": "d445b4ba098e5f6c098a64c19fdcbb00a08173ce748b797cc5df5d712cf36bea",
     "displayGeometryVersion": 2
   },
   {
@@ -157,8 +162,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 83610,
-    "sha256": "f47ade5b1a660d028e07cb4d173f4eabb2b5450fd2ff090b95d732fcfc7611bc",
+    "bytes": 89874,
+    "sha256": "c77fb7a3f288eabd51d7f61b7065d1eac392026ff5f91ad1400e3bc620d1d58a",
     "displayGeometryVersion": 2
   },
   {
@@ -173,8 +178,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 203863,
-    "sha256": "f71a555634af7a6433f359374ad6a3d9a25b6790cd889a89b782f1b0c26cb5b2",
+    "bytes": 241862,
+    "sha256": "4c0a10062c1aaa6d4e0f48c08c3517219797a0aaba3b89847cb463e2f760134b",
     "displayGeometryVersion": 2
   },
   {
@@ -189,8 +194,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 86826,
-    "sha256": "9390e16c7dbd71004752c0540cbdf8566d1aa922a1d729819298034dd2e8f455",
+    "bytes": 90790,
+    "sha256": "5aefd513baaba8fc1e640d45455e46c0dd33cf3eb02e7f5240a2ac60d2f528f4",
     "displayGeometryVersion": 2
   },
   {
@@ -205,8 +210,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 26,
-    "bytes": 132598,
-    "sha256": "63b2c55a78a7cdb36802ba7adce804536862bc40974a49d0079f5620c71df4e2",
+    "bytes": 147164,
+    "sha256": "8129df99652cff95623762a9212391f2e12649234b66ef612a671b4f2b5b8316",
     "displayGeometryVersion": 2
   },
   {
@@ -221,8 +226,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 8489,
-    "sha256": "ec7c2b086839bb4366ada8acdc515a204792aed9571cff1d484ea0fbf3441cc5",
+    "bytes": 9468,
+    "sha256": "c3a70aa94764e5204b256fb1f6d59280c314b16605b1ec424e4a2ae1bae9ed54",
     "displayGeometryVersion": 2
   },
   {
@@ -237,8 +242,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 36,
-    "bytes": 240883,
-    "sha256": "dd7d71f7e2a174911f3f128fb061dc26f4158d71a2ab692e2881a237672ede37",
+    "bytes": 267458,
+    "sha256": "42af918fabc1b1cdcd352f659dff5a7b2484c8076687af4e38984ccbff2ef4bc",
     "displayGeometryVersion": 2
   },
   {
@@ -253,8 +258,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 32,
-    "bytes": 417638,
-    "sha256": "0f36b364fe841e8e6b9a2cc1d4720d6bccd8d523bcf24780898f95a769563bf0",
+    "bytes": 456089,
+    "sha256": "21eeac8c0ae7ce4da945ed505350455335132f9d76744a75026403930d830dfd",
     "displayGeometryVersion": 2
   },
   {
@@ -269,8 +274,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 21799,
-    "sha256": "93866643dc8d0ff45a3db95aff27c34072e0848d81ddf48fda015521954ca8a7",
+    "bytes": 19622,
+    "sha256": "67cd53694dfb94f8fad11a7ec2147b8e80e35f9426c9b8d4eda7af2652dcf9e9",
     "displayGeometryVersion": 2
   },
   {
@@ -285,8 +290,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 10639,
-    "sha256": "3d801a81988b523d7740e74f4affb15943131bd728abe4bfbe34b1fabfbfabbd",
+    "bytes": 12409,
+    "sha256": "ac652369e13f5b46356e7b72c80a3451aa0c3450901aa8a6e31b795ce85dc76e",
     "displayGeometryVersion": 2
   },
   {
@@ -301,8 +306,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 83148,
-    "sha256": "cb8b4cb1c3ec78975d814af2bf84f0e11efb9734733e29cc783702823833fcbe",
+    "bytes": 85895,
+    "sha256": "5209a28fc3f0c85f514df18fbf38c4eab9f4afdc3c9fd5c3efaf2b38891eb939",
     "displayGeometryVersion": 2
   },
   {
@@ -317,8 +322,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 13,
-    "bytes": 65237,
-    "sha256": "81099a0701251f241159a5ba810957ce3743fb67111dff50d8ec4bf0301450cf",
+    "bytes": 72176,
+    "sha256": "114ee85b98262e8f4f3bb1d6f31c0dc1ec33c2b88dc9b6dab0280b2182e95706",
     "displayGeometryVersion": 2
   },
   {
@@ -333,8 +338,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 8,
-    "bytes": 60483,
-    "sha256": "c8d88b09f998d4bb4e445f019cda522879f68c7886dced5fbdf3ee158815ff7f",
+    "bytes": 59362,
+    "sha256": "e20df5f71b76aa8820aed2ed2a544fc7f561ea58ac067327f0cdc96f42253ab4",
     "displayGeometryVersion": 2
   },
   {
@@ -349,8 +354,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 28,
-    "bytes": 61507,
-    "sha256": "bb187f6144bfec52e31085248b0ee670109c866fad805179db4c7f0357c92ba6",
+    "bytes": 67933,
+    "sha256": "c2216a31d9ff40d9c24207f72bafe85583cb2ad2dce7e099de9bdd6b287c0231",
     "displayGeometryVersion": 2
   },
   {
@@ -365,8 +370,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 30,
-    "bytes": 109341,
-    "sha256": "0e5d157553cbad6976b9eb0fda705f3d3718259d7100aad6ef107f2f8e4d4a98",
+    "bytes": 119916,
+    "sha256": "e84af9a55235a0b528394b557d755e3f18539c6d1502ccdcad078b235249ea52",
     "displayGeometryVersion": 2
   },
   {
@@ -381,8 +386,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 15,
-    "bytes": 40449,
-    "sha256": "8e410e1516a9ecce87deb675cccd6973895b9dadb3650824c54d1b123876e612",
+    "bytes": 44907,
+    "sha256": "7cd5ab2a6ee5936209a342df2007bcac532c773203883f8ca6a04cd5f0772c09",
     "displayGeometryVersion": 2
   },
   {
@@ -397,8 +402,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 101,
-    "bytes": 193903,
-    "sha256": "a2587b2b945b319a35356c2b4f561b87103712d8e4c3662d2696befba48e5b67",
+    "bytes": 206691,
+    "sha256": "a485acf91aa95bc06bc155f8fd5a947786a9104db1cc6b5d249dd3cec42c84f8",
     "displayGeometryVersion": 2
   },
   {
@@ -413,8 +418,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 30679,
-    "sha256": "e4cd2ef87b6505b16310dc7afe7452daf153702e06e32a0ddc6cf21797f23efc",
+    "bytes": 35513,
+    "sha256": "155fbaf5502cb0da241e716d3dacaeacaf4ba03a42e02dfbfe93160e8dbd4a5a",
     "displayGeometryVersion": 2
   },
   {
@@ -429,8 +434,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 49662,
-    "sha256": "4a4971593a95810d891034550beb07daceadedbbc80ebaccec3e7209513ed6a5",
+    "bytes": 52159,
+    "sha256": "458f876db2aae06a510f54243b81fd95fd87a1b83580ad3a678bcd4cbb0a7e31",
     "displayGeometryVersion": 2
   },
   {
@@ -445,8 +450,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 17,
-    "bytes": 37509,
-    "sha256": "a02844d7a7ed66f24bebd72d9874bac4e9f27cfd4b0b4916e8a41e691c105795",
+    "bytes": 48106,
+    "sha256": "83fafa8dfcff713d1b0e3a4ed87c87d37c8c65bb301c057c148eae031ac692f6",
     "displayGeometryVersion": 2
   },
   {
@@ -461,8 +466,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 43480,
-    "sha256": "c27ca41d2d7fdc5e4eee549d51e825e2a81bb573a794973c8c649de62115740a",
+    "bytes": 47944,
+    "sha256": "97f85b7ad8cf40670bb638acc37c84fa3827e328f8e149057303052349eb5fdd",
     "displayGeometryVersion": 2
   },
   {
@@ -477,8 +482,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 79887,
-    "sha256": "60c7a69f2168e82fb09efd91344c27e5eeccb05b07a6c7818272785103caeffe",
+    "bytes": 84634,
+    "sha256": "1786874e5af73e1329ba4e6294945c3d8275e09b9b0999cab7c359316ecfa83d",
     "displayGeometryVersion": 2
   },
   {
@@ -493,8 +498,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 7,
-    "bytes": 26935,
-    "sha256": "1fdf6d5612a3f9f924cadc8f687fcc87211ee43b32e501e0a94df3ebae20ecb8",
+    "bytes": 27737,
+    "sha256": "066c9effe78b43172576c65681ac922fd97c3923d8d5e5d83ed248cd9247345f",
     "displayGeometryVersion": 2
   },
   {
@@ -509,8 +514,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 17,
-    "bytes": 42003,
-    "sha256": "7296fa39ac64cd676a4cd6246da4d1b6fb5804dee971cd30fe628888d15dff5f",
+    "bytes": 42795,
+    "sha256": "b90db268e2980e9d39b85c252853d2eb020fbf83f11019e6ac5eddd9a7f59abd",
     "displayGeometryVersion": 2
   },
   {
@@ -525,8 +530,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 12,
-    "bytes": 69491,
-    "sha256": "2e58b431fbd3f69bda3764e7fc1b706caacb34d3c5a8b9476599b4baf5df7a68",
+    "bytes": 72485,
+    "sha256": "5d1e2f3b2e961ac79552e5d526a60e6977ddfcf2d680e3419f917f43ddd83047",
     "displayGeometryVersion": 2
   },
   {
@@ -541,8 +546,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 139534,
-    "sha256": "7e7186275f9fa4cef80379a40c3e7358d00686894646cd6f03b03fb2e0dae991",
+    "bytes": 142717,
+    "sha256": "bade9c0b2351a0611ef7839aeccbc175c7fedaf30ce471ba270b770154c03999",
     "displayGeometryVersion": 2
   },
   {
@@ -557,8 +562,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 20,
-    "bytes": 33105,
-    "sha256": "f03d9fb9e0b3669e25f442f7953c710abf9b5b9a6f544ef689dc71916ceb352e",
+    "bytes": 31956,
+    "sha256": "0e8a8a4685d982687913581f354de277dfc4c2d9f7a7ee95fd29224e5dfe8db7",
     "displayGeometryVersion": 2
   },
   {
@@ -573,8 +578,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 25,
-    "bytes": 95431,
-    "sha256": "24d3b9f56fc00291b76955d79639468d8a88b2ce22fa705814ff267cd5285d28",
+    "bytes": 100612,
+    "sha256": "bf30ce197dc99b83afc41067b49216de15a57d76350c0dc28cca381ff4982d07",
     "displayGeometryVersion": 2
   },
   {
@@ -589,8 +594,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 7,
-    "bytes": 31922,
-    "sha256": "58b3bb8607a6dfbf30019c4e204fe0911ead46045c6982bbf9a19d3cf9a7beca",
+    "bytes": 40354,
+    "sha256": "00c9454ddbbaa986c851180dfa51a83969856c8cd95d29d769407db086fbc86d",
     "displayGeometryVersion": 2
   },
   {
@@ -605,8 +610,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 13,
-    "bytes": 65504,
-    "sha256": "c604efb35632e57235435d67e2723d3fa58cc76b76ba92e0f9a3bdeeab0fb9d7",
+    "bytes": 70166,
+    "sha256": "1e8c70e1b450e431a8d6a67db85af98483ca042aa0cd0d03bac7321c94fae112",
     "displayGeometryVersion": 2
   },
   {
@@ -621,8 +626,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 98821,
-    "sha256": "c63655f55775b620a17d666886c98f8a5cdbe8af9fadbf0cf01580c34d9eb4d0",
+    "bytes": 107946,
+    "sha256": "44fe1fd7a9155e7a748b6176218db8f1bd73e472af591d44acb27989aa9fb2cd",
     "displayGeometryVersion": 2
   },
   {
@@ -637,8 +642,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1053,
-    "sha256": "861071a2e3f78f972808469c68508dac4dbb5c5bad986666e537eb7df3150271",
+    "bytes": 1154,
+    "sha256": "ea0c626e02ac0a6a5ee750195ba82014664a7fdd73a6ef10673911383fcd8ac2",
     "displayGeometryVersion": 2
   },
   {
@@ -653,8 +658,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1176,
-    "sha256": "7d0e791cb508bd0eb260ac4f4bf9fbd931d005d816c153aa2a6ba5197e278ed6",
+    "bytes": 1237,
+    "sha256": "42045080a71c5faf35ee591d7ea102bfcc19a024d25cec8868b622eecb5876b4",
     "displayGeometryVersion": 2
   },
   {
@@ -669,8 +674,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 33614,
-    "sha256": "3c538766d39ef654fa6985a064e47be5d9f81b2e740540f6a136349da660b442",
+    "bytes": 38933,
+    "sha256": "788116b2d4b68469bf064170afcf6cffd87a9e35ad5921754c7db40e2297ae18",
     "displayGeometryVersion": 2
   },
   {
@@ -685,8 +690,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 60569,
-    "sha256": "dcbd59f593d13051c30d43a014987e54835f1b1daa64f6d7bd0f06b35ffc5894",
+    "bytes": 58338,
+    "sha256": "c0e74ddf4767aa11c4db704e47d7e4ad5bc71a74cf2076d643cbfb3d30c9b046",
     "displayGeometryVersion": 2
   },
   {
@@ -701,8 +706,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 83676,
-    "sha256": "66e92082136417cff9a92ea7033f2aea87d76dea2c1e3bec2fb1363e0b48221b",
+    "bytes": 91771,
+    "sha256": "a724a8338bfc81a13f996b5692d83b12e6fd3f13d223fb8b59b67264d6dd85b9",
     "displayGeometryVersion": 2
   },
   {
@@ -717,8 +722,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 173880,
-    "sha256": "e8f4b38ca6de1a241099bf366ca6f80e6e50987b8b9de53aaed7ec62bf1983f9",
+    "bytes": 182819,
+    "sha256": "f3f35af0922b85068cd9b34f89fb29e3f495cbd684fd01801e1b84b12296a7cb",
     "displayGeometryVersion": 2
   },
   {
@@ -733,8 +738,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 42678,
-    "sha256": "c7f82db23d0ba6c0d604b94e79b3620a5a75c101ee521330269522e7ab427e05",
+    "bytes": 46584,
+    "sha256": "98160b74214b4f40270bc18d93fc0f98e27d297f184630c27ab546e704188ff1",
     "displayGeometryVersion": 2
   },
   {
@@ -749,8 +754,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 22671,
-    "sha256": "5f035160977026f865e7b154fb7015b04f6e93daad2876c27d9a589be27a0729",
+    "bytes": 27721,
+    "sha256": "efb5428b5a51e6b8a334faa0ac59322c556274b6293c2d4f0322a058fd700abc",
     "displayGeometryVersion": 2
   },
   {
@@ -765,8 +770,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 27,
-    "bytes": 338857,
-    "sha256": "cee5e9d9e23c07cc9386ba8132b4a7590dfb095f685775cb91ffa591a61b9c3a",
+    "bytes": 385574,
+    "sha256": "06928df8a8c48ba4c7d2f9e74dc364704c067b79d9660438b5f51a22ecb61096",
     "displayGeometryVersion": 2
   },
   {
@@ -781,8 +786,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 22,
-    "bytes": 124604,
-    "sha256": "97019c6568f5128e14237f8a76f8bf2923383765bd8350b7422b09561f31cbb5",
+    "bytes": 133019,
+    "sha256": "52ad371e65f0433f5272da04518ca2624fd58859415556f24c87999b08dbb9dc",
     "displayGeometryVersion": 2
   },
   {
@@ -797,8 +802,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 86,
-    "bytes": 866816,
-    "sha256": "5134c7566d1a8a64ac92e7fb6b3f1b381d646c799567110ee8b424ce6b3b9d18",
+    "bytes": 1030580,
+    "sha256": "18df47a05e7e3cf66895f54671dc5ae0551d37bc09de033f8363f22b5ac62093",
     "displayGeometryVersion": 2
   },
   {
@@ -813,8 +818,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 29062,
-    "sha256": "68630dcda02841376d586c11632cb61e2abef1a449937b2e7dbfc944612fd4aa",
+    "bytes": 35209,
+    "sha256": "192a8bc7f76d2403bae16dbcf227fa46e32b3ce43652a7cff3e6ffe2ab52328a",
     "displayGeometryVersion": 2
   },
   {
@@ -829,8 +834,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 63187,
-    "sha256": "2abbf7e2132852faab618f1ef8cfd2c181dddcbe420c89e6423aef3916959191",
+    "bytes": 75622,
+    "sha256": "9e9aeb33fcc6d6f71c97454a812e3a5ea0287e3361c6083b7fd430f3f2c88f9f",
     "displayGeometryVersion": 2
   },
   {
@@ -845,8 +850,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 15,
-    "bytes": 27381,
-    "sha256": "b13f2046924a39aaf8d660c6f092b14e8955b7cab42849a908257b87f6ebfc1d",
+    "bytes": 34679,
+    "sha256": "6e9af846908ab0e5f9acb82628ec5bcf25b9903316ceb6e8d512248cdb81e21e",
     "displayGeometryVersion": 2
   },
   {
@@ -861,8 +866,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 119,
-    "bytes": 125608,
-    "sha256": "e9b1b9e322ee210763f22f456fbc50bd89014482b75b0c320286fcae0be4b338",
+    "bytes": 125841,
+    "sha256": "cbd437e015f359bafe7d50bba8425018505885bc2efcf2a130b4358de43c78aa",
     "displayGeometryVersion": 2
   },
   {
@@ -877,8 +882,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 21,
-    "bytes": 126305,
-    "sha256": "8c4d57d0bc64e289092ed101e7f505feb04643c7e15c678c6ed683a423f5eb06",
+    "bytes": 175248,
+    "sha256": "e2897e06df0014cceecee8b68372d12863a26006fe093d2de41e82f15abe67e3",
     "displayGeometryVersion": 2
   },
   {
@@ -893,8 +898,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 21,
-    "bytes": 86268,
-    "sha256": "3fb9dfaa8fef59d357335c7d9ff228b0f44a2beb834084ea4cb22748567ffb6a",
+    "bytes": 92770,
+    "sha256": "dfb076711e16cfa8f034c970d15d6fa95ebaf2415f538c5788afd749089db1c4",
     "displayGeometryVersion": 2
   },
   {
@@ -909,8 +914,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 18,
-    "bytes": 59777,
-    "sha256": "2be21cde0ab27b3bede3be8bf3af2d1bfb315576e8c9b4c79d5a5f4489c245d1",
+    "bytes": 71916,
+    "sha256": "4e14b6160c9cd46bc0fe0024400da3c1eed84a7f4a7037d532d798035bb78e06",
     "displayGeometryVersion": 2
   },
   {
@@ -925,8 +930,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 63,
-    "bytes": 147285,
-    "sha256": "583c47558d69c328d8dcd29a8569e84ea2f28d2961a01e3d9ffc5c7fa52be1eb",
+    "bytes": 158095,
+    "sha256": "dc1fc9b161e189cdd161a8e213afaf2f4d4b6ec61629ccf81c35665616162cc3",
     "displayGeometryVersion": 2
   },
   {
@@ -941,8 +946,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 24,
-    "bytes": 57964,
-    "sha256": "9490ef3791bfb2a1af747921b106ef07f4d1436ab0f6d4cd6d77382c992cedcc",
+    "bytes": 59810,
+    "sha256": "1b2be79bef854d67b6b7c24a0f71cb36bdeaed473e6400b2a704ebcb266ece33",
     "displayGeometryVersion": 2
   },
   {
@@ -957,8 +962,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 3,
-    "bytes": 5355,
-    "sha256": "20a4b6c16a2f63fc756bb2d196fcb0e1b7c399a3d2f68b6b8b8b98b343b35b01",
+    "bytes": 6151,
+    "sha256": "16dbf464f8edea1d15deffcf23e1467bad91a482f1fb2e4f25e3314ce459bc36",
     "displayGeometryVersion": 2
   },
   {
@@ -973,8 +978,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 23222,
-    "sha256": "49037f548876c88a52ff86df910f09541bbbbe992cbbf5e9cd9763025248b873",
+    "bytes": 23133,
+    "sha256": "41b4efa2bec0a2b4ce3bb851dc50c868b0dd436b2948f3cbbb99fbd393346309",
     "displayGeometryVersion": 2
   },
   {
@@ -989,8 +994,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 12,
-    "bytes": 26807,
-    "sha256": "7d62489247d011b9b00ba123292bd5d91ab15e6f8112cd6eeaec574f70004187",
+    "bytes": 30413,
+    "sha256": "c060be9415edd98b12a3efbc03db43f9ab44f7246723c7cd49a6e02173ac4984",
     "displayGeometryVersion": 2
   },
   {
@@ -1005,8 +1010,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 84,
-    "bytes": 84850,
-    "sha256": "4a25ac0395d609223a1f5da193b29f205bf1cd298d337fbd4c7c81305b31fbd8",
+    "bytes": 85390,
+    "sha256": "59f5d5696c6cd312c9124dea47f090a533a485222c5fd64b772a0e43d74d46b5",
     "displayGeometryVersion": 2
   },
   {
@@ -1021,8 +1026,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 12,
-    "bytes": 20537,
-    "sha256": "115cea09b43d51a9f046208feb384ea10654c8dc246e49f7663bddef5c65ade8",
+    "bytes": 23412,
+    "sha256": "b8d19d3a37c7e87d035bbd914f8f9d51eae1b62dfd20048a89ebb38532b2237a",
     "displayGeometryVersion": 2
   },
   {
@@ -1037,8 +1042,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 78,
-    "bytes": 98082,
-    "sha256": "a3a8615be0546e4e44a49efb5c1e9b9cdd473117f1e03d92a5ff60d9a3b64b67",
+    "bytes": 103439,
+    "sha256": "e4ccc0f2085cb153e982373dd48774737951264d341dd687b1d321679c31058f",
     "displayGeometryVersion": 2
   },
   {
@@ -1053,8 +1058,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 81,
-    "bytes": 181042,
-    "sha256": "859437ce35ff6b585bdd8adeff9fa922c8f284f19a69985e701cdc0cd210c43a",
+    "bytes": 186467,
+    "sha256": "3a354b5201b00e8802b909a4e4164fb185871cdf628145aed515340090196211",
     "displayGeometryVersion": 2
   },
   {
@@ -1069,8 +1074,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 52,
-    "bytes": 122200,
-    "sha256": "8715c621fcbbb7ebadcf7b075eaa73760322989eba8bec11c150adca34c5cbd5",
+    "bytes": 127499,
+    "sha256": "3635639e6d6e11af1e2d28226b419a137c73df3d6c8d1a5cb671d38adc321f88",
     "displayGeometryVersion": 2
   },
   {
@@ -1085,8 +1090,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 17,
-    "bytes": 67175,
-    "sha256": "b1aeaa6d6a4a2200c9bdbf350eeddc36ee27fe4dd78d38e46cf0f72179af4605",
+    "bytes": 73680,
+    "sha256": "014044bef9977d8cc2abc6e18fdf2adfdc71779b921d2bc07c1f95a3fdaa3504",
     "displayGeometryVersion": 2
   },
   {
@@ -1101,8 +1106,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 8,
-    "bytes": 47140,
-    "sha256": "23af01029472de38e9e7c22eb025f32636d111c4c462dad75aecd720cfeac480",
+    "bytes": 51711,
+    "sha256": "15ef8cc64531782c3c87d096964437e0310934a18c834e88206509267378b38a",
     "displayGeometryVersion": 2
   },
   {
@@ -1117,8 +1122,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 23052,
-    "sha256": "4c37795b789079fdb629e7c6418bf805d248c4c598dfa267821da29773d1b881",
+    "bytes": 23802,
+    "sha256": "831babc5196afa67d7d97d164db6045d14b6f708cf035ab2fffbad44551afd9b",
     "displayGeometryVersion": 2
   },
   {
@@ -1133,8 +1138,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 24223,
-    "sha256": "468764ab7b0ef11bd78b485e543945ac993c9728470950840abe21efc60efeba",
+    "bytes": 35360,
+    "sha256": "8771c3f22a3969349ff0f4965c0fd63fb2739e306627f547f3926772faca56f0",
     "displayGeometryVersion": 2
   },
   {
@@ -1149,8 +1154,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 22,
-    "bytes": 99581,
-    "sha256": "455fffa5fd13b1acae86fc66bc95bd7c571e7bb23fb798078266703377602ee3",
+    "bytes": 107982,
+    "sha256": "12d9c3a9100b459bca54ba70274a3ab54a21d012daeae79147cf9126c360cc76",
     "displayGeometryVersion": 2
   },
   {
@@ -1165,8 +1170,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 23,
-    "bytes": 56961,
-    "sha256": "b3a91f30fe0fd3fd5ed95ba5be0d521a7bec733b781310c953bcd6c1b063db2f",
+    "bytes": 56402,
+    "sha256": "bd440d65d120a3ab99bf307e5ed30acbd605271e6c2969a30eac493aa7c31351",
     "displayGeometryVersion": 2
   },
   {
@@ -1181,8 +1186,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 42,
-    "bytes": 71642,
-    "sha256": "fb17cb004812adcd422d0a0662330eb0058b198b6d6084b298c3a55b4c5a5092",
+    "bytes": 75667,
+    "sha256": "a3d6a69f4d8fba62f4704266e2c7b3b0e9c4deafe18a5a4a634a1111fe6d0328",
     "displayGeometryVersion": 2
   },
   {
@@ -1197,8 +1202,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 43,
-    "bytes": 56742,
-    "sha256": "69d2777dbb17db0891c786da3705275fd5f7023ec8e9e565df0987304f58a0d8",
+    "bytes": 63316,
+    "sha256": "1c068ac3745b5d69bd28265049eff096b8079a148b7558150bb2546824e22c44",
     "displayGeometryVersion": 2
   },
   {
@@ -1213,8 +1218,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 8,
-    "bytes": 22151,
-    "sha256": "480f6dccfe33a0c0d7ab413a2ce9324c0da789a8592ef3fb8567244abe25a2b3",
+    "bytes": 24400,
+    "sha256": "3cbadfffb82e2fdffc4522367b5fda654ce0d90fe4c09b17b26f115ce471206e",
     "displayGeometryVersion": 2
   },
   {
@@ -1229,8 +1234,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 56546,
-    "sha256": "51b6078010bd88a70ace2c7468cc29524ce476f90619664ea1016a4656752bc4",
+    "bytes": 56077,
+    "sha256": "8a374f8e933b2d535b6606dfb3807f05b359cfdf8c5f26fd2075e87507136915",
     "displayGeometryVersion": 2
   },
   {
@@ -1245,8 +1250,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 34,
-    "bytes": 59873,
-    "sha256": "b03de1a00f3602310f8a590ddc3ad0f0d0bfa2d12440cfe8f67d7d438fd3d54f",
+    "bytes": 62910,
+    "sha256": "831a39803819b8ef7a3e1d32d3806820f27de7ec07725ee8b530280bffd86481",
     "displayGeometryVersion": 2
   },
   {
@@ -1261,8 +1266,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 232,
-    "bytes": 287543,
-    "sha256": "27395383f53fdd30234d8b4b3559c4cb9b935adfc914674c75eab9d4fc64779e",
+    "bytes": 310521,
+    "sha256": "4e24f6310c25f8947d7478f4982ad5fc205ebd06f5af9f6ea7622f751fd37d91",
     "displayGeometryVersion": 2
   },
   {
@@ -1277,8 +1282,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 64512,
-    "sha256": "47e1d78d2c9090938f5ce57df875e4b293c5a3bf6d74ff5e401a0943b0c14ceb",
+    "bytes": 100754,
+    "sha256": "48a35f2f2cb013ae026f96cbdb433b6525548aee98662b7e734be5121924ac7d",
     "displayGeometryVersion": 2
   },
   {
@@ -1293,8 +1298,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 84118,
-    "sha256": "5e173ab593c7999f0e5d63b45b06321a2db2996b6e0af9bfb2724d80076c2234",
+    "bytes": 91792,
+    "sha256": "363f521c0740b2925b2e4574e62728d7fa449384d2c526d5ec0e2671460ba4a1",
     "displayGeometryVersion": 2
   },
   {
@@ -1309,8 +1314,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 4,
-    "bytes": 18390,
-    "sha256": "7dddc88dac37a140df60956bc8a37652b22019107498fdd7d0ba29719967d460",
+    "bytes": 20526,
+    "sha256": "fb2977f10cc9ee92f25b3272bdc80337ab042980b35d11bb7338056147d8ee50",
     "displayGeometryVersion": 2
   },
   {
@@ -1325,8 +1330,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 34,
-    "bytes": 75965,
-    "sha256": "74fee72715c1c8f5b8be51cce78311e1cb670b88554b9713f6153132870a7161",
+    "bytes": 80499,
+    "sha256": "61493804c406884ca19bb9beb7912c51bd64e222ba0bb86a3da84dbbc8a39d06",
     "displayGeometryVersion": 2
   },
   {
@@ -1341,8 +1346,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 15,
-    "bytes": 36443,
-    "sha256": "316914bf335dbba4ef24e0ddc706a1b27bead462d99b93d57bc6a730c207bb19",
+    "bytes": 37700,
+    "sha256": "ad712d76168c2a6b0609130b04600c2f28e60ba4497b98afd28fbf4c4ffa623d",
     "displayGeometryVersion": 2
   },
   {
@@ -1357,8 +1362,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 17,
-    "bytes": 80764,
-    "sha256": "c43d547113eb09b61110a2906f5f9c595d7c96b008989017f46f079f6897d271",
+    "bytes": 82864,
+    "sha256": "a6022cb27b1037826abe30583347481a91e89de10121585701cee6047c0ecd2b",
     "displayGeometryVersion": 2
   },
   {
@@ -1373,8 +1378,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 17,
-    "bytes": 122835,
-    "sha256": "0beeb29a83cb785ea59c5ae393a7317dd41cc5bfb6cb32a146329aa106d201f7",
+    "bytes": 118620,
+    "sha256": "071cb07825d7dac9309403745f65197e4dfd479b804768f2fbc51aa1c3cc3a99",
     "displayGeometryVersion": 2
   },
   {
@@ -1389,8 +1394,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 13393,
-    "sha256": "4bfd3404e9e432dfb6902e39a24f54123129d58d46ea18765d5a9e0e211bf83b",
+    "bytes": 14618,
+    "sha256": "3eecd65261d0605d81e17d04b4ea58df9e9b92093aaba8d572c47775d6867ba6",
     "displayGeometryVersion": 2
   },
   {
@@ -1405,8 +1410,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 33571,
-    "sha256": "ce49fe43992daf09e41749cd2a8829c2abcffaa6536c7edd37cb51e04c25968a",
+    "bytes": 37233,
+    "sha256": "7c3fb6e2953488ed5e5be26f29b0ecf872c4167d1dad8b9b376d0cd2688f4d45",
     "displayGeometryVersion": 2
   },
   {
@@ -1421,8 +1426,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 34279,
-    "sha256": "4bd2dcd958616b55ff631a411c871d16735d979b76c19e46ea5f55f0c1ac39b8",
+    "bytes": 36139,
+    "sha256": "92784de235b09e006a98637877ac07c37915ed7e8f61873b31451d6f11aa32b9",
     "displayGeometryVersion": 2
   },
   {
@@ -1437,8 +1442,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 18,
-    "bytes": 61063,
-    "sha256": "2b098b37265b0fd2cc16c82a6bd22cb4d89f0bc5ade03e6aa04b39ab036c22a9",
+    "bytes": 68357,
+    "sha256": "fd01550924aa4b7f84d22fdd6d8ee6d3765c1684b757539321e1f89569032bd5",
     "displayGeometryVersion": 2
   },
   {
@@ -1453,8 +1458,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 110,
-    "bytes": 174632,
-    "sha256": "a1e470ec715358a671a97008a0fa356514e23b6f73bb4b36aa1f83fcf3aa1a83",
+    "bytes": 186869,
+    "sha256": "660deccf452b84922cd0ee2284a8c8a97fd5a23c8dcbe42092b9b63e22cb6724",
     "displayGeometryVersion": 2
   },
   {
@@ -1469,8 +1474,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 26,
-    "bytes": 38694,
-    "sha256": "16134cc5fc3f27d6ca180bdfa5c113ce0b2a2a629d7a6296bab94e54c90cba22",
+    "bytes": 44234,
+    "sha256": "c1e7708e39a85663526807010b8f24b62bb3959111ef0d116599674d513de711",
     "displayGeometryVersion": 2
   },
   {
@@ -1485,8 +1490,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 31,
-    "bytes": 142531,
-    "sha256": "1fd697fb05fb252ffd4134e9a989d253134c1feacca12e6b7492df9db42b1c0e",
+    "bytes": 154385,
+    "sha256": "c12e031812ce90ab7b3cf1f488f7adc7805494584c2a58e609a59f029cdc7a66",
     "displayGeometryVersion": 2
   },
   {
@@ -1501,8 +1506,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 15,
-    "bytes": 28534,
-    "sha256": "352f5d7788ccd7384ab3859db7ccff0ff9ef4107ce06ff76dac5eccc9002e437",
+    "bytes": 35887,
+    "sha256": "ff4208250d81cddd60fe43bd3d42e438af3aa9a5a0f67287750edf0962967fc8",
     "displayGeometryVersion": 2
   },
   {
@@ -1517,8 +1522,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 10815,
-    "sha256": "07a06df57c24b240693149b308be32845214b77653e4d637576b6580cc45b52c",
+    "bytes": 12001,
+    "sha256": "c5a179e55dcfe56ec9d5978e7455f03b7add225e6c97ed10a6f4443fef7b18d0",
     "displayGeometryVersion": 2
   },
   {
@@ -1533,8 +1538,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 19,
-    "bytes": 59965,
-    "sha256": "20d89abbd97d00996ab686c202eb7780deed1d1b73ec81b8b40b7e0ef26bcf05",
+    "bytes": 65582,
+    "sha256": "f2cf78b54e18e383f53faffd9b3790dabb0c07ed57bdf11940bd306a22a2f1b1",
     "displayGeometryVersion": 2
   },
   {
@@ -1549,8 +1554,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 25,
-    "bytes": 46742,
-    "sha256": "75487d4e077f428969be4597cd65a61865162f2980adbf57dde0254f894148dd",
+    "bytes": 47039,
+    "sha256": "6fc6113a750184f58aa0d979d8fc2b6b294a3390530f76af7147713167238d82",
     "displayGeometryVersion": 2
   },
   {
@@ -1565,8 +1570,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 111261,
-    "sha256": "f2e0048e2be9949cea58f481f265c090947b3e2e46ae4dd261c56c60f8490d9e",
+    "bytes": 105913,
+    "sha256": "9dbaf2d02f673914142a4c96c1be79bc17340c125f75bdbd0bd3d849b19bafaa",
     "displayGeometryVersion": 2
   },
   {
@@ -1581,8 +1586,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 49166,
-    "sha256": "b13639271f34c91074ace6081d11a6d008a2014fb88edc61359a047a32b38a3c",
+    "bytes": 52731,
+    "sha256": "aba09ba392940ef593de9f771367361851e5179e04582ad97a9a473e4c7ad964",
     "displayGeometryVersion": 2
   },
   {
@@ -1597,8 +1602,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 37,
-    "bytes": 118473,
-    "sha256": "56f5f158eb888a490acad7965578312de7fa9e153589fd62a276e8d727039306",
+    "bytes": 119563,
+    "sha256": "77d5ae2ec3333a52458784e99d5d26bb5ac658da4db7a0622827f18ebd1eb45f",
     "displayGeometryVersion": 2
   },
   {
@@ -1613,8 +1618,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 12,
-    "bytes": 33072,
-    "sha256": "e29a8fb85cc69af4b3a249bb59c8b5718128f898ebe56ffe21b3432b7e98f036",
+    "bytes": 35189,
+    "sha256": "3b600b2a2b9b4d783ac0e3938ed82b680e9f5c9e142393929fc2ff77a2caffbd",
     "displayGeometryVersion": 2
   },
   {
@@ -1629,8 +1634,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 18,
-    "bytes": 105588,
-    "sha256": "c719df7376a9416127f5a098368eeb75e1c4165294461c98f3e2fb5a1be59df4",
+    "bytes": 106833,
+    "sha256": "08cee0aed1e6a1ed5648a291dfe5d81d73a3a7da10499c52efb7326511277dca",
     "displayGeometryVersion": 2
   },
   {
@@ -1645,8 +1650,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 21,
-    "bytes": 44966,
-    "sha256": "2e084b115573870c46fbf8682198694003e51f23f3c79e129632165ac5999dc1",
+    "bytes": 67492,
+    "sha256": "0229f5fe4d7311822d38d32a48f2e9c8f9f20aa926fa62d56d5160c3db39b838",
     "displayGeometryVersion": 2
   },
   {
@@ -1661,8 +1666,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 193,
-    "bytes": 181548,
-    "sha256": "da283ffa842a3ed15c5fc6cbd90d986c2eec4a2a625c19b29a8d72eab257c40d",
+    "bytes": 183121,
+    "sha256": "170ca16bb95c5aca339b403f7e2d9a75290687ca28d183e7a956b2e3dbbcdf00",
     "displayGeometryVersion": 2
   },
   {
@@ -1677,8 +1682,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 7,
-    "bytes": 11224,
-    "sha256": "7d411dee21fe6a56dd8bc81080f88a84b6331341a94d221763f54589a3f1ce47",
+    "bytes": 12308,
+    "sha256": "2f42d5dc8870a74f2338b1b3898cc70127211d43cb12e6f0757697a9272b17b8",
     "displayGeometryVersion": 2
   },
   {
@@ -1693,8 +1698,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 13,
-    "bytes": 113296,
-    "sha256": "5f30b0cac49e17417f189d756cb8c94eb99b5b959c91e2f02781f89f40139071",
+    "bytes": 108700,
+    "sha256": "cd2e3f8a87437f478902dfeb7ea32109bfa53c50200c6aeaec078573a84491e4",
     "displayGeometryVersion": 2
   },
   {
@@ -1709,8 +1714,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 15,
-    "bytes": 68440,
-    "sha256": "96622901bc7a356664dcf143c1cdb4636eefa9d83a7a1105df478b67033ab545",
+    "bytes": 71721,
+    "sha256": "30fbfa03210d6395db7d5473af653f0ae4c95fd40a78a6298a81eed61bc197bb",
     "displayGeometryVersion": 2
   },
   {
@@ -1725,8 +1730,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 54668,
-    "sha256": "1fbc58f54d7df5d8515ab1d9ef820eb3b449f2927d25ee507d06952d86fc2c1f",
+    "bytes": 54020,
+    "sha256": "6ddec89d78924a1791116f2a749814080b791f8454f686bde67d98dc54e55441",
     "displayGeometryVersion": 2
   },
   {
@@ -1741,8 +1746,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 8,
-    "bytes": 96020,
-    "sha256": "abf1509d428c8eb09dd36c95f35b3bdc0ad43c6901f748a220666bca6453683b",
+    "bytes": 99636,
+    "sha256": "ff780119d4d3c4c400794ad85424679dc29fea9454b86314e1033aa01df42561",
     "displayGeometryVersion": 2
   },
   {
@@ -1757,8 +1762,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 28,
-    "bytes": 49586,
-    "sha256": "c92b02451a8822bf70821b9fb351e4ad2c342edd48ff7a3a051ed91e3808c1b4",
+    "bytes": 53576,
+    "sha256": "f86aa9a1cc2af6701c9759c2b246e376684884ba4d1d6d5d5bf7faf3dac33edd",
     "displayGeometryVersion": 2
   },
   {
@@ -1773,8 +1778,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 77,
-    "bytes": 158595,
-    "sha256": "9f8abdad7f601d525ca4c7b0a5e3155f6a7a4e1ce6516632b8c780568d786b80",
+    "bytes": 174171,
+    "sha256": "84776ac30b3333107f3b791e4e7254d2f89ad0929af61858bf3e5bfd9d495917",
     "displayGeometryVersion": 2
   },
   {
@@ -1789,8 +1794,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 7879,
-    "sha256": "2d90f98945d19f04430e8cbbdfa3a4b39bd74d7b2ce20ae85dfba0de8904714c",
+    "bytes": 8373,
+    "sha256": "0fb1dd88c456f333e9333bfe286471c54334381a8b8d76205f63fa259d04de0c",
     "displayGeometryVersion": 2
   },
   {
@@ -1805,8 +1810,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 25194,
-    "sha256": "49d3a601f8ff8b48cbb671ede43aaa5348f278c893a94a07131d37a2cda46aab",
+    "bytes": 31021,
+    "sha256": "fca5d3de517c1463d266b0454f2527d61b9c5b645b8a1eb37314ebcc1bbe42a6",
     "displayGeometryVersion": 2
   },
   {
@@ -1821,8 +1826,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 32,
-    "bytes": 45441,
-    "sha256": "328ad755e31d8999eefbb80be759edb747d33bf2b1b3c75922a8c789878a6e43",
+    "bytes": 47892,
+    "sha256": "60a8e0669591dfbd7ccfbdc896486a274eac6cebe12f366ec41aa30816df99fa",
     "displayGeometryVersion": 2
   },
   {
@@ -1837,8 +1842,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 22,
-    "bytes": 97566,
-    "sha256": "7d930c2365d06b1421cd42bb8626499c7edc93c1a4ee8db985e7922b86024494",
+    "bytes": 94325,
+    "sha256": "ed0fd2d296292f6513bac942aed55aa07d2ea7d4a84e402846682813c6c89420",
     "displayGeometryVersion": 2
   },
   {
@@ -1853,8 +1858,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 12051,
-    "sha256": "c502f3062db90451346fdf60a41e5d18f72d1ed4fc4244382acbcb63ed301348",
+    "bytes": 14290,
+    "sha256": "3ef3efabdf7bc96a037a407dc1b12ef73de477fb6291e846d6e9575c1d5c733c",
     "displayGeometryVersion": 2
   },
   {
@@ -1869,8 +1874,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 23910,
-    "sha256": "a55bdcd9a2995c848515b860daf12d71e3366b09bd72997d32f2d078fd0cdd76",
+    "bytes": 25445,
+    "sha256": "b3d680ca40952593c4b1b981e04f82228a166189b87633c179464a5e7314e24d",
     "displayGeometryVersion": 2
   },
   {
@@ -1885,8 +1890,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 22,
-    "bytes": 42751,
-    "sha256": "1e62b7e79d110ec09950d8e518cd01cac61a2f473aaec11ca1cbb01335e26c09",
+    "bytes": 42808,
+    "sha256": "4243712e66e4035e4c65bd90fd77b8129cf77d50b5599d7227263e6e9dd7d82a",
     "displayGeometryVersion": 2
   },
   {
@@ -1901,8 +1906,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 13,
-    "bytes": 19775,
-    "sha256": "e37641e18c5973ed29c0ae99c5faa2c6bc0bb1455548aaaa37c4dd4541832134",
+    "bytes": 22769,
+    "sha256": "9bbcbc4da2759313e4e58681a6ac503fd81fcf9089c5324db28f4e0634b64ca9",
     "displayGeometryVersion": 2
   },
   {
@@ -1917,8 +1922,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 4,
-    "bytes": 9868,
-    "sha256": "f8c026fbc510ccee3cb85a98f13b5c6b458e821d00676e1030d6d355572d9cbf",
+    "bytes": 10994,
+    "sha256": "e2884bf6288a1a7cd856c9d896c2afc281d5550fde5557a55814fd0ef792497c",
     "displayGeometryVersion": 2
   },
   {
@@ -1949,8 +1954,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 48,
-    "bytes": 143495,
-    "sha256": "7e4994fbf068bd1ba43c69f51055cafc9c58694d885a5ed136e98c3d2434eb88",
+    "bytes": 158671,
+    "sha256": "50fdca5457e49a82e0f9d9b56e47bcef1f6937ac63a633b9796b8dc4aea9a8dc",
     "displayGeometryVersion": 2
   },
   {
@@ -1965,8 +1970,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 103326,
-    "sha256": "469d2084c66ff13b3f910373b437b2c403f6568b069e59933b30d0b551b60944",
+    "bytes": 104879,
+    "sha256": "10cadd6d700924e3630911f4698aa51e31aea15b3ea323387ad97a27dfa76d93",
     "displayGeometryVersion": 2
   },
   {
@@ -1981,8 +1986,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 4,
-    "bytes": 10657,
-    "sha256": "972530b10dee31603b90317c3e9ff769c28778fa1b0f681b76e545ab43c8c344",
+    "bytes": 10415,
+    "sha256": "15e95c91a42e78fecea1b27fffd4f2b3caca9f716a48544edbea9a361e3a6bfa",
     "displayGeometryVersion": 2
   },
   {
@@ -1997,8 +2002,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 17,
-    "bytes": 26006,
-    "sha256": "7d42b4e21d948d497aa5eb6c17106f276ec353a0a882dea10d1c0f8aa19b8af6",
+    "bytes": 26459,
+    "sha256": "ec9a921f4a59ea1c470b0dc93a6483854f8d49a6a95db288ede177ca48e521ef",
     "displayGeometryVersion": 2
   },
   {
@@ -2013,8 +2018,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 12005,
-    "sha256": "ea51a630b556424395c63842c0acd32032ce8dab35ec939274b6a53ba3f1b93e",
+    "bytes": 14368,
+    "sha256": "78081d15354a9525d7d348979f20873a7baced9d49c012432360530a0bb75024",
     "displayGeometryVersion": 2
   },
   {
@@ -2029,8 +2034,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 101779,
-    "sha256": "4523b9f1c9867f11e01a9ea6019a6d62a4fdb4615b2beb338cf80987477b1b14",
+    "bytes": 122918,
+    "sha256": "1a1f72187b8e643b10aaf7210db2fdb76d9f09dfce5293034c092602db6bf256",
     "displayGeometryVersion": 2
   },
   {
@@ -2045,8 +2050,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 7,
-    "bytes": 41149,
-    "sha256": "89e77ee2b082099cab9794b77317c2d71cb4a02b6ef14304255f3833d333291c",
+    "bytes": 54181,
+    "sha256": "c6913678f213f71b3aaf536155f0caaeb2469867576915e61c140d3f219fa36c",
     "displayGeometryVersion": 2
   },
   {
@@ -2061,8 +2066,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 7,
-    "bytes": 6020,
-    "sha256": "e4c8b2de36ac5a5eaab4fa8044a532eabc57cd2e41e2ce65ded01d807ee5d94d",
+    "bytes": 7646,
+    "sha256": "21132920a479bc5c8f00b5de09f6d39750f75a8acbc6c23150bcdd526f7a8f12",
     "displayGeometryVersion": 2
   },
   {
@@ -2077,8 +2082,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 34,
-    "bytes": 97580,
-    "sha256": "7e56e669612c2a7b5e1665fc53545b712e946d1c692d17dd610716ace6b82cc9",
+    "bytes": 106188,
+    "sha256": "b527b825ea92bdc503afa179b2b0faeafe05403532e88fdd1ecaf86cd0db3162",
     "displayGeometryVersion": 2
   },
   {
@@ -2093,8 +2098,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 21,
-    "bytes": 26530,
-    "sha256": "654119d1b6bb9d3f232b4fd9ac9281833b878ebdf990354258b52c6ed06d7913",
+    "bytes": 27425,
+    "sha256": "4a4bbed3c8dc30ff6f3e1f717e90dec6be24f0d4eca220d752ff3008423bd76e",
     "displayGeometryVersion": 2
   },
   {
@@ -2109,8 +2114,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 18,
-    "bytes": 31487,
-    "sha256": "03971faf02a9adad876bc5c4acc107e7662d464d53c011e634caa3015d3960af",
+    "bytes": 34539,
+    "sha256": "a8936bda01e11954d1ca170fbff7dd6bfba974cc544c1cdad459b3f03fd0f911",
     "displayGeometryVersion": 2
   },
   {
@@ -2125,8 +2130,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 112,
-    "bytes": 130175,
-    "sha256": "60587059ece738752ee306bb2a7f9913b684df55455c49e3314b0124f2288e42",
+    "bytes": 132491,
+    "sha256": "fa639685a3d597db11184cb79c38e2ef33f93cc8905a545ba641ece789cdbf30",
     "displayGeometryVersion": 2
   },
   {
@@ -2141,8 +2146,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 54570,
-    "sha256": "8cf228396bc4162e2ee968f1492f4526cf4279cbb1fcd0c3db6e581155cce712",
+    "bytes": 64735,
+    "sha256": "a7f569f67606d75a7ec83066293ab1ed4babce9442bb6d80a20fc8f499dcf413",
     "displayGeometryVersion": 2
   },
   {
@@ -2157,8 +2162,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 18,
-    "bytes": 41691,
-    "sha256": "b83508ea21b4023ddd110a7302ed8f04e0f4ca8079ea6f752068950ec56c4427",
+    "bytes": 45656,
+    "sha256": "ad0b80581341f29cc26202bad2061c91a180554d69037423199b81f03558c270",
     "displayGeometryVersion": 2
   },
   {
@@ -2173,8 +2178,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 24,
-    "bytes": 68862,
-    "sha256": "279259ee48d3c6bd0a6a8ce9fbe2332c25c511bd2aaa98f5b3f840049a59b7df",
+    "bytes": 75319,
+    "sha256": "e00c869ac68b02a5ef49f0eedd3ec82c023929224c40ea4bc068acf01a2836b8",
     "displayGeometryVersion": 2
   },
   {
@@ -2189,8 +2194,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 34,
-    "bytes": 155618,
-    "sha256": "4a58938ea4e8ba6aecf65bddc29c51c53cdbfdc1c99f91687ec98696fe89ee23",
+    "bytes": 162324,
+    "sha256": "acfa13e3aa12798650370f5db4ae88545d5b099e23a0471a50f64b975f89cfa2",
     "displayGeometryVersion": 2
   },
   {
@@ -2205,8 +2210,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 18,
-    "bytes": 65260,
-    "sha256": "603acd7c260851e466fedcbc30a961048a9d192effd6220bfeb49d38f44ba802",
+    "bytes": 68343,
+    "sha256": "4dff4f5f6a038d16cd246675118f7a01f5aba4a1d96f3d533166d28f260d7957",
     "displayGeometryVersion": 2
   },
   {
@@ -2221,8 +2226,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 20,
-    "bytes": 45007,
-    "sha256": "faf8d0219e86470011160872b41f9d4d6f46f3671b937be1a25bb6b994847938",
+    "bytes": 53129,
+    "sha256": "67643576ffc12794b3d2d71236d9ac13da498cfd01297b54872101fdcd8f8b89",
     "displayGeometryVersion": 2
   },
   {
@@ -2237,8 +2242,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 40,
-    "bytes": 48340,
-    "sha256": "e9301dc0a9e32daad854b19b50c1bff5e7332cf8eaf64ea15266ec7e2b4bea68",
+    "bytes": 52411,
+    "sha256": "fb342feb7d42e6980be013bbb9e501f31eb2269492a78d674d9914f387891b70",
     "displayGeometryVersion": 2
   },
   {
@@ -2253,8 +2258,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 55480,
-    "sha256": "d9aba8e75474b577d9a54b9f97299aa8ef7439886280bd27a1fb5556ddcd9a08",
+    "bytes": 63554,
+    "sha256": "a34bdc4b12fa0634da337b63ac63248e8111ae0e4000b72fa072ea2222313dda",
     "displayGeometryVersion": 2
   },
   {
@@ -2269,8 +2274,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 12,
-    "bytes": 21943,
-    "sha256": "d0e1d5aaf065bca28af0e244d069b1b8ba681f3bc47c80a56ecce8bf7ed9a831",
+    "bytes": 33086,
+    "sha256": "04ac8c780931e19d32f9c696fcad6bdb6714bead841e3c569146b88657527681",
     "displayGeometryVersion": 2
   },
   {
@@ -2285,8 +2290,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 44996,
-    "sha256": "de656f3d2ce906d520759ae395442a5f4799d532cf1e44bef18ca964d8499a65",
+    "bytes": 46394,
+    "sha256": "ff470d30667e42d76a8cc1dc0c6f8831a61ef69459fc6415459eb295a8872b50",
     "displayGeometryVersion": 2
   },
   {
@@ -2301,8 +2306,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 18638,
-    "sha256": "6fbfa429c90efc040023c310a63b1546086b48f5e98cf68e3f517fc7d11ba2a5",
+    "bytes": 18828,
+    "sha256": "89332ec5a28a929152524e7cbc69680adb793952aa4a04fc121270166532f131",
     "displayGeometryVersion": 2
   },
   {
@@ -2317,8 +2322,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 66437,
-    "sha256": "7888bd069c61a13fd45edfc00a864a7ad2badc83fe2caf24a745a747d4ead6b8",
+    "bytes": 67478,
+    "sha256": "9591696f1698422c5a229dab726b3341e9b88466575e4f94fedd0c682419b74d",
     "displayGeometryVersion": 2
   },
   {
@@ -2333,8 +2338,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 43849,
-    "sha256": "5d0b83ec2307787320177706067c65bbb4334b0520dbfc7d7d43a4de2637790f",
+    "bytes": 51770,
+    "sha256": "c0cafa6b7008a91bed553b875fcd224cea3d7878bdc952926f0a8e64d6f34a4e",
     "displayGeometryVersion": 2
   },
   {
@@ -2349,8 +2354,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 8,
-    "bytes": 88683,
-    "sha256": "6f17b8f3b786112f43e2a553b51ca8a1aaf4f09343dc7dbce09430fcb44bac0b",
+    "bytes": 83446,
+    "sha256": "ac21c9870410292909415c37a01217b45bdbad84fcccee26222df22974c0a242",
     "displayGeometryVersion": 2
   },
   {
@@ -2365,8 +2370,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 45,
-    "bytes": 85423,
-    "sha256": "7938913e0af0b1c5c7934c9fc2a31c22c54c9773c1874914b83b8dbc9efa14e9",
+    "bytes": 90515,
+    "sha256": "c0ce2fe8c0608d62298c7ea0a7800a8b49185c4865870a44482c93a5b4db0a3c",
     "displayGeometryVersion": 2
   },
   {
@@ -2381,8 +2386,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 24000,
-    "sha256": "fc26780fc5eb3dd43469d86e6c2da5be3c9a79f401071b296d840acbebb8cb99",
+    "bytes": 24769,
+    "sha256": "71b2a935f4c3f45d190501a268437015c970d91c84328bfe654d368289e4544d",
     "displayGeometryVersion": 2
   },
   {
@@ -2397,8 +2402,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 42810,
-    "sha256": "bdb8438fe480149c8c63b17463b5b778a56b3f90b0f9ea6907a29155d37289e1",
+    "bytes": 46265,
+    "sha256": "c6a34846a11733faba7a3a1947ddac49b55c2131ca4c4236dee23c0bcd57ce83",
     "displayGeometryVersion": 2
   },
   {
@@ -2413,8 +2418,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 26133,
-    "sha256": "073af516ca11d42d6cb18a16b5e1aa0d1a11ae94a3884f73053fde9a6468fbc6",
+    "bytes": 30539,
+    "sha256": "f7e4690d5cf7b281683a3aec35bc49b77802b9d70b4ab2ef3dc5298192ef8522",
     "displayGeometryVersion": 2
   },
   {
@@ -2429,8 +2434,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 16437,
-    "sha256": "716a2e33e41d87dcdb296ed9fea7b7f1f6e1dc9adfb9e4e06df31d529016deb6",
+    "bytes": 19367,
+    "sha256": "72b3faee35186e3e887552b7363b7ecc37aa516a5b62001dcfcfef478195c7c7",
     "displayGeometryVersion": 2
   },
   {
@@ -2445,8 +2450,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 12,
-    "bytes": 38731,
-    "sha256": "8c40aedf86a6f0add232c24bcbff0f880603e85bacb52b525ff08c94d4793fae",
+    "bytes": 44200,
+    "sha256": "22a61d54ac5ec0232b1f551673f81e56b51f757071ae40ebb555a4e9be2582e3",
     "displayGeometryVersion": 2
   },
   {
@@ -2461,8 +2466,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 26,
-    "bytes": 114243,
-    "sha256": "f470b4e25e586091367fd1c4b1dcae8a23644f2a0c562e64434f000c7514cdf6",
+    "bytes": 130536,
+    "sha256": "22771f119dbd092af4c7ba5dd1d6bb4ef7c3be4ed6c17fa9480ffa2261ca5989",
     "displayGeometryVersion": 2
   },
   {
@@ -2477,8 +2482,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 20,
-    "bytes": 103043,
-    "sha256": "2fabb0eb35b1c395e7bfc59b5a15aa64a115497aebcd4307ac9d90b84299b32e",
+    "bytes": 132002,
+    "sha256": "3f38f0fea9723b02620e5872fbb0f0bce13a31ba97a61f26f373f17ec97da3cb",
     "displayGeometryVersion": 2
   },
   {
@@ -2493,8 +2498,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 27,
-    "bytes": 90684,
-    "sha256": "85c4cfb451238ce1fb8401372f3426f0e35bc08a9bb837384d3eb4973134481b",
+    "bytes": 103574,
+    "sha256": "75bdf2a86cfa63fcc16442ad0dd104b844cfe64296990c715c5bf17119e8ca7a",
     "displayGeometryVersion": 2
   },
   {
@@ -2509,8 +2514,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 21,
-    "bytes": 62869,
-    "sha256": "6b09e8fc61dbd131d60c184aad79a04fe36141eda455a4197624beec791cef4b",
+    "bytes": 67569,
+    "sha256": "c17d4a88327f9b6a190f53ecbf9c618a07759f33d56100f3a0389f2d2b4a6e61",
     "displayGeometryVersion": 2
   },
   {
@@ -2525,8 +2530,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 13,
-    "bytes": 73362,
-    "sha256": "d1d218a6e5509c665da3f0ae872beae5643a4a6b835b6e9509517bdef0f765aa",
+    "bytes": 73918,
+    "sha256": "ab158d5e11f2a866d5619c0dd64efcbf76eeb11fe9a2aba103d03340903b85e6",
     "displayGeometryVersion": 2
   },
   {
@@ -2541,8 +2546,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 7,
-    "bytes": 13861,
-    "sha256": "7965cb9c7d6be8a1eba9197051db6922750e8f5cf39ada18044c706fe4e67ec0",
+    "bytes": 17232,
+    "sha256": "cf6b1f4fab3c419eb3c656af4abbf6d0177891f72204f0b12ea1aea6d8b8d95d",
     "displayGeometryVersion": 2
   },
   {
@@ -2557,8 +2562,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 25856,
-    "sha256": "c289a87d79c38b0956bfbe7502c8b7b9c74edd0e871184b0ad0416f43d50378c",
+    "bytes": 21982,
+    "sha256": "feeadc05dcde68e89cd725243bb7490435641e4295974ac481c683f018266dc3",
     "displayGeometryVersion": 2
   },
   {
@@ -2573,8 +2578,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 18,
-    "bytes": 14560,
-    "sha256": "8349a179cf10a07d13edbe33651422d5a6378e74a1ff312c13568766635509a0",
+    "bytes": 19326,
+    "sha256": "baa4cc5ce01fcce075525e4dca4efe710a0da4e66d9206e8fae0cca2782cd6f1",
     "displayGeometryVersion": 2
   },
   {
@@ -2605,8 +2610,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 2,
-    "bytes": 415186,
-    "sha256": "11f63ea8d3b0f6ae04c4022a6a53c2c65ff132c13ca2524389e33d58ccc778dd",
+    "bytes": 559529,
+    "sha256": "40f986e9d47a5ff3e83ca342d306e0ef726bd5c53e6e6619ae498b984f2666d7",
     "displayGeometryVersion": 2
   },
   {
@@ -2621,8 +2626,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 24,
-    "bytes": 81184,
-    "sha256": "70aea210352e9102c23b8d0ed24d2cd10c491b001529842ee6aeb03f8d5f3137",
+    "bytes": 102718,
+    "sha256": "cde9c7efba7edabee7131fa58bbfb7d19d02d27318cee16203329f1c2886f5b0",
     "displayGeometryVersion": 2
   },
   {
@@ -2637,8 +2642,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 3,
-    "bytes": 12119,
-    "sha256": "698802aa09be2e1b8c95a84f6293049070f0ec64ac6ef1bd644480ee0afde274",
+    "bytes": 16115,
+    "sha256": "97435107c7c5adaab812f78276302384c5be91481e020ee334dffe9bf3817077",
     "displayGeometryVersion": 2
   },
   {
@@ -2653,8 +2658,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 22,
-    "bytes": 84983,
-    "sha256": "7f7b3325e92fee026fec3f2457126cd634e0224f522e141904da720f2514c6a1",
+    "bytes": 91982,
+    "sha256": "8037a2aae3c2b32693970185dc23e3322fa13aab98602a760dec59d9f4894d94",
     "displayGeometryVersion": 2
   },
   {
@@ -2669,8 +2674,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 118,
-    "bytes": 234131,
-    "sha256": "b9f8fda12968a65d81a9944af385724e981ca228a2826324afa28b109bc06a0f",
+    "bytes": 278780,
+    "sha256": "505f17a61b7d3d13a9d9cc356400159f4411d57ed3ce0dc8d758b0a4d876ab85",
     "displayGeometryVersion": 2
   },
   {
@@ -2685,8 +2690,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 25,
-    "bytes": 35823,
-    "sha256": "344c9723d19d0f49ade5badde292f2440e04c9a1b3c84661536f3e022972ddcc",
+    "bytes": 40585,
+    "sha256": "ec29d97fde62748ab12bcfc007a1f3f62be3b11f59b671012422841ac1e2581c",
     "displayGeometryVersion": 2
   },
   {
@@ -2701,8 +2706,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1823,
-    "sha256": "9dce239fb41194f3ff2a6d69130603fb89a843fb4a011822afaae967dc742a17",
+    "bytes": 2006,
+    "sha256": "c7462a20d671cca6c6c6683d37710885c7802a2a44776fee85ce8b2541f64539",
     "displayGeometryVersion": 2
   },
   {
@@ -2717,8 +2722,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1583,
-    "sha256": "f96bd72796bd2be3ee6a9b325ac9e322042efb9e040c4b0e44f5303173460a51",
+    "bytes": 1603,
+    "sha256": "37c6649af910b96e9d1a2373638cef7b5fdbb94d99f2dae7f44159ee65ef8ea2",
     "displayGeometryVersion": 2
   },
   {
@@ -2733,8 +2738,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 30,
-    "bytes": 28164,
-    "sha256": "4745bd05369c3dfce59a3351c18bc6be74d6f3ae4408fe55d48186d1a24d8c3c",
+    "bytes": 57797,
+    "sha256": "d59fe71dbf93e1b941fa018007f59079473e5a3a9aa17b0891f3b8bc6045b2e1",
     "displayGeometryVersion": 2
   },
   {
@@ -2749,8 +2754,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 4713,
-    "sha256": "ed3c68d32122d768330ce0227858885e98cabfcab0aa134f0f89a62f9d47e2be",
+    "bytes": 6540,
+    "sha256": "7dbdf280e1712ae746de90b78720b462950a5421184b1c7e3e4eb46ce612b42c",
     "displayGeometryVersion": 2
   },
   {
@@ -2765,8 +2770,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 21,
-    "bytes": 31365,
-    "sha256": "83b642f79f8384da5fdb6b6a2de471d30391c313d95791e8549099abc3bf863a",
+    "bytes": 32469,
+    "sha256": "98d3b9b2e833da3de093dbba92890cb83034de1feb308fc2b1ab551de43e6384",
     "displayGeometryVersion": 2
   },
   {
@@ -2781,8 +2786,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 47,
-    "bytes": 142074,
-    "sha256": "43c42e47277f4b1a8d502067f2d2cf37b084351a474574381d3a42ade2aeedf2",
+    "bytes": 179589,
+    "sha256": "d84b42ee3901bd73ae6221f0b75b2e7bd244aecabe690eaddf6404c288384e2b",
     "displayGeometryVersion": 2
   },
   {
@@ -2797,8 +2802,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 2,
-    "bytes": 2094,
-    "sha256": "4bf10dd69c9ef40099d26c4c070f4b2b4c8bc985b9e33c10f3c6eff93cb83b40",
+    "bytes": 2488,
+    "sha256": "c96c0ce4beb1ac36f625a08cdbe76616d7edaaba0dc28c9072e7d6c822b9f9c9",
     "displayGeometryVersion": 2
   },
   {
@@ -2813,8 +2818,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 9,
-    "bytes": 29320,
-    "sha256": "43d48238b3d384b93720fc701c12eab9b9a17f9e010db8fd327eb12461c39fdc",
+    "bytes": 36213,
+    "sha256": "6683be1c0a1ee8945d12f25bd17f082bd9120fbdec46bc8cbb2f3cf28423d9f4",
     "displayGeometryVersion": 2
   },
   {
@@ -2829,8 +2834,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 149621,
-    "sha256": "edbbc00e08a6ecfcb60b3267007cf7a2c466f5eb26bb51c2c226e16978059b3f",
+    "bytes": 192987,
+    "sha256": "3cbe65aa571ff9cbf94ce9193eadcb32c9a079adce1405d29807c844784869c3",
     "displayGeometryVersion": 2
   },
   {
@@ -2861,8 +2866,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 4292,
-    "sha256": "e7514f54e13ce9d1703df231ce1a568892df6d4cf76ff667f8ed0068788edf7b",
+    "bytes": 10072,
+    "sha256": "844ed9e1eb785ac36c0192705d8c9364ae92fa06bad90d29930af0da35373fb2",
     "displayGeometryVersion": 2
   },
   {
@@ -2877,8 +2882,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 4,
-    "bytes": 5901,
-    "sha256": "3600da7287f1b331ef9301906bae1911a59dbcf3c628c8c4c18181aad92b9b9d",
+    "bytes": 10823,
+    "sha256": "068b01b8345a8c757ec1ceb39e90b2747e0c991edc9c709c9be5e39a2b2814b1",
     "displayGeometryVersion": 2
   },
   {
@@ -2893,8 +2898,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 26,
-    "bytes": 21438,
-    "sha256": "13312ed595f35b9f6c5e4b36ec29243f9b7e69ef0ce8db8c047a87a264cd989a",
+    "bytes": 23135,
+    "sha256": "b5b771ba03fdb925cadb7ef101f50935baf61e451dd2e348adee2f8dbb43e3a2",
     "displayGeometryVersion": 2
   },
   {
@@ -2909,8 +2914,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 2,
-    "bytes": 1755,
-    "sha256": "91d31bb21da2af77e22cd97460433a87482bc88afd2e2e89c18007a79b4d8a6d",
+    "bytes": 2989,
+    "sha256": "fb5c1ffbd1ae0d8aaa486b6f3b1ba0154bff0d6686d830b32c914c5440c47e7e",
     "displayGeometryVersion": 2
   },
   {
@@ -2925,8 +2930,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 2,
-    "bytes": 1322,
-    "sha256": "8f503ba90a20ac0e6aa102b54c0dfdd6bfe0a6783f58d910b9a503b39817c341",
+    "bytes": 2437,
+    "sha256": "3ae3d11f8ced921ef7db26e441aea6652d3e5eed19bf962d79cc824111fb1078",
     "displayGeometryVersion": 2
   },
   {
@@ -2941,8 +2946,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 17591,
-    "sha256": "764e03f1ca22c3da307018fa93f8f780f3e476f79aaea5f80748ca617d40bf8b",
+    "bytes": 20645,
+    "sha256": "a0113ba56d6324b18480aa3cab07b8ccfcc92d58ac311ca3f0c74605d37b0ac9",
     "displayGeometryVersion": 2
   },
   {
@@ -2957,8 +2962,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 7,
-    "bytes": 6330,
-    "sha256": "bb556b070e29095b6f6a27e0c0feff7eab6c66965202bbb6ac97ee0ae5c8fd74",
+    "bytes": 6678,
+    "sha256": "b2ba318664b8727bfad14c63cb119f702793611af873be4d8a41a76e67bef148",
     "displayGeometryVersion": 2
   },
   {
@@ -2973,8 +2978,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 5316,
-    "sha256": "948866f5f9c8ade47db0984588f77c5c35bcf8c84b1bbe02fa097b9d4fc98ab0",
+    "bytes": 5996,
+    "sha256": "fcd2f4e5545d730a4f7e287cdc7ec326050bf05105746eefd5827bb787d8f491",
     "displayGeometryVersion": 2
   },
   {
@@ -2989,8 +2994,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 10389,
-    "sha256": "b4cb0397a58d8373a0e673e2b1b20b5a5ed07a9c62d5c7d48efbb6aada921090",
+    "bytes": 10956,
+    "sha256": "2d88f345040ebb7efdf8cbd56857de1329e44b26b63fc15eb06a9917472e3613",
     "displayGeometryVersion": 2
   },
   {
@@ -3005,8 +3010,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 8833,
-    "sha256": "aead65de2be09c61f893abc54e8b11febb9c29579cb9da04ef32743f588ea33f",
+    "bytes": 10856,
+    "sha256": "393f8ea42cd1df871571dca36ec8ce388686339735fa360cd9bb5da9c03035cd",
     "displayGeometryVersion": 2
   },
   {
@@ -3021,8 +3026,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 8372,
-    "sha256": "c12d3626f2296bd8eeda98b66420db54f82ddd93bc5936a32765811bc7f684d0",
+    "bytes": 10370,
+    "sha256": "37492d63731a19158718ea501c575890079a3d53494528b407d3915c321b22a1",
     "displayGeometryVersion": 2
   },
   {
@@ -3037,8 +3042,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 3,
-    "bytes": 3532,
-    "sha256": "40397a0bd692db9d6c1442ff3a9f143c02188e7605366f8f92cf12625de59e62",
+    "bytes": 3051,
+    "sha256": "c43e54009f77219465534fd30dab0ecbb087dd8f5876fdd90b96c6d2276460bb",
     "displayGeometryVersion": 2
   },
   {
@@ -3053,8 +3058,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 8,
-    "bytes": 6799,
-    "sha256": "8a19bd9f64d14404dc422d56c98668e35afd4110741f0d07a38b23ae0d9e525b",
+    "bytes": 8721,
+    "sha256": "58c458b7371645d5c350580f20533dca82b8ff5b17b1f5bc3027766328b4cf02",
     "displayGeometryVersion": 2
   },
   {
@@ -3069,8 +3074,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 11700,
-    "sha256": "14fe31140b3c24e8ec60045704b5686949e8df95d65f29b5e51c4e102b262e25",
+    "bytes": 13862,
+    "sha256": "a36a78f10fea2d9875ad73a8a9676ef5a662f301b75de6c916b23d3a3ebe0aef",
     "displayGeometryVersion": 2
   },
   {
@@ -3085,8 +3090,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 3,
-    "bytes": 2748,
-    "sha256": "efef9798dd92bcdcfdf6ddc6b76a4f9e5d725e5c271ce4efb74cd8c3d05ab329",
+    "bytes": 4145,
+    "sha256": "7fa69eadb169a34ec92f7b1eedc27f4c35017219ecdec8d795a36fdefd010044",
     "displayGeometryVersion": 2
   },
   {
@@ -3117,8 +3122,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 4526,
-    "sha256": "94f5dec68b9e954137e72a4ccfc140da94381c38ff068037a151751a8665ea63",
+    "bytes": 5930,
+    "sha256": "948708922e2f167c824ce9540273818b777fb39cf611c6fd8d1afdccada52f46",
     "displayGeometryVersion": 2
   },
   {
@@ -3133,8 +3138,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 15,
-    "bytes": 13542,
-    "sha256": "14771b76d282bc7dadde09079d6d30a8f095f3af9c96716c4229a9584ee74e5b",
+    "bytes": 13961,
+    "sha256": "36401cb6c1921b7f4db49b08a790a3642f1b013d19d2345726fd32e7593cc01e",
     "displayGeometryVersion": 2
   },
   {
@@ -3149,8 +3154,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 588,
-    "sha256": "60e4bb92757be07cf7331f1b016d267182c34de9e586c43f7b50efaa5709cdad",
+    "bytes": 1305,
+    "sha256": "f956c29f7bdca87b7024553230a408ae307235b6b17eab0d5b5b427465f59ed6",
     "displayGeometryVersion": 2
   },
   {
@@ -3165,8 +3170,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 14,
-    "bytes": 21133,
-    "sha256": "f6c7a8cecf6b8b031383a8c1119dc0ec11139b7b3cb539e8f28f7cba7e21973a",
+    "bytes": 20777,
+    "sha256": "35cb778831abdcd32bd623ceaa955956dd7cfda00256d0aa375839d7f04c3256",
     "displayGeometryVersion": 2
   },
   {
@@ -3181,8 +3186,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1268,
-    "sha256": "b52a14cc91a8fdcc67c8f19c2219b53d7b7208c16a130bf555b532e965427799",
+    "bytes": 1532,
+    "sha256": "477700fbaa12e4aba0941cee3052166bc869b6a35c789f55902e7447ab944abc",
     "displayGeometryVersion": 2
   },
   {
@@ -3197,8 +3202,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 10720,
-    "sha256": "d02766f5db5e5fc925505214612f9cac1f0f9d4cf2456a54ad25da4a45cb5af8",
+    "bytes": 11948,
+    "sha256": "ccf19f60006838d9d9d9a0e71193ce550e583bddc9d13a21374c3658be5d1cdd",
     "displayGeometryVersion": 2
   },
   {
@@ -3213,8 +3218,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1515,
-    "sha256": "01d1812a640198c96ec1825e3ee8d4778049663c4c4761d8fa27e003b8f93a7f",
+    "bytes": 2382,
+    "sha256": "f0d09b21ededfc277c3c90b8df6f25ce81235d592e4d9ab13046aa6c8099176f",
     "displayGeometryVersion": 2
   },
   {
@@ -3229,8 +3234,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 3,
-    "bytes": 2435,
-    "sha256": "25cede8c89d4fe2b116773e9d6fd5799ee2ddda5638d87038bcbb232508f8213",
+    "bytes": 3471,
+    "sha256": "35967f0fe829a04303960aa0de5e497a0e3de02290c9c7f42653e126a9d541a5",
     "displayGeometryVersion": 2
   },
   {
@@ -3245,8 +3250,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 15996,
-    "sha256": "a73606a56216f580de03318f2831101b42fd34923c16019a34895dc2318b0812",
+    "bytes": 17315,
+    "sha256": "bcb034d53213faba5fbc11d94eece66da6bdd4b38939c09d8d56d0eb7d636a2f",
     "displayGeometryVersion": 2
   },
   {
@@ -3261,8 +3266,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 3,
-    "bytes": 2697,
-    "sha256": "866bb9c00869ada07275fe983f566b7bd44307bb3f35d6d16c7144de0bd45c4e",
+    "bytes": 6916,
+    "sha256": "d76007b76c33ed35a9cffec97f5680c598e4c98947309755d495c72777c4f53c",
     "displayGeometryVersion": 2
   },
   {
@@ -3277,8 +3282,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 2,
-    "bytes": 2589,
-    "sha256": "afcd4d0e933bf2a59eda0ae2d820d2bc1938323ed610107bc94fdc4e044304b3",
+    "bytes": 4245,
+    "sha256": "84afae7e6c6b13364e2c9efcbac72bc58b84a6fd60c29e6cdd20e60f94d5fac4",
     "displayGeometryVersion": 2
   },
   {
@@ -3293,8 +3298,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 22,
-    "bytes": 16100,
-    "sha256": "620ae613fd762381325ccacaa3dd3bdd5dd2b74c1dfd0b266be989d3586bb23e",
+    "bytes": 30637,
+    "sha256": "3439a77163ed430eb67131918d915b8b40ec11ab4db18c839d9a768e4a59280a",
     "displayGeometryVersion": 2
   },
   {
@@ -3309,8 +3314,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 68,
-    "bytes": 53540,
-    "sha256": "af91357c4ef48dce8d641730d81524cf49e151cc16ac044aa66f59c4bc582885",
+    "bytes": 57496,
+    "sha256": "48f9b060eb4ea1c73c9c2007ea6947c486712ef21594050489ca8c7f7e4ef959",
     "displayGeometryVersion": 2
   },
   {
@@ -3325,8 +3330,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1320,
-    "sha256": "a090040872d923878c851c87485f8eb0a08208c38491f707a6b7525f3c74b6eb",
+    "bytes": 1539,
+    "sha256": "d84978283dc57cf4b874d56fadf40babd15c7ea7e1c69d664de24a7912e15d95",
     "displayGeometryVersion": 2
   },
   {
@@ -3341,8 +3346,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1211,
-    "sha256": "ad87ba9e2c8748b955969c6e5d7e02fe58f8f1d55599306510b73641241176d1",
+    "bytes": 1272,
+    "sha256": "e8e99ed25ea5c554e29b6e0402b4b51de2ca3f7457e8978ee3f91262b8a670b2",
     "displayGeometryVersion": 2
   },
   {
@@ -3357,8 +3362,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1344,
-    "sha256": "e2d70efbdf13ec7411ad68b23e4d54ff92494cc582263aa49e8af7d1180f54a1",
+    "bytes": 2468,
+    "sha256": "2a08e82afe6895d4ce0578bdd3ca4505ebbe85e86e838952afff79ceafb3fc15",
     "displayGeometryVersion": 2
   },
   {
@@ -3373,8 +3378,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1267,
-    "sha256": "06cae35e17cf9603e60dd6f1eae0a4f4c8202e66c228cd93e7b1565e7885635e",
+    "bytes": 3158,
+    "sha256": "c0d45d8614f6efaa4b55bb6c3bf59cf4a09e2a77ba872c2cba93ba0476496db5",
     "displayGeometryVersion": 2
   },
   {
@@ -3405,8 +3410,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 5122,
-    "sha256": "cfcd124291688a5970906dc2f25065b9686813a37995692781bc0fc3bf639e03",
+    "bytes": 5873,
+    "sha256": "4e297b50befd172faf0292742efb1d364ae36cc8ae10f027a777f1d8034ecd10",
     "displayGeometryVersion": 2
   },
   {
@@ -3421,8 +3426,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 982,
-    "sha256": "c2bc428728d0b946f3ceac1713a85664a88192153b483d506bbff541e0a6b7ec",
+    "bytes": 1168,
+    "sha256": "113fb246f8a1a1d9ecc8ccc262ef2244ac6debaa138f76d531220b4862796696",
     "displayGeometryVersion": 2
   },
   {
@@ -3453,8 +3458,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 14407,
-    "sha256": "0cf343848a3ff0948184b6a48142b31093e8e196171c629971912b913f18a7d7",
+    "bytes": 19222,
+    "sha256": "b2c5bc203cef2562048423be1881f71a21c8f836a30cb27057f53deb87100292",
     "displayGeometryVersion": 2
   },
   {
@@ -3469,8 +3474,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 3798,
-    "sha256": "cc9fd44a2a3633af2309031d09e82f8ec7e94d702b58e226ecd6d798b322ee91",
+    "bytes": 6143,
+    "sha256": "1f67579263d3993f2c5432ba8d8a5baef43d7adba4ee96337f4d9f7c4709b9c8",
     "displayGeometryVersion": 2
   },
   {
@@ -3485,8 +3490,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 3,
-    "bytes": 2864,
-    "sha256": "8512ca522f54d16a7d5abf7be26a585e0b82aeeb994cae37ef6507b015564134",
+    "bytes": 3562,
+    "sha256": "bd87991f75667c389860a7ee40286fca89d5d1abd5c8e30854affdf83467cacd",
     "displayGeometryVersion": 2
   },
   {
@@ -3501,8 +3506,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 11,
-    "bytes": 11274,
-    "sha256": "73fa9ab449ed66ef70147ad435cdeddc78e49deed46ad01322118a3a04cb72bd",
+    "bytes": 16559,
+    "sha256": "d9412e5bc2fe664d7d53e9627032d20e5784952758e70c3e3d487e4ff7e3b18e",
     "displayGeometryVersion": 2
   },
   {
@@ -3517,8 +3522,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 10,
-    "bytes": 22894,
-    "sha256": "8ae3b25141328845589f82d10be6941a94b09b0e0bd646b99e544bcadefd7d3f",
+    "bytes": 48718,
+    "sha256": "b6490537ef610f0e1aa5c26e35693ed9a9d67d4c79ab69494f125ab8839439c8",
     "displayGeometryVersion": 2
   },
   {
@@ -3549,8 +3554,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 21,
-    "bytes": 13050,
-    "sha256": "62ef19746c5af4f77eb37a00d895287cee6e16c2156f220314e72354c716f161",
+    "bytes": 13230,
+    "sha256": "6120e301acd568205e68827a5edbebbde768fc93066dda2f7c1b056b0f34f108",
     "displayGeometryVersion": 2
   },
   {
@@ -3581,8 +3586,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 4,
-    "bytes": 3531,
-    "sha256": "a5fbeff359f6f0fabef81f8931076ebceb85862671fdbc42bac70d4d7c3331c8",
+    "bytes": 4491,
+    "sha256": "bee94f16cb5bd4429d9161012ddc1af4926c9546c78f1e084dae51b917e070b8",
     "displayGeometryVersion": 2
   },
   {
@@ -3597,8 +3602,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 4019,
-    "sha256": "7dc5441ab394028f4f87a8a3b7ddb33c7a148c98171b163d20f61b242648208d",
+    "bytes": 5319,
+    "sha256": "673deba508fdddfc486a69b1cef4a2f7ee11d9e131d14de6ab1bc219d5e5634b",
     "displayGeometryVersion": 2
   },
   {
@@ -3613,8 +3618,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 8546,
-    "sha256": "190454689daa1546f507b21fb6b1c9999e7c48653823b073bed58eac7b3d3204",
+    "bytes": 14059,
+    "sha256": "4910de4dccc26d24dc03ae1e328a7b9b58777d6be96b6ac35e8180b588b7ffc2",
     "displayGeometryVersion": 2
   },
   {
@@ -3629,8 +3634,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 6,
-    "bytes": 9166,
-    "sha256": "0256a96b8ed0b4e47fa318b275168da8551516a00fdca20a6b44e98771f472d4",
+    "bytes": 23121,
+    "sha256": "61a336cb3367cb4d4bd6ce1ace84651a8e46c1bc15384de0422c76d8de0539d4",
     "displayGeometryVersion": 2
   },
   {
@@ -3645,8 +3650,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1585,
-    "sha256": "ba2c3893bd3705ea96ae93358915f0e0647da8001aa4e96edd5bd9b8461c6632",
+    "bytes": 1958,
+    "sha256": "15eaddd25e6c57bebdcd61b33e628adc9b6c641e4767071246bcd157abf3fb9c",
     "displayGeometryVersion": 2
   },
   {
@@ -3661,8 +3666,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 4283,
-    "sha256": "e68734308838de25b097300496eee18954afd324df3b8b16beb9631e75472382",
+    "bytes": 4755,
+    "sha256": "3d121b5acdcfc49ed0f2a9deea6b5f6b0f3e1a8782e6feb03b1d705b85d80f66",
     "displayGeometryVersion": 2
   },
   {
@@ -3677,8 +3682,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 16,
-    "bytes": 12750,
-    "sha256": "ae517d9dfcd117d125198fe3c3dd53ceab6e3f46499c0426b6bf141979420f92",
+    "bytes": 13230,
+    "sha256": "72d0d8bc79c6e710b0422b1ba991b3518a8d815d8a2acf75904078919421ae0c",
     "displayGeometryVersion": 2
   },
   {
@@ -3693,8 +3698,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 1,
-    "bytes": 1104,
-    "sha256": "2e52a2687cf47cd87d3cd15da049c83df80cbf5a108b2a5a116b498c0629ae45",
+    "bytes": 1751,
+    "sha256": "98d1e0efa1b74b665adde7b58eb39eaf1f130467d39076ecd9857b17b9734db6",
     "displayGeometryVersion": 2
   },
   {
@@ -3709,8 +3714,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 4,
-    "bytes": 3107,
-    "sha256": "2efc09afd98d2695fd711dd15831ed18b0171f4c8082153948191b9bf8c11e16",
+    "bytes": 5119,
+    "sha256": "5ce4cac4d6794e3e2bccc2ba0af7e163ceaa47b144118984661c72ee871b1580",
     "displayGeometryVersion": 2
   },
   {
@@ -3725,8 +3730,8 @@
     "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson",
     "generatedAt": "2026-10-05T00:00:00Z",
     "features": 5,
-    "bytes": 4421,
-    "sha256": "86ed2bef5d0449be3f85beead72a68e672e195edd94efc610f85ffc129f80bf4",
+    "bytes": 5210,
+    "sha256": "2af813a1ef7a238bd3b0efe69d4852fffe517e2511532d4308177d146e28debd",
     "displayGeometryVersion": 2
   },
   {

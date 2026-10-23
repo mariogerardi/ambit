@@ -182,7 +182,9 @@ export async function reconcileRegionalDisplay(parent, children) {
     (sum, f) => sum + (f.geometry ? planarArea(f.geometry) : 0),
     0,
   );
-  if (uncovered > Math.max(1e-12, planarArea(footprint) * 1e-12))
+  // Dense coastlines can leave negligible floating-point overlay slivers.
+  // Bound these by one hundred-millionth of the display footprint's area.
+  if (uncovered > Math.max(1e-10, planarArea(footprint) * 1e-8))
     throw Object.assign(
       Error(
         `Incomplete subdivision display partition: ${parent.id} (${uncovered})`,

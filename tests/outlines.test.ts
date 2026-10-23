@@ -88,30 +88,39 @@ describe("independent boundary outlines", () => {
   it("keeps every straight segment above the highest possible land surface, including its midpoint", () => {
     for (const region of regions) {
       const positions = boundaryOutlinePositions(region);
-      expect(positions.length % 6).toBe(0);
+      expect(positions.length, region.id).toBeGreaterThan(0);
+      expect(positions.length % 6, region.id).toBe(0);
+      let highestEndpoint = 0,
+        lowestMidpoint = Infinity,
+        widestAngle = 0;
+      // Check every segment, but aggregate its extrema so dense coastlines do
+      // not spend most of this test allocating matcher objects and sliced arrays.
       for (let i = 0; i < positions.length; i += 6) {
-        const a = positions.slice(i, i + 3),
-          b = positions.slice(i + 3, i + 6);
-        expect(Math.hypot(...a)).toBeLessThan(
-          1 + boundaryAltitude(region) + 0.00003,
-        );
-        const middle = Math.hypot(
-          (a[0] + b[0]) / 2,
-          (a[1] + b[1]) / 2,
-          (a[2] + b[2]) / 2,
-        );
-        expect(middle, region.id).toBeGreaterThan(1 + boundaryAltitude(region));
+        const ax = positions[i],
+          ay = positions[i + 1],
+          az = positions[i + 2],
+          bx = positions[i + 3],
+          by = positions[i + 4],
+          bz = positions[i + 5],
+          radiusA = Math.hypot(ax, ay, az),
+          radiusB = Math.hypot(bx, by, bz);
+        highestEndpoint = Math.max(highestEndpoint, radiusA, radiusB);
+        const middle = Math.hypot((ax + bx) / 2, (ay + by) / 2, (az + bz) / 2);
+        lowestMidpoint = Math.min(lowestMidpoint, middle);
         const angle = Math.acos(
-          Math.min(
-            1,
-            (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]) /
-              (Math.hypot(...a) * Math.hypot(...b)),
-          ),
+          Math.min(1, (ax * bx + ay * by + az * bz) / (radiusA * radiusB)),
         );
-        expect(angle).toBeLessThanOrEqual(
-          (outlineResolution * Math.PI) / 180 + 0.000001,
-        );
+        widestAngle = Math.max(widestAngle, angle);
       }
+      expect(highestEndpoint, region.id).toBeLessThan(
+        1 + boundaryAltitude(region) + 0.00003,
+      );
+      expect(lowestMidpoint, region.id).toBeGreaterThan(
+        1 + boundaryAltitude(region),
+      );
+      expect(widestAngle, region.id).toBeLessThanOrEqual(
+        (outlineResolution * Math.PI) / 180 + 0.000001,
+      );
     }
   });
   it("preserves source coordinates and reuses buffers during hover and answer updates", () => {

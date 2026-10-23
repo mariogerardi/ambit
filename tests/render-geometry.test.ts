@@ -1,7 +1,7 @@
 import { THIRD_JOURNEY } from "./fixtures/engine/thirdJourney";
 import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { geoArea, geoBounds } from "d3-geo";
+import { geoArea, geoBounds, geoContains } from "d3-geo";
 import { DoubleSide, Mesh, MeshBasicMaterial, Raycaster, Vector3 } from "three";
 import { sphericalGeometry } from "../src/geography/sphericalGeometry.mjs";
 import type { RegionFeature } from "../src/geography/types";
@@ -106,6 +106,12 @@ describe("actual spherical renderer inputs", () => {
     expect(byId.get("wurl:AZE")).not.toBe(
       baseline.find((r) => r.id === "wurl:AZE"),
     );
+    const fragment = byId.get("clue-part:wurl:AZE")!;
+    expect(geoContains(fragment.geometry, [45.41, 39.21])).toBe(true);
+    expect(geoContains(fragment.geometry, [49.89, 40.4])).toBe(false);
+    expect(geoContains(byId.get("wurl:AZE")!.geometry, [45.41, 39.21])).toBe(
+      false,
+    );
     expect(prepare(questionRegions(world, q, "feedback"))).toBe(baseline);
     expect(prepare(questionRegions(world, q, "playing"))).toBe(clue);
   });
@@ -120,7 +126,11 @@ describe("actual spherical renderer inputs", () => {
     }
     const source = world.find((r) => r.id === "wurl:ZMB")!;
     const normalized = sphericalGeometry(source.geometry);
-    const rendered = prepareGlobeRegions([source])[0].geometry;
+    // Exercise tessellation of the original problematic canonical outline,
+    // independently of the denser display footprint shipped alongside it.
+    const rendered = prepareGlobeRegions([
+      { ...source, displayGeometry: source.geometry },
+    ])[0].geometry;
     const phi = (-13.2 * Math.PI) / 180,
       theta = (23.2 * Math.PI) / 180;
     const direction = new Vector3(
@@ -160,6 +170,7 @@ describe("actual spherical renderer inputs", () => {
     };
     expect(hit(normalized)).toBe(false);
     expect(hit(rendered)).toBe(true);
+    expect(hit(prepareGlobeRegions([source])[0].geometry)).toBe(true);
     expect(geoArea(rendered)).toBeCloseTo(geoArea(normalized), 10);
   });
   it("renders Ethiopia as its own footprint instead of the rest of Earth", () => {

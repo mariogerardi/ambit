@@ -128,6 +128,7 @@ function placeTexture(canvas: HTMLCanvasElement) {
   return texture;
 }
 export function placeDetailVisible(place: PlaceFeature, altitude: number) {
+  if (place.inspectionSelected) return true;
   if (
     ["river", "mountain", "landform", "ocean"].includes(place.kind) ||
     altitude < 0.4

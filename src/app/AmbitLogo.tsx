@@ -1,11 +1,22 @@
 export function AmbitLogo() {
   return (
-    <span className="ambit-wordmark" aria-hidden="true">
-      amb
-      <span className="ambit-letter-i">
-        i<img className="ambit-orb" src="/ambit-orb.svg" alt="" />
-      </span>
-      t
-    </span>
+    <>
+      <img
+        className="ambit-wordmark ambit-logo-dark"
+        src="/ambitlogo.png"
+        alt=""
+        aria-hidden="true"
+        width={2172}
+        height={724}
+        draggable={false}
+      />
+      <img
+        className="ambit-wordmark ambit-logo-light"
+        src="/ambitlogo2.png"
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+      />
+    </>
   );
 }

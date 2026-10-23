@@ -217,3 +217,35 @@
   font-size: inherit;
   vertical-align: baseline;
 }
+
+.experience .explore-fact-link {
+  display: inline;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ui-accent);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--ui-accent-rgb) / 0.4);
+  text-underline-offset: 3px;
+}
+.experience .explore-fact-link:hover {
+  color: var(--ui-text);
+  text-decoration-color: currentColor;
+}
+.explore-city-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+.city-source-note,
+.explore-source-link {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ui-muted);
+}
+.explore-source-link {
+  display: inline-block;
+  margin-top: 12px;
+}

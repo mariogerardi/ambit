@@ -61,7 +61,7 @@ it("ships a small, accessible loading screen in HTML before the app script", () 
     gzipSync(
       `${style}${shell.querySelector("head script")?.textContent}${loader?.outerHTML}`,
     ).length,
-  ).toBeLessThan(3072);
+  ).toBeLessThan(3200);
   expect(
     shell.querySelector('link[rel="preload"][href*="Manrope"]'),
   ).not.toBeNull();

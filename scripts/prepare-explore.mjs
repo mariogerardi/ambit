@@ -423,62 +423,13 @@ await fs.writeFile(
     features: physical,
   }),
 );
-const ne = JSON.parse(
-  await fs.readFile("sources/ne-countries.geojson", "utf8"),
-);
-const roster = JSON.parse(
-  await fs.readFile("src/game/data/un-members.v1.json", "utf8"),
-).members;
-const info = {};
-for (const line of (
-  await fs.readFile(".cache/quiz/countryInfo.txt", "utf8")
-).split(/\r?\n/)) {
-  if (!line || line.startsWith("#")) continue;
-  const p = line.split("\t"),
-    id = `wurl:${p[1]}`;
-  if (!roster.some((c) => c.id === id)) continue;
-  const n = ne.features.find(
-    (f) => f.properties.ISO_A3_EH === p[1],
-  )?.properties;
-  info[id] = {
-    areaKm2: Number(p[6]),
-    population: Number(p[7]),
-    continent: n?.CONTINENT ?? p[8],
-    subregion: n?.SUBREGION ?? "",
-    currencyCode: p[10],
-    currencyName: p[11],
-    callingCode: p[12],
-    languages: p[15].split(",").filter(Boolean),
-  };
-}
-const countryRaw = await fs.readFile(".cache/quiz/countryInfo.txt");
-if (
-  checks.countryInfo &&
-  checks.countryInfo.sha256 !==
-    createHash("sha256").update(countryRaw).digest("hex")
-)
-  throw Error("Country metadata checksum mismatch");
-checks.countryInfo = {
-  url: "https://download.geonames.org/export/dump/countryInfo.txt",
-  sha256: createHash("sha256").update(countryRaw).digest("hex"),
-  bytes: countryRaw.length,
-};
-await fs.writeFile(
-  "src/geography/data/country-info.v1.json",
-  JSON.stringify({
-    version: 1,
-    snapshot: stamp,
-    source:
-      "GeoNames CC BY 4.0 / Natural Earth public domain; population estimates are undated source estimates",
-    countries: info,
-  }),
-);
+await import("./prepare-country-profiles.mjs");
 await fs.writeFile(
   "sources/explore-checksums.json",
   JSON.stringify(checks, null, 2) + "\n",
 );
 console.log(
-  `Prepared ${regions.length} subdivisions, ${physical.length} geographic features, ${Object.keys(info).length} country profiles; Canada ${bytes.length} bytes.`,
+  `Prepared ${regions.length} subdivisions, ${physical.length} geographic features, Canada ${bytes.length} bytes.`,
 );
 // Reconcile regenerated subdivisions with the unchanged world footprint.
 await import("./prepare-regional-display.mjs");

@@ -5,6 +5,10 @@ import { createHash } from "node:crypto";
 import { reconcileRegionalDisplay } from "./regional-display.mjs";
 import { validateGeometry } from "./geometry.mjs";
 import { applyGreatLakesDisplay } from "./lake-display.mjs";
+import {
+  prepareWorldDisplay,
+  WORLD_DISPLAY_PERCENT,
+} from "./world-display.mjs";
 
 // Entirely offline. Parents are processed before descendants, including counties.
 export async function prepareRegionalDisplay(greatLakesOnly = false) {
@@ -12,7 +16,9 @@ export async function prepareRegionalDisplay(greatLakesOnly = false) {
     await fs.readFile("public/geography/manifest.json", "utf8"),
   );
   const world = await applyGreatLakesDisplay(
-    JSON.parse(await fs.readFile("public/geography/world.v1.json", "utf8")),
+    await prepareWorldDisplay(
+      JSON.parse(await fs.readFile("public/geography/world.v1.json", "utf8")),
+    ),
   );
   const parents = new Map(world.map((r) => [r.id, r]));
   let count = 0;
@@ -21,6 +27,11 @@ export async function prepareRegionalDisplay(greatLakesOnly = false) {
   worldLayer.bytes = worldBytes.length;
   worldLayer.sha256 = createHash("sha256").update(worldBytes).digest("hex");
   worldLayer.displayWaterSource = "Natural Earth v5.1.2 / 1:10m Great Lakes";
+  worldLayer.displaySimplification = {
+    method: "weighted",
+    retainedPercent: WORLD_DISPLAY_PERCENT,
+    keepShapes: true,
+  };
   const pending = [["public/geography/world.v1.json", worldBytes]];
   const affected = new Set(["wurl:USA", "wurl:CAN"]);
   for (const layer of manifest

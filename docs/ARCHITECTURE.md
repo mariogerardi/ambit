@@ -205,6 +205,12 @@ Legacy saved camera defaults are no longer applied. Globe display preferences
 are saved separately and do not move the camera. Camera flights fit their destination against the live viewport while panels move.
 Overview flights recalculate their world framing as the viewport settles; hidden
 mobile pages retain the normal map frame instead of a full-screen fitting area.
+Camera selections use the original gentle close-up flight at every scale,
+with its curved route and final approach. Nearby adjustments take 1.4 seconds;
+longer flights take 2.6–3.2 seconds. Explicit overview-tour timings are preserved.
+City-to-wide-view flights spread their pullback over most of the trip, avoiding
+a rapid departure zoom while retaining the same overall duration.
+Country-scale travel adds no decorative pullback; local flights retain their surface clearance.
 Fidget restores prior playback and
 retains polygon metadata needed for subsequent renderer refreshes. These contracts
 have helper/DOM coverage; that is not proof of GPU appearance or frame rate.
