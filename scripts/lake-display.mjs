@@ -11,7 +11,7 @@ export async function applyGreatLakesDisplay(world) {
     features: targets.map((r) => ({
       type: "Feature",
       properties: { id: r.id },
-      geometry: r.geometry,
+      geometry: r.displayGeometry ?? r.geometry,
     })),
   });
   const lakes = await fs.readFile(

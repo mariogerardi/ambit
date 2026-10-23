@@ -33,7 +33,6 @@ import {
   DirectionalLight,
   MeshPhongMaterial,
   Vector2,
-  Vector3,
 } from "three";
 import type { Object3D, PerspectiveCamera } from "three";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
@@ -50,6 +49,7 @@ import type {
 } from "../geography/types";
 import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { canPickRegion, raisedSurfacePoint } from "./interaction";
+import { SmallRegionLocators } from "./smallRegionLocators";
 import { ClueLocators } from "./clueLocators";
 import type { ClueLocator } from "./clueLocators";
 import { MapOverlays, isOverlayLayer } from "./overlays";
@@ -135,6 +135,7 @@ interface Props {
     onChange(value: Construction | undefined): void;
   };
   placeInteraction?: boolean;
+  placeInspection?: boolean;
   placeLabels?: boolean;
   placeMarkers?: boolean;
   placeContextual?: boolean;
@@ -153,15 +154,12 @@ interface Props {
   motion: boolean;
   rotationSpeed?: number;
   reduced: boolean;
-  markers: boolean;
   onReady(): void;
   onTextureFallback(): void;
   onFailure(): void;
 }
 const NO_FEATURES: PhysicalFeature[] = [];
 const NO_LABELS: object[] = [];
-const pointRadius = 0.28;
-const pointAltitude = 0.003;
 export const GlobeView = forwardRef<GlobeHandle, Props>(
   function GlobeView(props, ref) {
     const globe = useRef<GlobeMethods | undefined>(undefined);
@@ -259,6 +257,11 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           props.palette,
         );
     }, [mapOverlays, props.constructionInput?.brushRadiusKm, props.palette]);
+    const smallRegions = useMemo(() => new SmallRegionLocators(), []);
+    useEffect(() => {
+      host.current?.append(smallRegions.element);
+      return () => smallRegions.dispose();
+    }, [smallRegions]);
     const clueLocators = useMemo(() => new ClueLocators(), []);
     useEffect(() => {
       host.current?.append(clueLocators.element);
@@ -270,9 +273,6 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     );
     useEffect(() => () => mapOverlays.dispose(), [mapOverlays]);
     const labelFrame = useRef(0);
-    const countryPoints = useRef<
-      (PlaceFeature & { __threeObjPoint?: Object3D })[]
-    >([]);
     const refreshLabels = useCallback(() => {
       const g = globe.current;
       if (!g) return;
@@ -324,21 +324,32 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           labelFrame.current = 0;
           refreshLabels();
         });
-      // Tiny-country answer targets also stay small when the player zooms in.
-      const pixelScale =
-        (2 * Math.tan((camera.fov * Math.PI) / 360)) /
-        Math.max(1, rendererSize.y);
-      const position = new Vector3();
-      for (const point of countryPoints.current) {
-        const object = point.__threeObjPoint;
-        if (!object) continue;
-        object
-          .getWorldPosition(position)
-          .applyMatrix4(camera.matrixWorldInverse);
-        if (position.z < 0)
-          object.scale.x = object.scale.y = -position.z * pixelScale * 6;
-      }
-    }, [placeLabels, physical, clueLocators, mapOverlays]);
+      smallRegions.view(
+        camera,
+        rendererSize.x,
+        rendererSize.y,
+        g.getGlobeRadius(),
+        panelBoxes,
+      );
+    }, [placeLabels, physical, clueLocators, mapOverlays, smallRegions]);
+    useEffect(() => {
+      smallRegions.update(props.regions, props);
+      refreshLabels();
+    }, [
+      smallRegions,
+      props.regions,
+      props.states,
+      props.active,
+      props.palette,
+      props.hovered,
+      props.regionInteraction,
+      props.selectDisabled,
+      props.selectableRegionIds,
+      props.onCoordinateTap,
+      props.onSurfaceTap,
+      props.constructionInput,
+      refreshLabels,
+    ]);
     useEffect(() => {
       clueLocators.update(
         props.active === false ? [] : (props.clueLocators ?? []),
@@ -776,78 +787,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       }),
       [stop, size],
     );
-    const pointData = useMemo(() => {
-      const result: (PlaceFeature & { region?: RegionFeature })[] = [];
-      if (props.markers)
-        for (const region of props.regions)
-          if (
-            !region.displayBase &&
-            [
-              "Monaco",
-              "San Marino",
-              "Vatican",
-              "Liechtenstein",
-              "Nauru",
-              "Tuvalu",
-              "Singapore",
-              "Andorra",
-              "Malta",
-              "Luxembourg",
-            ].some((n) => region.name.includes(n))
-          )
-            result.push({
-              id: `marker:${region.id}`,
-              name: region.name,
-              kind: "other",
-              lat: region.focus.lat,
-              lng: region.focus.lng,
-              sourceId: region.sourceId,
-              region,
-            });
-      return result;
-    }, [props.markers, props.regions]);
-    countryPoints.current = pointData;
-    useEffect(() => {
-      const frame = requestAnimationFrame(refreshLabels);
-      return () => cancelAnimationFrame(frame);
-    }, [pointData, refreshLabels]);
-    const point = (obj: object) =>
-      obj as PlaceFeature & { region?: RegionFeature };
     const region = (obj: object) => obj as RegionFeature;
     const route = (obj: object) => obj as RouteFeature;
-    const pointColor = useCallback((obj: object) => {
-      const r = point(obj).region,
-        p = current.current;
-      return r
-        ? themedRegionStyle(
-            p.theme ?? "natural",
-            r.id,
-            p.states[r.id],
-            false,
-            p.palette,
-          ).fill
-        : "#ffe1a0";
-    }, []);
-    const onPointHover = useCallback((obj: object | null) => {
-      if (fidget.current.active || !inspection.current.allowed) return;
-      current.current.onHover(obj ? point(obj).region : undefined);
-    }, []);
-    const onPointClick = useCallback((obj: object) => {
-      if (!gesture.current.consume()) return;
-      const p = point(obj),
-        props = current.current;
-      if (p.region) {
-        if (canPickRegion(p.region, props)) props.onSelect(p.region);
-      } else props.onPlace(p);
-    }, []);
-    useEffect(() => {
-      for (const item of pointData) {
-        const object = (item as typeof item & { __threeObjPoint?: Object3D })
-          .__threeObjPoint;
-        if (object && "material" in object)
-          (object.material as MeshPhongMaterial).color.set(pointColor(item));
-      }
-    }, [pointData, props.states, props.palette, pointColor]);
     const prepareRegions = useMemo(createGlobeRegionPreparer, []);
     const renderRegions = useMemo(
       () => prepareRegions(props.regions),
@@ -910,7 +851,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     useEffect(refreshLabels, [size.width, size.height, ready, refreshLabels]);
     const onPlaceMarkerClick = useCallback(
       (obj: object, event: MouseEvent) => {
-        if (!isPlaceLabels(obj) || !host.current) return;
+        if (
+          !isPlaceLabels(obj) ||
+          !host.current ||
+          !current.current.placeInteraction
+        )
+          return;
         const bounds = host.current.getBoundingClientRect();
         const place = placeLabels.pick(
           event.clientX - bounds.left,
@@ -1416,6 +1362,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     const cityHover = props.placeInteraction
       ? props.places.find((p) => p.id === hoverPlaceId)?.hoverName
       : undefined;
+    const locatorHover = useRef(false);
     const hoverName =
       cityHover ??
       (props.regionInteraction !== false &&
@@ -1456,10 +1403,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           }
           updateConstructionCursor(event);
           gesture.current.up(event.pointerId, event.clientX, event.clientY);
-          // Fingers can hit a visible city within a 44px target, even when the
-          // renderer's ray misses its small dot. Consume here to avoid double picks.
+          // Pick visible cities before their underlying country. Touch keeps a
+          // generous hit area; consuming the gesture prevents a second selection.
           if (
-            event.pointerType === "touch" &&
+            !fidget.current.active &&
             current.current.placeInteraction &&
             host.current
           ) {
@@ -1467,11 +1414,28 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             const place = placeLabels.pick(
               event.clientX - box.left,
               event.clientY - box.top,
-              22,
+              event.pointerType === "touch" ? 22 : undefined,
             );
             if (place && gesture.current.consume()) {
               stop();
               current.current.onPlace(place);
+              return;
+            }
+          }
+          if (host.current && !fidget.current.active) {
+            const box = host.current.getBoundingClientRect();
+            const target = smallRegions.pick(
+              event.clientX - box.left,
+              event.clientY - box.top,
+              event.pointerType === "touch" ? 22 : 14,
+            );
+            if (target && gesture.current.consume()) {
+              stop();
+              if (current.current.onSurfaceTap)
+                current.current.onSurfaceTap(target);
+              else if (canPickRegion(target, current.current))
+                current.current.onSelect(target);
+              return;
             }
           }
         }}
@@ -1489,6 +1453,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           if (!inspection.current.allowed) return;
           if (!tooltip.current || !host.current) return;
           const box = host.current.getBoundingClientRect();
+          const locator = smallRegions.pick(
+            event.clientX - box.left,
+            event.clientY - box.top,
+          );
+          if (locator || locatorHover.current) current.current.onHover(locator);
+          locatorHover.current = !!locator;
           if (current.current.placeInteraction)
             setHoverPlaceId(
               placeLabels.pick(
@@ -1533,7 +1503,9 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               isPlaceLabels(obj) &&
               !!p.placeInteraction &&
               p.places.some(
-                (place) => place.id === hoverPlaceId && place.answerTarget,
+                (place) =>
+                  place.id === hoverPlaceId &&
+                  (place.answerTarget || p.placeInspection),
               )
             );
           }}
@@ -1573,15 +1545,6 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             if (!fidget.current.active)
               onPolygonHover(obj && "level" in obj ? obj : null);
           }}
-          pointsData={pointData}
-          pointLabel=""
-          pointColor={pointColor}
-          pointRadius={pointRadius}
-          pointAltitude={pointAltitude}
-          pointResolution={8}
-          pointsTransitionDuration={0}
-          onPointHover={onPointHover}
-          onPointClick={onPointClick}
           labelsData={NO_LABELS}
           arcsData={props.surfaceRoutes ? [] : props.routes}
           arcStartLat={(obj) => route(obj).from.lat}

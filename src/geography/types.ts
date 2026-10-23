@@ -42,6 +42,8 @@ export interface RegionFeature {
   sourceId: string;
 }
 export interface PlaceFeature {
+  /** Explore inspection stays visible independently of contextual label budgets. */
+  inspectionSelected?: boolean;
   /** Display intent is independent of location kind, eligibility, and correctness. */
   displayRole?: "reference" | "explanation";
   /** Available interior radius in radians, for screen-fitting area symbols. */

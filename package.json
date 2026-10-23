@@ -16,6 +16,8 @@
     "measure:saves": "node scripts/measure-save-growth.mjs",
     "prepare:flags": "python3 scripts/prepare-flags.py",
     "prepare:cities": "python3 scripts/prepare-cities.py",
+    "prepare:profiles": "node scripts/prepare-country-profiles.mjs && node scripts/prepare-language-names.mjs",
+    "prepare:map-colors": "node scripts/prepare-map-colors.mjs",
     "prepare:explore": "node scripts/prepare-explore.mjs",
     "prepare:regional-display": "node scripts/prepare-regional-display.mjs",
     "prepare:journeys": "node scripts/prepare-journey-index.mjs",

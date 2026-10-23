@@ -5,6 +5,44 @@ import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 describe("app explore shell (DOM only; no browser or WebGL)", () => {
+  it("searches and frames territories outside the Study roster and displays only their available profile fields", async () => {
+    await mount();
+    await click("Explore");
+    await click("Search countries");
+    const input = host.querySelector<HTMLInputElement>(
+      ".explore-search-field input",
+    )!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!.call(input, "Faroe");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await click("Faroe Islands");
+    const panel = host.querySelector(".mode-incoming .explore-card")!;
+    expect(panel.querySelector("h1")?.textContent).toBe("Faroe Islands");
+    expect(panel.textContent).toContain("Tórshavn");
+    expect(panel.textContent).toContain("Faroese");
+    expect(probe.focus.at(-1)).toEqual(member("wurl:FRO").focus);
+    await act(async () => probe.props!.onSelect(member("wurl:NE-SOL")));
+    expect(panel.querySelector("h1")?.textContent).toBe("Somaliland");
+    expect(panel.querySelector(".overline")?.textContent?.trim()).toBe(
+      "COUNTRY / TERRITORY",
+    );
+    expect(panel.textContent).toContain("Eastern Africa");
+    expect(panel.textContent).not.toContain("Currency");
+    expect(panel.textContent).not.toContain("—");
+    await click("Data notes");
+    expect(document.querySelector(".info-note-tooltip")?.textContent).toContain(
+      "Natural Earth source estimate for 2014",
+    );
+    await act(async () => probe.props!.onSelect(member("wurl:PSE")));
+    expect(panel.querySelector("h1")?.textContent).toBe("Palestine");
+    expect(panel.querySelector(".overline")?.textContent?.trim()).toBe(
+      "COUNTRY / TERRITORY",
+    );
+  });
   it("keeps Antarctica on its cached country surface without exposing or fetching placeholder regions", async () => {
     await mount();
     await click("Explore");

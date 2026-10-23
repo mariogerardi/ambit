@@ -14,8 +14,20 @@
     }
   ],
   "asset": "src/geography/data/cities.v1.json",
-  "sha256": "2554bf60757df6cfc4ac43e34e8c31c99ab8386901e228484c3f41d0fb1e47f2",
-  "bytes": 143117,
+  "sha256": "34361b98572bc00ee9f2e01138a384227d87d4687a53e0ef30506a061d1e2945",
+  "bytes": 392925,
   "cities": 2234,
-  "capitalPopulations": 193
+  "capitalPopulations": 193,
+  "exploreCities": 2506,
+  "explorePolicy": "Explore populated places across the full map catalog: source capitals (including a named city district when explicitly listed), places with population at least 250,000, and the largest other place per map unit when at least 15,000. Source capital relationships take precedence at generalized border points; other parent map units use pinned Natural Earth containment, with source-country fallback for coastal points outside generalized land. GeoNames country codes and source capital roles remain separate; these conventions do not determine sovereignty or quiz eligibility.",
+  "exploreInputs": [
+    {
+      "path": "sources/ne-countries.geojson",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb"
+    },
+    {
+      "path": "sources/catalog-mapping.json",
+      "sha256": "9e621ac5af9456d57cc9d72cdc51271b814786d06bb9448634f22a829f68b4b3"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
-import type { Focus, RegionFeature } from "../geography/types";
+import type { Focus, PlaceFeature, RegionFeature } from "../geography/types";
 import type { GlobeHandle } from "../globe/GlobeView";
 import {
   createDefaultViewCycle,
@@ -187,6 +187,13 @@ export function useCameraOrchestration({
       else frame(region.focus);
     },
     [mobile, frame],
+  );
+  const focusExploreCity = useCallback(
+    (city: Pick<PlaceFeature, "lat" | "lng">) => {
+      stop();
+      frame({ lat: city.lat, lng: city.lng, altitude: mobile ? 0.06 : 0.08 });
+    },
+    [frame, mobile, stop],
   );
   useEffect(() => {
     globe.current?.cancelFidget();
@@ -379,6 +386,7 @@ export function useCameraOrchestration({
     frame,
     stop,
     focusExplore,
+    focusExploreCity,
     pendingExploreFocus,
     // Keep entry intent independent of effect order: consuming the queued focus
     // must not make the shell clear a country selected by a Home tap.

@@ -2,11 +2,60 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { MAJOR_CITIES, DISPLAY_CAPITALS } from "../src/geography/places";
+import {
+  EXPLORE_CITIES,
+  EXPLORE_CITY_BY_ID,
+  exploreCapital,
+} from "../src/geography/places";
 import { CAPITALS } from "../src/game/quizData";
 import roster from "../src/game/data/un-members.v1.json";
 import metadata from "../sources/cities.metadata.json";
 
 describe("local major-city catalog", () => {
+  it("expands Explore to map territories with stable, sourced city records while preserving quiz capital conventions", () => {
+    const world = JSON.parse(
+      readFileSync("public/geography/world.v1.json", "utf8"),
+    ) as { id: string }[];
+    const ids = new Set(world.map((r) => r.id));
+    expect(EXPLORE_CITY_BY_ID.size).toBe(EXPLORE_CITIES.length);
+    for (const city of EXPLORE_CITIES) {
+      expect(ids.has(city.parentId!)).toBe(true);
+      expect(city.sourceCountryCode).toMatch(/^[A-Z]{2}$/);
+      expect(city.sourceId).toBe(`geonames:${city.id.slice(6)}`);
+    }
+    expect(exploreCapital("wurl:JEY")).toMatchObject({
+      name: "Saint Helier",
+      parentId: "wurl:JEY",
+    });
+    expect(exploreCapital("wurl:FRO")).toMatchObject({
+      name: "Tórshavn",
+      parentId: "wurl:FRO",
+    });
+    expect(exploreCapital("wurl:NE-KOS")).toMatchObject({
+      name: "Pristina",
+      parentId: "wurl:NE-KOS",
+    });
+    expect(exploreCapital("wurl:PSE")).toMatchObject({
+      name: "East Jerusalem",
+      sourceFeatureCode: "PPLX",
+      parentId: "wurl:PSE",
+    });
+    expect(exploreCapital("wurl:CYP")?.parentId).toBe("wurl:CYP");
+    expect(exploreCapital("wurl:ISR")?.parentId).toBe("wurl:ISR");
+    expect(EXPLORE_CITY_BY_ID.get("place:57289")).toMatchObject({
+      parentId: "wurl:NE-SOL",
+      sourceCountryName: "Somalia",
+    });
+    expect(EXPLORE_CITY_BY_ID.get("place:64021")?.parentId).toBe("wurl:NE-SOL");
+    expect(MAJOR_CITIES.find((c) => c.id === "place:57289")?.parentId).toBe(
+      "wurl:SOM",
+    );
+    for (const input of metadata.exploreInputs) {
+      expect(
+        createHash("sha256").update(readFileSync(input.path)).digest("hex"),
+      ).toBe(input.sha256);
+    }
+  });
   it("has valid unique eligible-country points and no duplicate primary capitals", () => {
     const members = new Set(roster.members.map((c) => c.id));
     const capitals = new Set(CAPITALS.map((c) => c.id));
