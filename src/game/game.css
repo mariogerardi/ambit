@@ -1078,8 +1078,6 @@
 .question-card {
   max-height: calc(100dvh - 200px);
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgb(var(--ui-line-rgb) / 0.5) transparent;
 }
 .answer-form > label,
 .typed-country-guess label,

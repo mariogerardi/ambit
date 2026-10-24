@@ -1,0 +1,97 @@
+.shared-neighbors-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.shared-neighbors-heading .quiet-button {
+  min-height: 44px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.shared-neighbors-score {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 4px 0 20px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.shared-neighbors-strikes {
+  color: var(--ui-accent);
+}
+.shared-neighbors-results {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 0 0 24px;
+  padding: 20px 0;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+}
+.shared-neighbors-results dt {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.shared-neighbors-results dd {
+  margin: 8px 0 0;
+  color: var(--ui-editorial);
+  font: 500 36px/1 var(--font-editorial);
+  font-variant-numeric: tabular-nums;
+}
+.shared-neighbors-game > .shared-neighbors-finish {
+  display: block;
+  min-height: 44px;
+  margin-top: 8px;
+  color: var(--ui-muted);
+}
+.shared-neighbors-game h1.editorial-heading {
+  font-size: 36px;
+  margin: 0 0 20px;
+}
+.shared-neighbors-game h1:focus {
+  outline: none;
+}
+.shared-neighbors-clues {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.shared-neighbors-clues > span:not([aria-hidden]) {
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.35);
+  border-radius: 9px;
+  background: rgb(var(--ui-accent-rgb) / 0.08);
+  font: 500 23px/1.2 var(--font-editorial);
+  color: var(--ui-accent);
+}
+.shared-neighbors-clues > [aria-hidden] {
+  color: var(--ui-muted);
+}
+.shared-neighbors-pin {
+  margin: 18px 0 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.shared-neighbors-feedback {
+  margin: 20px 0 8px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  padding-top: 18px;
+}
+.shared-neighbors-feedback .overline {
+  color: var(--ui-muted);
+}
+.shared-neighbors-feedback h2 {
+  color: var(--ui-editorial);
+  margin: 6px 0;
+}
+.shared-neighbors-feedback > p:last-child {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.experience .shared-neighbors-game > .primary-button {
+  min-height: 44px;
+}

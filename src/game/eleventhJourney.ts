@@ -59,7 +59,7 @@ const base = definePresentation({
 export const ELEVENTH_JOURNEY: Journey = {
   id: "not-the-obvious-city-v1",
   addedAt: "2026-10-10",
-  title: "Not the obvious city",
+  title: "Not the Obvious City",
   description:
     "Fame, compromise, relocation and divided government: discover the decisions behind five unexpected capitals.",
   rounds: [

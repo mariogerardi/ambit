@@ -113,7 +113,7 @@ const comparisons = [
 export const LATITUDE_JOURNEY: Journey = {
   id: "latitude-surprises-v1",
   addedAt: "2026-10-11",
-  title: "Latitude surprises",
+  title: "Latitude Surprises",
   description:
     "Take one latitude line around the world at a time. Across five continents, familiar cities turn out to be farther north—or south—than you expect.",
   rounds: comparisons.map((comparison): Question => {

@@ -40,7 +40,8 @@ async function mount(initial = defaultSettings, editor = true) {
   if (editor) await click("Custom");
 }
 async function click(name: string) {
-  const buttons = [...host.querySelectorAll<HTMLButtonElement>("button")];
+  const scope = document.querySelector('[role="dialog"]') ?? host;
+  const buttons = [...scope.querySelectorAll<HTMLButtonElement>("button")];
   const button =
     buttons.find(
       (value) =>
@@ -185,7 +186,9 @@ describe("Study Session configuration", () => {
         false,
       );
       expect(host.querySelector(".study-config")).toBeNull();
-      await click(`Start ${title}`);
+      await click(`Preview ${title}`);
+      expect(start).not.toHaveBeenCalled();
+      await click("Start session");
       const settings = start.mock.calls[0][0];
       expect(settings).toMatchObject({
         scope,
@@ -204,7 +207,8 @@ describe("Study Session configuration", () => {
   );
   it("customizes a path, keeps the draft after returning to paths, and leaves session replacement explicit", async () => {
     await mount(defaultSettings, false);
-    await click("Customize African capitals");
+    await click("Preview African capitals");
+    await click("Customize");
     expect(select("Where").value).toBe("continent");
     expect(select("Continent").value).toBe("AF");
     expect(select("Answer method").value).toBe("choices");
@@ -218,6 +222,32 @@ describe("Study Session configuration", () => {
     );
     await click("Start studying");
     expect(start.mock.calls[0][0]).toEqual(current);
+  });
+  it("warns about replacing an unfinished session and leaves settings untouched when a preview is dismissed", async () => {
+    const onSettings = vi.fn();
+    await act(async () =>
+      root.render(
+        <StudySetup
+          settings={defaultSettings}
+          onSettings={onSettings}
+          onStart={start}
+          onResume={() => {}}
+        />,
+      ),
+    );
+    expect(host.querySelector(".study-path-customize")).toBeNull();
+    await click("Preview World flags");
+    const dialog = document.querySelector('[role="dialog"]')!;
+    expect(dialog.textContent).toContain(
+      "Starting a new session replaces your current session.",
+    );
+    expect(dialog.textContent).toContain("10 questions");
+    await act(async () =>
+      dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })),
+    );
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(onSettings).not.toHaveBeenCalled();
+    expect(start).not.toHaveBeenCalled();
   });
   it("applies the shared method to newly selected topics and starts the summarized session", async () => {
     await mount();

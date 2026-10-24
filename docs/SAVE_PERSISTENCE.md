@@ -53,6 +53,20 @@ history. Navigation, refresh, and closing the tab preserve an active session;
 use **Resume session** to continue. Explicitly finishing/replacing a run archives
 its submitted answers.
 
+Shared Neighbors uses the same register store under
+`wurl.minigames.shared-neighbors.v1`, with the standard account suffix for signed-in
+players. Its active run stores a seed, pool signature, cycle/index, current pin,
+submitted feedback, cumulative score, and an optional end reason (three strikes
+or finishing early). Reloads preserve both unfinished games and final results;
+stale writers cannot move a run backward or reopen a finished run. Starting again
+creates a new run ID and shuffle. This minigame's progress is device-local
+and independent of the Daily/Study cloud namespaces. A changed pair-pool signature
+starts a fresh compatible run when play resumes.
+Missing Borders uses the independent `wurl.minigames.missing-borders.v1`
+namespace with the same account suffix and run merge rules. It stores a selected
+territory ID instead of a pin; the seed also determines the regional camera view.
+Neither minigame can replace the other's progress.
+
 Valid legacy data is copied into immutable base registers. A migration completion
 marker is written only after the entire copy succeeds. Interrupted migration can
 resume from the untouched original. Historical Study attempts without IDs receive

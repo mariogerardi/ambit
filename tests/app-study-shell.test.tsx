@@ -415,7 +415,8 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     vi.spyOn(Date, "now").mockReturnValue(24);
     await mount();
     await click("Study");
-    await click("Start Discover Asia");
+    await click("Preview Discover Asia");
+    await click("Start session");
     expect(probe.focus.at(-1)).toMatchObject({ lat: 35, lng: 90 });
     const session = startStudy(STUDY_PATHS[0].settings, 24);
     await act(async () =>

@@ -20,7 +20,7 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 | `PROJECT_INSTRUCTIONS.md`  | Instructions to paste into a ChatGPT Project or other AI workspace.                                                                                                            |
 | `IMPLEMENTING_A_SPEC.md`   | Coding-agent entry point: read the approved brief, inspect relevant Journeys, inherit shared conventions, implement and verify.                                                |
 | `JOURNEY_SPEC_TEMPLATE.md` | Record the approved design for implementation, including scenes, help, answer contracts, completion and sources.                                                               |
-| `FEATURED_EXAMPLES.md`     | One upload containing the preferred examples: Andes, Chasing the sun (flags), Mediterranean and Not the obvious city.                                                          |
+| `FEATURED_EXAMPLES.md`     | One upload containing the preferred examples: Andes, Chasing the Sun (flags), Mediterranean and Not the Obvious City.                                                          |
 | `examples/*.md`            | Every current Journey individually, including copy, rules, candidates, help, effective stage changes, sources, media descriptions and completion. Load only relevant examples. |
 | `references/*.md`          | Full crafting guide, engine, architecture, question catalog and geographic policy. Consult as needed rather than loading all at once.                                          |
 | `manifest.json`            | Repository revision, local-change indicator, highlighted IDs, and SHA-256 hashes/sizes of inputs and outputs.                                                                  |

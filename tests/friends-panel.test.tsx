@@ -514,7 +514,7 @@ it("labels the comparison as today's Journey and follows today's date for an old
   });
   const section = host.querySelector("#journey-comparison")!;
   expect(section.querySelector("h3")?.textContent).toContain(
-    "Today’s Journey — Exceptions to the rule",
+    "Today’s Journey — Exceptions to the Rule",
   );
   expect(section.querySelector("h3 em")).not.toBeNull();
   expect(section.textContent).not.toContain("2026-10-10 ·");

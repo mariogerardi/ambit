@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import type { JourneySummary } from "../game/journeyRegistry";
 import { unfinished } from "./dailyProgress";
 import type { DailyAttempt } from "./dailyProgress";
@@ -11,6 +12,7 @@ export function HomePanel({
   onPlay,
   onArchive,
   onRetrySchedule,
+  onMinigames,
   onExplore,
   onStudy,
 }: {
@@ -21,9 +23,45 @@ export function HomePanel({
   onPlay(): void;
   onArchive?(): void;
   onRetrySchedule(): void;
+  onMinigames(): void;
   onExplore(): void;
   onStudy(): void;
 }) {
+  const title = useRef<HTMLHeadingElement>(null);
+  useLayoutEffect(() => {
+    const heading = title.current;
+    const text = heading?.firstElementChild as HTMLElement | null;
+    if (!heading || !text) return;
+    let active = true;
+    const fit = () => {
+      if (!active || !heading.clientWidth) return;
+      heading.style.fontSize = "";
+      let low = 0;
+      let high = parseFloat(getComputedStyle(heading).fontSize);
+      if (text.getBoundingClientRect().width <= heading.clientWidth) return;
+      // Measure the actual font, including its fixed letter spacing.
+      while (high - low > 0.1) {
+        const size = (low + high) / 2;
+        heading.style.fontSize = `${size}px`;
+        if (text.getBoundingClientRect().width > heading.clientWidth)
+          high = size;
+        else low = size;
+      }
+      heading.style.fontSize = `${low}px`;
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(heading);
+    window.addEventListener("resize", fit);
+    void document.fonts?.ready.then(fit);
+    document.fonts?.addEventListener("loadingdone", fit);
+    return () => {
+      active = false;
+      observer.disconnect();
+      window.removeEventListener("resize", fit);
+      document.fonts?.removeEventListener("loadingdone", fit);
+    };
+  }, [journey.title]);
   const label = !attempt
     ? "Play"
     : unfinished(attempt)
@@ -31,13 +69,11 @@ export function HomePanel({
       : "View result";
   return (
     <section className="home-story home-menu">
-      <h1>
-        A world of&nbsp;
-        <em>wonders.</em>
-      </h1>
       <div className="daily-menu">
         <span className="overline daily-menu-eyebrow">TODAY’S JOURNEY</span>
-        <h2>{journey.title}</h2>
+        <h2 ref={title}>
+          <span>{journey.title}</span>
+        </h2>
         <p className="daily-menu-description">{journey.description}</p>
         <div className="daily-levels" aria-label="Five rounds">
           {[1, 2, 3, 4, 5].map((level) => (
@@ -98,6 +134,21 @@ export function HomePanel({
         </p>
       )}
       <div className="menu-secondary">
+        <button
+          className="home-minigames"
+          data-dd-action-name="Home Minigames"
+          onClick={onMinigames}
+        >
+          <strong>
+            <ActionIcon name="minigames" />
+            <span className="menu-secondary-label">Minigames</span>
+            <span className="menu-new-badge">NEW!</span>
+            <span className="menu-secondary-arrow" aria-hidden="true">
+              →
+            </span>
+          </strong>
+          <small>More ways to play.</small>
+        </button>
         <button data-dd-action-name="Home Explore" onClick={onExplore}>
           <strong>
             <ActionIcon name="explore" />

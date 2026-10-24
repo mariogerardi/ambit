@@ -154,7 +154,13 @@
 }
 
 /* One continuous edge fade protects bare content without floating halos. */
-.experience:is(.mode-home, .mode-explore, .mode-archive, .mode-study)::before,
+.experience:is(
+    .mode-home,
+    .mode-explore,
+    .mode-archive,
+    .mode-study,
+    .mode-minigames
+  )::before,
 .experience.phase-finished::before {
   content: "";
   position: absolute;
@@ -185,7 +191,7 @@
   text-shadow: var(--ui-text-shadow, 0 2px 3px #000c, 0 0 8px #0008);
 }
 .experience .experience-logo {
-  transform: translateY(12px);
+  transform: translateY(2px);
 }
 .experience .primary-button {
   text-shadow: none;
@@ -207,7 +213,7 @@
   margin-top: 26px;
 }
 .home-menu .globe-invitation {
-  margin-top: 30px;
+  margin-top: 12px;
 }
 .board-tools button:disabled {
   opacity: 0.4;
@@ -352,6 +358,10 @@
 .explore-introduction {
   margin: 0 0 8px;
 }
+.experience :is(.study-landing > .study-introduction, .explore-introduction) {
+  font-size: 15px;
+  line-height: 1.65;
+}
 .explore-heading-tools :is(.explore-search-toggle, .settings-button) {
   width: 44px;
   height: 44px;
@@ -393,4 +403,3 @@
 .explore-card .explore-controls .display-settings {
   margin-top: 8px;
 }
-

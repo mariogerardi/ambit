@@ -1,4 +1,4 @@
-"""Crop reviewed, bundled flag vectors for Chasing the sun; never downloads flags."""
+"""Crop reviewed, bundled flag vectors for Chasing the Sun; never downloads flags."""
 from copy import deepcopy
 import hashlib
 import json
