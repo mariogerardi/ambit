@@ -7,7 +7,7 @@ import type { Focus, RegionFeature } from "../geography/types";
 import type { NeighborPair } from "./sharedNeighbors";
 
 export interface MissingBorderPair extends NeighborPair {
-  anchor: Focus;
+  borderPoints: [number, number][];
 }
 const rad = Math.PI / 180;
 const location = (focus: Focus): [number, number] => [focus.lng, focus.lat];
@@ -59,34 +59,41 @@ export function missingBorderPairs(
   return [...borders]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([id, border]) => {
-      // Prefer a boundary component with regional context over an isolated outpost.
-      // Geometry order does not influence either the pool or this choice.
-      const points = border.points.sort(([a, b], [c, d]) => a - c || b - d);
-      let best = points[0],
-        bestCount = -1;
-      for (
-        let i = 0;
-        i < points.length;
-        i += Math.max(1, Math.floor(points.length / 16))
-      ) {
-        const point = points[i];
-        const count = regions.filter(
-          (r) =>
-            !border.countries.includes(r.id) &&
-            geoDistance(point, location(r.focus)) < 40 * rad,
-        ).length;
-        if (count > bestCount) {
-          best = point;
-          bestCount = count;
-        }
-      }
       return {
         id,
         countries: border.countries,
         answer: `composite:missing-borders:${id}`,
-        anchor: { lng: best[0], lat: best[1] },
+        borderPoints: border.points.sort(([a, b], [c, d]) => a - c || b - d),
       };
     });
+}
+
+/** Resolve regional context for the current map, rather than the entire deck. */
+export function missingBorderAnchor(
+  pair: MissingBorderPair,
+  regions: RegionFeature[],
+): Focus {
+  // Prefer a boundary component with regional context over an isolated outpost.
+  const points = pair.borderPoints;
+  let best = points[0],
+    bestCount = -1;
+  for (
+    let i = 0;
+    i < points.length;
+    i += Math.max(1, Math.floor(points.length / 16))
+  ) {
+    const point = points[i];
+    const count = regions.filter(
+      (r) =>
+        !pair.countries.includes(r.id) &&
+        geoDistance(point, location(r.focus)) < 40 * rad,
+    ).length;
+    if (count > bestCount) {
+      best = point;
+      bestCount = count;
+    }
+  }
+  return { lng: best[0], lat: best[1] };
 }
 
 /** Seeded regional views: the erased boundary stays 12–24° away from the center. */
@@ -95,6 +102,15 @@ export function missingBorderFocus(
   regions: RegionFeature[],
   seed: number,
 ): Focus {
+  return regionalFocus(pair, regions, seed, missingBorderAnchor(pair, regions));
+}
+
+function regionalFocus(
+  pair: MissingBorderPair,
+  regions: RegionFeature[],
+  seed: number,
+  anchor: Focus,
+): Focus {
   let state = seed >>> 0;
   for (const char of pair.id)
     state = Math.imul(state ^ char.charCodeAt(0), 16777619) >>> 0;
@@ -102,9 +118,9 @@ export function missingBorderFocus(
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 4294967296;
   };
-  const lat = pair.anchor.lat * rad,
-    lng = pair.anchor.lng * rad;
-  let best: Focus = pair.anchor,
+  const lat = anchor.lat * rad,
+    lng = anchor.lng * rad;
+  let best: Focus = anchor,
     bestCount = -1;
   for (let i = 0; i < 32; i++) {
     const bearing = random() * Math.PI * 2,
@@ -152,6 +168,7 @@ export function missingBorderJourney(
   seed: number,
 ): Journey {
   const names = pair.countries.map((id) => context.names.get(id)!);
+  const anchor = missingBorderAnchor(pair, regions);
   return {
     ...missingBordersBase,
     rounds: [
@@ -193,7 +210,7 @@ export function missingBorderJourney(
         explanation: `The missing border separates ${names[0]} and ${names[1]}.`,
         scenes: {
           play: {
-            focus: missingBorderFocus(pair, regions, seed),
+            focus: regionalFocus(pair, regions, seed, anchor),
             map: {
               borders: true,
               hoverFeedback: false,
@@ -201,7 +218,7 @@ export function missingBorderJourney(
               candidates: "highlighted",
             },
           },
-          reveal: { focus: { ...pair.anchor, altitude: 0.55 }, borders: true },
+          reveal: { focus: { ...anchor, altitude: 0.55 }, borders: true },
         },
       }),
     ],

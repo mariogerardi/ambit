@@ -6,6 +6,7 @@ import { createQuestionContext } from "../src/game/questionPreparation";
 import { journeyWorld } from "../src/app/journeyWorld";
 import {
   missingBorderPairs,
+  missingBorderAnchor,
   missingBorderFocus,
   missingBorderJourney,
   missingBordersBase,
@@ -31,9 +32,10 @@ it("generates a stable pool of real land borders, including overseas components"
       true,
     );
   const franceBrazil = pairs.find((p) => p.id === "wurl:BRA|wurl:FRA")!;
-  expect(franceBrazil.anchor.lat).toBeGreaterThan(0);
-  expect(franceBrazil.anchor.lat).toBeLessThan(6);
-  expect(franceBrazil.anchor.lng).toBeLessThan(-45);
+  const anchor = missingBorderAnchor(franceBrazil, regions);
+  expect(anchor.lat).toBeGreaterThan(0);
+  expect(anchor.lat).toBeLessThan(6);
+  expect(anchor.lng).toBeLessThan(-45);
   expect(missingBorderPairs([...regions].reverse())).toEqual(pairs);
   const deck = neighborDeck(pairs, 123, 0);
   expect(new Set(deck.map((p) => p.id)).size).toBe(pairs.length);
@@ -77,16 +79,15 @@ it("prepares and dissolves every pair, with selectable distractors and no answer
   }
 });
 
-it("varies regional framing reproducibly while keeping the erased boundary off-center and in view", () => {
-  const rad = Math.PI / 180;
-  for (const pair of pairs)
-    for (const seed of [0, 123, 456]) {
+it.each([0, 123, 456])(
+  "keeps every boundary off-center and visible with regional distractors (seed %i)",
+  (seed) => {
+    const rad = Math.PI / 180;
+    for (const pair of pairs) {
       const focus = missingBorderFocus(pair, regions, seed);
+      const anchor = missingBorderAnchor(pair, regions);
       const distance =
-        geoDistance(
-          [focus.lng, focus.lat],
-          [pair.anchor.lng, pair.anchor.lat],
-        ) / rad;
+        geoDistance([focus.lng, focus.lat], [anchor.lng, anchor.lat]) / rad;
       expect(distance).toBeGreaterThanOrEqual(12 - 1e-6);
       expect(distance).toBeLessThanOrEqual(24 + 1e-6);
       expect(focus.altitude).toBe(1.25);
@@ -98,6 +99,10 @@ it("varies regional framing reproducibly while keeping the erased boundary off-c
       );
       expect(distractors.length, pair.id).toBeGreaterThanOrEqual(6);
     }
+  },
+);
+
+it("varies regional framing reproducibly between saved seeds", () => {
   expect(missingBorderFocus(pairs[0], regions, 123)).toEqual(
     missingBorderFocus(pairs[0], regions, 123),
   );
