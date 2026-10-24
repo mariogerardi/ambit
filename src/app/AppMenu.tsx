@@ -123,7 +123,11 @@ export function AppMenu({
             </div>
             <button
               data-dd-action-name="Menu Minigames"
-              aria-current={path === "/minigames" ? "page" : undefined}
+              aria-current={
+                path.split(/[?#]/)[0].startsWith("/minigames")
+                  ? "page"
+                  : undefined
+              }
               onClick={() => navigate("/minigames")}
             >
               <ActionIcon name="minigames" />

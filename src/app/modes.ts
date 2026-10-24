@@ -18,7 +18,7 @@ export function modeForPath(path: string): AppMode {
         ? "daily"
         : path === "/explore"
           ? "explore"
-          : path === "/minigames"
+          : path === "/minigames" || path.startsWith("/minigames/")
             ? "minigames"
             : path === "/study"
               ? "study"

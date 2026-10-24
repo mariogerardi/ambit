@@ -246,7 +246,40 @@ without remounting the account shell or replaying its entry animation. Admin mou
 on first use and stays mounted when switching account tabs, retaining its editor.
 Legacy `/admin` links replace their URL with the matching account destination.
 Home places a full-width Minigames card with a NEW! badge above Explore and Study.
-`/minigames` opens a simple landing page while games are being added.
+`/minigames` uses Study's preset card styles for Shared Neighbors and Missing
+Borders. Minigame cards and Study preset cards open `ActivityPreviewDialog` with a
+local illustration, description, session/control details, and how-to-play copy.
+Study previews offer Start session and Customize; opening or dismissing one does
+not change saved settings. An unfinished-session replacement warning appears
+before starting. Minigames show Controls and How to play, including previews opened
+directly under `/minigames/`. The shared dialog uses the existing settings/feedback modal
+styles, with a scrollable body, persistent actions, trapped focus, an inert
+workspace, Escape/backdrop dismissal, and focus restored to its card.
+Shared Neighbors plays at `/minigames/shared-neighbors/play` on the same mounted
+globe. `src/minigames/sharedNeighbors.ts` derives every eligible pair with one
+common neighbor from the complete canonical border graph, including adjacent
+clue countries. Each seeded shuffle visits the full pool once, then reshuffles;
+there is no difficulty filter. A single-question contract reuses `pin-inside`
+grading and Journey map presentation, keeping the answer and surrounding borders
+hidden until submission. Framing uses the given countries before submission and
+the answer on reveal. Device-local, account-scoped registers preserve the deck,
+pin, feedback, score, and finished result. Three wrong answers end a run after
+revealing the last answer. Players can also Finish game early; an unsubmitted pin
+does not count. Back to games pauses an unfinished run, and Play again starts a
+fresh shuffle with a reset score. Focused coverage lives in the
+`shared-neighbors-minigame`, `shared-neighbors-save`, and
+`shared-neighbors-minigame-shell` tests.
+Missing Borders plays at `/minigames/missing-borders/play` through the same
+`useBorderMinigame` controller and `BorderMinigamePanel`. Its pool is generated
+from shared canonical segments between eligible countries. Each question reuses
+`merged-region-single`: all other map units remain selectable, the original
+members are replaced by one anonymous composite, and a pick immediately grades
+and restores the real boundaries. `missingBorders.ts` anchors the view near the
+actual erased boundary (including overseas components), then samples seeded
+regional camera offsets with surrounding distractors. The boundary stays 12–24°
+away from the camera center; reloads preserve the same view. The game uses the
+same three-strike/finish/restart flow with independent saved progress. Focused
+coverage lives in `missing-borders-minigame` and `missing-borders-minigame-shell`.
 The menu groups Home, Journey (with Archive nested beneath it), Minigames, Explore, and Study
 above feedback and World credits. The Archive hierarchy connector sits outside
 the row's selected/hover background. World credits opens a modal with source and

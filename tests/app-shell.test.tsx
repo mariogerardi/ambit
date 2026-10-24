@@ -38,7 +38,10 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       "Minigames",
     );
     expect(probe.mounts).toBe(1);
-    await click("Back to Home");
+    expect(host.querySelector(".minigames-landing")?.textContent).not.toContain(
+      "Back to Home",
+    );
+    await click("ambit home");
     expect(location.pathname).toBe("/");
     await click("Open menu");
     await act(async () =>
@@ -51,7 +54,55 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     expect(location.pathname).toBe("/minigames");
     expect(host.querySelector(".app-menu-content")).toBeNull();
     expect(probe.mounts).toBe(1);
+    expect(
+      [...host.querySelectorAll(".minigames-landing .study-path h3")].map(
+        (heading) => heading.textContent,
+      ),
+    ).toEqual(["Shared Neighbors", "Missing Borders"]);
+    expect(
+      host.querySelector(".minigames-landing .study-path-customize"),
+    ).toBeNull();
+    for (const [slug, title] of [
+      ["shared-neighbors", "Shared Neighbors"],
+      ["missing-borders", "Missing Borders"],
+    ]) {
+      await click(`Preview ${title}`);
+      expect(location.pathname).toBe("/minigames");
+      const dialog = document.querySelector('[role="dialog"]')!;
+      expect(dialog.querySelector("h2")?.textContent).toBe(title);
+      expect(dialog.querySelector("img")?.getAttribute("src")).toBe(
+        `/previews/${slug}.svg`,
+      );
+      expect(
+        [...dialog.querySelectorAll("dt")].map((item) => item.textContent),
+      ).toEqual(["Controls"]);
+      expect(
+        dialog.querySelector(".activity-preview-how h3")?.textContent,
+      ).toBe("How to play");
+      expect(dialog.textContent).not.toContain("coming soon");
+      expect(dialog.textContent).not.toContain("Customize");
+      expect(probe.mounts).toBe(1);
+      await click("Back to games");
+      expect(document.querySelector('[role="dialog"]')).toBeNull();
+      expect(location.pathname).toBe("/minigames");
+    }
   });
+
+  it.each([
+    ["shared-neighbors", "Shared Neighbors"],
+    ["missing-borders", "Missing Borders"],
+  ])(
+    "opens the %s minigame page directly for non-admins",
+    async (slug, title) => {
+      authProbe.admin = false;
+      history.replaceState(null, "", `/minigames/${slug}`);
+      await mount();
+      expect(location.pathname).toBe(`/minigames/${slug}`);
+      expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe(
+        title,
+      );
+    },
+  );
 
   it("remounts progress when accounts change and waits for account discovery", async () => {
     authProbe.loading = true;

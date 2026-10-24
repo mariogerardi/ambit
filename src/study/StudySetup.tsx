@@ -1,6 +1,14 @@
 import { StudyBack } from "./StudyBack";
 import { CAPITAL_DISTRACTORS } from "./distractors";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { normalizeAnswer, countryIdForName } from "../game/answerNames";
 import {
   COUNTRIES,
@@ -12,6 +20,8 @@ import {
 import type { StudySettings, StudyStyle, StudyTopic } from "./engine";
 import { STUDY_PATHS } from "./paths";
 import { StudyPreferences } from "./StudyPreferences";
+import { ActivityPreviewDialog } from "../app/ActivityPreviewDialog";
+import { PanelActive } from "../app/ModePanels";
 
 const topicNames = {
   countries: "Countries",
@@ -437,6 +447,14 @@ export function StudySetup(props: {
   onEditorChange?(editing: boolean): void;
 }) {
   const [editing, setEditing] = useState(!!props.initialEditor);
+  const [previewPath, setPreviewPath] =
+    useState<(typeof STUDY_PATHS)[number]>();
+  const previewTrigger = useRef<HTMLButtonElement | null>(null);
+  const panelActive = useContext(PanelActive);
+  const closePreview = useCallback(() => setPreviewPath(undefined), []);
+  useEffect(() => {
+    if (!panelActive) closePreview();
+  }, [panelActive, closePreview]);
   useEffect(() => {
     props.onEditorChange?.(editing);
     return () => props.onEditorChange?.(false);
@@ -460,6 +478,39 @@ export function StudySetup(props: {
       className="info-view study-setup study-landing"
       aria-label="Study setup"
     >
+      {panelActive && previewPath && (
+        <ActivityPreviewDialog
+          preview={{
+            ...previewPath,
+            facts: previewPath.detail.split(" · ").map((value, index) => ({
+              label: ["Area", "Answer method", "Session"][index],
+              value,
+            })),
+          }}
+          returnFocus={previewTrigger.current}
+          onClose={closePreview}
+          notice={
+            props.onResume
+              ? "Starting a new session replaces your current session."
+              : undefined
+          }
+          primary={{
+            label: "Start session",
+            onClick: () => {
+              closePreview();
+              props.onStart(structuredClone(previewPath.settings));
+            },
+          }}
+          customize={{
+            label: "Customize",
+            onClick: () => {
+              props.onSettings(structuredClone(previewPath.settings));
+              closePreview();
+              setEditing(true);
+            },
+          }}
+        />
+      )}
       <h1 className="editorial-heading">
         Make the world <em>familiar.</em>
       </h1>
@@ -482,9 +533,13 @@ export function StudySetup(props: {
           <article className="study-path" key={path.id}>
             <button
               className="study-path-start"
-              data-dd-action-name="Study Start Path"
-              aria-label={`Start ${path.title}`}
-              onClick={() => props.onStart(structuredClone(path.settings))}
+              data-dd-action-name="Study Preview Path"
+              aria-haspopup="dialog"
+              aria-label={`Preview ${path.title}`}
+              onClick={(event) => {
+                previewTrigger.current = event.currentTarget;
+                setPreviewPath(path);
+              }}
             >
               <span aria-hidden="true">
                 <svg
@@ -501,28 +556,6 @@ export function StudySetup(props: {
             </button>
             <h3>{path.title}</h3>
             <p>{path.description}</p>
-            <div className="inline-actions">
-              <button
-                className="quiet-button study-path-customize"
-                data-dd-action-name="Study Customize Path"
-                aria-label={`Customize ${path.title}`}
-                onClick={() => {
-                  props.onSettings(structuredClone(path.settings));
-                  setEditing(true);
-                }}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  aria-hidden="true"
-                >
-                  <path d="m15 4 5 5M4 20l4-1L20 7a2 2 0 0 0-4-4L4 15Z" />
-                </svg>
-                <span>Customize</span>
-              </button>
-            </div>
           </article>
         ))}
         <button
