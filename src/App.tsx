@@ -209,6 +209,7 @@ export function App() {
   );
   const unrestricted =
     mode === "home" ||
+    mode === "minigames" ||
     mode === "account" ||
     (mode === "study" && (studySetup || !study.session));
   const displayLayers =
@@ -845,9 +846,18 @@ export function App() {
         onPlay={() => playDaily(today)}
         onArchive={() => navigate("/archive")}
         onRetrySchedule={() => void schedule.refresh()}
+        onMinigames={() => navigate("/minigames")}
         onExplore={() => navigate("/explore")}
         onStudy={() => navigate("/study")}
       />
+    ) : mode === "minigames" ? (
+      <section className="info-view minigames-landing">
+        <h1 className="editorial-heading">Minigames</h1>
+        <p>Quick geography games are on the way.</p>
+        <button className="quiet-button" onClick={() => navigate("/")}>
+          Back to Home →
+        </button>
+      </section>
     ) : mode === "archive" ? (
       <JourneyArchive
         onContentHeight={mobile.enabled ? setExploreContentHeight : undefined}
@@ -1145,6 +1155,7 @@ export function App() {
         ? session!.phase
         : "playing";
   const motionControls = (mode === "home" ||
+    mode === "minigames" ||
     mode === "explore" ||
     mode === "archive" ||
     (mode === "study" &&

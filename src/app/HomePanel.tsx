@@ -12,6 +12,7 @@ export function HomePanel({
   onPlay,
   onArchive,
   onRetrySchedule,
+  onMinigames,
   onExplore,
   onStudy,
 }: {
@@ -22,6 +23,7 @@ export function HomePanel({
   onPlay(): void;
   onArchive?(): void;
   onRetrySchedule(): void;
+  onMinigames(): void;
   onExplore(): void;
   onStudy(): void;
 }) {
@@ -132,6 +134,21 @@ export function HomePanel({
         </p>
       )}
       <div className="menu-secondary">
+        <button
+          className="home-minigames"
+          data-dd-action-name="Home Minigames"
+          onClick={onMinigames}
+        >
+          <strong>
+            <ActionIcon name="minigames" />
+            <span className="menu-secondary-label">Minigames</span>
+            <span className="menu-new-badge">NEW!</span>
+            <span className="menu-secondary-arrow" aria-hidden="true">
+              →
+            </span>
+          </strong>
+          <small>More ways to play.</small>
+        </button>
         <button data-dd-action-name="Home Explore" onClick={onExplore}>
           <strong>
             <ActionIcon name="explore" />

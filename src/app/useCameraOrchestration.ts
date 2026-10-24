@@ -226,6 +226,7 @@ export function useCameraOrchestration({
         frame(questionDestination);
       } else if (
         mode === "home" ||
+        mode === "minigames" ||
         mode === "explore" ||
         mode === "archive" ||
         mode === "study"

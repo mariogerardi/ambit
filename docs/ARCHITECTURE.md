@@ -245,7 +245,9 @@ account header and navigation bar. `/account?tab=dashboard`, `profile`, `friends
 without remounting the account shell or replaying its entry animation. Admin mounts
 on first use and stays mounted when switching account tabs, retaining its editor.
 Legacy `/admin` links replace their URL with the matching account destination.
-The menu groups Home, Journey (with Archive nested beneath it), Explore, and Study
+Home places a full-width Minigames card with a NEW! badge above Explore and Study.
+`/minigames` opens a simple landing page while games are being added.
+The menu groups Home, Journey (with Archive nested beneath it), Minigames, Explore, and Study
 above feedback and World credits. The Archive hierarchy connector sits outside
 the row's selected/hover background. World credits opens a modal with source and
 license links, trapped keyboard focus, Escape/backdrop dismissal and focus return.

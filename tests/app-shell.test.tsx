@@ -25,6 +25,34 @@ import {
 } from "../src/study/engine";
 
 describe("app shell (DOM only; no browser or WebGL)", () => {
+  it("opens Minigames from Home and the menu without remounting the globe", async () => {
+    await mount();
+    const cards = host.querySelectorAll(".menu-secondary > button");
+    expect(cards[0].textContent).toContain("Minigames");
+    expect(cards[0].textContent).toContain("NEW!");
+    expect(cards[1].textContent).toContain("Explore");
+    expect(cards[2].textContent).toContain("Study");
+    await act(async () => (cards[0] as HTMLButtonElement).click());
+    expect(location.pathname).toBe("/minigames");
+    expect(host.querySelector(".minigames-landing h1")?.textContent).toBe(
+      "Minigames",
+    );
+    expect(probe.mounts).toBe(1);
+    await click("Back to Home");
+    expect(location.pathname).toBe("/");
+    await click("Open menu");
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>(
+          '[data-dd-action-name="Menu Minigames"]',
+        )!
+        .click(),
+    );
+    expect(location.pathname).toBe("/minigames");
+    expect(host.querySelector(".app-menu-content")).toBeNull();
+    expect(probe.mounts).toBe(1);
+  });
+
   it("remounts progress when accounts change and waits for account discovery", async () => {
     authProbe.loading = true;
     await act(async () => root.render(<PlayerWorkspace />));

@@ -68,6 +68,7 @@ async function render(title = "The Vaccine That Crossed the World") {
         ready
         onPlay={() => {}}
         onRetrySchedule={() => {}}
+        onMinigames={() => {}}
         onExplore={() => {}}
         onStudy={() => {}}
       />,

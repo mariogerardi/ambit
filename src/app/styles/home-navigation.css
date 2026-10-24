@@ -24,6 +24,27 @@
 .home-menu .menu-secondary strong {
   gap: 10px;
 }
+.home-menu .menu-secondary .home-minigames {
+  grid-column: 1 / -1;
+  border-color: rgb(var(--ui-accent-rgb) / 0.6);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--ui-accent-rgb) / 0.18),
+    rgb(var(--ui-surface-rgb) / 0.8)
+  );
+}
+.home-menu .menu-secondary .home-minigames strong {
+  display: flex;
+}
+.home-menu .menu-secondary .menu-new-badge {
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: var(--ui-accent);
+  color: var(--ui-on-accent);
+  font: 700 10px/1 var(--font-ui);
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
 .home-menu .menu-secondary .action-icon {
   width: 20px;
   height: 20px;

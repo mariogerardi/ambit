@@ -122,6 +122,14 @@ export function AppMenu({
               </div>
             </div>
             <button
+              data-dd-action-name="Menu Minigames"
+              aria-current={path === "/minigames" ? "page" : undefined}
+              onClick={() => navigate("/minigames")}
+            >
+              <ActionIcon name="minigames" />
+              <span>Minigames</span>
+            </button>
+            <button
               data-dd-action-name="Menu Explore"
               aria-current={path === "/explore" ? "page" : undefined}
               onClick={() => navigate("/explore")}
