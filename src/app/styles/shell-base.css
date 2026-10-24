@@ -224,6 +224,10 @@
   letter-spacing: -0.7px;
   margin: 0;
   color: var(--ui-editorial, #ffe2a1);
+  white-space: nowrap;
+}
+.daily-menu h2 > span {
+  display: inline-block;
 }
 .daily-levels {
   display: flex;

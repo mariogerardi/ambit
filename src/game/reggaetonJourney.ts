@@ -177,7 +177,7 @@ const pinTiers = (bullseye: number, close: number, outer: number) => [
 
 export const REGGAETON_JOURNEY: Journey = {
   id: "the-sound-of-somewhere-reggaeton",
-  title: "The Sound of Somewhere: Reggaetón",
+  title: "The Reggaetón Route",
   addedAt: "2026-10-19",
   saveRevision: 3,
   legacyRoundLabels: {

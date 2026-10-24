@@ -36,7 +36,7 @@ const base = definePresentation({
 export const TWELFTH_JOURNEY: Journey = {
   id: "exceptions-to-the-rule-v1",
   addedAt: "2026-10-10",
-  title: "Exceptions to the rule",
+  title: "Exceptions to the Rule",
   description:
     "A country need not fit on one continent, a coastline need not last, and land need not stand above the sea. Follow five places that complicate a familiar map.",
   rounds: [

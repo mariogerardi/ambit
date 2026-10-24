@@ -117,7 +117,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
   id: "chasing-the-sun-v2",
   addedAt: "2026-10-11",
   supersedes: "chasing-the-sun-v1",
-  title: "Chasing the sun",
+  title: "Chasing the Sun",
   description:
     "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
   completion: {

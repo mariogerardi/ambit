@@ -1,3 +1,12 @@
+.home-menu,
+.mode-layer:has(> .home-menu) {
+  scrollbar-width: none;
+}
+.home-menu::-webkit-scrollbar,
+.mode-layer:has(> .home-menu)::-webkit-scrollbar {
+  display: none;
+}
+
 .home-menu .menu-secondary button {
   padding: 16px;
   border: 1px solid rgb(var(--ui-accent-rgb) / 0.25);

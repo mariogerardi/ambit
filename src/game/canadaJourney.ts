@@ -28,7 +28,7 @@ const regionsSource = {
 export const CANADA_JOURNEY: Journey = {
   id: "beyond-the-maple-leaf-v1",
   addedAt: "2026-10-11",
-  title: "Beyond the maple leaf",
+  title: "Beyond the Maple Leaf",
   description:
     "Begin with a familiar flag, then look beyond it: two official languages, a bilingual province, a capital between communities, and a northern ocean shore.",
   rounds: [

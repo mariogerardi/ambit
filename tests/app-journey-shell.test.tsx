@@ -482,7 +482,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
     expect(host.textContent).toContain("Well spotted.");
   });
 
-  it("lets Island instincts use either country taps or six immediate choices without making the clue answerable", async () => {
+  it("lets Island Instincts use either country taps or six immediate choices without making the clue answerable", async () => {
     history.replaceState(null, "", "/journey/island-instincts");
     await mount();
     const canvas = host.querySelector("canvas");

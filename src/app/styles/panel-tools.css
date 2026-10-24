@@ -185,7 +185,7 @@
   text-shadow: var(--ui-text-shadow, 0 2px 3px #000c, 0 0 8px #0008);
 }
 .experience .experience-logo {
-  transform: translateY(12px);
+  transform: translateY(2px);
 }
 .experience .primary-button {
   text-shadow: none;

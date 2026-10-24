@@ -24,7 +24,7 @@ Before writing questions, establish:
 
 A geographic route is **not** automatically a thematic argument. “Spain → Sicily → Libya → Balkans” is a travel sequence; the author must also show how each question arises from the Mediterranean rather than merely being located near it. Likewise, a Journey _Along the Andes_ should use the mountain system as more than recurring prose.
 
-Choose the input format to fit the skill—not to achieve five different controls. Repetition can be the identity of a Journey (as in _Shared neighbors_); variety can be the identity of another. Difficulty need not rise continuously. A simple visual question between harder ones can improve pacing, while an obscure opening needs good inference clues or a satisfying discovery.
+Choose the input format to fit the skill—not to achieve five different controls. Repetition can be the identity of a Journey (as in _Shared Neighbors_); variety can be the identity of another. Difficulty need not rise continuously. A simple visual question between harder ones can improve pacing, while an obscure opening needs good inference clues or a satisfying discovery.
 
 **Read all five prompts and reveals in order.** Identify repeated trivia (e.g., two consecutive capital-recall questions), an overly broad first task, and later questions spoiled by earlier answers. Do not force increasing difficulty for its own sake. The finale should provide a satisfying destination, discovery, consequence, or new application of earlier understanding.
 
@@ -108,7 +108,9 @@ Give each Journey its own voice. A repeated mechanic can develop a comparison
 without pretending to follow a continuous itinerary. Keep movement language
 geographically honest, particularly when the previous question accepts several
 different locations. A title must promise the subject the five questions actually
-develop; a thematic name cannot substitute for that development.
+develop; a thematic name cannot substitute for that development. Use title case
+for Journey names, keeping short articles and prepositions lowercase unless they
+begin or end the title (for example, _Beyond the Maple Leaf_).
 
 Each new question opens at the top of its panel and focuses its heading. Advancing
 resets both the desktop card and mobile tray; selecting answers or opening help

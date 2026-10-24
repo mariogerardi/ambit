@@ -67,7 +67,7 @@
   {
     "id": "beyond-the-maple-leaf-v1",
     "addedAt": "2026-10-11",
-    "title": "Beyond the maple leaf",
+    "title": "Beyond the Maple Leaf",
     "description": "Begin with a familiar flag, then look beyond it: two official languages, a bilingual province, a capital between communities, and a northern ocean shore.",
     "path": "/journey/beyond-the-maple-leaf",
     "module": "./canadaJourney.ts",
@@ -97,7 +97,7 @@
   {
     "id": "chasing-the-sun-v2",
     "addedAt": "2026-10-11",
-    "title": "Chasing the sun",
+    "title": "Chasing the Sun",
     "supersedes": "chasing-the-sun-v1",
     "description": "One familiar symbol, many different stories. Cross oceans and continents to discover how differently a sun can shine.",
     "path": "/journey/chasing-the-sun",
@@ -199,7 +199,7 @@
   {
     "id": "exceptions-to-the-rule-v1",
     "addedAt": "2026-10-10",
-    "title": "Exceptions to the rule",
+    "title": "Exceptions to the Rule",
     "description": "A country need not fit on one continent, a coastline need not last, and land need not stand above the sea. Follow five places that complicate a familiar map.",
     "path": "/journey/exceptions-to-the-rule",
     "module": "./twelfthJourney.ts",
@@ -264,7 +264,7 @@
   {
     "id": "island-instincts-v1",
     "addedAt": "2026-10-10",
-    "title": "Island instincts",
+    "title": "Island Instincts",
     "description": "Island-hop around the world and resist the nearest-coast guess. Five islands reveal how distance and belonging can disagree.",
     "path": "/journey/island-instincts",
     "module": "./fourteenthJourney.ts",
@@ -299,7 +299,7 @@
   {
     "id": "latitude-surprises-v1",
     "addedAt": "2026-10-11",
-    "title": "Latitude surprises",
+    "title": "Latitude Surprises",
     "description": "Take one latitude line around the world at a time. Across five continents, familiar cities turn out to be farther north—or south—than you expect.",
     "path": "/journey/latitude-surprises",
     "module": "./latitudeJourney.ts",
@@ -497,7 +497,7 @@
   {
     "id": "not-the-obvious-city-v1",
     "addedAt": "2026-10-10",
-    "title": "Not the obvious city",
+    "title": "Not the Obvious City",
     "description": "Fame, compromise, relocation and divided government: discover the decisions behind five unexpected capitals.",
     "path": "/journey/not-the-obvious-city",
     "module": "./eleventhJourney.ts",
@@ -683,7 +683,7 @@
   {
     "id": "shared-neighbors-v1",
     "addedAt": "2026-10-10",
-    "title": "Shared neighbors",
+    "title": "Shared Neighbors",
     "description": "Two countries can point to a third. Follow five pairs of neighbors across inland frontiers, long coasts, and mountain borders to find the land between them.",
     "path": "/journey/shared-neighbors",
     "module": "./ninthJourney.ts",
@@ -748,7 +748,7 @@
   {
     "id": "the-sound-of-somewhere-reggaeton",
     "addedAt": "2026-10-19",
-    "title": "The Sound of Somewhere: Reggaetón",
+    "title": "The Reggaetón Route",
     "saveRevision": 3,
     "legacyRoundLabels": {
       "reggaeton-01-jamaica": "Jamaica · Kingston",
@@ -835,7 +835,7 @@
   {
     "id": "try-not-to-click-russia-v1",
     "addedAt": "2026-10-10",
-    "title": "On Russia’s doorstep",
+    "title": "On Russia’s Doorstep",
     "description": "From the Baltic to the Pacific, Russia meets neighbors of very different shapes and sizes. Find five of them using coastlines and geography, with political borders hidden.",
     "path": "/journey/try-not-to-click-russia",
     "module": "./fifteenthJourney.ts",

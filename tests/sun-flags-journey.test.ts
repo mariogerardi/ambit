@@ -55,7 +55,7 @@ const shell = (game: GameState) =>
       onStudy: () => {},
     }),
   );
-describe("Chasing the sun", () => {
+describe("Chasing the Sun", () => {
   it("allows both Sun of May countries to be tapped with names hidden until selection", () => {
     const view = journeyWorld(
       world,

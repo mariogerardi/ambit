@@ -119,7 +119,7 @@ the same treatment below 1,600 square screen pixels: a two-cycle blue pulse and
 a persistent leader/name callout. It avoids the horizon, viewport edges, question
 panel and other labels, creates no hit target, and is removed when play ends.
 Reduced motion retains only the static callout. These are orientation cues, not
-accuracy rings, grading geometry, or answer disclosure. Island instincts shows
+accuracy rings, grading geometry, or answer disclosure. Island Instincts shows
 the pattern; use the same shared annotation rather than per-question city dots
 or thick white borders.
 
@@ -312,7 +312,7 @@ as another playable set; it does not retire or supersede Missing Borders.
 
 ## Shared-neighbor example
 
-[Shared neighbors](../src/game/ninthJourney.ts) and
+[Shared Neighbors](../src/game/ninthJourney.ts) and
 [Shared Neighbors II](../src/game/sharedNeighborsTwoJourney.ts) use `mode: "pin"`
 with a `pin-inside` rule. The two given countries are outlined references;
 the answer footprint and surrounding political borders remain hidden until
