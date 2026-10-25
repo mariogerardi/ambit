@@ -1,7 +1,9 @@
 export function AnswerCounter({
   value,
   onChange,
+  id = "written-answer",
 }: {
+  id?: string;
   value: string;
   onChange(value: string): void;
 }) {
@@ -22,7 +24,7 @@ export function AnswerCounter({
         <span aria-hidden="true">−</span>
       </button>
       <input
-        id="written-answer"
+        id={id}
         type="number"
         min={0}
         step={1}

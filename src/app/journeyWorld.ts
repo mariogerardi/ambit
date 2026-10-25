@@ -1,3 +1,4 @@
+import type { ClueLocator } from "../globe/clueLocators";
 import { constructionScene } from "../game/constructionScene";
 import { intersectionOverlays } from "../game/bearingIntersection";
 import { geoDistance } from "d3-geo";
@@ -424,7 +425,7 @@ export function journeyWorld(
     regions: displayedRegions,
     clueLocators:
       game.phase === "playing"
-        ? (round.clueLocators ?? []).flatMap((clue) => {
+        ? (round.clueLocators ?? []).flatMap<ClueLocator>((clue) => {
             const region = displayedRegions.find((r) => r.id === clue.regionId);
             return region
               ? [

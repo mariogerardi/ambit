@@ -1,3 +1,6 @@
+import { RegionFades } from "./regionFades";
+import type { RegionReveal } from "./regionFades";
+import { bindFrameAnnotations } from "./frameAnnotations";
 import {
   automaticConstructionNavigation,
   currentConstruction,
@@ -34,7 +37,7 @@ import {
   MeshPhongMaterial,
   Vector2,
 } from "three";
-import type { Object3D, PerspectiveCamera } from "three";
+import type { Material, Object3D, PerspectiveCamera } from "three";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
@@ -113,6 +116,8 @@ interface Props {
   surfaceRoutes?: boolean;
   showBorders?: boolean;
   borderRegionIds?: string[];
+  borderOmissions?: Record<string, number[][][]>;
+  regionReveal?: RegionReveal;
   showRegionalBorders?: boolean;
   regionInteraction?: boolean;
   regionNames?: "all" | "none" | "committed";
@@ -235,6 +240,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       [texture, setTexture] = useState<string>();
     const current = useRef(props);
     current.current = props;
+    const regionFades = useMemo(() => new RegionFades(), []);
+    useEffect(() => () => regionFades.dispose(), [regionFades]);
     const placeLabels = useMemo(() => new PlaceLabels(), []);
     const physical = useMemo(() => new PhysicalFeatures(), []);
     const mapOverlays = useMemo(() => new MapOverlays(), []);
@@ -279,6 +286,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       if (!g) return;
       const rendererSize = g.renderer().getSize(new Vector2());
       const camera = g.camera() as PerspectiveCamera;
+      // Controls/tweens may move the camera before the next WebGL render.
+      camera.updateMatrixWorld();
       const near =
         cameraNearPlane(g.pointOfView().altitude) * g.getGlobeRadius();
       if (Math.abs(camera.near - near) > 0.000001) {
@@ -288,6 +297,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       // Geographic context gets first claim on space; city names then avoid it.
       physical.view(camera, rendererSize.x, rendererSize.y);
       mapOverlays.view(camera, rendererSize.x, rendererSize.y);
+      regionFades.view();
       const panel = document
         .querySelector(".question-card")
         ?.getBoundingClientRect();
@@ -303,12 +313,17 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               },
             ]
           : [];
+      const flagBoxes = placeLabels.priorityMarkerBoxes(
+        camera,
+        rendererSize.x,
+        rendererSize.y,
+      );
       const clueBoxes = clueLocators.view(
         camera,
         rendererSize.x,
         rendererSize.y,
         g.getGlobeRadius(),
-        [...physical.labelBoxes(), ...panelBoxes],
+        [...physical.labelBoxes(), ...panelBoxes, ...flagBoxes],
         !travel.current.active && !flyover.current.active,
       );
       placeLabels.view(camera, rendererSize.x, rendererSize.y, [
@@ -318,21 +333,35 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       if (
         (placeLabels.needsRefresh() ||
           physical.needsRefresh() ||
-          clueLocators.needsRefresh()) &&
+          clueLocators.needsRefresh() ||
+          mapOverlays.needsRefresh() ||
+          regionFades.needsRefresh()) &&
         !labelFrame.current
       )
         labelFrame.current = requestAnimationFrame(() => {
           labelFrame.current = 0;
           refreshLabels();
         });
+      // The render hook runs after Three's scene traversal. Apply changed
+      // sprite scales/transforms now so their WebGL draw matches this frame too.
+      placeLabels.group.updateMatrixWorld(true);
+      physical.group.updateMatrixWorld(true);
+      mapOverlays.group.updateMatrixWorld(true);
       smallRegions.view(
         camera,
         rendererSize.x,
         rendererSize.y,
         g.getGlobeRadius(),
-        panelBoxes,
+        [...panelBoxes, ...flagBoxes],
       );
-    }, [placeLabels, physical, clueLocators, mapOverlays, smallRegions]);
+    }, [
+      placeLabels,
+      physical,
+      clueLocators,
+      mapOverlays,
+      smallRegions,
+      regionFades,
+    ]);
     useEffect(() => {
       smallRegions.update(props.regions, props);
       refreshLabels();
@@ -450,11 +479,6 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         stop();
       };
       const reportView = () => {
-        if (!labelFrame.current)
-          labelFrame.current = requestAnimationFrame(() => {
-            labelFrame.current = 0;
-            refreshLabels();
-          });
         const pov = g.pointOfView();
         if (host.current) {
           host.current.dataset.cameraLat = pov.lat.toFixed(4);
@@ -462,6 +486,16 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           host.current.dataset.cameraAltitude = pov.altitude.toFixed(4);
         }
       };
+      const unbindAnnotations = bindFrameAnnotations(
+        g.scene(),
+        refreshLabels,
+        () =>
+          placeLabels.needsRefresh() ||
+          physical.needsRefresh() ||
+          clueLocators.needsRefresh() ||
+          mapOverlays.needsRefresh() ||
+          regionFades.needsRefresh(),
+      );
       c.addEventListener("start", start);
       c.addEventListener("change", reportView);
       const canvas = g.renderer().domElement;
@@ -517,6 +551,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       const cameraTravel = travel.current;
       const globeFidget = fidget.current;
       return () => {
+        unbindAnnotations();
         c.removeEventListener("start", start);
         c.removeEventListener("change", reportView);
         canvas.removeEventListener("webglcontextlost", failure);
@@ -945,6 +980,28 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         props.onCoordinateTap,
       ],
     );
+    const capMaterial = useCallback(
+      (obj: object) => {
+        const r = region(obj),
+          reveal = props.regionReveal;
+        if (!reveal?.ids.includes(r.id)) return undefined;
+        const from = themedRegionStyle(
+          props.theme ?? "natural",
+          r.id,
+          reveal.clueIds.includes(r.id) ? "clue" : "disabled",
+          false,
+          props.palette,
+        ).fill;
+        return regionFades.get(
+          r.id,
+          reveal.key,
+          from,
+          capColor(obj),
+          reveal.durationMs,
+        );
+      },
+      [props.regionReveal, props.theme, props.palette, capColor, regionFades],
+    );
     const updateOutline = useCallback(
       (object: Object3D, obj: object) => {
         if (isPhysicalLayer(obj)) {
@@ -976,6 +1033,17 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               p.palette,
             ).fill,
           );
+        if (
+          !("from" in obj) &&
+          line.userData.borderOmissions !== p.borderOmissions?.[r.id]
+        ) {
+          const old = line.geometry;
+          line.geometry = new LineSegmentsGeometry().setPositions(
+            boundaryOutlinePositions(r, p.borderOmissions?.[r.id]),
+          );
+          line.userData.borderOmissions = p.borderOmissions?.[r.id];
+          old.dispose();
+        }
         // Keep the parent's exterior boundary wherever detailed coverage falls
         // short. Its surface is non-interactive, but its outline remains useful.
         line.visible = "from" in obj || regionBorderVisible(r, p);
@@ -1103,6 +1171,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       props.palette,
       props.showBorders,
       props.borderRegionIds,
+      props.borderOmissions,
       props.showRegionalBorders,
       updateOutline,
     ]);
@@ -1377,6 +1446,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         className="globe-canvas"
         data-pin-input={!!props.onCoordinateTap || undefined}
         data-pin-held={props.pinHeld || undefined}
+        data-pin-cursor={!!props.onCoordinateTap || props.pinHeld || undefined}
         data-construction-input={props.constructionInput?.tool}
         data-scene-instance={sceneId}
         ref={host}
@@ -1521,6 +1591,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           // a previous round's country name after the clue changes.
           polygonLabel={() => ""}
           polygonCapColor={capColor}
+          // The runtime accepts a falsy material to retain its default cap.
+          polygonCapMaterial={capMaterial as (obj: object) => Material}
           polygonSideColor=""
           polygonStrokeColor=""
           polygonAltitude={boundaryAltitude}

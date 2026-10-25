@@ -226,6 +226,7 @@ export function useCameraOrchestration({
         frame(questionDestination);
       } else if (
         mode === "home" ||
+        mode === "minigames" ||
         mode === "explore" ||
         mode === "archive" ||
         mode === "study"
@@ -259,6 +260,9 @@ export function useCameraOrchestration({
     cameraKey,
     isJourney,
     !!journeyFocus,
+    mode === "minigames" ? journeyFocus?.lat : undefined,
+    mode === "minigames" ? journeyFocus?.lng : undefined,
+    mode === "minigames" ? journeyFocus?.altitude : undefined,
     helpFraming,
     namedRegions.length,
     phase,

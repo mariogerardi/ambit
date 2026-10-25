@@ -25,6 +25,104 @@ import {
 } from "../src/study/engine";
 
 describe("app shell (DOM only; no browser or WebGL)", () => {
+  it("opens Minigames from Home and the menu without remounting the globe", async () => {
+    await mount();
+    const cards = host.querySelectorAll(".menu-secondary > button");
+    expect(cards[0].textContent).toContain("Minigames");
+    expect(cards[0].textContent).toContain("NEW!");
+    expect(cards[1].textContent).toContain("Explore");
+    expect(cards[2].textContent).toContain("Study");
+    await act(async () => (cards[0] as HTMLButtonElement).click());
+    expect(location.pathname).toBe("/minigames");
+    expect(host.querySelector(".minigames-landing h1")?.textContent).toBe(
+      "A world to play with.",
+    );
+    expect(probe.mounts).toBe(1);
+    expect(host.querySelector(".minigames-landing")?.textContent).not.toContain(
+      "Back to Home",
+    );
+    await click("ambit home");
+    expect(location.pathname).toBe("/");
+    await click("Open menu");
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>(
+          '[data-dd-action-name="Menu Minigames"]',
+        )!
+        .click(),
+    );
+    expect(location.pathname).toBe("/minigames");
+    expect(host.querySelector(".app-menu-content")).toBeNull();
+    expect(probe.mounts).toBe(1);
+    expect(
+      [...host.querySelectorAll(".minigames-landing .study-path h3")].map(
+        (heading) => heading.textContent,
+      ),
+    ).toEqual([
+      "Shared Neighbors",
+      "Missing Borders",
+      "Border Run",
+      "Pinpoint",
+    ]);
+    expect(
+      host.querySelector(".minigames-landing .study-path-customize"),
+    ).toBeNull();
+    expect(
+      host.querySelectorAll(".minigame-card .minigame-motif"),
+    ).toHaveLength(4);
+    for (const [slug, title] of [
+      ["shared-neighbors", "Shared Neighbors"],
+      ["missing-borders", "Missing Borders"],
+    ]) {
+      await click(`Preview ${title}`);
+      expect(location.pathname).toBe("/minigames");
+      const dialog = document.querySelector('[role="dialog"]')!;
+      expect(dialog.querySelector("h2")?.textContent).toBe(title);
+      expect(dialog.querySelector("img")?.getAttribute("src")).toBe(
+        `/previews/${slug}.svg`,
+      );
+      expect(
+        [...dialog.querySelectorAll("dt")].map((item) => item.textContent),
+      ).toEqual(["Controls"]);
+      expect(
+        dialog.querySelector(".activity-preview-how h3")?.textContent,
+      ).toBe("How to play");
+      expect(dialog.textContent).not.toContain("coming soon");
+      expect(
+        dialog.querySelector<HTMLDetailsElement>(".minigame-rules")!.open,
+      ).toBe(false);
+      await act(async () =>
+        dialog.querySelector<HTMLElement>(".minigame-rules summary")!.click(),
+      );
+      expect(
+        dialog.querySelector<HTMLDetailsElement>(".minigame-rules")!.open,
+      ).toBe(true);
+      expect(dialog.textContent).toContain("Customize");
+      expect(probe.mounts).toBe(1);
+      await click("Close preview");
+      expect(document.querySelector('[role="dialog"]')).toBeNull();
+      expect(location.pathname).toBe("/minigames");
+    }
+  });
+
+  it.each([
+    ["shared-neighbors", "Shared Neighbors"],
+    ["missing-borders", "Missing Borders"],
+    ["border-run", "Border Run"],
+    ["pinpoint", "Pinpoint"],
+  ])(
+    "opens the %s minigame page directly for non-admins",
+    async (slug, title) => {
+      authProbe.admin = false;
+      history.replaceState(null, "", `/minigames/${slug}`);
+      await mount();
+      expect(location.pathname).toBe(`/minigames/${slug}`);
+      expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe(
+        title,
+      );
+    },
+  );
+
   it("remounts progress when accounts change and waits for account discovery", async () => {
     authProbe.loading = true;
     await act(async () => root.render(<PlayerWorkspace />));

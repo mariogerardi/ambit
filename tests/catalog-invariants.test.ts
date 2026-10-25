@@ -21,6 +21,7 @@ describe("catalog identity", () => {
     expect(new Set(roundIds).size).toBe(roundIds.length);
     for (const journey of JOURNEYS) {
       const entry = JOURNEY_INDEX.find((item) => item.id === journey.id)!;
+      expect(entry.title).toBe(journey.title);
       expect(entry.path).toBe(journeyPath(journey.id));
       expect(entry.addedAt).toBe(journey.addedAt);
       expect(entry.rounds.map((round) => round.id)).toEqual(

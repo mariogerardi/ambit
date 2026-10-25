@@ -453,3 +453,32 @@ The shipped [source notes](public/journeys/within-reach/SOURCES.md),
 versions, transformations and reproducible circle benchmarks. OSM source and
 derived databases are distributed under ODbL 1.0; GeoNames attribution and its
 CC BY 4.0 license apply to the incorporated names.
+
+## Pinpoint landmarks and photographs
+
+The 60-landmark coordinate snapshot in `src/minigames/landmarks.v1.json` is
+curated from Wikidata's P625 statements, with entity IDs and source revisions
+retained. Wikidata structured data is available under CC0 1.0:
+https://www.wikidata.org/wiki/Wikidata:Licensing.
+`sources/pinpoint/targets.json` owns the curated scope;
+`scripts/prepare-pinpoint.py` freezes that catalog without regenerating shared
+geography. The geographic variety is a game-design choice, not a complete list
+of landmarks or a ranking.
+
+The 58 photographs in `public/minigames/pinpoint/` are Wikimedia Commons
+thumbnails. Each retains its source page, photographer, applicable license,
+license link and checksum in the accompanying `SOURCES.json`. The game displays
+attribution and a license link with each photograph. Files are served locally and
+are unchanged from the downloaded thumbnails; the UI may crop their displayed
+frame. All attribution and share-alike requirements continue to apply to the
+photographs independently of the application code. Manually reviewed corrections
+in `sources/pinpoint/overrides.json` distinguish the licenses of photographs from
+public-domain buildings depicted in them.
+
+The unused earlier preview `public/previews/border-run.v1.jpg` is AI-generated game
+artwork of a fictional mountain crossing. It does not document a real border.
+Its prompt and generation record are in `sources/border-run-preview.md`.
+
+The active Border Run and Pinpoint preview illustrations
+(`public/previews/border-run.svg` and `public/previews/pinpoint.svg`) use the bundled
+map geometry, with game markers and scoring rings drawn as vector artwork.

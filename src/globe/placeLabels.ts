@@ -72,10 +72,10 @@ export function placeMarkerSize(place: PlaceFeature, contextual = false) {
   if (place.answerTarget) return place.visualState === "selected" ? 34 : 30;
   if (!contextual) return 30;
   return place.kind === "capital"
-    ? 18
+    ? 14
     : (place.population ?? 0) >= 2_000_000
-      ? 18
-      : 13;
+      ? 13
+      : 10;
 }
 /** City quotas are per visible country; capitals do not consume them. */
 export function countryCityLimit(altitude: number) {
@@ -152,7 +152,16 @@ export interface LabelBox {
 }
 /** Answer cities share one style so a capital's typography cannot disclose it. */
 export const placeLabelStyle = (place: PlaceFeature) => {
-  const style = placeStyle(place.answerTarget ? "city" : place.kind);
+  const base = placeStyle(place.answerTarget ? "city" : place.kind);
+  const style =
+    place.labelTypography === "numeric"
+      ? {
+          ...base,
+          font: "500 22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+          text: "#b4cbd0",
+          textHeight: 18,
+        }
+      : base;
   return { ...style, textHeight: style.textHeight * (place.labelScale ?? 1) };
 };
 
@@ -228,6 +237,34 @@ export class PlaceLabels {
   needsRefresh() {
     return this.pendingLabels;
   }
+  /** Screen-space flags take priority over DOM island rings on the same frame. */
+  priorityMarkerBoxes(
+    camera: PerspectiveCamera,
+    width: number,
+    height: number,
+  ): LabelBox[] {
+    return this.active.flatMap(({ place, position }) => {
+      if (
+        !["start", "finish"].includes(place.markerRole ?? "") ||
+        !this.showMarkers ||
+        position.clone().normalize().dot(camera.position.clone().normalize()) <=
+          this.radius / camera.position.length()
+      )
+        return [];
+      const p = position.clone().project(camera);
+      const x = ((p.x + 1) * width) / 2,
+        y = ((1 - p.y) * height) / 2;
+      const size = placeMarkerSize(place, this.contextual);
+      return [
+        {
+          left: x - size * 0.25,
+          right: x + size * 0.75,
+          top: y - size,
+          bottom: y + size * 0.1,
+        },
+      ];
+    });
+  }
   /** Canvas textures must be redrawn after the locally hosted font loads. */
   refreshFont() {
     for (const sprite of this.sprites.values()) {
@@ -248,7 +285,8 @@ export class PlaceLabels {
     if (
       sprite &&
       sprite.userData.labelName === place.name &&
-      sprite.userData.labelKind === labelKind
+      sprite.userData.labelKind === labelKind &&
+      sprite.userData.labelTypography === place.labelTypography
     )
       return sprite;
     if (sprite) {
@@ -275,7 +313,12 @@ export class PlaceLabels {
     context.textBaseline = "alphabetic";
     context.textAlign = "left";
     context.lineJoin = "round";
-    context.lineWidth = labelKind === "capital" ? 4 : 6;
+    context.lineWidth =
+      place.labelTypography === "numeric"
+        ? 2.5
+        : labelKind === "capital"
+          ? 4
+          : 6;
     const x = 10 + left,
       y = (canvas.height + ascent - descent) / 2;
     context.strokeStyle = "#071217";
@@ -298,6 +341,7 @@ export class PlaceLabels {
     sprite.userData.role = "label";
     sprite.userData.labelName = place.name;
     sprite.userData.labelKind = labelKind;
+    sprite.userData.labelTypography = place.labelTypography;
     sprite.raycast = () => {}; // Text never intercepts map answers.
     this.sprites.set(place.id, sprite);
     return sprite;
@@ -326,7 +370,7 @@ export class PlaceLabels {
           : place.visualState === "answer"
             ? "◎"
             : "");
-    const key = `${style.shape}:${color}:${!!place.answerTarget}:${place.markerRole}:${badge}:${this.contextual}:${place.visualState}`;
+    const key = `${place.fadeInMs ? place.id : ""}:${style.shape}:${color}:${!!place.answerTarget}:${place.markerRole}:${badge}:${this.contextual}:${place.visualState}`;
     if (sprite && sprite.userData.markerStyle === key) return sprite;
     let material = this.markerMaterials.get(key);
     if (!material) {
@@ -394,6 +438,59 @@ export class PlaceLabels {
           ctx.arc(32, 32, 9, 0, Math.PI * 2);
         }
         ctx.stroke();
+      } else if (
+        place.markerRole === "start" ||
+        place.markerRole === "finish"
+      ) {
+        ctx.clearRect(0, 0, 64, 64);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#071524";
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(16, 58);
+        ctx.lineTo(16, 8);
+        ctx.lineTo(53, 14);
+        ctx.lineTo(45, 35);
+        ctx.lineTo(16, 29);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(16, 29);
+        ctx.lineTo(16, 58);
+        ctx.stroke();
+        if (place.markerRole === "finish") {
+          // A regular checkerboard follows the flag's skew instead of floating
+          // rectangular spots inside it. The silhouette and pole stay unchanged.
+          const point = (u: number, v: number) => [
+            (1 - v) * (16 + 37 * u) + v * (16 + 29 * u),
+            (1 - v) * (8 + 6 * u) + v * (29 + 6 * u),
+          ];
+          for (let y = 0; y < 3; y++)
+            for (let x = 0; x < 4; x++) {
+              ctx.fillStyle = (x + y) % 2 ? "#fff0cd" : "#15313b";
+              ctx.beginPath();
+              [
+                [x / 4, y / 3],
+                [(x + 1) / 4, y / 3],
+                [(x + 1) / 4, (y + 1) / 3],
+                [x / 4, (y + 1) / 3],
+              ].forEach(([u, v], i) => {
+                const [px, py] = point(u, v);
+                if (i) ctx.lineTo(px, py);
+                else ctx.moveTo(px, py);
+              });
+              ctx.closePath();
+              ctx.fill();
+            }
+          ctx.beginPath();
+          ctx.moveTo(16, 8);
+          ctx.lineTo(53, 14);
+          ctx.lineTo(45, 35);
+          ctx.lineTo(16, 29);
+          ctx.closePath();
+          ctx.stroke();
+        }
       } else if (place.markerRole === "target") {
         ctx.clearRect(0, 0, 64, 64);
         ctx.strokeStyle = color;
@@ -408,6 +505,11 @@ export class PlaceLabels {
         ctx.lineTo(23, 32);
         ctx.moveTo(41, 32);
         ctx.lineTo(57, 32);
+        ctx.strokeStyle = "#071524";
+        ctx.lineWidth = 9;
+        ctx.stroke();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 5;
         ctx.stroke();
       } else if (badge) {
         ctx.fillStyle =
@@ -436,8 +538,14 @@ export class PlaceLabels {
     else sprite = new Sprite(material);
     sprite.userData.markerStyle = key;
     sprite.center.set(
-      0.5,
-      style.shape === "pin" && place.markerRole !== "target" ? 6 / 64 : 0.5,
+      place.markerRole === "start" || place.markerRole === "finish"
+        ? 0.25
+        : 0.5,
+      place.markerRole === "start" || place.markerRole === "finish"
+        ? 6 / 64
+        : style.shape === "pin" && place.markerRole !== "target"
+          ? 6 / 64
+          : 0.5,
     );
     sprite.renderOrder = 20;
     sprite.userData.placeId = place.id;
@@ -467,6 +575,7 @@ export class PlaceLabels {
       this.palette === (layer.palette ?? "atlas")
     )
       return;
+    const previousIds = new Set(this.active.map((e) => e.place.id));
     this.data = layer.places;
     this.radius = radius;
     this.showLabels = layer.visible;
@@ -494,6 +603,10 @@ export class PlaceLabels {
             : undefined;
       label?.position.copy(position);
       marker?.position.copy(position);
+      if (marker && place.fadeInMs && !previousIds.has(place.id)) {
+        marker.userData.fadeStarted = performance.now();
+        marker.material.opacity = 0;
+      }
       return { place, position, label, marker };
     });
     this.group.clear();
@@ -660,6 +773,14 @@ export class PlaceLabels {
             : placeMarkerSize(place, this.contextual);
         marker.scale.set(scale * size, scale * size, 1);
         marker.visible = size > 0;
+        if (place.fadeInMs && marker.userData.fadeStarted !== undefined) {
+          const t = Math.min(
+            1,
+            (performance.now() - marker.userData.fadeStarted) / place.fadeInMs,
+          );
+          marker.material.opacity = t * t * (3 - 2 * t);
+          if (t < 1) this.pendingLabels = true;
+        }
         if (place.markerRole !== "annotation")
           this.targets.push({ place, x, y });
       }

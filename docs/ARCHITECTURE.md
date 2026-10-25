@@ -245,7 +245,108 @@ account header and navigation bar. `/account?tab=dashboard`, `profile`, `friends
 without remounting the account shell or replaying its entry animation. Admin mounts
 on first use and stays mounted when switching account tabs, retaining its editor.
 Legacy `/admin` links replace their URL with the matching account destination.
-The menu groups Home, Journey (with Archive nested beneath it), Explore, and Study
+Home places a full-width Minigames card with a NEW! badge above Explore and Study.
+`/minigames` uses Study's preset card styles for Shared Neighbors, Missing
+Borders, Border Run and Pinpoint. Minigame landing cards use touching hexagon motifs with reduced-motion-aware hover cues.
+Minigame cards and Study preset cards open `ActivityPreviewDialog` with a
+local illustration, description, session/control details, and how-to-play copy.
+Study previews offer Start session and Customize; opening or dismissing one does
+not change saved settings. An unfinished-session replacement warning appears
+before starting. Minigames show Controls, a short How to play, and expandable Full rules, including previews opened
+directly under `/minigames/`. The shared dialog uses the existing settings/feedback modal
+styles, with a scrollable body, persistent actions, trapped focus, an inert
+workspace, Escape/backdrop dismissal, and focus restored to its card. The content
+body only becomes keyboard-scrollable when its measured height overflows;
+resize/content observers keep that state current. Minigame previews offer
+Customize within the same modal. Preferences do not interrupt an unfinished
+run; a settings snapshot applies when starting a new game, with a replacement
+notice when necessary. An empty filtered pool disables starting and offers reset.
+Shared Neighbors plays at `/minigames/shared-neighbors/play` on the same mounted
+globe. `src/minigames/sharedNeighbors.ts` derives every eligible pair with one
+common neighbor from the complete canonical border graph, including adjacent
+clue countries. Each seeded shuffle visits the full pool once, then reshuffles;
+there is no difficulty filter. A single-question contract reuses `pin-inside`
+grading and Journey map presentation, keeping the answer and surrounding borders
+hidden until submission. Small clue-country rings remain visible during pin input
+without becoming pick targets or exposing the hidden answer. The existing pin
+cursor applies to all coordinate-pinning input. Framing uses the given countries before submission and
+the answer on reveal. Device-local, account-scoped registers preserve the deck,
+pin, feedback, score, and finished result. Three wrong answers end a run after
+revealing the last answer. Players can also Finish game early; an unsubmitted pin
+does not count. Back to games pauses an unfinished run, and Play again starts a
+fresh shuffle with a reset score. Focused coverage lives in the
+`shared-neighbors-minigame`, `shared-neighbors-save`, and
+`shared-neighbors-minigame-shell` tests.
+Missing Borders plays at `/minigames/missing-borders/play` through the same
+`useBorderMinigame` controller and `BorderMinigamePanel`. Its pool is generated
+from shared canonical segments between eligible countries. Each question reuses
+`merged-region-single`: the round's search area determines selectable countries, the original
+members are replaced by one anonymous composite, and a pick immediately grades
+and restores the real boundaries. A reveal-only accent traces the actual shared
+display edges, keeping separate boundary components separate and respecting reduced motion.
+The shared edges are omitted from both ordinary country outlines on reveal, so
+the gold stroke is the only restored boundary; exterior borders stay intact. `missingBorders.ts` anchors the view near the
+actual erased boundary (including overseas components). Continent-wide is the
+default: the camera centers consistently on that continent at a continent-specific scale, and
+other continents are not valid answers. Regional search uses a narrower subset
+and a view with the boundary 12–24° off-center. Remote composite components
+outside the search area cannot accept picks; ignored picks do not cost strikes.
+Reloads preserve the same view. The game uses the
+same three-strike/finish/restart flow with independent saved progress. Focused
+coverage lives in `missing-borders-minigame` and `missing-borders-minigame-shell`.
+Border Run displays start/finish flags before submission, then reveals countries
+and numbered crossings sequentially. Countries and markers fade over 180 ms,
+with crossings interleaved between country steps at 110 ms intervals. Render-clock
+materials handle color blending without rebuilding geography. Flag footprints
+take priority over overlapping island rings; the finish flag uses fitted checks.
+The final crossing pulses; reduced motion
+shows the complete route immediately. Reveal progress is ephemeral and never
+changes scoring or saved progress.
+Border Run (`/minigames/border-run/play`) uses numeric questions whose minimum
+is computed on a connected-land-component graph in `borderRunTopology.ts`.
+Ownership never links separate islands or overseas components. Multi-source
+breadth-first searches find minimum country crossings, and numeric grading reuses
+`manual-number`. Borders are hidden by default, with a saved Show borders option.
+`borderRunPath.ts` chooses shared-boundary portals, triangulates each participating
+polygon, and finds and simplifies an interior corridor. It rounds bends only where
+the replacement stays inside land; holes and concave shores remain constraints.
+The corridor is used for camera fitting only. Reveals display numbered badges
+on actual shared-boundary crossings, with a repeating pulse on the final crossing (finite fade for reduced motion),
+rather than a connecting line. Entry framing uses the actual endpoint components;
+reveal framing fits the full route. These are schematic land corridors derived
+from canonical boundaries, not transport-network data.
+
+Pinpoint (`/minigames/pinpoint/play`) reuses `pin-distance` and `pin-inside` for ten
+rounds. The pool includes primary capitals, bundled cities with a source population
+of at least one million, 60 curated Wikidata landmarks across 60 countries, eligible
+countries and the 50 bundled US states. There are 58 attributed, locally bundled
+landmark photos. Category choices are random; selection then chooses a country
+before a place, avoiding repeated countries within a run where possible. This
+keeps large Chinese/Indian city catalogs from dominating the draw. Point scores
+are `round(1000 * exp(-max(0, km-1)/1500))`; areas earn 1,000 for canonical
+containment. Feedback shows three reference rings (1,000, 500 and 100 points),
+retaining every scoring tier for grading. The target name has label priority over
+ring numbers; the distance connector links the guessed and actual locations.
+The red crossed pin is reserved for zero-point guesses. Pinpoint keeps the previous orientation
+on advancement at altitude 1.15 and reveals at altitude 1.0, avoiding a repeated
+world-sized reset. The controller caches base graphs, land topologies and display
+meshes; images and location APIs are not queried during play.
+
+All four games share a compact score/strikes row, Journey-style answer feedback and separate results
+overview. A terminal answer stays in feedback until **See results**; finishing
+early goes directly to the overview. The latest 64 submitted visits preserve
+revealed country IDs, outcome and pins. The overview highlights those areas and
+pins, with up to six sampled flyover stops including missed-pin locations;
+reduced motion uses the overview focus. Replay appears only on the overview.
+Personal bests are recorded only for each game’s default rules, using the active
+run’s settings snapshot. Custom games retain progress but do not record or display
+a personal best. The settings footer announces eligibility beside Reset settings.
+Default-rule records survive replay and merge by maximum.
+Focused coverage for the new games and completion behavior lives in
+`extra-minigames`, `extra-minigames-shell`, `border-run-routing`,
+`pinpoint-scoring` and the existing minigame shell tests.
+
+The menu groups Home, Journey (with Archive nested beneath it), Minigames, Explore, and Study
 above feedback and World credits. The Archive hierarchy connector sits outside
 the row's selected/hover background. World credits opens a modal with source and
 license links, trapped keyboard focus, Escape/backdrop dismissal and focus return.
@@ -253,8 +354,10 @@ Theme settings live in the account's Appearance tab and save on this device;
 guests can open Appearance alongside the sign-in Profile tab. The menu heading
 is simply “Ambit”. Explore opens search
 through the underlined introduction link. Selected-country
-details keep the input out of their layout; “Search another country” opens a
-floating search box without clearing or reframing the current selection. A shared
+details keep the input out of their layout; “Search another country or territory” opens a
+floating search box without clearing or reframing the current selection. Search
+uses the selectable map catalog, including the active regional branch, rather
+than the Study roster or only ADM0 units. A shared
 cog beside the globe motion controls opens display settings in Home, Explore and
 the Study overview. Preferences save automatically in `wurl.globe-layers.v1`;
 legacy display choices migrate without restoring a camera. On mobile, rotation

@@ -8,7 +8,7 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
   it("searches and frames territories outside the Study roster and displays only their available profile fields", async () => {
     await mount();
     await click("Explore");
-    await click("Search countries");
+    await click("Search countries and territories");
     const input = host.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -176,6 +176,30 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
     expect(probe.mounts).toBe(1);
     expect(host.querySelector("canvas")).toBe(canvas);
     expect(probe.props!.states["wurl:CAN"]).toBe("selected");
+    await click("Search another country or territory");
+    const search = document.querySelector<HTMLInputElement>(
+      ".explore-search-field input",
+    )!;
+    const typeSearch = (value: string) =>
+      act(async () => {
+        Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value",
+        )!.set!.call(search, value);
+        search.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    await typeSearch("Canada");
+    expect(
+      document.querySelector(".explore-search-popup")!.textContent,
+    ).toContain("Canada");
+    await typeSearch("Ontario");
+    expect(
+      document.querySelector(".explore-search-popup")!.textContent,
+    ).toContain("Ontario");
+    await click("Ontario");
+    expect(
+      host.querySelector(".selected-region")?.textContent ?? host.textContent,
+    ).toContain("Ontario");
     const ontario = probe.props!.regions.find((r) => r.id === "wurl:CAN-ON")!;
     await act(async () => probe.props!.onSelect(ontario));
     expect(probe.props!.states["wurl:CAN"]).toBe("disabled");
@@ -230,7 +254,7 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
     await click("Explore");
     expect(document.querySelector(".explore-search-popup")).toBeNull();
     expect(host.querySelector(".explore-search-field")).toBeNull();
-    await click("Search countries");
+    await click("Search countries and territories");
     const input = host.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -251,7 +275,7 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus.at(-1)).toEqual(member("wurl:AND").focus);
     expect(probe.focus.at(-1)!.altitude).toBeLessThan(0.1);
     const count = probe.focus.length;
-    await click("Search another country");
+    await click("Search another country or territory");
     expect(
       document.querySelector('.explore-country-search[role="dialog"]'),
     ).not.toBeNull();
@@ -273,7 +297,7 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Explore");
     const earth = host.querySelector("canvas");
-    await click("Search countries");
+    await click("Search countries and territories");
     const input = host.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -286,7 +310,7 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
     expect(document.activeElement).toBe(
       host.querySelector(".mode-incoming .explore-search-link"),
     );
-    await click("Search countries");
+    await click("Search countries and territories");
     await click("Close search");
     expect(host.querySelector(".explore-search-field")).toBeNull();
     expect(document.activeElement).toBe(

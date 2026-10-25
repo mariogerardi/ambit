@@ -5,6 +5,7 @@ export type AppMode =
   | "daily"
   | "archive"
   | "explore"
+  | "minigames"
   | "study"
   | "practice";
 export function modeForPath(path: string): AppMode {
@@ -17,9 +18,11 @@ export function modeForPath(path: string): AppMode {
         ? "daily"
         : path === "/explore"
           ? "explore"
-          : path === "/study"
-            ? "study"
-            : JOURNEY_INDEX.some((j) => j.path === path)
-              ? "practice"
-              : "home";
+          : path === "/minigames" || path.startsWith("/minigames/")
+            ? "minigames"
+            : path === "/study"
+              ? "study"
+              : JOURNEY_INDEX.some((j) => j.path === path)
+                ? "practice"
+                : "home";
 }

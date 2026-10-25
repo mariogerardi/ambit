@@ -70,6 +70,7 @@ function canvasFactory() {
       arc() {},
       stroke() {},
       fill() {},
+      fillRect() {},
     }),
   }));
   vi.stubGlobal("document", { createElement });
@@ -982,6 +983,9 @@ describe("zoom-aware context places", () => {
   it("uses black dots and slightly larger sizes for the largest cities", () => {
     const city = { ...places[0], kind: "city" as const, population: 300_000 };
     expect(placeStyle("city").marker).toBe("#101010");
+    expect(
+      placeMarkerSize({ ...city, population: 3_820_914 }, true),
+    ).toBeLessThan(15);
     expect(placeStyle("city").textHeight).toBeGreaterThanOrEqual(24);
     expect(placeStyle("city").font).toContain("500 26px");
     expect(
@@ -1209,4 +1213,144 @@ it("keeps smaller local island labels fixed to the shore as the camera pans", ()
   }
   expect(placeLabelStyle(place).textHeight).toBeCloseTo(19.2);
   labels.dispose();
+});
+
+it("gives an answer name space before compact monospaced score annotations", () => {
+  canvasFactory();
+  const labels = new PlaceLabels();
+  const target: PlaceFeature = {
+    ...places[0],
+    id: "answer",
+    name: "Córdoba",
+    kind: "pin",
+    markerRole: "target",
+    labelFlexible: true,
+    priority: 1000,
+  };
+  const bands: PlaceFeature[] = Array.from({ length: 10 }, (_, index) => ({
+    ...places[0],
+    id: `band:${index}`,
+    name: String(1000 - index * 100),
+    markerHidden: true,
+    priority: 90,
+    labelTypography: "numeric",
+  }));
+  labels.update(
+    {
+      id: "pinpoint",
+      kind: "place-labels",
+      places: [...bands, target],
+      visible: true,
+    },
+    100,
+  );
+  labels.view(camera(), 800, 800);
+  const name = labels.group.children.find(
+    (s) => s.userData.role === "label" && s.userData.placeId === target.id,
+  )!;
+  expect(name.visible).toBe(true);
+  expect(placeLabelStyle(bands[0]).font).toContain("monospace");
+  expect(placeLabelStyle(bands[0]).textHeight).toBeLessThan(
+    placeLabelStyle(target).textHeight,
+  );
+  labels.dispose();
+});
+
+it("anchors start and finish flags at the bottom of their poles", () => {
+  canvasFactory();
+  const labels = new PlaceLabels();
+  labels.update(
+    {
+      id: "flags",
+      kind: "place-labels",
+      visible: true,
+      markers: true,
+      places: ["start", "finish"].map((markerRole, i) => ({
+        ...places[0],
+        id: `flag:${i}`,
+        kind: "other" as const,
+        lng: i * 10,
+        markerRole: markerRole as "start" | "finish",
+        markerSize: 44,
+        labelHidden: true,
+      })),
+    },
+    100,
+  );
+  labels.view(camera(), 800, 800);
+  const markers = labels.group.children.filter(
+    (c) => c instanceof Sprite && c.userData.role === "marker",
+  ) as Sprite[];
+  expect(markers).toHaveLength(2);
+  expect(
+    markers.every((m) => m.center.x === 0.25 && m.center.y === 6 / 64),
+  ).toBe(true);
+  labels.dispose();
+});
+
+it("reserves flag space above island rings and fades newly introduced crossing markers", () => {
+  canvasFactory();
+  const labels = new PlaceLabels(),
+    c = camera();
+  const start = {
+    ...places[0],
+    kind: "other" as const,
+    markerRole: "start" as const,
+    markerSize: 44,
+    labelHidden: true,
+  };
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  labels.update(
+    {
+      id: "flags",
+      kind: "place-labels",
+      visible: true,
+      markers: true,
+      places: [start],
+    },
+    100,
+  );
+  const box = labels.priorityMarkerBoxes(c, 800, 800)[0];
+  expect(box.left).toBeLessThan(400);
+  expect(box.right).toBeGreaterThan(400);
+  expect(box.top).toBeLessThan(365);
+  expect(box.bottom).toBeGreaterThan(400);
+  const crossing = {
+    ...places[0],
+    id: "crossing",
+    kind: "other" as const,
+    markerBadge: "1",
+    fadeInMs: 180,
+    labelHidden: true,
+  };
+  labels.update(
+    {
+      id: "flags",
+      kind: "place-labels",
+      visible: true,
+      markers: true,
+      places: [start, crossing],
+    },
+    100,
+  );
+  labels.view(c, 800, 800);
+  const marker = labels.group.children.find(
+    (o) => o.userData.placeId === crossing.id && o.userData.role === "marker",
+  ) as Sprite;
+  expect(marker.material.opacity).toBe(0);
+  expect(labels.needsRefresh()).toBe(true);
+  clock.mockReturnValue(90);
+  labels.view(c, 800, 800);
+  expect(marker.material.opacity).toBeCloseTo(0.5);
+  // The flag has an independent material and stays fully visible.
+  const flag = labels.group.children.find(
+    (o) => o.userData.placeId === start.id && o.userData.role === "marker",
+  ) as Sprite;
+  expect(flag.material.opacity).toBe(1);
+  clock.mockReturnValue(180);
+  labels.view(c, 800, 800);
+  expect(marker.material.opacity).toBe(1);
+  expect(labels.needsRefresh()).toBe(false);
+  labels.dispose();
+  clock.mockRestore();
 });

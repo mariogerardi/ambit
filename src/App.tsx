@@ -4,6 +4,10 @@ import { useWorldGeography } from "./app/useWorldGeography";
 import { useCameraOrchestration } from "./app/useCameraOrchestration";
 import { usePlayerProgress } from "./app/usePlayerProgress";
 import { HomePanel } from "./app/HomePanel";
+import { MinigamesPanel } from "./app/MinigamesPanel";
+import { useSharedNeighbors } from "./minigames/useSharedNeighbors";
+import { BorderMinigamePanel } from "./minigames/BorderMinigamePanel";
+import { useBorderMinigame } from "./minigames/useBorderMinigame";
 import { JourneyArchive } from "./app/JourneyArchive";
 import {
   archiveDay,
@@ -29,6 +33,7 @@ import { BoardBoundary, PanelBoundary } from "./app/ErrorBoundaries";
 import { clearGlobeChunkReload } from "./app/globeChunkRecovery";
 import type {
   RegionFeature,
+  Focus,
   VisualState,
   PlaceFeature,
 } from "./geography/types";
@@ -112,6 +117,7 @@ const GlobeView = lazy(() =>
   import("./globe/GlobeView").then((m) => ({ default: m.GlobeView })),
 );
 const emptyRoutes: [] = [];
+const emptyRegions: RegionFeature[] = [];
 const noAction = () => {};
 export function PlayerWorkspace() {
   const account = useAccount();
@@ -207,8 +213,19 @@ export function App() {
   const [explore, setExplore] = useState<ExploreSettings>(
     defaultLayers ?? DEFAULT_LAYERS,
   );
+  const sharedPlaying =
+    mode === "minigames" && pathname === "/minigames/shared-neighbors/play";
+  const missingPlaying =
+    mode === "minigames" && pathname === "/minigames/missing-borders/play";
+  const borderRunPlaying =
+    mode === "minigames" && pathname === "/minigames/border-run/play";
+  const pinpointPlaying =
+    mode === "minigames" && pathname === "/minigames/pinpoint/play";
+  const minigamePlaying =
+    sharedPlaying || missingPlaying || borderRunPlaying || pinpointPlaying;
   const unrestricted =
     mode === "home" ||
+    (mode === "minigames" && !minigamePlaying) ||
     mode === "account" ||
     (mode === "study" && (studySetup || !study.session));
   const displayLayers =
@@ -339,17 +356,52 @@ export function App() {
     const index = journey.rounds.findIndex((q) => q.id === id);
     setConstructionReviewIndex(index >= 0 ? index : undefined);
   }, [journey.id, game.phase, journey.completion?.initialConstructionRoundId]);
+  const sharedNeighbors = useSharedNeighbors(
+    mode === "minigames" ? namedRegions : emptyRegions,
+    subject,
+  );
+  const missingBorders = useBorderMinigame(
+    mode === "minigames" ? namedRegions : emptyRegions,
+    subject,
+    "missing-borders",
+  );
+  const borderRun = useBorderMinigame(
+    mode === "minigames" ? namedRegions : emptyRegions,
+    subject,
+    "border-run",
+    undefined,
+    borderRunPlaying,
+  );
+  const pinpoint = useBorderMinigame(
+    mode === "minigames" ? namedRegions : emptyRegions,
+    subject,
+    "pinpoint",
+    () => globe.current?.view(),
+  );
+  const activeMinigame = missingPlaying
+    ? missingBorders
+    : borderRunPlaying
+      ? borderRun
+      : pinpointPlaying
+        ? pinpoint
+        : sharedNeighbors;
+  useEffect(() => {
+    if (minigamePlaying && webgl && activeMinigame.count && !activeMinigame.run)
+      activeMinigame.start();
+  }, [minigamePlaying, webgl, activeMinigame.count, !!activeMinigame.run]);
   const world = useMemo(
     () =>
-      isJourney && context && loaded
-        ? loaded.runtime.journeyWorld(
-            namedRegions,
-            journey,
-            game,
-            context,
-            constructionReviewIndex,
-          )
-        : undefined,
+      minigamePlaying
+        ? activeMinigame.world
+        : isJourney && context && loaded
+          ? loaded.runtime.journeyWorld(
+              namedRegions,
+              journey,
+              game,
+              context,
+              constructionReviewIndex,
+            )
+          : undefined,
     [
       isJourney,
       context,
@@ -358,6 +410,8 @@ export function App() {
       game,
       loaded,
       constructionReviewIndex,
+      minigamePlaying,
+      activeMinigame.world,
     ],
   );
   const session = study.session;
@@ -404,7 +458,9 @@ export function App() {
     recenter,
   } = useCameraOrchestration({
     mode,
-    transitionKey: cameraKey,
+    transitionKey: minigamePlaying
+      ? `${cameraKey}:${activeMinigame.run?.id}:${activeMinigame.run?.cycle}:${activeMinigame.run?.index}`
+      : cameraKey,
     ready,
     mobile: mobile.enabled,
     globe,
@@ -412,15 +468,22 @@ export function App() {
     regions: namedRegions,
     clearHover,
     journey: {
-      active: isJourney,
-      definition: journey,
-      context,
+      active: isJourney || (minigamePlaying && !!activeMinigame.world),
+      definition:
+        minigamePlaying && activeMinigame.journey
+          ? activeMinigame.journey
+          : journey,
+      context: minigamePlaying ? activeMinigame.context : context,
       focus: world?.focus,
-      phase: game.phase,
-      roundIndex: game.roundIndex,
-      answers: game.answers,
-      help: game.help,
-      dailyReady,
+      phase: minigamePlaying
+        ? (activeMinigame.game?.phase ?? "playing")
+        : game.phase,
+      roundIndex: minigamePlaying ? 0 : game.roundIndex,
+      answers: minigamePlaying
+        ? (activeMinigame.game?.answers ?? [])
+        : game.answers,
+      help: minigamePlaying ? undefined : game.help,
+      dailyReady: minigamePlaying || dailyReady,
     },
     study: {
       active: studying,
@@ -431,7 +494,7 @@ export function App() {
       capitalFocus: studyPresentation.capitalFocus,
     },
   });
-  const mobileStep = `${path}:${isJourney ? `${journey.id}:${game.roundIndex}:${game.phase}` : studying ? `${session!.prompt.ordinal}:${session!.phase}` : mode === "explore" ? `${selected}:${selectedRegion?.id}:${selectedCity?.id}` : "setup"}`;
+  const mobileStep = `${path}:${minigamePlaying ? `${activeMinigame.run?.cycle}:${activeMinigame.run?.index}:${activeMinigame.run?.result ?? "playing"}:${activeMinigame.ended}` : isJourney ? `${journey.id}:${game.roundIndex}:${game.phase}` : studying ? `${session!.prompt.ordinal}:${session!.phase}` : mode === "explore" ? `${selected}:${selectedRegion?.id}:${selectedCity?.id}` : "setup"}`;
   useEffect(() => {
     setGlobeExpanded(false);
     if (mobile.enabled && document.activeElement instanceof HTMLElement)
@@ -754,9 +817,13 @@ export function App() {
     stop();
   };
   const choose = useCallback(
-    (region: RegionFeature) => {
+    (region: RegionFeature, point?: Focus) => {
       stop();
-      if (mode === "explore") selectExplore(region.id);
+      if (missingPlaying) {
+        if (point && !activeMinigame.canSelectPoint(point)) return;
+        if (!activeMinigame.ended && activeMinigame.run?.result === undefined)
+          activeMinigame.action({ type: "select", id: region.id });
+      } else if (mode === "explore") selectExplore(region.id);
       else if (mode === "study" && studyPreview && !studying) {
         if (!studyPool({ ...studyPreview, scope: "all" }).includes(region.id))
           return;
@@ -786,6 +853,11 @@ export function App() {
       mode,
       namedRegions,
       selectExplore,
+      missingPlaying,
+      activeMinigame.action,
+      activeMinigame.canSelectPoint,
+      activeMinigame.ended,
+      activeMinigame.run?.result,
       studying,
       studyPreview,
       studyEditing,
@@ -845,8 +917,25 @@ export function App() {
         onPlay={() => playDaily(today)}
         onArchive={() => navigate("/archive")}
         onRetrySchedule={() => void schedule.refresh()}
+        onMinigames={() => navigate("/minigames")}
         onExplore={() => navigate("/explore")}
         onStudy={() => navigate("/study")}
+      />
+    ) : minigamePlaying ? (
+      <BorderMinigamePanel
+        shared={activeMinigame}
+        webgl={webgl}
+        onBack={() => navigate("/minigames")}
+      />
+    ) : mode === "minigames" ? (
+      <MinigamesPanel
+        path={pathname}
+        onNavigate={navigate}
+        shared={sharedNeighbors}
+        missing={missingBorders}
+        borderRun={borderRun}
+        pinpoint={pinpoint}
+        webgl={webgl}
       />
     ) : mode === "archive" ? (
       <JourneyArchive
@@ -934,6 +1023,7 @@ export function App() {
       <ExplorePanel
         onContentHeight={mobile.enabled ? setExploreContentHeight : undefined}
         regions={namedRegions}
+        searchRegions={exploreRegions}
         selected={selected}
         search={exploreSearch}
         onSearch={setExploreSearch}
@@ -1139,12 +1229,15 @@ export function App() {
     ) : null;
   const phase = isJourney
     ? game.phase
-    : mode === "home"
-      ? "home"
-      : studying
-        ? session!.phase
-        : "playing";
+    : minigamePlaying
+      ? (activeMinigame.game?.phase ?? "playing")
+      : mode === "home"
+        ? "home"
+        : studying
+          ? session!.phase
+          : "playing";
   const motionControls = (mode === "home" ||
+    (mode === "minigames" && !minigamePlaying) ||
     mode === "explore" ||
     mode === "archive" ||
     (mode === "study" &&
@@ -1225,7 +1318,10 @@ export function App() {
                 placeContextual={!!displayLayers || !!studyDisplay}
                 placeDensity={studyDisplay ? "study" : undefined}
                 selectDisabled={
-                  world?.selectDisabled || mode === "explore" || !!studyPreview
+                  (minigamePlaying && activeMinigame.ended) ||
+                  world?.selectDisabled ||
+                  mode === "explore" ||
+                  !!studyPreview
                 }
                 selectableRegionIds={world?.selectableRegionIds}
                 placeMarkers={studyPresentation.placeMarkers}
@@ -1233,6 +1329,16 @@ export function App() {
                 routes={world?.routes ?? emptyRoutes}
                 overlays={world?.overlays}
                 clueLocators={world?.clueLocators}
+                regionReveal={
+                  minigamePlaying
+                    ? activeMinigame.world?.regionReveal
+                    : undefined
+                }
+                borderOmissions={
+                  minigamePlaying
+                    ? activeMinigame.world?.borderOmissions
+                    : undefined
+                }
                 showBorders={borders}
                 borderRegionIds={
                   world?.borderRegionIds ?? studyPresentation.borderRegionIds
@@ -1241,6 +1347,9 @@ export function App() {
                 surfaceRoutes
                 regionNames={names}
                 regionInteraction={
+                  (!minigamePlaying ||
+                    (!activeMinigame.ended &&
+                      activeMinigame.run?.result === undefined)) &&
                   mode !== "archive" &&
                   !studyBrowsingHistory &&
                   !studyEditing &&
@@ -1253,15 +1362,23 @@ export function App() {
                 onHover={setHover}
                 onSelect={choose}
                 interactionLabel={
-                  isJourney &&
-                  ["pin", "geo-multipin"].includes(
-                    journey.rounds[game.roundIndex].mode,
-                  )
-                    ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
-                    : isJourney &&
-                        journey.rounds[game.roundIndex].mode.startsWith("city-")
-                      ? "Interactive Earth. Select a city marker to answer; drag to rotate, scroll or pinch to zoom."
-                      : undefined
+                  minigamePlaying && activeMinigame.game?.phase !== "playing"
+                    ? "Interactive Earth. Drag to rotate, scroll or pinch to zoom."
+                    : missingPlaying
+                      ? "Interactive Earth. Tap the territory hiding two countries; drag to rotate, scroll or pinch to zoom."
+                      : sharedPlaying || pinpointPlaying
+                        ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
+                        : isJourney &&
+                            ["pin", "geo-multipin"].includes(
+                              journey.rounds[game.roundIndex].mode,
+                            )
+                          ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
+                          : isJourney &&
+                              journey.rounds[game.roundIndex].mode.startsWith(
+                                "city-",
+                              )
+                            ? "Interactive Earth. Select a city marker to answer; drag to rotate, scroll or pinch to zoom."
+                            : undefined
                 }
                 placeInteraction={
                   mode === "explore" ||
@@ -1291,24 +1408,31 @@ export function App() {
                     : undefined
                 }
                 onCoordinateTap={
-                  isJourney &&
-                  game.phase === "playing" &&
-                  ["pin", "geo-multipin"].includes(
-                    journey.rounds[game.roundIndex].mode,
-                  )
+                  (sharedPlaying || pinpointPlaying) &&
+                  !activeMinigame.ended &&
+                  activeMinigame.run?.result === undefined
                     ? (point) => {
                         stop();
-                        dispatch({
-                          type:
-                            journey.rounds[game.roundIndex].mode ===
-                            "geo-multipin"
-                              ? "drop-labeled-pin"
-                              : "drop-pin",
-                          lat: point.lat,
-                          lng: point.lng,
-                        });
+                        activeMinigame.action({ type: "pin", ...point });
                       }
-                    : undefined
+                    : isJourney &&
+                        game.phase === "playing" &&
+                        ["pin", "geo-multipin"].includes(
+                          journey.rounds[game.roundIndex].mode,
+                        )
+                      ? (point) => {
+                          stop();
+                          dispatch({
+                            type:
+                              journey.rounds[game.roundIndex].mode ===
+                              "geo-multipin"
+                                ? "drop-labeled-pin"
+                                : "drop-pin",
+                            lat: point.lat,
+                            lng: point.lng,
+                          });
+                        }
+                      : undefined
                 }
                 onPlace={(place) => {
                   if (

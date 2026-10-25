@@ -16,9 +16,11 @@ import { localDateKey } from "../../src/app/dailyProgress";
 import { createStudySave } from "../../src/app/progressSaves";
 import type {
   Focus,
+  MapOverlay,
   PhysicalFeature,
   PlaceFeature,
   RegionFeature,
+  RouteFeature,
   VisualState,
 } from "../../src/geography/types";
 import type { ClueLocator } from "../../src/globe/clueLocators";
@@ -28,7 +30,11 @@ import { supportsWebGL } from "../../src/globe/support";
 import { clearProfileCache } from "../../src/services/playerProfileCache";
 export const savedStudy = () => createStudySave().load();
 interface GlobeProps {
+  routes: RouteFeature[];
+  regionReveal?: import("../../src/globe/regionFades").RegionReveal;
+  borderOmissions?: Record<string, number[][][]>;
   clueLocators?: ClueLocator[];
+  overlays?: MapOverlay[];
   palette?: string;
   visualScale?: number;
   initialFocus?: Focus;
@@ -46,11 +52,12 @@ interface GlobeProps {
   onReady(): void;
   onFailure(): void;
   onInteraction(): void;
-  onSelect(region: RegionFeature): void;
+  onSelect(region: RegionFeature, point?: Focus): void;
   onPlace(place: PlaceFeature): void;
   onCoordinateTap?(point: Focus): void;
   regionInteraction?: boolean;
   selectDisabled?: boolean;
+  selectableRegionIds?: readonly string[];
   placeMarkers?: boolean;
   placeLabels?: boolean;
   placeInteraction?: boolean;

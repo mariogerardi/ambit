@@ -30,7 +30,7 @@
     z-index: 6;
   }
   .experience .experience-logo {
-    transform: translateY(10px);
+    transform: translateY(0);
     font-size: 28px;
   }
   .experience .experience-header-right {
@@ -147,7 +147,7 @@
     line-height: 1.5;
   }
   .experience .home-menu .globe-invitation {
-    margin-top: 18px;
+    margin-top: 10px;
   }
   .experience :is(.info-view h1, .question-card h2) {
     overflow-wrap: anywhere;
@@ -191,7 +191,7 @@
     font-size: 12px;
   }
   .experience .study-landing > .study-introduction {
-    font-size: 13px;
+    font-size: 15px;
   }
   .experience .explore-heading h1 {
     font-size: clamp(24px, 7vw, 28px);
@@ -580,7 +580,7 @@
     gap: 8px;
   }
   .experience .experience-logo {
-    transform: translateY(10px);
+    transform: translateY(0);
     font-size: 28px;
   }
   .mobile-map-tools > button {
@@ -737,17 +737,19 @@
   .experience .archive-heading > .quiet-button {
     font-size: 11px;
   }
-  .home-menu .menu-secondary strong {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+  .home-menu .menu-secondary button {
+    padding: 12px;
   }
-  .home-menu .menu-secondary .menu-secondary-label {
-    grid-column: 1 / -1;
-    grid-row: 2;
+  .experience .home-menu .menu-secondary strong {
+    gap: 6px;
+    font-size: 18px;
+  }
+  .home-menu .menu-secondary .action-icon {
+    width: 18px;
+    height: 18px;
   }
   .home-menu .menu-secondary .menu-secondary-arrow {
-    grid-column: 2;
-    grid-row: 1;
+    font-size: 14px;
   }
 }
 

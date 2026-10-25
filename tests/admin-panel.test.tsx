@@ -298,7 +298,7 @@ it("keeps an unsaved selection when a refreshed schedule changes in another sess
   };
   await render();
   expect(host.querySelector(".scheduled-journey-preview h4")?.textContent).toBe(
-    "Chasing the sun",
+    "Chasing the Sun",
   );
   expect(host.querySelector(".schedule-current")?.textContent).toContain(
     "Along the Andes",
@@ -471,7 +471,7 @@ it("blocks publication when the schedule is unavailable and preserves a draft af
     "Sign in again",
   );
   expect(host.querySelector(".scheduled-journey-preview h4")?.textContent).toBe(
-    "Chasing the sun",
+    "Chasing the Sun",
   );
 });
 

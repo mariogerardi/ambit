@@ -1,0 +1,1014 @@
+{
+  "version": "pinpoint-landmarks-v1",
+  "reviewedOn": "2026-10-24",
+  "source": "https://www.wikidata.org/",
+  "coordinateLicense": "CC0 1.0",
+  "landmarks": [
+    {
+      "id": "Q243",
+      "name": "Eiffel Tower",
+      "countryId": "wurl:FRA",
+      "lat": 48.858296,
+      "lng": 2.294479,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q243",
+      "revision": 2559388206,
+      "photo": {
+        "src": "/minigames/pinpoint/Q243.jpg",
+        "author": "Benh LIEU SONG",
+        "url": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "sha256": "848139c75c8eb5d021837af2f856a51e8e0055e3f0c388d6fae26b49cfac339f",
+        "licenseNote": "Commons describes the tower as public domain; the photograph is CC BY-SA 3.0."
+      }
+    },
+    {
+      "id": "Q10285",
+      "name": "Colosseum",
+      "countryId": "wurl:ITA",
+      "lat": 41.890277777778,
+      "lng": 12.492222222222,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q10285",
+      "revision": 2551136894,
+      "photo": {
+        "src": "/minigames/pinpoint/Q10285.jpg",
+        "author": "FeaturedPics",
+        "url": "https://commons.wikimedia.org/wiki/File:Colosseo_2020.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "4598c003050dd05d5e02e41bbe86f69e3ae1e5e752b43b548faf5a71f3600fff"
+      }
+    },
+    {
+      "id": "Q131013",
+      "name": "Acropolis of Athens",
+      "countryId": "wurl:GRC",
+      "lat": 37.971666666666664,
+      "lng": 23.726111111111113,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q131013",
+      "revision": 2550942301,
+      "photo": {
+        "src": "/minigames/pinpoint/Q131013.jpg",
+        "author": "A.Savin",
+        "url": "https://commons.wikimedia.org/wiki/File:Attica_06-13_Athens_50_View_from_Philopappos_-_Acropolis_Hill.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "5011cfee5b2390b562ad4ae5bd3289d8ef55d0799560377e1ebee53130cc2a29"
+      }
+    },
+    {
+      "id": "Q48435",
+      "name": "Sagrada Família",
+      "countryId": "wurl:ESP",
+      "lat": 41.40369,
+      "lng": 2.17433,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q48435",
+      "revision": 2559650378,
+      "photo": {
+        "src": "/minigames/pinpoint/Q48435.jpg",
+        "author": "Canaan",
+        "url": "https://commons.wikimedia.org/wiki/File:SF_maig_2026.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "983c2cc93b0befb4be20188a50849115243b4ebc61371f244c8ff197f2aaa1cc"
+      }
+    },
+    {
+      "id": "Q41225",
+      "name": "Big Ben",
+      "countryId": "wurl:GBR",
+      "lat": 51.50067,
+      "lng": -0.12457,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q41225",
+      "revision": 2534780027,
+      "photo": {
+        "src": "/minigames/pinpoint/Q41225.jpg",
+        "author": "Christian David",
+        "url": "https://commons.wikimedia.org/wiki/File:Elizabeth_Tower_and_the_north_front_of_the_Palace_of_Westminster,_London.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "f88c0e511e03d663bbd4f311cd83d675afb696908d685d9dc7a92b7e9c86a6c6"
+      }
+    },
+    {
+      "id": "Q82425",
+      "name": "Brandenburg Gate",
+      "countryId": "wurl:DEU",
+      "lat": 52.516272222222,
+      "lng": 13.377722222222,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q82425",
+      "revision": 2559475859,
+      "photo": {
+        "src": "/minigames/pinpoint/Q82425.jpg",
+        "author": "Thomas Wolf, www.foto-tw.de",
+        "url": "https://commons.wikimedia.org/wiki/File:Brandenburger_Tor_morgens.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "2c541aa03a88f580e412ee4a604984ad7c051c5d47398c08c39819607013ec6f"
+      }
+    },
+    {
+      "id": "Q215003",
+      "name": "Belém Tower",
+      "countryId": "wurl:PRT",
+      "lat": 38.691388888889,
+      "lng": -9.2158333333333,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q215003",
+      "revision": 2555918917,
+      "photo": {
+        "src": "/minigames/pinpoint/Q215003.jpg",
+        "author": "Rehman Abubakr",
+        "url": "https://commons.wikimedia.org/wiki/File:Belem_Tower_-_April_2019_(2).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "1b8bddb1856667ab32144e192e0c3792dfa27d2e5cc9234d78ebb78dbd2e18ab"
+      }
+    },
+    {
+      "id": "Q129846",
+      "name": "St. Basil's Cathedral",
+      "countryId": "wurl:RUS",
+      "lat": 55.7525,
+      "lng": 37.62305555555555,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q129846",
+      "revision": 2550241209,
+      "photo": {
+        "src": "/minigames/pinpoint/Q129846.jpg",
+        "author": "W. Bulach",
+        "url": "https://commons.wikimedia.org/wiki/File:00_0568_Saint_Basil%27s_Cathedral_-_Moscow.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "98410ef5cad229f3db83316ece885b5088fe89a0742ce56f09b1c4f0228f1fd3"
+      }
+    },
+    {
+      "id": "Q204871",
+      "name": "Charles Bridge",
+      "countryId": "wurl:CZE",
+      "lat": 50.086388888889,
+      "lng": 14.411944444444,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q204871",
+      "revision": 2523363080
+    },
+    {
+      "id": "Q465534",
+      "name": "Széchenyi Chain Bridge",
+      "countryId": "wurl:HUN",
+      "lat": 47.49891,
+      "lng": 19.04353,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q465534",
+      "revision": 2541299398,
+      "photo": {
+        "src": "/minigames/pinpoint/Q465534.jpg",
+        "author": "Alireza Javaheri",
+        "url": "https://commons.wikimedia.org/wiki/File:Budapest_-_Chain_Bridge_-_panoramio.jpg",
+        "license": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sha256": "587bd002c4a1b3e8b2e5eafdd0f92141ab2e176673b7947c35930af44c81aec1"
+      }
+    },
+    {
+      "id": "Q180901",
+      "name": "Atomium",
+      "countryId": "wurl:BEL",
+      "lat": 50.895,
+      "lng": 4.3413888888889,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q180901",
+      "revision": 2558305297,
+      "photo": {
+        "src": "/minigames/pinpoint/Q180901.jpg",
+        "author": "Zairon",
+        "url": "https://commons.wikimedia.org/wiki/File:Laeken_Atomium_06.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "1eebd92069287eff8d244fbd5d0b04d24bbd02633997a6ede89c192fe870d37a"
+      }
+    },
+    {
+      "id": "Q214619",
+      "name": "The Little Mermaid",
+      "countryId": "wurl:DNK",
+      "lat": 55.69286,
+      "lng": 12.59926,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q214619",
+      "revision": 2559746510,
+      "photo": {
+        "src": "/minigames/pinpoint/Q214619.jpg",
+        "author": "Benoît Prieur",
+        "url": "https://commons.wikimedia.org/wiki/File:Petite_sir%C3%A8ne_de_Copenhague_(conforme_%C3%A0_la_loi_danoise).JPG",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "sha256": "678995a8f38e446474ac0cc229348a48846c57f3eb2227751e8d60381693ff2c"
+      }
+    },
+    {
+      "id": "Q37200",
+      "name": "Great Pyramid of Giza",
+      "countryId": "wurl:EGY",
+      "lat": 29.97915,
+      "lng": 31.13422,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q37200",
+      "revision": 2559756853,
+      "photo": {
+        "src": "/minigames/pinpoint/Q37200.jpg",
+        "author": "Nina",
+        "url": "https://commons.wikimedia.org/wiki/File:Kheops-Pyramid.jpg",
+        "license": "CC BY 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+        "sha256": "565f59cff0c6a22a3499d0e822724326f327eeb01edecebbe140cbac9fa386b7"
+      }
+    },
+    {
+      "id": "Q213360",
+      "name": "Table Mountain",
+      "countryId": "wurl:ZAF",
+      "lat": -33.96216,
+      "lng": 18.41352,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q213360",
+      "revision": 2553837989,
+      "photo": {
+        "src": "/minigames/pinpoint/Q213360.jpg",
+        "author": "Danie van der Merwe from Cape Town, South Africa",
+        "url": "https://commons.wikimedia.org/wiki/File:Table_Mountain_DanieVDM.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sha256": "530a656456b3c7ac315858da4d6ebf6d15b2d67603ca3eff3fb68af157b38081"
+      }
+    },
+    {
+      "id": "Q43278",
+      "name": "Victoria Falls",
+      "countryId": "wurl:ZMB",
+      "lat": -17.924777777778,
+      "lng": 25.858055555556,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q43278",
+      "revision": 2554749747,
+      "photo": {
+        "src": "/minigames/pinpoint/Q43278.jpg",
+        "author": "Diego Delso",
+        "url": "https://commons.wikimedia.org/wiki/File:Cataratas_Victoria,_Zambia-Zimbabue,_2018-07-27,_DD_05.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "a7f5bda5e36c99d6c52f7a6286b58016836b22dbdf2920c27930ddbefbe07c9d"
+      }
+    },
+    {
+      "id": "Q7296",
+      "name": "Mount Kilimanjaro",
+      "countryId": "wurl:TZA",
+      "lat": -3.0666666666667,
+      "lng": 37.359166666667,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q7296",
+      "revision": 2557991344,
+      "photo": {
+        "src": "/minigames/pinpoint/Q7296.jpg",
+        "author": "Chris 73 / Wikimedia Commons",
+        "url": "https://commons.wikimedia.org/wiki/File:Mt._Kilimanjaro_12.2006.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "1fcfe57ed941eb003af4f80ff349868cc1e8104bdfcaa49c8660e15baf6e3335"
+      }
+    },
+    {
+      "id": "Q642979",
+      "name": "Rock-Hewn Churches of Lalibela",
+      "countryId": "wurl:ETH",
+      "lat": 12.02935,
+      "lng": 39.04042,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q642979",
+      "revision": 2515876223,
+      "photo": {
+        "src": "/minigames/pinpoint/Q642979.jpg",
+        "author": "Sailko",
+        "url": "https://commons.wikimedia.org/wiki/File:Lalibela,_san_giorgio,_esterno_07.jpg",
+        "license": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sha256": "53e36bce557f0c43d83105f5b18e8f5a10cde3689398932c34daa2cfcd77f30c"
+      }
+    },
+    {
+      "id": "Q683632",
+      "name": "Great Mosque of Djenné",
+      "countryId": "wurl:MLI",
+      "lat": 13.905277777778,
+      "lng": -4.5555555555556,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q683632",
+      "revision": 2545721534,
+      "photo": {
+        "src": "/minigames/pinpoint/Q683632.jpg",
+        "author": "Andy Gilham",
+        "url": "https://commons.wikimedia.org/wiki/File:Great_Mosque_of_Djenn%C3%A9_1.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sha256": "2b388d10f251cad2fda29f9858ad3261fbafb6ebd0d83ae82975888d252870f7"
+      }
+    },
+    {
+      "id": "Q41346",
+      "name": "Hassan II Mosque",
+      "countryId": "wurl:MAR",
+      "lat": 33.60734166666667,
+      "lng": -7.632561111111111,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q41346",
+      "revision": 2540442843,
+      "photo": {
+        "src": "/minigames/pinpoint/Q41346.jpg",
+        "author": "Milamber's portfolio",
+        "url": "https://commons.wikimedia.org/wiki/File:Sunshine_on_mosque_Hassan_II_in_Casablanca,_Morocco_-_Flickr_-_Milamber%27s_portfolio.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sha256": "cd2b0f848a1e8f703b1f40588d269dc0374a7f5eb9684bb3cd5d41eafcce3e38"
+      }
+    },
+    {
+      "id": "Q1290337",
+      "name": "Rova of Antananarivo",
+      "countryId": "wurl:MDG",
+      "lat": -18.923611111111,
+      "lng": 47.532222222222,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q1290337",
+      "revision": 2512857550,
+      "photo": {
+        "src": "/minigames/pinpoint/Q1290337.jpg",
+        "author": "Dalbergiaada",
+        "url": "https://commons.wikimedia.org/wiki/File:Palais_royal_Rova_Manjakamiadana_2.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "a9966665198e23eb13a0f933c6d2a593e68531bebc2fcb20ad06775ef00d8ac8"
+      }
+    },
+    {
+      "id": "Q815584",
+      "name": "Basilica of Our Lady of Peace",
+      "countryId": "wurl:CIV",
+      "lat": 6.811111111111111,
+      "lng": -5.296944444444445,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q815584",
+      "revision": 2549589013,
+      "photo": {
+        "src": "/minigames/pinpoint/Q815584.jpg",
+        "author": "Didierwiki",
+        "url": "https://commons.wikimedia.org/wiki/File:Basilique_notre_Dame_de_la_Paix_de_Yamoussoukro_16.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "sha256": "1b5fcc61e04acd5014155202145ff26934dd798cfba76e443247817f0aaac31b"
+      }
+    },
+    {
+      "id": "Q9141",
+      "name": "Taj Mahal",
+      "countryId": "wurl:IND",
+      "lat": 27.175,
+      "lng": 78.04194444444444,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q9141",
+      "revision": 2559756383,
+      "photo": {
+        "src": "/minigames/pinpoint/Q9141.jpg",
+        "author": "Taj_Mahal,_Agra,_India_edit2.jpg: Yann; edited by King of Hearts derivative work: Jbarta (talk)",
+        "url": "https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India_edit3.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "f4f5443116b2baff4e9d8250249b92d5555c784f96e1b50f02ba4695bfa6120c"
+      }
+    },
+    {
+      "id": "Q798826",
+      "name": "Great Wall at Badaling",
+      "countryId": "wurl:CHN",
+      "lat": 40.35428,
+      "lng": 116.00649,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q798826",
+      "revision": 2515882931,
+      "photo": {
+        "src": "/minigames/pinpoint/Q798826.jpg",
+        "author": "DF08 at English Wikipedia",
+        "url": "https://commons.wikimedia.org/wiki/File:GreatWall_Badaling.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "sha256": "57ec9415dd523a53062334b22eb2493547c3de8972a7d06b1c18de78a38c9e29"
+      }
+    },
+    {
+      "id": "Q43473",
+      "name": "Angkor Wat",
+      "countryId": "wurl:KHM",
+      "lat": 13.4125,
+      "lng": 103.86666666667,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q43473",
+      "revision": 2552235098,
+      "photo": {
+        "src": "/minigames/pinpoint/Q43473.jpg",
+        "author": "The original uploader was Fuzheado at English Wikipedia.",
+        "url": "https://commons.wikimedia.org/wiki/File:Angkor_wat_temple.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "sha256": "6b40e6d0276abf397bab1b5c758f4e5524764dfa5827e1807b9c5601bfae599f"
+      }
+    },
+    {
+      "id": "Q42798",
+      "name": "Borobudur",
+      "countryId": "wurl:IDN",
+      "lat": -7.60793,
+      "lng": 110.20384,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q42798",
+      "revision": 2559687224,
+      "photo": {
+        "src": "/minigames/pinpoint/Q42798.jpg",
+        "author": "Gunawan Kartapranata",
+        "url": "https://commons.wikimedia.org/wiki/File:Borobudur-Nothwest-view.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "sha256": "5771265fd1a39a753a91f1656536a074026f02fac83f67b1ebc9f244afe526ad",
+        "licenseNote": "Commons describes the building as public domain; the photograph is CC BY-SA 3.0."
+      }
+    },
+    {
+      "id": "Q83063",
+      "name": "Petronas Towers",
+      "countryId": "wurl:MYS",
+      "lat": 3.1577777777777776,
+      "lng": 101.71166666666667,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q83063",
+      "revision": 2556069544,
+      "photo": {
+        "src": "/minigames/pinpoint/Q83063.jpg",
+        "author": "AwOiSoAk KaOsIoWa",
+        "url": "https://commons.wikimedia.org/wiki/File:Kuala_Lumpur_-_panoramio_(18).jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "61f8bf45561bb49442e5037ab22e55665dbf4de50745ecc5fb22f82ca57efb3c"
+      }
+    },
+    {
+      "id": "Q548679",
+      "name": "Marina Bay Sands",
+      "countryId": "wurl:SGP",
+      "lat": 1.2825,
+      "lng": 103.86,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q548679",
+      "revision": 2556620340,
+      "photo": {
+        "src": "/minigames/pinpoint/Q548679.jpg",
+        "author": "Tony Hisgett from Birmingham, UK",
+        "url": "https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands_Hotel_3_(31345110894).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sha256": "9196fd187e9206bc1960687fabedf21e7c712b858aa90c48ba54e4f7fc650c9a"
+      }
+    },
+    {
+      "id": "Q724970",
+      "name": "Wat Arun",
+      "countryId": "wurl:THA",
+      "lat": 13.743688888888888,
+      "lng": 100.48891944444445,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q724970",
+      "revision": 2513533803,
+      "photo": {
+        "src": "/minigames/pinpoint/Q724970.jpg",
+        "author": "Diliff",
+        "url": "https://commons.wikimedia.org/wiki/File:Wat_Arun_from_Chao_Phraya_River.jpg",
+        "license": "CC BY 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+        "sha256": "d57a467e91f6680a2a9096541a674a9d9d03a2b5fba597cfae72d625b693f3bb"
+      }
+    },
+    {
+      "id": "Q464535",
+      "name": "Shwedagon Pagoda",
+      "countryId": "wurl:MMR",
+      "lat": 16.79833333,
+      "lng": 96.14944444,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q464535",
+      "revision": 2551284204,
+      "photo": {
+        "src": "/minigames/pinpoint/Q464535.jpg",
+        "author": "Stefan Fussan",
+        "url": "https://commons.wikimedia.org/wiki/File:Yangon_-_Shwedagon_Pagoda_03.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "7c6e6da3eb1c322f8d48d81b28ba6191230250ad3d94dd727df7b1d1243d17d2"
+      }
+    },
+    {
+      "id": "Q39231",
+      "name": "Mount Fuji",
+      "countryId": "wurl:JPN",
+      "lat": 35.36055555555556,
+      "lng": 138.7275,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q39231",
+      "revision": 2537608902,
+      "photo": {
+        "src": "/minigames/pinpoint/Q39231.jpg",
+        "author": "名古屋太郎, (edited by Hannes_24)",
+        "url": "https://commons.wikimedia.org/wiki/File:Kodaki_fuji_frm_shojinko_refurb.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "09fcd73b9e095808d8f0e3f793a42b9b447da942fa1f11197aee0f1572e9bf74"
+      }
+    },
+    {
+      "id": "Q482485",
+      "name": "Gyeongbokgung",
+      "countryId": "wurl:KOR",
+      "lat": 37.5798841,
+      "lng": 126.9767996,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q482485",
+      "revision": 2560317469
+    },
+    {
+      "id": "Q5788",
+      "name": "Petra",
+      "countryId": "wurl:JOR",
+      "lat": 30.328888888889,
+      "lng": 35.440277777778,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q5788",
+      "revision": 2560286472,
+      "photo": {
+        "src": "/minigames/pinpoint/Q5788.jpg",
+        "author": "Diego Delso",
+        "url": "https://commons.wikimedia.org/wiki/File:The_Treasury,_Petra,_Jordan5.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "f348eebea9a4e20ff6b4d1de6052c001e17bd2fa8083064399721b6fcb0954a9"
+      }
+    },
+    {
+      "id": "Q12495",
+      "name": "Burj Khalifa",
+      "countryId": "wurl:ARE",
+      "lat": 25.197222222222223,
+      "lng": 55.274166666666666,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q12495",
+      "revision": 2553195880,
+      "photo": {
+        "src": "/minigames/pinpoint/Q12495.jpg",
+        "author": "Tim.Reckmann",
+        "url": "https://commons.wikimedia.org/wiki/File:Dubai_skyline_2015_(crop).jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "0ed9473a3882b920bef699a78571fe8726513e788b021f7b836ef98314f41c4c"
+      }
+    },
+    {
+      "id": "Q1548443",
+      "name": "Sultan Qaboos Grand Mosque",
+      "countryId": "wurl:OMN",
+      "lat": 23.583888888889,
+      "lng": 58.389166666667,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q1548443",
+      "revision": 2514709101,
+      "photo": {
+        "src": "/minigames/pinpoint/Q1548443.jpg",
+        "author": "Mostafameraji",
+        "url": "https://commons.wikimedia.org/wiki/File:Sultan_Qaboos_Grand_Mosque_(1).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "77a6588ffd60b56c18d0ae1cb14f65baa338d915e53cabfc7a1641443e3be5ac"
+      }
+    },
+    {
+      "id": "Q1373583",
+      "name": "Registan",
+      "countryId": "wurl:UZB",
+      "lat": 39.654722222222,
+      "lng": 66.975555555556,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q1373583",
+      "revision": 2553155306,
+      "photo": {
+        "src": "/minigames/pinpoint/Q1373583.jpg",
+        "author": "Bernard Gagnon",
+        "url": "https://commons.wikimedia.org/wiki/File:Registan_01.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "sha256": "92ebd88e09d904c658e20fc8403a684a4dc84bde61ec3de3c81ecc1be5b82ffe"
+      }
+    },
+    {
+      "id": "Q804210",
+      "name": "Baiterek",
+      "countryId": "wurl:KAZ",
+      "lat": 51.12833333333333,
+      "lng": 71.43055555555556,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q804210",
+      "revision": 2527591460,
+      "photo": {
+        "src": "/minigames/pinpoint/Q804210.jpg",
+        "author": "Matti Blume",
+        "url": "https://commons.wikimedia.org/wiki/File:Night_at_Esil_District,_Astana_(P1190721).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+        "sha256": "75c0dcd50c1fa75525ab28b3fbfdb2ea1e9d1695fd8ef69a82348c7c36c6ed73"
+      }
+    },
+    {
+      "id": "Q500983",
+      "name": "Faisal Mosque",
+      "countryId": "wurl:PAK",
+      "lat": 33.72972222222222,
+      "lng": 73.03722222222223,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q500983",
+      "revision": 2542526174,
+      "photo": {
+        "src": "/minigames/pinpoint/Q500983.jpg",
+        "author": "Ali Mujtaba",
+        "url": "https://commons.wikimedia.org/wiki/File:Ali_Mujtaba_WLM2015_FAISAL_MOSQUE_m_10.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "e723917da326cf29b4d559073837ed07e1a9ddff5fa566585fde1864aa303ae0"
+      }
+    },
+    {
+      "id": "Q272153",
+      "name": "Sigiriya",
+      "countryId": "wurl:LKA",
+      "lat": 7.9569444444444,
+      "lng": 80.759722222222,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q272153",
+      "revision": 2553713868,
+      "photo": {
+        "src": "/minigames/pinpoint/Q272153.jpg",
+        "author": "Binuka poojan",
+        "url": "https://commons.wikimedia.org/wiki/File:Beauty_of_Sigiriya_by_Binuka.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "544f64e652f22ba813efa21da4a610eb6b34d87c3b9afbd2d3b8ecc741906783"
+      }
+    },
+    {
+      "id": "Q12946982",
+      "name": "Swayambhunath",
+      "countryId": "wurl:NPL",
+      "lat": 27.715,
+      "lng": 85.29,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q12946982",
+      "revision": 2548784674,
+      "photo": {
+        "src": "/minigames/pinpoint/Q12946982.jpg",
+        "author": "Vyacheslav Argenberg",
+        "url": "https://commons.wikimedia.org/wiki/File:Swayambhu,_Kathmandu,_Nepal.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sha256": "d5ad95faa4d74559097e7149beb7ffadbf2e079e226b7c65985f67886e52cb0e"
+      }
+    },
+    {
+      "id": "Q842921",
+      "name": "Omar Ali Saifuddien Mosque",
+      "countryId": "wurl:BRN",
+      "lat": 4.889578,
+      "lng": 114.939136,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q842921",
+      "revision": 2547873921,
+      "photo": {
+        "src": "/minigames/pinpoint/Q842921.jpg",
+        "author": "Daniel Weiss",
+        "url": "https://commons.wikimedia.org/wiki/File:Sultan_Omar_Ali_Saifuddien_Mosque;_2002.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sha256": "ce47efd9bf4f1f585ce80a5489591bcf5b0d31643c4f8fe3b175b67e70edc21d"
+      }
+    },
+    {
+      "id": "Q80541",
+      "name": "Blue Mosque",
+      "countryId": "wurl:TUR",
+      "lat": 41.0053851,
+      "lng": 28.9768247,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q80541",
+      "revision": 2553736938,
+      "photo": {
+        "src": "/minigames/pinpoint/Q80541.jpg",
+        "author": "Moonik",
+        "url": "https://commons.wikimedia.org/wiki/File:Exterior_of_Sultan_Ahmed_I_Mosque_in_Istanbul,_Turkey_002.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "e82e0f288f13fcf23cb27320bf6594685d2726d9ae87adba85a344173708f9e5"
+      }
+    },
+    {
+      "id": "Q9202",
+      "name": "Statue of Liberty",
+      "countryId": "wurl:USA",
+      "lat": 40.689209166667,
+      "lng": -74.044425277778,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q9202",
+      "revision": 2557256318,
+      "photo": {
+        "src": "/minigames/pinpoint/Q9202.jpg",
+        "author": "Christian David",
+        "url": "https://commons.wikimedia.org/wiki/File:Statue_of_Liberty_and_a_sightseeing_boat,_Liberty_Island,_New_York.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "6b3ddacf14d6400812e53e7770cff62371e4f0a84fc8e35ec0f569d8424c4a88"
+      }
+    },
+    {
+      "id": "Q5859",
+      "name": "Chichen Itza",
+      "countryId": "wurl:MEX",
+      "lat": 20.683055555556,
+      "lng": -88.568611111111,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q5859",
+      "revision": 2551136917,
+      "photo": {
+        "src": "/minigames/pinpoint/Q5859.jpg",
+        "author": "Daniel Schwen",
+        "url": "https://commons.wikimedia.org/wiki/File:Chichen_Itza_3.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "8462a823246de57f1541b0057de050f268d8f122f61b838d9658ef9dfdf5a7f8"
+      }
+    },
+    {
+      "id": "Q134883",
+      "name": "CN Tower",
+      "countryId": "wurl:CAN",
+      "lat": 43.642752777778,
+      "lng": -79.387147222222,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q134883",
+      "revision": 2542555379,
+      "photo": {
+        "src": "/minigames/pinpoint/Q134883.jpg",
+        "author": "Chris Woodrich",
+        "url": "https://commons.wikimedia.org/wiki/File:CN_Tower_from_Puente_de_Luz,_Toronto,_Ontario,_2025-08-25_01.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "345edbd7cd94e57a8d1f81d4546dad4e9c1ee18d3edee61dee57a609d17ed528"
+      }
+    },
+    {
+      "id": "Q181172",
+      "name": "Tikal",
+      "countryId": "wurl:GTM",
+      "lat": 17.222094444444,
+      "lng": -89.623613888889,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q181172",
+      "revision": 2555941447,
+      "photo": {
+        "src": "/minigames/pinpoint/Q181172.jpg",
+        "author": "Mundo Maya",
+        "url": "https://commons.wikimedia.org/wiki/File:Tikal_3.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "954ea0322e4f2dfa77a7ec008004f4b68178427f2c243c62a9df63096bef4c35"
+      }
+    },
+    {
+      "id": "Q7350",
+      "name": "Panama Canal",
+      "countryId": "wurl:PAN",
+      "lat": 9.12,
+      "lng": -79.75,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q7350",
+      "revision": 2551332917,
+      "photo": {
+        "src": "/minigames/pinpoint/Q7350.jpg",
+        "author": "User:Stan Shebs",
+        "url": "https://commons.wikimedia.org/wiki/File:Panama_Canal_Gatun_Locks.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "2a0ab0fc3a6cec9489cf399737ee670a258f886e328d2878116c10de23cc8091"
+      }
+    },
+    {
+      "id": "Q910189",
+      "name": "Castillo de San Pedro de la Roca",
+      "countryId": "wurl:CUB",
+      "lat": 19.968705555556,
+      "lng": -75.8703,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q910189",
+      "revision": 2523011640,
+      "photo": {
+        "src": "/minigames/pinpoint/Q910189.jpg",
+        "author": "Glogg, Peter, Switzerland",
+        "url": "https://commons.wikimedia.org/wiki/File:Castillo_del_Morro_by_Glogg_4.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sha256": "905d3143ab94feeaa5cee97897ca16c88d002a7a41b2d3e4a78492a92c3bafd6"
+      }
+    },
+    {
+      "id": "Q206194",
+      "name": "Citadelle Laferrière",
+      "countryId": "wurl:HTI",
+      "lat": 19.573611111111,
+      "lng": -72.243888888889,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q206194",
+      "revision": 2541244911,
+      "photo": {
+        "src": "/minigames/pinpoint/Q206194.jpg",
+        "author": "SPC Gibran Torres, United States Army",
+        "url": "https://commons.wikimedia.org/wiki/File:Citadelle_Laferri%C3%A8re_Aerial_View.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "sha256": "064b601432fc4a4a869ce67ea4ebfef344cc79e1579e778be89938db2da9a462"
+      }
+    },
+    {
+      "id": "Q200521",
+      "name": "Brimstone Hill Fortress National Park",
+      "countryId": "wurl:KNA",
+      "lat": 17.347,
+      "lng": -62.836,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q200521",
+      "revision": 2553565201,
+      "photo": {
+        "src": "/minigames/pinpoint/Q200521.jpg",
+        "author": "Ukexpat",
+        "url": "https://commons.wikimedia.org/wiki/File:BrimstoneHill01.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sha256": "eb68f4babcd7ca8e4648232258a9d6fb8d4aaf89c2e9defe32e4758f9482cb8d"
+      }
+    },
+    {
+      "id": "Q79961",
+      "name": "Christ the Redeemer",
+      "countryId": "wurl:BRA",
+      "lat": -22.951915648887244,
+      "lng": -43.21046412278801,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q79961",
+      "revision": 2558124354,
+      "photo": {
+        "src": "/minigames/pinpoint/Q79961.jpg",
+        "author": "Arne Müseler",
+        "url": "https://commons.wikimedia.org/wiki/File:Christ_the_Redeemer_-_Cristo_Redentor.jpg",
+        "license": "CC BY-SA 3.0 de",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+        "sha256": "686711062de8e55b8f4810d8c770a5497267164cf334177fb6f8dccc66321e7c"
+      }
+    },
+    {
+      "id": "Q676203",
+      "name": "Machu Picchu",
+      "countryId": "wurl:PER",
+      "lat": -13.163333333333334,
+      "lng": -72.54555555555555,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q676203",
+      "revision": 2553534435,
+      "photo": {
+        "src": "/minigames/pinpoint/Q676203.jpg",
+        "author": "Draceane",
+        "url": "https://commons.wikimedia.org/wiki/File:Machu_Picchu,_2023_(012).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "3d885fd62532e509e8cac82fc93556e3d107851fafd7ef8bf9f411ada12d237a"
+      }
+    },
+    {
+      "id": "Q3448354",
+      "name": "Ahu Tongariki",
+      "countryId": "wurl:CHL",
+      "lat": -27.125833333333,
+      "lng": -109.27694444444,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q3448354",
+      "revision": 2403365383,
+      "photo": {
+        "src": "/minigames/pinpoint/Q3448354.jpg",
+        "author": "The original uploader was Hhooper1 at English Wikipedia.",
+        "url": "https://commons.wikimedia.org/wiki/File:Easter_Island_Ahu_(2006).jpg",
+        "license": "CC BY 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+        "sha256": "6364285beb0f81a8313436c53802294d6f8944f755eb6298ec64e76a8327e649"
+      }
+    },
+    {
+      "id": "Q1813101",
+      "name": "Palacio Quemado",
+      "countryId": "wurl:BOL",
+      "lat": -16.49583333,
+      "lng": -68.13361111,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q1813101",
+      "revision": 2549868886,
+      "photo": {
+        "src": "/minigames/pinpoint/Q1813101.jpg",
+        "author": "Rodrigo Achá from Arica, Chile",
+        "url": "https://commons.wikimedia.org/wiki/File:Palacio_Quemado_(Palacio_de_Gobierno)_y_Catedral_Metropolitana_de_La_Paz,_Bolivia.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sha256": "9d0dfeeb78db6a765a0157ce23ffcd430f12c4329a53c1990be3d60ea8e08bb6"
+      }
+    },
+    {
+      "id": "Q1806478",
+      "name": "Ciudad Mitad del Mundo",
+      "countryId": "wurl:ECU",
+      "lat": -0.0022222222222222222,
+      "lng": -78.45583333333333,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q1806478",
+      "revision": 2513539844,
+      "photo": {
+        "src": "/minigames/pinpoint/Q1806478.jpg",
+        "author": "Kaldari",
+        "url": "https://commons.wikimedia.org/wiki/File:Mitad_del_Mundo_01.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "sha256": "2aa52a8bf986e911d13a036b9f28eeee9881631196b8c851030f261988503ed2"
+      }
+    },
+    {
+      "id": "Q831389",
+      "name": "Obelisco de Buenos Aires",
+      "countryId": "wurl:ARG",
+      "lat": -34.60376,
+      "lng": -58.38162,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q831389",
+      "revision": 2559721276,
+      "photo": {
+        "src": "/minigames/pinpoint/Q831389.jpg",
+        "author": "Sebastianalmaraz",
+        "url": "https://commons.wikimedia.org/wiki/File:ObeliscoBA2015.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "45c42f8e1a0c82890c9e48a577a72fdddf83c8d2af9afc7d5bdbb4a18558b781"
+      }
+    },
+    {
+      "id": "Q2227269",
+      "name": "Las Lajas Sanctuary",
+      "countryId": "wurl:COL",
+      "lat": 0.8055,
+      "lng": -77.586,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q2227269",
+      "revision": 2522154197,
+      "photo": {
+        "src": "/minigames/pinpoint/Q2227269.jpg",
+        "author": "Diego Delso",
+        "url": "https://commons.wikimedia.org/wiki/File:Santuario_de_Las_Lajas,_Ipiales,_Colombia,_2015-07-21,_DD_21-23_HDR.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "f78926e9ca02e7b67a309e65f8e4db322f1269c63639c9fc10af137b2c310eae"
+      }
+    },
+    {
+      "id": "Q80299",
+      "name": "Angel Falls",
+      "countryId": "wurl:VEN",
+      "lat": 5.970055555555556,
+      "lng": -62.53622222222222,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q80299",
+      "revision": 2551299003,
+      "photo": {
+        "src": "/minigames/pinpoint/Q80299.jpg",
+        "author": "Paulo Capiotti",
+        "url": "https://commons.wikimedia.org/wiki/File:SaltoAngel4.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "sha256": "783721a8cce6b476da3c1684188ba54322ec79072250e9f7f26a9f57f68bf687"
+      }
+    },
+    {
+      "id": "Q45178",
+      "name": "Sydney Opera House",
+      "countryId": "wurl:AUS",
+      "lat": -33.857058,
+      "lng": 151.214897,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q45178",
+      "revision": 2540580002,
+      "photo": {
+        "src": "/minigames/pinpoint/Q45178.jpg",
+        "author": "No machine-readable author provided. Roybb95~commonswiki assumed (based on copyright claims).",
+        "url": "https://commons.wikimedia.org/wiki/File:Sydney_Opera_House_Sails.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sha256": "d30f80cc9ae48d62e205da4a62cdd07160c3a9dda2267f4cd5382007eb790e58"
+      }
+    },
+    {
+      "id": "Q722125",
+      "name": "Sky Tower",
+      "countryId": "wurl:NZL",
+      "lat": -36.84847222222222,
+      "lng": 174.76230555555554,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q722125",
+      "revision": 2513533798,
+      "photo": {
+        "src": "/minigames/pinpoint/Q722125.jpg",
+        "author": "Orderinchaos",
+        "url": "https://commons.wikimedia.org/wiki/File:Auckland_Sky_Tower_closeup.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "ea8ae67f3e13d0011926f8641a526d544a5ac62b1709b2bf0d7ba06b001c9b7f"
+      }
+    },
+    {
+      "id": "Q2992825",
+      "name": "Royal Palace of Tonga",
+      "countryId": "wurl:TON",
+      "lat": -21.131388888889,
+      "lng": -175.20055555556,
+      "sourceUrl": "https://www.wikidata.org/wiki/Q2992825",
+      "revision": 2550112024,
+      "photo": {
+        "src": "/minigames/pinpoint/Q2992825.jpg",
+        "author": "Uhooep",
+        "url": "https://commons.wikimedia.org/wiki/File:Royal_Palace,_Nuku%27alofa,_Nov_18.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sha256": "9a532775253f313d17bfe94fa9b125fc161e53ce7ea3b9199401df289195f15d"
+      }
+    }
+  ]
+}

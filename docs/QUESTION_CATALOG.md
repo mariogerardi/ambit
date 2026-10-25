@@ -22,19 +22,19 @@ For an approved specification, start with
 | Drawing the Sahara                 | `/journey/drawing-the-sahara`                 | [drawingSaharaJourney.ts](../src/game/drawingSaharaJourney.ts)                 |
 | Where the Silk Roads Met           | `/journey/where-the-silk-roads-met`           | [silkRoadIntersectionsJourney.ts](../src/game/silkRoadIntersectionsJourney.ts) |
 | The Vaccine That Crossed the World | `/journey/the-vaccine-that-crossed-the-world` | [vaccineExpeditionJourney.ts](../src/game/vaccineExpeditionJourney.ts)         |
-| Beyond the maple leaf              | `/journey/beyond-the-maple-leaf`              | [canadaJourney.ts](../src/game/canadaJourney.ts)                               |
+| Beyond the Maple Leaf              | `/journey/beyond-the-maple-leaf`              | [canadaJourney.ts](../src/game/canadaJourney.ts)                               |
 | Around the Mediterranean           | `/journey/mediterranean`                      | [fourthJourney.ts](../src/game/fourthJourney.ts)                               |
-| Shared neighbors                   | `/journey/shared-neighbors`                   | [ninthJourney.ts](../src/game/ninthJourney.ts)                                 |
+| Shared Neighbors                   | `/journey/shared-neighbors`                   | [ninthJourney.ts](../src/game/ninthJourney.ts)                                 |
 | Shared Neighbors II                | `/journey/shared-neighbors-two`               | [sharedNeighborsTwoJourney.ts](../src/game/sharedNeighborsTwoJourney.ts)       |
 | Along the Andes                    | `/journey/along-the-andes`                    | [andesJourney.ts](../src/game/andesJourney.ts)                                 |
-| Not the obvious city               | `/journey/not-the-obvious-city`               | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                           |
-| Island instincts                   | `/journey/island-instincts`                   | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)                       |
+| Not the Obvious City               | `/journey/not-the-obvious-city`               | [eleventhJourney.ts](../src/game/eleventhJourney.ts)                           |
+| Island Instincts                   | `/journey/island-instincts`                   | [fourteenthJourney.ts](../src/game/fourteenthJourney.ts)                       |
 | A Continent in Pieces              | `/journey/north-america`                      | [northAmericaJourney.ts](../src/game/northAmericaJourney.ts)                   |
-| Latitude surprises                 | `/journey/latitude-surprises`                 | [latitudeJourney.ts](../src/game/latitudeJourney.ts)                           |
+| Latitude Surprises                 | `/journey/latitude-surprises`                 | [latitudeJourney.ts](../src/game/latitudeJourney.ts)                           |
 | Pacific Landfalls                  | `/journey/ring-of-fire`                       | [tenthJourney.ts](../src/game/tenthJourney.ts)                                 |
-| Exceptions to the rule             | `/journey/exceptions-to-the-rule`             | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                             |
-| On Russia’s doorstep               | `/journey/try-not-to-click-russia`            | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                         |
-| Chasing the sun                    | `/journey/chasing-the-sun`                    | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                           |
+| Exceptions to the Rule             | `/journey/exceptions-to-the-rule`             | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                             |
+| On Russia’s Doorstep               | `/journey/try-not-to-click-russia`            | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                         |
+| Chasing the Sun                    | `/journey/chasing-the-sun`                    | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                           |
 | Down the Danube                    | `/journey/down-the-danube`                    | [danubeJourney.ts](../src/game/danubeJourney.ts)                               |
 | Same Hour, Different Worlds        | `/journey/same-hour-different-worlds`         | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                           |
 | Same Name, Different Place         | `/journey/same-name-different-place`          | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)                     |
@@ -42,7 +42,7 @@ For an approved specification, start with
 | Missing Borders II                 | `/journey/missing-borders-two`                | [missingBordersTwoJourney.ts](../src/game/missingBordersTwoJourney.ts)         |
 | Across the Divide                  | `/journey/across-the-divide`                  | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)                   |
 | Far From Everything                | `/journey/far-from-everything`                | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts)         |
-| The Sound of Somewhere: Reggaetón  | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
+| The Reggaetón Route                | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.
@@ -239,7 +239,7 @@ not safe evidence for a current-year ranking. Supply a dated source, population
 measure, units, rounding/tolerance, and tie policy; add a versioned dataset and
 predicate if the question should be computed rather than fixed.
 
-Not the obvious city develops five capital decisions: typed recall in Türkiye,
+Not the Obvious City develops five capital decisions: typed recall in Türkiye,
 a Canberra pin, interpreting Abuja's relocation, anonymous Brasília markers, and
 South Africa's three traditional capital roles. Türkiye's assist marks Ankara,
 Konya and Kayseri with identical city styling. Nigeria's known locations are
@@ -378,7 +378,7 @@ an explicitly exaggerated schematic. `correctFeedback` overrides widget-derived 
 with `src`, `alt`, and visible country `label` for each flag. It replaces the
 clue image on feedback. An optional `detail` (`src`, `alt`) enlarges a reviewed
 motif; `caption` explains its meaning. `image.context` retains the full flag as
-secondary context when the clue itself is a motif crop. Chasing the sun uses it for Argentina and Uruguay;
+secondary context when the clue itself is a motif crop. Chasing the Sun uses it for Argentina and Uruguay;
 its Philippine reveal stays on the Philippines, and its authored completion
 visits the six flag countries across the five stops. `completion.flags` uses the
 same comparison contract after the Journey ends. `scripts/prepare-sun-details.py`

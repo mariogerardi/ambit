@@ -259,6 +259,9 @@
   gap: 10px;
   margin-top: 16px;
 }
+.study-paths > article.study-path {
+  padding-bottom: 48px;
+}
 .study-path {
   position: relative;
   min-width: 0;
@@ -273,6 +276,7 @@
   display: flex;
   flex-direction: column;
   text-shadow: none;
+  transition: border-color 160ms ease;
 }
 .study-path h3 {
   font-size: 21px;

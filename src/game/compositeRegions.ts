@@ -122,6 +122,16 @@ export function compositeRegion(
     sourceId: "journey-composite",
     focus: members[0].focus,
     geometry: dissolveRegions(members),
+    // Match neighboring display shores/borders; coarse grading outlines leave
+    // visible gaps and overlaps against the detailed map and disclose the pair.
+    displayGeometry: members.some((member) => member.displayGeometry)
+      ? dissolveRegions(
+          members.map((member) => ({
+            ...member,
+            geometry: member.displayGeometry ?? member.geometry,
+          })),
+        )
+      : undefined,
   };
   entries.set(question, result);
   return result;

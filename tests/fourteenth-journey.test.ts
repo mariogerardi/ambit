@@ -37,7 +37,7 @@ const at = (roundIndex: number): GameState => ({
   roundIndex,
 });
 
-describe("Island instincts Journey", () => {
+describe("Island Instincts Journey", () => {
   it("registers five one-pick questions for practice, Admin and daily rotation", () => {
     expect(JOURNEYS).toContain(journey);
     expect(journey.rounds).toHaveLength(5);

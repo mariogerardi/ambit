@@ -11,6 +11,12 @@ export const outlineResolution = 0.5;
 export const outlineClearance = 0.00002;
 const radians = Math.PI / 180;
 const cache = new WeakMap<RegionFeature["geometry"], Float32Array>();
+const omittedCache = new WeakMap<
+  RegionFeature["geometry"],
+  WeakMap<number[][][], Float32Array>
+>();
+const edgeKey = (a: number[], b: number[]) =>
+  [a.join(","), b.join(",")].sort().join("|");
 
 /** Draw committed highlights after ordinary and hovered borders, still depth-tested. */
 export function outlineEmphasis(
@@ -53,8 +59,17 @@ export function regionBorderVisible(
   );
 }
 
-export function boundaryOutlinePositions(region: RegionFeature) {
-  const cached = cache.get(region.geometry);
+export function boundaryOutlinePositions(
+  region: RegionFeature,
+  omissions?: number[][][],
+) {
+  const filtered =
+    omittedCache.get(region.geometry) ??
+    new WeakMap<number[][][], Float32Array>();
+  if (omissions) omittedCache.set(region.geometry, filtered);
+  const cached = omissions
+    ? filtered.get(omissions)
+    : cache.get(region.geometry);
   if (cached) return cached;
   const radius = 1 + boundaryAltitude(region) + outlineClearance;
   const positions: number[] = [];
@@ -67,6 +82,11 @@ export function boundaryOutlinePositions(region: RegionFeature) {
       radius * Math.cos(phi) * Math.cos(theta),
     ];
   };
+  const skipped = new Set(
+    omissions?.flatMap((path) =>
+      path.slice(1).map((p, i) => edgeKey(path[i], p)),
+    ) ?? [],
+  );
   const parts =
     region.geometry.type === "Polygon"
       ? [region.geometry.coordinates]
@@ -74,6 +94,7 @@ export function boundaryOutlinePositions(region: RegionFeature) {
   for (const part of parts)
     for (const ring of part) {
       for (let i = 1; i < ring.length; i++) {
+        if (skipped.has(edgeKey(ring[i - 1], ring[i]))) continue;
         const from = ring[i - 1] as [number, number];
         const to = ring[i] as [number, number];
         const steps = Math.max(
@@ -90,7 +111,8 @@ export function boundaryOutlinePositions(region: RegionFeature) {
       }
     }
   const result = new Float32Array(positions);
-  cache.set(region.geometry, result);
+  if (omissions) filtered.set(omissions, result);
+  else cache.set(region.geometry, result);
   return result;
 }
 

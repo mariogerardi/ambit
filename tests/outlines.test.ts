@@ -1,3 +1,4 @@
+import { sharedBoundary } from "../src/minigames/sharedBoundary";
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { geoInterpolate } from "d3-geo";
@@ -169,4 +170,68 @@ describe("independent boundary outlines", () => {
     }
     expect(surfaceRoutePositions(route)).toBe(positions);
   });
+});
+
+it("omits only the restored shared border from both country outlines and restores it when omitted edges are cleared", () => {
+  const a: RegionFeature = {
+    id: "a",
+    name: "a",
+    level: "ADM0",
+    sourceId: "test",
+    focus: { lat: 0.5, lng: 0.5 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 1],
+          [0, 0],
+        ],
+      ],
+    },
+  };
+  const b = {
+    ...a,
+    id: "b",
+    geometry: {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [1, 0],
+          [2, 0],
+          [2, 1],
+          [1, 1],
+          [1, 0],
+        ],
+      ],
+    },
+  };
+  const omitted = [
+    [
+      [1, 0],
+      [1, 1],
+    ],
+  ];
+  for (const r of [a, b]) {
+    const original = boundaryOutlinePositions(r);
+    const filtered = boundaryOutlinePositions(r, omitted);
+    expect(filtered.length).toBeLessThan(original.length);
+    expect(filtered.length).toBeGreaterThan(original.length / 2);
+    expect(boundaryOutlinePositions(r, omitted)).toBe(filtered);
+    expect(boundaryOutlinePositions(r)).toBe(original);
+  }
+});
+
+it("omits detailed France/Italy shared edges after renderer geometry preparation", () => {
+  const members = ["wurl:FRA", "wurl:ITA"].map(
+    (id) => regions.find((r) => r.id === id)!,
+  );
+  const omitted = sharedBoundary(members[0], members[1]);
+  expect(omitted.length).toBeGreaterThan(0);
+  for (const r of members)
+    expect(boundaryOutlinePositions(r, omitted).length).toBeLessThan(
+      boundaryOutlinePositions(r).length,
+    );
 });
