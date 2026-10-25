@@ -327,15 +327,13 @@ it("fades corridor context with camera altitude without rebuilding geometry or i
     expect(line.geometry).toBe(geometry);
   }
   expect(new Raycaster().intersectObject(group, true)).toEqual([]);
-  for (const palette of ["dusk", "ocean", "survey"] as const) {
+  for (const palette of ["dusk", "ocean", "survey", "paper"] as const) {
     overlays.setPalette(palette);
     expect(line.material.color.getHexString()).toBe(
       playColors(palette).corridor.slice(1),
     );
     expect(line.geometry).toBe(geometry);
   }
-  overlays.setPalette("paper");
-  expect(line.material.color.getHexString()).toBe("a36708");
   overlays.dispose();
 });
 

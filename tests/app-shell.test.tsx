@@ -79,7 +79,7 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       const dialog = document.querySelector('[role="dialog"]')!;
       expect(dialog.querySelector("h2")?.textContent).toBe(title);
       expect(dialog.querySelector("img")?.getAttribute("src")).toBe(
-        `/previews/${slug}.svg`,
+        `/artwork/ocean/previews/${slug}.svg`,
       );
       expect(
         [...dialog.querySelectorAll("dt")].map((item) => item.textContent),

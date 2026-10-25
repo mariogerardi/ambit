@@ -18,12 +18,12 @@ import {
   startNeighborRun,
   neighborDeck,
 } from "../src/minigames/sharedNeighbors";
-import { CAPITALS } from "../src/game/quizData";
+import { interiorAnchor } from "../src/geography/interiorAnchor";
 
 it("plays, reveals, advances, and resumes the same shuffled deck without remounting Earth", async () => {
   authProbe.admin = false;
   const pairs = sharedNeighborPairs(buildBorderGraph(world));
-  const run = startNeighborRun(pairs);
+  const run = { ...startNeighborRun(pairs), seed: 42 };
   createNeighborSave().save({ version: 1, run });
   const pair = neighborDeck(pairs, run.seed, 0)[0];
   await mount();
@@ -45,9 +45,11 @@ it("plays, reveals, advances, and resumes the same shuffled deck without remount
   expect(host.querySelector(".minigame-answer-area")!.textContent).toContain(
     "Borders are hidden. Place your pin in the shared neighbor.",
   );
-  const pin =
-    CAPITALS.find((c) => c.countryId === pair.answer) ??
-    world.find((c) => c.id === pair.answer)!.focus;
+  // Camera focuses and coastal capitals need not lie inside simplified grading geometry.
+  const pin = interiorAnchor({
+    ...world.find((c) => c.id === pair.answer)!,
+    displayGeometry: undefined,
+  });
   await act(async () =>
     probe.props!.onCoordinateTap!({ lat: pin.lat, lng: pin.lng }),
   );
