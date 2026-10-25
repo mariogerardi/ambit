@@ -69,7 +69,7 @@ it("customizes Shared Neighbors without changing an unfinished run until Start n
   expect(probe.mounts).toBe(1);
 });
 
-it("starts Missing Borders with the chosen region and wider framing", async () => {
+it("starts Missing Borders centered on the chosen continent", async () => {
   history.replaceState(null, "", "/minigames/missing-borders");
   await mount();
   await click("Customize");
@@ -95,7 +95,7 @@ it("starts Missing Borders with the chosen region and wider framing", async () =
     framing: "wide",
     excludeSmallCountries: true,
   });
-  expect(probe.focus.at(-1)?.altitude).toBe(1.7);
+  expect(probe.focus.at(-1)).toEqual({ lat: 50, lng: 20, altitude: 1.05 });
   expect(host.querySelector(".missing-borders-game")).not.toBeNull();
   expect(probe.props!.regionInteraction).toBe(true);
 });
