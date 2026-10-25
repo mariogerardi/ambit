@@ -12,6 +12,7 @@ import {
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { playColors } from "../src/theme/playColors.ts";
+import { THEME_IDS } from "../src/theme/themes.ts";
 import {
   ROOT,
   parseArgs,
@@ -177,14 +178,15 @@ test(
       const palette = JSON.parse(
         kit.match(/## Semantic map colors[^]*?```json\n([^]*?)\n```/)[1],
       );
-      for (const theme of ["atlas", "ocean", "dusk", "paper"])
+      assert.deepEqual(Object.keys(palette.themes), THEME_IDS);
+      for (const theme of THEME_IDS)
         assert.deepEqual(palette.themes[theme], playColors(theme));
       assert.notEqual(
         palette.themes.paper.correct,
-        palette.themes.atlas.correct,
+        palette.themes.ocean.correct,
       );
-      assert.ok(palette.themes.atlas.surface);
-      assert.ok(palette.themes.atlas["context-land"]);
+      assert.ok(palette.themes.ocean.surface);
+      assert.ok(palette.themes.ocean["context-land"]);
       assert.match(
         kit,
         /One tap commits an anonymous composite territory immediately/,

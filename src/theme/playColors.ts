@@ -1,4 +1,4 @@
-import { DEFAULT_THEME } from "./themes";
+import { DEFAULT_THEME } from "./themes.ts";
 import type { ThemeId } from "./themes";
 
 /** Legacy dark-theme values; rendering consumers should use playColors(theme). */

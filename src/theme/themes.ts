@@ -1,4 +1,4 @@
-import { playColors } from "./playColors";
+import { playColors } from "./playColors.ts";
 export type ThemeId = "ocean" | "survey" | "dusk" | "paper";
 interface Theme {
   name: string;
