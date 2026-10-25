@@ -12,13 +12,27 @@ import { CAPITALS } from "../game/quizData";
 import { countryIdForName, normalizeAnswer } from "../game/answerNames";
 import { isRecord, strings } from "../app/storage";
 import type { VisualState } from "../geography/types";
+import type { RegionFeature } from "../geography/types";
+import {
+  drawPlaceReview,
+  reducePlaceReview,
+  validPlaceReview,
+  validStudyPlace,
+} from "./placeReview";
+import type { StudyPlaceTarget } from "./placeReview";
+import {
+  gradeStudyPin,
+  isStudyPinPrompt,
+  studyPinTarget,
+  validStudyPin,
+} from "./pins";
 export const COUNTRIES = roster.members;
 export const FLAGS = new Map(
   flagCatalog.flags.map((f) => [f.countryId, f.src]),
 );
 export const TOPICS = ["countries", "capitals", "flags"] as const;
 export type StudyTopic = (typeof TOPICS)[number];
-export type StudyStyle = "map" | "typing" | "choices" | "mixed";
+export type StudyStyle = "map" | "pin" | "typing" | "choices" | "mixed";
 type PromptStyle = Exclude<StudyStyle, "mixed">;
 export interface StudySettings {
   topics: StudyTopic[];
@@ -55,12 +69,14 @@ export const defaultSettings: StudySettings = {
 };
 export interface StudyPrompt {
   targetId: string;
-  topic: StudyTopic;
+  topic: StudyTopic | "places";
+  place?: StudyPlaceTarget;
   style: PromptStyle;
   choices: string[];
   ordinal: number;
 }
 export interface StudyAnswer {
+  pin?: { lat: number; lng: number };
   prompt: StudyPrompt;
   response: string;
   selectedId?: string;
@@ -76,6 +92,8 @@ export function missedStudyAnswers(session: StudySession): StudyAnswer[] {
   return [...latest.values()].filter((answer) => !answer.correct);
 }
 export interface StudySession {
+  placeReview?: StudyPlaceTarget[];
+  pin?: { lat: number; lng: number };
   id?: string;
   challengeId?: string;
   settings: StudySettings;
@@ -242,8 +260,36 @@ function draw(
     phase: "playing",
     text: "",
     choiceId: "",
+    pin: undefined,
     prompt: { targetId, topic, style, choices, ordinal },
   };
+}
+export function startPlaceStudy(targets: StudyPlaceTarget[]): StudySession {
+  const places = [...new Map(targets.map((t) => [t.id, t])).values()];
+  if (!places.length || !places.every(validStudyPlace))
+    throw Error("Choose valid places to review.");
+  return drawPlaceReview(
+    {
+      settings: { ...defaultSettings, length: "all", autoAdvance: false },
+      pool: places.map((p) => p.id),
+      placeReview: places,
+      remaining: places.map((p) => p.id),
+      deck: [],
+      seed: Date.now() >>> 0,
+      phase: "playing",
+      text: "",
+      choiceId: "",
+      history: [],
+      prompt: {
+        targetId: "",
+        topic: "places",
+        style: "map",
+        choices: [],
+        ordinal: 0,
+      },
+    },
+    0,
+  );
 }
 export function startStudy(
   settings: StudySettings,
@@ -259,7 +305,7 @@ export function startStudy(
       targets.some(
         ({ targetId, topic }) =>
           !studyPool(settings).includes(targetId) ||
-          !settings.topics.includes(topic),
+          !settings.topics.includes(topic as StudyTopic),
       ))
   )
     throw Error("Choose valid places and topics for review.");
@@ -316,6 +362,7 @@ export type StudyPreferencesValue = Pick<
 >;
 
 export type StudyAction =
+  | { type: "pin"; lat: number; lng: number }
   | { type: "preferences"; value: StudyPreferencesValue }
   | { type: "text"; value: string }
   | { type: "choice"; id: string }
@@ -333,6 +380,7 @@ export function studyComplete(session: StudySession) {
 export function studyReducer(
   session: StudySession,
   action: StudyAction,
+  regions: RegionFeature[] = [],
 ): StudySession {
   if (action.type === "preferences")
     return { ...session, settings: { ...session.settings, ...action.value } };
@@ -340,9 +388,17 @@ export function studyReducer(
   if (action.type === "next") {
     if (session.phase !== "feedback") return session;
     if (studyComplete(session)) return { ...session, phase: "summary" };
-    return draw(session, session.prompt.ordinal + 1);
+    return session.placeReview
+      ? drawPlaceReview(session, session.prompt.ordinal + 1)
+      : draw(session, session.prompt.ordinal + 1);
   }
+  if (session.placeReview) return reducePlaceReview(session, action, regions);
+  if (session.prompt.topic === "places") return session;
   if (session.phase !== "playing") return session;
+  if (action.type === "pin")
+    return session.prompt.style === "pin" && validStudyPin(action)
+      ? { ...session, pin: { lat: action.lat, lng: action.lng } }
+      : session;
   if (action.type === "text")
     return canTypeStudyAnswer(session.prompt)
       ? { ...session, text: action.value }
@@ -366,7 +422,14 @@ export function studyReducer(
   const { targetId, topic, style } = session.prompt;
   let selectedId: string | undefined,
     response = "";
-  if (action.type === "pick") {
+  let pinResult: ReturnType<typeof gradeStudyPin>;
+  if (style === "pin") {
+    if (!session.pin) return session;
+    const target = studyPinTarget(session.prompt, regions);
+    pinResult = target && gradeStudyPin(target, session.pin, regions);
+    if (!pinResult) return session;
+    response = pinResult.response;
+  } else if (action.type === "pick") {
     selectedId = action.id;
     response = countryName(action.id);
   } else if (style === "choices") {
@@ -390,13 +453,15 @@ export function studyReducer(
           (id) => normalizeAnswer(id.slice(5)) === normalizeAnswer(response),
         );
   }
-  const correct = selectedId
-    ? selectedId === targetId
-    : topic === "capitals" &&
-      style !== "map" &&
-      [capitalOf(targetId).name, ...capitalOf(targetId).aliases].some(
-        (a) => normalizeAnswer(a) === normalizeAnswer(response),
-      );
+  const correct = pinResult
+    ? pinResult.correct
+    : selectedId
+      ? selectedId === targetId
+      : topic === "capitals" &&
+        style !== "map" &&
+        [capitalOf(targetId).name, ...capitalOf(targetId).aliases].some(
+          (a) => normalizeAnswer(a) === normalizeAnswer(response),
+        );
   return {
     ...session,
     phase: "feedback",
@@ -412,20 +477,39 @@ export function studyReducer(
       : [],
     history: [
       ...session.history,
-      { prompt: session.prompt, response, selectedId, correct },
+      {
+        prompt: session.prompt,
+        response,
+        selectedId,
+        correct,
+        ...(style === "pin" ? { pin: session.pin } : {}),
+      },
     ],
   };
 }
 export function answerLabel(prompt: StudyPrompt, id = prompt.targetId): string {
+  if (prompt.place) return prompt.place.name;
   return prompt.topic === "capitals" && prompt.style !== "map"
     ? (capitalChoiceName(id) ?? id)
     : countryName(id);
 }
 export const canTypeStudyAnswer = (prompt: StudyPrompt) =>
-  !(prompt.topic === "countries" && prompt.style === "map");
+  !isStudyPinPrompt(prompt) &&
+  !(
+    (prompt.topic === "countries" || prompt.topic === "places") &&
+    prompt.style === "map"
+  );
 export function studyPrompt(prompt: StudyPrompt): string {
+  if (prompt.place)
+    return `Place a pin ${prompt.place.regionId ? "inside" : "at"} ${prompt.place.name}.`;
   const name = countryName(prompt.targetId),
     capital = capitalOf(prompt.targetId).name;
+  if (prompt.style === "pin")
+    return prompt.topic === "capitals"
+      ? `Place a pin at the capital of ${name}.`
+      : prompt.topic === "flags"
+        ? "Place a pin inside the country that flies this flag."
+        : `Place a pin inside ${name}.`;
   if (prompt.topic === "flags") return "Which country flies this flag?";
   if (prompt.topic === "capitals")
     return prompt.style === "map"
@@ -438,6 +522,19 @@ export function studyPrompt(prompt: StudyPrompt): string {
 export function studyStates(
   session: StudySession,
 ): Record<string, VisualState> {
+  if (session.placeReview || session.prompt.style === "pin")
+    return {
+      ...Object.fromEntries(COUNTRIES.map((c) => [c.id, "surface" as const])),
+      ...(session.phase === "feedback" &&
+      (session.prompt.place?.regionId || session.prompt.style === "pin")
+        ? {
+            [session.prompt.place?.regionId ?? session.prompt.targetId]:
+              session.history.at(-1)?.correct
+                ? ("correct" as const)
+                : ("answer" as const),
+          }
+        : {}),
+    };
   const states: Record<string, VisualState> = Object.fromEntries(
     COUNTRIES.map((c) => [c.id, "disabled"]),
   );
@@ -475,7 +572,7 @@ export function validSettings(value: unknown): value is StudySettings {
     value.countryIds.every((id) => memberIds.has(id)) &&
     isRecord(value.styles) &&
     TOPICS.every((t) =>
-      ["map", "typing", "choices", "mixed"].includes(
+      ["map", "pin", "typing", "choices", "mixed"].includes(
         String((value.styles as Record<string, unknown>)[t]),
       ),
     ) &&
@@ -507,7 +604,8 @@ function validPrompt(value: unknown, pool: string[]): value is StudyPrompt {
     typeof value.targetId === "string" &&
     pool.includes(value.targetId) &&
     TOPICS.includes(value.topic as StudyTopic) &&
-    ["map", "typing", "choices"].includes(String(value.style)) &&
+    value.place === undefined &&
+    ["map", "pin", "typing", "choices"].includes(String(value.style)) &&
     strings(value.choices) &&
     value.choices.length <= 6 &&
     new Set(value.choices).size === value.choices.length &&
@@ -546,6 +644,8 @@ export function validStudy(value: unknown): value is StudySave {
     return false;
   if (value.session === undefined) return true;
   const s = value.session;
+  if (isRecord(s) && s.placeReview !== undefined)
+    return validSettings(s.settings) && validPlaceReview(s);
   return (
     isRecord(s) &&
     (s.id === undefined || typeof s.id === "string") &&
@@ -590,6 +690,7 @@ export function validStudy(value: unknown): value is StudySave {
     ["playing", "feedback", "summary"].includes(String(s.phase)) &&
     typeof s.text === "string" &&
     typeof s.choiceId === "string" &&
+    (s.pin === undefined || validStudyPin(s.pin)) &&
     Array.isArray(s.history) &&
     s.history.every(
       (a) =>
@@ -597,6 +698,8 @@ export function validStudy(value: unknown): value is StudySave {
         validPrompt(a.prompt, s.pool as string[]) &&
         typeof a.correct === "boolean" &&
         typeof a.response === "string" &&
+        (a.pin === undefined || validStudyPin(a.pin)) &&
+        (a.prompt.style !== "pin" || a.pin !== undefined) &&
         (a.selectedId === undefined ||
           (a.prompt.style === "choices"
             ? a.prompt.choices

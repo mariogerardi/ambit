@@ -22,6 +22,7 @@ import {
 import {
   missingBorderPairs,
   missingBorderJourney,
+  missingBorderFocus,
   inMissingBorderSearch,
 } from "./missingBorders";
 import {
@@ -298,13 +299,14 @@ export function useBorderMinigame(
           p.id.startsWith("border-run:crossing:") ? { ...p, fadeInMs: 180 } : p,
         );
       }
-      if (revealStep >= routeLength * 2) {
+      if (revealStep >= routeLength * 2 - 1) {
         const [lng, lat] = borderRunCrossings(route).at(-1)!;
         view.clueLocators.push({
           id: `border-run:${route.id}:finish`,
           label: "",
           pulseOnly: true,
           repeat: true,
+          appearance: "completion",
           region: route.components.at(-1)!.region,
           anchor: { lng, lat },
         });
@@ -468,7 +470,13 @@ export function useBorderMinigame(
       (!!journey &&
         inMissingBorderSearch(
           point,
-          journey.rounds[0].focus,
+          runSettings.framing === "wide"
+            ? journey.rounds[0].focus
+            : missingBorderFocus(
+                pair as MissingBorderPair,
+                regions,
+                (current!.seed + Math.imul(current!.cycle, 0x9e3779b9)) >>> 0,
+              ),
           runSettings.framing === "wide",
         )),
     restart: () => {
@@ -554,6 +562,34 @@ export function useBorderMinigame(
                       : pinpointPoints(distanceKm)
                     : undefined;
                 const result = points === undefined ? next.result! : points > 0;
+                const pinpointTarget =
+                  kind === "pinpoint" ? (pair as PinpointPair) : undefined;
+                const visit = {
+                  ids,
+                  correct: result,
+                  point: { lat: target.lat, lng: target.lng },
+                  pin: next.pin,
+                  points,
+                  distanceKm,
+                  ...(pinpointTarget
+                    ? {
+                        target: {
+                          id: pinpointTarget.id,
+                          name: pinpointTarget.name,
+                          lat: target.lat,
+                          lng: target.lng,
+                          regionId: pinpointTarget.region?.id,
+                          sourceUrl: pinpointTarget.sourceUrl,
+                        },
+                      }
+                    : {}),
+                };
+                const needsReview = (
+                  v: import("./sharedNeighbors").MinigameVisit,
+                ) =>
+                  kind === "pinpoint"
+                    ? (v.points ?? (v.correct ? 1000 : 0)) < 500
+                    : !v.correct;
                 return {
                   ...next,
                   result,
@@ -562,17 +598,13 @@ export function useBorderMinigame(
                     points === undefined
                       ? next.points
                       : (previous.points ?? 0) + points,
-                  history: [
-                    ...(previous.history ?? []),
-                    {
-                      ids,
-                      correct: result,
-                      point: { lat: target.lat, lng: target.lng },
-                      pin: next.pin,
-                      points,
-                      distanceKm,
-                    },
-                  ].slice(-64),
+                  history: [...(previous.history ?? []), visit].slice(-64),
+                  review: [
+                    ...(previous.review ??
+                      previous.history?.filter(needsReview) ??
+                      []),
+                    ...(needsReview(visit) ? [visit] : []),
+                  ],
                 };
               })()
             : previous,

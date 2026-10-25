@@ -169,7 +169,7 @@ export function MinigamesPanel({
         A world to <em>play with.</em>
       </h1>
       <p className="muted study-introduction">
-        Find common ground, follow borders, and test your sense of place.
+        Find unlikely connections, uncover hidden borders, and follow your instincts across the globe.
       </p>
       <div className="study-paths">
         {games.map((item) => (

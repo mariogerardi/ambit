@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <defs>
+    <radialGradient id="ocean" cx="32%" cy="25%" r="78%">
+      <stop stop-color="#204c68"/>
+      <stop offset=".48" stop-color="#204c68"/>
+      <stop offset="1" stop-color="#204c68"/>
+    </radialGradient>
+    <clipPath id="earth"><circle cx="12" cy="12" r="11.5"/></clipPath>
+  </defs>
+  <circle cx="12" cy="12" r="11.5" fill="url(#ocean)"/>
+  <g clip-path="url(#earth)" fill="#72956b">
+    <path d="M3.5 1L11.5 3L13.5 7L10.5 11L6.5 10L4.5 14L.5 12ZM10.5 13L15.5 12L18.5 15L15.5 20L14.5 25L10.5 21L9.5 17ZM20.5 2L26.5 4L25.5 12L20.5 14L18.5 10L19.5 6Z"/>
+  </g>
+  <circle cx="8.5" cy="7" r="3" fill="#f0eddf" opacity=".16"/>
+</svg>

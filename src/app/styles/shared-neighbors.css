@@ -7,13 +7,12 @@
 .shared-neighbors-heading .minigame-title {
   margin: 0;
   color: var(--ui-accent);
-  font: 500 28px/1.2 var(--font-editorial);
+  font: 500 24px/1.2 var(--font-editorial);
 }
 .shared-neighbors-heading {
   margin-bottom: 12px;
 }
-.experience .minigame-games-button,
-.experience .minigame-finish-button {
+.experience .minigame-games-button {
   min-height: 44px;
   padding: 10px 14px;
   border: 1px solid rgb(var(--ui-accent-rgb) / 0.35);
@@ -23,8 +22,7 @@
   font: 500 13px/1.3 var(--font-ui);
   cursor: pointer;
 }
-.experience .minigame-games-button:hover,
-.experience .minigame-finish-button:hover {
+.experience .minigame-games-button:hover {
   background: rgb(var(--ui-accent-rgb) / 0.12);
   border-color: var(--ui-accent);
 }
@@ -33,12 +31,9 @@
 }
 .minigame-action-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-columns: 1fr;
   gap: 12px;
   margin-top: 22px;
-}
-.minigame-action-row.is-ended {
-  grid-template-columns: 1fr;
 }
 .experience .minigame-action-row .primary-button {
   width: 100%;
@@ -46,6 +41,9 @@
   margin: 0;
   padding: 10px 14px;
   font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .shared-neighbors-score {
   display: flex;
@@ -56,9 +54,6 @@
   color: var(--ui-muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-}
-.shared-neighbors-strikes {
-  color: var(--ui-accent);
 }
 .shared-neighbors-results {
   display: grid;
@@ -198,25 +193,28 @@
   gap: 8px;
   margin-top: 20px;
 }
-.minigame-complete-label {
-  margin: 20px 0 12px;
-  color: var(--ui-accent);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-}
 .minigame-overview {
   padding-top: 0;
 }
-.minigame-overview-note {
+.minigame-result-detail {
   padding: 0 0 8px;
 }
-.minigame-overview-note p {
+.minigame-result-detail p {
   font-size: 14px;
   line-height: 1.6;
   margin: 0 0 8px;
 }
-.minigame-overview-note .muted {
+.minigame-result-detail .muted {
   font-size: 12px;
+}
+.minigame-result-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0 18px;
+}
+.experience .minigame-result-actions > button {
+  min-width: 0;
 }
 .shared-neighbors-feedback .minigame-ended-notice {
   font-size: 12px;
@@ -291,21 +289,26 @@
 .minigame-menu summary {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgb(var(--ui-accent-rgb) / 0.25);
-  border-radius: 10px;
-  background: rgb(var(--ui-accent-rgb) / 0.05);
-  color: var(--ui-accent);
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-editorial);
   list-style: none;
   cursor: pointer;
+}
+.minigame-menu summary svg {
+  width: 20px;
+  height: 20px;
 }
 .minigame-menu summary::-webkit-details-marker {
   display: none;
 }
 .minigame-menu summary:hover,
 .minigame-menu[open] summary {
-  border-color: var(--ui-accent);
+  background: rgb(var(--ui-editorial-rgb) / 0.1);
 }
 .minigame-menu-options {
   position: absolute;
@@ -348,26 +351,33 @@
   margin-top: 4px;
 }
 .minigames-landing .study-paths > .minigame-card {
-  padding: 14px 16px 38px;
+  padding: 14px 16px 10px;
   overflow: hidden;
-  background:
-    linear-gradient(145deg, rgb(var(--ui-accent-rgb) / 0.09), transparent 75%),
-    rgb(var(--ui-surface-rgb));
+}
+.minigames-landing .study-paths {
+  grid-auto-rows: 1fr;
 }
 .minigame-card .study-path-start {
   z-index: 1;
 }
-.minigame-card .minigame-motif {
+.minigame-motif-frame {
+  position: relative;
+  display: block;
   width: 100%;
   height: 68px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  pointer-events: none;
+}
+.minigame-card .minigame-motif {
+  width: 100%;
+  height: 100%;
   overflow: visible;
   pointer-events: none;
 }
 .minigame-motif .motif-land {
   fill: rgb(var(--ui-accent-rgb) / 0.06);
-  stroke: rgb(var(--ui-accent-rgb) / 0.28);
-  stroke-width: 1.2;
+  stroke: var(--ui-editorial);
+  stroke-width: 1.5;
 }
 .minigame-motif .motif-country,
 .minigame-motif .motif-pin {
@@ -400,12 +410,17 @@
   text-anchor: middle;
   font: 600 12px var(--font-ui);
 }
-.minigame-motif .motif-question {
-  fill: var(--ui-accent);
-  text-anchor: middle;
-  font: 500 30px var(--font-ui);
-  transform-box: fill-box;
-  transform-origin: center;
+.minigame-motif-frame .motif-question {
+  position: absolute;
+  left: calc(50% - 16px);
+  top: 14px;
+  width: 32px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--ui-accent);
+  font: 500 23px/1 var(--font-ui);
+  transform-origin: 50% 50%;
 }
 .minigame-motif .motif-flag {
   fill: var(--ui-editorial);
@@ -414,18 +429,14 @@
   stroke-linejoin: round;
 }
 .minigame-motif .motif-checker {
-  fill: #15313b;
+  fill: var(--play-outline);
   stroke: none;
 }
 .minigame-motif .motif-checker.is-light {
-  fill: #fff0cd;
-}
-.motif-missing-borders .motif-land {
-  stroke: var(--ui-editorial);
-  stroke-width: 1.5;
+  fill: var(--ui-text);
 }
 .minigame-motif .motif-boundary {
-  stroke: #edc467;
+  stroke: var(--ui-editorial);
   stroke-width: 2.5;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
@@ -439,14 +450,21 @@
 .motif-border-run .motif-step {
   opacity: 0;
 }
-.minigame-card:is(:hover, :focus-within) .motif-boundary,
-.minigame-card:is(:hover, :focus-within) .motif-route {
+.motif-completion {
+  --completion-pulse-radius: 11px;
+  opacity: 0;
+}
+.minigame-card:is(:hover, :focus-within, :active) .motif-completion {
+  opacity: 1;
+}
+.minigame-card:is(:hover, :focus-within, :active) .motif-boundary,
+.minigame-card:is(:hover, :focus-within, :active) .motif-route {
   stroke-dashoffset: 0;
 }
-.minigame-card:is(:hover, :focus-within) .motif-boundary {
-  filter: drop-shadow(0 0 3px #edc467aa);
+.minigame-card:is(:hover, :focus-within, :active) .motif-boundary {
+  filter: drop-shadow(0 0 3px rgb(var(--ui-editorial-rgb) / 0.65));
 }
-.minigame-card:is(:hover, :focus-within) .motif-step {
+.minigame-card:is(:hover, :focus-within, :active) .motif-step {
   opacity: 1;
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -457,19 +475,22 @@
   .motif-step {
     transition: opacity 180ms ease;
   }
-  .minigame-card:is(:hover, :focus-within) .motif-step-1 {
+  .minigame-card:is(:hover, :focus-within, :active) .motif-step-1 {
     transition-delay: 130ms;
   }
-  .minigame-card:is(:hover, :focus-within) .motif-step-2 {
+  .minigame-card:is(:hover, :focus-within, :active) .motif-step-2 {
     transition-delay: 290ms;
   }
-  .minigame-card:is(:hover, :focus-within) .motif-question {
-    animation: minigame-question-turn 600ms ease;
+  .minigame-card:is(:hover, :focus-within, :active) .motif-completion {
+    transition: opacity 0s linear 290ms;
+  }
+  .minigame-card:is(:hover, :focus-within, :active) .motif-question {
+    animation: minigame-question-turn 2.4s linear infinite;
   }
 }
 @keyframes minigame-question-turn {
   to {
-    transform: rotateY(360deg);
+    transform: rotate(360deg);
   }
 }
 @media (min-width: 901px) {
@@ -488,7 +509,7 @@
 .motif-pinpoint :is(.motif-ring, .motif-target, .motif-connection) {
   opacity: 0;
 }
-.minigame-card:is(:hover, :focus-within)
+.minigame-card:is(:hover, :focus-within, :active)
   .motif-pinpoint
   :is(.motif-ring, .motif-target, .motif-connection) {
   opacity: 1;
@@ -497,13 +518,19 @@
   .motif-pinpoint :is(.motif-ring, .motif-target, .motif-connection) {
     transition: opacity 150ms ease;
   }
-  .minigame-card:is(:hover, :focus-within) .motif-pinpoint .motif-ring-inner {
+  .minigame-card:is(:hover, :focus-within, :active)
+    .motif-pinpoint
+    .motif-ring-inner {
     transition-delay: 140ms;
   }
-  .minigame-card:is(:hover, :focus-within) .motif-pinpoint .motif-ring-outer {
+  .minigame-card:is(:hover, :focus-within, :active)
+    .motif-pinpoint
+    .motif-ring-outer {
     transition-delay: 280ms;
   }
-  .minigame-card:is(:hover, :focus-within) .motif-pinpoint .motif-connection {
+  .minigame-card:is(:hover, :focus-within, :active)
+    .motif-pinpoint
+    .motif-connection {
     transition-delay: 460ms;
     animation: minigame-distance-dashes 800ms linear 460ms infinite;
   }

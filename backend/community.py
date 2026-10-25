@@ -153,7 +153,7 @@ def settings(value, challenge=False):
     countries = value.get("countryIds")
     if not isinstance(topics, list) or not 1 <= len(topics) <= 3 or len(set(topics)) != len(topics) or any(t not in ("countries", "capitals", "flags") for t in topics):
         raise Problem(400, "Choose valid Study topics.")
-    if not isinstance(styles, dict) or set(styles) != {"countries", "capitals", "flags"} or any(v not in ("map", "typing", "choices", "mixed") for v in styles.values()):
+    if not isinstance(styles, dict) or set(styles) != {"countries", "capitals", "flags"} or any(v not in ("map", "pin", "typing", "choices", "mixed") for v in styles.values()):
         raise Problem(400, "Choose valid answer methods.")
     if not isinstance(countries, list) or len(countries) > 193 or any(not isinstance(c, str) or c not in COUNTRIES for c in countries):
         raise Problem(400, "Choose valid countries.")

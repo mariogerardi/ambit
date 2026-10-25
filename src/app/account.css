@@ -469,7 +469,6 @@
 /* Friends balance daily activity with small, comparable score tables. */
 .friends-panel {
   display: grid;
-  gap: 24px;
 }
 .friends-panel h2 {
   margin: 0 0 8px;
@@ -477,7 +476,6 @@
 }
 .friends-panel h3 {
   margin: 0 0 12px;
-  font-size: 23px;
 }
 
 .friend-add,
@@ -502,7 +500,6 @@
 .friend-find-form {
   display: flex;
   align-items: end;
-  gap: 12px;
   margin-top: 12px;
 }
 .friend-find-form .field {
@@ -546,13 +543,6 @@
   height: 48px;
   font-size: 28px;
 }
-.friend-share {
-  margin-top: 12px;
-}
-.friend-share p {
-  font-size: 12px;
-  margin: 4px 0 0;
-}
 .friend-requests .account-list {
   margin-bottom: 0;
 }
@@ -570,13 +560,10 @@
 }
 .experience .friends-panel button.friend-card {
   display: grid;
-  gap: 16px;
   width: 100%;
-  padding: 18px;
   text-align: left;
   color: var(--ui-text);
   border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-  border-radius: 14px;
   background: rgb(var(--ui-surface-rgb));
   transition:
     border-color 150ms ease,
@@ -595,11 +582,6 @@
 }
 .friend-daily-status.status-completed {
   color: var(--ui-accent);
-}
-.friend-card-streak {
-  font-size: 12px;
-  color: var(--ui-muted);
-  line-height: 1.5;
 }
 .friend-profile > header {
   flex-wrap: wrap;
@@ -668,17 +650,8 @@
   font-size: 12px;
 }
 @media (max-width: 700px) {
-  .friend-cards {
-    grid-template-columns: 1fr;
-  }
   .friend-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .friend-find-form {
-    flex-wrap: wrap;
-  }
-  .friend-find-form .field {
-    flex-basis: 100%;
   }
   .friend-add,
   .friend-profile {
@@ -765,9 +738,6 @@
   width: 100%;
   justify-content: start;
 }
-.friends-search-column .friend-share .tertiary-action {
-  font-size: 12px;
-}
 .friends-panel h3 {
   font-size: 20px;
 }
@@ -790,9 +760,6 @@
 .friend-card .friend-identity > span,
 .friend-card .friend-daily-status {
   font-size: 12px;
-}
-.friend-card .friend-card-streak {
-  font-size: 11px;
 }
 @media (max-width: 700px) {
   .friends-workspace {
@@ -818,7 +785,6 @@
 
 .friend-journey-comparison {
   padding-bottom: 24px;
-  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
 }
 .friend-journey-comparison header {
   display: flex;

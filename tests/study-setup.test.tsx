@@ -75,6 +75,15 @@ const summary = () =>
   host.querySelector(".study-session-description")!.textContent!;
 
 describe("Study Session configuration", () => {
+  it("offers pin placement as a normal Study answer method", async () => {
+    await mount();
+    await change("Answer method", "pin");
+    expect(summary()).toContain("Place a pin");
+    await click("Start studying");
+    const settings = start.mock.calls[0][0];
+    expect(settings.styles.countries).toBe("pin");
+    expect(startStudy(settings, 42).prompt.style).toBe("pin");
+  });
   it("uses an explicit per-topic checkbox, hides the shared method, and preserves the choice when methods match", async () => {
     await mount();
     await click("Capitals");

@@ -1,5 +1,6 @@
 import { DEFAULT_THEME, isTheme, THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
+import { artworkUrl } from "../theme/artwork";
 import { helpCountCopy, helpSummary } from "../game/guidance";
 import type { Journey } from "../game/questionContracts";
 import type { GameState } from "../game/state";
@@ -226,7 +227,7 @@ export async function resultImage(result: SharedJourneyResult): Promise<Blob> {
     document.fonts.load('400 64px "Newsreader"', result.title),
   ]);
   const globe = new Image();
-  globe.src = "/brand/account-globe.svg";
+  globe.src = artworkUrl("/brand/account-globe.svg", palette);
   await globe.decode();
   const canvas = document.createElement("canvas");
   canvas.width = 1200;

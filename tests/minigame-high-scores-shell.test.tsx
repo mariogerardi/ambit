@@ -91,7 +91,7 @@ for (const kind of kinds) {
       else {
         expect(scores.load()).toEqual({ "best:old-custom-rules": 9999 });
         expect(
-          host.querySelector(".minigame-overview-note")!.textContent,
+          host.querySelector(".minigame-result-detail")!.textContent,
         ).toContain("doesn’t count toward your personal best");
       }
     },

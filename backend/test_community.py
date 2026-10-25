@@ -407,6 +407,8 @@ class CommunityTests(unittest.TestCase):
             with self.assertRaises(community.Problem):
                 community.settings(settings, True)
         self.assertEqual(community.settings({**SETTINGS, "revisitMissed": True}, True)["revisitMissed"], False)
+        pins = {"countries": "pin", "capitals": "pin", "flags": "pin"}
+        self.assertEqual(community.settings({**SETTINGS, "styles": pins}, True)["styles"], pins)
 
     def test_all_social_routes_are_authorized_and_storage_is_retained(self):
         resources = template()["Resources"]

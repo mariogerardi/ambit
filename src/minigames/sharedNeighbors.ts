@@ -24,6 +24,7 @@ export const MINIGAME_TITLES: Record<BorderMinigame, string> = {
   pinpoint: "Pinpoint",
 };
 export interface MinigameVisit {
+  target?: import("../study/placeReview").StudyPlaceTarget;
   ids: string[];
   correct: boolean;
   point: { lat: number; lng: number };
@@ -38,6 +39,8 @@ export interface NeighborPair {
   answer: string;
 }
 export interface NeighborRun {
+  /** Misses survive the capped visual recap of long runs. */
+  review?: MinigameVisit[];
   id: string;
   kind?: BorderMinigame;
   startedAt: number;

@@ -83,6 +83,15 @@ flag. Older runs without visit history remain playable; historical outcomes are
 not invented. A terminal answer and the subsequent overview are separate durable
 states; a stale tab cannot restore the reveal after the overview was entered.
 Pinpoint ends after ten submissions, independently of its binary accuracy result.
+New runs retain review misses separately from the capped visit recap. Pinpoint
+visits additionally snapshot their named target, coordinates and optional region/source.
+Older runs fall back to available visit geography; missing historical place metadata
+is not invented. Starting review creates a normal synced Study session with additive
+`placeReview` target metadata and pin responses, including history/replay support.
+Normal Study settings additionally accept the `pin` answer method. Active sessions
+retain pending pin coordinates; submitted answers retain their pins and validate
+coordinate bounds through the same save/history layer. No new storage namespace
+or save-version migration is required.
 Legacy Missing Borders runs retain their original pool when the new small-country
 filter preference defaults to enabled; applying that preference starts a new run.
 

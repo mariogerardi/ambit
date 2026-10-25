@@ -1,6 +1,7 @@
 import avatars from "../../shared/profile-avatars.json";
 import flags from "../game/data/flags.v1.json";
 import countries from "../game/data/un-members.v1.json";
+import { ThemedImage } from "../theme/ThemedImage";
 
 export const AVATARS: Record<
   string,
@@ -39,7 +40,7 @@ export function ProfileAvatar({
       {image ? (
         <img src={image} alt="" />
       ) : (
-        (preset.symbol ?? <img src="/ambit-orb.svg" alt="" />)
+        (preset.symbol ?? <ThemedImage src="/ambit-orb.svg" alt="" />)
       )}
     </span>
   );

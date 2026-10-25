@@ -27,12 +27,19 @@ import { StudySetup } from "./StudySetup";
 import { StudySessionOptions } from "./StudySessionOptions";
 import { AnswerInput } from "../game/AnswerInput";
 import { StudyHistory } from "./StudyHistory";
+import type { StudyPlaceTarget } from "./placeReview";
+import {
+  CAPITAL_PIN_RADIUS_KM,
+  isStudyPinPrompt,
+  studyPinFeedback,
+} from "./pins";
 export function StudyPanel({
   save,
   setup,
   active,
   onSettings,
   onStart,
+  onStartPlaces,
   onAction,
   onSetup,
   onResume,
@@ -59,6 +66,7 @@ export function StudyPanel({
   webgl: boolean;
   onSettings(settings: StudySettings): void;
   onStart(settings: StudySettings, targets?: StudyReviewTarget[]): void;
+  onStartPlaces?(targets: StudyPlaceTarget[]): void;
   onLocate?(answer: StudyAnswer): void;
   onAction(action: StudyAction): void;
   onSetup(): void;
@@ -142,6 +150,10 @@ export function StudyPanel({
   if (showHistory)
     return (
       <StudyHistory
+        onStartPlaces={(targets) => {
+          setShowHistory(false);
+          onStartPlaces?.(targets);
+        }}
         records={save.history ?? []}
         onBack={() => setShowHistory(false)}
         onView={(record) => {
@@ -157,8 +169,14 @@ export function StudyPanel({
   if (!webgl && session?.phase !== "summary")
     return (
       <section className="info-view" role="status">
-        <p>This activity requires the 3D globe. Try another browser or device.</p>
-        {onHome && <button className="quiet-button" onClick={onHome}>Home</button>}
+        <p>
+          This activity requires the 3D globe. Try another browser or device.
+        </p>
+        {onHome && (
+          <button className="quiet-button" onClick={onHome}>
+            Home
+          </button>
+        )}
       </section>
     );
   if (setup || !session) {
@@ -179,6 +197,7 @@ export function StudyPanel({
   if (session.phase === "summary")
     return (
       <StudyResults
+        onStartPlaces={onStartPlaces}
         session={session}
         onSetup={onSetup}
         onStart={onStart}
@@ -193,7 +212,7 @@ export function StudyPanel({
       {editing && active && (
         <StudySessionOptions
           settings={session.settings}
-          locked={!!session.challengeId}
+          locked={!!session.challengeId || !!session.placeReview}
           onPreferencesChange={onCustomizeChange}
           onPause={
             onHome
@@ -248,25 +267,41 @@ export function StudyPanel({
             key={`${prompt.ordinal}/${prompt.targetId}`}
             onReport={onReport ? () => onReport(prompt) : undefined}
             sources={
-              <a
-                className="fact-source"
-                href={
-                  prompt.topic === "capitals"
-                    ? capitalSource.url
+              prompt.place ? (
+                <a
+                  className="fact-source"
+                  href={
+                    prompt.place.sourceUrl ??
+                    (prompt.place.regionId
+                      ? "https://www.naturalearthdata.com/"
+                      : "https://www.openstreetmap.org/")
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Map source ↗
+                </a>
+              ) : (
+                <a
+                  className="fact-source"
+                  href={
+                    prompt.topic === "capitals"
+                      ? capitalSource.url
+                      : prompt.topic === "flags"
+                        ? "https://github.com/lipis/flag-icons/tree/c09927e63705529bbf59ca6684cd9b23225dddad"
+                        : "https://www.un.org/en/about-us/member-states"
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {prompt.topic === "capitals"
+                    ? capitalSource.name
                     : prompt.topic === "flags"
-                      ? "https://github.com/lipis/flag-icons/tree/c09927e63705529bbf59ca6684cd9b23225dddad"
-                      : "https://www.un.org/en/about-us/member-states"
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                {prompt.topic === "capitals"
-                  ? capitalSource.name
-                  : prompt.topic === "flags"
-                    ? "flag-icons · pinned flag artwork"
-                    : "United Nations · member states"}{" "}
-                ↗
-              </a>
+                      ? "flag-icons · pinned flag artwork"
+                      : "United Nations · member states"}{" "}
+                  ↗
+                </a>
+              )
             }
           />
           <button
@@ -294,16 +329,34 @@ export function StudyPanel({
           </figure>
         )}
         {session.phase === "playing" ? (
-          prompt.style === "map" ? (
+          prompt.style === "map" || isStudyPinPrompt(prompt) ? (
             <div className="study-map-answer">
               <p className="study-map-instruction question-support">
                 {webgl
-                  ? "Select your answer on the globe."
-                  : canTypeStudyAnswer(prompt)
-                    ? "The globe isn’t available. Answer by country name below."
-                    : "The globe isn’t available. Open session settings to choose another answer method."}
+                  ? isStudyPinPrompt(prompt)
+                    ? session.pin
+                      ? "Pin placed. Move it or submit your answer."
+                      : prompt.style === "pin" && prompt.topic === "capitals"
+                        ? `Place a pin within ${CAPITAL_PIN_RADIUS_KM} km of the capital, then submit.`
+                        : prompt.place && !prompt.place.regionId
+                          ? "Place a pin within about 1,042 km, then submit."
+                          : "Tap land or water to place your pin, then submit."
+                    : "Select your answer on the globe."
+                  : isStudyPinPrompt(prompt)
+                    ? "The globe isn’t available. Try another browser or device."
+                    : canTypeStudyAnswer(prompt)
+                      ? "The globe isn’t available. Answer by country name below."
+                      : "The globe isn’t available. Open session settings to choose another answer method."}
               </p>
-              <QuestionActions showSubmit={false} />
+              {isStudyPinPrompt(prompt) ? (
+                <QuestionActions
+                  showSubmit
+                  disabled={!session.pin}
+                  onSubmit={() => onAction({ type: "submit" })}
+                />
+              ) : (
+                <QuestionActions showSubmit={false} />
+              )}
               {canTypeStudyAnswer(prompt) && (
                 <details
                   className="typed-country-guess"
@@ -402,16 +455,26 @@ export function StudyPanel({
           >
             <div className="feedback-label">
               {correct
-                ? `✓ ${prompt.style === "typing" ? "Nicely remembered." : "Well spotted."}`
+                ? `✓ ${isStudyPinPrompt(prompt) ? "Well placed." : prompt.style === "typing" ? "Nicely remembered." : "Well spotted."}`
                 : "Not quite."}
             </div>
-            <p className="study-response">
-              <span>Your answer: </span>
-              <strong>{session.history.at(-1)?.response}</strong>
-            </p>
+            {isStudyPinPrompt(prompt) ? (
+              <p className="study-pin-feedback">
+                {studyPinFeedback(session.history.at(-1)!, answerLabel(prompt))}
+              </p>
+            ) : (
+              <p className="study-response">
+                <span>Your answer: </span>
+                <strong>{session.history.at(-1)?.response}</strong>
+              </p>
+            )}
             {!correct && (
               <p className="study-response study-correction">
-                <span>Correct answer: </span>
+                <span>
+                  {isStudyPinPrompt(prompt)
+                    ? "Correct location: "
+                    : "Correct answer: "}
+                </span>
                 <strong>{answerLabel(prompt)}</strong>
               </p>
             )}

@@ -425,7 +425,9 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           shininess: props.theme === "play" ? 0 : 6,
           specular:
             props.theme === "play" &&
-            ["ocean", "survey"].includes(props.palette ?? DEFAULT_THEME)
+            ["ocean", "survey", "dusk", "paper"].includes(
+              props.palette ?? DEFAULT_THEME,
+            )
               ? "#000000"
               : "#111111",
         }),
@@ -1636,8 +1638,13 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           arcEndLat={(obj) => route(obj).to.lat}
           arcEndLng={(obj) => route(obj).to.lng}
           arcColor={() =>
-            props.palette === "survey"
-              ? [playColors("survey").hinted, playColors("survey").corridor]
+            props.palette === "survey" ||
+            props.palette === "dusk" ||
+            props.palette === "paper"
+              ? [
+                  playColors(props.palette).hinted,
+                  playColors(props.palette).corridor,
+                ]
               : ["#d2efbe", "#eacb93"]
           }
           arcAltitudeAutoScale={0.4}

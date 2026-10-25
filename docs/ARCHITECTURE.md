@@ -171,6 +171,14 @@ target country, worldwide cities, or worldwide capitals. City options use their
 own place IDs and the bundled major-city catalog; countries without another city
 are excluded from a session using country-city capital multiple choice.
 
+Study also offers an explicit **Place a pin** method for countries, flags and
+capitals. Country and flag answers grade canonical country containment; capitals
+accept pins within 50 km of the capital. Pin prompts hide answer locations until
+feedback, show a movable guess and require submission. Feedback describes the
+actual country or distance, including old minigame-review saves. The existing
+Mixed method retains its select/type/choice rotation; pin placement is opt-in.
+`study/pins.ts` shares target resolution, grading and feedback with minigame reviews.
+
 The Study cog groups report/edit/finish actions on desktop and mobile. On phones,
 correct answers stay visible longer before automatic advance. Explore selections use tighter
 camera framing. Home magnifies the mobile globe projection by 20% behind its
@@ -289,7 +297,9 @@ the gold stroke is the only restored boundary; exterior borders stay intact. `mi
 actual erased boundary (including overseas components). Continent-wide is the
 default: the camera centers consistently on that continent at a continent-specific scale, and
 other continents are not valid answers. Regional search uses a narrower subset
-and a view with the boundary 12–24° off-center. Remote composite components
+chosen by a seeded search circle. The camera then centers and fits the selectable
+land within that circle, independently of eligibility, so coastal search areas
+do not frame mostly ocean. Remote composite components
 outside the search area cannot accept picks; ignored picks do not cost strikes.
 Reloads preserve the same view. The game uses the
 same three-strike/finish/restart flow with independent saved progress. Focused
@@ -299,7 +309,9 @@ and numbered crossings sequentially. Countries and markers fade over 180 ms,
 with crossings interleaved between country steps at 110 ms intervals. Render-clock
 materials handle color blending without rebuilding geography. Flag footprints
 take priority over overlapping island rings; the finish flag uses fitted checks.
-The final crossing pulses; reduced motion
+The final crossing uses a subtle success-green ripple with a thin dark casing,
+shared with the Border Run menu preview. It starts with the final crossing marker,
+including during camera travel. Reduced motion keeps a static completion ring and
 shows the complete route immediately. Reveal progress is ephemeral and never
 changes scoring or saved progress.
 Border Run (`/minigames/border-run/play`) uses numeric questions whose minimum
@@ -311,7 +323,7 @@ breadth-first searches find minimum country crossings, and numeric grading reuse
 polygon, and finds and simplifies an interior corridor. It rounds bends only where
 the replacement stays inside land; holes and concave shores remain constraints.
 The corridor is used for camera fitting only. Reveals display numbered badges
-on actual shared-boundary crossings, with a repeating pulse on the final crossing (finite fade for reduced motion),
+on actual shared-boundary crossings, with a repeating pulse on the final crossing (a static ring for reduced motion),
 rather than a connecting line. Entry framing uses the actual endpoint components;
 reveal framing fits the full route. These are schematic land corridors derived
 from canonical boundaries, not transport-network data.
@@ -342,6 +354,15 @@ Personal bests are recorded only for each game’s default rules, using the acti
 run’s settings snapshot. Custom games retain progress but do not record or display
 a personal best. The settings footer announces eligibility beside Reset settings.
 Default-rule records survive replay and merge by maximum.
+Results pair equal-width Study and Share actions. `minigameReview.ts` deduplicates
+missed countries (neighbors, merged-border pairs, or route countries); Pinpoint
+reviews targets scoring below 500. Misses are retained independently of the
+64-visit recap, with target metadata for Pinpoint's named places. `placeReview.ts`
+creates a one-pass pin Study session: region targets grade canonical containment,
+and point targets use Pinpoint's 500-point threshold. These sessions use the
+existing Study save/history flow and hide the answer until feedback.
+`minigameSharing.ts` draws a result card with each game's themed preview illustration,
+without answer geography, using the Journey share dialog's native-share/download flow.
 Focused coverage for the new games and completion behavior lives in
 `extra-minigames`, `extra-minigames-shell`, `border-run-routing`,
 `pinpoint-scoring` and the existing minigame shell tests.
@@ -370,13 +391,22 @@ Leaving a Study builder skips the outgoing panel copy, which would otherwise
 remount the editor as the Study overview during the exit animation.
 
 Discovery uses neutral matte surfaces, a dark backdrop, richer land colors, and no
-globe halo. Survey shares its typography, layout and surface treatment, with
-graphite cartography, pale borders and copper accents. Discovery retains the
-`ocean` preference ID. Theme-specific material rules live in `src/theme/themes.css`; startup
+globe halo. Odyssey shares its typography, layout and surface treatment, with
+graphite cartography, pale borders and gold accents. Discovery retains the
+`ocean` preference ID. Shared material rules live in `src/theme/themes.css`; startup
 map colors and shared result-card colors follow the palette. See
 [Themes and visual styling](THEMES.md) for the full inventory.
 
-Discovery (the default), Survey, Dusk, and Paper share semantic roles for text, editorial emphasis,
+Expedition replaces Dusk (preserving its `dusk` preference ID) with violet cartography,
+cyan actions and pink editorial emphasis. It shares Discovery's typography and materials.
+`theme/artwork.ts` and the themed SVG variants generated by
+`scripts/prepare-theme-artwork.mjs` cover activity previews, Account/avatar globes
+and shared result artwork for all four themes. Safari replaces Paper (preserving
+its `paper` preference ID) with a deep green backdrop, blue ocean, mostly green land and
+seafoam accents and sienna actions. Odyssey keeps the saved `survey` ID. Original flag, photograph and
+data-legend colors are preserved. Custom cursors use the live gameplay palette.
+
+Discovery (the default), Odyssey, Expedition, and Safari share semantic roles for text, editorial emphasis,
 actions, land, selection, and feedback. UI consumes `--ui-*` custom properties;
 portal dialogs inherit them from the document. Globe styles use the same registry
 through [`src/globe/themes.ts`](../src/globe/themes.ts). Journey color values come

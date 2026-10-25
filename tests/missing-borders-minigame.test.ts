@@ -13,6 +13,8 @@ import {
   missingBorderFocus,
   missingBorderJourney,
   missingBordersBase,
+  missingBorderCandidateContinent,
+  inMissingBorderSearch,
 } from "../src/minigames/missingBorders";
 import {
   startNeighborRun,
@@ -47,7 +49,9 @@ it("generates a stable pool of real land borders, including overseas components"
 it("prepares and dissolves every pair, with selectable distractors and no answer-only emphasis", () => {
   for (const pair of pairs) {
     const journey = missingBorderJourney(pair, base, regions, 123);
-    expect(journey.rounds[0].feedbackOverlays?.length, pair.id).toBeGreaterThan(0);
+    expect(journey.rounds[0].feedbackOverlays?.length, pair.id).toBeGreaterThan(
+      0,
+    );
     const context = createQuestionContext(regions, [], journey, base);
     const run = startNeighborRun(pairs);
     const play = journeyWorld(
@@ -113,6 +117,48 @@ it("varies regional framing reproducibly between saved seeds", () => {
   expect(missingBorderFocus(pairs[0], regions, 456)).not.toEqual(
     missingBorderFocus(pairs[0], regions, 123),
   );
+});
+
+it("frames selectable regional land instead of the offshore search-circle center without changing eligibility", () => {
+  const pair = pairs.find((p) => p.id === "wurl:GHA|wurl:TGO")!;
+  const search = missingBorderFocus(pair, regions, 123);
+  const q = missingBorderJourney(pair, base, regions, 123, false).rounds[0];
+  const candidates = regions.filter(
+    (r) =>
+      !pair.countries.includes(r.id) &&
+      missingBorderCandidateContinent(r) === "AF" &&
+      inMissingBorderSearch(r.focus, search, false),
+  );
+  expect(q.selection).toEqual({
+    type: "ids",
+    ids: [...candidates.map((r) => r.id), pair.answer],
+  });
+  expect(search.lng).toBeLessThan(0);
+  expect(q.focus.lng).toBeGreaterThan(0);
+  expect(q.focus.lat).toBeGreaterThan(0);
+  expect(
+    missingBorderJourney(pair, base, regions, 123, false).rounds[0].focus,
+  ).toEqual(q.focus);
+  for (const region of [
+    ...candidates,
+    ...regions.filter((r) => pair.countries.includes(r.id)),
+  ]) {
+    const geometry = region.displayGeometry ?? region.geometry;
+    const polygons =
+      geometry.type === "Polygon"
+        ? [geometry.coordinates]
+        : geometry.coordinates;
+    for (const [lng, lat] of polygons.flatMap((polygon) => polygon[0])) {
+      if (!inMissingBorderSearch({ lng, lat }, search, false)) continue;
+      const angle = geoDistance([q.focus.lng, q.focus.lat], [lng, lat]);
+      expect(Math.cos(angle)).toBeGreaterThan(1 / (1 + q.focus.altitude!));
+      const projectedAngle = Math.atan2(
+        Math.sin(angle),
+        1 + q.focus.altitude! - Math.cos(angle),
+      );
+      expect((projectedAngle * 180) / Math.PI).toBeLessThan(22);
+    }
+  }
 });
 
 it("rejects hidden member IDs, grades a pick immediately, locks reveals, and ends at three strikes", () => {

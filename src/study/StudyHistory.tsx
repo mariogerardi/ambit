@@ -1,4 +1,5 @@
 import { StudyBack } from "./StudyBack";
+import type { StudyPlaceTarget } from "./placeReview";
 import { studyComplete, studyReplayTargets } from "./engine";
 import type { StudyRecord, StudySettings, StudyReviewTarget } from "./engine";
 import { ActionIcon } from "../app/ActionIcon";
@@ -8,11 +9,13 @@ export function StudyHistory({
   onBack,
   onView,
   onStart,
+  onStartPlaces,
 }: {
   records: StudyRecord[];
   onBack(): void;
   onView(record: StudyRecord): void;
   onStart(settings: StudySettings, targets?: StudyReviewTarget[]): void;
+  onStartPlaces?(targets: StudyPlaceTarget[]): void;
 }) {
   const dateFormat = new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -27,7 +30,11 @@ export function StudyHistory({
       <h1 className="editorial-heading">
         Past <em>sessions.</em>
       </h1>
-      {!records.length && <p className="muted">Your Study sessions will appear here, including sessions ended early.</p>}
+      {!records.length && (
+        <p className="muted">
+          Your Study sessions will appear here, including sessions ended early.
+        </p>
+      )}
       <ul className="study-history-list">
         {[...records]
           .sort((a, b) => b.finishedAt - a.finishedAt)
@@ -42,11 +49,14 @@ export function StudyHistory({
                 ? "Ended"
                 : "Ended early";
             const date = dateFormat.format(record.finishedAt);
+            const description = record.session.placeReview
+              ? `Map review · ${record.session.placeReview.length} places`
+              : studyDescription(record.session.settings);
             return (
               <li key={record.id}>
                 <button
                   className="study-history-view"
-                  aria-label={`View results: ${studyDescription(record.session.settings)}, ${date}`}
+                  aria-label={`View results: ${description}, ${date}`}
                   onClick={() => onView(record)}
                 >
                   <span className="study-history-score">
@@ -56,7 +66,7 @@ export function StudyHistory({
                     <small>{status}</small>
                   </span>
                   <span className="study-history-description">
-                    {studyDescription(record.session.settings)}
+                    {description}
                   </span>
                   <time dateTime={new Date(record.finishedAt).toISOString()}>
                     {date}
@@ -73,10 +83,12 @@ export function StudyHistory({
                     className="quiet-button tertiary-action"
                     aria-label={`Replay session from ${date}`}
                     onClick={() =>
-                      onStart(
-                        record.session.settings,
-                        studyReplayTargets(record.session),
-                      )
+                      record.session.placeReview
+                        ? onStartPlaces?.(record.session.placeReview)
+                        : onStart(
+                            record.session.settings,
+                            studyReplayTargets(record.session),
+                          )
                     }
                   >
                     <ActionIcon name="repeat" /> Replay

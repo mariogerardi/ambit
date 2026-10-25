@@ -1,4 +1,18 @@
-import { useContext, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import type { RegionFeature } from "../geography/types";
+import type { StudyPlaceTarget } from "../study/placeReview";
+import { minigameReviewTargets } from "./minigameReview";
+import { minigameShareCard } from "./minigameSharing";
+import { JourneyShareDialog } from "../app/JourneyShareDialog";
+import { ActionIcon } from "../app/ActionIcon";
+import { SettingsIcon } from "../app/SettingsIcon";
 import { PanelActive } from "../app/ModePanels";
 import type { useBorderMinigame } from "./useBorderMinigame";
 import { AnswerCounter } from "../game/AnswerCounter";
@@ -10,10 +24,14 @@ export function BorderMinigamePanel({
   shared,
   webgl,
   onBack,
+  onStudy,
+  regions,
 }: {
   shared: ReturnType<typeof useBorderMinigame>;
   webgl: boolean;
   onBack(): void;
+  onStudy(targets: StudyPlaceTarget[]): void;
+  regions: RegionFeature[];
 }) {
   const missing = shared.kind === "missing-borders",
     pinpoint = shared.kind === "pinpoint",
@@ -26,6 +44,33 @@ export function BorderMinigamePanel({
     ended = shared.ended,
     overview = shared.overview,
     feedback = run?.result !== undefined;
+  const [sharing, setSharing] = useState(false);
+  const closeSharing = useCallback(() => setSharing(false), []);
+  const reviewTargets = useMemo(
+    () => (run ? minigameReviewTargets(shared.kind, run, regions) : []),
+    [shared.kind, run, regions],
+  );
+  const shareCard = useMemo(
+    () =>
+      run ? minigameShareCard(shared.kind, run, shared.ranked) : undefined,
+    [shared.kind, run, shared.ranked],
+  );
+  const singular = reviewTargets.length === 1;
+  const reviewNoun = pinpoint
+    ? singular
+      ? "place"
+      : "places"
+    : route
+      ? singular
+        ? "country"
+        : "countries"
+      : missing
+        ? singular
+          ? "country"
+          : "countries"
+        : singular
+          ? "neighbor"
+          : "neighbors";
   useLayoutEffect(() => {
     if (!active) return;
     if (menu.current) menu.current.open = false;
@@ -39,7 +84,9 @@ export function BorderMinigamePanel({
     return (
       <section className="info-view">
         <h1 className="editorial-heading">{shared.title}</h1>
-        <p>This activity requires the 3D globe. Try another browser or device.</p>
+        <p>
+          This activity requires the 3D globe. Try another browser or device.
+        </p>
         <button
           className="minigame-games-button"
           aria-label="All games"
@@ -54,9 +101,11 @@ export function BorderMinigamePanel({
       <section className="info-view" role="status">
         <p>
           {shared.ready ? (
-            pinpoint
-              ? "No puzzles match your settings. Try more place categories, a broader area, or fewer exclusions."
-              : "No puzzles match your settings. Try a broader area or fewer exclusions."
+            pinpoint ? (
+              "No puzzles match your settings. Try more place categories, a broader area, or fewer exclusions."
+            ) : (
+              "No puzzles match your settings. Try a broader area or fewer exclusions."
+            )
           ) : (
             <>Loading {shared.title}…</>
           )}
@@ -107,7 +156,7 @@ export function BorderMinigamePanel({
             }}
           >
             <summary aria-label="Game menu">
-              <span aria-hidden="true">•••</span>
+              <SettingsIcon />
             </summary>
             <div className="minigame-menu-options">
               <button
@@ -118,7 +167,7 @@ export function BorderMinigamePanel({
               >
                 All games
               </button>
-              {!hasAnswerAction && !ended && (
+              {!ended && (
                 <button
                   onClick={() => {
                     closeMenu();
@@ -132,16 +181,6 @@ export function BorderMinigamePanel({
           </details>
         )}
       </div>
-      {overview && (
-        <p className="minigame-complete-label">
-          Game over ·{" "}
-          {run.ended === "strikes"
-            ? "Three strikes"
-            : pinpoint && run.answered === 10
-              ? "Ten rounds complete"
-              : "Ended early"}
-        </p>
-      )}
       <h1 className="editorial-heading" ref={heading} tabIndex={-1}>
         {overview ? (
           <>
@@ -211,7 +250,7 @@ export function BorderMinigamePanel({
               </div>
             )}
           </dl>
-          <div className="minigame-overview-note">
+          <div className="minigame-result-detail">
             {pinpoint && run.answered > 0 && (
               <p>
                 <strong>
@@ -229,18 +268,31 @@ export function BorderMinigamePanel({
                 Custom rules · This run doesn’t count toward your personal best.
               </p>
             )}
-            <p>
-              {run.answered
-                ? pinpoint
-                  ? "Revisit your pins and the places you were aiming for."
-                  : route
-                    ? "Revisit the countries along your routes."
-                    : missing
-                      ? "See the countries behind your discoveries."
-                      : "Revisit the neighbors you found."
-                : "No answers submitted this time."}
-            </p>
           </div>
+          <div className="minigame-result-actions result-actions">
+            <button
+              className="primary-button"
+              disabled={!reviewTargets.length}
+              onClick={() => onStudy(reviewTargets)}
+            >
+              <ActionIcon name="study" />
+              <span>
+                {reviewTargets.length
+                  ? `Study ${reviewTargets.length} missed ${reviewNoun}`
+                  : "Nothing to review"}
+              </span>
+            </button>
+            <button
+              className="study-repeat-button"
+              onClick={() => setSharing(true)}
+            >
+              <ActionIcon name="share" />
+              <span>Share result</span>
+            </button>
+          </div>
+          {sharing && shareCard && (
+            <JourneyShareDialog card={shareCard} onClose={closeSharing} />
+          )}
           <div className="minigame-actions">
             <button className="primary-button" onClick={shared.restart}>
               Play again
@@ -354,15 +406,7 @@ export function BorderMinigamePanel({
       {!overview && (
         <>
           {hasAnswerAction && (
-            <div className={`minigame-action-row ${ended ? "is-ended" : ""}`}>
-              {!ended && (
-                <button
-                  className="minigame-finish-button"
-                  onClick={() => shared.action({ type: "finish" })}
-                >
-                  Finish game
-                </button>
-              )}
+            <div className="minigame-action-row">
               {feedback ? (
                 <button
                   className="primary-button"
@@ -388,6 +432,7 @@ export function BorderMinigamePanel({
                   onClick={() => shared.action({ type: "submit" })}
                 >
                   Check answer
+                  <span aria-hidden="true">→</span>
                 </button>
               ) : null}
             </div>

@@ -196,7 +196,7 @@ export function HomePanel({
               →
             </span>
           </strong>
-          <small>Discover countries and territories.</small>
+          <small>Discover the world.</small>
         </button>
         <button data-dd-action-name="Home Study" onClick={onStudy}>
           <strong>

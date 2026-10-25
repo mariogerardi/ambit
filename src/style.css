@@ -10,7 +10,7 @@
   font-weight: 400;
   --mint: var(--ui-focus, #d3ebbb);
   --dim: var(--ui-muted, #8aa0a4);
-  --line: rgb(var(--ui-line-rgb) / 0.15);
+  --line: rgb(var(--ui-line-rgb) / 0.22);
 }
 * {
   box-sizing: border-box;
@@ -163,6 +163,58 @@ strong {
     opacity: 0.8;
   }
   to {
+    opacity: 0;
+  }
+}
+.completion-pulse-group {
+  --completion-pulse-radius: 20px;
+}
+.completion-pulse {
+  fill: none;
+  stroke: var(--play-correct);
+  stroke-width: 1.2px;
+  opacity: 0;
+}
+.completion-pulse-casing {
+  stroke: var(--play-outline);
+  stroke-width: 2.4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .clue-locators:not([data-reduced="true"])
+    .is-repeating.is-pulsing
+    > .completion-pulse,
+  .minigame-card:is(:hover, :focus-within, :active)
+    .motif-completion
+    > .completion-pulse {
+    animation: completion-pulse 1.6s ease-out infinite forwards;
+  }
+  .minigame-card:is(:hover, :focus-within, :active)
+    .motif-completion
+    > .completion-pulse {
+    animation-delay: 290ms;
+  }
+}
+.clue-locators[data-reduced="true"] .is-pulsing > .completion-pulse {
+  opacity: 0.45;
+}
+@media (prefers-reduced-motion: reduce) {
+  .clue-locators .is-pulsing > .completion-pulse,
+  .minigame-card:is(:hover, :focus-within, :active)
+    .motif-completion
+    > .completion-pulse {
+    opacity: 0.45;
+  }
+}
+@keyframes completion-pulse {
+  from {
+    r: var(--completion-pulse-radius);
+    opacity: 0.45;
+  }
+  45% {
+    opacity: 0.3;
+  }
+  to {
+    r: calc(var(--completion-pulse-radius) * 1.9);
     opacity: 0;
   }
 }

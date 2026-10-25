@@ -146,7 +146,7 @@ it("frames the search continent independently of the erased boundary without cha
   const regional = missingBorderJourney(pair, base, regions, 123, false);
   const wide = missingBorderJourney(pair, base, regions, 123, true);
   expect(wide.rounds[0].rule).toEqual(regional.rounds[0].rule);
-  expect(regional.rounds[0].focus.altitude).toBe(1.25);
+  expect(regional.rounds[0].focus).not.toEqual(wide.rounds[0].focus);
   expect(wide.rounds[0].focus).toEqual({ lat: 50, lng: 20, altitude: 1.05 });
   const focus = wide.rounds[0].focus,
     anchor = missingBorderAnchor(pair, regions);

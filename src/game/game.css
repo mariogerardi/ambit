@@ -7,22 +7,6 @@
   background: var(--ui-bg, #101010);
   color: var(--ui-text, #eff1df);
 }
-.experience-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      ellipse at 64% 43%,
-      rgb(var(--ui-surface-rgb) / 0.2),
-      transparent 65%
-    ),
-    radial-gradient(
-      ellipse at 4% 90%,
-      rgb(var(--ui-surface-rgb) / 0.11),
-      transparent 48%
-    );
-}
 .game-scene {
   position: absolute;
   inset: 0;
@@ -112,8 +96,6 @@
   color: var(--ui-on-accent, #203b3b);
   font-size: 12px;
   font-weight: 500;
-  box-shadow: 0 3px 0
-    rgb(var(--ui-shadow-rgb) / calc(0.251 * var(--ui-shadow-strength)));
 }
 .primary-button:hover {
   background: var(--ui-action-hover, #f0dca6);
@@ -169,10 +151,8 @@
   top: 150px;
   width: 420px;
   z-index: 2;
-  background: rgb(var(--ui-surface-rgb) / 0.941);
   border: 1px solid rgb(var(--ui-line-rgb) / 0.11);
   border-radius: 18px;
-  backdrop-filter: blur(16px);
   padding: 24px;
   box-shadow: 0 15px 60px
     rgb(var(--ui-shadow-rgb) / calc(0.133 * var(--ui-shadow-strength)));
@@ -274,9 +254,6 @@
   border-radius: 8px;
   background: rgb(var(--ui-surface-rgb));
   color: var(--ui-text);
-  box-shadow:
-    0 3px 0 rgb(0 0 0 / 0.22),
-    inset 0 1px 0 rgb(255 255 255 / 0.08);
   font-size: 12px;
   text-align: left;
   touch-action: none;
@@ -414,11 +391,6 @@
   color: var(--ui-text, #c1d1b8);
   font-size: 11px;
   gap: 5px;
-}
-.candidate-grid button.chosen {
-  background: rgb(var(--ui-accent-rgb) / 0.125);
-  border-color: rgb(var(--ui-accent-rgb) / 0.565);
-  color: var(--ui-accent, #f0dfa9);
 }
 .candidate-grid button i {
   font-style: normal;
@@ -579,12 +551,6 @@
 }
 .point-orb-earned {
   border-color: currentColor;
-  background: radial-gradient(
-    circle at 30% 25%,
-    color-mix(in srgb, currentColor 65%, white),
-    currentColor 75%
-  );
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
 }
 .point-orb-earned svg {
   opacity: 1;
@@ -966,7 +932,6 @@
     width: 100%;
     padding: 21px;
     border-radius: 15px;
-    background: rgb(var(--ui-surface-rgb) / 0.961);
   }
   .round-overline {
     margin-bottom: 14px;
@@ -1570,7 +1535,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px 12px;
-  font-size: 9px;
   color: var(--ui-muted, #b9ccc2);
   margin: 16px 0;
 }
@@ -1580,8 +1544,6 @@
   gap: 5px;
 }
 .feedback-map-key i {
-  width: 7px;
-  height: 7px;
   border-radius: 50%;
 }
 .key-neutral {
@@ -1720,14 +1682,6 @@
   border-color: rgb(var(--ui-line-rgb) / 0.24);
   font-weight: 500;
 }
-.order-populated .order-card:not(.chosen) {
-  background:
-    linear-gradient(
-      rgb(var(--ui-line-rgb) / 0.075),
-      rgb(var(--ui-line-rgb) / 0.075)
-    ),
-    rgb(var(--ui-surface-rgb));
-}
 .order-populated .order-bank .order-position {
   color: var(--ui-muted);
 }
@@ -1779,13 +1733,11 @@
   margin-top: 24px;
   font-size: 18px;
 }
-.journey-friend-preview,
 .friend-comparison-list {
   list-style: none;
   padding: 0;
   margin: 12px 0;
 }
-.journey-friend-preview button,
 .friend-comparison-list li > button,
 .comparison-you {
   display: flex;
@@ -1797,11 +1749,6 @@
   padding: 14px 0;
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
 }
-.journey-friend-preview button {
-  background: none;
-  border-radius: 0;
-}
-.journey-friend-preview button > span,
 .friend-comparison-list li > span,
 .friend-comparison-list button > span:last-child {
   display: flex;

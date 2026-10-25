@@ -2,31 +2,12 @@
   margin: 28px 0 10px;
   font-size: 24px;
 }
-.study-path {
-  padding: 14px 0;
-  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.169);
-}
 .study-path h3 {
-  margin: 0 0 6px;
   font-family: var(--font-editorial);
-  font-size: 24px;
   font-weight: 500;
 }
 .study-path p {
-  margin: 0 0 6px;
-  font-size: 13px;
   line-height: 1.5;
-}
-.study-path small {
-  color: var(--dim);
-  font-size: 12px;
-}
-.study-path .inline-actions {
-  margin-top: 4px;
-  gap: 24px;
-}
-.study-path .quiet-button {
-  font-size: 13px;
 }
 .study-resume-button {
   margin-top: 12px;
@@ -61,10 +42,6 @@
 }
 .study-method-details .study-config-row {
   margin-block: 8px;
-}
-.study-method-help {
-  margin: 0;
-  font-size: 12px;
 }
 .study-start .study-session-description {
   margin: 0 0 12px;
@@ -268,11 +245,6 @@
   padding: 12px 12px 8px;
   border: 1px solid rgb(var(--ui-editorial-rgb) / 0.4);
   border-radius: 12px;
-  background: linear-gradient(
-    130deg,
-    rgb(var(--ui-surface-rgb) / 1),
-    rgb(var(--ui-surface-rgb) / 1) 65%
-  );
   display: flex;
   flex-direction: column;
   text-shadow: none;
@@ -289,27 +261,6 @@
   color: var(--ui-text, #c0cec7);
   margin: 6px 0;
 }
-.study-path small {
-  font-size: 11px;
-  margin-top: 0;
-  padding-top: 2px;
-  line-height: 1.5;
-}
-.study-path .inline-actions {
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 4px;
-  padding-right: 32px;
-}
-.study-path .quiet-button {
-  padding: 6px 0;
-  font-size: 12px;
-  min-height: 36px;
-}
-.study-path .quiet-button:first-child {
-  color: var(--ui-accent, #f3d68f);
-  font-weight: 400;
-}
 .experience .study-path-start {
   position: absolute;
   inset: 0;
@@ -323,7 +274,6 @@
   right: 12px;
   bottom: 8px;
   width: 24px;
-  height: 36px;
   display: grid;
   place-items: center;
   color: var(--ui-accent, #ffe2a1);
@@ -335,30 +285,6 @@
 .study-path:has(.study-path-start:focus-visible) {
   outline: 2px solid var(--ui-accent, #efd18f);
   outline-offset: 3px;
-}
-.study-path-customize {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 1;
-}
-.experience .study-path button.study-path-customize {
-  gap: 6px;
-  padding: 5px 10px;
-  min-height: 32px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
-  border-radius: 7px;
-  background: rgb(var(--ui-line-rgb) / 0.06);
-  color: var(--ui-accent);
-  font-size: 12px;
-  transition:
-    background 150ms ease,
-    border-color 150ms ease;
-}
-.experience .study-path button.study-path-customize:hover {
-  background: rgb(var(--ui-line-rgb) / 0.14);
-  border-color: var(--ui-accent);
 }
 .study-path-start > span {
   height: 32px;

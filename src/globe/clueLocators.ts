@@ -15,6 +15,8 @@ export interface ClueLocator {
   pulseOnly?: boolean;
   /** Replay the pulse while this locator is displayed; reduced motion stays finite. */
   repeat?: boolean;
+  /** Strong success ripple for the final Border Run crossing. */
+  appearance?: "completion";
   region: RegionFeature;
   /** Fixed geographic anchor for a border crossing or other supplied point. */
   anchor?: Pick<Focus, "lat" | "lng">;
@@ -169,8 +171,7 @@ export class ClueLocators {
   ) {
     this.reduced = reduced;
     const colors = playColors(palette);
-    this.element.style.color =
-      palette === "paper" ? colors["context-outline"] : colors.hinted;
+    this.element.style.color = colors.hinted;
     this.element.style.setProperty(
       "--clue-label-stroke",
       THEMES[palette].globe.ocean,
@@ -216,6 +217,26 @@ export class ClueLocators {
           entry.prepared = prepareClueLocator(clue);
         entry.clue = clue;
         entry.text.textContent = clue.pulseOnly ? "" : clue.label;
+      }
+      entry.group.classList.toggle(
+        "completion-pulse-group",
+        clue.appearance === "completion",
+      );
+      const pulse = entry.group.querySelector(
+        "circle:not(.completion-pulse-casing)",
+      )!;
+      if (clue.appearance === "completion") {
+        pulse.classList.replace("clue-locator-pulse", "completion-pulse");
+        pulse.setAttribute("r", "20");
+        if (!entry.group.querySelector(".completion-pulse-casing")) {
+          const casing = pulse.cloneNode() as SVGCircleElement;
+          casing.classList.add("completion-pulse-casing");
+          entry.group.insertBefore(casing, pulse);
+        }
+      } else {
+        entry.group.querySelector(".completion-pulse-casing")?.remove();
+        pulse.classList.replace("completion-pulse", "clue-locator-pulse");
+        pulse.setAttribute("r", clue.pulseOnly ? "12" : "18");
       }
       entry.group.classList.toggle("is-repeating", !!clue.repeat);
       if (reduced && !clue.pulseOnly)
@@ -266,8 +287,9 @@ export class ClueLocators {
             "transform",
             `translate(${point.x} ${point.y})`,
           );
-          if (!settled && !entry.pulsed) this.pendingPulses = true;
-          if (settled && !entry.pulsed) {
+          const canPulse = settled || entry.clue.appearance === "completion";
+          if (!canPulse && !entry.pulsed) this.pendingPulses = true;
+          if (canPulse && !entry.pulsed) {
             entry.group.classList.add("is-pulsing");
             entry.pulsed = true;
           }

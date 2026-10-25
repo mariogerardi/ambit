@@ -42,8 +42,8 @@ it("ships a small, accessible loading screen in HTML before the app script", () 
   );
   expect(
     loader
-      ?.querySelector("#ambit-loading-ocean stop[offset='.55']")
-      ?.getAttribute("stop-color"),
+      ?.querySelector(".ambit-loading-globe > circle")
+      ?.getAttribute("fill"),
   ).toBe(`var(--map-ocean, ${THEMES.ocean.globe.ocean})`);
   for (const path of loader?.querySelectorAll("#ambit-loading-land path") ??
     []) {
@@ -52,11 +52,11 @@ it("ships a small, accessible loading screen in HTML before the app script", () 
   expect(style).toContain("100dvh");
   expect(style).toContain(THEMES.ocean.ui.bg);
   expect(style).toContain("min(38vw, 170px)");
-  expect(style).toContain("animation: ambit-loading-glow 3.2s");
-  expect(style).toContain("filter: drop-shadow(0 0 32px #8dcfc777)");
+  expect(loader?.querySelector("radialGradient")).toBeNull();
+  expect(loader?.querySelectorAll("img")).toHaveLength(1);
+  expect(style).not.toContain("ambit-loading-glow");
   expect(style).not.toContain("ambit-loading-orbit");
   expect(style).toContain("prefers-reduced-motion");
-  expect(style).toContain("animation-duration: 8s");
   expect(style).toContain("transition: opacity 450ms");
   expect(html.indexOf('id="root"')).toBeLessThan(
     html.indexOf('src="/src/main.tsx"'),
@@ -104,17 +104,9 @@ it("uses the saved theme before the app bundle loads", () => {
         color,
       );
     });
-    if (theme === "ocean" || theme === "survey") {
-      const globe = page.window.document.querySelector(".ambit-loading-globe")!;
-      const globeStyle = page.window.getComputedStyle(globe);
-      expect(globeStyle.filter).toBe("none");
-      expect(globeStyle.animation).toBe("none");
-      expect(
-        page.window.getComputedStyle(
-          globe.querySelector('circle[fill="url(#ambit-loading-shade)"]')!,
-        ).display,
-      ).toBe("none");
-    }
+    const globe = page.window.document.querySelector(".ambit-loading-globe")!;
+    expect(globe.querySelector("radialGradient")).toBeNull();
+    expect(globe.querySelectorAll("circle[stroke]")).toHaveLength(0);
     page.window.close();
   }
   expect(html.indexOf("localStorage.getItem")).toBeLessThan(
@@ -177,7 +169,7 @@ it("keeps the React loading markup aligned with the HTML shell", async () => {
   for (const selector of [
     "#ambit-loading-land path",
     ".ambit-loading-map use",
-    "radialGradient stop",
+    "svg circle",
   ]) {
     expect(
       [...mounted.querySelectorAll(selector)].map((element) =>

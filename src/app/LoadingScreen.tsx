@@ -26,16 +26,6 @@ export function LoadingScreen({ active = true }: { active?: boolean }) {
         aria-hidden="true"
       >
         <defs>
-          <radialGradient id="ambit-loading-ocean" cx="32%" cy="24%" r="78%">
-            <stop stopColor="#477b80" />
-            <stop offset=".55" stopColor="var(--map-ocean, #234d69)" />
-            <stop offset="1" stopColor="#102a36" />
-          </radialGradient>
-          <radialGradient id="ambit-loading-shade" cx="32%" cy="22%" r="82%">
-            <stop stopColor="#e7ffef" stopOpacity=".16" />
-            <stop offset=".55" stopColor="#bce7da" stopOpacity=".02" />
-            <stop offset="1" stopColor="#031015" stopOpacity=".72" />
-          </radialGradient>
           <clipPath id="ambit-loading-clip">
             <circle cx="110" cy="110" r="90" />
           </clipPath>
@@ -71,33 +61,14 @@ export function LoadingScreen({ active = true }: { active?: boolean }) {
             />
           </g>
         </defs>
-        <circle cx="110" cy="110" r="90" fill="url(#ambit-loading-ocean)" />
+        <circle cx="110" cy="110" r="90" fill="var(--map-ocean, #234d69)" />
         <g clipPath="url(#ambit-loading-clip)">
           <g className="ambit-loading-map" transform="translate(-90)">
             <use href="#ambit-loading-land" />
           </g>
-          <circle cx="110" cy="110" r="90" fill="url(#ambit-loading-shade)" />
         </g>
-        <circle
-          cx="110"
-          cy="110"
-          r="90"
-          fill="none"
-          stroke="var(--map-atmosphere, #8dcfc7)"
-          strokeOpacity=".48"
-          strokeWidth="1.5"
-        />
       </svg>
-      <img
-        className="ambit-loading-title ambit-logo-dark"
-        src="/ambitlogo.png"
-        alt="ambit"
-      />
-      <img
-        className="ambit-loading-title ambit-logo-light"
-        src="/ambitlogo2.png"
-        alt="ambit"
-      />
+      <img className="ambit-loading-title" src="/ambitlogo.png" alt="ambit" />
       <span className="ambit-loading-copy">
         Loading your world<span className="ambit-loading-dots">…</span>
       </span>
