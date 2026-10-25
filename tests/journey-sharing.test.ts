@@ -1,3 +1,4 @@
+import { THEMES } from "../src/theme/themes";
 import { expect, it } from "vitest";
 import { CANADA_JOURNEY } from "../src/game/canadaJourney";
 import { initialGame } from "../src/game/state";
@@ -237,7 +238,7 @@ it("accompanies the image with an invitation rather than repeating the receipt",
   );
   const caption = resultCaption(result);
   expect(caption).toBe(
-    `A world of wonders. Take today’s Journey with me → ${result.playUrl}`,
+    `Take today’s Journey with me → ${result.playUrl}`,
   );
   expect(caption).not.toContain("\n");
   expect(caption).toContain(result.playUrl);
@@ -290,4 +291,46 @@ it("shares an archive result with its public dated route rather than today's puz
   expect(resultText(result)).toContain("Play this Journey:");
   expect(resultCaption(result)).toContain("Explore this Journey with me");
   expect(resultCaption(result)).not.toContain("localhost");
+});
+
+it("uses the selected theme for exported result-card surfaces and text", () => {
+  for (const palette of ["ocean", "paper"] as const) {
+    const fills: string[] = [];
+    const text: { value: string; color: string }[] = [];
+    const ctx = {
+      fillStyle: "",
+      fillRect() {
+        fills.push(this.fillStyle);
+      },
+      fillText(value: string) {
+        text.push({ value, color: this.fillStyle });
+      },
+      measureText(value: string) {
+        return { width: value.length * 20 };
+      },
+      save() {},
+      restore() {},
+      drawImage() {},
+      beginPath() {},
+      arc() {},
+      fill() {},
+      stroke() {},
+      moveTo() {},
+      lineTo() {},
+      closePath() {},
+    };
+    paintResultCard(
+      ctx as unknown as CanvasRenderingContext2D,
+      {} as CanvasImageSource,
+      sharedJourneyResult(CANADA_JOURNEY, initialGame, "2026-10-13"),
+      palette,
+    );
+    expect(fills[0]).toBe(THEMES[palette].ui.bg);
+    expect(text.find((item) => item.value === "ambit")?.color).toBe(
+      THEMES[palette].ui.text,
+    );
+    expect(text.find((item) => item.value === "points")?.color).toBe(
+      THEMES[palette].ui.muted,
+    );
+  }
 });

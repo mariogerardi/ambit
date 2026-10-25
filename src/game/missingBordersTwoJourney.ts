@@ -41,7 +41,7 @@ const definitions = [
     focus: { lat: 30, lng: 95, altitude: 1.45 },
     reveal: { lat: 26, lng: 81, altitude: 0.7 },
     leadIn: "A border has been erased from this map of Asia.",
-    prompt: "Tap the territory that should be two countries.",
+    prompt: "Select the territory that should be two countries.",
     hint: "Look for a smaller, landlocked country absorbed into the northern edge of a much larger neighbor.",
     assistText:
       "Four territories remain selectable. Compare the outlines near the Himalayan foothills.",
@@ -104,7 +104,7 @@ const definitions = [
     focus: { lat: 52, lng: 18, altitude: 1.1 },
     reveal: { lat: 46.7, lng: 26.5, altitude: 0.3 },
     leadIn: "Here, a country has blended into its western neighbor.",
-    prompt: "Tap the merged territory in Europe.",
+    prompt: "Select the merged territory in Europe.",
     hint: "Look west of Ukraine. A smaller country has become a northeastern extension of its neighbor.",
     assistText:
       "Four territories remain selectable. Compare the shapes just north and west of the Black Sea.",

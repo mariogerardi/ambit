@@ -34,8 +34,7 @@ export function StudyPreferences({
           </label>
         ))}
         <aside className="study-hint-note">
-          <span aria-hidden="true">ⓘ</span> Names and markers can give away
-          answers.
+          <span aria-hidden="true">ⓘ</span> Labels and markers may reveal answers.
         </aside>
       </fieldset>
       <fieldset className="display-settings">
@@ -49,7 +48,7 @@ export function StudyPreferences({
               onSettings({ ...settings, autoAdvance: event.target.checked })
             }
           />
-          Move on after a correct answer
+          Automatically advance after correct answers
         </label>
         <label data-dd-action-name="Study Toggle Missed Review">
           <input
@@ -60,7 +59,7 @@ export function StudyPreferences({
               onSettings({ ...settings, revisitMissed: event.target.checked })
             }
           />
-          Bring back missed answers
+          Revisit missed questions
         </label>
       </fieldset>
     </div>

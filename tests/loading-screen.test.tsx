@@ -6,7 +6,7 @@ import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { afterEach, expect, it, vi } from "vitest";
 import { LoadingScreen } from "../src/app/LoadingScreen";
-import { THEME_KEY, THEMES } from "../src/theme/themes";
+import { THEME_IDS, THEME_KEY, THEMES } from "../src/theme/themes";
 
 const html = readFileSync("index.html", "utf8");
 const shell = new DOMParser().parseFromString(html, "text/html");
@@ -35,18 +35,22 @@ it("ships a small, accessible loading screen in HTML before the app script", () 
     [...(loader?.querySelectorAll("#ambit-loading-land path[fill]") ?? [])].map(
       (path) => path.getAttribute("fill"),
     ),
-  ).toEqual(THEMES.atlas.globe.land);
+  ).toEqual(
+    THEMES.ocean.globe.land.map(
+      (color, index) => `var(--map-land-${index}, ${color})`,
+    ),
+  );
   expect(
     loader
       ?.querySelector("#ambit-loading-ocean stop[offset='.55']")
       ?.getAttribute("stop-color"),
-  ).toBe(THEMES.atlas.globe.ocean);
+  ).toBe(`var(--map-ocean, ${THEMES.ocean.globe.ocean})`);
   for (const path of loader?.querySelectorAll("#ambit-loading-land path") ??
     []) {
     expect(path.getAttribute("d")).not.toMatch(/M0,20(?:L180,20|h180)/);
   }
   expect(style).toContain("100dvh");
-  expect(style).toContain(THEMES.atlas.ui.bg);
+  expect(style).toContain(THEMES.ocean.ui.bg);
   expect(style).toContain("min(38vw, 170px)");
   expect(style).toContain("animation: ambit-loading-glow 3.2s");
   expect(style).toContain("filter: drop-shadow(0 0 32px #8dcfc777)");
@@ -57,11 +61,12 @@ it("ships a small, accessible loading screen in HTML before the app script", () 
   expect(html.indexOf('id="root"')).toBeLessThan(
     html.indexOf('src="/src/main.tsx"'),
   );
+  // Includes all palettes before the bundle loads.
   expect(
     gzipSync(
       `${style}${shell.querySelector("head script")?.textContent}${loader?.outerHTML}`,
     ).length,
-  ).toBeLessThan(3200);
+  ).toBeLessThan(3800);
   expect(
     shell.querySelector('link[rel="preload"][href*="Manrope"]'),
   ).not.toBeNull();
@@ -71,7 +76,7 @@ it("ships a small, accessible loading screen in HTML before the app script", () 
 });
 
 it("uses the saved theme before the app bundle loads", () => {
-  for (const theme of ["atlas", "ocean", "dusk", "paper"] as const) {
+  for (const theme of THEME_IDS) {
     const page = new JSDOM(html, {
       url: "https://playambit.com",
       runScripts: "dangerously",
@@ -83,19 +88,76 @@ it("uses the saved theme before the app bundle loads", () => {
       },
     });
     const root = page.window.document.documentElement;
-    if (theme === "atlas") {
-      expect(root.dataset.theme).toBeUndefined();
-    } else {
-      expect(root.dataset.theme).toBe(theme);
+    expect(root.dataset.theme).toBe(theme);
+    expect(
+      page.window.getComputedStyle(root).getPropertyValue("--ui-bg").trim(),
+    ).toBe(THEMES[theme].ui.bg);
+    const computed = page.window.getComputedStyle(root);
+    expect(computed.getPropertyValue("--ui-text").trim()).toBe(
+      THEMES[theme].ui.text,
+    );
+    expect(computed.getPropertyValue("--map-ocean").trim()).toBe(
+      THEMES[theme].globe.ocean,
+    );
+    THEMES[theme].globe.land.forEach((color, index) => {
+      expect(computed.getPropertyValue(`--map-land-${index}`).trim()).toBe(
+        color,
+      );
+    });
+    if (theme === "ocean" || theme === "survey") {
+      const globe = page.window.document.querySelector(".ambit-loading-globe")!;
+      const globeStyle = page.window.getComputedStyle(globe);
+      expect(globeStyle.filter).toBe("none");
+      expect(globeStyle.animation).toBe("none");
       expect(
-        page.window.getComputedStyle(root).getPropertyValue("--ui-bg").trim(),
-      ).toBe(THEMES[theme].ui.bg);
+        page.window.getComputedStyle(
+          globe.querySelector('circle[fill="url(#ambit-loading-shade)"]')!,
+        ).display,
+      ).toBe("none");
     }
     page.window.close();
   }
   expect(html.indexOf("localStorage.getItem")).toBeLessThan(
     html.indexOf('id="root"'),
   );
+});
+
+it("uses Discovery before the bundle loads when storage is empty, invalid, or blocked", () => {
+  for (const value of [
+    null,
+    "{",
+    '{"version":2,"theme":"paper"}',
+    '{"version":1,"theme":"unknown"}',
+    '{"version":1,"theme":"atlas"}',
+    "blocked",
+  ]) {
+    const page = new JSDOM(html, {
+      url: "https://playambit.com",
+      runScripts: "dangerously",
+      beforeParse(window) {
+        if (value === "blocked") {
+          Object.defineProperty(window, "localStorage", {
+            get() {
+              throw new Error("blocked");
+            },
+          });
+        } else if (value !== null) {
+          window.localStorage.setItem(THEME_KEY, value);
+        }
+      },
+    });
+    expect(page.window.document.documentElement.dataset.theme).toBe("ocean");
+    expect(
+      page.window
+        .getComputedStyle(page.window.document.documentElement)
+        .getPropertyValue("--ui-bg")
+        .trim(),
+    ).toBe(THEMES.ocean.ui.bg);
+    page.window.close();
+  }
+  expect(
+    shell.querySelector('meta[name="theme-color"]')?.getAttribute("content"),
+  ).toBe(THEMES.ocean.ui.bg);
 });
 
 it("keeps the React loading markup aligned with the HTML shell", async () => {

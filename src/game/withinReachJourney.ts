@@ -48,7 +48,7 @@ const stories: Record<
   }
 > = {
   boston: {
-    prompt: "How many of these islands can fit inside a single circle?",
+    prompt: "Position the circle to enclose as many whole islands as you can.",
     label: "Boston Harbor",
     leadIn:
       "Boston doesn’t end at the waterfront. Beyond the city, wooded shores and old forts rise from the harbor.",
@@ -111,7 +111,7 @@ const stories: Record<
     ),
   },
   cyclades: {
-    prompt: "Where will your circle hold the most whole islands?",
+    prompt: "Find the position that lets your circle enclose the most whole islands.",
     label: "The Cyclades",
     leadIn:
       "Syros, Mykonos, Paros, Naxos: the Cyclades scatter across the Aegean. Look between the larger islands for the small shores that are easy to miss.",
@@ -214,7 +214,7 @@ export const WITHIN_REACH_JOURNEY: Journey = {
   addedAt: "2026-10-21",
   title: "Within Reach",
   description:
-    "From Boston Harbor to the Cyclades, explore islands large and small. Move one circle across five island groups and see how many complete shores you can bring within reach.",
+    "From Boston Harbor to the Cyclades, explore five island groups. In each, position a circle to enclose as many whole islands as you can.",
   mapAttribution: {
     label: "© OpenStreetMap contributors · GeoNames · source notes",
     url: "/journeys/within-reach/SOURCES.md",
@@ -231,7 +231,7 @@ export const WITHIN_REACH_JOURNEY: Journey = {
       prompt: story.prompt,
       instruction:
         index === 0
-          ? "Move the circle to enclose as many blue islands as you can. An island counts only if its whole shoreline fits."
+          ? "An island counts only if its whole shoreline fits."
           : "",
       mode: "geo-circle",
       count: 1,

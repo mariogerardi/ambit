@@ -77,12 +77,12 @@ export function ConstructionAnswer({
             className="quiet-button"
             disabled={!webgl || !onPulseIslands}
             onClick={onPulseIslands}
-            title="Pulse every island once"
+            title="Highlight each island"
           >
             <span className="island-pulse-icon" aria-hidden="true">
               <i />
             </span>
-            Pulse islands
+            Highlight islands
           </button>
           <button
             type="button"
@@ -183,7 +183,7 @@ export function ConstructionAnswer({
             : q.mode === "geo-brush"
               ? "Paint inside the outline; drag outside it to turn the globe."
               : q.mode === "geo-polygon"
-                ? "Tap to add corners; drag a corner to reshape. Drag outside the outline to turn the globe."
+                ? "Click or tap to add corners. Drag a corner to reshape the outline, or drag outside it to rotate the globe."
                 : q.mode === "geo-trace"
                   ? `Follow the river in one stroke. Drag outside ${q.constructionArea?.name ?? "the outline"} to turn the globe.`
                   : `Place two ends, then slide them along the border. Drag outside ${q.constructionArea?.name ?? "the outline"} to turn the globe.`}

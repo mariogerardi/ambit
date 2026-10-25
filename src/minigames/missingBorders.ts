@@ -245,7 +245,7 @@ export function missingBorderJourney(
         resolvedLabel: names.join(" + "),
         prompt: "Which territory is hiding two countries?",
         instruction:
-          "One border is missing. Tap the shape hiding two countries.",
+          "One border is missing. Select the shape hiding two countries.",
         mode: "merged-region-single",
         count: 1,
         commitment: "immediate",

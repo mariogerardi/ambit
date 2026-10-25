@@ -116,8 +116,10 @@ describe("Within Reach whole-island edition", () => {
     expect(copy).not.toMatch(
       /neighbou?rhood|between (?:their )?doors|marked landings|it reaches|belonging can be/i,
     );
-    expect(journey.rounds[0].prompt).toBe(
-      "How many of these islands can fit inside a single circle?",
+    expect(
+      journey.rounds.find((q) => q.id === "within-reach:boston")!.prompt,
+    ).toBe(
+      "Position the circle to enclose as many whole islands as you can.",
     );
   });
   it("archives marker-edition attempts intact instead of regrading them as whole islands", () => {

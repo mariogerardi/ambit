@@ -124,7 +124,7 @@ export const DANUBE_JOURNEY: Journey = {
       title: "The river takes a shortcut.",
       leadIn:
         "In southern Germany, the Danube pulls a disappearing act. Some water sinks underground and resurfaces at a spring.",
-      prompt: "Which other river system receives it?",
+      prompt: "Which river system receives the diverted Danube water?",
       rule: { type: "choice-ids", ids: ["river:rhine"] },
       choices: [
         { id: "river:elbe", label: "Elbe" },
@@ -134,7 +134,7 @@ export const DANUBE_JOURNEY: Journey = {
       ],
       feedbackMapCaption: "Danube route so far · local Rhine context",
       explanation:
-        "Hidden limestone passages carry the water to the Aach spring, then toward Lake Constance. Part of the Danube slips into another river system, crossing a watershed underground.",
+        "Hidden limestone passages carry the water to the Aach spring, then toward Lake Constance and into the Rhine river system. Part of the Danube crosses a watershed underground.",
       source: source(
         "UNESCO Global Geopark Swabian Alb · Danube seepage",
         "https://www.geopark-alb.de/en/experience-geopark/journey-into-earths-history/detail/the-danube-seepage",
@@ -180,7 +180,7 @@ export const DANUBE_JOURNEY: Journey = {
       title: "The first capital downstream.",
       leadIn:
         "Stay with the water flowing east into Austria, toward our first capital.",
-      prompt: "Drop a pin as close to Vienna as you can.",
+      prompt: "Place a pin as close to Vienna as you can.",
       instruction: "",
       mode: "pin",
       rule: {
@@ -334,7 +334,7 @@ export const DANUBE_JOURNEY: Journey = {
       ],
       rule: { type: "country-ids", ids: ["wurl:SRB", "wurl:ROU"] },
       explanation:
-        "The river marks a border for people and an ancient migration corridor for sturgeon. At the Iron Gates, dams generate electricity while blocking the fish’s passage upstream.",
+        "At the Iron Gates, the Danube forms a border between Serbia and Romania. The river is also an ancient migration corridor for sturgeon. At the Iron Gates, dams generate electricity while blocking the fish’s passage upstream.",
       source: source(
         "ICPDR · restoring fish migration at the Iron Gates",
         "https://www.icpdr.org/tasks-topics/tasks/river-basin-management/sturgeon-conservation/we-pass-facilitating-fish-migration",
@@ -402,7 +402,7 @@ export const DANUBE_JOURNEY: Journey = {
       ],
       feedbackMapCaption: "Danube · full route to the sea",
       explanation:
-        "Three main branches carry the Danube through its delta to the sea. Remember the water that vanished underground at our first stop? That diversion eventually reaches the North Sea—a different ending for the same river.",
+        "Three main branches carry the Danube through its delta into the Black Sea. Remember the water that vanished underground at our first stop? That diversion eventually reaches the North Sea—a different ending for the same river.",
       sources: [riverSource],
       scenes: {
         play: {

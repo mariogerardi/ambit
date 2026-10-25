@@ -131,7 +131,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus).toHaveLength(flights);
     for (const id of studyPool(defaultSettings))
       expect(probe.props!.states[id]).toBe("selectable");
-    await click("Back to paths");
+    await click("Back to Study");
     expect(host.querySelector(".experience.page-layout")).toBeNull();
     expect(probe.props!.states["wurl:EGY"]).toBe("disabled");
     expect(

@@ -95,7 +95,7 @@ const reaches = [1200, 900, 1200, 900, 1000];
 const base = definePresentation({
   label: "Bearings",
   topic: "Silk Roads",
-  instruction: "Drop a pin where the two bearings meet.",
+  instruction: "Place a pin where the two bearings meet.",
   failure: "feedback",
   disclosure: {
     hoverNames: false,

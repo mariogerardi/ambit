@@ -133,7 +133,7 @@ export function QuestionAccuracy({ question }: { question: Question }) {
                 {rule.type === "raster-overlap" && "f1" in tier
                   ? `overlap score at least ${tier.f1 * 100}%, with at least ${tier.precision * 100}% of scored paint on ${rule.targetLabel ?? "mapped dunes"}.`
                   : rule.type === "labeled-region-pin-set" && "count" in tier
-                    ? `locate at least ${tier.count} correctly labeled landscapes.`
+                    ? `locate at least ${tier.count} correctly labeled ${tier.count === 1 ? "landscape" : "landscapes"}.`
                     : rule.type === "island-coverage-max" && "count" in tier
                       ? `enclose at least ${tier.count} entire islands, including every shore.`
                       : rule.type === "point-coverage-max" && "count" in tier

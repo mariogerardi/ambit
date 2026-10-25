@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { subdivisionTypeLabel } from "../geography/regions";
 import type { RegionFeature } from "../geography/types";
 import { EXPLORE_CITIES, exploreCapital } from "../geography/places";
 import type { ExploreCity } from "../geography/places";
@@ -291,7 +292,7 @@ export function ExplorePanel({
               country.name
             ) : (
               <>
-                Explore the <em>world.</em>
+                The world, <em>up close.</em>
               </>
             )}
           </h1>
@@ -311,8 +312,8 @@ export function ExplorePanel({
       {!country && (
         <>
           <p className="muted explore-introduction">
-            Tap a country or territory to see its details. Small places have
-            rings; zoom in to separate nearby targets.{" "}<br></br><br></br>
+            Select a country or territory to take a closer look. Small places
+            are marked with rings. Zoom in to distinguish nearby locations.{" "}<br></br><br></br>
             <button
               ref={searchButton}
               data-dd-action-name="Explore Open Search"
@@ -322,7 +323,7 @@ export function ExplorePanel({
               aria-controls="explore-search"
               onClick={() => setOpen((value) => !value)}
             >
-              Or search by name.
+              Search countries and territories
             </button>
           </p>
         </>
@@ -367,7 +368,7 @@ export function ExplorePanel({
                 </button>
               ))
             ) : (
-              <p>No matching places. Try another spelling.</p>
+              <p>No matching places. Try another name or spelling.</p>
             )}
           </div>,
           document.body,
@@ -523,19 +524,19 @@ export function ExplorePanel({
                 disabled={!region}
                 onClick={() => region && onFocus(region)}
               >
-                ◎ Zoom
+                ◎ Zoom to country
               </button>
               <button
                 ref={searchButton}
                 data-dd-action-name="Explore Search Another Country"
                 className="quiet-button explore-tool-button explore-country-search-trigger"
-                aria-label="Search another country or territory"
-                title="Search another country or territory"
+                aria-label="Search another place"
+                title="Search another place"
                 aria-expanded={open}
                 aria-controls="explore-search"
                 onClick={() => setOpen(true)}
               >
-                Search
+                Search another place
               </button>
               <button
                 className="quiet-button explore-tool-button explore-clear-selection"
@@ -544,7 +545,7 @@ export function ExplorePanel({
                 title="Clear selection"
                 onClick={() => onSelect()}
               >
-                Clear
+                Clear selection
               </button>
             </div>
             {layer && (
@@ -567,7 +568,7 @@ export function ExplorePanel({
           {selectedRegion && (
             <div className="region-detail">
               <div className="overline">
-                {selectedRegion.localType ?? selectedRegion.level}
+                {subdivisionTypeLabel(selectedRegion)}
               </div>
               <h3>{selectedRegion.name}</h3>
               <div className="inline-actions">
@@ -593,7 +594,7 @@ export function ExplorePanel({
                     data-dd-action-name="Explore Back To Regions"
                     onClick={() => onBreakdown(selected)}
                   >
-                    Back to {layer?.label.toLowerCase()}
+                    Back to {layer?.label}
                   </button>
                 )}
               </div>

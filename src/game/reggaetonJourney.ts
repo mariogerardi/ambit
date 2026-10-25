@@ -204,7 +204,7 @@ export const REGGAETON_JOURNEY: Journey = {
       leadIn:
         "In Puerto Rico, DJs and rappers built an underground mixtape scene, mixing hip-hop with Jamaican dancehall.",
       prompt: "Find Puerto Rico on the globe.",
-      instruction: "Tap the island.",
+      instruction: "Select the island.",
       mode: "map-single",
       count: 1,
       selection: {
@@ -252,7 +252,7 @@ export const REGGAETON_JOURNEY: Journey = {
       topic: "reggaeton",
       leadIn:
         "Caribbean migration connected Jamaica with Panama long before Puerto Rico's mixtapes. Workers and their families settled around Colón, near the canal's Caribbean entrance.",
-      prompt: "Drop a pin on that coast, as close to Colón as you can.",
+      prompt: "Place a pin on that coast, as close to Colón as you can.",
       instruction: "",
       mode: "pin",
       count: 1,
@@ -436,7 +436,7 @@ export const REGGAETON_JOURNEY: Journey = {
       prompt:
         "Roughly how far apart are San Juan and Medellín in a straight line?",
       instruction: "",
-      inputLabel: "Distance in kilometres",
+      inputLabel: "Distance in kilometers",
       mode: "slider",
       count: 1,
       selection: { type: "none" },

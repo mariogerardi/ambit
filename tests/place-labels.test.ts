@@ -22,11 +22,7 @@ import {
   MAP_SURFACE_ALTITUDE,
 } from "../src/globe/surface";
 import { ANSWER_PLACES } from "../src/game/answerTargets";
-import {
-  PLAY_HIGHLIGHTS,
-  PLAY_FEEDBACK,
-  playRegionStyle,
-} from "../src/globe/themes";
+import { playRegionStyle } from "../src/globe/themes";
 import { playColors } from "../src/theme/playColors";
 import { cityReference } from "../src/game/authoredPlaces";
 import type { PlaceFeature } from "../src/geography/types";
@@ -244,7 +240,7 @@ describe("cached readable place labels", () => {
       100,
     );
     labels.view(camera(), 800, 800);
-    expect(context.fillStyle).toBe(PLAY_HIGHLIGHTS.context);
+    expect(context.fillStyle).toBe(playColors().hinted);
     expect(context.strokeStyle).toBe("#071524");
     expect(context.stroke).toHaveBeenCalledOnce();
     expect(
@@ -423,7 +419,7 @@ describe("cached readable place labels", () => {
     const marker = labels.group.children.find(
       (p) => p.userData.placeId === "a",
     )!;
-    expect(marker.userData.markerStyle).toContain(PLAY_HIGHLIGHTS.selectable);
+    expect(marker.userData.markerStyle).toContain(playColors().selectable);
     expect(
       labels.group.children.find(
         (p) => p.userData.placeId === "pin" && p.userData.role === "marker",
@@ -433,7 +429,7 @@ describe("cached readable place labels", () => {
       labels.group.children.find(
         (p) => p.userData.placeId === "pin" && p.userData.role === "marker",
       )!.userData.markerStyle,
-    ).toContain(PLAY_HIGHLIGHTS.selected);
+    ).toContain(playColors().selected);
     const before = factory.mock.calls.length;
     labels.update(
       {
@@ -449,7 +445,7 @@ describe("cached readable place labels", () => {
     expect(labels.group.children.find((p) => p.userData.placeId === "a")).toBe(
       marker,
     );
-    expect(marker.userData.markerStyle).toContain(PLAY_FEEDBACK.correct);
+    expect(marker.userData.markerStyle).toContain(playColors().correct);
     expect(factory.mock.calls.length).toBe(before + 1); // one shared color texture, no blank-name textures
     labels.dispose();
   });
@@ -1141,7 +1137,7 @@ it("uses contrasting river ink and casing, including after a palette change with
       material: { color: { getHexString(): string }; linewidth: number };
       renderOrder: number;
     }[];
-  for (const palette of ["atlas", "paper"] as const) {
+  for (const palette of ["dusk", "survey", "paper"] as const) {
     physical.update({ ...layer, palette }, 100);
     const lines = visibleLines();
     expect(lines).toHaveLength(2);
@@ -1353,4 +1349,37 @@ it("reserves flag space above island rings and fades newly introduced crossing m
   expect(labels.needsRefresh()).toBe(false);
   labels.dispose();
   clock.mockRestore();
+});
+
+it("keeps Survey's place typography and marker shapes while adapting ink to graphite land", () => {
+  for (const kind of ["city", "capital", "pin"] as const) {
+    const original = placeStyle(kind, "ocean");
+    const survey = placeStyle(kind, "survey");
+    expect(survey.font).toBe(original.font);
+    expect(survey.textHeight).toBe(original.textHeight);
+    expect(survey.shape).toBe(original.shape);
+    expect(survey.marker).not.toBe(original.marker);
+  }
+});
+
+it("refreshes cached label ink when switching to Survey with unchanged places", () => {
+  canvasFactory();
+  const labels = new PlaceLabels();
+  const layer = {
+    id: "labels",
+    kind: "place-labels" as const,
+    places,
+    visible: true,
+  };
+  labels.update({ ...layer, palette: "ocean" }, 100);
+  const original = labels.group.children[0] as Sprite;
+  const dispose = vi.spyOn(original.material, "dispose");
+  labels.update({ ...layer, palette: "survey" }, 100);
+  const survey = labels.group.children[0] as Sprite;
+  expect(survey).not.toBe(original);
+  expect(dispose).toHaveBeenCalledOnce();
+  expect(survey.userData.labelColor).toBe(placeStyle("capital", "survey").text);
+  labels.update({ ...layer, palette: "survey" }, 100);
+  expect(labels.group.children[0]).toBe(survey);
+  labels.dispose();
 });

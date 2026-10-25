@@ -9,7 +9,6 @@ import type { useBorderMinigame } from "../minigames/useBorderMinigame";
 export const games = [
   {
     slug: "shared-neighbors",
-    quickStart: "Pin the country that borders both clues.",
     title: "Shared Neighbors",
     description: "Two countries. One shared neighbor. Can you find it?",
     image: "/previews/shared-neighbors.svg",
@@ -17,42 +16,47 @@ export const games = [
       "Two highlighted countries and a location pin on a map of Europe.",
     controls: "Place a pin",
     instruction:
+      "Two countries are highlighted. Place a pin inside a country that shares a land border with both. Borders appear after you answer. Three incorrect answers end the run, or you can finish early.",
+    rules:
       "Use two highlighted countries as clues, then place a pin inside the country that shares a land border with both. Borders stay hidden until the reveal. Keep going until three wrong answers, or finish whenever you like.",
   },
   {
     slug: "missing-borders",
-    quickStart: "Find the two countries hiding in one shape.",
     title: "Missing Borders",
     description:
       "A border has vanished. Spot the countries hiding in one shape.",
     image: "/previews/missing-borders.svg",
     imageAlt: "Spain and Portugal shown as one continuous highlighted shape.",
-    controls: "Tap a territory",
+    controls: "Select a territory",
     instruction:
-      "One border has disappeared. Search the region and tap the territory hiding two countries to reveal their boundary. Three wrong answers end the game; you can also finish whenever you like.",
+      "One border has disappeared. Find the territory hiding two countries and select it to reveal their boundary. Three incorrect answers end the run, or you can finish early.",
+    rules:
+      "One border has disappeared. Search the region and select the territory hiding two countries to reveal their boundary. Three wrong answers end the game; you can also finish whenever you like.",
   },
   {
     slug: "border-run",
-    quickStart: "Count the fewest land borders between the flags.",
     title: "Border Run",
-    description: "Two countries. How many borders stand between them?",
+    description: "Two countries. How many borders must you cross?",
     image: "/previews/border-run.svg",
     imageAlt:
       "A map of Europe with highlighted route countries and four numbered border crossings.",
     controls: "Enter a number",
     instruction:
+      "Two countries are marked with flags. Count the fewest land borders you would cross between them, then reveal one shortest route. Sea crossings and corner contacts don’t count. Three incorrect answers end the run.",
+    rules:
       "Find the fewest shared land-border crossings between two countries. Enter your number, then see one shortest route. Routes follow connected land between countries; sea crossings and corner contacts don’t count. Borders are hidden unless you enable them. Three wrong answers end the game.",
   },
   {
     slug: "pinpoint",
-    quickStart: "Place your pin. Get closer, score higher. Ten rounds.",
     title: "Pinpoint",
     description: "Familiar places. One globe. How close can you get?",
     image: "/previews/pinpoint.svg",
     imageAlt: "A location pin and distance rings on a map of South America.",
     controls: "Place a pin",
     instruction:
-      "Play ten rounds with your chosen categories. Cities and landmarks earn up to 1,000 points by distance: within 1 km earns full points, and the score halves about every 1,040 km. Countries and US states earn 1,000 points for a pin anywhere inside. Each run brings a fresh mix of places.",
+      "Find cities, landmarks, countries, and U.S. states by placing pins on the globe. Cities and landmarks score by distance; countries and states score for a pin inside their boundaries. Play ten rounds, earning up to 1,000 points each.",
+    rules:
+      "Play ten rounds with your chosen categories. Cities and landmarks earn up to 1,000 points by distance: within 1 km earns full points, and the score halves about every 1,040 km. Countries and U.S. states earn 1,000 points for a pin anywhere inside. Each run brings a fresh mix of places.",
   },
 ];
 
@@ -112,8 +116,8 @@ export function MinigamesPanel({
             image: selected.image,
             imageAlt: selected.imageAlt,
             facts: [{ label: "Controls", value: selected.controls }],
-            howToPlay: selected.quickStart,
-            rules: selected.instruction,
+            howToPlay: selected.instruction,
+            rules: selected.rules,
           }}
           onClose={closePreview}
           returnFocus={trigger.current}
@@ -134,7 +138,9 @@ export function MinigamesPanel({
             !game.settingsSaved
               ? "Settings couldn’t be saved on this device."
               : game.ready && !game.count
-                ? "No puzzles match these settings. Choose a broader region or exclude fewer countries."
+                ? game.kind === "pinpoint"
+                  ? "No puzzles match your settings. Try more place categories, a broader area, or fewer exclusions."
+                  : "No puzzles match your settings. Try a broader area or fewer exclusions."
                 : game.hasUnfinished && !game.canResume
                   ? "Starting a new game replaces your current game."
                   : undefined
@@ -163,7 +169,7 @@ export function MinigamesPanel({
         A world to <em>play with.</em>
       </h1>
       <p className="muted study-introduction">
-        Find a shared neighbor, uncover a border, or chase your next high score.
+        Find common ground, follow borders, and test your sense of place.
       </p>
       <div className="study-paths">
         {games.map((item) => (

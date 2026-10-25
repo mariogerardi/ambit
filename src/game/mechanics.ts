@@ -368,7 +368,7 @@ export const MECHANICS = {
   ),
   pin: defineMechanic(
     ["pin-distance", "pin-inside"],
-    "Drop a pin",
+    "Place a pin",
     "pin",
     "pin",
     "none",

@@ -1,3 +1,4 @@
+import { DEFAULT_THEME } from "../theme/themes";
 import { makePaintOverlay } from "./paintOverlay";
 import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { patchGeometry, cellsGeometry } from "./constructionOverlays";
@@ -112,7 +113,7 @@ function cellsColor(
 export function makeMapOverlay(
   overlay: MapOverlay,
   globeRadius: number,
-  palette: ThemeId = "atlas",
+  palette: ThemeId = DEFAULT_THEME,
 ) {
   if (overlay.type === "paint")
     return makePaintOverlay(overlay, globeRadius, palette);
@@ -244,7 +245,7 @@ export function makeMapOverlay(
           : (overlay.type === "path" || overlay.type === "circle") &&
               overlay.visualState
             ? playColors(palette)[overlay.visualState]
-            : "#efd18f",
+            : playColors(palette).guide,
       linewidth:
         (overlay.type === "path" && overlay.visualState === "corridor") ||
         (overlay.type === "circle" && overlay.active)
@@ -272,7 +273,7 @@ export function makeMapOverlay(
   if (overlay.type === "path") {
     const color = overlay.visualState
       ? playColors(palette)[overlay.visualState]
-      : "#efd18f";
+      : playColors(palette).guide;
     if (overlay.arrowhead) {
       const arrow = pathArrowhead(
         overlay.coordinates,
@@ -311,7 +312,7 @@ export function makeMapOverlay(
                 )
               : overlay.visualState
                 ? playColors(palette)[overlay.visualState]
-                : "#efd18f",
+                : playColors(palette).guide,
           ),
         },
         bandOpacity: { value: overlay.active ? 0.13 : 0.045 },
@@ -366,7 +367,7 @@ export class MapOverlays {
     center?: GeoPoint,
     radiusKm = 160,
     radius = 100,
-    palette: ThemeId = "atlas",
+    palette: ThemeId = DEFAULT_THEME,
   ) {
     if (!center) {
       if (this.brush) this.brush.group.visible = false;
@@ -508,14 +509,16 @@ export class MapOverlays {
               : overlay.type === "path"
                 ? overlay.visualState
                   ? playColors(palette)[overlay.visualState]
-                  : "#efd18f"
+                  : playColors(palette).guide
                 : overlay.type === "circle" && overlay.accuracyBand
                   ? pinBandColor(
                       overlay.accuracyBand.index,
                       overlay.accuracyBand.count,
                       palette,
                     )
-                  : undefined;
+                  : overlay.type === "circle"
+                    ? playColors(palette).guide
+                    : undefined;
     if (!color) return;
     for (const child of group.children) {
       if (child instanceof Sprite) child.material.color.set(color);
@@ -533,7 +536,7 @@ export class MapOverlays {
         child.material.uniforms.bandColor.value.set(color);
     }
   }
-  get(overlay: MapOverlay, radius: number, palette: ThemeId = "atlas") {
+  get(overlay: MapOverlay, radius: number, palette: ThemeId = DEFAULT_THEME) {
     const signature = JSON.stringify(
       overlay.type === "paint"
         ? [

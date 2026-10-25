@@ -156,7 +156,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       leadIn: "Begin in South America.",
       prompt:
         "The Sun of May has a face. Which two South American countries put it on their national flags?",
-      instruction: "Tap both countries.",
+      instruction: "Select both countries.",
       mode: "map-multiple",
       count: 2,
       rule: { type: "country-ids", ids: ["wurl:ARG", "wurl:URY"] },
@@ -236,7 +236,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       ),
       feedbackFlags: [sunFlags[2]],
       explanation:
-        "Each of the eight rays preserves the memory of a province in the 1896 uprising. The sun carries that struggle for independence into the national flag.",
+        "The eight rays recall provinces associated with the 1896 Philippine Revolution against Spanish colonial rule. The sun carries that struggle for independence into the national flag.",
       source: source(
         "Philippine Supreme Court · constitutional discussion of the flag",
         "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/24/51077",
@@ -300,7 +300,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
         },
       ],
       explanation:
-        "The sun represents life and abundance. Its rays connect that idea to the harvest; the eagle below stands for independence.",
+        "The rays resemble grains, evoking abundance. The sun represents life and energy; the eagle below stands for independence.",
       source: source(
         "President of Kazakhstan · national flag symbolism",
         "https://www.akorda.kz/en/state_symbols/kazakhstan_flag",
@@ -342,7 +342,7 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       title: "No rays required.",
       leadIn: "Head east to the Pacific.",
       prompt:
-        "Here the sun becomes a simple red disc. Drop a pin on one of the four main islands of the country that flies this flag.",
+        "Here the sun becomes a simple red disc. Place a pin on one of the four main islands of the country that flies this flag.",
       instruction:
         "Country borders are hidden; estimate using the island shapes.",
       mode: "pin",
@@ -350,12 +350,22 @@ export const SUN_FLAGS_JOURNEY: Journey = {
       disclosure: { ...base.disclosure, namedChoices: false },
       image: flag("JPN", "A red disc centered on a white field."),
       explanation:
-        "The flag’s name, Hinomaru, means ‘sun circle.’ A face, rays, and a horizon disappear; the sun is still unmistakable.",
+        "Japan’s flag, the Hinomaru, depicts a simple red sun. Its four main islands are Hokkaido, Honshu, Shikoku, and Kyushu. A face, rays, and a horizon disappear; the sun is still unmistakable.",
       source: source(
         "Web Japan · national flag and anthem",
         "https://web-japan.org/factsheet/en/pdf/11NFlagAnthem.pdf",
       ),
-      sources: [mapSource, capitalSource],
+      sources: [
+        mapSource,
+        capitalSource,
+        {
+          ...source(
+            "Ministry of Foreign Affairs of Japan · four main islands",
+            "https://www.mofa.go.jp/territory/page1we_000006.html",
+          ),
+          reviewedOn: "2026-10-25",
+        },
+      ],
       guidance: {
         hint: "Look for an island country off the eastern coast of mainland Asia.",
         assist: {

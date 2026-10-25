@@ -516,7 +516,7 @@ it("turns the needle with pointer/touch input while retaining the draft when ass
         .find((b) => b.textContent?.includes(text))!
         .click(),
     );
-  clickHelp("Need a hint");
+  clickHelp("Get a hint");
   clickHelp("Need an assist");
   expect(host.querySelector("output")?.textContent).toBe("180°");
   expect(host.querySelector(".compass-sector")).not.toBeNull();

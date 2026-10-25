@@ -10,6 +10,20 @@ export function subdivisionKind(
     return region.id === "wurl:USA-DC" ? "federal district" : "state";
   return region.localType;
 }
+/** Format source type labels for display without changing catalog classifications. */
+export function subdivisionTypeLabel(
+  region: Pick<RegionFeature, "id" | "parentId" | "localType" | "level">,
+): string {
+  const kind = subdivisionKind(region);
+  if (!kind) return region.level;
+  return kind
+    .split("|")
+    .map((part) => {
+      const label = part.trim().replace(/governarate/gi, "governorate");
+      return label.charAt(0).toUpperCase() + label.slice(1);
+    })
+    .join(" / ");
+}
 export const REGIONAL_LAYERS = [
   { parentId: "wurl:USA", key: "USA/ADM1", label: "States & Washington, D.C." },
   { parentId: "wurl:CAN", key: "CAN/ADM1", label: "Provinces & territories" },

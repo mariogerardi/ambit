@@ -96,7 +96,7 @@ const stops = [
     slug: "tenerife",
     progress: "Departure",
     leadIn:
-      "In November 1803, the María Pita left A Coruña with an unusual cargo: a vaccine kept alive through a chain of vaccinations among children.",
+      "In November 1803, the María Pita left A Coruña carrying a vaccine kept active through successive vaccinations among children.",
     prompt:
       "Set your first bearing from A Coruña toward Santa Cruz de Tenerife, the expedition’s first island stop.",
     hint: "The Canary Islands lie off northwestern Africa, considerably south of Galicia. Start by considering the Atlantic southwest of the Iberian Peninsula.",

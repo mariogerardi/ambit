@@ -176,7 +176,7 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
     expect(probe.mounts).toBe(1);
     expect(host.querySelector("canvas")).toBe(canvas);
     expect(probe.props!.states["wurl:CAN"]).toBe("selected");
-    await click("Search another country or territory");
+    await click("Search another place");
     const search = document.querySelector<HTMLInputElement>(
       ".explore-search-field input",
     )!;
@@ -275,7 +275,7 @@ describe("app explore shell (DOM only; no browser or WebGL)", () => {
     expect(probe.focus.at(-1)).toEqual(member("wurl:AND").focus);
     expect(probe.focus.at(-1)!.altitude).toBeLessThan(0.1);
     const count = probe.focus.length;
-    await click("Search another country or territory");
+    await click("Search another place");
     expect(
       document.querySelector('.explore-country-search[role="dialog"]'),
     ).not.toBeNull();

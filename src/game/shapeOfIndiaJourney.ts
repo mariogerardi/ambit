@@ -161,7 +161,7 @@ export const SHAPE_OF_INDIA_JOURNEY: Journey = {
   addedAt: "2026-10-23",
   title: "The Shape of India",
   description:
-    "A coastline becomes a country; mountains give way to crowded plains. Explore India through five shapes, ending with a line that divides its people in half.",
+    "A coastline becomes a country; mountains give way to crowded plains. Explore India through five shapes, ending with a line that puts half its population on either side.",
   mapAttribution: {
     label: "NASA · Natural Earth · RESOLVE · GeoNames · WorldPop",
     url: assets + "SOURCES.md",
@@ -200,7 +200,7 @@ export const SHAPE_OF_INDIA_JOURNEY: Journey = {
           "Recognizing the country footprint is the task; the broader editable land does not trace the answer.",
       },
       guidance: {
-        hint: "Use the peninsula and its two coastlines to anchor yourself. India's land also extends around the Himalayan foothills and into the northeast.",
+        hint: "Use the peninsula and its two coastlines to anchor yourself. India’s land also extends around the Himalayan foothills and into the northeast.",
         assist: {
           text: "Five cities are marked, from Amritsar in the north to Kanyakumari at the southern tip. Kolkata and Guwahati help you find India’s eastern reach.",
           places: [
@@ -349,7 +349,7 @@ export const SHAPE_OF_INDIA_JOURNEY: Journey = {
     defineQuestion({
       ...base,
       id: "india-03-name-the-neighbors",
-      title: "Name India's Neighbors",
+      title: "Name India’s Neighbors",
       label: "The neighbors",
       resolvedLabel: "Six land neighbors",
       correctFeedback: "Well remembered.",
@@ -507,7 +507,7 @@ export const SHAPE_OF_INDIA_JOURNEY: Journey = {
         ],
       },
       guidance: {
-        hint: "A line that halves India's land will not necessarily halve its people. Pay special attention to the densely settled plains across the north.",
+        hint: "A line that halves India’s land will not necessarily halve its people. Pay special attention to the densely settled plains across the north.",
         assist: {
           text: "The lowland settlement belt is labeled. Use the full population map, including the less densely populated land, to choose your dividing line.",
           places: [
@@ -534,7 +534,7 @@ export const SHAPE_OF_INDIA_JOURNEY: Journey = {
         ],
       },
       qualification:
-        "The map shows WorldPop’s population estimates for 2025, rather than a census. Darker areas hold more people per square kilometre; the colors emphasize differences across both sparse and dense areas.",
+        "The map shows WorldPop’s population estimates for 2025, rather than a census. Darker areas hold more people per square kilometer; the colors emphasize differences across both sparse and dense areas.",
       sources: [population, geography],
       scenes: {
         play: {

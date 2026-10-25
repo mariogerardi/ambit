@@ -17,13 +17,18 @@ standards; examples do not override the crafting guide.
 | Change clues, scenes or camera framing | [Engine: Explicit scenes](JOURNEY_ENGINE.md#explicit-scenes); crafting sections 5–6                                               | `presentation.ts`, `scenes.ts`, and the relevant presentation/camera owner in [Architecture](ARCHITECTURE.md#module-map).                                     |
 | Change grading or add a mechanic       | [Engine: Responsibilities](JOURNEY_ENGINE.md#responsibilities) and [Extending the engine](JOURNEY_ENGINE.md#extending-the-engine) | `questionContracts.ts`, preparation/evaluation owner, `mechanics.ts` and the matching `recipes.ts` example.                                                   |
 | Register or retire a Journey           | [Catalog: Add or change a Journey](QUESTION_CATALOG.md#add-or-change-a-journey)                                                   | `journeys.ts`, generated index, retired IDs and save recovery.                                                                                                |
+| Change themes or shared visual styling | [Themes and visual styling](THEMES.md)                                                                                            | `src/theme/themes.ts`, `playColors.ts`, shared CSS, and theme/preference/loading tests.                                                                       |
 | Change saves, accounts or backend APIs | [Architecture: Module map](ARCHITECTURE.md#module-map)                                                                            | Relevant sections of [Save persistence](SAVE_PERSISTENCE.md) or [Services](SERVICES.md), then the owning module and focused tests.                            |
+
+For player-facing wording, follow [Player-facing copy](COPY_STYLE.md), alongside
+the task-specific guide above.
 
 ## Current guides
 
 | Guide                                                 | Use it for                                                                                             |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [Development](DEVELOPMENT.md)                         | Running checks, regenerating assets safely, and maintaining docs.                                      |
+| [Themes and visual styling](THEMES.md)                | Palette values, theme coverage, shared styles, and fixed-color exceptions.                             |
 | [Architecture](ARCHITECTURE.md)                       | Finding the owner of a behavior; shared globe, loading, and presentation contracts.                    |
 | [Question catalog and authoring](QUESTION_CATALOG.md) | Practice routes, answer modes, rules, factual scope, and adding a Journey.                             |
 | [Journey engine](JOURNEY_ENGINE.md)                   | Scene APIs, validation, presentation owners, and mechanic extension.                                   |

@@ -52,7 +52,7 @@ export function correctAnswerCopy(question: Question): string {
       "language-family",
     ].includes(question.rule.type)
   )
-    return "Beautifully reasoned.";
+    return "Well done.";
   if (["text", "typed-regions"].includes(question.mode))
     return "Nicely remembered.";
   if (

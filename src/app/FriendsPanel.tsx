@@ -306,7 +306,7 @@ export function FriendsPanel({
     }
     setNotice(
       (await copyShareText(link))
-        ? "Your invitation link is copied."
+        ? "Invitation link copied."
         : `Your invitation link: ${link}`,
     );
   }
@@ -538,7 +538,7 @@ export function FriendsPanel({
           </section>
           <p className="friend-data-note">
             Study sessions vary in difficulty, so these stats aren’t ranked.
-            Progress updates after syncing.
+            Progress updates when syncing is complete.
           </p>
         </article>
       </div>

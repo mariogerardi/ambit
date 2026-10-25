@@ -5,7 +5,7 @@
   font-family: var(--font-ui);
   font-optical-sizing: auto;
   color: var(--ui-text, #e9f0e9);
-  background: var(--ui-bg, #030a0e);
+  background: var(--ui-bg, #101010);
   font-synthesis: none;
   font-weight: 400;
   --mint: var(--ui-focus, #d3ebbb);

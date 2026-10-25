@@ -1,6 +1,6 @@
 import type { VisualState } from "../geography/types";
 import { regionStyle } from "./visualStates";
-import { THEMES } from "../theme/themes";
+import { DEFAULT_THEME, THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
 import mapColors from "../geography/data/map-colors.v1.json";
 import { playColors } from "../theme/playColors";
@@ -10,7 +10,7 @@ export type GlobeTheme = "natural" | "play";
 /** Regions, places, paths and UI use the same semantic palette. */
 export function playStateColor(
   state: VisualState,
-  palette: ThemeId = "atlas",
+  palette: ThemeId = DEFAULT_THEME,
 ): string | undefined {
   const colors = playColors(palette);
   return state in colors ? colors[state as keyof typeof colors] : undefined;
@@ -19,9 +19,9 @@ export function playRegionStyle(
   id: string,
   state: VisualState = "default",
   hovered = false,
-  palette: ThemeId = "atlas",
+  palette: ThemeId = DEFAULT_THEME,
 ) {
-  const { land, border } = THEMES[palette].globe;
+  const { land, border, candidateBorder = border } = THEMES[palette].globe;
   let hash = 0;
   for (const character of id)
     hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
@@ -39,15 +39,21 @@ export function playRegionStyle(
           ]),
     stroke: candidateHover
       ? colors["candidate-hover-outline"]
-      : state === "hinted"
-        ? colors["context-outline"]
-        : state === "clue"
-          ? colors["clue-outline"]
-          : ["selected", "correct", "answer", "incorrect", "visited"].includes(
-                state,
-              )
-            ? colors.outline
-            : border,
+      : state === "selectable" || state === "surface"
+        ? candidateBorder
+        : state === "hinted"
+          ? colors["context-outline"]
+          : state === "clue"
+            ? colors["clue-outline"]
+            : [
+                  "selected",
+                  "correct",
+                  "answer",
+                  "incorrect",
+                  "visited",
+                ].includes(state)
+              ? colors.outline
+              : border,
   };
 }
 export function themedRegionStyle(
@@ -55,7 +61,7 @@ export function themedRegionStyle(
   id: string,
   state: VisualState = "default",
   hovered = false,
-  palette: ThemeId = "atlas",
+  palette: ThemeId = DEFAULT_THEME,
 ) {
   return theme === "play"
     ? playRegionStyle(id, state, hovered, palette)

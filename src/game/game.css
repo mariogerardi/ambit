@@ -4,7 +4,7 @@
   min-height: 740px;
   height: 100dvh;
   overflow: hidden;
-  background: var(--ui-bg, #050d11);
+  background: var(--ui-bg, #101010);
   color: var(--ui-text, #eff1df);
 }
 .experience-glow {
@@ -1866,7 +1866,7 @@
 .experience .order-card.chosen {
   background: var(--play-selected, #f6bc46);
   border-color: var(--play-outline, #172b35);
-  color: #172b35;
+  color: var(--play-on-selected, #172b35);
 }
 .assist-conflict {
   display: block;
@@ -1927,7 +1927,7 @@
   height: 15px;
   font-size: 12px;
   font-style: normal;
-  color: #172b35;
+  color: var(--play-on-selected, #172b35);
 }
 .feedback-map-key i svg {
   display: block;

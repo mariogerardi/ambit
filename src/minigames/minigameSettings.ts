@@ -22,7 +22,7 @@ export const PINPOINT_CATEGORIES = {
   cities: "Major cities",
   landmarks: "Landmarks",
   countries: "Countries",
-  regions: "US states",
+  regions: "U.S. states",
 } as const;
 export type PinpointCategory = keyof typeof PINPOINT_CATEGORIES;
 export const defaultCategories: PinpointCategory[] = ["cities", "landmarks"];

@@ -1,3 +1,4 @@
+import { DEFAULT_THEME } from "../theme/themes";
 import {
   CanvasTexture,
   Group,
@@ -27,13 +28,18 @@ export interface PlaceLabelLayer {
 }
 export const isPlaceLabels = (value: object): value is PlaceLabelLayer =>
   "kind" in value && value.kind === "place-labels";
-export function placeStyle(kind: PlaceFeature["kind"]) {
+export function placeStyle(
+  kind: PlaceFeature["kind"],
+  palette: ThemeId = DEFAULT_THEME,
+) {
+  const survey = palette === "survey";
   if (["river", "mountain", "landform", "ocean"].includes(kind))
     return {
       shape: "circle",
-      marker: "#101010",
-      text:
-        kind === "river"
+      marker: survey ? "#d4d4d4" : "#101010",
+      text: survey
+        ? "#d4d4d4"
+        : kind === "river"
           ? "#b0e5ef"
           : kind === "mountain" || kind === "landform"
             ? "#ede1ca"
@@ -44,23 +50,23 @@ export function placeStyle(kind: PlaceFeature["kind"]) {
   if (kind === "pin")
     return {
       shape: "pin",
-      marker: "#ffd665",
-      text: "#f4f8ff",
+      marker: survey ? playColors(palette).selected : "#ffd665",
+      text: survey ? "#ececec" : "#f4f8ff",
       font: "500 26px Manrope, sans-serif",
       textHeight: 24,
     };
   return kind === "capital"
     ? {
         shape: "star",
-        marker: "#e4e8df",
-        text: "#f4f8ff",
+        marker: survey ? "#e4e4e4" : "#e4e8df",
+        text: survey ? "#ececec" : "#f4f8ff",
         font: "500 26px Manrope, sans-serif",
         textHeight: 26,
       }
     : {
         shape: "circle",
-        marker: "#101010",
-        text: "#f4f8ff",
+        marker: survey ? "#d4d4d4" : "#101010",
+        text: survey ? "#ececec" : "#f4f8ff",
         font: "500 26px Manrope, sans-serif",
         textHeight: 24,
       };
@@ -151,14 +157,17 @@ export interface LabelBox {
   bottom: number;
 }
 /** Answer cities share one style so a capital's typography cannot disclose it. */
-export const placeLabelStyle = (place: PlaceFeature) => {
-  const base = placeStyle(place.answerTarget ? "city" : place.kind);
+export const placeLabelStyle = (
+  place: PlaceFeature,
+  palette: ThemeId = DEFAULT_THEME,
+) => {
+  const base = placeStyle(place.answerTarget ? "city" : place.kind, palette);
   const style =
     place.labelTypography === "numeric"
       ? {
           ...base,
           font: "500 22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
-          text: "#b4cbd0",
+          text: palette === "survey" ? "#c4c4c4" : "#b4cbd0",
           textHeight: 18,
         }
       : base;
@@ -231,7 +240,7 @@ export class PlaceLabels {
   private radius = 100;
   private contextual = false;
   private density?: PlaceLabelLayer["density"];
-  private palette: ThemeId = "atlas";
+  private palette: ThemeId = DEFAULT_THEME;
   private drawnBoxes: LabelBox[] = [];
   private pendingLabels = false;
   needsRefresh() {
@@ -281,12 +290,14 @@ export class PlaceLabels {
   private targets: { place: PlaceFeature; x: number; y: number }[] = [];
   private label(place: PlaceFeature) {
     const labelKind = place.answerTarget ? "city" : place.kind;
+    const style = placeLabelStyle(place, this.palette);
     let sprite = this.sprites.get(place.id);
     if (
       sprite &&
       sprite.userData.labelName === place.name &&
       sprite.userData.labelKind === labelKind &&
-      sprite.userData.labelTypography === place.labelTypography
+      sprite.userData.labelTypography === place.labelTypography &&
+      sprite.userData.labelColor === style.text
     )
       return sprite;
     if (sprite) {
@@ -295,7 +306,6 @@ export class PlaceLabels {
       sprite.material.dispose();
       this.sprites.delete(place.id);
     }
-    const style = placeLabelStyle(place);
     const canvas = document.createElement("canvas"),
       context = canvas.getContext("2d")!;
     context.font = style.font;
@@ -342,6 +352,7 @@ export class PlaceLabels {
     sprite.userData.labelName = place.name;
     sprite.userData.labelKind = labelKind;
     sprite.userData.labelTypography = place.labelTypography;
+    sprite.userData.labelColor = style.text;
     sprite.raycast = () => {}; // Text never intercepts map answers.
     this.sprites.set(place.id, sprite);
     return sprite;
@@ -349,8 +360,8 @@ export class PlaceLabels {
   private marker(place: PlaceFeature) {
     let sprite = this.markers.get(place.id);
     const style = place.answerTarget
-      ? { ...placeStyle(place.kind), shape: "circle" }
-      : placeStyle(place.kind);
+      ? { ...placeStyle(place.kind, this.palette), shape: "circle" }
+      : placeStyle(place.kind, this.palette);
     const color = place.accuracyBand
       ? pinBandColor(
           place.accuracyBand.index,
@@ -418,7 +429,7 @@ export class PlaceLabels {
         ctx.clearRect(0, 0, 64, 64);
         ctx.strokeStyle =
           place.visualState === "selected"
-            ? "#172b35"
+            ? playColors(this.palette)["on-selected"]
             : playColors(this.palette)["on-feedback"];
         ctx.lineWidth = 3.5;
         ctx.lineCap = "round";
@@ -518,8 +529,8 @@ export class PlaceLabels {
             place.visualState ?? "",
           ) &&
           (!place.accuracyBand || place.accuracyBand.index === 0)
-            ? "#fffaf0"
-            : "#071524";
+            ? playColors(this.palette)["on-feedback"]
+            : playColors(this.palette)["on-selected"];
         ctx.font = "400 22px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -572,7 +583,7 @@ export class PlaceLabels {
       this.showMarkers === markers &&
       this.contextual === !!layer.contextual &&
       this.density === layer.density &&
-      this.palette === (layer.palette ?? "atlas")
+      this.palette === (layer.palette ?? DEFAULT_THEME)
     )
       return;
     const previousIds = new Set(this.active.map((e) => e.place.id));
@@ -582,7 +593,7 @@ export class PlaceLabels {
     this.showMarkers = markers;
     this.contextual = !!layer.contextual;
     this.density = layer.density;
-    this.palette = layer.palette ?? "atlas";
+    this.palette = layer.palette ?? DEFAULT_THEME;
     this.active = layer.places.map((place) => {
       const lat = (place.lat * Math.PI) / 180,
         lng = (place.lng * Math.PI) / 180;
@@ -812,7 +823,7 @@ export class PlaceLabels {
       if (label.parent !== this.group) this.group.add(label);
       label.position.copy(position);
       label.visible = false;
-      const h = placeLabelStyle(place).textHeight,
+      const h = placeLabelStyle(place, this.palette).textHeight,
         w = h * label.userData.aspect;
       const placement = placeLabelPlacement(
         x,

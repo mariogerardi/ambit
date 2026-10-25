@@ -142,7 +142,7 @@ export function FriendJourneyComparison({
             </em>
           </h3>
           <p className="muted">
-            Scores only unlock after you both finish the same Journey.
+            Compare scores once you’ve both completed the same Journey.
           </p>
         </div>
       </header>

@@ -117,7 +117,7 @@ export const FIFTEENTH_JOURNEY: Journey = {
         progressLabel: name,
         topic: "Russia’s neighbors",
         title: `Try not to click Russia: ${name}`,
-        prompt: `Drop a pin inside ${name}.`,
+        prompt: `Place a pin inside ${name}.`,
         leadIn: {
           FIN: "Start on the western side of the giant neighbor.",
           PRK: "Jump east to its short border near the Pacific.",

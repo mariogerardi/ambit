@@ -265,7 +265,7 @@ describe("capital distractors", () => {
       countryIds: ["wurl:LIE"],
       capitalDistractors: "countryCities",
     };
-    expect(settingsError(settings)).toContain("another bundled city");
+    expect(settingsError(settings)).toContain("another listed city");
     const mixed = startStudy(
       { ...settings, styles: { ...settings.styles, capitals: "mixed" } },
       42,

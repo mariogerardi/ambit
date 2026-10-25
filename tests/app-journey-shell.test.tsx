@@ -299,7 +299,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
     )!;
     await act(async () => next.click());
     expect(host.textContent).toContain(
-      "fewest number of state border crossings",
+      "minimum number of state borders",
     );
     expect(probe.props!.showBorders).toBe(false);
     await enter(
@@ -333,17 +333,17 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
       "southern Germany",
     );
     expect(copy.querySelector(".journey-prompt")?.textContent).toContain(
-      "Which other river",
+      "Which river system",
     );
     const actions = host.querySelector(
       ".mode-incoming .question-answer-actions",
     )!;
     const buttons = actions.querySelectorAll<HTMLButtonElement>("button");
-    expect(buttons[0].textContent).toContain("Need a hint?");
+    expect(buttons[0].textContent).toContain("Get a hint");
     expect(buttons[0].disabled).toBe(false);
     expect(buttons[0].type).toBe("button");
     expect(buttons[1].textContent).toContain("Submit answer");
-    await click("Need a hint?");
+    await click("Get a hint");
     expect(host.textContent).toContain("toward Lake Constance");
     await click("Need an assist?");
     expect(

@@ -247,7 +247,7 @@ describe("card ordering controls", () => {
       );
       expect(document.body.querySelector(".order-drag-preview")).toBeNull();
       expect(host.querySelector('[aria-label="Middle: Bolivia"]')).toBeTruthy();
-      await act(async () => button("Need a hint?").click());
+      await act(async () => button("Get a hint").click());
       await act(async () => button("Need an assist?").click());
       expect(
         host.querySelector<HTMLButtonElement>(

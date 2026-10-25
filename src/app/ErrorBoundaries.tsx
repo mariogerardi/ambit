@@ -36,7 +36,7 @@ export class PanelBoundary extends Component<
   render() {
     return this.state.failed ? (
       <section className="info-view" role="alert">
-        <p>This screen could not be loaded.</p>
+        <p>Couldn’t load this screen.</p>
         <button onClick={() => location.reload()}>Reload ↻</button>
       </section>
     ) : (

@@ -246,7 +246,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
         label: "Crossings",
         title: "The shortest state route.",
         prompt:
-          "What is the fewest number of state border crossings from California to Missouri?",
+          "What is the minimum number of state borders you must cross to travel from California to Missouri?",
         instruction:
           "State borders are hidden. Stay in the U.S.; corner contacts don’t count.",
         mode: "number",
@@ -357,7 +357,7 @@ export const NORTH_AMERICA_JOURNEY: Journey = {
       "Ontario reaches south into the Great Lakes, including the Point Pelee area below Boston’s latitude. The Canada–U.S. border is not a simple division of north from south.",
       "California, Arizona, New Mexico, and Texas each meet Mexico. On one side of the international boundary, four different states share the same southern neighbor.",
       "",
-      "The Carolinas grew from one colony, and the Dakotas from one territory. West Virginia separated from Virginia during the Civil War. These directions preserve histories of division, not just positions on a compass.",
+      "The five states are North Carolina, South Carolina, North Dakota, South Dakota, and West Virginia. The Carolinas grew from one colony, the Dakotas from one territory, and West Virginia separated from Virginia during the Civil War. These directions preserve histories of division, not just positions on a compass.",
     ][index],
   })),
   completion: {

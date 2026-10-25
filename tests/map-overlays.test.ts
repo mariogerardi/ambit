@@ -11,7 +11,7 @@ import {
   Vector3,
 } from "three";
 import { MAP_ANNOTATION_ALTITUDE } from "../src/globe/surface";
-import { pinBandColor } from "../src/theme/playColors";
+import { pinBandColor, playColors } from "../src/theme/playColors";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { MapOverlays, overlayPositions } from "../src/globe/overlays";
@@ -309,7 +309,9 @@ it("fades corridor context with camera altitude without rebuilding geometry or i
   const geometry = line.geometry;
   expect(line.material.linewidth).toBe(3);
   expect(line.material.dashed).toBe(false);
-  expect(line.material.color.getHexString()).toBe("ffd34e");
+  expect(line.material.color.getHexString()).toBe(
+    playColors().corridor.slice(1),
+  );
   const camera = new PerspectiveCamera();
   for (const [altitude, expected] of [
     [0.3, 0.28],
@@ -325,6 +327,13 @@ it("fades corridor context with camera altitude without rebuilding geometry or i
     expect(line.geometry).toBe(geometry);
   }
   expect(new Raycaster().intersectObject(group, true)).toEqual([]);
+  for (const palette of ["dusk", "ocean", "survey"] as const) {
+    overlays.setPalette(palette);
+    expect(line.material.color.getHexString()).toBe(
+      playColors(palette).corridor.slice(1),
+    );
+    expect(line.geometry).toBe(geometry);
+  }
   overlays.setPalette("paper");
   expect(line.material.color.getHexString()).toBe("a36708");
   overlays.dispose();
@@ -363,4 +372,37 @@ it("draws a revealed boundary progressively and stops requesting stationary fram
   ).toBe(total);
   overlays.dispose();
   clock.mockRestore();
+});
+
+it("updates unclassified guide ink when switching palettes without rebuilding geometry", () => {
+  const overlays = new MapOverlays();
+  const guides: MapOverlay[] = [
+    {
+      id: "guide-path",
+      type: "path",
+      coordinates: [
+        [0, 0],
+        [10, 10],
+      ],
+    },
+    {
+      id: "guide-circle",
+      type: "circle",
+      center: { lat: 0, lng: 0 },
+      radiusKm: 100,
+    },
+  ];
+  const groups = guides.map((guide) => overlays.get(guide, 100));
+  const lines = groups.map((group) => group.children[0] as LineSegments2);
+  const geometry = lines.map((line) => line.geometry);
+  for (const palette of ["survey", "ocean"] as const) {
+    overlays.setPalette(palette);
+    lines.forEach((line, index) => {
+      expect(line.material.color.getHexString()).toBe(
+        playColors(palette).guide.slice(1),
+      );
+      expect(line.geometry).toBe(geometry[index]);
+    });
+  }
+  overlays.dispose();
 });

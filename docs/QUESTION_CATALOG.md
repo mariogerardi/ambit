@@ -415,7 +415,7 @@ change the answer contract. Across the Divide demonstrates this supported path.
 An optional `guidance.assist` supplies
 separate copy, surviving `candidateIds`, named reference `places`, and/or broad
 search `overlays`. The first
-request reveals the hint; the button then changes from “Need a hint?” with a bulb
+request reveals the hint; the button then changes from “Get a hint” with a bulb
 to “Need an assist?” with a lifebuoy, in a different color. After all available
 help is used it remains visible and disabled. Assists never modify the rule or
 grading tolerance. Eliminated choices cannot be newly selected through the map,

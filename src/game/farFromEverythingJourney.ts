@@ -252,7 +252,7 @@ const stops: Stop[] = [
       "Valparaíso and Pitcairn Island are now marked far apart. Look between them, closer to Pitcairn.",
     assistPlaces: [valparaiso, pitcairn],
     explanation:
-      "Rapa Nui sits thousands of kilometres west of continental Chile. Its moai and ceremonial platforms belong to a distinctive Polynesian cultural landscape that developed amid extraordinary oceanic isolation.",
+      "Rapa Nui sits thousands of kilometers west of continental Chile. Its moai and ceremonial platforms belong to a distinctive Polynesian cultural landscape that developed amid extraordinary oceanic isolation.",
     source: unesco,
     sources: [
       gazetteer("4030726", "Rapa Nui island reference"),
@@ -302,7 +302,7 @@ const stops: Stop[] = [
     assistPlaces: [stHelena],
     revealPlaces: [edinburgh],
     explanation:
-      "Tristan da Cunha is home to Edinburgh of the Seven Seas. With no airport, reaching the community means travelling by sea—often from Cape Town. The village sits on the island's northern coast beneath Queen Mary's Peak.",
+      "Tristan da Cunha is home to Edinburgh of the Seven Seas. With no airport, reaching the community means traveling by sea—often from Cape Town. The village sits on the island’s northern coast beneath Queen Mary’s Peak.",
     source: tristanLocation,
     sources: [
       tristanAccess,
@@ -333,7 +333,7 @@ const stops: Stop[] = [
       "A 55°S parallel now crosses the search area. Look near it, south of the Atlantic and southwest of Africa.",
     assistOverlays: [parallel(-55)],
     explanation:
-      "Bouvetøya is a Norwegian nature reserve with no permanent population. About 89% of its 49-square-kilometre surface is glaciated. It lies roughly 1,700 km north of Antarctica's coast, outside Antarctica itself.",
+      "Bouvetøya is a Norwegian nature reserve with no permanent population. About 89% of its 49-square-kilometer surface is glaciated. It lies roughly 1,700 km north of Antarctica’s coast, outside Antarctica itself.",
     source: polar,
     sources: [tristanLocation],
   },
@@ -357,7 +357,7 @@ const stops: Stop[] = [
     assistOverlays: [parallel(-50)],
     revealPlaces: nearestLand,
     explanation:
-      "Point Nemo is the oceanic pole of inaccessibility. Its nearest land is Ducie Island, Motu Nui near Rapa Nui, and Maher Island in Antarctica—each thousands of kilometres away.",
+      "Point Nemo is the oceanic pole of inaccessibility. Its nearest land is Ducie Island, Motu Nui near Rapa Nui, and Maher Island in Antarctica—each thousands of kilometers away.",
     source: noaa,
     sources: [
       gazetteer("4030717", "Ducie Island"),

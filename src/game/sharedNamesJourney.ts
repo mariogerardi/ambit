@@ -107,7 +107,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
       title: "Two Congos.",
       leadIn:
         "In Central Africa, two neighboring countries share the name Congo.",
-      prompt: "Find them on the globe.",
+      prompt: "Find both countries named Congo on the globe.",
       mode: "map-multiple",
       count: 2,
       commitment: "submit",
@@ -315,7 +315,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
       title: "Victoria, by the river.",
       leadIn:
         "Lake Victoria lies in East Africa. Farther south, Victoria Falls is on the Zambezi River at the Zambia–Zimbabwe border.",
-      prompt: "Drop a pin as close to the falls as you can.",
+      prompt: "Place a pin as close to the falls as you can.",
       instruction: "",
       mode: "pin",
       count: 1,

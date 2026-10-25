@@ -254,7 +254,7 @@ it("keeps the island target in play and explains scoring with each question resu
   expect(host.querySelector('[aria-label="Reset shape"]')).toBeNull();
   const buttons = [...host.querySelectorAll("button")];
   await act(async () =>
-    buttons.find((b) => b.textContent?.includes("Pulse islands"))!.click(),
+    buttons.find((b) => b.textContent?.includes("Highlight islands"))!.click(),
   );
   await act(async () =>
     buttons.find((b) => b.textContent?.includes("Recenter view"))!.click(),

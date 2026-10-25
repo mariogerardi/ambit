@@ -111,8 +111,7 @@ export function WorldCreditsDialog({ onClose }: { onClose(): void }) {
           </div>
         </dl>
         <p>
-          Map and clue assets are served locally. Question sources appear after
-          answering.
+          Sources for individual Journey questions appear after you answer.
         </p>
         <div className="world-credits-links">
           <a

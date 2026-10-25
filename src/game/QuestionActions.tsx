@@ -86,13 +86,13 @@ export function QuestionActions({
             pointScoring
               ? assist
                 ? "Need an assist?"
-                : "Need a hint?"
+                : "Get a hint"
               : undefined
           }
           aria-describedby={pointScoring && guidance ? ceilingId : undefined}
           title={
             !guidance
-              ? "Hints are coming soon."
+              ? "No hint available for this question."
               : exhausted
                 ? "All available help has been used."
                 : undefined
@@ -102,7 +102,7 @@ export function QuestionActions({
           }
           onClick={assist ? guidance?.onAssist : guidance?.onHint}
         >
-          {assist ? "Need an assist?" : "Need a hint?"}{" "}
+          {assist ? "Need an assist?" : "Get a hint"}{" "}
           <ActionIcon name={assist ? "assist" : "hint"} />
           {pointScoring && guidance && (
             <small id={ceilingId} className="help-point-ceiling">

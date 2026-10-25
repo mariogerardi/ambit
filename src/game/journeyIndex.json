@@ -719,7 +719,7 @@
     "id": "the-shape-of-india-v1",
     "addedAt": "2026-10-23",
     "title": "The Shape of India",
-    "description": "A coastline becomes a country; mountains give way to crowded plains. Explore India through five shapes, ending with a line that divides its people in half.",
+    "description": "A coastline becomes a country; mountains give way to crowded plains. Explore India through five shapes, ending with a line that puts half its population on either side.",
     "path": "/journey/the-shape-of-india",
     "module": "./shapeOfIndiaJourney.ts",
     "rounds": [
@@ -913,7 +913,7 @@
     "addedAt": "2026-10-21",
     "title": "Within Reach",
     "supersedes": "within-reach-v1",
-    "description": "From Boston Harbor to the Cyclades, explore islands large and small. Move one circle across five island groups and see how many complete shores you can bring within reach.",
+    "description": "From Boston Harbor to the Cyclades, explore five island groups. In each, position a circle to enclose as many whole islands as you can.",
     "path": "/journey/within-reach",
     "module": "./withinReachJourney.ts",
     "rounds": [

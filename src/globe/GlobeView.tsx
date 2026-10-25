@@ -67,10 +67,10 @@ import {
   localZoomFloor,
   focusAltitude,
 } from "./camera";
-import { pinBandColor } from "../theme/playColors";
+import { pinBandColor, playColors } from "../theme/playColors";
 import { themedRegionStyle, playStateColor } from "./themes";
 import type { GlobeTheme } from "./themes";
-import { THEMES } from "../theme/themes";
+import { DEFAULT_THEME, THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
 import {
   boundaryOutlinePositions,
@@ -276,7 +276,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       return () => clueLocators.dispose();
     }, [clueLocators]);
     useEffect(
-      () => mapOverlays.setPalette(props.palette ?? "atlas"),
+      () => mapOverlays.setPalette(props.palette ?? DEFAULT_THEME),
       [mapOverlays, props.palette],
     );
     useEffect(() => () => mapOverlays.dispose(), [mapOverlays]);
@@ -420,9 +420,14 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         new MeshPhongMaterial({
           color:
             props.theme === "play"
-              ? THEMES[props.palette ?? "atlas"].globe.ocean
+              ? THEMES[props.palette ?? DEFAULT_THEME].globe.ocean
               : "#173f4d",
           shininess: props.theme === "play" ? 0 : 6,
+          specular:
+            props.theme === "play" &&
+            ["ocean", "survey"].includes(props.palette ?? DEFAULT_THEME)
+              ? "#000000"
+              : "#111111",
         }),
       [props.theme, props.palette],
     );
@@ -1058,7 +1063,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               : (playStateColor(
                   route(obj).visualState ?? "hinted",
                   p.palette,
-                ) ?? "#efd18f"),
+                ) ?? playColors(p.palette).guide),
           );
           line.material.opacity = 1;
           line.material.linewidth = 2.2;
@@ -1583,7 +1588,12 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           }}
           globeMaterial={material}
           globeImageUrl={props.theme === "play" ? undefined : texture}
-          atmosphereColor={THEMES[props.palette ?? "atlas"].globe.atmosphere}
+          atmosphereColor={
+            THEMES[props.palette ?? DEFAULT_THEME].globe.atmosphere
+          }
+          showAtmosphere={
+            THEMES[props.palette ?? DEFAULT_THEME].globe.showAtmosphere
+          }
           atmosphereAltitude={0.12}
           polygonsData={countryRegions}
           polygonGeoJsonGeometry="geometry"
@@ -1625,7 +1635,11 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           arcStartLng={(obj) => route(obj).from.lng}
           arcEndLat={(obj) => route(obj).to.lat}
           arcEndLng={(obj) => route(obj).to.lng}
-          arcColor={() => ["#d2efbe", "#eacb93"]}
+          arcColor={() =>
+            props.palette === "survey"
+              ? [playColors("survey").hinted, playColors("survey").corridor]
+              : ["#d2efbe", "#eacb93"]
+          }
           arcAltitudeAutoScale={0.4}
           arcStroke={0.48}
           arcDashLength={props.reduced ? 1 : 0.4}

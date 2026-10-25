@@ -732,7 +732,7 @@ export function App() {
           schedule.schedule?.assignments,
         ),
       );
-    document.title = `ambit — ${mode === "home" ? "A world of wonders" : mode === "daily" || mode === "practice" ? "Journey" : mode[0].toUpperCase() + mode.slice(1)}`;
+    document.title = `Ambit — ${mode === "home" ? "a different way to see the world" : mode === "daily" || mode === "practice" ? "Journey" : mode[0].toUpperCase() + mode.slice(1)}`;
   }, [
     mode,
     activeAttempt,
@@ -1014,7 +1014,7 @@ export function App() {
                 ...cloudSave,
                 status: "error",
                 message:
-                  "Saving on this device failed. New progress has not synced. Free storage space and try again.",
+                  "Couldn’t save your progress on this device. New progress has not synced. Check your browser’s storage settings or available space, then try again.",
                 retry: retrySaving,
               }
         }
@@ -1666,9 +1666,13 @@ export function App() {
               contextError ||
               (recovery.failed
                 ? recovery.recovering
-                  ? "Restoring the globe… Your progress is kept."
-                  : "The globe is unavailable. Your progress is kept."
-                : "The 3D globe is required to play Ambit on this device.")}
+                  ? canSave
+                    ? "Restoring the globe… Your current session remains open."
+                    : "Restoring the globe… Recent progress may not be saved."
+                  : canSave
+                    ? "The globe isn’t available. Your current session remains open."
+                    : "The globe isn’t available. Recent progress may not be saved."
+                : "The 3D globe isn’t available. Try another browser or device.")}
           </p>
           {error && (
             <button onClick={() => setRetry((v) => v + 1)}>Try again ↻</button>

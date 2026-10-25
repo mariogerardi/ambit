@@ -303,7 +303,7 @@ describe("card matching", () => {
           }),
         ),
       );
-      await act(async () => button("Need a hint?").click());
+      await act(async () => button("Get a hint").click());
       await act(async () => button("Need an assist?").click());
       expect(
         host.querySelector<HTMLButtonElement>(

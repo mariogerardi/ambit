@@ -381,7 +381,7 @@ export function GameShell({
                     >
                       {game.showConstructionExample
                         ? "Hide solution"
-                        : "See our solution"}{" "}
+                        : "Show solution"}{" "}
                       <span aria-hidden="true">
                         {game.showConstructionExample ? "↑" : "→"}
                       </span>
@@ -578,7 +578,7 @@ export function GameShell({
           <h1 className="journey-result-heading" ref={heading} tabIndex={-1}>
             {game.phase === "failed" ? (
               <>
-                This is where <em>we pause.</em>
+                This run <em>ends here.</em>
               </>
             ) : (
               <>

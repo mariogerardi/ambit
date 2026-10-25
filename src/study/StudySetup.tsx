@@ -29,13 +29,13 @@ const topicNames = {
   flags: "Flags",
 };
 const methods: Record<StudyStyle, string> = {
-  map: "Tap globe",
+  map: "Select on globe",
   typing: "Type",
   choices: "Multiple choice",
   mixed: "Mixed",
 };
 const summaryMethods: Record<StudyStyle, string> = {
-  map: "Tap globe",
+  map: "Select on globe",
   typing: "Type answers",
   choices: "Multiple choice",
   mixed: "Mixed",
@@ -107,7 +107,7 @@ export function StudyEditor({
       aria-label="Study setup"
     >
       <div className="study-editor-scroll">
-        {onBack && <StudyBack label="Back to paths" onClick={onBack} />}
+        {onBack && <StudyBack label="Back to Study" onClick={onBack} />}
         <h1 className="editorial-heading">
           Build a <em>session.</em>
         </h1>
@@ -264,7 +264,7 @@ export function StudyEditor({
                 })
               }
             />
-            Use different methods by topic
+            Choose an answer method for each topic
           </label>
           {perTopic && (
             <div className="study-method-details">
@@ -298,9 +298,9 @@ export function StudyEditor({
             ["choices", "mixed"].includes(settings.styles.capitals) && (
               <>
                 <label className="study-config-row">
-                  <span>Capital distractors</span>
+                  <span>Other answer choices</span>
                   <select
-                    aria-label="Capital distractors"
+                    aria-label="Other answer choices"
                     data-dd-action-name="Study Select Capital Distractors"
                     value={settings.capitalDistractors ?? "study"}
                     onChange={(event) =>
@@ -321,11 +321,10 @@ export function StudyEditor({
                 </label>
                 {settings.capitalDistractors === "countryCities" && (
                   <p className="muted study-distractor-note">
-                    Uses the bundled major-city catalog. Countries without
-                    another city are excluded from this session when capitals
-                    use multiple choice; mixed practice uses map or typing
-                    there. Fewer options appear when fewer distinct cities are
-                    available.
+                    Uses major cities included in Ambit. Countries without
+                    another listed city are skipped in multiple-choice practice;
+                    mixed practice uses map or typing instead. Some questions
+                    may have fewer choices.
                   </p>
                 )}
               </>
@@ -372,7 +371,7 @@ export function StudyEditor({
                   {value === "continuous"
                     ? "Keep going"
                     : value === "all"
-                      ? "Cover everything once"
+                      ? "One complete pass"
                       : `${value} questions`}
                 </option>
               ))}
@@ -419,7 +418,7 @@ export function StudyEditor({
         </button>
         {onResume && (
           <aside className="study-replacement-note">
-            <p>Starting a new session replaces your current session.</p>
+            <p>Starting a new session will end your current one.</p>
             <button
               className="quiet-button tertiary-action"
               data-dd-action-name="Study Resume Session"
@@ -491,7 +490,7 @@ export function StudySetup(props: {
           onClose={closePreview}
           notice={
             props.onResume
-              ? "Starting a new session replaces your current session."
+              ? "Starting a new session will end your current one."
               : undefined
           }
           primary={{
@@ -515,8 +514,7 @@ export function StudySetup(props: {
         Make the world <em>familiar.</em>
       </h1>
       <p className="muted study-introduction">
-        Practice countries, capitals and flags. Choose a path or build your own
-        session.
+        Practice countries, capitals and flags. Choose a ready-made session or build your own.
       </p>
       {props.onResume && (
         <button
