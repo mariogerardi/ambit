@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isStudyPinPrompt, studyPinTarget } from "../study/pins";
 import type { RefObject } from "react";
 import type { Focus, PlaceFeature, RegionFeature } from "../geography/types";
 import type { GlobeHandle } from "../globe/GlobeView";
@@ -245,6 +246,13 @@ export function useCameraOrchestration({
       setMotion(false);
       clearHover();
       frame(journeyFocus);
+    } else if (
+      studying &&
+      session?.phase === "feedback" &&
+      isStudyPinPrompt(session.prompt)
+    ) {
+      const target = studyPinTarget(session.prompt, namedRegions);
+      if (target) frame({ ...target, altitude: target.regionId ? 1.1 : 0.3 });
     } else if (studying && session?.phase === "playing") {
       setMotion(false);
       clearHover();

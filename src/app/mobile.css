@@ -138,8 +138,8 @@
     padding: 4px 0;
   }
   .experience .home-menu .menu-secondary {
-    margin-top: 16px;
-    gap: 14px;
+    margin-top: 10px;
+    gap: 10px;
   }
   .experience .menu-secondary small,
   .experience .globe-invitation {
@@ -213,7 +213,6 @@
       .primary-button,
       .quiet-button,
       .candidate-grid button,
-      .study-presets button,
       .country-search button
     ) {
     font-size: 14px;
@@ -251,7 +250,6 @@
   .experience
     :is(
       .display-settings label,
-      .checkbox-line,
       .custom-pool label,
       .regional-toggle,
       .study-choices label
@@ -269,7 +267,7 @@
     font-size: 13px;
     line-height: 1.6;
   }
-  .experience :is(.typed-country-guess summary, .explore-controls summary) {
+  .experience .typed-country-guess summary {
     font-size: 14px;
     padding-block: 12px;
   }
@@ -668,9 +666,7 @@
   }
   .experience.experience .study-editor {
     flex: 1;
-    height: auto;
     min-height: 0;
-    overflow: hidden;
     padding-bottom: 0;
   }
   .experience .study-editor h1.editorial-heading {
@@ -707,13 +703,6 @@
   .experience .study-path h3,
   .experience .study-path-build strong {
     font-size: 21px;
-  }
-  .experience .study-path .quiet-button {
-    min-height: 44px;
-    font-size: 13px;
-  }
-  .experience .study-path button.study-path-customize {
-    min-height: 44px;
   }
   .experience button.explore-search-link {
     min-height: 0;

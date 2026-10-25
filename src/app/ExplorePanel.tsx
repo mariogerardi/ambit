@@ -313,7 +313,7 @@ export function ExplorePanel({
         <>
           <p className="muted explore-introduction">
             Select a country or territory to take a closer look. Small places
-            are marked with rings. Zoom in to distinguish nearby locations.{" "}<br></br><br></br>
+            are marked with rings. Zoom in to distinguish nearby locations. Or,{" "}
             <button
               ref={searchButton}
               data-dd-action-name="Explore Open Search"
@@ -323,7 +323,7 @@ export function ExplorePanel({
               aria-controls="explore-search"
               onClick={() => setOpen((value) => !value)}
             >
-              Search countries and territories
+              search countries and territories
             </button>
           </p>
         </>

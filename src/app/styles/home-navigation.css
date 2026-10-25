@@ -11,12 +11,6 @@
   padding: 16px;
   border: 1px solid rgb(var(--ui-accent-rgb) / 0.25);
   border-radius: 11px;
-  background: linear-gradient(
-    135deg,
-    rgb(var(--ui-accent-rgb) / 0.08),
-    rgb(var(--ui-surface-rgb) / 0.8)
-  );
-  background-color: rgb(var(--ui-accent-rgb) / 0.02);
   transition:
     background-color 180ms ease,
     border-color 180ms ease;
@@ -30,12 +24,6 @@
 .home-menu .menu-secondary .home-minigames {
   grid-column: 1 / -1;
   border-color: rgb(var(--ui-accent-rgb) / 0.4);
-  background: linear-gradient(
-    135deg,
-    rgb(var(--ui-accent-rgb) / 0.18),
-    rgb(var(--ui-surface-rgb) / 0.8)
-  );
-  background-color: rgb(var(--ui-accent-rgb) / 0.06);
 }
 .home-menu .menu-secondary .menu-new-badge {
   padding: 4px 7px;

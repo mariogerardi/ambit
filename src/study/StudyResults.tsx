@@ -1,4 +1,6 @@
 import { useState } from "react";
+import type { StudyPlaceTarget } from "./placeReview";
+import { isStudyPinPrompt, studyPinFeedback } from "./pins";
 import { ActionIcon } from "../app/ActionIcon";
 import {
   TOPICS,
@@ -18,6 +20,7 @@ export function StudyResults({
   session,
   onSetup,
   onStart,
+  onStartPlaces,
   onLocate,
   onHome,
   onHistory,
@@ -25,6 +28,7 @@ export function StudyResults({
   session: StudySession;
   onSetup(): void;
   onStart(settings: StudySettings, targets?: StudyReviewTarget[]): void;
+  onStartPlaces?(targets: StudyPlaceTarget[]): void;
   onLocate?(answer: StudyAnswer): void;
   onHome?(): void;
   onHistory?(): void;
@@ -33,8 +37,19 @@ export function StudyResults({
   const missed = missedStudyAnswers(session);
   const missedIds = [...new Set(missed.map((a) => a.prompt.targetId))];
   const right = session.history.filter((a) => a.correct).length;
-  const topics = { countries: "Country", capitals: "Capital", flags: "Flag" };
+  const topics = {
+    countries: "Country",
+    capitals: "Capital",
+    flags: "Flag",
+    places: "Place",
+  };
   function review() {
+    if (session.placeReview) {
+      onStartPlaces?.(
+        missed.flatMap((a) => (a.prompt.place ? [a.prompt.place] : [])),
+      );
+      return;
+    }
     const settings: StudySettings = {
       ...session.settings,
       scope: "custom",
@@ -101,7 +116,10 @@ export function StudyResults({
                       onLocate?.(answer);
                     }}
                   >
-                    <strong>{countryName(answer.prompt.targetId)}</strong>
+                    <strong>
+                      {answer.prompt.place?.name ??
+                        countryName(answer.prompt.targetId)}
+                    </strong>
                     <span>{topics[answer.prompt.topic]}</span>
                   </button>
                   {expanded && (
@@ -109,10 +127,17 @@ export function StudyResults({
                       className="study-review-detail"
                       id={`review-${key.replaceAll("/", "-")}`}
                     >
-                      <p>
-                        Your {answer.prompt.style === "map" ? "pick" : "answer"}
-                        : <strong>{answer.response}</strong>
-                      </p>
+                      {isStudyPinPrompt(answer.prompt) ? (
+                        <p>
+                          {studyPinFeedback(answer, answerLabel(answer.prompt))}
+                        </p>
+                      ) : (
+                        <p>
+                          Your{" "}
+                          {answer.prompt.style === "map" ? "pick" : "answer"}:{" "}
+                          <strong>{answer.response}</strong>
+                        </p>
+                      )}
                       {answer.prompt.topic === "capitals" &&
                         answer.prompt.style !== "map" && (
                           <p>
@@ -158,7 +183,11 @@ export function StudyResults({
         <button
           className={missed.length ? "study-repeat-button" : "primary-button"}
           data-dd-action-name="Study Repeat Session"
-          onClick={() => onStart(session.settings, studyReplayTargets(session))}
+          onClick={() =>
+            session.placeReview
+              ? onStartPlaces?.(session.placeReview)
+              : onStart(session.settings, studyReplayTargets(session))
+          }
         >
           <ActionIcon name="repeat" />
           <span>Repeat this session</span>

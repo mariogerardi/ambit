@@ -5,6 +5,21 @@ import { progressKey } from "../app/progressSaves";
 import { validPin } from "../game/answerTargets";
 import type { NeighborRun, BorderMinigame } from "./sharedNeighbors";
 import { validMinigameSettings } from "./minigameSettings";
+import { validStudyPlace } from "../study/placeReview";
+
+const validVisit = (v: unknown) =>
+  isRecord(v) &&
+  Array.isArray(v.ids) &&
+  v.ids.every((id) => typeof id === "string") &&
+  typeof v.correct === "boolean" &&
+  validPin(v.point) &&
+  (v.pin === undefined || validPin(v.pin)) &&
+  (v.points === undefined || integer(v.points)) &&
+  (v.distanceKm === undefined ||
+    (typeof v.distanceKm === "number" &&
+      Number.isFinite(v.distanceKm) &&
+      v.distanceKm >= 0)) &&
+  (v.target === undefined || validStudyPlace(v.target));
 
 interface Save {
   version: 1;
@@ -33,6 +48,10 @@ export function validNeighborRun(value: unknown): value is NeighborRun {
     integer(value.answered) &&
     integer(value.correct) &&
     Number(value.correct) <= Number(value.answered) &&
+    (value.review === undefined ||
+      (Array.isArray(value.review) &&
+        value.review.length <= 64 &&
+        value.review.every(validVisit))) &&
     (value.text === undefined ||
       (typeof value.text === "string" && /^\d{0,3}$/.test(value.text))) &&
     (value.points === undefined || integer(value.points)) &&
@@ -40,20 +59,7 @@ export function validNeighborRun(value: unknown): value is NeighborRun {
     (value.history === undefined ||
       (Array.isArray(value.history) &&
         value.history.length <= 64 &&
-        value.history.every(
-          (v) =>
-            isRecord(v) &&
-            Array.isArray(v.ids) &&
-            v.ids.every((id) => typeof id === "string") &&
-            typeof v.correct === "boolean" &&
-            validPin(v.point) &&
-            (v.pin === undefined || validPin(v.pin)) &&
-            (v.points === undefined || integer(v.points)) &&
-            (v.distanceKm === undefined ||
-              (typeof v.distanceKm === "number" &&
-                Number.isFinite(v.distanceKm) &&
-                v.distanceKm >= 0)),
-        ))) &&
+        value.history.every(validVisit))) &&
     (value.settings === undefined || validMinigameSettings(value.settings)) &&
     (value.ended === undefined ||
       value.ended === "finished" ||

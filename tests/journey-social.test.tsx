@@ -112,6 +112,45 @@ async function renderDialog() {
     root.render(<JourneyShareDialog result={result} onClose={vi.fn()} />),
   );
 }
+it("shares a minigame card with its own image, filename and caption", async () => {
+  const image = vi.fn(
+    async () => new Blob(["minigame"], { type: "image/png" }),
+  );
+  const share = vi.fn(async () => {});
+  Object.defineProperty(navigator, "share", {
+    configurable: true,
+    value: share,
+  });
+  Object.defineProperty(navigator, "canShare", {
+    configurable: true,
+    value: () => true,
+  });
+  await act(async () =>
+    root.render(
+      <JourneyShareDialog
+        card={{
+          heading: "Share Pinpoint",
+          caption: "Play Pinpoint with me",
+          description: "7,200 points",
+          filename: "ambit-pinpoint.png",
+          image,
+        }}
+        onClose={vi.fn()}
+      />,
+    ),
+  );
+  expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
+    "Share Pinpoint",
+  );
+  expect(mocks.image).not.toHaveBeenCalled();
+  await click("Share");
+  expect(share).toHaveBeenCalledWith(
+    expect.objectContaining({
+      text: "Play Pinpoint with me",
+      files: [expect.objectContaining({ name: "ambit-pinpoint.png" })],
+    }),
+  );
+});
 it("lets guests share without social requests and links comparison sign-in to the saved edition", async () => {
   await renderSocial();
   expect(fetcher).not.toHaveBeenCalled();

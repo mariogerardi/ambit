@@ -5,8 +5,10 @@ import type {
   VisualState,
 } from "../geography/types";
 import { DISPLAY_CAPITALS } from "../geography/places";
+import { US_STATES } from "../geography/usStates";
 import { capitalOf, studyPool, studyStates } from "./engine";
 import type { StudyAnswer, StudySession, StudySettings } from "./engine";
+import { isStudyPinPrompt, studyPinTarget } from "./pins";
 
 interface StudyPresentationOptions {
   active: boolean;
@@ -49,7 +51,8 @@ export function useStudyPresentation({
         ...studyStates(session),
         ...(session.phase === "summary" && review
           ? {
-              [review.prompt.targetId]: "answer",
+              [review.prompt.place?.regionId ?? review.prompt.targetId]:
+                "answer",
               ...(review.selectedId &&
               review.selectedId !== review.prompt.targetId
                 ? { [review.selectedId]: "incorrect" }
@@ -70,8 +73,70 @@ export function useStudyPresentation({
     return neutral;
   }, [active, session, review, display, regionIds, neutral]);
 
+  const shownPrompt =
+    session?.phase === "summary" ? review?.prompt : session?.prompt;
+  const placeSession =
+    session && shownPrompt && isStudyPinPrompt(shownPrompt)
+      ? session
+      : undefined;
   const places = useMemo<PlaceFeature[] | undefined>(() => {
     if (!display) return undefined;
+    if (placeSession) {
+      const session = placeSession;
+      const answer =
+        session.phase === "summary" ? review : session.history.at(-1);
+      const targetPrompt =
+        session.phase === "summary" ? review?.prompt : session.prompt;
+      const target = targetPrompt && studyPinTarget(targetPrompt, regions);
+      return [
+        ...(session.phase === "playing" && session.pin
+          ? [
+              {
+                id: "study:guess",
+                name: "Your pin",
+                kind: "pin" as const,
+                sourceId: "study",
+                ...session.pin,
+                visualState: "selected" as const,
+                labelHidden: true,
+                priority: 1000,
+              },
+            ]
+          : []),
+        ...(session.phase !== "playing" && target
+          ? [
+              {
+                id: "study:target",
+                name: target.name,
+                kind: "pin" as const,
+                sourceId: "study",
+                lat: target.lat,
+                lng: target.lng,
+                visualState: answer?.correct
+                  ? ("correct" as const)
+                  : ("answer" as const),
+                priority: 1000,
+              },
+            ]
+          : []),
+        ...(session.phase !== "playing" && answer?.pin
+          ? [
+              {
+                id: "study:guess",
+                name: "Your pin",
+                kind: "pin" as const,
+                sourceId: "study",
+                ...answer.pin,
+                visualState: answer.correct
+                  ? ("correct" as const)
+                  : ("incorrect" as const),
+                labelHidden: true,
+                priority: 1000,
+              },
+            ]
+          : []),
+      ];
+    }
     return [
       ...(display.capitalMarkers || display.capitalNames || capitalReveal
         ? DISPLAY_CAPITALS.filter(
@@ -104,14 +169,33 @@ export function useStudyPresentation({
             )
         : []),
     ];
-  }, [display, ids, capitalReveal, regions]);
+  }, [
+    display,
+    ids,
+    capitalReveal,
+    regions,
+    placeSession,
+    placeSession ? review : undefined,
+  ]);
 
   // Map answers have no country focus: framing their target would disclose it.
   const clueFocus =
-    session && session.phase !== "summary" && session.prompt.style !== "map"
+    session &&
+    session.phase !== "summary" &&
+    session.prompt.style !== "map" &&
+    !isStudyPinPrompt(session.prompt)
       ? regions.find((r) => r.id === session.prompt.targetId)?.focus
       : undefined;
+  const revealRegionId =
+    session?.placeReview && session.phase !== "playing"
+      ? (review?.prompt.place ?? session.prompt.place)?.regionId
+      : undefined;
+  const mapRegions = useMemo(() => {
+    const state = US_STATES.find((r) => r.id === revealRegionId);
+    return state ? [...regions, state] : regions;
+  }, [regions, revealRegionId]);
   return {
+    regions: mapRegions,
     display,
     states,
     places,
@@ -121,11 +205,22 @@ export function useStudyPresentation({
         ? ("committed" as const)
         : ("none" as const)
       : undefined,
-    borderRegionIds: display ? (display.borders ? regionIds : []) : undefined,
+    borderRegionIds: display
+      ? display.borders
+        ? session?.placeReview
+          ? regions.map((r) => r.id)
+          : regionIds
+        : []
+      : undefined,
     namedRegionIds: display ? regionIds : undefined,
-    placeMarkers: display ? display.capitalMarkers || !!capitalReveal : true,
+    placeMarkers: display
+      ? !!placeSession || display.capitalMarkers || !!capitalReveal
+      : true,
     placeLabels: display
-      ? display.capitalNames || display.countryNames || !!capitalReveal
+      ? !!placeSession ||
+        display.capitalNames ||
+        display.countryNames ||
+        !!capitalReveal
       : true,
     highlight: session?.prompt.topic === "countries" ? clueFocus : undefined,
     capitalFocus: session?.prompt.topic === "capitals" ? clueFocus : undefined,

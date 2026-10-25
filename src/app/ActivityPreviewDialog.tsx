@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { ThemedImage } from "../theme/ThemedImage";
 
 export type ActivityPreview = {
   title: string;
@@ -157,7 +158,7 @@ export function ActivityPreviewDialog({
           <div ref={body} className="activity-preview-body">
             {content ?? (
               <>
-                <img
+                <ThemedImage
                   className="activity-preview-image"
                   src={preview.image}
                   alt={preview.imageAlt}

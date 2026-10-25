@@ -1,5 +1,5 @@
 import { sharedBoundary } from "./sharedBoundary";
-import { geoDistance, geoInterpolate } from "d3-geo";
+import { geoBounds, geoDistance, geoInterpolate } from "d3-geo";
 import roster from "../game/data/un-members.v1.json";
 import { defineQuestion } from "../game/questionBuilder";
 import { mapSource } from "../game/countryFacts";
@@ -146,7 +146,7 @@ export function missingBorderAnchor(
   return { lng: best[0], lat: best[1] };
 }
 
-/** Seeded regional views: the erased boundary stays 12–24° away from the center. */
+/** Seeded search circle; camera framing separately fits its selectable land. */
 export function missingBorderFocus(
   pair: MissingBorderPair,
   regions: RegionFeature[],
@@ -204,6 +204,41 @@ function regionalFocus(
   return best;
 }
 
+function frameSearchArea(regions: RegionFeature[], searchCenter: Focus): Focus {
+  const points = regions.flatMap((region) => {
+    const geometry = region.displayGeometry ?? region.geometry;
+    const polygons =
+      geometry.type === "Polygon"
+        ? [geometry.coordinates]
+        : geometry.coordinates;
+    // Fit the playable parts, without pulling overseas outposts into the view.
+    return polygons
+      .flatMap((polygon) => polygon[0])
+      .filter(([lng, lat]) =>
+        inMissingBorderSearch({ lng, lat }, searchCenter, false),
+      );
+  });
+  if (!points.length) return searchCenter;
+  const [[west, south], [east, north]] = geoBounds({
+    type: "MultiPoint",
+    coordinates: points,
+  });
+  const center: [number, number] = [
+    ((west + ((east - west + 360) % 360) / 2 + 540) % 360) - 180,
+    (south + north) / 2,
+  ];
+  const radius = points.reduce(
+    (max, point) =>
+      Math.max(max, geoDistance(center, point as [number, number])),
+    0,
+  );
+  return {
+    lng: center[0],
+    lat: center[1],
+    altitude: Math.max(0.65, 0.25 + radius * 2.05),
+  };
+}
+
 export const missingBordersBase: Journey = {
   id: "minigame-missing-borders",
   title: "Missing Borders",
@@ -222,7 +257,7 @@ export function missingBorderJourney(
   const anchor = missingBorderAnchor(pair, regions);
   const continent = missingBorderContinent(pair);
   // Frame the search area consistently, independently of the hidden boundary.
-  const focus = wide
+  const searchCenter = wide
     ? { ...continentViews[continent] }
     : regionalFocus(pair, regions, seed, anchor);
   const members = pair.countries.map((id) => regions.find((r) => r.id === id)!);
@@ -231,8 +266,11 @@ export function missingBorderJourney(
     (region) =>
       !pair.countries.includes(region.id) &&
       missingBorderCandidateContinent(region) === continent &&
-      (wide || inMissingBorderSearch(region.focus, focus, false)),
+      (wide || inMissingBorderSearch(region.focus, searchCenter, false)),
   );
+  const focus = wide
+    ? searchCenter
+    : frameSearchArea([...candidates, ...members], searchCenter);
   return {
     ...missingBordersBase,
     rounds: [

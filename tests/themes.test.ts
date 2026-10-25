@@ -11,6 +11,7 @@ import {
   THEMES,
 } from "../src/theme/themes";
 import { playColors } from "../src/theme/playColors";
+import { themeCursors } from "../src/theme/cursors";
 import { readFileSync } from "node:fs";
 import { validateRegions } from "../src/geography/loadLayer";
 import {
@@ -51,10 +52,17 @@ function contrast(a: string, b: string) {
 }
 
 describe("application themes", () => {
-  it("defaults to Discovery and lists Survey second", () => {
+  it("defaults to Discovery and keeps four exploratory dark identities", () => {
     expect(DEFAULT_THEME).toBe("ocean");
     expect(THEME_IDS.slice(0, 2)).toEqual(["ocean", "survey"]);
     expect(THEMES.ocean.name).toBe("Discovery");
+    expect(THEME_IDS.map((id) => THEMES[id].name)).toEqual([
+      "Discovery",
+      "Odyssey",
+      "Expedition",
+      "Safari",
+    ]);
+    expect(THEME_IDS.every((id) => THEMES[id].scheme === "dark")).toBe(true);
     expect(readTheme()).toBe("ocean");
     expect(playRegionStyle("wurl:CAN")).toEqual(
       playRegionStyle("wurl:CAN", "default", false, "ocean"),
@@ -80,6 +88,28 @@ describe("application themes", () => {
     expect(globe.showAtmosphere).toBe(false);
     expect(ui["text-shadow"]).toBe("none");
   });
+  it("retains saved selections after renaming themes and keeps distinct feedback", () => {
+    saveTheme("dusk");
+    expect(readTheme()).toBe("dusk");
+    expect(THEMES.dusk.name).toBe("Expedition");
+    const colors = playColors("dusk");
+    expect(colors.selected).toBe(THEMES.dusk.ui.action);
+    expect(colors.correct).toBe(THEMES.dusk.ui.correct);
+    expect(
+      new Set([
+        colors.selected,
+        colors.correct,
+        colors.answer,
+        colors.incorrect,
+        colors.clue,
+        colors.visited,
+      ]).size,
+    ).toBe(6);
+    applyTheme("dusk");
+    expect(
+      document.documentElement.style.getPropertyValue("--artwork-account"),
+    ).toContain("/artwork/dusk/brand/account-globe.svg");
+  });
 
   it("connects Discovery's selection and outcomes to the interface without merging result roles", () => {
     const colors = playColors("ocean");
@@ -101,7 +131,7 @@ describe("application themes", () => {
     ).toBe(7);
   });
 
-  it("keeps Survey's cartography neutral and candidate boundaries readable", () => {
+  it("keeps Odyssey's cartography neutral and candidate boundaries readable", () => {
     const { globe } = THEMES.survey;
     for (const color of [globe.ocean, ...globe.land])
       expect(new Set(color.slice(1).match(/../g)).size).toBe(1);
@@ -204,6 +234,33 @@ describe("application themes", () => {
     expect(() => saveTheme("ocean")).not.toThrow();
     applyTheme("ocean");
     expect(document.documentElement.dataset.theme).toBe("ocean");
+  });
+  it("updates the actual pin, brush and eraser SVG cursor inks with the live theme", () => {
+    const pins = new Set<string>();
+    for (const id of THEME_IDS) {
+      applyTheme(id);
+      const colors = playColors(id),
+        cursors = themeCursors(colors, THEMES[id].ui.text);
+      pins.add(cursors.pin);
+      for (const [tool, value] of Object.entries(cursors)) {
+        expect(
+          document.documentElement.style.getPropertyValue(`--cursor-${tool}`),
+        ).toBe(value);
+        const encoded = value.match(/data:image\/svg\+xml,([^\"]+)/)![1];
+        const svg = new DOMParser().parseFromString(
+          decodeURIComponent(encoded),
+          "image/svg+xml",
+        );
+        expect(svg.querySelector("parsererror")).toBeNull();
+        expect(svg.querySelector("path")?.getAttribute("fill")).toBe(
+          tool === "erase" ? colors.incorrect : colors.selected,
+        );
+        expect(svg.querySelector("path")?.getAttribute("stroke")).toBe(
+          colors.outline,
+        );
+      }
+    }
+    expect(pins.size).toBe(4);
   });
 
   it.each(THEME_IDS)(

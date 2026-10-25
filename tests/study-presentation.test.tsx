@@ -8,6 +8,7 @@ import {
   capitalOf,
   defaultSettings,
   startStudy,
+  startPlaceStudy,
   studyReducer,
 } from "../src/study/engine";
 import type { StudySettings } from "../src/study/engine";
@@ -46,6 +47,62 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount());
   vi.unstubAllGlobals();
+});
+
+it("withholds exact review targets until submission and clears pins between questions", async () => {
+  let session = startPlaceStudy([
+    { id: "place:a", name: "A", lat: 20, lng: 30 },
+    { id: "place:b", name: "B", lat: 40, lng: 50 },
+  ]);
+  await render({ session });
+  expect(result.places).toEqual([]);
+  expect(result.highlight).toBeUndefined();
+  expect(result.capitalFocus).toBeUndefined();
+  session = studyReducer(session, { type: "pin", lat: 0, lng: 0 });
+  await render({ session });
+  expect(result.places).toHaveLength(1);
+  expect(result.places![0]).toMatchObject({
+    lat: 0,
+    lng: 0,
+    visualState: "selected",
+  });
+  session = studyReducer(session, { type: "submit" });
+  await render({ session });
+  expect(result.places!.find((p) => p.id === "study:target")).toMatchObject({
+    lat: 20,
+    lng: 30,
+    visualState: "answer",
+  });
+  session = studyReducer(session, { type: "next" });
+  await render({ session });
+  expect(result.places).toEqual([]);
+});
+it("keeps normal capital pin targets hidden, shows the movable pin, and reveals the capital after submission", async () => {
+  let session = startStudy(
+    {
+      ...settings,
+      capitalNames: true,
+      capitalMarkers: true,
+      styles: { ...settings.styles, capitals: "pin" },
+    },
+    42,
+  );
+  const target = capitalOf(session.prompt.targetId);
+  await render({ session });
+  expect(result.places).toEqual([]);
+  expect(result.capitalFocus).toBeUndefined();
+  expect(result.highlight).toBeUndefined();
+  session = studyReducer(session, { type: "pin", lat: 0, lng: 0 });
+  await render({ session });
+  expect(result.places).toHaveLength(1);
+  expect(result.places![0].id).toBe("study:guess");
+  session = studyReducer(session, { type: "submit" }, regions);
+  await render({ session });
+  expect(result.places!.find((p) => p.id === "study:target")).toMatchObject({
+    name: target.name,
+    lat: target.lat,
+    lng: target.lng,
+  });
 });
 
 it("hides a capital map answer, reveals it after a wrong pick, and clears it on advance", async () => {

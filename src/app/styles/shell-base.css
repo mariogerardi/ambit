@@ -194,11 +194,6 @@
   padding: 18px 22px;
   border: 1px solid rgb(var(--ui-editorial-rgb) / 0.4);
   border-radius: 16px;
-  background: linear-gradient(
-    130deg,
-    rgb(var(--ui-raised-rgb) / 1),
-    rgb(var(--ui-surface-rgb) / 1) 65%
-  );
   text-shadow: none;
   box-shadow: 0 12px 36px
     rgb(var(--ui-shadow-rgb) / calc(0.133 * var(--ui-shadow-strength)));
@@ -305,8 +300,8 @@
 .menu-secondary {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 22px;
+  gap: 14px;
+  margin-top: 14px;
 }
 .menu-secondary button {
   text-align: left;
@@ -365,14 +360,6 @@
   height: auto;
   display: block;
   object-fit: contain;
-}
-.study-score {
-  font: 400 64px var(--font-ui);
-  color: var(--ui-accent, #e5cf94);
-  margin: 22px 0;
-}
-.study-score small {
-  font: 400 12px var(--font-ui);
 }
 .save-notice {
   position: absolute;
@@ -485,7 +472,8 @@
     font-size: 31px;
   }
   .menu-secondary {
-    gap: 18px;
+    gap: 12px;
+    margin-top: 12px;
   }
   .mode-layer .question-card,
   .mode-layer .finish-story {

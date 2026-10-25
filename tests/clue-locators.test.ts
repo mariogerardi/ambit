@@ -157,6 +157,29 @@ it("pulses every supplied island once after travel, including large ones, and ca
   layer.dispose();
 });
 
+it("adds and removes the completion ripple casing without duplicating it on updates", () => {
+  const layer = new ClueLocators();
+  const finish: ClueLocator = {
+    ...clue(1),
+    pulseOnly: true,
+    repeat: true,
+    appearance: "completion",
+  };
+  layer.update([finish]);
+  layer.view(camera(), 800, 600, 100, [], false);
+  const group = layer.element.querySelector("g")!;
+  expect(group.classList.contains("is-pulsing")).toBe(true);
+  expect(group.querySelectorAll(".completion-pulse")).toHaveLength(2);
+  layer.update([finish], "survey", true);
+  expect(group.querySelectorAll(".completion-pulse-casing")).toHaveLength(1);
+  expect(layer.element.dataset.reduced).toBe("true");
+  layer.update([{ ...finish, appearance: undefined, repeat: false }]);
+  expect(group.querySelectorAll("circle")).toHaveLength(1);
+  expect(group.querySelector(".clue-locator-pulse")).not.toBeNull();
+  expect(group.classList.contains("completion-pulse-group")).toBe(false);
+  layer.dispose();
+});
+
 it("anchors a border-crossing pulse at its supplied point rather than the country center", () => {
   const fixed = {
     ...clue(35, 175),

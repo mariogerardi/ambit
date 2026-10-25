@@ -33,6 +33,22 @@ export function placeStyle(
   palette: ThemeId = DEFAULT_THEME,
 ) {
   const survey = palette === "survey";
+  if (palette === "paper")
+    return {
+      shape: kind === "pin" ? "pin" : kind === "capital" ? "star" : "circle",
+      marker: kind === "pin" ? playColors(palette).selected : "#d7dfc9",
+      text: kind === "river" || kind === "ocean" ? "#c5dfd0" : "#f0eddf",
+      font: "500 26px Manrope, sans-serif",
+      textHeight: kind === "capital" ? 26 : 24,
+    };
+  if (palette === "dusk")
+    return {
+      shape: kind === "pin" ? "pin" : kind === "capital" ? "star" : "circle",
+      marker: kind === "pin" ? playColors(palette).selected : "#e0d3f4",
+      text: kind === "river" || kind === "ocean" ? "#b6f2f4" : "#f2edf9",
+      font: "500 26px Manrope, sans-serif",
+      textHeight: kind === "capital" ? 26 : 24,
+    };
   if (["river", "mountain", "landform", "ocean"].includes(kind))
     return {
       shape: "circle",
@@ -524,7 +540,6 @@ export class PlaceLabels {
         ctx.stroke();
       } else if (badge) {
         ctx.fillStyle =
-          this.palette === "paper" &&
           ["correct", "answer", "incorrect"].includes(
             place.visualState ?? "",
           ) &&

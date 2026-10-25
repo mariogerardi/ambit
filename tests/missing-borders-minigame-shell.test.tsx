@@ -127,6 +127,8 @@ it("offers the next map after a miss, then ends on the third strike and restarts
     host.querySelector(".shared-neighbors-feedback h2")?.textContent,
   ).toContain(" + ");
   await click("See results");
+  expect(host.querySelector(".minigame-complete-label")).toBeNull();
+  expect(host.textContent).not.toContain("Game over");
   await click("Play again");
   expect(
     createNeighborSave(undefined, "missing-borders").load().run?.id,
@@ -171,32 +173,37 @@ it("starts from a direct public link, finishes early, and reframes a fresh game"
   expect(probe.mounts).toBe(1);
 });
 
-it("ignores countries outside the round's continent and remote parts outside its search area", async () => {
-  const pairs = missingBorderPairs(world),
-    run = seededRun();
-  const deck = neighborDeck(pairs, run.seed, 0);
-  run.index = deck.findIndex((pair) => pair.id === "wurl:BRA|wurl:FRA");
-  createNeighborSave(undefined, "missing-borders").save({ version: 1, run });
-  history.replaceState(null, "", "/minigames/missing-borders/play");
-  await mount();
-  expect(probe.props!.selectableRegionIds).toContain("wurl:SUR");
-  expect(probe.props!.selectableRegionIds).not.toContain("wurl:DEU");
-  const germany = probe.props!.regions.find((r) => r.id === "wurl:DEU")!;
-  await act(async () => probe.props!.onSelect(germany));
-  expect(
-    createNeighborSave(undefined, "missing-borders").load().run?.answered,
-  ).toBe(0);
-  const merged = probe.props!.regions.find((r) =>
-    r.id.startsWith("composite:"),
-  )!;
-  await act(async () =>
-    probe.props!.onSelect(merged, { lat: 48.86, lng: 2.35 }),
-  );
-  expect(
-    createNeighborSave(undefined, "missing-borders").load().run?.answered,
-  ).toBe(0);
-  await act(async () => probe.props!.onSelect(merged, { lat: 4, lng: -52 }));
-  expect(
-    createNeighborSave(undefined, "missing-borders").load().run,
-  ).toMatchObject({ answered: 1, correct: 1 });
-});
+it.each(["wide", "regional"] as const)(
+  "ignores countries outside the round's continent and remote parts outside its %s search area",
+  async (framing) => {
+    const pairs = missingBorderPairs(world),
+      run = seededRun();
+    run.settings.framing = framing;
+    createMinigameSettingsSave(undefined, "missing-borders").save(run.settings);
+    const deck = neighborDeck(pairs, run.seed, 0);
+    run.index = deck.findIndex((pair) => pair.id === "wurl:BRA|wurl:FRA");
+    createNeighborSave(undefined, "missing-borders").save({ version: 1, run });
+    history.replaceState(null, "", "/minigames/missing-borders/play");
+    await mount();
+    expect(probe.props!.selectableRegionIds).toContain("wurl:SUR");
+    expect(probe.props!.selectableRegionIds).not.toContain("wurl:DEU");
+    const germany = probe.props!.regions.find((r) => r.id === "wurl:DEU")!;
+    await act(async () => probe.props!.onSelect(germany));
+    expect(
+      createNeighborSave(undefined, "missing-borders").load().run?.answered,
+    ).toBe(0);
+    const merged = probe.props!.regions.find((r) =>
+      r.id.startsWith("composite:"),
+    )!;
+    await act(async () =>
+      probe.props!.onSelect(merged, { lat: 48.86, lng: 2.35 }),
+    );
+    expect(
+      createNeighborSave(undefined, "missing-borders").load().run?.answered,
+    ).toBe(0);
+    await act(async () => probe.props!.onSelect(merged, { lat: 4, lng: -52 }));
+    expect(
+      createNeighborSave(undefined, "missing-borders").load().run,
+    ).toMatchObject({ answered: 1, correct: 1 });
+  },
+);

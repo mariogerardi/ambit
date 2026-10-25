@@ -49,32 +49,32 @@
         --map-land-5: #a6a6a6;
       }
       html[data-theme="dusk"] {
-        --ui-bg: #17131d;
-        --ui-text: #f6eee5;
-        --ui-muted: #ccbfcf;
-        --map-ocean: #3b2f4f;
-        --map-atmosphere: #bd9dc2;
-        --map-border: rgba(64, 43, 64, 0.65);
-        --map-land-0: #b4a3d8;
-        --map-land-1: #89c6b2;
-        --map-land-2: #e4c58e;
-        --map-land-3: #d59a79;
-        --map-land-4: #92bdcf;
-        --map-land-5: #aebd7a;
+        --ui-bg: #100d18;
+        --ui-text: #f2edf9;
+        --ui-muted: #c4bad5;
+        --map-ocean: #211833;
+        --map-atmosphere: #b79ae5;
+        --map-border: rgba(25, 16, 39, 0.85);
+        --map-land-0: #ae7fea;
+        --map-land-1: #48bdc9;
+        --map-land-2: #df78bb;
+        --map-land-3: #678fe0;
+        --map-land-4: #c4a4ec;
+        --map-land-5: #dfa76b;
       }
       html[data-theme="paper"] {
-        --ui-bg: #f4eee1;
-        --ui-text: #29343b;
-        --ui-muted: #50616a;
-        --map-ocean: #82b3cc;
-        --map-atmosphere: #7eafbd;
-        --map-border: rgba(60, 78, 68, 0.65);
-        --map-land-0: #93b79c;
-        --map-land-1: #d5bc7e;
-        --map-land-2: #ce997e;
-        --map-land-3: #aab8d2;
-        --map-land-4: #9abfc2;
-        --map-land-5: #c3a2b6;
+        --ui-bg: #08140d;
+        --ui-text: #f0eddf;
+        --ui-muted: #c2c8b9;
+        --map-ocean: #204c68;
+        --map-atmosphere: #a5b79b;
+        --map-border: rgba(10, 27, 17, 0.8);
+        --map-land-0: #72956b;
+        --map-land-1: #8da976;
+        --map-land-2: #537f65;
+        --map-land-3: #a1b68b;
+        --map-land-4: #699785;
+        --map-land-5: #8b8a60;
       }
       .ambit-loading-screen {
         position: fixed;
@@ -100,38 +100,11 @@
       .ambit-loading-globe {
         width: min(38vw, 170px);
         height: auto;
-        filter: drop-shadow(0 0 22px #8dcfc744);
-        animation: ambit-loading-glow 3.2s ease-in-out infinite;
-      }
-      html:is([data-theme="ocean"], [data-theme="survey"])
-        .ambit-loading-globe {
-        filter: none;
-        animation: none;
-      }
-      html:is([data-theme="ocean"], [data-theme="survey"])
-        #ambit-loading-ocean
-        stop {
-        stop-color: var(--map-ocean);
-      }
-      html:is([data-theme="ocean"], [data-theme="survey"])
-        .ambit-loading-globe
-        circle[fill="url(#ambit-loading-shade)"],
-      html:is([data-theme="ocean"], [data-theme="survey"])
-        .ambit-loading-globe
-        > circle:last-child {
-        display: none;
       }
       .ambit-loading-title {
         display: block;
         width: clamp(160px, 40vw, 220px);
         height: auto;
-      }
-      html .ambit-logo-light,
-      html[data-theme="paper"] .ambit-logo-dark {
-        display: none;
-      }
-      html[data-theme="paper"] .ambit-logo-light {
-        display: block;
       }
       .ambit-loading-copy {
         color: var(--ui-muted, #b6c9bf);
@@ -141,11 +114,6 @@
       .ambit-loading-dots {
         animation: ambit-loading-fade 1.7s ease-in-out infinite;
       }
-      @keyframes ambit-loading-glow {
-        50% {
-          filter: drop-shadow(0 0 32px #8dcfc777);
-        }
-      }
       @keyframes ambit-loading-fade {
         50% {
           opacity: 0.35;
@@ -154,9 +122,6 @@
       @media (prefers-reduced-motion: reduce) {
         .ambit-loading-screen {
           transition-duration: 150ms;
-        }
-        .ambit-loading-globe {
-          animation-duration: 8s;
         }
         .ambit-loading-dots {
           animation-duration: 4s;
@@ -237,16 +202,6 @@
           aria-hidden="true"
         >
           <defs>
-            <radialGradient id="ambit-loading-ocean" cx="32%" cy="24%" r="78%">
-              <stop stop-color="#477b80" />
-              <stop offset=".55" stop-color="var(--map-ocean, #234d69)" />
-              <stop offset="1" stop-color="#102a36" />
-            </radialGradient>
-            <radialGradient id="ambit-loading-shade" cx="32%" cy="22%" r="82%">
-              <stop stop-color="#e7ffef" stop-opacity=".16" />
-              <stop offset=".55" stop-color="#bce7da" stop-opacity=".02" />
-              <stop offset="1" stop-color="#031015" stop-opacity=".72" />
-            </radialGradient>
             <clipPath id="ambit-loading-clip">
               <circle cx="110" cy="110" r="90" />
             </clipPath>
@@ -282,33 +237,14 @@
               />
             </g>
           </defs>
-          <circle cx="110" cy="110" r="90" fill="url(#ambit-loading-ocean)" />
+          <circle cx="110" cy="110" r="90" fill="var(--map-ocean, #234d69)" />
           <g clip-path="url(#ambit-loading-clip)">
             <g class="ambit-loading-map" transform="translate(-90)">
               <use href="#ambit-loading-land" />
             </g>
-            <circle cx="110" cy="110" r="90" fill="url(#ambit-loading-shade)" />
           </g>
-          <circle
-            cx="110"
-            cy="110"
-            r="90"
-            fill="none"
-            stroke="var(--map-atmosphere, #8dcfc7)"
-            stroke-opacity=".48"
-            stroke-width="1.5"
-          />
         </svg>
-        <img
-          class="ambit-loading-title ambit-logo-dark"
-          src="/ambitlogo.png"
-          alt="ambit"
-        />
-        <img
-          class="ambit-loading-title ambit-logo-light"
-          src="/ambitlogo2.png"
-          alt="ambit"
-        />
+        <img class="ambit-loading-title" src="/ambitlogo.png" alt="ambit" />
         <span class="ambit-loading-copy"
           >Loading your world<span class="ambit-loading-dots">…</span></span
         >

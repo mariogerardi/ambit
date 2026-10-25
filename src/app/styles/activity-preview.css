@@ -55,7 +55,7 @@
   width: 100%;
   height: clamp(160px, 38vw, 230px);
   object-fit: cover;
-  background: #0b1923;
+  background: var(--ui-bg);
   border-radius: 10px;
 }
 .activity-preview-content[data-scrollable="true"]:focus-visible {

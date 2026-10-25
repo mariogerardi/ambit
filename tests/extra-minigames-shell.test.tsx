@@ -27,6 +27,30 @@ import {
 
 afterEach(() => vi.useRealTimers());
 
+it.each(["shared-neighbors", "missing-borders", "border-run", "pinpoint"])(
+  "keeps %s finishing under its cog and adds an arrow to its answer action",
+  async (kind) => {
+    history.replaceState(null, "", `/minigames/${kind}/play`);
+    await mount();
+    const menu = host.querySelector<HTMLDetailsElement>(".minigame-menu")!;
+    expect(menu.querySelector("summary svg")).not.toBeNull();
+    expect(host.querySelector(".minigame-finish-button")).toBeNull();
+    const answer = host.querySelector(".minigame-action-row .primary-button");
+    if (kind !== "missing-borders")
+      expect(answer?.querySelector('[aria-hidden="true"]')?.textContent).toBe(
+        "→",
+      );
+    await act(async () => menu.querySelector("summary")!.click());
+    expect(menu.open).toBe(true);
+    const finish = [...menu.querySelectorAll("button")].find(
+      (button) => button.textContent === "Finish game",
+    )!;
+    expect(finish).toBeDefined();
+    await act(async () => finish.click());
+    expect(host.querySelector(".minigame-overview")).not.toBeNull();
+  },
+);
+
 it("keeps Pinpoint scoring details behind Full rules", async () => {
   history.replaceState(null, "", "/minigames/pinpoint");
   await mount();
@@ -89,7 +113,11 @@ it("plays a numeric country route, reveals numbered crossings, and saves a high 
   const actions = host.querySelector(".minigame-action-row")!;
   expect(
     [...actions.querySelectorAll("button")].map((b) => b.textContent),
-  ).toEqual(["Finish game", "Check answer"]);
+  ).toEqual(["Check answer→"]);
+  expect(host.querySelector(".minigame-menu-options")!.textContent).toContain(
+    "Finish game",
+  );
+  expect(host.querySelector(".minigame-menu summary svg")).not.toBeNull();
   expect(actions.nextElementSibling?.getAttribute("aria-label")).toBe(
     "Game progress",
   );
@@ -155,6 +183,7 @@ it("plays a numeric country route, reveals numbered crossings, and saves a high 
   expect(probe.props!.clueLocators![0]).toMatchObject({
     pulseOnly: true,
     repeat: true,
+    appearance: "completion",
     anchor: { lat: crossings.at(-1)!.lat, lng: crossings.at(-1)!.lng },
   });
   await click("Next route");
@@ -278,7 +307,7 @@ it("scores ten landmark pins, restores feedback, and requires See results before
   expect(
     host.querySelector(".shared-neighbors-results")!.textContent,
   ).not.toContain("Personal best");
-  expect(host.querySelector(".minigame-overview-note")!.textContent).toContain(
+  expect(host.querySelector(".minigame-result-detail")!.textContent).toContain(
     "Custom rules",
   );
   await click("Play again");

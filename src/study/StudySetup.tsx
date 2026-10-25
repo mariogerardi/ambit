@@ -30,12 +30,14 @@ const topicNames = {
 };
 const methods: Record<StudyStyle, string> = {
   map: "Select on globe",
+  pin: "Place a pin",
   typing: "Type",
   choices: "Multiple choice",
   mixed: "Mixed",
 };
 const summaryMethods: Record<StudyStyle, string> = {
   map: "Select on globe",
+  pin: "Place a pin",
   typing: "Type answers",
   choices: "Multiple choice",
   mixed: "Mixed",
@@ -514,7 +516,8 @@ export function StudySetup(props: {
         Make the world <em>familiar.</em>
       </h1>
       <p className="muted study-introduction">
-        Practice countries, capitals and flags. Choose a ready-made session or build your own.
+        Practice countries, capitals and flags. Choose a ready-made session or
+        build your own.
       </p>
       {props.onResume && (
         <button

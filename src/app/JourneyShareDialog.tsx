@@ -9,13 +9,21 @@ import {
 } from "./journeySharing";
 import type { SharedJourneyResult } from "./journeySharing";
 
-export function JourneyShareDialog({
-  result,
-  onClose,
-}: {
-  result: SharedJourneyResult;
-  onClose(): void;
-}) {
+export interface ResultShareCard {
+  heading: string;
+  caption: string;
+  description: string;
+  filename: string;
+  image(): Promise<Blob>;
+}
+
+export function JourneyShareDialog(
+  props: (
+    | { result: SharedJourneyResult; card?: never }
+    | { card: ResultShareCard; result?: never }
+  ) & { onClose(): void },
+) {
+  const { result, card, onClose } = props;
   const id = useId(),
     dialog = useRef<HTMLDivElement>(null);
   const [image, setImage] = useState<{ url: string; file: File }>();
@@ -24,23 +32,27 @@ export function JourneyShareDialog({
   const [busy, setBusy] = useState(false);
   const [fallback, setFallback] = useState(false);
   const [revision, setRevision] = useState(0);
-  const text = resultCaption(result);
-  const imageDescription = resultText(result);
+  const text = card?.caption ?? resultCaption(result!);
+  const imageDescription = card?.description ?? resultText(result!);
   const [useDownload, setUseDownload] = useState(false);
   useEffect(() => {
     let alive = true,
       url: string | undefined;
     setImage(undefined);
     setError("");
-    void resultImage(result)
+    void (card ? card.image() : resultImage(result!))
       .then((blob) => {
         if (!alive) return;
         url = URL.createObjectURL(blob);
         setImage({
           url,
-          file: new File([blob], `ambit-${result.date}.png`, {
-            type: "image/png",
-          }),
+          file: new File(
+            [blob],
+            card?.filename ?? `ambit-${result!.date}.png`,
+            {
+              type: "image/png",
+            },
+          ),
         });
       })
       .catch(() => {
@@ -50,7 +62,7 @@ export function JourneyShareDialog({
       alive = false;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [result, revision]);
+  }, [result, card, revision]);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
@@ -129,7 +141,9 @@ export function JourneyShareDialog({
     } catch (error) {
       if (!shareCancelled(error)) {
         setUseDownload(true);
-        setNotice("Couldn’t open sharing. Save the image and copy its caption instead.");
+        setNotice(
+          "Couldn’t open sharing. Save the image and copy its caption instead.",
+        );
       }
     } finally {
       setBusy(false);
@@ -164,7 +178,7 @@ export function JourneyShareDialog({
         aria-labelledby={id}
       >
         <div className="study-options-heading">
-          <h2 id={id}>Share your Journey</h2>
+          <h2 id={id}>{card?.heading ?? "Share your Journey"}</h2>
           <button
             data-dd-action-name="Journey Share Close"
             aria-label="Close sharing"

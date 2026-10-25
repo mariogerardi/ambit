@@ -7,6 +7,9 @@ import { HomePanel } from "./app/HomePanel";
 import { MinigamesPanel } from "./app/MinigamesPanel";
 import { useSharedNeighbors } from "./minigames/useSharedNeighbors";
 import { BorderMinigamePanel } from "./minigames/BorderMinigamePanel";
+import { startPlaceStudy } from "./study/engine";
+import type { StudyPlaceTarget } from "./study/placeReview";
+import { isStudyPinPrompt, studyPinTarget } from "./study/pins";
 import { useBorderMinigame } from "./minigames/useBorderMinigame";
 import { JourneyArchive } from "./app/JourneyArchive";
 import {
@@ -61,6 +64,7 @@ import { GlobeControls } from "./app/GlobeControls";
 import { AmbitLogo } from "./app/AmbitLogo";
 import { applyTheme, readTheme, saveTheme, THEME_KEY } from "./theme/themes";
 import type { ThemeId } from "./theme/themes";
+import { ThemeContext } from "./theme/ThemedImage";
 const GameShell = lazy(() =>
   import("./game/GameShell").then((m) => ({ default: m.GameShell })),
 );
@@ -792,7 +796,7 @@ export function App() {
           ? (() => {
               const updated = {
                 ...p,
-                session: studyReducer(p.session, action),
+                session: studyReducer(p.session, action, regions),
               };
               return updated.session.phase === "summary"
                 ? archiveStudy(updated)
@@ -800,7 +804,7 @@ export function App() {
             })()
           : p,
       ),
-    [],
+    [regions],
   );
   const start = (settings: StudySettings, targets?: StudyReviewTarget[]) => {
     if (!webgl) return;
@@ -893,6 +897,17 @@ export function App() {
     navigate(date === today ? "/daily" : archivePath(date));
   }
   const todayAttempt = daily.attempts[today];
+  const startPlaces = (targets: StudyPlaceTarget[]) => {
+    if (!webgl || !targets.length) return;
+    setStudy((previous) => ({
+      ...leaveStudy(previous),
+      session: { ...startPlaceStudy(targets), id: crypto.randomUUID() },
+    }));
+    setStudySetup(false);
+    setStudyReview(undefined);
+    stop();
+    navigate("/study");
+  };
   const todayJourney =
     allJourneys.find((j) => j.id === todayAttempt?.journeyId) ??
     dailyJourney(
@@ -926,6 +941,8 @@ export function App() {
         shared={activeMinigame}
         webgl={webgl}
         onBack={() => navigate("/minigames")}
+        onStudy={startPlaces}
+        regions={regions}
       />
     ) : mode === "minigames" ? (
       <MinigamesPanel
@@ -1078,9 +1095,13 @@ export function App() {
           setStudyReview(undefined);
         }}
         onStart={start}
+        onStartPlaces={startPlaces}
         onLocate={(answer) => {
           setStudyReview(answer);
-          locateStudyAnswer(answer.prompt.targetId);
+          const pinTarget = studyPinTarget(answer.prompt, regions);
+          if (pinTarget)
+            frame({ ...pinTarget, altitude: pinTarget.regionId ? 0.7 : 0.3 });
+          else locateStudyAnswer(answer.prompt.targetId);
         }}
         onAction={studyAction}
         onEditingChange={setStudyEditing}
@@ -1262,7 +1283,7 @@ export function App() {
       onFidget={fidget}
     />
   );
-  return (
+  const content = (
     <main
       className={`experience mode-${mode} phase-${phase} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
       style={
@@ -1277,7 +1298,6 @@ export function App() {
       data-keyboard-open={mobile.keyboard || undefined}
       data-panel-only={panelOnly || undefined}
     >
-      <div className="experience-glow" aria-hidden="true" />
       {(!webgl || mode === "account") && (
         <div className="account-earth" aria-hidden="true" />
       )}
@@ -1309,7 +1329,9 @@ export function App() {
                 visualScale={mobile.enabled && mode === "home" ? 1.2 : 1}
                 regions={
                   world?.regions ??
-                  (mode === "explore" ? exploreRegions : namedRegions)
+                  (mode === "explore"
+                    ? exploreRegions
+                    : studyPresentation.regions)
                 }
                 warmRegions={warmRegions}
                 physicalFeatures={world?.physicalFeatures ?? physicalFeatures}
@@ -1347,13 +1369,15 @@ export function App() {
                 surfaceRoutes
                 regionNames={names}
                 regionInteraction={
-                  (!minigamePlaying ||
-                    (!activeMinigame.ended &&
-                      activeMinigame.run?.result === undefined)) &&
-                  mode !== "archive" &&
-                  !studyBrowsingHistory &&
-                  !studyEditing &&
-                  (world?.regionInteraction ?? true)
+                  !studying || !session || !isStudyPinPrompt(session.prompt)
+                    ? (!minigamePlaying ||
+                        (!activeMinigame.ended &&
+                          activeMinigame.run?.result === undefined)) &&
+                      mode !== "archive" &&
+                      !studyBrowsingHistory &&
+                      !studyEditing &&
+                      (world?.regionInteraction ?? true)
+                    : false
                 }
                 namedRegionIds={
                   world?.namedRegionIds ?? studyPresentation.namedRegionIds
@@ -1408,31 +1432,38 @@ export function App() {
                     : undefined
                 }
                 onCoordinateTap={
-                  (sharedPlaying || pinpointPlaying) &&
-                  !activeMinigame.ended &&
-                  activeMinigame.run?.result === undefined
+                  studying &&
+                  session && isStudyPinPrompt(session.prompt) && !studyEditing &&
+                  session.phase === "playing"
                     ? (point) => {
                         stop();
-                        activeMinigame.action({ type: "pin", ...point });
+                        studyAction({ type: "pin", ...point });
                       }
-                    : isJourney &&
-                        game.phase === "playing" &&
-                        ["pin", "geo-multipin"].includes(
-                          journey.rounds[game.roundIndex].mode,
-                        )
+                    : (sharedPlaying || pinpointPlaying) &&
+                        !activeMinigame.ended &&
+                        activeMinigame.run?.result === undefined
                       ? (point) => {
                           stop();
-                          dispatch({
-                            type:
-                              journey.rounds[game.roundIndex].mode ===
-                              "geo-multipin"
-                                ? "drop-labeled-pin"
-                                : "drop-pin",
-                            lat: point.lat,
-                            lng: point.lng,
-                          });
+                          activeMinigame.action({ type: "pin", ...point });
                         }
-                      : undefined
+                      : isJourney &&
+                          game.phase === "playing" &&
+                          ["pin", "geo-multipin"].includes(
+                            journey.rounds[game.roundIndex].mode,
+                          )
+                        ? (point) => {
+                            stop();
+                            dispatch({
+                              type:
+                                journey.rounds[game.roundIndex].mode ===
+                                "geo-multipin"
+                                  ? "drop-labeled-pin"
+                                  : "drop-pin",
+                              lat: point.lat,
+                              lng: point.lng,
+                            });
+                          }
+                        : undefined
                 }
                 onPlace={(place) => {
                   if (
@@ -1702,4 +1733,5 @@ export function App() {
       {creditsOpen && <WorldCreditsDialog onClose={closeCredits} />}
     </main>
   );
+  return <ThemeContext value={theme}>{content}</ThemeContext>;
 }

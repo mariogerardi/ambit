@@ -1,4 +1,5 @@
 const paths = {
+  share: "M12 16V3m-5 5 5-5 5 5M5 13v7h14v-7",
   paint:
     "m14 4 6 6M4 20c0-4 1-6 4-6l2 2c0 3-2 4-6 4Zm4-6L18 3a2 2 0 0 1 3 3L10 16",
   erase:
