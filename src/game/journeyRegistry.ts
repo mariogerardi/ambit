@@ -35,7 +35,7 @@ export function loadJourney(id: string): Promise<Journey> {
         "id" in value &&
         value.id === id,
     );
-    if (!journey) throw Error("The Journey could not be loaded.");
+    if (!journey) throw Error("Couldn’t load this Journey. Please reload to try again.");
     validateJourneyContracts(journey);
     return journey;
   });

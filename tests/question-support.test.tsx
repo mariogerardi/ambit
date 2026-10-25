@@ -27,6 +27,16 @@ function markup(html: string) {
 }
 
 describe("shared question support", () => {
+  it("uses singular and plural landscape names in accuracy tiers", () => {
+    const { question } = find("india-02-three-landscapes");
+    const info = markup(
+      renderToStaticMarkup(<QuestionAccuracy question={question} />),
+    );
+    expect(info.textContent).toContain("1 correctly labeled landscape.");
+    expect(info.textContent).toContain("2 correctly labeled landscapes.");
+    expect(info.textContent).toContain("3 correctly labeled landscapes.");
+  });
+
   it("renders at most one support paragraph across the complete catalog", () => {
     for (const journey of JOURNEYS) {
       const context = createQuestionContext(regions, COUNTRY_FACTS, journey);
@@ -70,14 +80,14 @@ describe("shared question support", () => {
     }
   });
 
-  it("keeps the tap cue and final-answer notice in inline spans of one paragraph", () => {
+  it("keeps the selection cue and final-answer notice in inline spans of one paragraph", () => {
     const { question } = find("reggaeton-01-jamaica");
     const host = markup(
       renderToStaticMarkup(<QuestionSupport question={question} />),
     );
     expect(host.querySelectorAll("p")).toHaveLength(1);
     expect(host.textContent).toBe(
-      "Tap the island. Your first answer is final.",
+      "Select the island. Your first answer is final.",
     );
     expect(host.querySelector("p")?.children[0].tagName).toBe("SPAN");
     expect(host.querySelector("p")?.children[1].className).toBe(
@@ -85,9 +95,9 @@ describe("shared question support", () => {
     );
   });
 
-  it("omits the duplicate tap sentence when the prompt already supplies the task", () => {
+  it("omits the duplicate selection sentence when the prompt already supplies the task", () => {
     const { question } = find("missing-borders-01-iberia");
-    expect(question.prompt).toMatch(/Tap the territory/);
+    expect(question.prompt).toMatch(/Select the territory/);
     expect(question.instruction).toBe("");
     expect(
       markup(renderToStaticMarkup(<QuestionSupport question={question} />))

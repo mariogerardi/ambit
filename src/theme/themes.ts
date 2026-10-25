@@ -1,5 +1,5 @@
 import { playColors } from "./playColors";
-export type ThemeId = "atlas" | "ocean" | "dusk" | "paper";
+export type ThemeId = "ocean" | "survey" | "dusk" | "paper";
 interface Theme {
   name: string;
   scheme: "dark" | "light";
@@ -7,9 +7,11 @@ interface Theme {
   globe: {
     ocean: string;
     atmosphere: string;
+    showAtmosphere: boolean;
     land: readonly string[];
     disabled: string;
     border: string;
+    candidateBorder?: string;
     highlight: string;
   };
 }
@@ -40,53 +42,75 @@ const dark = {
   incorrect: "#ffa19a",
   "text-shadow": "0 1px 3px rgb(0 0 0 / .6)",
 };
+const discoveryUi = {
+  ...dark,
+  bg: "#101010",
+  input: "#161616",
+  text: "#ececec",
+  muted: "#bdbdbd",
+  faint: "#a6a6a6",
+  editorial: "#f0c671",
+  "editorial-rgb": "240 198 113",
+  accent: "#91dfbd",
+  "accent-hover": "#b2edd3",
+  action: "#f0c671",
+  "action-hover": "#f6d798",
+  "daily-action": "#f0c671",
+  "daily-action-hover": "#f6d798",
+  "on-accent": "#202020",
+  "accent-rgb": "145 223 189",
+  "line-rgb": "160 160 160",
+  focus: "#91dfbd",
+  "surface-rgb": "28 28 28",
+  "raised-rgb": "38 38 38",
+  "scrim-rgb": "16 16 16",
+  "shadow-strength": ".6",
+  "text-shadow": "none",
+  correct: "#79d58b",
+  incorrect: "#eb9b96",
+};
 export const THEMES: Record<ThemeId, Theme> = {
-  atlas: {
-    name: "Atlas",
+  ocean: {
+    name: "Discovery",
     scheme: "dark",
-    ui: dark,
+    ui: discoveryUi,
     globe: {
-      ocean: "#234650",
-      atmosphere: "#8dcfc7",
-      land: ["#a4c898", "#e4ca83", "#72bfb3", "#d5a17d", "#b4a8cf", "#bec887"],
-      disabled: "#788f91",
-      border: "rgba(37,62,60,0.52)",
+      ocean: "#234d69",
+      atmosphere: "#a6a6a6",
+      showAtmosphere: false,
+      land: ["#78cfa0", "#efbc62", "#70bfce", "#e99579", "#b59ae1", "#bfd574"],
+      disabled: "#5b5b5b",
+      border: "rgba(25,47,57,0.7)",
       highlight: "#fff1be",
     },
   },
-  ocean: {
-    name: "Ocean",
+  survey: {
+    name: "Survey",
     scheme: "dark",
     ui: {
-      ...dark,
-      bg: "#071321",
-      input: "#0a1b2c",
-      text: "#edf4f7",
-      muted: "#b2c9d7",
-      faint: "#8da9ba",
-      editorial: "#efbb91",
-      "editorial-rgb": "239 187 145",
-      accent: "#9fdde4",
-      "accent-hover": "#c0eef0",
-      action: "#efbb91",
-      "action-hover": "#f8d4b3",
-      "daily-action": "#efbb91",
-      "daily-action-hover": "#f8d4b3",
-      "on-accent": "#102b3c",
-      "accent-rgb": "159 221 228",
-      "line-rgb": "141 169 186",
-      focus: "#9fdde4",
-      "surface-rgb": "22 31 42",
-      "raised-rgb": "36 45 53",
-      "scrim-rgb": "7 19 33",
+      ...discoveryUi,
+      editorial: "#e6ad7c",
+      "editorial-rgb": "230 173 124",
+      accent: "#e6ad7c",
+      "accent-hover": "#f1c39e",
+      action: "#e6ad7c",
+      "action-hover": "#f1c39e",
+      "daily-action": "#e6ad7c",
+      "daily-action-hover": "#f1c39e",
+      "accent-rgb": "230 173 124",
+      focus: "#e6ad7c",
+      correct: "#8bd89a",
+      incorrect: "#ed9a91",
     },
     globe: {
-      ocean: "#153c65",
-      atmosphere: "#8ecfe3",
-      land: ["#86cabc", "#dcab86", "#b3c98e", "#b6a7d8", "#e1d0a5", "#8ebace"],
-      disabled: "#7291a7",
-      border: "rgba(27,55,73,0.65)",
-      highlight: "#fff1be",
+      ocean: "#242424",
+      atmosphere: "#bcbcbc",
+      showAtmosphere: false,
+      land: ["#676767", "#858585", "#747474", "#969696", "#5b5b5b", "#a6a6a6"],
+      disabled: "#4e4e4e",
+      border: "rgba(225,225,225,0.7)",
+      candidateBorder: "#202020",
+      highlight: "#e6ad7c",
     },
   },
   dusk: {
@@ -118,6 +142,7 @@ export const THEMES: Record<ThemeId, Theme> = {
     globe: {
       ocean: "#3b2f4f",
       atmosphere: "#bd9dc2",
+      showAtmosphere: true,
       land: ["#b4a3d8", "#89c6b2", "#e4c58e", "#d59a79", "#92bdcf", "#aebd7a"],
       disabled: "#9a8c9c",
       border: "rgba(64,43,64,0.65)",
@@ -158,6 +183,7 @@ export const THEMES: Record<ThemeId, Theme> = {
     globe: {
       ocean: "#82b3cc",
       atmosphere: "#7eafbd",
+      showAtmosphere: true,
       land: ["#93b79c", "#d5bc7e", "#ce997e", "#aab8d2", "#9abfc2", "#c3a2b6"],
       disabled: "#b3b7a7",
       border: "rgba(60,78,68,0.65)",
@@ -167,7 +193,7 @@ export const THEMES: Record<ThemeId, Theme> = {
 };
 export const THEME_IDS = Object.keys(THEMES) as ThemeId[];
 export const THEME_KEY = "ambit.theme.v1";
-export const DEFAULT_THEME: ThemeId = "atlas";
+export const DEFAULT_THEME: ThemeId = "ocean";
 export function isTheme(value: unknown): value is ThemeId {
   return typeof value === "string" && Object.hasOwn(THEMES, value);
 }
@@ -204,6 +230,12 @@ export function applyTheme(id: ThemeId, root = document.documentElement) {
   for (const [name, value] of Object.entries(theme.ui))
     root.style.setProperty(`--ui-${name}`, value);
   root.style.setProperty("--map-neutral", theme.globe.disabled);
+  root.style.setProperty("--map-ocean", theme.globe.ocean);
+  root.style.setProperty("--map-atmosphere", theme.globe.atmosphere);
+  root.style.setProperty("--map-border", theme.globe.border);
+  theme.globe.land.forEach((color, index) =>
+    root.style.setProperty(`--map-land-${index}`, color),
+  );
   for (const [role, color] of Object.entries(playColors(id)))
     root.style.setProperty(`--play-${role}`, color);
   root.ownerDocument

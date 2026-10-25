@@ -79,7 +79,7 @@ export function borderRunJourney(
         commitment: "submit",
         failure: "feedback",
         rule: { type: "manual-number", value: Number(pair.answer) },
-        correctFeedback: "Beautifully reasoned.",
+        correctFeedback: "Well done.",
         source: mapSource,
         disclosure: {
           hoverNames: false,

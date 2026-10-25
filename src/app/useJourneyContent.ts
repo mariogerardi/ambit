@@ -75,7 +75,8 @@ export function useJourneyContent({
         if (live) setLoaded({ journey, runtime });
       })
       .catch(() => {
-        if (live) setJourneyError("The Journey could not be loaded.");
+        if (live)
+          setJourneyError("Couldn’t load this Journey. Please reload to try again.");
       });
     return () => {
       live = false;
@@ -98,7 +99,7 @@ export function useJourneyContent({
         error:
           error instanceof Error
             ? error.message
-            : "The world could not be prepared.",
+            : "Couldn’t prepare the world. Please reload to try again.",
       };
     }
   }, [regions, isJourney, journey, contexts]);

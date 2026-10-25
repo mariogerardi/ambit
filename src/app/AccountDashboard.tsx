@@ -217,7 +217,7 @@ export function AccountDashboard({
     perform(
       () =>
         api.request(`friends/${encodeURIComponent(id)}`, "PATCH", { action }),
-      "Your friends list is updated.",
+      "Your friends list has been updated.",
     );
   const saveProfile = (value: AccountProfile) =>
     api.request<AccountProfile>("profile", "PATCH", value);
@@ -480,8 +480,8 @@ export function AccountDashboard({
                       }
                     />
                     <small id="handle-help">
-                      3–24 letters, numbers or underscores. Friends can find you
-                      by this handle.
+                      Use 3–24 characters: letters, numbers, or underscores, starting
+                      with a letter. Friends can find you by this handle.
                     </small>
                     <div
                       id="handle-availability"
@@ -512,7 +512,7 @@ export function AccountDashboard({
                       ) : handleAvailability?.state === "available" ? (
                         "This handle is available."
                       ) : handleAvailability?.state === "offline" ? (
-                        "Availability couldn’t be checked. Saving will check again."
+                        "Couldn’t check availability. We’ll check again when you save."
                       ) : null}
                     </div>
                   </label>
@@ -562,7 +562,7 @@ export function AccountDashboard({
                   </div>
                   {!__AVATAR_IMAGES__.length && (
                     <p className="muted avatar-coming-soon">
-                      More avatars are coming soon. Choose a flag below.
+                      Choose a country flag as your avatar.
                     </p>
                   )}
                   <label className="field flag-avatar-choice">

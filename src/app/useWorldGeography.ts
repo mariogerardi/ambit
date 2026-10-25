@@ -47,7 +47,7 @@ export function useWorldGeography({
           fetch("/geography/manifest.json", { signal: controller.signal }),
           fetch(worldUrl, { signal: controller.signal }),
         ]);
-        if (!response.ok) throw Error("The world could not be loaded.");
+        if (!response.ok) throw Error("Couldn’t load the world. Try again.");
         loader = new LayerLoader(
           (await response.json()) as BoundaryLayerManifest[],
           undefined,
@@ -64,7 +64,7 @@ export function useWorldGeography({
       } catch {
         if (!controller.signal.aborted)
           setError(
-            "The world couldn’t load. Check your connection and try again.",
+            "Couldn’t load the world. Check your connection and try again.",
           );
       }
     })();
@@ -81,7 +81,10 @@ export function useWorldGeography({
         if (live) setRegional(module);
       })
       .catch(() => {
-        if (live) setRegionalStatus("Regional boundaries could not be loaded.");
+        if (live)
+          setRegionalStatus(
+            "Couldn’t load regional boundaries. Try reloading the page.",
+          );
       });
     return () => {
       live = false;
@@ -111,7 +114,7 @@ export function useWorldGeography({
       if (live && error.name !== "AbortError") {
         setBranches([]);
         setRegionalStatus(
-          "Regional boundaries could not be loaded. Turn the layer off and on to retry.",
+          "Couldn’t load regional boundaries. Turn the layer off and on to try again.",
         );
       }
     });
@@ -132,7 +135,10 @@ export function useWorldGeography({
       signal: controller.signal,
     })
       .then(async (response) => {
-        if (!response.ok) throw Error("Geographic layers could not be loaded.");
+        if (!response.ok)
+          throw Error(
+            "Couldn’t load geographic layers. Turn the layer off and on to try again.",
+          );
         const data = validatePhysicalSnapshot(await response.json());
         if (!controller.signal.aborted) {
           setPhysicalData(data);
@@ -142,7 +148,7 @@ export function useWorldGeography({
       .catch(() => {
         if (!controller.signal.aborted)
           setPhysicalError(
-            "Map details couldn’t load. Try reloading the page.",
+            "Couldn’t load map details. Try reloading the page.",
           );
       });
     return () => controller.abort();

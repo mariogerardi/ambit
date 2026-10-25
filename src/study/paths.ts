@@ -24,11 +24,11 @@ export const STUDY_PATHS = [
     id: "asia",
     title: "Discover Asia",
     description: "Get to know Asia's countries on the globe.",
-    detail: "Asia · Tap globe · 10 questions",
+    detail: "Asia · Select on globe · 10 questions",
     image: "/previews/discover-asia.svg",
     imageAlt: "A map of Asia with several countries highlighted.",
     howToPlay:
-      "Read a country name and find it on the globe. Tap your choice, submit your answer, and use the reveal to learn its location. Practice ten countries at your own pace.",
+      "Find each named country on the globe. Submit your answer to reveal its location. Ten questions, at your own pace.",
     settings: pathSettings("countries", "map", "AS"),
   },
   {

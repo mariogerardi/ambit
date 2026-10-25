@@ -185,9 +185,9 @@ describe("bearing path annotations", () => {
       100,
     );
     expect(overlays.group.children[0]).toBe(group);
-    overlays.setPalette("atlas");
+    overlays.setPalette("dusk");
     expect(label.material.color.getHexString()).toBe(
-      playColors().correct.slice(1),
+      playColors("dusk").correct.slice(1),
     );
     expect(new Raycaster().intersectObject(overlays.group, true)).toEqual([]);
     overlays.update({ ...layer, overlays: [] }, 100);

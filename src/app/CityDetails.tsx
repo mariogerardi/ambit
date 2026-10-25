@@ -50,9 +50,8 @@ export function CityDetails({
                 {capitalNames}{" "}
                 <InfoTooltip label="Capital notes" compact>
                   <p>
-                    Capital relationships follow the pinned GeoNames source.
-                    They may differ for disputed places or places with multiple
-                    seats of government.
+                    Capital designations come from GeoNames and may differ for
+                    disputed places or countries with multiple seats of government.
                   </p>
                 </InfoTooltip>
               </dd>
@@ -64,9 +63,9 @@ export function CityDetails({
                 Population{" "}
                 <InfoTooltip label="Population notes" compact>
                   <p>
-                    This is a GeoNames source place estimate, not a comparable
-                    metropolitan-area population. The snapshot date is not a
-                    census year.
+                    This population estimate comes from GeoNames and refers to
+                    the listed place, not necessarily its wider metropolitan area.
+                    The data snapshot date is not a census date.
                   </p>
                 </InfoTooltip>
               </dt>

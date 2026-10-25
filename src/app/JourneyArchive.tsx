@@ -177,7 +177,9 @@ export function JourneyArchive({
                       ? "In progress"
                       : entry?.status === "unplayed"
                         ? "Not played"
-                        : "Unavailable";
+                        : date && date > today
+                          ? "Not yet released"
+                          : "Unavailable";
                 return (
                   <td key={column}>
                     {date && (
@@ -255,8 +257,8 @@ export function JourneyArchive({
         <p>The archive opens after the first Daily on October 11, 2026.</p>
       )}
       <p className="archive-streak-note">
-        Past Journeys earn points and save your progress. They don’t add to your
-        Daily streak.
+        Past Journeys still earn points and save your progress, but they won’t
+        count toward your Daily streak.
       </p>
     </section>
   );

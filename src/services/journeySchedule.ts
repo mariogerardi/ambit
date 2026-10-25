@@ -65,7 +65,7 @@ async function request(token?: string, body?: unknown, month?: string, admin = f
       response.status === 403 || response.status === 401 ? "Sign in with an admin account to change the schedule." :
       "Couldn’t load or save the Journey schedule. Please try again.");
   const schedule: unknown = await response.json();
-  if (!validJourneySchedule(schedule)) throw Error("The Journey schedule could not be read. Please try again.");
+  if (!validJourneySchedule(schedule)) throw Error("Couldn’t read the Journey schedule. Please try again.");
   return schedule;
 }
 export function useJourneySchedule() {

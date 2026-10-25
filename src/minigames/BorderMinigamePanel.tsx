@@ -39,7 +39,7 @@ export function BorderMinigamePanel({
     return (
       <section className="info-view">
         <h1 className="editorial-heading">{shared.title}</h1>
-        <p>The 3D globe is required to play on this device.</p>
+        <p>This activity requires the 3D globe. Try another browser or device.</p>
         <button
           className="minigame-games-button"
           aria-label="All games"
@@ -54,7 +54,9 @@ export function BorderMinigamePanel({
       <section className="info-view" role="status">
         <p>
           {shared.ready ? (
-            "No puzzles match your settings. Choose more places or exclude fewer countries."
+            pinpoint
+              ? "No puzzles match your settings. Try more place categories, a broader area, or fewer exclusions."
+              : "No puzzles match your settings. Try a broader area or fewer exclusions."
           ) : (
             <>Loading {shared.title}…</>
           )}
@@ -137,7 +139,7 @@ export function BorderMinigamePanel({
             ? "Three strikes"
             : pinpoint && run.answered === 10
               ? "Ten rounds complete"
-              : "Finished by you"}
+              : "Ended early"}
         </p>
       )}
       <h1 className="editorial-heading" ref={heading} tabIndex={-1}>
@@ -145,7 +147,7 @@ export function BorderMinigamePanel({
           <>
             {pinpoint ? (
               <>
-                Your eye for <em>distance.</em>
+                Your aim, <em>mapped.</em>
               </>
             ) : route ? (
               <>
@@ -281,7 +283,7 @@ export function BorderMinigamePanel({
                 <span aria-hidden="true">{run.result ? "✳" : "◎"}</span>
                 {run.result
                   ? route
-                    ? "Beautifully reasoned."
+                    ? "Well done."
                     : missing
                       ? "Well spotted."
                       : pinpoint && target?.place
@@ -289,7 +291,7 @@ export function BorderMinigamePanel({
                           ? "Very close."
                           : (last?.points ?? 0) >= 500
                             ? "Nicely placed."
-                            : "On the map."
+                            : "Farther afield."
                         : correctAnswerCopy(shared.journey!.rounds[0])
                   : "Not quite."}
               </div>

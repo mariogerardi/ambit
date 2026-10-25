@@ -76,7 +76,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       resolvedLabel: "Ankara",
       label: "Famous city",
       title: "The famous distraction.",
-      prompt: "What is the national capital?",
+      prompt: "What is Türkiye’s capital?",
       guidance: {
         hint: "Look inland to the Anatolian plateau. This city became the capital as the republic was founded in 1923.",
         assist: {
@@ -88,7 +88,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       mode: "text",
       rule: { type: "capital-name", countryId: "wurl:TUR" },
       explanation:
-        "The new republic chose an inland political center in 1923. Istanbul remained the famous city on the Bosporus, but fame and national government had different addresses.",
+        "Ankara became Türkiye’s capital in 1923. Istanbul remained the famous city on the Bosporus, but fame and national government had different addresses.",
       source: source(
         "Türkiye Ministry of Culture and Tourism · 1923 chronology",
         "https://www.ktb.gov.tr/EN-103934/1923.html",
@@ -133,7 +133,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       label: "Planned capital",
       leadIn:
         "Cross to Australia, where Sydney and Melbourne competed to host the capital.",
-      prompt: "Drop a pin in Canberra, the city chosen instead.",
+      prompt: "Place a pin in Canberra, the city chosen instead.",
       guidance: {
         hint: "The capital is inland in southeastern Australia, between Sydney and Melbourne.",
         assist: {
@@ -238,9 +238,9 @@ export const ELEVENTH_JOURNEY: Journey = {
         },
       ],
       rule: { type: "choice-ids", ids: ["abuja:access"] },
-      correctFeedback: "Beautifully reasoned.",
+      correctFeedback: "Well done.",
       guidance: {
-        hint: "Compare the two locations. What changes for people travelling to the seat of government?",
+        hint: "Compare the two locations. What changes for people traveling to the seat of government?",
         assist: {
           text: "Two explanations remain: access from across the country, or a compromise between rival cities. Compare what each explanation claims.",
           candidateIds: ["abuja:access", "abuja:rivalry"],
@@ -304,7 +304,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       selection: { type: "ids", ids: BRAZIL_CITY_TARGETS },
       commitment: "submit",
       explanation:
-        "In 1960, the seat of government moved from coastal Rio de Janeiro to a planned city in the interior.",
+        "Brasília became Brazil’s capital in 1960, when the seat of government moved from coastal Rio de Janeiro to a planned city in the interior.",
       source: source(
         "Presidency of Brazil · Law 3,273, capital transfer date",
         "https://www.planalto.gov.br/ccivil_03/leis/l3273.htm",
@@ -387,7 +387,7 @@ export const ELEVENTH_JOURNEY: Journey = {
         },
       },
       explanation:
-        "National administration, Parliament, and the Supreme Court of Appeal have different homes. Johannesburg houses the Constitutional Court, adding another layer to a country whose government cannot be located with one capital marker.",
+        "Pretoria houses South Africa’s national administration, Cape Town its Parliament, and Bloemfontein its Supreme Court of Appeal. Johannesburg houses the Constitutional Court, adding another layer to a country whose government cannot be located with one capital marker.",
       source: source(
         "South African Government · three national capitals",
         "https://www.gov.za/about-sa/south-africas-provinces",

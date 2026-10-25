@@ -198,7 +198,7 @@ describe("product copy follows the answer and visible reveal", () => {
   });
   it("distinguishes recall, placement, recognition, reasoning and fallback", () => {
     expect(correctAnswerCopy(JOURNEY.rounds[3])).toBe("Nicely remembered.");
-    expect(correctAnswerCopy(JOURNEY.rounds[1])).toBe("Beautifully reasoned.");
+    expect(correctAnswerCopy(JOURNEY.rounds[1])).toBe("Well done.");
     expect(correctAnswerCopy(EIGHTH_JOURNEY.rounds[0])).toBe("Nicely placed.");
     expect(correctAnswerCopy(EIGHTH_JOURNEY.rounds[1])).toBe("Well spotted.");
     expect(correctAnswerCopy(ELEVENTH_JOURNEY.rounds[0])).toBe(
@@ -302,6 +302,10 @@ describe("product copy follows the answer and visible reveal", () => {
     expect(finished).not.toContain("JOURNEY COMPLETE");
     expect(finished).toContain("Every step <em>takes you somewhere.</em>");
     expect(finished).not.toContain(JOURNEY.description);
+    const failed = renderToStaticMarkup(
+      <GameShell {...props} game={{ ...game, phase: "failed" }} />,
+    );
+    expect(failed).toContain("This run <em>ends here.</em>");
   });
   it.each(["typing", "choices", "map"] as const)(
     "keeps Study %s feedback accurate and avoids repeating a correct answer",

@@ -369,7 +369,14 @@ hints remain governed by question disclosure and Study session settings.
 Leaving a Study builder skips the outgoing panel copy, which would otherwise
 remount the editor as the Study overview during the exit animation.
 
-Atlas, Ocean, Dusk, and Paper share semantic roles for text, editorial emphasis,
+Discovery uses neutral matte surfaces, a dark backdrop, richer land colors, and no
+globe halo. Survey shares its typography, layout and surface treatment, with
+graphite cartography, pale borders and copper accents. Discovery retains the
+`ocean` preference ID. Theme-specific material rules live in `src/theme/themes.css`; startup
+map colors and shared result-card colors follow the palette. See
+[Themes and visual styling](THEMES.md) for the full inventory.
+
+Discovery (the default), Survey, Dusk, and Paper share semantic roles for text, editorial emphasis,
 actions, land, selection, and feedback. UI consumes `--ui-*` custom properties;
 portal dialogs inherit them from the document. Globe styles use the same registry
 through [`src/globe/themes.ts`](../src/globe/themes.ts). Journey color values come
@@ -382,7 +389,7 @@ See the [authoring visual grammar](JOURNEY_CRAFTING.md#5-give-the-globe-purposef
 
 To add a theme, extend the palette registry and `ThemeId`, check semantic contrast
 and geography feedback, and update the documentation. The menu derives choices
-from the registry; unknown stored IDs fall back to Atlas. Do not hardcode a new
+from the registry; unknown stored IDs fall back to Discovery. Do not hardcode a new
 palette into a component or use visual color as the sole answer cue.
 
 Use the existing `tertiary-action` class for low-priority actions and

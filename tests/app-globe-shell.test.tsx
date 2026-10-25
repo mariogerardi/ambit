@@ -68,7 +68,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     });
     expect(probe.mounts).toBe(2);
     expect(host.querySelector("canvas")).toBeNull();
-    expect(host.textContent).toContain("The globe is unavailable");
+    expect(host.textContent).toContain("The globe isn’t available");
     await click("Retry globe");
     expect(probe.mounts).toBe(3);
     expect(
@@ -86,7 +86,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     });
     expect(probe.mounts).toBe(1);
     expect(host.querySelector("canvas")).toBeNull();
-    expect(host.textContent).toContain("The globe is unavailable");
+    expect(host.textContent).toContain("The globe isn’t available");
     await click("Explore");
     expect(location.pathname).toBe("/explore");
     vi.mocked(supportsWebGL).mockReturnValue(true);
@@ -228,7 +228,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     const canvas = host.querySelector("canvas");
     loader.mockRejectedValueOnce(Error("offline"));
     await click("Play");
-    expect(host.textContent).toContain("The Journey could not be loaded.");
+    expect(host.textContent).toContain("Couldn’t load this Journey. Please reload to try again.");
     const attempt = JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts;
     await click("Try again");
     expect(host.querySelector(".mode-incoming .question-card")).not.toBeNull();
@@ -392,7 +392,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     expect(probe.mounts).toBe(0);
     expect(host.querySelector(".account-earth")).not.toBeNull();
     expect(host.textContent).toContain(
-      "The 3D globe is required to play Ambit",
+      "The 3D globe isn’t available",
     );
     expect(
       host.querySelector<HTMLButtonElement>(".daily-menu .primary-button")
@@ -402,7 +402,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     await click("Study");
     expect(probe.mounts).toBe(0);
     expect(host.textContent).toContain(
-      "The 3D globe is required to play Ambit",
+      "This activity requires the 3D globe",
     );
   });
 });

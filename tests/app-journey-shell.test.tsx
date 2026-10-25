@@ -339,11 +339,11 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
       ".mode-incoming .question-answer-actions",
     )!;
     const buttons = actions.querySelectorAll<HTMLButtonElement>("button");
-    expect(buttons[0].textContent).toContain("Need a hint?");
+    expect(buttons[0].textContent).toContain("Get a hint");
     expect(buttons[0].disabled).toBe(false);
     expect(buttons[0].type).toBe("button");
     expect(buttons[1].textContent).toContain("Submit answer");
-    await click("Need a hint?");
+    await click("Get a hint");
     expect(host.textContent).toContain("toward Lake Constance");
     await click("Need an assist?");
     expect(

@@ -85,7 +85,7 @@ export const TWELFTH_JOURNEY: Journey = {
       ],
       importedRegions: geography.regions as RegionFeature[],
       explanation:
-        "French Guiana is part of France, so the country’s longest land border lies in South America. A European mainland does not contain all of a country’s geography.",
+        "Brazil shares France’s longest international land border, along French Guiana, an overseas part of France. A European mainland does not contain all of a country’s geography.",
       source: source(
         "Presidency of Brazil · France’s longest land border",
         "https://www.gov.br/planalto/en/latest-news/2023/05/presidents-lula-and-macron-meet-at-the-g7-summit-and-seal-resumption-of-brazil-france-relations",
@@ -329,7 +329,7 @@ export const TWELFTH_JOURNEY: Journey = {
       instruction: "",
       rule: { type: "country-ids", ids: ["wurl:AZE"] },
       explanation:
-        "Baku stands on the Caspian shore, below the level of the world’s oceans. Sea level is a reference height, not a guarantee that dry land must be above it.",
+        "Baku is Azerbaijan’s capital, on the Caspian shore about 28 meters below sea level. Sea level is a reference height, not a guarantee that dry land must be above it.",
       source: source(
         "Azerbaijan · Baku’s Caspian setting and elevation",
         "https://azerbaijan.az/en/related-information/217",

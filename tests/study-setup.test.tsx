@@ -103,7 +103,7 @@ describe("Study Session configuration", () => {
     await openAdvanced();
     const checkbox = [...host.querySelectorAll<HTMLLabelElement>("label")]
       .find(
-        (label) => label.textContent?.trim() === "Bring back missed answers",
+        (label) => label.textContent?.trim() === "Revisit missed questions",
       )!
       .querySelector<HTMLInputElement>("input")!;
     await act(async () => checkbox.click());
@@ -163,9 +163,9 @@ describe("Study Session configuration", () => {
     expect(scroll.contains(host.querySelector(".study-advanced"))).toBe(true);
     await openAdvanced();
     expect(host.querySelector("aside.study-hint-note")?.textContent).toContain(
-      "Names and markers can give away answers.",
+      "Labels and markers may reveal answers.",
     );
-    await click("Back to paths");
+    await click("Back to Study");
     expect(preview).toHaveBeenLastCalledWith(undefined);
   });
   it.each([
@@ -213,7 +213,7 @@ describe("Study Session configuration", () => {
     expect(select("Continent").value).toBe("AF");
     expect(select("Answer method").value).toBe("choices");
     await change("Session length", "20");
-    await click("Back to paths");
+    await click("Back to Study");
     expect(start).not.toHaveBeenCalled();
     await click("Custom");
     expect(select("Session length").value).toBe("20");
@@ -239,7 +239,7 @@ describe("Study Session configuration", () => {
     await click("Preview World flags");
     const dialog = document.querySelector('[role="dialog"]')!;
     expect(dialog.textContent).toContain(
-      "Starting a new session replaces your current session.",
+      "Starting a new session will end your current one.",
     );
     expect(dialog.textContent).toContain("10 questions");
     await act(async () =>
@@ -303,7 +303,7 @@ describe("Study Session configuration", () => {
       capitals: "map",
       flags: "map",
     });
-    expect(summary()).toContain("Tap globe");
+    expect(summary()).toContain("Select on globe");
   });
   it("validates custom countries and carries the filtered selections into the session", async () => {
     await mount();
@@ -375,7 +375,7 @@ it("lets the player choose and start with a capital distractor pool", async () =
     topics: ["capitals"],
     styles: { ...defaultSettings.styles, capitals: "choices" },
   });
-  const field = select("Capital distractors");
+  const field = select("Other answer choices");
   expect([...field.options].map((option) => option.value)).toEqual([
     "study",
     "region",
@@ -383,12 +383,12 @@ it("lets the player choose and start with a capital distractor pool", async () =
     "globalCities",
     "globalCapitals",
   ]);
-  await change("Capital distractors", "countryCities");
-  expect(host.textContent).toContain("bundled major-city catalog");
+  await change("Other answer choices", "countryCities");
+  expect(host.textContent).toContain("Uses major cities included in Ambit.");
   await click("Start studying");
   expect(start).toHaveBeenCalledWith(
     expect.objectContaining({ capitalDistractors: "countryCities" }),
   );
   await change("Answer method", "typing");
-  expect(select("Capital distractors")).toBeNull();
+  expect(select("Other answer choices")).toBeNull();
 });

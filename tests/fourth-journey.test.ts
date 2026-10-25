@@ -29,11 +29,7 @@ import {
   highlightedPartId,
 } from "../src/game/presentation";
 import { GameShell } from "../src/game/GameShell";
-import {
-  playRegionStyle,
-  PLAY_HIGHLIGHTS,
-  PLAY_FEEDBACK,
-} from "../src/globe/themes";
+import { playRegionStyle } from "../src/globe/themes";
 import { pinDistanceTier } from "../src/game/answerTargets";
 import { EARTH_KM } from "../src/game/spatial";
 import { sphericalGeometry } from "../src/geography/sphericalGeometry.mjs";
@@ -100,7 +96,7 @@ describe("Mediterranean facelift", () => {
     for (const id of q.selection.type === "ids" ? q.selection.ids : []) {
       expect(states[id]).toBe("selectable");
       expect(playRegionStyle(id, states[id]).fill).toBe(
-        PLAY_HIGHLIGHTS.selectable,
+        playColors().selectable,
       );
     }
     const selected = reduce(at(0), { type: "select", id: "wurl:MAR" });
@@ -113,7 +109,7 @@ describe("Mediterranean facelift", () => {
         "wurl:MAR",
         questionVisualStates(q, context, selected)["wurl:MAR"],
       ).fill,
-    ).toBe(PLAY_FEEDBACK.correct);
+    ).toBe(playColors().correct);
     expect(journeyWorld(regions, journey, at(0), context).places).toHaveLength(
       0,
     );
@@ -201,7 +197,7 @@ describe("Mediterranean facelift", () => {
       const map = journeyWorld(regions, journey, game, context);
       expect(map.states[part]).toBe(state);
       expect(playRegionStyle(part, map.states[part]).fill).toBe(
-        PLAY_FEEDBACK[state],
+        playColors()[state],
       );
       expect(map.states["wurl:ITA"]).toBe("disabled");
       expect(shell(game)).not.toContain('aria-label="Map color key"');

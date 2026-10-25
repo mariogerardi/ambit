@@ -29,7 +29,7 @@
 }
 .home-menu .menu-secondary .home-minigames {
   grid-column: 1 / -1;
-  border-color: rgb(var(--ui-accent-rgb) / 0.6);
+  border-color: rgb(var(--ui-accent-rgb) / 0.4);
   background: linear-gradient(
     135deg,
     rgb(var(--ui-accent-rgb) / 0.18),

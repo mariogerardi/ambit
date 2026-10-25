@@ -100,3 +100,98 @@
   background: rgb(var(--ui-line-rgb) / 0.22);
   color: var(--ui-muted);
 }
+
+/* The app and review entry points share the same logo selection as startup. */
+.ambit-logo-light,
+[data-theme="paper"] .ambit-logo-dark {
+  display: none;
+}
+[data-theme="paper"] .ambit-logo-light {
+  display: block;
+}
+
+/* Discovery and Survey share their matte surface treatment: neutral surfaces carry the colorful cartography.
+   Keep these overrides here so other themes can retain their own material. */
+:is([data-theme="ocean"], [data-theme="survey"]) .experience-glow {
+  display: none;
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  :is(
+    .question-card,
+    .daily-menu,
+    .app-menu-content,
+    .admin-journey-card,
+    .admin-content .feedback-review li,
+    .study-history-list li,
+    .minigames-landing .study-paths > .minigame-card,
+    .home-menu .menu-secondary button,
+    .study-path
+  ) {
+  background: rgb(var(--ui-surface-rgb));
+  backdrop-filter: none;
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  .home-menu
+  .menu-secondary
+  button {
+  border-color: rgb(var(--ui-line-rgb) / 0.3);
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  .home-menu
+  .menu-secondary
+  .home-minigames {
+  border-color: rgb(var(--ui-accent-rgb) / 0.4);
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  .home-menu
+  .menu-secondary
+  button:is(:hover, :focus-visible),
+:is([data-theme="ocean"], [data-theme="survey"]) .study-history-list li:hover {
+  background: rgb(var(--ui-raised-rgb));
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  :is(.primary-button, .order-card, .point-orb-earned) {
+  box-shadow: none;
+}
+:is([data-theme="ocean"], [data-theme="survey"]) .point-orb-earned {
+  background: currentColor;
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  .experience
+  .order-populated
+  .order-card:not(.chosen) {
+  background: rgb(var(--ui-raised-rgb));
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  .experience
+  .order-populated
+  .drop-target
+  .order-card,
+:is([data-theme="ocean"], [data-theme="survey"])
+  .experience
+  .drop-target
+  .order-card {
+  background: var(--play-selected);
+  color: var(--play-on-selected);
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  .experience
+  .mobile-map-tools
+  button {
+  text-shadow: none;
+}
+:is([data-theme="ocean"], [data-theme="survey"]) .ambit-loading-globe {
+  filter: none;
+  animation: none;
+}
+:is([data-theme="ocean"], [data-theme="survey"]) #ambit-loading-ocean stop {
+  stop-color: var(--map-ocean);
+}
+:is([data-theme="ocean"], [data-theme="survey"])
+  .ambit-loading-globe
+  circle[fill="url(#ambit-loading-shade)"],
+:is([data-theme="ocean"], [data-theme="survey"])
+  .ambit-loading-globe
+  > circle:last-child {
+  display: none;
+}

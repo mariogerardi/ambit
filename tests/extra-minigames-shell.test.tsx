@@ -27,6 +27,43 @@ import {
 
 afterEach(() => vi.useRealTimers());
 
+it("keeps Pinpoint scoring details behind Full rules", async () => {
+  history.replaceState(null, "", "/minigames/pinpoint");
+  await mount();
+  const dialog = document.querySelector('[role="dialog"]')!;
+  const rules = dialog.querySelector<HTMLDetailsElement>("details")!;
+  expect(rules.open).toBe(false);
+  expect(rules.textContent).toContain("within 1 km earns full points");
+  expect(rules.textContent).toContain("1,040 km");
+  const introduction = dialog.cloneNode(true) as HTMLElement;
+  introduction.querySelector("details")!.remove();
+  expect(introduction.textContent).toContain("Play ten rounds");
+  expect(introduction.textContent).not.toContain("1,040 km");
+});
+
+it("explains how to recover a Pinpoint pool with no categories", async () => {
+  createMinigameSettingsSave(undefined, "pinpoint").save({
+    ...defaultMinigameSettings,
+    categories: [],
+  });
+  history.replaceState(null, "", "/minigames/pinpoint");
+  await mount();
+  const dialog = document.querySelector('[role="dialog"]')!;
+  expect(dialog.textContent).toContain("Try more place categories");
+  expect(
+    dialog.querySelector<HTMLButtonElement>(
+      ".activity-preview-actions .primary-button",
+    )!.disabled,
+  ).toBe(true);
+  await click("Customize");
+  await click("Reset settings");
+  expect(
+    dialog.querySelector<HTMLButtonElement>(
+      ".activity-preview-actions .primary-button",
+    )!.disabled,
+  ).toBe(false);
+});
+
 it("plays a numeric country route, reveals numbered crossings, and saves a high score independently of the next run", async () => {
   const pairs = borderRunPairs(landTopology(world));
   const run = {

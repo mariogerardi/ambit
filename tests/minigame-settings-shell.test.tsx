@@ -113,7 +113,7 @@ it("explains an empty pool, prevents starting it, and restores playable defaults
     )!.disabled,
   ).toBe(true);
   expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
-    "No puzzles match these settings.",
+    "No puzzles match your settings.",
   );
   expect(createNeighborSave().load().run).toBeUndefined();
   await click("Customize");

@@ -67,19 +67,19 @@ export function MinigameSettingsEditor({
                   {label}
                   {value === "cities" && (
                     <small>
-                      National capitals and cities with a source population of
-                      at least one million.
+                      National capitals and cities with populations of at least
+                      one million, according to the source data.
                     </small>
                   )}
                   {value === "landmarks" && (
                     <small>
-                      60 landmarks across 60 countries, including monuments,
-                      historic sites and natural landmarks.
+                      60 landmarks in 60 countries, from historic sites and
+                      monuments to natural wonders.
                     </small>
                   )}
                   {value === "regions" && (
                     <small>
-                      The 50 US states, using the app’s existing boundaries.
+                      The 50 U.S. states, using the app’s existing boundaries.
                     </small>
                   )}
                 </span>
@@ -187,7 +187,7 @@ export function MinigameSettingsEditor({
           <>
             <label className="minigame-setting-row">
               <span>
-                Include Exclaves and Overseas Territories
+                Include exclaves and overseas territories
                 <small>
                   When off, overseas and exclave-only border relationships
                   aren’t used.
@@ -300,7 +300,7 @@ export function MinigameSettingsEditor({
         <p className="minigame-score-eligibility" role="status">
           {usesDefaultMinigameRules(settings, kind)
             ? "Default rules · Personal bests are recorded."
-            : "Custom rules · Personal bests aren’t recorded."}
+            : "Custom rules · This run won’t count toward your personal best."}
         </p>
         <button
           className="quiet-button"

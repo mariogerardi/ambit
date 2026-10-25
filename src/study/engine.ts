@@ -140,7 +140,7 @@ export function settingsError(settings: StudySettings): string | undefined {
     return settings.capitalDistractors === "countryCities" &&
       settings.topics.includes("capitals") &&
       settings.styles.capitals === "choices"
-      ? "Choose a country with another bundled city, or a different distractor pool."
+      ? "Choose a country with another listed city, or change the multiple-choice answer options."
       : "Choose at least one country.";
   if (
     settings.topics.some(

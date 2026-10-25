@@ -1,3 +1,5 @@
+import { DEFAULT_THEME, isTheme, THEMES } from "../theme/themes";
+import type { ThemeId } from "../theme/themes";
 import { helpCountCopy, helpSummary } from "../game/guidance";
 import type { Journey } from "../game/questionContracts";
 import type { GameState } from "../game/state";
@@ -79,7 +81,7 @@ export function resultText(result: SharedJourneyResult) {
   ].join("\n");
 }
 export function resultCaption(result: SharedJourneyResult) {
-  return `A world of wonders. ${result.archive ? "Explore this Journey" : "Take today’s Journey"} with me → ${result.playUrl}`;
+  return `${result.archive ? "Explore this Journey" : "Take today’s Journey"} with me → ${result.playUrl}`;
 }
 
 /** Wrap even a single long word; title fitting must never silently clip content. */
@@ -114,17 +116,19 @@ export function paintResultCard(
   ctx: CanvasRenderingContext2D,
   globe: CanvasImageSource,
   result: SharedJourneyResult,
+  palette: ThemeId = DEFAULT_THEME,
 ) {
-  ctx.fillStyle = "#071321";
+  const { ui, globe: cartography } = THEMES[palette];
+  ctx.fillStyle = ui.bg;
   ctx.fillRect(0, 0, 1200, 940);
   ctx.save();
   ctx.globalAlpha = 0.36;
   ctx.drawImage(globe, 540, -120, 900, 900);
   ctx.restore();
-  ctx.fillStyle = "#edf4f7";
+  ctx.fillStyle = ui.text;
   ctx.font = '800 52px "Manrope"';
   ctx.fillText("ambit", 80, 115);
-  ctx.fillStyle = "#b2c9d7";
+  ctx.fillStyle = ui.muted;
   ctx.font = '500 28px "Manrope"';
   ctx.fillText(resultDate(result.date), 80, 175);
   let size = 64,
@@ -139,11 +143,11 @@ export function paintResultCard(
     if (lines.length * size * 1.15 <= 190) break;
     size -= 2;
   } while (size > 16);
-  ctx.fillStyle = "#efbb91";
+  ctx.fillStyle = ui.editorial;
   lines.forEach((line, index) =>
     ctx.fillText(line, 85, 275 + index * size * 1.15),
   );
-  ctx.fillStyle = "#edf4f7";
+  ctx.fillStyle = ui.text;
   ctx.font = '800 160px "Manrope"';
   const titleBottom = 275 + (lines.length - 1) * size * 1.15;
   const scoreBaseline = Math.max(520, titleBottom + 164);
@@ -152,7 +156,7 @@ export function paintResultCard(
   const scoreX = 80;
   ctx.fillText(score, scoreX, scoreBaseline);
   ctx.font = '500 30px "Manrope"';
-  ctx.fillStyle = "#b2c9d7";
+  ctx.fillStyle = ui.muted;
   ctx.fillText("points", scoreX + scoreWidth + 12, scoreBaseline);
   for (let slot = 0; slot < result.maxPoints; slot++) {
     const x = 94 + slot * 30,
@@ -160,10 +164,10 @@ export function paintResultCard(
       filled = slot < result.points;
     ctx.beginPath();
     ctx.arc(x, y, 12, 0, Math.PI * 2);
-    ctx.strokeStyle = filled ? "#a7d9cc" : "#7291a7";
+    ctx.strokeStyle = filled ? ui.accent : cartography.disabled;
     ctx.lineWidth = 1.5;
     if (filled) {
-      ctx.fillStyle = "#a7d9cc";
+      ctx.fillStyle = ui.accent;
       ctx.fill();
     }
     ctx.stroke();
@@ -178,11 +182,11 @@ export function paintResultCard(
         else ctx.moveTo(px, py);
       }
       ctx.closePath();
-      ctx.fillStyle = "#071321";
+      ctx.fillStyle = ui.bg;
       ctx.fill();
     }
   }
-  ctx.fillStyle = "#edf4f7";
+  ctx.fillStyle = ui.text;
   ctx.font = '500 28px "Manrope"';
   const summary = wrapCardText(
     `${result.correct}/${result.outcomes.length} correct answers · ${result.legacyPoints ? "Earlier scoring · " : ""}${result.help}`,
@@ -194,26 +198,29 @@ export function paintResultCard(
     ctx.fillText(line, 80, scoreBaseline + 108 + i * 42),
   );
   if (result.endedEarly) {
-    ctx.fillStyle = "#b2c9d7";
+    ctx.fillStyle = ui.muted;
     ctx.fillText(
       "Ended early · — not reached",
       80,
       scoreBaseline + 108 + summary.length * 42 + 12,
     );
   }
-  ctx.fillStyle = "#9fdde4";
+  ctx.fillStyle = ui.accent;
   ctx.font = '600 27px "Manrope"';
   ctx.fillText(
     result.archive ? "Play this Journey" : "Play today’s Journey",
     80,
     851,
   );
-  ctx.fillStyle = "#b2c9d7";
+  ctx.fillStyle = ui.muted;
   ctx.font = '500 24px "Manrope"';
   const playUrl = new URL(result.playUrl);
   ctx.fillText(playUrl.host + playUrl.pathname, 80, 895, 1040);
 }
 export async function resultImage(result: SharedJourneyResult): Promise<Blob> {
+  // Use the live choice even when browser storage is unavailable.
+  const applied = document.documentElement.dataset.theme;
+  const palette = isTheme(applied) ? applied : DEFAULT_THEME;
   await Promise.all([
     document.fonts.load('800 52px "Manrope"', result.title),
     document.fonts.load('400 64px "Newsreader"', result.title),
@@ -226,7 +233,7 @@ export async function resultImage(result: SharedJourneyResult): Promise<Blob> {
   canvas.height = 940;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Image export is unavailable. Please retry.");
-  paintResultCard(ctx, globe, result);
+  paintResultCard(ctx, globe, result, palette);
   return new Promise((resolve, reject) =>
     canvas.toBlob(
       (blob) =>

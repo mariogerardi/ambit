@@ -122,14 +122,14 @@ export function JourneyShareDialog({
         return;
       }
       await navigator.share({
-        title: "Ambit · A world of wonders",
+        title: "Ambit · A different way to see the world",
         text,
         files: [image.file],
       });
     } catch (error) {
       if (!shareCancelled(error)) {
         setUseDownload(true);
-        setNotice("Couldn’t open sharing. Save the image and caption instead.");
+        setNotice("Couldn’t open sharing. Save the image and copy its caption instead.");
       }
     } finally {
       setBusy(false);
@@ -143,7 +143,7 @@ export function JourneyShareDialog({
       !!navigator.canShare?.({
         files: [image.file],
         text,
-        title: "Ambit · A world of wonders",
+        title: "Ambit · A different way to see the world",
       });
   } catch {
     /* Downloads remain available. */
@@ -202,7 +202,7 @@ export function JourneyShareDialog({
             disabled={busy || !image}
             onClick={() => void share()}
           >
-            {useDownload ? "Save image and caption" : "Share"}
+            {useDownload ? "Save image & copy caption" : "Share"}
           </button>
         </div>
         {image && !fileShare && (

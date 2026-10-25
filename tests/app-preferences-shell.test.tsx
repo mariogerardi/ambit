@@ -23,6 +23,7 @@ describe("app preferences shell (DOM only; no browser or WebGL)", () => {
       authProbe.subject = subject;
       history.replaceState(null, "", "/explore");
       await mount();
+      expect(probe.props!.palette).toBe("ocean");
       await act(async () => probe.props!.onSelect(member("wurl:CAN")));
       const earth = host.querySelector("canvas");
       await click("Account");
@@ -39,6 +40,21 @@ describe("app preferences shell (DOM only; no browser or WebGL)", () => {
       await click("Open menu");
       expect(host.querySelector(".app-menu-content .theme-picker")).toBeNull();
       await click("Close menu");
+      const firstTheme = host.querySelector<HTMLInputElement>(
+        'input[name="app-theme"]',
+      )!;
+      expect(firstTheme.value).toBe("ocean");
+      expect(firstTheme.checked).toBe(true);
+      const survey = host.querySelector<HTMLInputElement>(
+        'input[name="app-theme"][value="survey"]',
+      )!;
+      await act(async () => survey.closest<HTMLLabelElement>("label")!.click());
+      expect(readTheme()).toBe("survey");
+      expect(document.documentElement.dataset.theme).toBe("survey");
+      expect(probe.props!.palette).toBe("survey");
+      expect(probe.props!.states).toEqual(states);
+      expect(probe.focus).toHaveLength(focusCount);
+      expect(host.querySelector("canvas")).toBe(earth);
       const paper = host.querySelector<HTMLInputElement>(
         'input[name="app-theme"][value="paper"]',
       )!;
@@ -74,15 +90,15 @@ describe("app preferences shell (DOM only; no browser or WebGL)", () => {
     },
   );
 
-  it("restores a saved theme at startup", async () => {
-    localStorage.setItem(
-      THEME_KEY,
-      JSON.stringify({ version: 1, theme: "ocean" }),
-    );
-    await mount();
-    expect(probe.props!.palette).toBe("ocean");
-    expect(document.documentElement.dataset.theme).toBe("ocean");
-  });
+  it.each(["dusk", "survey"] as const)(
+    "restores a saved %s theme at startup",
+    async (theme) => {
+      localStorage.setItem(THEME_KEY, JSON.stringify({ version: 1, theme }));
+      await mount();
+      expect(probe.props!.palette).toBe(theme);
+      expect(document.documentElement.dataset.theme).toBe(theme);
+    },
+  );
 
   it("shares display settings while overview navigation keeps the live orientation", async () => {
     await mount();

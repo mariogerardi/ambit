@@ -314,7 +314,7 @@ export const MECHANIC_RECIPES: Question[] = [
     count: 1,
     selection: { type: "none" },
     commitment: "submit",
-    inputLabel: "Distance in kilometres",
+    inputLabel: "Distance in kilometers",
     rule: {
       type: "numeric-range",
       value: 350,

@@ -279,7 +279,7 @@ it.each([true, false])(
     );
     expect(html).not.toContain("Answer by name");
     expect(html).not.toContain("<input");
-    if (!webgl) expect(html).toContain("3D globe is required");
+    if (!webgl) expect(html).toContain("requires the 3D globe");
   },
 );
 it("gives mobile correct-answer feedback time to read before automatic advance", async () => {

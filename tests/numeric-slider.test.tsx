@@ -263,7 +263,7 @@ describe("numeric slider control without WebGL", () => {
   it("labels the native range, leaves its default uncommitted and wires pointer/keyboard confirmation", async () => {
     await render();
     expect(host.querySelector('label[for="written-answer"]')?.textContent).toBe(
-      "Distance in kilometres",
+      "Distance in kilometers",
     );
     expect(slider().getAttribute("min")).toBe("0");
     expect(slider().getAttribute("max")).toBe("5000");

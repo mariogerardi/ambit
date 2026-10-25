@@ -152,7 +152,7 @@ describe("authored Journey hint and assist stages", () => {
       .getAttribute("d");
     expect(host.querySelector(".question-guidance")).toBeNull();
     expect(host.querySelector(".answer-hint-button")!.textContent).toContain(
-      "Need a hint?",
+      "Get a hint",
     );
     await clickHelp();
     expect(game.phase).toBe("playing");

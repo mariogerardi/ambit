@@ -3,7 +3,7 @@ import { Vector3 } from "three";
 import type { PerspectiveCamera } from "three";
 import type { Focus, RegionFeature } from "../geography/types";
 import { interiorAnchor } from "../geography/interiorAnchor";
-import { THEMES } from "../theme/themes";
+import { DEFAULT_THEME, THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
 import { playColors } from "../theme/playColors";
 import type { LabelBox } from "./placeLabels";
@@ -164,7 +164,7 @@ export class ClueLocators {
   }
   update(
     clues: readonly ClueLocator[],
-    palette: ThemeId = "atlas",
+    palette: ThemeId = DEFAULT_THEME,
     reduced = false,
   ) {
     this.reduced = reduced;

@@ -157,7 +157,7 @@ export function StudyPanel({
   if (!webgl && session?.phase !== "summary")
     return (
       <section className="info-view" role="status">
-        <p>The 3D globe is required to play Ambit on this device.</p>
+        <p>This activity requires the 3D globe. Try another browser or device.</p>
         {onHome && <button className="quiet-button" onClick={onHome}>Home</button>}
       </section>
     );
@@ -298,10 +298,10 @@ export function StudyPanel({
             <div className="study-map-answer">
               <p className="study-map-instruction question-support">
                 {webgl
-                  ? "Tap your answer on the globe."
+                  ? "Select your answer on the globe."
                   : canTypeStudyAnswer(prompt)
-                    ? "The globe is unavailable. Answer by country name below."
-                    : "The globe is unavailable. Open session settings to build a session with another answer method."}
+                    ? "The globe isn’t available. Answer by country name below."
+                    : "The globe isn’t available. Open session settings to choose another answer method."}
               </p>
               <QuestionActions showSubmit={false} />
               {canTypeStudyAnswer(prompt) && (

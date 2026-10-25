@@ -221,7 +221,7 @@ it("retains both image and caption after native sharing fails or clipboard acces
   await renderDialog();
   await click("Share");
   expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled();
-  await click("Save image and caption");
+  await click("Save image & copy caption");
   expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1);
   expect(
     document.querySelector<HTMLTextAreaElement>(

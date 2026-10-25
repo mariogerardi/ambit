@@ -42,7 +42,7 @@ const definitions = [
     reveal: { lat: 39.5, lng: -5.5, altitude: 0.34 },
     leadIn:
       "A border has been erased from this map of Europe and North Africa.",
-    prompt: "Tap the territory that should be two countries.",
+    prompt: "Select the territory that should be two countries.",
     hint: "A peninsula can look like one continuous landmass without being one country.",
     assistText:
       "Four territories remain selectable. Compare their coastlines and the borders they still share with their neighbors.",
@@ -84,7 +84,7 @@ const definitions = [
     focus: { lat: 38, lng: 125, altitude: 0.68 },
     reveal: { lat: 38.5, lng: 127.5, altitude: 0.3 },
     leadIn: "A political division has disappeared from this map of East Asia.",
-    prompt: "Tap the territory that should be two countries.",
+    prompt: "Select the territory that should be two countries.",
     hint: "The missing boundary dates to a twentieth-century division of a peninsula, rather than a coastline or mountain barrier.",
     assistText:
       "Four territories remain selectable in the region. Think about which peninsula has been divided into two states since the mid-twentieth century.",
@@ -127,7 +127,7 @@ const definitions = [
     reveal: { lat: 56.9, lng: 24.5, altitude: 0.28 },
     leadIn:
       "This time, two borders are missing. Three neighboring countries now look like one.",
-    prompt: "Tap the merged territory.",
+    prompt: "Select the merged territory.",
     hint: "The missing borders separate three neighbors commonly grouped together under one regional name.",
     assistText:
       "Four territories remain selectable around the Baltic. Compare their shapes: one apparent territory normally contains three neighboring countries.",

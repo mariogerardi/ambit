@@ -89,6 +89,10 @@ them. Numeric sliders use the same convention. Territory-containment pins do not
 receive a distance bullseye. Review the combined rendered prompt, supporting copy
 and control text, rather than reviewing the authored fields in isolation.
 
+Use “Select” for choosing map features and “Place a pin” for coordinate answers.
+Use “Tap” or “Drag” when explaining a specific gesture, such as editing a shape.
+Keep the wording consistent across prompts, instructions, and control labels.
+
 Feedback headings are a brief reaction: one to four words, such as “Well
 spotted.” or “Very close.” Apply this to `correctFeedback` and accuracy-tier
 `feedback` too. Put discoveries in the reveal body; omit interface narration
@@ -421,11 +425,19 @@ Keep the hint on screen after the assist. Preserve prior selections and explain 
 question's points at two for a hint or one for an assist. Disclose the ceiling
 before help is used; never change the acceptance rule or tolerance.
 
-Help controls should be visually secondary to the normal answer/submit action and clearly progress from “Need a hint?” to “Need an assist?”. Question information/sources/reporting is separate from gameplay help.
+Help controls should be visually secondary to the normal answer/submit action and clearly progress from “Get a hint” to “Need an assist?”. Question information/sources/reporting is separate from gameplay help.
 
 ## 8. Design the reveal before declaring the question finished
 
 Write both **answer text** and **answer-state globe**. The correct answer should be explicit, followed by a short insight that adds something beyond restating the question. On a miss, show the canonical solution clearly. For questions with multiple valid solutions, distinguish an illustrative accepted example from an exhaustive answer set.
+
+Review the complete reveal: the shared answer line, explanatory copy, and map
+work together. Name the answer naturally in the explanation so it also works as
+an educational takeaway, then explain its significance. For open-ended placements
+or several valid answers, describe the geographic target or relationship rather
+than pretending there is one unique solution. Preserve the Journey’s narrative
+voice and forward movement. Follow [Player-facing copy](COPY_STYLE.md) for shared
+terminology, formatting, and recovery messages.
 
 The revealed visual must represent the **actual type of answer**:
 

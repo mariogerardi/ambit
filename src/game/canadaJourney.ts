@@ -71,9 +71,9 @@ export const CANADA_JOURNEY: Journey = {
           focus: { lat: 38, lng: -102, altitude: 1.2 },
         },
       },
-      leadIn: "Start with a familiar flag.",
+      leadIn: "Start with a flag.",
       explanation:
-        "The maple leaf brings one country instantly to mind. Its shared symbol is our starting point; the languages and places behind it tell a more varied story.",
+        "The maple leaf points us to Canada. Its shared symbol is our starting point; the languages and places behind it tell a more varied story.",
       scenes: {
         play: {
           focus: { lat: 14, lng: 24, altitude: 1.65 },

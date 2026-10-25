@@ -51,6 +51,90 @@ function contrast(a: string, b: string) {
 }
 
 describe("application themes", () => {
+  it("defaults to Discovery and lists Survey second", () => {
+    expect(DEFAULT_THEME).toBe("ocean");
+    expect(THEME_IDS.slice(0, 2)).toEqual(["ocean", "survey"]);
+    expect(THEMES.ocean.name).toBe("Discovery");
+    expect(readTheme()).toBe("ocean");
+    expect(playRegionStyle("wurl:CAN")).toEqual(
+      playRegionStyle("wurl:CAN", "default", false, "ocean"),
+    );
+    expect(playColors()).toEqual(playColors("ocean"));
+    localStorage.setItem(
+      THEME_KEY,
+      JSON.stringify({ version: 1, theme: "atlas" }),
+    );
+    expect(isTheme("atlas")).toBe(false);
+    expect(readTheme()).toBe("ocean");
+  });
+
+  it("keeps Discovery's background, surfaces, and subdued copy neutral", () => {
+    const { ui, globe } = THEMES.ocean;
+    for (const role of ["bg", "input", "text", "muted", "faint"]) {
+      const channels = ui[role].slice(1).match(/../g)!;
+      expect(new Set(channels).size, role).toBe(1);
+    }
+    for (const role of ["surface-rgb", "raised-rgb", "scrim-rgb", "line-rgb"]) {
+      expect(new Set(ui[role].split(" ")).size, role).toBe(1);
+    }
+    expect(globe.showAtmosphere).toBe(false);
+    expect(ui["text-shadow"]).toBe("none");
+  });
+
+  it("connects Discovery's selection and outcomes to the interface without merging result roles", () => {
+    const colors = playColors("ocean");
+    expect(colors.selected).toBe(THEMES.ocean.ui.action);
+    expect(colors.correct).toBe(THEMES.ocean.ui.correct);
+    expect(colors.correct).not.toBe(THEMES.ocean.ui.accent);
+    expect(contrast(colors.correct, colors.disabled)).toBeGreaterThanOrEqual(3);
+    expect(colors.incorrect).toBe(THEMES.ocean.ui.incorrect);
+    expect(
+      new Set([
+        colors.selectable,
+        colors.selected,
+        colors.hinted,
+        colors.correct,
+        colors.answer,
+        colors.incorrect,
+        colors.visited,
+      ]).size,
+    ).toBe(7);
+  });
+
+  it("keeps Survey's cartography neutral and candidate boundaries readable", () => {
+    const { globe } = THEMES.survey;
+    for (const color of [globe.ocean, ...globe.land])
+      expect(new Set(color.slice(1).match(/../g)).size).toBe(1);
+    const base = playRegionStyle("wurl:CAN", "default", false, "survey");
+    for (const state of ["selectable", "surface"] as const) {
+      const candidate = playRegionStyle("wurl:CAN", state, false, "survey");
+      expect(candidate.stroke).not.toBe(base.stroke);
+      expect(contrast(candidate.stroke, candidate.fill)).toBeGreaterThanOrEqual(
+        3,
+      );
+    }
+    const colors = playColors("survey");
+    expect(colors.selected).toBe(THEMES.survey.ui.action);
+    expect(colors.correct).toBe(THEMES.survey.ui.correct);
+    expect(colors.correct).not.toBe(THEMES.survey.ui.accent);
+  });
+
+  it.each(THEME_IDS)(
+    "keeps selected copy and outcome symbols legible in %s",
+    (theme) => {
+      const colors = playColors(theme);
+      expect(
+        contrast(colors["on-selected"], colors.selected),
+      ).toBeGreaterThanOrEqual(4.5);
+      for (const role of ["correct", "answer", "incorrect"] as const) {
+        expect(
+          contrast(colors["on-feedback"], colors[role]),
+          `${theme}: ${role}`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    },
+  );
+
   it("gives every shared-border country pair distinct base colors in every palette, including enclave boundaries", () => {
     const world = validateRegions(
       JSON.parse(readFileSync("public/geography/world.v1.json", "utf8")),
@@ -132,8 +216,18 @@ describe("application themes", () => {
       const { ui, scheme } = THEMES[id];
       expect(document.documentElement.style.colorScheme).toBe(scheme);
       expect(meta.content).toBe(ui.bg);
+      expect(
+        document.documentElement.style.getPropertyValue("--map-ocean"),
+      ).toBe(THEMES[id].globe.ocean);
+      THEMES[id].globe.land.forEach((color, index) => {
+        expect(
+          document.documentElement.style.getPropertyValue(
+            `--map-land-${index}`,
+          ),
+        ).toBe(color);
+      });
       expect(Object.keys(ui).sort()).toEqual(
-        Object.keys(THEMES.atlas.ui).sort(),
+        Object.keys(THEMES.ocean.ui).sort(),
       );
       for (const [name, value] of Object.entries(ui)) {
         expect(
@@ -216,7 +310,7 @@ describe("application themes", () => {
           (id) => playRegionStyle("CAN", "default", false, id).fill,
         ),
       ).size,
-    ).toBe(4);
+    ).toBe(THEME_IDS.length);
     for (const id of THEME_IDS) {
       for (const state of [
         "selected",

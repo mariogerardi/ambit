@@ -40,7 +40,7 @@ describe("Explore city navigation (DOM only; mocked globe)", () => {
     ).not.toBe(true);
     await click("Population notes");
     expect(document.querySelector(".info-note-tooltip")?.textContent).toContain(
-      "not a census year",
+      "not a census date",
     );
     await click("← Back to France");
     expect(panel().querySelector("h1")?.textContent).toBe("France");

@@ -177,7 +177,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       leadIn: "Now compare Madrid's clock with the rest of Europe.",
       prompt:
         "Which of these countries keeps the same time as Madrid in both winter and summer?",
-      instruction: "Tap a country.",
+      instruction: "Select a country.",
       mode: "map-single",
       count: 1,
       commitment: "immediate",

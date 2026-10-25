@@ -197,7 +197,7 @@ export const ANDES_JOURNEY: Journey = {
         { id: "city:medellin", label: "Medellín" },
       ],
       explanation:
-        "The capital sits high in Colombia’s Eastern Cordillera. Caracas lies farther east, in Venezuela’s separate Coastal Range.",
+        "Bogotá sits high in Colombia’s Eastern Cordillera. Caracas lies farther east, in Venezuela’s separate Coastal Range.",
       correctFeedback: "Nice connection.",
       source: source(
         "Bogotá · Eastern Hills",
@@ -339,7 +339,7 @@ export const ANDES_JOURNEY: Journey = {
         committedNames: true,
       },
       explanation:
-        "The lake spans their border high on the Altiplano, between Andean ranges.",
+        "Peru and Bolivia share Lake Titicaca, high on the Altiplano between Andean ranges.",
       source: source(
         "UNESCO · Lake Titicaca",
         "https://whc.unesco.org/en/tentativelists/5080",
@@ -379,7 +379,7 @@ export const ANDES_JOURNEY: Journey = {
       title: "The highest stop.",
       leadIn: "Follow the range south to its highest peak.",
       prompt:
-        "Aconcagua is the highest mountain in the Americas, on the Argentine side of the Chilean border. Drop a pin as close to its summit as you can.",
+        "Aconcagua is the highest mountain in the Americas, on the Argentine side of the Chilean border. Place a pin as close to its summit as you can.",
       instruction: "",
       mode: "pin",
       rule: {
@@ -394,7 +394,7 @@ export const ANDES_JOURNEY: Journey = {
       },
       selection: { type: "none" },
       explanation:
-        "The summit rises in Mendoza province, about 15 km east of the Chilean frontier. The highest point is on the Argentine side.",
+        "Aconcagua’s summit rises in Argentina’s Mendoza province, about 15 km east of the Chilean border.",
       source: source(
         "Argentina’s space agency · Aconcagua beside the Chilean frontier",
         "https://www.argentina.gob.ar/ciencia/conae/educacion-y-formacion-masiva/materiales-educativos/cerro-aconcagua-mendoza-sentinel-2a-msi-28-de-febrero-de-2017",

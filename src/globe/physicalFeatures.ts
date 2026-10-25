@@ -1,3 +1,4 @@
+import { DEFAULT_THEME } from "../theme/themes";
 import { playColors } from "../theme/playColors";
 import type { ThemeId } from "../theme/themes";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
@@ -63,7 +64,7 @@ export class PhysicalFeatures {
   private featureTokens = new WeakMap<PhysicalFeature, number>();
   private nextFeatureToken = 0;
   private radius = 100;
-  private palette: ThemeId = "atlas";
+  private palette: ThemeId = DEFAULT_THEME;
   private labelLevels: PlaceFeature[][] = [[], [], []];
   private labelLevel = -1;
   constructor() {
@@ -73,7 +74,7 @@ export class PhysicalFeatures {
     this.labels.refreshFont();
   }
   update(layer: PhysicalLayer, radius: number) {
-    const palette = layer.palette ?? "atlas";
+    const palette = layer.palette ?? DEFAULT_THEME;
     if (
       this.data === layer.features &&
       this.radius === radius &&

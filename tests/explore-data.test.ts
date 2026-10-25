@@ -6,6 +6,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   REGIONAL_INDEX,
+  subdivisionTypeLabel,
   catalogRegions,
   exploreBoundaries,
   regionalChain,
@@ -23,6 +24,21 @@ import { languageName } from "../src/geography/languages";
 import { createHash } from "node:crypto";
 afterEach(() => vi.unstubAllGlobals());
 describe("Explore local data and requested cleanup", () => {
+  it("formats subdivision types without exposing raw source separators or spelling", () => {
+    expect(subdivisionTypeLabel({
+      id: "wurl:LBY-TN", parentId: "wurl:LBY", level: "ADM1",
+      localType: "municipality|governarate",
+    })).toBe("Municipality / Governorate");
+    expect(subdivisionTypeLabel({
+      id: "county", parentId: "wurl:USA-NY", level: "ADM2", localType: "county",
+    })).toBe("County");
+    expect(subdivisionTypeLabel({
+      id: "wurl:USA-DC", parentId: "wurl:USA", level: "ADM1", localType: "state",
+    })).toBe("Federal district");
+    expect(subdivisionTypeLabel({
+      id: "unknown", parentId: "unknown", level: "ADM1",
+    })).toBe("ADM1");
+  });
   it("expands every country language tag without depending on browser language coverage", () => {
     const codes = [
       ...new Set(Object.values(info.countries).flatMap((c) => c.languages)),

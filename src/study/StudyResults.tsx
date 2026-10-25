@@ -83,7 +83,7 @@ export function StudyResults({
             review
           </h2>
           <p className="study-review-instruction">
-            Select a place to locate it on the globe.
+            Select a place to find it on the globe.
           </p>
           <ul className="study-review-list">
             {missed.map((answer) => {
@@ -134,7 +134,11 @@ export function StudyResults({
           </ul>
         </>
       ) : session.history.length > 0 ? (
-        <p className="study-result-success">No places left to review.</p>
+        <p className="study-result-success">
+          {right === session.history.length
+            ? "A clean sweep."
+            : "No places left to review."}
+        </p>
       ) : null}
       <div
         className={`study-result-actions result-actions${missed.length ? "" : " study-result-actions-perfect"}`}
@@ -147,8 +151,7 @@ export function StudyResults({
           >
             <ActionIcon name="review" />
             <span>
-              Review {missedIds.length}{" "}
-              {missedIds.length === 1 ? "place" : "places"}
+              Review missed {missed.length === 1 ? "answer" : "answers"}
             </span>
           </button>
         )}

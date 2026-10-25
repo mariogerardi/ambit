@@ -27,7 +27,7 @@ export function StudyHistory({
       <h1 className="editorial-heading">
         Past <em>sessions.</em>
       </h1>
-      {!records.length && <p className="muted">No past sessions yet.</p>}
+      {!records.length && <p className="muted">Your Study sessions will appear here, including sessions ended early.</p>}
       <ul className="study-history-list">
         {[...records]
           .sort((a, b) => b.finishedAt - a.finishedAt)

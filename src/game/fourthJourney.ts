@@ -155,7 +155,7 @@ export const FOURTH_JOURNEY: Journey = {
       leadIn:
         "A narrow strait connects the Atlantic Ocean with the Mediterranean Sea.",
       prompt: "Which country faces Spain across it?",
-      instruction: "Tap a country.",
+      instruction: "Select a country.",
       mode: "map-single",
       count: 1,
       commitment: "immediate",
@@ -258,7 +258,7 @@ export const FOURTH_JOURNEY: Journey = {
       resolvedLabel: "Tripoli",
       title: "A capital on the southern shore.",
       leadIn: "Cross from Sicily to the North African shore.",
-      prompt: "What is its capital?",
+      prompt: "What is Libya’s capital?",
       mode: "text",
       inputLabel: "Capital city",
       count: 1,
@@ -272,7 +272,7 @@ export const FOURTH_JOURNEY: Journey = {
         },
       },
       explanation:
-        "Libya’s capital stands on the northwestern coast, across the water from southern Europe. The sea separates these shores, but also brings them into the same neighborhood.",
+        "Tripoli, Libya’s capital, stands on its northwestern Mediterranean coast, across the water from southern Europe. The sea separates these shores, but also brings them into the same neighborhood.",
       sources: [
         source(
           "GeoNames · reviewed Libyan city coordinates",
@@ -303,7 +303,7 @@ export const FOURTH_JOURNEY: Journey = {
       leadIn:
         "Along the Adriatic, a shared coastline meets the borders of a former federation.",
       prompt: "Which four of these countries were republics of Yugoslavia?",
-      instruction: "Tap four countries.",
+      instruction: "Select four countries.",
       mode: "map-multiple",
       count: 4,
       selection: { type: "ids", ids: ADRIATIC_CANDIDATES },
@@ -322,7 +322,7 @@ export const FOURTH_JOURNEY: Journey = {
         },
       },
       explanation:
-        "These four former Yugoslav republics all reach the Adriatic. Bosnia and Herzegovina does so through a small opening at Neum. Albania and Greece share the wider coastal region, but were outside the federation: a sea’s neighborhood and a political union are different things.",
+        "Slovenia, Croatia, Bosnia and Herzegovina, and Montenegro were all republics of Yugoslavia with Adriatic coastlines. Bosnia and Herzegovina’s narrow opening is at Neum. Albania and Greece share the wider coastal region, but were outside the federation: a sea’s neighborhood and a political union are different things.",
       source: source(
         "UN ICTY · Yugoslavia’s six republics",
         "https://www.icty.org/en/about/what-former-yugoslavia",
@@ -362,7 +362,7 @@ export const FOURTH_JOURNEY: Journey = {
       title: "The eastern gateway.",
       leadIn: "Continue east to Egypt.",
       prompt:
-        "We’ve hidden the Suez Canal on this map. Drop a pin where ships enter it from the Mediterranean.",
+        "We’ve hidden the Suez Canal on this map. Place a pin where ships enter it from the Mediterranean.",
       instruction: "",
       mode: "pin",
       count: 1,
