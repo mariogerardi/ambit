@@ -10,8 +10,27 @@ import type { GameState } from "../game/state";
 import { validPin } from "../game/answerTargets";
 import { mapSource } from "../game/countryFacts";
 import { canSelect } from "../game/questionPreparation";
+import type { MinigameSettings } from "./minigameSettings";
 
-export type BorderMinigame = "shared-neighbors" | "missing-borders";
+export type BorderMinigame =
+  | "shared-neighbors"
+  | "missing-borders"
+  | "border-run"
+  | "pinpoint";
+export const MINIGAME_TITLES: Record<BorderMinigame, string> = {
+  "shared-neighbors": "Shared Neighbors",
+  "missing-borders": "Missing Borders",
+  "border-run": "Border Run",
+  pinpoint: "Pinpoint",
+};
+export interface MinigameVisit {
+  ids: string[];
+  correct: boolean;
+  point: { lat: number; lng: number };
+  pin?: { lat: number; lng: number };
+  points?: number;
+  distanceKm?: number;
+}
 
 export interface NeighborPair {
   id: string;
@@ -20,6 +39,7 @@ export interface NeighborPair {
 }
 export interface NeighborRun {
   id: string;
+  kind?: BorderMinigame;
   startedAt: number;
   signature: string;
   seed: number;
@@ -31,11 +51,16 @@ export interface NeighborRun {
   selectedId?: string;
   result?: boolean;
   ended?: "strikes" | "finished";
+  settings?: MinigameSettings;
+  text?: string;
+  points?: number;
+  history?: MinigameVisit[];
+  overview?: boolean;
 }
 
 /** Also recognizes runs saved before the three-strike limit was introduced. */
 export const neighborRunEnded = (run: NeighborRun) =>
-  !!run.ended || run.answered - run.correct >= 3;
+  !!run.ended || (run.kind !== "pinpoint" && run.answered - run.correct >= 3);
 
 /** Intersect the complete graph before checking answer eligibility. */
 export function sharedNeighborPairs(graph: BorderGraph): NeighborPair[] {
@@ -62,11 +87,11 @@ export function poolSignature(pairs: NeighborPair[]): string {
 }
 
 /** Fisher–Yates: every pair appears once per cycle; seed makes reloads stable. */
-export function neighborDeck(
-  pairs: NeighborPair[],
+export function neighborDeck<T extends NeighborPair>(
+  pairs: T[],
   seed: number,
   cycle: number,
-): NeighborPair[] {
+): T[] {
   let state = (seed + Math.imul(cycle, 0x9e3779b9)) >>> 0;
   const random = () => {
     state = (state + 0x6d2b79f5) >>> 0;
@@ -186,14 +211,18 @@ export function neighborJourney(
 export function neighborGame(run: NeighborRun, journey: Journey): GameState {
   const response = {
     selectedIds: run.selectedId ? [run.selectedId] : [],
-    text: "",
+    text: run.text ?? "",
     ordered: [],
     pin: run.pin,
   };
   return {
     ...initialGame,
     ...response,
-    phase: run.result === undefined ? "playing" : "feedback",
+    phase: run.overview
+      ? "finished"
+      : run.result === undefined
+        ? "playing"
+        : "feedback",
     answers:
       run.result === undefined
         ? []
@@ -202,6 +231,8 @@ export function neighborGame(run: NeighborRun, journey: Journey): GameState {
 }
 
 export type NeighborAction =
+  | { type: "overview" }
+  | { type: "text"; value: string }
   | { type: "select"; id: string }
   | { type: "pin"; lat: number; lng: number }
   | { type: "submit" }
@@ -214,8 +245,11 @@ export function neighborReducer(
   context: QuestionContext,
   count: number,
 ): NeighborRun {
+  if (action.type === "overview")
+    return neighborRunEnded(run) ? { ...run, overview: true } : run;
   if (neighborRunEnded(run)) return run;
-  if (action.type === "finish") return { ...run, ended: "finished" };
+  if (action.type === "finish")
+    return { ...run, ended: "finished", overview: true };
   const grade = (response: NeighborRun): NeighborRun => {
     const correct = isCorrect(
       journey.rounds[0],
@@ -227,10 +261,15 @@ export function neighborReducer(
       result: correct,
       answered: run.answered + 1,
       correct: run.correct + Number(correct),
+      overview: false,
       ended:
-        run.answered + 1 - run.correct - Number(correct) >= 3
-          ? "strikes"
-          : undefined,
+        run.kind === "pinpoint"
+          ? run.answered + 1 >= 10
+            ? "finished"
+            : undefined
+          : run.answered + 1 - run.correct - Number(correct) >= 3
+            ? "strikes"
+            : undefined,
     };
   };
   if (action.type === "select")
@@ -238,6 +277,12 @@ export function neighborReducer(
       journey.rounds[0].mode === "merged-region-single" &&
       canSelect(journey.rounds[0], context, action.id)
       ? grade({ ...run, selectedId: action.id })
+      : run;
+  if (action.type === "text")
+    return journey.rounds[0].mode === "number" &&
+      run.result === undefined &&
+      /^\d{0,3}$/.test(action.value)
+      ? { ...run, text: action.value }
       : run;
   if (action.type === "pin")
     return journey.rounds[0].mode === "pin" &&
@@ -247,9 +292,10 @@ export function neighborReducer(
       : run;
   if (action.type === "submit") {
     if (
-      journey.rounds[0].mode !== "pin" ||
       run.result !== undefined ||
-      !validPin(run.pin)
+      (journey.rounds[0].mode === "pin"
+        ? !validPin(run.pin)
+        : journey.rounds[0].mode !== "number" || !/^\d+$/.test(run.text ?? ""))
     )
       return run;
     return grade(run);
@@ -261,6 +307,7 @@ export function neighborReducer(
     index: next % count,
     cycle: run.cycle + Number(next === count),
     pin: undefined,
+    text: undefined,
     selectedId: undefined,
     result: undefined,
   };

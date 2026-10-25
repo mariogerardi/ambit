@@ -54,7 +54,9 @@ export interface PlaceFeature {
   annotationRadius?: number;
   /** Read-only response badge; never changes picking eligibility or grading. */
   markerBadge?: string;
-  markerRole?: "target" | "annotation";
+  /** Fade a newly introduced authored marker on the render clock. */
+  fadeInMs?: number;
+  markerRole?: "target" | "annotation" | "start" | "finish";
   accuracyBand?: { index: number; count: number };
   /** Authored answer markers use semantic colors independently of countries. */
   visualState?: VisualState;
@@ -66,6 +68,8 @@ export interface PlaceFeature {
   surfaceAligned?: boolean;
   /** Display-only text size multiplier. */
   labelScale?: number;
+  /** Compact monospaced labels for numeric map annotations. */
+  labelTypography?: "numeric";
   /** Label-only geographic context must never create a city/capital marker. */
   markerHidden?: boolean;
   /** Authored reveal marker diameter, including texture padding, in screen pixels. */
@@ -175,6 +179,8 @@ export type MapOverlay =
         | "hinted"
         | "corridor";
       coordinates: number[][];
+      /** Draw the path once on reveal; omitted for reduced motion. */
+      reveal?: { durationMs: number; delayMs?: number };
       /** Noninteractive direction and along-path annotation. */
       arrowhead?: boolean;
       label?: string;

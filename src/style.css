@@ -148,6 +148,11 @@ strong {
 .island-locator.is-pulsing > .clue-locator-pulse {
   animation: clue-locator-pulse 1.4s ease-out 1 both;
 }
+.clue-locators:not([data-reduced="true"])
+  .is-repeating.is-pulsing
+  > .clue-locator-pulse {
+  animation: clue-locator-pulse 1.8s ease-out infinite;
+}
 .clue-locators[data-reduced="true"]
   .island-locator.is-pulsing
   > .clue-locator-pulse {

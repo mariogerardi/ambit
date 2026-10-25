@@ -1,7 +1,7 @@
 import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { Vector3 } from "three";
 import type { PerspectiveCamera } from "three";
-import type { RegionFeature } from "../geography/types";
+import type { Focus, RegionFeature } from "../geography/types";
 import { interiorAnchor } from "../geography/interiorAnchor";
 import { THEMES } from "../theme/themes";
 import type { ThemeId } from "../theme/themes";
@@ -13,7 +13,11 @@ export interface ClueLocator {
   label: string;
   /** A finite ripple at the island itself; no extra name or leader line. */
   pulseOnly?: boolean;
+  /** Replay the pulse while this locator is displayed; reduced motion stays finite. */
+  repeat?: boolean;
   region: RegionFeature;
+  /** Fixed geographic anchor for a border crossing or other supplied point. */
+  anchor?: Pick<Focus, "lat" | "lng">;
 }
 const svg = <K extends keyof SVGElementTagNameMap>(tag: K) =>
   document.createElementNS("http://www.w3.org/2000/svg", tag);
@@ -32,9 +36,9 @@ export function prepareClueLocator(clue: ClueLocator) {
   const geometry = clue.region.displayGeometry ?? clue.region.geometry;
   const parts =
     geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
-  const anchor = clue.pulseOnly
-    ? clue.region.focus
-    : interiorAnchor(clue.region);
+  const anchor =
+    clue.anchor ??
+    (clue.pulseOnly ? clue.region.focus : interiorAnchor(clue.region));
   return {
     anchor: position(anchor.lng, anchor.lat),
     pulseOnly: !!clue.pulseOnly,
@@ -205,12 +209,15 @@ export class ClueLocators {
       } else {
         if (
           (entry.clue.region.displayGeometry ?? entry.clue.region.geometry) !==
-          (clue.region.displayGeometry ?? clue.region.geometry)
+            (clue.region.displayGeometry ?? clue.region.geometry) ||
+          entry.clue.anchor?.lat !== clue.anchor?.lat ||
+          entry.clue.anchor?.lng !== clue.anchor?.lng
         )
           entry.prepared = prepareClueLocator(clue);
         entry.clue = clue;
         entry.text.textContent = clue.pulseOnly ? "" : clue.label;
       }
+      entry.group.classList.toggle("is-repeating", !!clue.repeat);
       if (reduced && !clue.pulseOnly)
         entry.group.classList.remove("is-pulsing");
     }

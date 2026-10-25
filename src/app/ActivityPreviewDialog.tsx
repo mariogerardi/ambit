@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 export type ActivityPreview = {
@@ -8,6 +9,7 @@ export type ActivityPreview = {
   imageAlt: string;
   facts: { label: string; value: string }[];
   howToPlay: string;
+  rules?: string;
 };
 
 type Action = { label: string; disabled?: boolean; onClick(): void };
@@ -19,6 +21,7 @@ export function ActivityPreviewDialog({
   primary,
   customize,
   notice,
+  content,
 }: {
   preview: ActivityPreview;
   onClose(): void;
@@ -26,9 +29,34 @@ export function ActivityPreviewDialog({
   primary?: Action;
   customize?: Action;
   notice?: string;
+  content?: ReactNode;
 }) {
   const id = useId();
   const dialog = useRef<HTMLDivElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const body = useRef<HTMLDivElement>(null);
+  const [scrollable, setScrollable] = useState(false);
+  useLayoutEffect(() => {
+    if (scroller.current) scroller.current.scrollTop = 0;
+  }, [!!content]);
+  useLayoutEffect(() => {
+    const element = scroller.current;
+    if (!element) return;
+    const update = () =>
+      setScrollable(element.scrollHeight > element.clientHeight + 1);
+    update();
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? undefined
+        : new ResizeObserver(update);
+    observer?.observe(element);
+    if (body.current) observer?.observe(body.current);
+    addEventListener("resize", update);
+    return () => {
+      observer?.disconnect();
+      removeEventListener("resize", update);
+    };
+  }, []);
   // Keep lifecycle independent of callbacks recreated by a parent render.
   const close = useRef(onClose);
   close.current = onClose;
@@ -49,7 +77,7 @@ export function ActivityPreviewDialog({
       if (event.key !== "Tab") return;
       const controls = [
         ...(dialog.current?.querySelectorAll<HTMLElement>(
-          ':is(button:not(:disabled), a[href], [tabindex="0"])',
+          ':is(button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, a[href], [tabindex="0"])',
         ) ?? []),
       ];
       const first = controls[0],
@@ -95,7 +123,7 @@ export function ActivityPreviewDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={`${id}-title`}
-        aria-describedby={`${id}-description`}
+        aria-describedby={content ? undefined : `${id}-description`}
       >
         <div className="study-options-heading activity-preview-heading">
           <h2 id={`${id}-title`}>{preview.title}</h2>
@@ -120,36 +148,53 @@ export function ActivityPreviewDialog({
         </div>
         <div
           className="activity-preview-content"
-          tabIndex={0}
-          role="region"
-          aria-label="Preview details"
+          ref={scroller}
+          data-scrollable={scrollable}
+          tabIndex={scrollable ? 0 : undefined}
+          role={scrollable ? "region" : undefined}
+          aria-label={scrollable ? "Preview details" : undefined}
         >
-          <img
-            className="activity-preview-image"
-            src={preview.image}
-            alt={preview.imageAlt}
-            width="960"
-            height="480"
-            decoding="async"
-          />
-          <p className="activity-preview-description" id={`${id}-description`}>
-            {preview.description}
-          </p>
-          <div className="activity-preview-details">
-            <div className="activity-preview-how">
-              <h3>How to play</h3>
-              <p>{preview.howToPlay}</p>
-            </div>
-            <dl className="activity-preview-facts">
-              {preview.facts.map((fact) => (
-                <div key={fact.label}>
-                  <dt>{fact.label}</dt>
-                  <dd>{fact.value}</dd>
+          <div ref={body} className="activity-preview-body">
+            {content ?? (
+              <>
+                <img
+                  className="activity-preview-image"
+                  src={preview.image}
+                  alt={preview.imageAlt}
+                  width="960"
+                  height="480"
+                  decoding="async"
+                />
+                <p
+                  className="activity-preview-description"
+                  id={`${id}-description`}
+                >
+                  {preview.description}
+                </p>
+                <div className="activity-preview-details">
+                  <div className="activity-preview-how">
+                    <h3>How to play</h3>
+                    <p>{preview.howToPlay}</p>
+                    {preview.rules && (
+                      <details className="minigame-rules">
+                        <summary>Full rules</summary>
+                        <p>{preview.rules}</p>
+                      </details>
+                    )}
+                  </div>
+                  <dl className="activity-preview-facts">
+                    {preview.facts.map((fact) => (
+                      <div key={fact.label}>
+                        <dt>{fact.label}</dt>
+                        <dd>{fact.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 </div>
-              ))}
-            </dl>
+              </>
+            )}
+            {notice && <p className="activity-preview-notice">{notice}</p>}
           </div>
-          {notice && <p className="activity-preview-notice">{notice}</p>}
         </div>
         <div className="activity-preview-actions">
           {customize ? (

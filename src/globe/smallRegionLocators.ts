@@ -58,6 +58,7 @@ export function projectSmallRegion(
   width: number,
   height: number,
   radius: number,
+  minVisibleArea = 100,
 ) {
   if (!width || !height || region.anchor.dot(camera.position) <= radius) return;
   const world = region.anchor.clone().multiplyScalar(radius);
@@ -78,7 +79,7 @@ export function projectSmallRegion(
   // A broad country should not acquire a locator just from grazing the horizon.
   const area =
     region.area * ((radius * scale) / view.z) ** 2 * Math.max(0.35, facing);
-  if (!Number.isFinite(area) || area >= 100) return;
+  if (!Number.isFinite(area) || area >= minVisibleArea) return;
   return { x: ((screen.x + 1) * width) / 2, y: ((1 - screen.y) * height) / 2 };
 }
 
@@ -112,7 +113,7 @@ export class SmallRegionLocators {
       if (
         settings.active === false ||
         settings.constructionInput ||
-        settings.onCoordinateTap ||
+        (settings.onCoordinateTap && state !== "clue") ||
         region.displayBase ||
         region.displayCovered ||
         region.level !== "ADM0"
@@ -186,6 +187,7 @@ export class SmallRegionLocators {
         width,
         height,
         radius,
+        entry.prominent ? 625 : 225,
       );
       const visible =
         point &&
@@ -203,8 +205,9 @@ export class SmallRegionLocators {
           `translate(${point.x} ${point.y})`,
         );
         if (
-          canPickRegion(entry.region, this.settings) ||
-          this.settings.onSurfaceTap
+          !this.settings.onCoordinateTap &&
+          (canPickRegion(entry.region, this.settings) ||
+            this.settings.onSurfaceTap)
         )
           this.targets.push({ region: entry.region, ...point });
       }

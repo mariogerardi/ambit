@@ -2,6 +2,8 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import type { DailyAttempt } from "../src/app/dailyProgress";
+import { initialGame } from "../src/game/state";
 import { HomePanel } from "../src/app/HomePanel";
 
 let width: number;
@@ -111,4 +113,61 @@ it("refits after font loading and title changes, and stops observing on unmount"
   await act(async () => root.unmount());
   expect(disconnect).toHaveBeenCalled();
   root = createRoot(host);
+});
+
+it("draws a connected trail with filled stops and solid links only for completed questions", async () => {
+  const game: DailyAttempt["game"] = {
+    ...initialGame,
+    help: { one: "assisted" },
+    answers: [
+      { roundId: "one", correct: true, points: 3, pointsVersion: 1 },
+      { roundId: "two", correct: true, points: 2, pointsVersion: 1 },
+      { roundId: "three", correct: false, points: 0, pointsVersion: 1 },
+      { roundId: "four", correct: true },
+    ].map((answer) => ({ ...answer, selectedIds: [], text: "", ordered: [] })),
+  };
+  await act(async () =>
+    root.render(
+      <HomePanel
+        journey={{
+          id: "test",
+          title: "A Journey",
+          description: "A route.",
+          rounds: [],
+        }}
+        attempt={{
+          date: "2026-10-24",
+          journeyId: "test",
+          scheduleVersion: 1,
+          game,
+        }}
+        ready
+        onPlay={() => {}}
+        onRetrySchedule={() => {}}
+        onMinigames={() => {}}
+        onExplore={() => {}}
+        onStudy={() => {}}
+      />,
+    ),
+  );
+  const trail = host.querySelector(".daily-levels")!;
+  expect(trail.getAttribute("aria-label")).toBe(
+    "4 of 5 Journey questions completed. Points by stage: 1/3, 2/3, 0/3, 3/3, 0/3.",
+  );
+  expect(trail.querySelectorAll('[data-complete="true"]')).toHaveLength(4);
+  expect(trail.querySelectorAll('[data-complete="false"]')).toHaveLength(1);
+  expect(trail.querySelectorAll("path.completed")).toHaveLength(3);
+  expect(trail.querySelectorAll("path")).toHaveLength(4);
+  expect(
+    [...trail.querySelectorAll(".daily-stage-points")].map(
+      (stage) => stage.querySelectorAll('[data-filled="true"]').length,
+    ),
+  ).toEqual([1, 2, 0, 3, 0]);
+  expect(trail.querySelectorAll(".daily-stage-points i")).toHaveLength(15);
+  expect(
+    [...trail.querySelectorAll("path")].every((path) =>
+      /^M [\d.]+ 20 H [\d.]+$/.test(path.getAttribute("d")!),
+    ),
+  ).toBe(true);
+  expect(trail.textContent).not.toMatch(/[✓×]/);
 });

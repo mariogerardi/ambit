@@ -249,3 +249,21 @@
   display: inline-block;
   margin-top: 12px;
 }
+
+/* Match the first text baseline, including rows with city links/source notes. */
+.explore-card .country-facts {
+  align-items: first baseline;
+}
+.explore-card .country-facts dt,
+.explore-card .country-facts dd {
+  line-height: 1.5;
+}
+.experience .explore-card .explore-fact-link {
+  padding: 0;
+  line-height: inherit;
+  vertical-align: baseline;
+}
+.explore-card .country-facts .info-note-footnote {
+  vertical-align: baseline;
+  transform: translateY(-0.3em);
+}

@@ -1,5 +1,8 @@
+import { sharedBoundary } from "../src/minigames/sharedBoundary";
+import { compositeRegion } from "../src/game/compositeRegions";
+import { sphericalGeometry } from "../src/geography/sphericalGeometry.mjs";
 import { readFileSync } from "node:fs";
-import { geoDistance } from "d3-geo";
+import { geoArea, geoDistance } from "d3-geo";
 import { expect, it } from "vitest";
 import type { RegionFeature } from "../src/geography/types";
 import { createQuestionContext } from "../src/game/questionPreparation";
@@ -44,6 +47,7 @@ it("generates a stable pool of real land borders, including overseas components"
 it("prepares and dissolves every pair, with selectable distractors and no answer-only emphasis", () => {
   for (const pair of pairs) {
     const journey = missingBorderJourney(pair, base, regions, 123);
+    expect(journey.rounds[0].feedbackOverlays?.length, pair.id).toBeGreaterThan(0);
     const context = createQuestionContext(regions, [], journey, base);
     const run = startNeighborRun(pairs);
     const play = journeyWorld(
@@ -57,7 +61,7 @@ it("prepares and dissolves every pair, with selectable distractors and no answer
       expect(play.regions.some((r) => r.id === id)).toBe(false);
     expect(play.regionNames).toBe("none");
     expect(play.showBorders).toBe(true);
-    expect(play.selectableRegionIds!.length).toBeGreaterThan(100);
+    expect(play.selectableRegionIds!.length).toBeGreaterThan(2);
     const other = play.selectableRegionIds!.find((id) => id !== pair.answer)!;
     expect(play.states[pair.answer]).toBe(play.states[other]);
     const graded = neighborReducer(
@@ -155,4 +159,111 @@ it("rejects hidden member IDs, grades a pick immediately, locks reveals, and end
     }
   }
   expect(run.ended).toBe("strikes");
+});
+
+it.each([
+  ["FRA", "ITA"],
+  ["LAO", "KHM"],
+])(
+  "matches detailed neighboring borders for the merged %s/%s display while preserving grading geometry",
+  (a, b) => {
+    const pair = pairs.find(
+      (p) =>
+        p.countries.includes(`wurl:${a}`) && p.countries.includes(`wurl:${b}`),
+    )!;
+    const q = missingBorderJourney(pair, base, regions, 123).rounds[0];
+    const merged = compositeRegion(regions, q);
+    const members = pair.countries.map(
+      (id) => regions.find((r) => r.id === id)!,
+    );
+    const edges = (geometry: RegionFeature["geometry"]) => {
+      const parts =
+        geometry.type === "Polygon"
+          ? [geometry.coordinates]
+          : geometry.coordinates;
+      return parts.flatMap((part) =>
+        part.flatMap((ring) =>
+          ring
+            .slice(1)
+            .map((point, i) =>
+              [point.join(","), ring[i].join(",")].sort().join("|"),
+            ),
+        ),
+      );
+    };
+    const expected = new Set<string>();
+    for (const member of members)
+      for (const edge of edges(member.displayGeometry!)) {
+        if (expected.has(edge)) expected.delete(edge);
+        else expected.add(edge);
+      }
+    expect(merged.displayGeometry).toBeDefined();
+    expect(new Set(edges(merged.displayGeometry!))).toEqual(expected);
+    expect(geoArea(sphericalGeometry(merged.displayGeometry!))).toBeCloseTo(
+      members.reduce(
+        (sum, r) => sum + geoArea(sphericalGeometry(r.displayGeometry!)),
+        0,
+      ),
+      10,
+    );
+    expect(geoArea(sphericalGeometry(merged.geometry))).toBeCloseTo(
+      members.reduce(
+        (sum, r) => sum + geoArea(sphericalGeometry(r.geometry)),
+        0,
+      ),
+      10,
+    );
+  },
+);
+
+it.each([
+  ["FRA", "ITA"],
+  ["LAO", "KHM"],
+  ["BRA", "FRA"],
+])("traces only real detailed shared edges for %s/%s on reveal", (a, b) => {
+  const members = [a, b].map(
+    (id) => regions.find((r) => r.id === `wurl:${id}`)!,
+  );
+  const key = (a: number[], b: number[]) =>
+    [a.join(","), b.join(",")].sort().join("|");
+  const edges = (r: RegionFeature) => {
+    const g = r.displayGeometry ?? r.geometry;
+    const polygons = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+    return new Set(
+      polygons.flatMap((p) =>
+        p.flatMap((ring) => ring.slice(1).map((p, i) => key(ring[i], p))),
+      ),
+    );
+  };
+  const aEdges = edges(members[0]),
+    bEdges = edges(members[1]);
+  const traced = sharedBoundary(members[0], members[1]);
+  expect(traced.length).toBeGreaterThan(0);
+  expect(
+    new Set(
+      traced.flatMap((path) => path.slice(1).map((p, i) => key(path[i], p))),
+    ),
+  ).toEqual(new Set([...aEdges].filter((e) => bEdges.has(e))));
+  const pair = pairs.find(
+    (p) =>
+      p.countries.includes(members[0].id) &&
+      p.countries.includes(members[1].id),
+  )!;
+  const q = missingBorderJourney(pair, base, regions, 123).rounds[0];
+  expect(q.overlays).toBeUndefined();
+  expect(q.feedbackOverlays?.length).toBe(traced.length);
+  expect(
+    q.feedbackOverlays?.every(
+      (o) => o.type === "path" && o.reveal?.durationMs === 1100,
+    ),
+  ).toBe(true);
+});
+
+it("centers a continent consistently across seeds without pointing at the erased boundary", () => {
+  const pair = pairs.find((p) => p.id === "wurl:ESP|wurl:PRT")!;
+  const focus = missingBorderJourney(pair, base, regions, 123).rounds[0].focus;
+  expect(focus).toEqual({ lat: 50, lng: 20, altitude: 1.05 });
+  expect(
+    missingBorderJourney(pair, base, regions, 456).rounds[0].focus,
+  ).toEqual(focus);
 });

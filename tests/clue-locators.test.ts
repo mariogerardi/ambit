@@ -156,3 +156,32 @@ it("pulses every supplied island once after travel, including large ones, and ca
   expect(layer.element.children).toHaveLength(0);
   layer.dispose();
 });
+
+it("anchors a border-crossing pulse at its supplied point rather than the country center", () => {
+  const fixed = {
+    ...clue(35, 175),
+    pulseOnly: true,
+    repeat: true,
+    anchor: { lng: 0, lat: 0 },
+  };
+  expect(
+    projectClueLocator(prepareClueLocator(fixed), camera(), 800, 600, 100),
+  ).toMatchObject({ x: 400, y: 300 });
+  const layer = new ClueLocators();
+  layer.update([fixed]);
+  layer.view(camera(), 800, 600, 100);
+  expect(
+    layer.element.querySelector("g")!.classList.contains("is-pulsing"),
+  ).toBe(true);
+  expect(
+    layer.element.querySelector("g")!.classList.contains("is-repeating"),
+  ).toBe(true);
+  layer.update([{ ...fixed, repeat: false }]);
+  expect(
+    layer.element.querySelector("g")!.classList.contains("is-repeating"),
+  ).toBe(false);
+  layer.update([{ ...fixed, anchor: { lng: 175, lat: 0 } }]);
+  layer.view(camera(), 800, 600, 100);
+  expect(layer.element.querySelector("g")!.style.display).toBe("none");
+  layer.dispose();
+});

@@ -226,29 +226,74 @@
   display: inline-block;
 }
 .daily-levels {
-  display: flex;
-  gap: 10px;
+  position: relative;
+  height: 48px;
   margin: 12px 0;
 }
-.daily-levels span {
-  flex: 1;
-  display: grid;
-  place-items: center;
+.daily-levels svg {
+  display: block;
+  width: 100%;
+  height: 48px;
+  overflow: visible;
+}
+.daily-levels path {
+  fill: none;
+  stroke: rgb(var(--ui-accent-rgb) / 0.35);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+  vector-effect: non-scaling-stroke;
+}
+.daily-levels path.completed {
+  stroke: var(--ui-accent);
+  stroke-dasharray: none;
+}
+.daily-levels .daily-trail-stop {
+  position: absolute;
+  width: 24px;
+  transform: translateX(-50%);
   text-align: center;
-  padding: 5px 0;
-  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-  color: var(--ui-muted, #92a699);
-  font-size: 10px;
+  color: var(--ui-muted);
+}
+.daily-trail-stop > i {
+  display: block;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  margin-inline: auto;
+  border: 1.5px solid var(--ui-accent);
+  border-radius: 50%;
+  background: var(--ui-bg, #071622);
+}
+.daily-trail-stop[data-complete="true"] > i {
+  background: var(--ui-accent);
+}
+.daily-stage-points {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+.daily-stage-points i {
+  box-sizing: border-box;
+  width: 4px;
+  height: 4px;
+  border: 1px solid #9ed9df;
+  border-radius: 50%;
+}
+.daily-stage-points i[data-filled="true"] {
+  background: #9ed9df;
+}
+.daily-trail-stop small {
+  display: block;
+  margin-top: 5px;
+  font: 500 10px/1 var(--font-ui);
   font-variant-numeric: tabular-nums;
 }
-.experience .daily-levels span.journey-incorrect {
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1;
-}
-.daily-levels .answered {
-  color: var(--ui-accent, #f4d184);
-  border-bottom-color: var(--ui-accent, #f4d184);
+.daily-trail-stop[data-complete="true"] small {
+  color: var(--ui-accent);
 }
 .daily-menu .primary-button {
   width: 100%;

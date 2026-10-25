@@ -295,7 +295,9 @@ selected-ID response and map control. See its executable recipe and
 validates member connectivity, the complete internal adjacency set, candidate
 availability and meaningful assist survivors. `compositeRegions.ts` dissolves
 exact directed shared edges in the bundled country topology and caches the
-result; this is not a general union for arbitrary overlapping/imported polygons.
+result. A separate display dissolve uses the members’ detailed display boundaries
+to match neighboring surfaces without changing canonical grading geometry. This
+is not a general union for arbitrary overlapping/imported polygons.
 No geography is regenerated. Presentation replaces member surfaces with one
 anonymous composite during play and restores the original polygons on reveal.
 Globe picking selects one synthetic ID; grading never uses the dissolved geometry.

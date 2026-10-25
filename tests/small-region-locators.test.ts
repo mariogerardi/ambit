@@ -14,10 +14,10 @@ const world = validateRegions(
   JSON.parse(readFileSync("public/geography/world.v1.json", "utf8")),
 );
 const maldives = world.find((r) => r.id === "wurl:MDV")!;
-const camera = (distance = 300, reversed = false) => {
+const camera = (distance = 300, reversed = false, region = maldives) => {
   const c = new PerspectiveCamera(50, 800 / 600, 0.01, 1200);
   c.position
-    .copy(prepareSmallRegion(maldives).anchor)
+    .copy(prepareSmallRegion(region).anchor)
     .multiplyScalar(reversed ? -distance : distance);
   c.lookAt(0, 0, 0);
   c.updateMatrixWorld();
@@ -143,4 +143,37 @@ describe("small-country location and selection", () => {
     }
     layer.dispose();
   });
+});
+
+it("shows a small clue ring during pin input without revealing answers or intercepting pin placement", () => {
+  const layer = new SmallRegionLocators();
+  const sanMarino = world.find((r) => r.id === "wurl:SMR")!;
+  const hidden = { ...sanMarino, id: "hidden-answer" };
+  layer.update([sanMarino, hidden], {
+    states: { [sanMarino.id]: "clue", [hidden.id]: "surface" },
+    onCoordinateTap: () => {},
+    regionInteraction: true,
+  });
+  layer.view(camera(300, false, sanMarino), 800, 600, 100);
+  expect(layer.element.childElementCount).toBe(1);
+  expect(layer.element.querySelector("g")!.style.display).toBe("");
+  expect(layer.pick(400, 300, 22)).toBeUndefined();
+  layer.dispose();
+});
+
+it("keeps a locator on a small emphasized country even when its footprint exceeds the old cutoff", () => {
+  const luxembourg = world.find((r) => r.id === "wurl:LUX")!;
+  const c = camera(140, false, luxembourg);
+  expect(
+    projectSmallRegion(prepareSmallRegion(luxembourg), c, 800, 600, 100),
+  ).toBeUndefined();
+  const layer = new SmallRegionLocators();
+  layer.update([luxembourg], {
+    states: { [luxembourg.id]: "clue" },
+    onCoordinateTap: () => {},
+  });
+  layer.view(c, 800, 600, 100);
+  expect(layer.element.querySelector("g")!.style.display).toBe("");
+  expect(layer.pick(400, 300)).toBeUndefined();
+  layer.dispose();
 });

@@ -35,7 +35,7 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     await act(async () => (cards[0] as HTMLButtonElement).click());
     expect(location.pathname).toBe("/minigames");
     expect(host.querySelector(".minigames-landing h1")?.textContent).toBe(
-      "Minigames",
+      "A world to play with.",
     );
     expect(probe.mounts).toBe(1);
     expect(host.querySelector(".minigames-landing")?.textContent).not.toContain(
@@ -58,10 +58,18 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       [...host.querySelectorAll(".minigames-landing .study-path h3")].map(
         (heading) => heading.textContent,
       ),
-    ).toEqual(["Shared Neighbors", "Missing Borders"]);
+    ).toEqual([
+      "Shared Neighbors",
+      "Missing Borders",
+      "Border Run",
+      "Pinpoint",
+    ]);
     expect(
       host.querySelector(".minigames-landing .study-path-customize"),
     ).toBeNull();
+    expect(
+      host.querySelectorAll(".minigame-card .minigame-motif"),
+    ).toHaveLength(4);
     for (const [slug, title] of [
       ["shared-neighbors", "Shared Neighbors"],
       ["missing-borders", "Missing Borders"],
@@ -80,9 +88,18 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
         dialog.querySelector(".activity-preview-how h3")?.textContent,
       ).toBe("How to play");
       expect(dialog.textContent).not.toContain("coming soon");
-      expect(dialog.textContent).not.toContain("Customize");
+      expect(
+        dialog.querySelector<HTMLDetailsElement>(".minigame-rules")!.open,
+      ).toBe(false);
+      await act(async () =>
+        dialog.querySelector<HTMLElement>(".minigame-rules summary")!.click(),
+      );
+      expect(
+        dialog.querySelector<HTMLDetailsElement>(".minigame-rules")!.open,
+      ).toBe(true);
+      expect(dialog.textContent).toContain("Customize");
       expect(probe.mounts).toBe(1);
-      await click("Back to games");
+      await click("Close preview");
       expect(document.querySelector('[role="dialog"]')).toBeNull();
       expect(location.pathname).toBe("/minigames");
     }
@@ -91,6 +108,8 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
   it.each([
     ["shared-neighbors", "Shared Neighbors"],
     ["missing-borders", "Missing Borders"],
+    ["border-run", "Border Run"],
+    ["pinpoint", "Pinpoint"],
   ])(
     "opens the %s minigame page directly for non-admins",
     async (slug, title) => {

@@ -43,6 +43,13 @@
   overscroll-behavior: contain;
   padding: 0 18px 16px;
 }
+.activity-preview-content[data-scrollable="false"] {
+  overflow-y: hidden;
+  overscroll-behavior: auto;
+}
+.activity-preview-body {
+  display: flow-root;
+}
 .activity-preview-image {
   display: block;
   width: 100%;
@@ -51,7 +58,7 @@
   background: #0b1923;
   border-radius: 10px;
 }
-.activity-preview-content:focus-visible {
+.activity-preview-content[data-scrollable="true"]:focus-visible {
   outline: 2px solid var(--ui-accent);
   outline-offset: -3px;
 }

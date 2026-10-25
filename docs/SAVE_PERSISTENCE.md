@@ -66,6 +66,41 @@ Missing Borders uses the independent `wurl.minigames.missing-borders.v1`
 namespace with the same account suffix and run merge rules. It stores a selected
 territory ID instead of a pin; the seed also determines the regional camera view.
 Neither minigame can replace the other's progress.
+Minigame preferences use independent, account-scoped
+`wurl.minigames.<game>.settings.v1` registers, merged per preference field. A new
+run snapshots its settings; legacy runs use their existing pool and defaults for
+fields available at the time. Editing preferences never
+changes the active deck or camera settings. Resume preserves that snapshot, and
+starting with different preferences explicitly replaces the unfinished run.
+New and reset preferences use continent-wide search. Saved regional choices
+remain available; framing preferences only affect Missing Borders when comparing
+an unfinished run with its current preferences.
+
+Border Run and Pinpoint use independent `wurl.minigames.<game>.v1` namespaces
+with the same account suffix and merge rules. Runs optionally carry their game
+kind, numeric draft, accumulated points, up to 64 submitted visits, and an overview
+flag. Older runs without visit history remain playable; historical outcomes are
+not invented. A terminal answer and the subsequent overview are separate durable
+states; a stale tab cannot restore the reveal after the overview was entered.
+Pinpoint ends after ten submissions, independently of its binary accuracy result.
+Legacy Missing Borders runs retain their original pool when the new small-country
+filter preference defaults to enabled; applying that preference starts a new run.
+
+`wurl.minigames.<game>.scores.v1` stores personal bests in independent registers
+using the existing default-settings keys. Only runs whose relevant settings
+match that game’s defaults may write or display a personal best. Eligibility uses
+the run snapshot, not editable preferences; legacy Missing Borders runs without
+the small-country filter are custom runs. Old custom-settings fields are retained
+but no longer used. Scores resolve by maximum, preventing stale tabs or replay
+from lowering a record. Finishing early records only submitted answers.
+These high scores and active runs are device-local and account-scoped; they do
+not enter the Daily/Study cloud sync namespaces.
+Border Run's Show borders preference defaults to false and belongs to the run
+snapshot and best-score key. The connected-component route pool and expanded,
+country-diverse Pinpoint deck use revised pool identities; incompatible active
+runs restart with a compatible shuffle. Their v2 personal-best fields keep older
+records intact without mixing scores earned under the previous rules. Shared
+Neighbors and Missing Borders retain their existing pools and best-score keys.
 
 Valid legacy data is copied into immutable base registers. A migration completion
 marker is written only after the entire copy succeeds. Interrupted migration can

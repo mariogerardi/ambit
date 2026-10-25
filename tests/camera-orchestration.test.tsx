@@ -414,3 +414,22 @@ it("uses live viewport dimensions for recentering and tighter mobile Explore fra
     altitude: Math.max(0.012, (country.focus.altitude ?? 0.8) * 0.72),
   });
 });
+
+it("frames a late-loaded puzzle focus even when the phase and route key have not changed", async () => {
+  await render({
+    mode: "minigames",
+    transitionKey: "missing:run:0",
+    journey: {
+      ...options.journey,
+      active: true,
+      focus: { lat: -15, lng: -60, altitude: 1.25 },
+    },
+  });
+  vi.mocked(port.focus).mockClear();
+  const focus = { lat: 50, lng: 20, altitude: 1.05 };
+  await render({ journey: { ...options.journey, focus } });
+  expect(port.focus).toHaveBeenCalledExactlyOnceWith(focus);
+  vi.mocked(port.focus).mockClear();
+  await render({ journey: { ...options.journey, focus: { ...focus } } });
+  expect(port.focus).not.toHaveBeenCalled();
+});

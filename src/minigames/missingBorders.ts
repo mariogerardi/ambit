@@ -1,3 +1,4 @@
+import { sharedBoundary } from "./sharedBoundary";
 import { geoDistance, geoInterpolate } from "d3-geo";
 import roster from "../game/data/un-members.v1.json";
 import { defineQuestion } from "../game/questionBuilder";
@@ -5,12 +6,61 @@ import { mapSource } from "../game/countryFacts";
 import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { Focus, RegionFeature } from "../geography/types";
 import type { NeighborPair } from "./sharedNeighbors";
+import { CAPITALS } from "../game/quizData";
+import { missingBorderContinent } from "./minigameSettings";
 
 export interface MissingBorderPair extends NeighborPair {
   borderPoints: [number, number][];
 }
 const rad = Math.PI / 180;
 const location = (focus: Focus): [number, number] => [focus.lng, focus.lat];
+const continentViews: Record<string, Focus> = {
+  AF: { lat: 3, lng: 20, altitude: 1.3 },
+  AS: { lat: 35, lng: 90, altitude: 1.5 },
+  EU: { lat: 50, lng: 20, altitude: 1.05 },
+  NA: { lat: 35, lng: -100, altitude: 1.4 },
+  SA: { lat: -15, lng: -60, altitude: 1.25 },
+  OC: { lat: -22, lng: 150, altitude: 1.25 },
+};
+const countryContinents = new Map(
+  CAPITALS.map((capital) => [capital.countryId, capital.continent]),
+);
+const territoryContinents = new WeakMap<RegionFeature, string>();
+export function missingBorderCandidateContinent(
+  region: RegionFeature,
+): string | undefined {
+  if (region.id === "wurl:ATA") return undefined;
+  if (region.id === "wurl:GRL") return "NA";
+  const known =
+    countryContinents.get(region.id) ?? territoryContinents.get(region);
+  if (known) return known;
+  let closest = CAPITALS[0],
+    distance = Infinity;
+  for (const capital of CAPITALS) {
+    const next = geoDistance(location(region.focus), [
+      capital.lng,
+      capital.lat,
+    ]);
+    if (next < distance) {
+      closest = capital;
+      distance = next;
+    }
+  }
+  territoryContinents.set(region, closest.continent);
+  return closest.continent;
+}
+
+export const missingBorderSearchRadius = (wide: boolean) => (wide ? 70 : 42);
+export function inMissingBorderSearch(
+  point: Focus,
+  focus: Focus,
+  wide: boolean,
+): boolean {
+  return (
+    geoDistance(location(point), location(focus)) <=
+    missingBorderSearchRadius(wide) * rad
+  );
+}
 
 /** Use actual shared segments, including borders in overseas components. */
 export function missingBorderPairs(
@@ -166,9 +216,23 @@ export function missingBorderJourney(
   context: QuestionContext,
   regions: RegionFeature[],
   seed: number,
+  wide = true,
 ): Journey {
   const names = pair.countries.map((id) => context.names.get(id)!);
   const anchor = missingBorderAnchor(pair, regions);
+  const continent = missingBorderContinent(pair);
+  // Frame the search area consistently, independently of the hidden boundary.
+  const focus = wide
+    ? { ...continentViews[continent] }
+    : regionalFocus(pair, regions, seed, anchor);
+  const members = pair.countries.map((id) => regions.find((r) => r.id === id)!);
+  const boundary = sharedBoundary(members[0], members[1]);
+  const candidates = regions.filter(
+    (region) =>
+      !pair.countries.includes(region.id) &&
+      missingBorderCandidateContinent(region) === continent &&
+      (wide || inMissingBorderSearch(region.focus, focus, false)),
+  );
   return {
     ...missingBordersBase,
     rounds: [
@@ -181,19 +245,14 @@ export function missingBorderJourney(
         resolvedLabel: names.join(" + "),
         prompt: "Which territory is hiding two countries?",
         instruction:
-          "One land border has disappeared. Tap the merged territory.",
+          "One border is missing. Tap the shape hiding two countries.",
         mode: "merged-region-single",
         count: 1,
         commitment: "immediate",
         failure: "feedback",
         selection: {
           type: "ids",
-          ids: [
-            ...regions
-              .filter((r) => !pair.countries.includes(r.id))
-              .map((r) => r.id),
-            pair.answer,
-          ],
+          ids: [...candidates.map((r) => r.id), pair.answer],
         },
         rule: {
           type: "merged-region",
@@ -210,7 +269,7 @@ export function missingBorderJourney(
         explanation: `The missing border separates ${names[0]} and ${names[1]}.`,
         scenes: {
           play: {
-            focus: regionalFocus(pair, regions, seed, anchor),
+            focus,
             map: {
               borders: true,
               hoverFeedback: false,
@@ -218,7 +277,19 @@ export function missingBorderJourney(
               candidates: "highlighted",
             },
           },
-          reveal: { focus: { ...anchor, altitude: 0.55 }, borders: true },
+          reveal: {
+            focus: { ...anchor, altitude: 0.65 },
+            borders: true,
+            overlays: boundary.map((coordinates, index) => ({
+              id: `missing-border:reveal:${pair.id}:${index}`,
+              type: "path",
+              coordinates,
+              surfaceAligned: true,
+              foreground: true,
+              visualState: "corridor",
+              reveal: { durationMs: 1100, delayMs: 450 },
+            })),
+          },
         },
       }),
     ],

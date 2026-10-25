@@ -42,25 +42,37 @@ it("plays, reveals, advances, and resumes the same shuffled deck without remount
       ".shared-neighbors-game .primary-button",
     )!.disabled,
   ).toBe(true);
+  expect(host.querySelector(".minigame-answer-area")!.textContent).toContain(
+    "Borders are hidden. Place your pin in the shared neighbor.",
+  );
   const pin =
     CAPITALS.find((c) => c.countryId === pair.answer) ??
     world.find((c) => c.id === pair.answer)!.focus;
   await act(async () =>
     probe.props!.onCoordinateTap!({ lat: pin.lat, lng: pin.lng }),
   );
+  expect(host.querySelector(".minigame-answer-area")!.textContent).toContain(
+    "Pin placed. Move it or check your answer.",
+  );
+  expect(
+    host.querySelector(".minigame-answer-area")!.textContent,
+  ).not.toContain("Borders are hidden.");
   await click("Check answer");
   expect(
     host.querySelector(".shared-neighbors-feedback h2")?.textContent,
   ).toBeTruthy();
   expect(host.querySelector(".shared-neighbors-score")?.textContent).toContain(
-    "1 answered",
+    "1 correct",
   );
   expect(probe.props!.onCoordinateTap).toBeUndefined();
   await click("Next pair");
   const second = neighborDeck(pairs, run.seed, 0)[1];
   expect(probe.props!.borderRegionIds).toEqual(second.countries);
   expect(createNeighborSave().load().run?.index).toBe(1);
-  await click("Back to games");
+  await act(async () =>
+    host.querySelector<HTMLElement>(".minigame-menu summary")!.click(),
+  );
+  await click("All games");
   await act(async () => root.unmount());
   resetRoot();
   await mount();
@@ -68,7 +80,7 @@ it("plays, reveals, advances, and resumes the same shuffled deck without remount
   await click("Resume game");
   expect(probe.props!.borderRegionIds).toEqual(second.countries);
   expect(host.querySelector(".shared-neighbors-score")?.textContent).toContain(
-    "1 answered",
+    "1 correct",
   );
 });
 
@@ -91,21 +103,30 @@ it("ends after three strikes, reveals the answer, and starts a fresh shuffled ru
     if (strike < 3) await click("Next pair");
   }
   expect(host.querySelector(".shared-neighbors-game h1")?.textContent).toBe(
-    "Three strikes.",
+    "Which country borders both?",
   );
   expect(
     host.querySelector(".shared-neighbors-feedback h2")?.textContent,
   ).toBeTruthy();
+  expect(host.querySelector(".shared-neighbors-results")).toBeNull();
   expect(
-    [...host.querySelectorAll(".shared-neighbors-results dd")].map(
-      (n) => n.textContent,
+    [...host.querySelectorAll("button")].some(
+      (b) => b.textContent === "Play again",
     ),
-  ).toEqual(["0", "3", "3"]);
+  ).toBe(false);
   expect(probe.props!.onCoordinateTap).toBeUndefined();
   expect(document.activeElement).toBe(
-    host.querySelector(".shared-neighbors-game h1"),
+    [...host.querySelectorAll("button")].find(
+      (b) => b.textContent === "See results →",
+    ),
   );
   expect(createNeighborSave().load().run?.ended).toBe("strikes");
+  await click("See results");
+  expect(host.querySelector(".minigame-overview")).not.toBeNull();
+  expect(probe.tours.length).toBeGreaterThan(0);
+  expect(probe.props!.places.some((p) => p.id.startsWith("recap:guess:"))).toBe(
+    true,
+  );
   await click("Play again");
   const restarted = createNeighborSave().load().run!;
   expect(restarted.id).not.toBe(initial.id);
@@ -124,16 +145,16 @@ it("finishes early, restores the results after reload, and offers Play from the 
     answered: 0,
   });
   expect(host.querySelector(".shared-neighbors-game h1")?.textContent).toBe(
-    "Game finished.",
+    "Your neighbors, found.",
   );
   expect(probe.props!.onCoordinateTap).toBeUndefined();
   await act(async () => root.unmount());
   resetRoot();
   await mount();
   expect(host.querySelector(".shared-neighbors-game h1")?.textContent).toBe(
-    "Game finished.",
+    "Your neighbors, found.",
   );
-  await click("Back to games");
+  await click("Choose another game");
   await click("Preview Shared Neighbors");
   expect(document.querySelector('[role="dialog"]')?.textContent).not.toContain(
     "Resume game",

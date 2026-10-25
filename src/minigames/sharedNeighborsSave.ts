@@ -4,6 +4,7 @@ import { isRecord } from "../app/storage";
 import { progressKey } from "../app/progressSaves";
 import { validPin } from "../game/answerTargets";
 import type { NeighborRun, BorderMinigame } from "./sharedNeighbors";
+import { validMinigameSettings } from "./minigameSettings";
 
 interface Save {
   version: 1;
@@ -14,6 +15,13 @@ const integer = (value: unknown) =>
 export function validNeighborRun(value: unknown): value is NeighborRun {
   return (
     isRecord(value) &&
+    (value.kind === undefined ||
+      [
+        "shared-neighbors",
+        "missing-borders",
+        "border-run",
+        "pinpoint",
+      ].includes(String(value.kind))) &&
     typeof value.id === "string" &&
     value.id.length > 0 &&
     integer(value.startedAt) &&
@@ -25,6 +33,28 @@ export function validNeighborRun(value: unknown): value is NeighborRun {
     integer(value.answered) &&
     integer(value.correct) &&
     Number(value.correct) <= Number(value.answered) &&
+    (value.text === undefined ||
+      (typeof value.text === "string" && /^\d{0,3}$/.test(value.text))) &&
+    (value.points === undefined || integer(value.points)) &&
+    (value.overview === undefined || typeof value.overview === "boolean") &&
+    (value.history === undefined ||
+      (Array.isArray(value.history) &&
+        value.history.length <= 64 &&
+        value.history.every(
+          (v) =>
+            isRecord(v) &&
+            Array.isArray(v.ids) &&
+            v.ids.every((id) => typeof id === "string") &&
+            typeof v.correct === "boolean" &&
+            validPin(v.point) &&
+            (v.pin === undefined || validPin(v.pin)) &&
+            (v.points === undefined || integer(v.points)) &&
+            (v.distanceKm === undefined ||
+              (typeof v.distanceKm === "number" &&
+                Number.isFinite(v.distanceKm) &&
+                v.distanceKm >= 0)),
+        ))) &&
+    (value.settings === undefined || validMinigameSettings(value.settings)) &&
     (value.ended === undefined ||
       value.ended === "finished" ||
       (value.ended === "strikes" &&
@@ -34,7 +64,9 @@ export function validNeighborRun(value: unknown): value is NeighborRun {
       (typeof value.selectedId === "string" && value.selectedId.length > 0)) &&
     (value.result === undefined ||
       (typeof value.result === "boolean" &&
-        (validPin(value.pin) || typeof value.selectedId === "string")))
+        (validPin(value.pin) ||
+          typeof value.selectedId === "string" ||
+          (typeof value.text === "string" && /^\d+$/.test(value.text)))))
   );
 }
 const codec: SaveCodec<Save> = {
@@ -59,6 +91,7 @@ const codec: SaveCodec<Save> = {
     if (!!previous.ended !== !!next.ended)
       return previous.ended ? previous : next;
     const rank = (run: NeighborRun) => [
+      Number(!!run.overview),
       run.answered,
       run.cycle,
       run.index,

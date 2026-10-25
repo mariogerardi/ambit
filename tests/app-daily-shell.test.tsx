@@ -530,6 +530,6 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
       FIFTEENTH_JOURNEY.description,
     );
     expect(daily.querySelector("time")).toBeNull();
-    expect(daily.querySelectorAll(".daily-levels span")).toHaveLength(5);
+    expect(daily.querySelectorAll(".daily-trail-stop")).toHaveLength(5);
   });
 });

@@ -129,9 +129,49 @@ it("ships an illustration for every preset and minigame", () => {
     ...STUDY_PATHS.map((path) => path.image),
     "/previews/shared-neighbors.svg",
     "/previews/missing-borders.svg",
+    "/previews/border-run.svg",
+    "/previews/pinpoint.svg",
   ];
-  for (const path of paths)
-    expect(readFileSync(`public${path}`, "utf8")).toContain(
-      '<svg xmlns="http://www.w3.org/2000/svg"',
-    );
+  for (const path of paths) {
+    const bytes = readFileSync(`public${path}`);
+    if (path.endsWith(".jpg"))
+      expect([...bytes.subarray(0, 2)]).toEqual([255, 216]);
+    else
+      expect(bytes.toString("utf8")).toContain(
+        '<svg xmlns="http://www.w3.org/2000/svg"',
+      );
+  }
+});
+
+it("only exposes keyboard scrolling when the body overflows, including after resizing", async () => {
+  const resized: (() => void)[] = [];
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      constructor(callback: () => void) {
+        resized.push(callback);
+      }
+      observe() {}
+      disconnect() {}
+    },
+  );
+  const dialog = await render();
+  const content = dialog.querySelector<HTMLElement>(
+    ".activity-preview-content",
+  )!;
+  let height = 200;
+  Object.defineProperty(content, "clientHeight", { get: () => 200 });
+  Object.defineProperty(content, "scrollHeight", { get: () => height });
+  await act(async () => resized.forEach((update) => update()));
+  expect(content.getAttribute("tabindex")).toBeNull();
+  expect(content.getAttribute("role")).toBeNull();
+  expect(content.dataset.scrollable).toBe("false");
+  height = 400;
+  await act(async () => resized.forEach((update) => update()));
+  expect(content.getAttribute("tabindex")).toBe("0");
+  expect(content.getAttribute("role")).toBe("region");
+  height = 200;
+  await act(async () => resized.forEach((update) => update()));
+  expect(content.getAttribute("tabindex")).toBeNull();
+  expect(content.dataset.scrollable).toBe("false");
 });

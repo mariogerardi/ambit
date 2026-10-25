@@ -22,6 +22,7 @@ import { CityDetails } from "./CityDetails";
 export type { GlobeLayers as ExploreSettings } from "./worldPreferences";
 export function ExplorePanel({
   regions,
+  searchRegions = regions,
   selected,
   selectedRegion,
   selectedCity,
@@ -41,6 +42,7 @@ export function ExplorePanel({
   search: string;
   onSearch(value: string): void;
   regions: RegionFeature[];
+  searchRegions?: RegionFeature[];
   selected?: string;
   selectedRegion?: RegionFeature;
   selectedCity?: ExploreCity;
@@ -113,25 +115,28 @@ export function ExplorePanel({
   const capital = exploreCapital(selected ?? ""),
     region = regions.find((r) => r.id === selected);
   const profile = COUNTRY_PROFILES[selected ?? ""];
-  const exploreCountries = useMemo(
-    () => regions.filter((r) => r.level === "ADM0"),
-    [regions],
+  const searchableRegions = useMemo(
+    () => searchRegions.filter(
+      (r) => r.level === "ADM0" || (!r.displayBase && !r.displayCovered),
+    ),
+    [searchRegions],
+  );
+  const searchNames = useMemo(
+    () => new Map(searchableRegions.map((r) => [r.id, r.name])),
+    [searchableRegions],
   );
   const rosterCountry = COUNTRIES.some((c) => c.id === selected);
   const center = capital?.name ?? profile?.listedCapital;
-  const results = search.trim()
-    ? exploreCountries.filter(
-        (c) =>
-          normalizeAnswer(c.name).includes(normalizeAnswer(search)) ||
-          c.id ===
-            countryIdForName(
-              {
-                names: new Map(
-                  exploreCountries.map((country) => [country.id, country.name]),
-                ),
-              },
-              search,
-            ),
+  const query = normalizeAnswer(search);
+  const aliasId = query
+    ? countryIdForName({ names: searchNames }, search)
+    : undefined;
+  const results = query
+    ? searchableRegions.filter(
+        (region) =>
+          [region.name, ...(region.aliases ?? [])].some((name) =>
+            normalizeAnswer(name).includes(query),
+          ) || region.id === aliasId,
       )
     : [];
   const layer = regionalLayers.find((l) => l.parentId === selected),
@@ -216,7 +221,7 @@ export function ExplorePanel({
   const searchField = open && (
     <div id="explore-search" className="explore-search-field">
       <label className="field">
-        <span className="sr-only">Find a country</span>
+        <span className="sr-only">Find a country or territory</span>
         <input
           ref={input}
           data-dd-action-name="Explore Search Field"
@@ -307,12 +312,12 @@ export function ExplorePanel({
         <>
           <p className="muted explore-introduction">
             Tap a country or territory to see its details. Small places have
-            rings; zoom in to separate nearby targets.{" "}
+            rings; zoom in to separate nearby targets.{" "}<br></br><br></br>
             <button
               ref={searchButton}
               data-dd-action-name="Explore Open Search"
               className="explore-search-link"
-              aria-label="Search countries"
+              aria-label="Search countries and territories"
               aria-expanded={open}
               aria-controls="explore-search"
               onClick={() => setOpen((value) => !value)}
@@ -330,7 +335,7 @@ export function ExplorePanel({
           <div
             className="explore-country-search"
             role="dialog"
-            aria-label="Search countries"
+            aria-label="Search countries and territories"
           >
             {searchField}
           </div>,
@@ -362,7 +367,7 @@ export function ExplorePanel({
                 </button>
               ))
             ) : (
-              <p>No matching countries. Try another spelling.</p>
+              <p>No matching places. Try another spelling.</p>
             )}
           </div>,
           document.body,
@@ -524,8 +529,8 @@ export function ExplorePanel({
                 ref={searchButton}
                 data-dd-action-name="Explore Search Another Country"
                 className="quiet-button explore-tool-button explore-country-search-trigger"
-                aria-label="Search another country"
-                title="Search another country"
+                aria-label="Search another country or territory"
+                title="Search another country or territory"
                 aria-expanded={open}
                 aria-controls="explore-search"
                 onClick={() => setOpen(true)}

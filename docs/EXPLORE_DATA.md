@@ -35,7 +35,8 @@ City populations describe source places, not comparable metropolitan areas.
 They determine display prominence, not a reliable global population ranking.
 
 Explore profiles and search cover the full map catalog independently of the
-193-country Study roster. Where GeoNames has no matching independent profile,
+193-country Study roster. Search also includes selectable subdivisions in the
+currently loaded regional branch and matches their aliases. Where GeoNames has no matching independent profile,
 Natural Earth supplies geographic context and, when available, a population
 estimate with its source year. Missing fields are omitted. Non-roster capital
 strings are labeled **Listed capital**, with a note explaining source conventions;
@@ -150,7 +151,10 @@ Ordinary rings are thin and subdued, roughly 6 pixels across at wide zooms and
 up to 11 pixels as the camera approaches. Selected and feedback rings are slightly
 larger and stronger. Touch hit areas remain generous independently of visible
 size. Foreshortening at the horizon does not by itself qualify a broad country
-for a small-place locator.
+for a small-place locator. Screen annotations project on the globe’s own render
+frame after camera matrix updates, keeping rotation, damping, flyovers and mobile
+resizes synchronized. Context city dots use smaller symbols than authored game
+targets, with a modest size distinction for large cities.
 
 Ordinary country fills use a committed six-color assignment based on shared
 boundary edges in the shipped world geometry, including enclave holes; point

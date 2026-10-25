@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import type { JourneySummary } from "../game/journeyRegistry";
 import { unfinished } from "./dailyProgress";
 import type { DailyAttempt } from "./dailyProgress";
+import { answerPoints, QUESTION_POINTS } from "../game/points";
 import { ActionIcon } from "./ActionIcon";
 
 export function HomePanel({
@@ -62,6 +63,16 @@ export function HomePanel({
       document.fonts?.removeEventListener("loadingdone", fit);
     };
   }, [journey.title]);
+  const stages = Array.from({ length: 5 }, (_, index) => {
+    const answer = attempt?.game.answers[index];
+    return {
+      answer,
+      points: answerPoints(
+        answer,
+        answer ? attempt?.game.help?.[answer.roundId] : undefined,
+      ),
+    };
+  });
   const label = !attempt
     ? "Play"
     : unfinished(attempt)
@@ -75,23 +86,51 @@ export function HomePanel({
           <span>{journey.title}</span>
         </h2>
         <p className="daily-menu-description">{journey.description}</p>
-        <div className="daily-levels" aria-label="Five rounds">
-          {[1, 2, 3, 4, 5].map((level) => (
-            <span
-              key={level}
-              className={
-                attempt?.game.answers[level - 1]
-                  ? `answered${attempt.game.answers[level - 1].correct ? "" : " journey-incorrect"}`
-                  : ""
-              }
-            >
-              {attempt?.game.answers[level - 1]
-                ? attempt.game.answers[level - 1].correct
-                  ? "✓"
-                  : "×"
-                : String(level).padStart(2, "0")}
-            </span>
-          ))}
+        <div
+          className="daily-levels"
+          role="img"
+          aria-label={`${attempt?.game.answers.length ?? 0} of 5 Journey questions completed. Points by stage: ${stages.map((stage) => `${stage.points}/${QUESTION_POINTS}`).join(", ")}.`}
+        >
+          <svg
+            viewBox="0 0 440 48"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            {[0, 1, 2, 3].map((index) => {
+              const x = 12 + index * 104;
+              return (
+                <path
+                  key={index}
+                  className={stages[index + 1].answer ? "completed" : undefined}
+                  d={`M ${x} 20 H ${x + 104}`}
+                />
+              );
+            })}
+          </svg>
+          {stages.map(({ answer, points }, index) => {
+            const completed = !!answer;
+            return (
+              <span
+                key={index}
+                className="daily-trail-stop"
+                data-complete={completed}
+                title={`Question ${index + 1}: ${points}/${QUESTION_POINTS} points · ${completed ? "completed" : "not completed"}`}
+                aria-hidden="true"
+                style={{
+                  left: `${((12 + index * 104) / 440) * 100}%`,
+                  top: 14,
+                }}
+              >
+                <span className="daily-stage-points">
+                  {Array.from({ length: QUESTION_POINTS }, (_, point) => (
+                    <i key={point} data-filled={point < points} />
+                  ))}
+                </span>
+                <i />
+                <small>{String(index + 1).padStart(2, "0")}</small>
+              </span>
+            );
+          })}
         </div>
         <div className="daily-menu-actions">
           <button

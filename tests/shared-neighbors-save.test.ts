@@ -5,6 +5,8 @@ import {
   validNeighborRun,
 } from "../src/minigames/sharedNeighborsSave";
 import { startNeighborRun } from "../src/minigames/sharedNeighbors";
+import { createMinigameSettingsSave } from "../src/minigames/minigameSettingsSave";
+import { defaultMinigameSettings } from "../src/minigames/minigameSettings";
 
 beforeEach(() => {
   const values = new Map<string, string>();
@@ -21,6 +23,62 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 const run = () =>
   startNeighborRun([{ id: "a|b", countries: ["a", "b"], answer: "c" }]);
+
+it("saves preferences separately from active runs, accounts, and the other minigame", () => {
+  const initial = run();
+  createNeighborSave("a").save({ version: 1, run: initial });
+  const settings = {
+    ...defaultMinigameSettings,
+    includeTerritories: false,
+    excludedCountries: ["wurl:FRA"],
+  };
+  createMinigameSettingsSave("a", "shared-neighbors").save(settings);
+  expect(createMinigameSettingsSave("a", "shared-neighbors").load()).toEqual(
+    settings,
+  );
+  expect(createMinigameSettingsSave("a", "missing-borders").load()).toEqual(
+    defaultMinigameSettings,
+  );
+  expect(createMinigameSettingsSave("b", "shared-neighbors").load()).toEqual(
+    defaultMinigameSettings,
+  );
+  expect(createNeighborSave("a").load().run).toEqual(initial);
+});
+
+it("merges independent preference fields from stale tabs", () => {
+  const a = createMinigameSettingsSave(undefined, "shared-neighbors"),
+    b = createMinigameSettingsSave(undefined, "shared-neighbors");
+  a.save({ ...defaultMinigameSettings, includeTerritories: false });
+  b.save({ ...defaultMinigameSettings, excludeAdjacentClues: true });
+  expect(
+    createMinigameSettingsSave(undefined, "shared-neighbors").load(),
+  ).toMatchObject({ includeTerritories: false, excludeAdjacentClues: true });
+});
+
+it("preserves a run's settings snapshot and accepts legacy runs without settings", () => {
+  const initial = {
+    ...run(),
+    settings: {
+      ...defaultMinigameSettings,
+      framing: "wide" as const,
+      region: "EU" as const,
+    },
+  };
+  createNeighborSave(undefined, "missing-borders").save({
+    version: 1,
+    run: initial,
+  });
+  expect(createNeighborSave(undefined, "missing-borders").load().run).toEqual(
+    initial,
+  );
+  expect(validNeighborRun(run())).toBe(true);
+  expect(
+    validNeighborRun({
+      ...initial,
+      settings: { ...initial.settings, region: "invalid" },
+    }),
+  ).toBe(false);
+});
 
 it("restores a shuffled run, scores, and feedback without mixing accounts or Study saves", () => {
   const store = createNeighborSave("a");

@@ -329,3 +329,38 @@ it("fades corridor context with camera altitude without rebuilding geometry or i
   expect(line.material.color.getHexString()).toBe("a36708");
   overlays.dispose();
 });
+
+it("draws a revealed boundary progressively and stops requesting stationary frames when complete", () => {
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  const overlays = new MapOverlays();
+  const path: MapOverlay = {
+    id: "boundary",
+    type: "path",
+    coordinates: [
+      [0, 0],
+      [10, 0],
+      [15, 5],
+    ],
+    reveal: { durationMs: 1000, delayMs: 200 },
+  };
+  const group = overlays.get(path, 100);
+  const line = group.children[0] as LineSegments2;
+  const total = line.geometry.getAttribute("instanceStart").count;
+  const camera = new PerspectiveCamera(50, 1, 1, 1000);
+  expect(line.geometry.instanceCount).toBe(0);
+  expect(overlays.needsRefresh()).toBe(true);
+  clock.mockReturnValue(700);
+  overlays.view(camera, 800, 800);
+  expect(line.geometry.instanceCount).toBe(Math.ceil(total / 2));
+  expect(overlays.get({ ...path }, 100)).toBe(group);
+  clock.mockReturnValue(1200);
+  overlays.view(camera, 800, 800);
+  expect(line.geometry.instanceCount).toBe(total);
+  expect(overlays.needsRefresh()).toBe(false);
+  const staticGroup = overlays.get({ ...path, reveal: undefined }, 100);
+  expect(
+    (staticGroup.children[0] as LineSegments2).geometry.instanceCount,
+  ).toBe(total);
+  overlays.dispose();
+  clock.mockRestore();
+});

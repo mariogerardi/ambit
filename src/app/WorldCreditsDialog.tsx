@@ -91,6 +91,13 @@ export function WorldCreditsDialog({ onClose }: { onClose(): void }) {
             <dd>GeoNames (CC BY 4.0).</dd>
           </div>
           <div>
+            <dt>Pinpoint landmarks &amp; photographs</dt>
+            <dd>
+              Wikidata (CC0); Wikimedia Commons photographs under their
+              individual licenses. Credits accompany each photograph.
+            </dd>
+          </div>
+          <div>
             <dt>Flags</dt>
             <dd>Public-domain SVGs from Wikimedia Commons.</dd>
           </div>
@@ -123,6 +130,13 @@ export function WorldCreditsDialog({ onClose }: { onClose(): void }) {
             rel="noreferrer"
           >
             Danube map data (ODbL)
+          </a>
+          <a
+            href="/minigames/pinpoint/SOURCES.json"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Pinpoint photo credits and location sources
           </a>
         </div>
       </div>

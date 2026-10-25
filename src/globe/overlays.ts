@@ -264,6 +264,11 @@ export function makeMapOverlay(
   if (overlay.type === "path" && overlay.dashed) line.computeLineDistances();
   line.raycast = () => {};
   group.add(line);
+  if (overlay.type === "path" && overlay.reveal) {
+    line.geometry.instanceCount = 0;
+    group.userData.revealStarted = performance.now();
+    group.userData.revealing = true;
+  }
   if (overlay.type === "path") {
     const color = overlay.visualState
       ? playColors(palette)[overlay.visualState]
@@ -427,8 +432,33 @@ export class MapOverlays {
     }
     this.group.visible = active.size > 0 || !!this.brush?.group.visible;
   }
+  needsRefresh() {
+    return [...this.objects.values()].some(
+      ({ group }) => group.userData.revealing,
+    );
+  }
   view(camera: PerspectiveCamera, width: number, height: number) {
     for (const { group, overlay } of this.objects.values()) {
+      if (
+        overlay.type === "path" &&
+        overlay.reveal &&
+        group.userData.revealing
+      ) {
+        const elapsed =
+          performance.now() -
+          group.userData.revealStarted -
+          (overlay.reveal.delayMs ?? 0);
+        const progress = Math.max(
+          0,
+          Math.min(1, elapsed / Math.max(1, overlay.reveal.durationMs)),
+        );
+        for (const child of group.children)
+          if (child instanceof LineSegments2)
+            child.geometry.instanceCount = Math.ceil(
+              child.geometry.getAttribute("instanceStart").count * progress,
+            );
+        group.userData.revealing = progress < 1;
+      }
       if (overlay.type === "path" && overlay.opacityByAltitude) {
         group.updateWorldMatrix(true, false);
         const radius = group.getWorldScale(new Vector3()).x;
@@ -545,6 +575,7 @@ export class MapOverlays {
                   ? [
                       overlay.type,
                       overlay.coordinates,
+                      overlay.reveal,
                       overlay.foreground,
                       overlay.dashed,
                       overlay.opacity,

@@ -77,5 +77,49 @@ Geographic adjacency means shared boundary edges, not point contact or permissio
 to cross a border. Simplified geometry and source territorial conventions constrain
 all calculations and need review for ambiguous new questions.
 
+Shared Neighbors includes exclave and overseas border relationships by default.
+Its optional mainland filter builds an eligibility graph from each country's
+largest land component, retaining all components for Indonesia and Malaysia so
+their ordinary archipelagic borders remain eligible. Canonical geometry still
+grades pins. Country exclusions remove clues and answers from the puzzle pool;
+Missing Borders exclusions remove prospective merged members, while surrounding
+map context remains visible. Missing Borders region filtering uses the physical
+shared boundary's nearest bundled capital continent, so overseas borders follow
+their local region rather than the sovereign country's capital.
+That continent also bounds the selectable answer pool for each round. Regional
+search further narrows the eligible countries to the local view; continent-wide
+search includes that continent's countries and territories. Country membership
+uses the bundled capital continent, with nearest-capital fallback for territories
+and Greenland assigned to North America. Point checks prevent remote components
+of a composite from accepting selections outside the round's search area.
+
+Missing Borders excludes small merged members by default. This is a geometric
+size rule, not a political classification of “micronations”: countries with less
+than 2,500 km² of canonical spherical area are excluded from merged answers.
+Luxembourg remains eligible. Surrounding small territories may still appear as
+context and selectable distractors. Players can disable the filter.
+
+Border Run uses eligible countries only, including as transit nodes. Its topology
+tracks each connected polygon component separately, so a route cannot jump between
+peninsular Malaysia and Borneo, between Indonesian islands, or between metropolitan
+France and French Guiana. Exclusions remove every component of the country before
+shortest-path computation. Unreachable and directly adjacent pairs are omitted.
+Reveals number real shared-edge crossings, with a pulse at the final crossing.
+The interior corridor is retained for camera fitting; it is not drawn on the map.
+
+Pinpoint uses the existing GeoNames/capital snapshots, a curated 60-landmark
+Wikidata coordinate snapshot, canonical country geometry and bundled US-state
+geometry. Each landmark retains its source entity and revision. The 58 locally
+bundled Commons photos retain individual credits and licenses in
+`public/minigames/pinpoint/SOURCES.json`, including reviewed corrections where
+metadata confuses a photograph's license with that of the depicted building.
+`scripts/prepare-pinpoint.py` prepares only that minigame catalog. Point locations
+score distance; countries and states score containment, never distance to an
+arbitrary centroid. Categories are randomized, then countries are drawn before
+places, with repeat-country avoidance where possible. Places repeat only after
+the selected category's pool is exhausted. No live image or location API is used
+by the game. All four minigame previews use map illustrations drawn from the
+bundled geographic geometry.
+
 See [Explore data](EXPLORE_DATA.md), [question authoring](QUESTION_CATALOG.md),
 and [attribution](../NOTICE.md) for source-specific scope and maintenance.
