@@ -100,6 +100,19 @@ export function RasterLegend({ question }: { question: Question }) {
 
 /** Full acceptance bands stay available through the free question-information menu. */
 export function QuestionAccuracy({ question }: { question: Question }) {
+  if (question.partialCredit === "one-of-two")
+    return (
+      <details className="question-help-sources">
+        <summary>Accuracy</summary>
+        <div className="question-accuracy">
+          <p>Both countries: 3 points. One correct country: 1 point.</p>
+          <p>
+            Help applies its usual ceiling. A country filled in by an assist
+            does not earn partial credit.
+          </p>
+        </div>
+      </details>
+    );
   if (question.rule.type === "country-set-recall")
     return (
       <details className="question-help-sources">

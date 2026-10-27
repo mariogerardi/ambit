@@ -459,9 +459,12 @@ export function journeyWorld(
               displayedRegions.map((region) => [
                 region.id,
                 authoredOverview
-                  ? completion?.regionIds?.includes(region.id)
-                    ? "visited"
-                    : "disabled"
+                  ? !constructionCompletion &&
+                    visited?.[region.id] === "incorrect"
+                    ? "incorrect"
+                    : completion?.regionIds?.includes(region.id)
+                      ? "visited"
+                      : "disabled"
                   : visited?.[region.id] === "incorrect"
                     ? "incorrect"
                     : completion?.regionIds?.includes(region.id)
@@ -488,12 +491,29 @@ export function journeyWorld(
             .map(presentJourneyPlace),
         ]
       : authoredOverview
-        ? (completion?.places ?? []).map((p) =>
-            presentJourneyPlace({
-              ...p,
-              visualState: p.visualState ?? "visited",
-            }),
-          )
+        ? [
+            ...(completion?.places ?? []).map((p) =>
+              presentJourneyPlace({
+                ...p,
+                visualState:
+                  !constructionCompletion &&
+                  reviewedPointStates.get(p.id) === "incorrect"
+                    ? "incorrect"
+                    : (p.visualState ?? "visited"),
+              }),
+            ),
+            // Without a separate saved-response review, an authored overview
+            // must retain the player's actual mistakes alongside its discoveries.
+            ...(!constructionCompletion
+              ? discoveries.filter(
+                  (p) =>
+                    p.visualState === "incorrect" &&
+                    !completion?.places.some(
+                      (authored) => authored.id === p.id,
+                    ),
+                )
+              : []),
+          ]
         : game.phase === "finished"
           ? [
               ...new Map(

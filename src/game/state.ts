@@ -23,6 +23,8 @@ import { cityIdForName } from "./answerTargets";
 import { submittedPoints, POINTS_VERSION } from "./points";
 import type { BearingResult } from "./compassBearing";
 import { enterRecall, assistRecall } from "./countryRecall";
+import { partialSelectionCredit } from "./partialCredit";
+import type { PartialSelectionCredit } from "./partialCredit";
 export interface Answer extends Response {
   /** Frozen geographic/angle evidence for historical receipts; never regrade it. */
   bearing?: BearingResult;
@@ -33,6 +35,7 @@ export interface Answer extends Response {
   /** Submission-time rewards; absent for answers earned under the old rules. */
   points?: number;
   pointsVersion?: number;
+  partialCredit?: PartialSelectionCredit;
 }
 export interface GameState extends Response {
   phase: "home" | "playing" | "feedback" | "finished" | "failed";
@@ -110,6 +113,9 @@ export function gameReducer(
     if (result) {
       response = { ...response, constructionResult: result };
     }
+    const partialCredit = !correct
+      ? partialSelectionCredit(round, response, state.help?.[round.id])
+      : undefined;
     return {
       ...state,
       selectedIds: response.selectedIds,
@@ -143,6 +149,7 @@ export function gameReducer(
             ? structuredClone(response.recall)
             : undefined,
           correct,
+          ...(partialCredit ? { partialCredit } : {}),
           points: submittedPoints(
             round,
             response,

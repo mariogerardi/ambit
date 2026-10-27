@@ -74,6 +74,9 @@ The following modules own their own lifetimes and can be read independently:
   recentering, rotation controls, reduced motion and completion flyovers. It receives
   the mounted globe/scene refs and current presentation destinations. The globe's
   `camera.ts` still owns animation, cancellation and live viewport fitting.
+  Long departures from a local close-up first pull back to an orbital view, then
+  rotate at that distance before approaching the destination. Nearby local
+  reframing retains its existing smooth scale change; reduced motion jumps directly.
 - [`HomePanel.tsx`](../src/app/HomePanel.tsx): today's Journey title, progress,
   Play/Resume/View result action and navigation; readiness is supplied by the shell.
 - [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Feedback/Tools tabs, calendar

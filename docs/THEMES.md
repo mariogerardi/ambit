@@ -84,6 +84,11 @@ globe and minigame share artwork adapt to Discovery, Odyssey, Expedition and Saf
 Minigame exports use the same full preview illustration as their modal.
 Flags, photographic clues, data legends and the brand wordmark keep their authored colors.
 
+The 24 selectable profile avatars offer six motifs in four fixed theme palettes.
+Their colors follow the saved avatar choice rather than the viewer's current
+theme. `node scripts/prepare-profile-avatars.mjs` refreshes those SVGs and catalog
+labels; the existing avatar IDs remain stable.
+
 Run `node scripts/prepare-theme-artwork.mjs` with the pinned Node version after
 editing a palette or source SVG. Generated variants live under `public/artwork/`;
 original geometry and embedded flag artwork stay intact. `tests/theme-artwork.test.tsx` checks palette

@@ -216,8 +216,12 @@ export interface Question {
     namedChoices: boolean;
     committedNames: boolean;
     previousVisits: boolean;
+    /** Compass estimation can supply both endpoints; comparison paths remain reveal-only. */
+    bearingDestination?: boolean;
   };
   commitment: "immediate" | "submit";
+  /** One independently found country in a submitted two-country pair earns one point. */
+  partialCredit?: "one-of-two";
   failure: "feedback" | "end-game";
   focus: Focus;
   /** Finite orientation sequence; reduced motion uses focus directly. */
@@ -245,6 +249,8 @@ export interface Question {
       licenseUrl: string;
     };
   };
+  /** Additional habitat or comparison photographs, each with its own attribution. */
+  feedbackImages?: NonNullable<Question["feedbackImage"]>[];
   /** A clearly schematic explanation; never used as playable geography. */
   feedbackDiagram?:
     | {
@@ -439,6 +445,7 @@ export type QuestionPresentation = Partial<
     | "count"
     | "selection"
     | "commitment"
+    | "partialCredit"
     | "choices"
     | "inputLabel"
     | "orderLabels"

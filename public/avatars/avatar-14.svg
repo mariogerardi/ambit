@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title"><title id="title">Mountain · Odyssey</title>
+<circle cx="256" cy="256" r="256" fill="#101010"/>
+<circle cx="256" cy="256" r="234" fill="#161616" stroke="#f0c671" stroke-opacity=".22" stroke-width="2"/>
+<path d="M86 370 188 208 292 370Z" fill="#747474" stroke="#202020" stroke-width="7" stroke-linejoin="round"/>
+<path d="M147 370 276 132 420 370Z" fill="#676767" stroke="#202020" stroke-width="7" stroke-linejoin="round"/>
+<path d="M276 132 276 370H420Z" fill="#858585"/>
+<path d="m230 218 46-86 52 86-29-14-23 27-22-27Z" fill="#ececec"/>
+<path d="M147 370 276 132 420 370Z" fill="none" stroke="#202020" stroke-width="7" stroke-linejoin="round"/>
+</svg>

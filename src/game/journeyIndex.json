@@ -716,6 +716,42 @@
     ]
   },
   {
+    "id": "small-wonders-v1",
+    "addedAt": "2026-10-25",
+    "title": "Small Wonders",
+    "saveRevision": 1,
+    "description": "Five adorable animals. Five extraordinary places to call home.",
+    "path": "/journey/small-wonders",
+    "module": "./smallWondersJourney.ts",
+    "rounds": [
+      {
+        "id": "small-wonders-quokka-refuge-v1",
+        "label": "Quokka",
+        "resolvedLabel": "Quokka · Rottnest Island"
+      },
+      {
+        "id": "small-wonders-axolotl-city-v1",
+        "label": "Axolotl",
+        "resolvedLabel": "Axolotl · Mexico City"
+      },
+      {
+        "id": "small-wonders-red-panda-range-v1",
+        "label": "Red panda",
+        "resolvedLabel": "Red panda · Nepal & Bhutan"
+      },
+      {
+        "id": "small-wonders-fox-bearing-v1",
+        "label": "Fennec fox",
+        "resolvedLabel": "Fennec fox · Sahara to Greenland"
+      },
+      {
+        "id": "small-wonders-equatorial-penguin-v1",
+        "label": "Penguin",
+        "resolvedLabel": "Penguin · Galápagos Islands"
+      }
+    ]
+  },
+  {
     "id": "the-shape-of-india-v1",
     "addedAt": "2026-10-23",
     "title": "The Shape of India",

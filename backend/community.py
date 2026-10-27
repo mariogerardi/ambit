@@ -357,14 +357,22 @@ def journey_points(answers, usage):
             and sum(isinstance(e, dict) and e.get("result") == "wrong" for e in recall["entries"]) < 3
             and recall.get("ended") != "third-wrong"
         )
-        if answer.get("correct") is not True and not partial_recall:
+        credit, selected = answer.get("partialCredit"), answer.get("selectedIds")
+        partial_selection = (
+            isinstance(credit, dict) and isinstance(credit.get("matchedId"), str)
+            and re.fullmatch(r"wurl:[A-Z]{3}", credit["matchedId"]) is not None
+            and isinstance(selected, list) and len(selected) == 2
+            and all(isinstance(i, str) and re.fullmatch(r"wurl:[A-Z]{3}", i) for i in selected)
+            and len(set(selected)) == 2 and credit["matchedId"] in selected
+        )
+        if answer.get("correct") is not True and not partial_recall and not partial_selection:
             continue
         if old and answer.get("correct") is True:
             points += 3
         elif answer.get("pointsVersion") == 1 and type(answer.get("points")) is int and 0 <= answer["points"] <= 3:
             stage = usage.get(answer.get("roundId")) if isinstance(usage, dict) else None
             ceiling = 1 if stage == "assisted" else 2 if stage == "hinted" else 3
-            points += min(answer["points"], ceiling, 3 if answer.get("correct") is True else 2)
+            points += min(answer["points"], ceiling, 3 if answer.get("correct") is True else 1 if partial_selection else 2)
     return min(15, points), legacy
 
 

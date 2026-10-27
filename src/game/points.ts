@@ -4,6 +4,10 @@ import type { Question, Response } from "./questionContracts";
 import type { Answer, GameState } from "./state";
 import type { HelpStage } from "./guidance";
 import { hasRecallCredit } from "./countryRecall";
+import {
+  partialSelectionCredit,
+  validPartialSelectionCredit,
+} from "./partialCredit";
 
 export const QUESTION_POINTS = 3;
 export const POINTS_VERSION = 1;
@@ -18,7 +22,8 @@ export function submittedPoints(
   help?: HelpStage,
   prepared?: AnswerOutcome,
 ) {
-  if (!correct && question.rule.type !== "country-set-recall") return 0;
+  if (!correct && question.rule.type !== "country-set-recall")
+    return partialSelectionCredit(question, response, help) ? 1 : 0;
   const outcome =
     prepared ?? mechanicFor(question).outcome?.(question, response, true);
   const earned = outcome?.accuracyPoints ?? QUESTION_POINTS;
@@ -27,7 +32,12 @@ export function submittedPoints(
 
 /** Historical answers retain full prior credit; never regrade old coordinates/facts. */
 export function answerPoints(answer: Answer | undefined, help?: HelpStage) {
-  if (!answer || (!answer.correct && !hasRecallCredit(answer.recall))) return 0;
+  if (!answer) return 0;
+  const partial = validPartialSelectionCredit(
+    answer.partialCredit,
+    answer.selectedIds,
+  );
+  if (!answer.correct && !hasRecallCredit(answer.recall) && !partial) return 0;
   if (answer.pointsVersion === undefined && answer.points === undefined)
     return answer.correct ? QUESTION_POINTS : 0;
   if (
@@ -38,7 +48,11 @@ export function answerPoints(answer: Answer | undefined, help?: HelpStage) {
   )
     return 0;
   // Stronger help can arrive from another tab after the answer snapshot.
-  return Math.min(answer.points!, pointCeiling(help), answer.correct ? 3 : 2);
+  return Math.min(
+    answer.points!,
+    pointCeiling(help),
+    answer.correct ? 3 : partial ? 1 : 2,
+  );
 }
 export const journeyPoints = (game: Pick<GameState, "answers" | "help">) =>
   game.answers.reduce(

@@ -195,6 +195,17 @@ direction; the correct route has its own label. These noninteractive annotations
 clear with the reveal and follow the shared theme. No Journey-specific
 renderer or reducer branch is needed.
 
+Compass questions normally conceal the destination marker. Set
+`disclosure.bearingDestination: true` when both endpoints are given and the task
+is estimating direction between them. Both use the same blue reference style;
+the correct path and submitted heading remain reveal-only. This presentation
+option does not change angular grading, help ceilings, or saved bearing evidence.
+
+An authored completion overview retains actual wrong country selections and
+point guesses alongside its declared geography. Construction overviews with
+separate saved-response review keep their existing focused overview; the mistakes
+remain available in that review.
+
 ## Bearing Intersection composition
 
 `PRESENTATION_RECIPES` in `recipes.ts` includes `recipe:bearing-intersection`.
@@ -504,6 +515,13 @@ camera, never the submitted response. Nearby and correct pins preserve authored
 framing.
 `state.ts` records `Answer.points` (0–3) and `pointsVersion: 1` at submission.
 `points.ts` owns rewards and totals; `journeyScore` remains a correct-answer count.
+An unordered two-country `map-multiple` question may opt into
+`partialCredit: "one-of-two"`. A submitted pair with exactly one independently
+found correct country earns one point; a country filled in by an assist earns
+no partial credit. Both answers still earn the normal three points before help
+ceilings, and only both count as a fully correct question. A frozen
+`Answer.partialCredit.matchedId` accompanies the one-point receipt through save
+validation and account totals. Existing answers retain their recorded rewards.
 `answerPoints` preserves historical answers without these fields as full prior
 credit and clamps versioned rewards to stronger help arriving from another tab.
 Old coordinates and changed facts are never regraded. Daily save validation

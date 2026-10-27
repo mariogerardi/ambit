@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title"><title id="title">Pinpoint · Odyssey</title>
+<circle cx="256" cy="256" r="256" fill="#101010"/>
+<circle cx="256" cy="256" r="234" fill="#161616" stroke="#f0c671" stroke-opacity=".22" stroke-width="2"/>
+<g fill="none" stroke="#f0c671" stroke-width="3" opacity=".32"><ellipse cx="256" cy="385" rx="78" ry="22"/><ellipse cx="256" cy="385" rx="46" ry="12"/></g>
+<g transform="translate(96 101) scale(5)"><path d="M32 58C26 43 13 33 13 23A19 19 0 0 1 51 23C51 33 38 43 32 58Z" fill="#f0c671" stroke="#202020" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="23" r="6.5" fill="#101010" stroke="#f0c671" stroke-width="1.4"/></g>
+</svg>

@@ -95,9 +95,12 @@ updates from overwriting newer edits. Handle claims and changes are transactiona
 No email address appears in another player's profile.
 
 [`shared/profile-avatars.json`](../shared/profile-avatars.json) defines the default
-avatar catalog for both frontend and backend. It reserves 24 PNG choices named
-`avatar-01.png` through `avatar-24.png` under [`public/avatars/`](../public/avatars/README.md).
-Add PNGs and update their catalog labels, then restart the dev server or build.
+avatar catalog for both frontend and backend. Its 24 choices under
+[`public/avatars/`](../public/avatars/README.md) cover six game motifs in the
+Discovery, Odyssey, Expedition, and Safari palettes. These fixed artwork variants
+keep the same colors for every viewer. `node scripts/prepare-profile-avatars.mjs`
+regenerates the SVGs and labels from current theme colors; PNG replacements are
+also supported. Restart the dev server after adding files, or build normally.
 Build configuration enables only files that exist; missing slots stay disabled
 and do not request missing images. Earlier emoji avatars remain valid for existing
 profiles but are no longer offered in the picker.

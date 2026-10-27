@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title"><title id="title">Mountain · Expedition</title>
+<circle cx="256" cy="256" r="256" fill="#100d18"/>
+<circle cx="256" cy="256" r="234" fill="#171320" stroke="#64e8ed" stroke-opacity=".22" stroke-width="2"/>
+<path d="M86 370 188 208 292 370Z" fill="#df78bb" stroke="#21152f" stroke-width="7" stroke-linejoin="round"/>
+<path d="M147 370 276 132 420 370Z" fill="#ae7fea" stroke="#21152f" stroke-width="7" stroke-linejoin="round"/>
+<path d="M276 132 276 370H420Z" fill="#48bdc9"/>
+<path d="m230 218 46-86 52 86-29-14-23 27-22-27Z" fill="#f2edf9"/>
+<path d="M147 370 276 132 420 370Z" fill="none" stroke="#21152f" stroke-width="7" stroke-linejoin="round"/>
+</svg>

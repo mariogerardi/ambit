@@ -1,138 +1,138 @@
 {
   "globe": {
     "label": "Globe",
-    "symbol": "\ud83c\udf0d",
+    "symbol": "🌍",
     "hidden": true
   },
   "compass": {
     "label": "Compass",
-    "symbol": "\ud83e\udded",
+    "symbol": "🧭",
     "hidden": true
   },
   "mountain": {
     "label": "Mountain",
-    "symbol": "\u26f0\ufe0f",
+    "symbol": "⛰️",
     "hidden": true
   },
   "star": {
     "label": "Star",
-    "symbol": "\u2726",
+    "symbol": "✦",
     "hidden": true
   },
   "wave": {
     "label": "Wave",
-    "symbol": "\ud83c\udf0a",
+    "symbol": "🌊",
     "hidden": true
   },
   "sun": {
     "label": "Sun",
-    "symbol": "\u2600\ufe0f",
+    "symbol": "☀️",
     "hidden": true
   },
   "planet": {
     "label": "Planet",
-    "symbol": "\ud83e\ude90",
+    "symbol": "🪐",
     "hidden": true
   },
   "balloon": {
     "label": "Balloon",
-    "symbol": "\ud83c\udf88",
+    "symbol": "🎈",
     "hidden": true
   },
   "avatar-01": {
-    "label": "Avatar 01",
-    "image": "/avatars/avatar-01.png"
+    "label": "Pinpoint · Discovery",
+    "image": "/avatars/avatar-01.svg"
   },
   "avatar-02": {
-    "label": "Avatar 02",
-    "image": "/avatars/avatar-02.png"
+    "label": "Pinpoint · Odyssey",
+    "image": "/avatars/avatar-02.svg"
   },
   "avatar-03": {
-    "label": "Avatar 03",
-    "image": "/avatars/avatar-03.png"
+    "label": "Pinpoint · Expedition",
+    "image": "/avatars/avatar-03.svg"
   },
   "avatar-04": {
-    "label": "Avatar 04",
-    "image": "/avatars/avatar-04.png"
+    "label": "Pinpoint · Safari",
+    "image": "/avatars/avatar-04.svg"
   },
   "avatar-05": {
-    "label": "Avatar 05",
-    "image": "/avatars/avatar-05.png"
+    "label": "Finish flag · Discovery",
+    "image": "/avatars/avatar-05.svg"
   },
   "avatar-06": {
-    "label": "Avatar 06",
-    "image": "/avatars/avatar-06.png"
+    "label": "Finish flag · Odyssey",
+    "image": "/avatars/avatar-06.svg"
   },
   "avatar-07": {
-    "label": "Avatar 07",
-    "image": "/avatars/avatar-07.png"
+    "label": "Finish flag · Expedition",
+    "image": "/avatars/avatar-07.svg"
   },
   "avatar-08": {
-    "label": "Avatar 08",
-    "image": "/avatars/avatar-08.png"
+    "label": "Finish flag · Safari",
+    "image": "/avatars/avatar-08.svg"
   },
   "avatar-09": {
-    "label": "Avatar 09",
-    "image": "/avatars/avatar-09.png"
+    "label": "Star · Discovery",
+    "image": "/avatars/avatar-09.svg"
   },
   "avatar-10": {
-    "label": "Avatar 10",
-    "image": "/avatars/avatar-10.png"
+    "label": "Star · Odyssey",
+    "image": "/avatars/avatar-10.svg"
   },
   "avatar-11": {
-    "label": "Avatar 11",
-    "image": "/avatars/avatar-11.png"
+    "label": "Star · Expedition",
+    "image": "/avatars/avatar-11.svg"
   },
   "avatar-12": {
-    "label": "Avatar 12",
-    "image": "/avatars/avatar-12.png"
+    "label": "Star · Safari",
+    "image": "/avatars/avatar-12.svg"
   },
   "avatar-13": {
-    "label": "Avatar 13",
-    "image": "/avatars/avatar-13.png"
+    "label": "Mountain · Discovery",
+    "image": "/avatars/avatar-13.svg"
   },
   "avatar-14": {
-    "label": "Avatar 14",
-    "image": "/avatars/avatar-14.png"
+    "label": "Mountain · Odyssey",
+    "image": "/avatars/avatar-14.svg"
   },
   "avatar-15": {
-    "label": "Avatar 15",
-    "image": "/avatars/avatar-15.png"
+    "label": "Mountain · Expedition",
+    "image": "/avatars/avatar-15.svg"
   },
   "avatar-16": {
-    "label": "Avatar 16",
-    "image": "/avatars/avatar-16.png"
+    "label": "Mountain · Safari",
+    "image": "/avatars/avatar-16.svg"
   },
   "avatar-17": {
-    "label": "Avatar 17",
-    "image": "/avatars/avatar-17.png"
+    "label": "Explore compass · Discovery",
+    "image": "/avatars/avatar-17.svg"
   },
   "avatar-18": {
-    "label": "Avatar 18",
-    "image": "/avatars/avatar-18.png"
+    "label": "Explore compass · Odyssey",
+    "image": "/avatars/avatar-18.svg"
   },
   "avatar-19": {
-    "label": "Avatar 19",
-    "image": "/avatars/avatar-19.png"
+    "label": "Explore compass · Expedition",
+    "image": "/avatars/avatar-19.svg"
   },
   "avatar-20": {
-    "label": "Avatar 20",
-    "image": "/avatars/avatar-20.png"
+    "label": "Explore compass · Safari",
+    "image": "/avatars/avatar-20.svg"
   },
   "avatar-21": {
-    "label": "Avatar 21",
-    "image": "/avatars/avatar-21.png"
+    "label": "Journey · Discovery",
+    "image": "/avatars/avatar-21.svg"
   },
   "avatar-22": {
-    "label": "Avatar 22",
-    "image": "/avatars/avatar-22.png"
+    "label": "Journey · Odyssey",
+    "image": "/avatars/avatar-22.svg"
   },
   "avatar-23": {
-    "label": "Avatar 23",
-    "image": "/avatars/avatar-23.png"
+    "label": "Journey · Expedition",
+    "image": "/avatars/avatar-23.svg"
   },
   "avatar-24": {
-    "label": "Avatar 24",
-    "image": "/avatars/avatar-24.png"
+    "label": "Journey · Safari",
+    "image": "/avatars/avatar-24.svg"
   }
 }

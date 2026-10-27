@@ -76,7 +76,9 @@ function resolveQuestionPlaces(
               (p) => p.id !== origin.id && p.id !== destination.id,
             ),
           ]
-        : []),
+        : question.disclosure.bearingDestination
+          ? [cityReference(destination)]
+          : []),
     ];
   }
   const items =
