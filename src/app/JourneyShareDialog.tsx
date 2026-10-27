@@ -35,6 +35,8 @@ export function JourneyShareDialog(
   const text = card?.caption ?? resultCaption(result!);
   const imageDescription = card?.description ?? resultText(result!);
   const [useDownload, setUseDownload] = useState(false);
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     let alive = true,
       url: string | undefined;
@@ -66,12 +68,15 @@ export function JourneyShareDialog(
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
+    const workspace = document.querySelector("main.experience");
+    const wasInert = workspace?.hasAttribute("inert");
+    workspace?.setAttribute("inert", "");
     document.body.style.overflow = "hidden";
     dialog.current?.focus();
     const key = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        close.current();
       }
       if (event.key !== "Tab") return;
       const controls = [
@@ -81,16 +86,19 @@ export function JourneyShareDialog(
       ];
       const first = controls[0],
         last = controls.at(-1);
+      const outside = !dialog.current?.contains(document.activeElement);
       if (
         event.shiftKey &&
-        (document.activeElement === first ||
+        (outside ||
+          document.activeElement === first ||
           document.activeElement === dialog.current)
       ) {
         event.preventDefault();
         last?.focus();
       } else if (
         !event.shiftKey &&
-        (document.activeElement === last ||
+        (outside ||
+          document.activeElement === last ||
           document.activeElement === dialog.current)
       ) {
         event.preventDefault();
@@ -101,9 +109,10 @@ export function JourneyShareDialog(
     return () => {
       document.body.style.overflow = overflow;
       removeEventListener("keydown", key);
-      if (previous?.isConnected) previous.focus();
+      if (!wasInert) workspace?.removeAttribute("inert");
+      if (previous?.isConnected) previous.focus({ preventScroll: true });
     };
-  }, [onClose]);
+  }, []);
   async function save() {
     if (!image) return;
     const link = document.createElement("a");

@@ -1,24 +1,31 @@
 # Journey specification
 
-Status: draft / approved for implementation
-Authoring-kit revision / generated date / local-change indicator:
-Journey being created or edited (title, ID, source file):
+**Status:** draft / approved for implementation\
+**Journey:** title; ID and source file if known\
+**Authoring basis:** live repository revision, or exported-kit revision/date and known limitations\
+**Registration:** defer / authorize (see Catalog impact)
 
-Record the intended experience and settled decisions. Fill technical identifiers
-only when known; the implementing agent resolves routine details from current
-examples and shared conventions. Optional blanks do not invalidate an otherwise
-approved spec. Use `IMPLEMENTING_A_SPEC.md` for the implementation handoff.
+Specify the **approved player experience**. Do not replicate the engine's
+implementation guide. The implementing agent resolves routine IDs, types, styles,
+files and shared UI conventions from the current repository. Leave irrelevant
+fields blank; an approved spec need not fill every template cell. Use
+`IMPLEMENTING_A_SPEC.md` for the coding handoff.
+
+**Decision status:** Approved player-facing tasks, clues, assistance, reveals,
+scoring exceptions and explicit exclusions are **locked**. Distinguish **verified**
+engine behavior (checked against current source), **proposed** technical designs,
+**to verify** claims based on an older kit or uncertain implementation, and
+**open** material decisions. Label uncertainties where they matter, not every
+routine detail. Do not reopen locked creative decisions without a material reason.
 
 ## Whole Journey
 
-- **Premise and throughline:**
-- **What to preserve in a facelift:**
-- **Opening, rhythm and finale:**
-- **Continuity / accumulated discoveries:**
-- **Standards:** follow the current crafting guide; label any requested departure
-  from current interaction, visual or scoring standards as a design decision.
-- **Engine additions required:** none, or explicitly describe them.
-- **Unresolved decisions:** none, or list them.
+- **Premise and throughline:** What connects all five stops and what will the player discover?
+- **Opening, rhythm and finale:** Route, repeated mechanic or varied interactions; intentional pacing.
+- **Continuity:** What carries forward geographically or conceptually?
+- **Preserve when revising:** Existing identity and approved questions; omit for a new Journey.
+- **Standards and exceptions:** Follow `JOURNEY_CRAFTING.md`; state intentional departures.
+- **Open material decisions:** None, or list only decisions that could change the experience or scope.
 
 | Stop / destination | Task and intended skill | Given / withheld clues | Hint / assist | Reveal / reason to belong |
 | ------------------ | ----------------------- | ---------------------- | ------------- | ------------------------- |
@@ -28,110 +35,141 @@ approved spec. Use `IMPLEMENTING_A_SPEC.md` for the implementation handoff.
 | 4                  |                         |                        |               |                           |
 | 5                  |                         |                        |               |                           |
 
-## Round specification — repeat for each of the five rounds
+### Implementation fit — after approving the outline
 
-- **Identity:** stable ID when editing, label, spoiler-safe progress label and
+Map each distinct interaction to the closest known recipe. For a familiar sequel,
+a one-sentence statement that all five reuse the existing mechanic is sufficient.
+A portable-kit claim is **to verify** until checked against current code. This is
+a lightweight feasibility check, **not** a reason to replace a locked gameplay idea.
+
+| Stop(s) | Existing recipe or proposed interaction | New data/assets | Engine addition | Verified / kit / to verify |
+| ------- | --------------------------------------- | --------------- | --------------- | -------------------------- |
+|         |                                         |                 |                 |                            |
+
+If a genuinely new interaction could invalidate a major assumption, resolve that
+specific feasibility risk before implementing the entire Journey. Skip separate
+feasibility work for routine reuse.
+
+## Round specification — repeat for each stop
+
+Be concise with existing mechanics. Expand new or unusual scoring, geography and
+presentation only as needed to preserve the intended experience.
+
+- **Identity:** Stable ID when editing, progress label safe from spoilers, and
   resolved receipt label where needed.
-- **Copy:** optional lead-in, prompt, exceptional interaction instruction only.
-  Leave the instruction empty if the prompt/control already conveys the action.
+- **Copy:** Optional lead-in, one clear prompt, and only exceptional instructions.
   The shared control combines instructions and commitment notices in one 14px
-  supporting paragraph. It derives distance/slider bullseye copy from the rule;
-  do not repeat notices, band numbers or pin movement instructions. Review the
-  complete rendered copy. Do not refer to palette shades such as “darker yellow.”
-- **Mechanic:** exact registered mode; count, order, immediate/submit commitment,
-  failure behavior. Current single-country/merged-territory taps commit immediately;
-  pins and multi-answer selections confirm. Distinguish engine capabilities from
-  the authoring standard; identify proposed departures explicitly.
-- **Answer contract:** canonical answers, accepted aliases, eligible candidates,
-  distractors and the mistaken reasoning each represents. Identify IDs when known;
-  do not invent bundled IDs. State conventions/dates that affect correctness.
-- **Pin questions:** point-distance versus territory-inside. Distance pins need an
-  acceptance radius and three inclusive accuracy bands ending at that radius;
-  territory-inside pins use canonical containment without invented distance tiers.
-  Choose useful inner radii; the shared bullseye line and free **Accuracy**
-  information expose the bands before submission. Keep supplied point
-  references outside the acceptance zone. Standard distance tiers earn 3/2/1
-  points; accepted pins still count as one correct answer. Territory-inside pins
-  earn three points. Hint/assist ceilings are two/one, applied with `min`, not an
-  additional deduction. All five questions currently total 15 points; variable
-  weights and timers require separate design.
-- **Play scene:** camera intent (coordinates only if reviewed), contextual regions,
-  selectable objects, labels, borders, overlays, physical features and media.
-  State what is deliberately hidden and why the player still has a fair task.
-- **Hint:** exact player-facing copy and the new understanding it supplies.
-- **Assist:** exact copy, surviving candidates, reference markers/overlays and
-  locked selections/slots if applicable. Explain the decision that remains.
-- **Reveal:** correct-answer display, explanation, correct/miss differences,
-  camera, map roles, borders, flags/images/diagrams, and what persists afterward.
-- **Evidence:** factual and geometry source URLs, review date, media alt text,
-  provenance and license/credit requirements. Mark unverified claims explicitly.
+  supporting paragraph and generates distance/slider bullseye text. Do not repeat
+  generic controls, accuracy bands or pin-movement instructions. Review combined
+  rendered copy; avoid instructions tied to palette shades.
+- **Answer action:** What the player does, count/order, immediate versus submit
+  commitment, and any early-ending rule. Supply an exact registered mode only if
+  verified; otherwise specify the player interaction and mark internal names as
+  proposed. Current single-country/merged-territory taps commit immediately;
+  pins and multi-answer selections confirm.
+- **Answer contract and grading:** Canonical answers, aliases, eligible inputs,
+  distractors and their plausible mistakes, tolerances, partial credit, failure
+  cases and exceptions. Give IDs when known; do not invent them. State the facts,
+  dates, boundary policies or source conventions that affect correctness. Inherit
+  standard scoring and help rules unless a departure is explicitly approved.
+- **Play scene:** Camera intent (coordinates only if reviewed); reference regions,
+  interactable objects, labels, borders, physical features, overlays and media.
+  Explicitly identify withheld answers and why the remaining task is fair.
+- **Hint:** Exact text and the geographic understanding it provides.
+- **Assist:** Exact text, new reference/selection state and the decision that
+  remains meaningful after help.
+- **Reveal and feedback:** Brief reaction to the earned result, explanatory text,
+  answer and actual miss/partial display, camera and what persists afterward.
+- **Evidence:** Factual/geometry/media URLs, actual review dates, provenance,
+  alt text, licenses and credits. Mark unverified claims.
 
-### Visual contract — repeat for each round
+### Inherited grading conventions
 
-List every meaningful object or equally treated group. Geometry, role and input
-are independent; a displayed candidate does not automatically accept a globe tap.
-Gold land denotes globe answer choices. Noninteractive name/button area pools use
-blue clue styling, `map.candidateRole: "clue"`, deferred selection feedback and no
-hover emphasis. Established references remain a separate blue context role.
-Use the shared roles, point styles, area symbols and palettes from the crafting
-guide rather than prescribing per-question colors or marker sizes.
+Distance pins need an acceptance radius and three inclusive 3/2/1 bands ending
+at that radius; free **Accuracy** information exposes them before submission.
+Keep supplied point references outside the acceptance area. Territory-inside
+pins use canonical containment, not distance tiers, and earn three points.
+Accepted pins still count as one correct answer. Hints cap points at two, assists
+at one, using `min` rather than cumulative deductions. The five rounds total
+15 points; variable weights and timers require separate design. For an exception,
+spell out its boundaries and interaction with help, correctness and saved state.
 
-| Object / stable identity | Geometry / representation   | Role during play                                    | Inspection / answer input / none | Play → hint → assist → reveal → completion |
-| ------------------------ | --------------------------- | --------------------------------------------------- | -------------------------------- | ------------------------------------------ |
-|                          | area / point / line / label | reference / candidate / open search / withheld clue |                                  |                                            |
+### Visual contract — detailed only when needed
 
-- **Given and withheld:** distinguish a reference from the place to be found.
-  For tiny supplied clues, specify a play-only locator label already given in the
-  prompt, or generic wording if the name is withheld. Use the shared size-based
-  pulse/callout, never a city marker, owner label or withheld target locator.
-  Explain deliberately hidden boundaries/features. Show area-selection outlines;
-  do not expose a withheld pin target's footprint or coordinate.
-- **Outcome cases:** specify correct, actual wrong, and partial set/assignment
-  feedback where supported. Keep matching slot identity. Supporting illustrations
-  do not receive the player's grade.
-- **Recap:** discoveries become purple; actual mistakes remain red, with mistake
-  precedence if the same object is also discovered elsewhere. A city/pin mistake
-  grades the location, not its containing country. Custom scenes retain these roles.
-- **Lifecycle:** what is removed on reveal, advance, exit, replay and restored draft?
-  Avoid stale overlays, markers, tooltips or selections.
+For a **reused mechanic**, reference its existing recipe and specify only scene
+content, intentional deviations, withheld clues, help/reveal differences and
+unusual result cases. Do not inventory inherited UI elements.
+
+For a **new or complex interaction**, track meaningful geographic objects/groups
+through play, hint, assist, reveal and completion. Display geometry, role,
+inspection and answer eligibility are independent; visible does not mean tappable.
+
+| Object / identity | Geometry | Role; inspection / input / none | Play → hint → assist → reveal → completion / removal |
+| ----------------- | -------- | ------------------------------- | ---------------------------------------------------- |
+|                   |          |                                 |                                                      |
+
+Follow the shared visual semantics: gold for selectable globe land; blue for
+reference context and noninteractive area-name/button clues (using
+`map.candidateRole: "clue"`, deferred selection feedback and no hover emphasis).
+Use shared point styles, area symbols and palettes, not per-Journey color hacks.
+Supplied tiny clues may use a play-only locator for an already named place, but
+never leak withheld target markers, labels, footprints or coordinates. Preserve
+submitted wrong answers and labeled slots. Recap discoveries are purple and actual
+mistakes red (mistakes take precedence); pin/city errors grade the location, not
+the containing country. Give exceptional overlays, markers and tooltips explicit
+removal/restoration points. Illustrative examples do not receive the player's grade.
 
 ## Completion
 
-The closing heading follows earned points and the orbs come from shared UI.
-Author the Journey's caption and visual payoff rather than a fixed score headline.
+The shared UI supplies the score-dependent heading and point orbs. Author the
+Journey-specific geographic payoff rather than a fixed result heading.
 
 - **Payoff and caption:**
-- **Map:** regions, stop markers, physical context, labels and color roles.
-- **Camera:** static focus / ordered flyover views; no false connecting routes.
+- **Map and saved outcomes:** Geographic context, discoveries, actual mistakes,
+  relevant labels and deliberate custom scenes.
+- **Camera:** Static focus or ordered flyover; no false connecting routes.
 - **Media and attribution:**
 
 ## Implementation handoff
 
+- **Approved scope:** Locked player decisions and explicit exclusions; the
+  approved five-stop outline is authoritative.
+- **Technical suggestions:** Relevant examples/recipes and any proposed data,
+  rule, input or rendering contract. Validate against the live repository; adapt
+  implementation details without quietly changing the experience.
+- **Required additions / risks:** The smallest verified engine extension (if any)
+  and unresolved material correctness, fairness, data, licensing or compatibility
+  issue. Ordinary file/ID choices are delegated to the implementing agent.
+
 ### Catalog impact
 
-- **Stable Journey ID and added date:**
-- **Registration:** Every registered Journey joins the shared automatic-selection pool.
-- **Assignments and locked dates:** list references to a superseded or removed ID.
-- **Save continuity:** preserve the pinned edition of started attempts; identify
-  any answer-contract revision, retirement or recovery handling.
-- **Metadata:** regenerate the index only when its inputs change. Round catalog
-  entries derive from registered Journeys automatically.
+- **Identity:** Stable Journey ID, added date and route when known.
+- **Registration decision:** **Defer / Authorize.** Registered Journeys enter the
+  automatic Daily pool; the current engine has **no unlisted status**. If deferred,
+  arrange isolated review instead of claiming registration will remain hidden.
+  Approval to implement does not itself authorize deployment.
+- **Existing dates and saves:** Identify superseded/removed IDs and affected
+  assignments. Preserve locked dates, started attempts and completed receipts;
+  specify answer-contract revisions, retirement and recovery behavior as needed.
+- **Metadata:** Regenerate the index only when its inputs change. Registered
+  round catalog entries derive automatically; account for the backend catalog
+  when shipping the change.
+- **Deployment:** Not authorized unless explicitly requested.
 
-- **Approved scope / material decisions:**
-- **Existing mechanic recipes and examples to consult:**
-- **Implementation owners:** contracts/builder for authored content; preparation
-  for canonical answer resolution; evaluation for grading. List engine changes only
-  when required; presentation and camera edits do not change answer acceptance.
-- **Affected Journey registration / metadata:**
-- **Save strategy:** edit current Journey; identify changes to answer contracts and
-  required save-revision handling. Preserve completed receipts as agreed.
-- **Focused verification:** Journey audit, relevant behavior checks and TypeScript
-  for typed changes. Check actual wrong responses, partial assignments, repeated
-  objects and recap precedence when affected; empty synthetic misses are insufficient.
-  CI owns the full-suite/build gate before merge; keep local checks focused and test identities by ID.
-  Browser testing only when explicitly requested or for a specific unresolved
-  rendering/input risk. Record actual versus automated verification separately.
-- **Authoring handoff:** refresh the kit after relevant source/docs changes and
-  replace uploaded copies. Record remaining limitations; a snapshot is not a live
-  repository or proof of rendered quality.
-- **Deployment:** not authorized unless separately requested.
+### Verification and handoff
+
+- **Required acceptance:** Record only Journey-specific invariants (e.g., fair
+  grading, clue disclosure, genuine wrong/partial states and save restoration).
+  Inherit the six acceptance gates in `IMPLEMENTING_A_SPEC.md` rather than copying
+  them into this spec.
+- **Illustrative cases (optional):** A few scenarios clarifying novel behavior;
+  examples are not a requirement to generate a test per case.
+- **Focused checks:** `npm run check:journey -- <id-or-slug>`, relevant
+  behavior/catalog checks and TypeScript for typed changes. Verify real wrong
+  submissions and recap precedence when affected; empty synthetic misses are
+  insufficient. CI owns full-suite/build gates. Browser checks only if requested
+  or needed for a critical unresolved input/rendering risk; distinguish mocked
+  checks from real-browser evidence.
+- **Authoring kit:** Refresh after relevant source/docs changes and replace
+  uploaded copies; a snapshot is not current source or rendered verification.
+- **Handoff report:** What changed, verified results and material limitations.

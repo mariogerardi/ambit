@@ -41,7 +41,7 @@ const MODE_NOTES = {
   "geo-cut":
     "Place two ends on a frozen country boundary. A geodesic half-plane divides the population grid; any orientation with balanced totals is valid. Three error bands reward closeness to 50/50. Reveal each side’s letter and frozen population percentage on the map, without presuming unequal land.",
   "compass-bearing":
-    "Standalone initial spherical bearing question with explicit origin/destination records and three circular-error tiers. Rotate an upright true-north dial or use optional degree entry under “Type my answer” and keyboard input; an untouched dial is unanswered. Submit explicitly. Optional broad compass sectors guide without restricting input or changing tolerance. Destination and comparison arcs stay reveal-only. Three tiers earn 3/2/1 before help ceilings; frozen submission evidence preserves historical receipts. A relay is optional content, not an engine dependency.",
+    "Standalone initial spherical bearing question with explicit origin/destination records and three circular-error tiers. Rotate an upright true-north dial or use optional degree entry under “Type my answer” and keyboard input; an untouched dial is unanswered. Submit explicitly. Optional broad compass sectors guide without restricting input or changing tolerance. The destination stays reveal-only unless disclosure.bearingDestination explicitly supplies it as a blue reference for direction estimation; comparison arcs always stay reveal-only. Three tiers earn 3/2/1 before help ceilings; frozen submission evidence preserves historical receipts. A relay is optional content, not an engine dependency.",
   pin: "Place a point near a reviewed target or inside canonical territory, then confirm. The shared supporting row derives a concise bullseye sentence from the rule; all inclusive acceptance bands remain available before answering in the free Accuracy information. Do not hand-write numeric bands or movement boilerplate in instruction. Bearing Intersection composes this pin response with question.bearingIntersection: two explicit station records, computed read-only compass headings, an optional single broad geographic assist sector, and reveal-only great-circle arcs. It works independently per question; see recipe:bearing-intersection and JOURNEY_ENGINE.md. The schema also supports legacy single-radius questions. Territory-inside pins use containment without invented distance bands. Accepted pins still count as one correct answer; three distance tiers award 3/2/1 points and help caps rewards at two (hint) or one (assist). Territory-inside pins award three points before help. Help cannot change tolerance; target rings belong to reveal.",
   slider:
     "Estimate a quantity using a native range input. The rule owns bounds, step, unit, target and tolerance. The shared supporting row derives the concise bullseye message; free Accuracy information discloses all bands. Do not repeat those numbers in instruction. The committed scale shows the answer, estimate and accuracy ranges.",
@@ -528,6 +528,7 @@ export async function exportJourneyKit(options) {
           acceptedAnswers,
           count,
           commitment: question.commitment,
+          partialCredit: question.partialCredit,
           failure: question.failure,
           selection: question.selection,
           eligible:
@@ -560,7 +561,7 @@ export async function exportJourneyKit(options) {
           ...(question.instruction
             ? [`**Instruction:** ${question.instruction}`]
             : []),
-          `**Answer:** ${inlineJson({ rule: summarizeGeometry(question.rule), accepted: contract.acceptedAnswers, count, commitment: question.commitment, ...(question.matchSlots ? { matchSlots: question.matchSlots } : {}) })}`,
+          `**Answer:** ${inlineJson({ rule: summarizeGeometry(question.rule), accepted: contract.acceptedAnswers, count, commitment: question.commitment, partialCredit: question.partialCredit, ...(question.matchSlots ? { matchSlots: question.matchSlots } : {}) })}`,
           `**Candidates:** ${inlineJson(contract.eligible)}`,
           ...(question.guidance
             ? [`**Hint:** ${question.guidance.hint}`]
@@ -771,6 +772,7 @@ export async function exportJourneyKit(options) {
               clueImage: question.image,
               feedbackFlags: question.feedbackFlags,
               feedbackImage: question.feedbackImage,
+              feedbackImages: question.feedbackImages,
               feedbackDiagram: question.feedbackDiagram,
               mapCaption: question.mapCaption,
               rasterLegend: question.rasterLegend,
@@ -788,9 +790,10 @@ export async function exportJourneyKit(options) {
           ...(question.image ||
           question.feedbackFlags ||
           question.feedbackImage ||
+          question.feedbackImages?.length ||
           question.feedbackDiagram
             ? [
-                `**Media:** ${inlineJson({ clue: question.image, revealFlags: question.feedbackFlags, revealImage: question.feedbackImage, revealDiagram: question.feedbackDiagram })}`,
+                `**Media:** ${inlineJson({ clue: question.image, revealFlags: question.feedbackFlags, revealImage: question.feedbackImage, revealImages: question.feedbackImages, revealDiagram: question.feedbackDiagram })}`,
               ]
             : []),
           `**Source:** [${question.source.name}](${question.source.url}) · reviewed ${question.source.reviewedOn}. Additional map/media sources remain in the detailed reference.`,

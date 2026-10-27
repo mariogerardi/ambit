@@ -277,8 +277,8 @@ test(
         "utf8",
       );
       assert.match(template, /Visual contract/);
-      assert.match(template, /actual wrong/);
-      assert.match(template, /mistake\s+precedence/);
+      assert.match(template, /genuine wrong\/partial states/);
+      assert.match(template, /mistakes take precedence/);
       await writeFile(path.join(directory, "my-notes.md"), "Keep my notes");
       await exportJourneyKit({
         ...options,

@@ -9,7 +9,10 @@ examples are reference material, not permission to publish or change scope.
 
 Read the whole spec, including its throughline, five stops, help, reveals and
 completion. Treat its approved outline as the design review already completed.
-Preserve the intended reasoning, favorite questions and explicit exceptions.
+Preserve approved tasks, clues, assistance, reveals, scoring exceptions and
+explicit exclusions. Technical sketches, internal names and file choices may
+adapt to current code while preserving that player experience. A proposed
+implementation is not itself a locked creative decision.
 Do not restart design or request approval for decisions already settled.
 When the request is another set using an existing mechanic, use that Journey as
 the primary model. Preserve the original and give the sequel fresh identities;
@@ -25,10 +28,13 @@ experience or the amount of new engineering. Continue independent work meanwhile
 Read the editorial, visual and engine sections relevant to the approved experience.
 In the repository, use the [task-to-section map](../README.md#find-the-relevant-section);
 in a portable kit, use the guide and references listed in `AUTHORING_KIT.md`.
-Skim the catalog's **Bundled Journeys** table, then inspect examples that match the spec's
-mechanics and storytelling or geography challenges. Review each chosen example's
+Start with the spec's implementation-fit notes and the closest current recipe or
+Journey. Consult the catalog and additional examples only to resolve relevant
+mechanic, storytelling or geography questions. Review each chosen example's
 prompt, play scene, hint, assist, actual answer contract, reveal and completion.
-Featured examples are starting points; consult the broader suite as needed.
+Distinguish capabilities verified in current source from proposed designs,
+unverified kit claims and open material decisions. An exported example or a
+plausible mode name alone does not establish current support.
 
 In the repository, guides live in `docs/` and Journey definitions in
 `src/game/*Journey.ts`. In the portable kit, use `AUTHORING_KIT.md`,
@@ -44,6 +50,14 @@ Use `JOURNEY_ENGINE.md`, `mechanics.ts`, `questionContracts.ts`,
 `questionBuilder.ts` and the matching `recipes.ts` example for implementation.
 Use the current repository when an exported snapshot disagrees with live code.
 
+Scale planning to novelty. For a familiar sequel, confirm the shared mechanic and
+identify content or scene differences; no separate feasibility exercise or full
+inventory of inherited UI is needed. For new interactions or bespoke data,
+identify the affected contracts, controls, grading, presentation and save behavior.
+Resolve a risk that could invalidate the experience before implementing all five
+stops. Report material capability conflicts without silently replacing an
+approved task; continue independent work while the necessary decision is resolved.
+
 Inherit shared typography, supporting copy, legends, controls, feedback headings,
 map roles and scoring. Authors supply meaningful exceptions and the experience;
 the agent supplies routine technical details. Keep eligibility, grading, display
@@ -53,10 +67,28 @@ or material departure before substituting a different experience.
 ## 4. Implement, verify and hand off
 
 Implement the approved spec with the existing authoring builders and grouped
-scenes. Preserve save continuity and follow catalog policy for registration.
+scenes. Preserve save continuity and follow the catalog policy.
 Review the combined rendered copy and effective scenes for answer leakage,
 redundancy and stale objects. Check correct, actual wrong and partial responses
 where relevant, plus the final recap.
+
+### Registration and compatibility
+
+Honor the registration authorization in the request or spec. Every registered
+Journey enters the automatic Daily pool; there is no unlisted catalog state.
+When authorized, register the Journey and route, update the catalog table and
+regenerate index metadata only when its inputs change. Preserve started editions,
+locked assignments and completed receipts, with explicit revision/recovery
+handling where needed. Account for the backend's bundled catalog when shipping.
+
+If registration is deferred, keep the new Journey out of `journeys.ts` and the
+generated index. The ID/slug checker and normal practice/review routes require
+indexed content; they cannot preview an unregistered module automatically. Use
+direct-module checks, including `auditJourney`, and an explicitly arranged isolated
+review when needed. Do not register temporarily just to make those tools work.
+If registration is unresolved, continue independent content work and flag that
+decision before changing the catalog. Implementation approval does not authorize
+deployment.
 
 ### Acceptance gates
 
@@ -100,18 +132,19 @@ result. An approved spec does not waive these shared standards.
    mechanic. Check action spacing, input width, duplicate counters and stale
    legends/results independently of the narrative.
 
-Use focused unit/DOM checks, asset checks and code inspection to establish the
-parts they can verify. Follow `AGENTS.md` for a narrowly scoped browser check when
-requested or needed to settle a critical rendering/input uncertainty. Distinguish
-structural or mocked evidence from actual browser appearance; state what remains
-unverified. Do not add a full-suite or full-device-tour requirement to these gates.
+### Focused verification and handoff
 
-Follow repository `AGENTS.md`: focused Journey/behavior checks and TypeScript for
-typed changes; CI owns the full-suite/build gate before merge. Use a browser
-only when requested or needed to resolve a specific critical rendering/input risk.
-Register new content and its route, update the catalog table, and regenerate index
-metadata when its inputs change. Run `npm run check:journey -- <id-or-slug>` and
-the relevant behavior/catalog checks; test Journey identity by ID.
+Select relevant checks from [Development](../DEVELOPMENT.md#choose-focused-checks)
+for the Journey-specific invariants and affected behavior. Reuse existing coverage;
+add or update tests for meaningful regression risks, not for every illustrative
+scenario. All six acceptance gates still apply to reused and new mechanics.
+Use unit/DOM checks, asset checks and code inspection for what they can establish.
+Run `npm run check:journey -- <id-or-slug>` for indexed content, or the direct-module
+audit for deferred content, and TypeScript for typed changes. Follow
+[AGENTS.md](../../AGENTS.md) for local/CI and browser-check boundaries. Distinguish
+structural or mocked evidence from actual browser appearance; report limitations
+without presenting an unverified acceptance gate as passed.
+
 Report what changed, what was verified and any material limitation. Publish or
 deploy only when the user's request authorizes it. Refresh the portable kit after
 relevant source or documentation changes with `npm run export:journeys`;

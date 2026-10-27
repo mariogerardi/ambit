@@ -501,7 +501,14 @@ export function App() {
   const mobileStep = `${path}:${minigamePlaying ? `${activeMinigame.run?.cycle}:${activeMinigame.run?.index}:${activeMinigame.run?.result ?? "playing"}:${activeMinigame.ended}` : isJourney ? `${journey.id}:${game.roundIndex}:${game.phase}` : studying ? `${session!.prompt.ordinal}:${session!.phase}` : mode === "explore" ? `${selected}:${selectedRegion?.id}:${selectedCity?.id}` : "setup"}`;
   useEffect(() => {
     setGlobeExpanded(false);
-    if (mobile.enabled && document.activeElement instanceof HTMLElement)
+    // Dismiss the keyboard without undoing the next screen's focus management.
+    if (
+      mobile.enabled &&
+      document.activeElement instanceof HTMLElement &&
+      document.activeElement.matches(
+        'input, textarea, [contenteditable="true"]',
+      )
+    )
       document.activeElement.blur();
   }, [mobileStep, mobile.enabled]);
   const states = useMemo<Record<string, VisualState>>(

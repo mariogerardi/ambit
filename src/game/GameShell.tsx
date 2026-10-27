@@ -358,7 +358,9 @@ export function GameShell({
                       correctAnswerCopy(round))
                     : (constructionFeedback ??
                       compass?.feedback ??
-                      "Not quite.")}
+                      (feedback?.partialCredit
+                        ? "One country found."
+                        : "Not quite."))}
                 </div>
                 <PointOrbs
                   earned={answerPoints(feedback, game.help?.[round.id])}
@@ -409,32 +411,31 @@ export function GameShell({
               {!!round.feedbackFlags?.length && (
                 <FlagComparison flags={round.feedbackFlags} />
               )}
-              {round.feedbackImage && (
-                <figure className="journey-feedback-image">
-                  <img
-                    src={round.feedbackImage.src}
-                    alt={round.feedbackImage.alt}
-                  />
-                  <figcaption>
-                    {round.feedbackImage.caption}{" "}
-                    <a
-                      href={round.feedbackImage.credit.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {round.feedbackImage.credit.name}
-                    </a>
-                    {" · "}
-                    <a
-                      href={round.feedbackImage.credit.licenseUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {round.feedbackImage.credit.license}
-                    </a>
-                  </figcaption>
-                </figure>
-              )}
+              {[round.feedbackImage, ...(round.feedbackImages ?? [])]
+                .filter((image) => !!image)
+                .map((image) => (
+                  <figure className="journey-feedback-image" key={image.src}>
+                    <img src={image.src} alt={image.alt} />
+                    <figcaption>
+                      {image.caption}{" "}
+                      <a
+                        href={image.credit.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {image.credit.name}
+                      </a>
+                      {" · "}
+                      <a
+                        href={image.credit.licenseUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {image.credit.license}
+                      </a>
+                    </figcaption>
+                  </figure>
+                ))}
               {round.feedbackDiagram?.type === "river-banks" && (
                 <figure className="river-banks-diagram">
                   <svg

@@ -11,7 +11,9 @@ export default defineConfig({
     __APP_RELEASE__: JSON.stringify(commit),
     __AVATAR_IMAGES__: JSON.stringify(
       readdirSync(new URL("./public/avatars/", import.meta.url))
-        .filter((file) => /^avatar-(0[1-9]|1[0-9]|2[0-4])\.png$/.test(file))
+        .filter((file) =>
+          /^avatar-(0[1-9]|1[0-9]|2[0-4])\.(png|svg)$/.test(file),
+        )
         .map((file) => `/avatars/${file}`),
     ),
   },

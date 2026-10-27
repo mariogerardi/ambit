@@ -21,7 +21,7 @@ export const SHARED_VISUAL_RULES = {
   "clue-locator":
     "Supplied area locators retain authored labels during play and clear when play ends.",
   "bearing-disclosure":
-    "Compass play retains the origin but withholds its destination and outgoing comparison paths.",
+    "Compass play retains its given endpoints and withholds outgoing comparison paths; destinations are concealed unless explicitly supplied.",
   "pin-reference":
     "Supplied reference points cannot themselves earn a correct pin.",
   "point-answer-role":
@@ -74,12 +74,16 @@ export function auditVisualScene(
       !world.places.some(
         (p) => p.id === origin.id && p.visualState === "hinted",
       ) ||
-      world.places.some(
-        (p) =>
-          p.id === destination.id ||
-          (Math.abs(p.lat - destination.lat) < 1e-8 &&
-            Math.abs(p.lng - destination.lng) < 1e-8),
-      ) ||
+      (q.disclosure.bearingDestination
+        ? !world.places.some(
+            (p) => p.id === destination.id && p.visualState === "hinted",
+          )
+        : world.places.some(
+            (p) =>
+              p.id === destination.id ||
+              (Math.abs(p.lat - destination.lat) < 1e-8 &&
+                Math.abs(p.lng - destination.lng) < 1e-8),
+          )) ||
       world.overlays?.some(
         (o) =>
           o.id.startsWith("bearing-route:") ||

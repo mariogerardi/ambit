@@ -1513,6 +1513,17 @@
   width: 100%;
   height: auto;
 }
+.experience .journey-photo-clue.flag-clue-with-context {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.experience .journey-photo-clue.flag-clue-with-context > img,
+.experience .journey-photo-clue .flag-context {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
 .flag-collection {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }

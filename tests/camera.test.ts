@@ -17,6 +17,44 @@ import type { Focus } from "../src/geography/types";
 import { regionStyle, stateStyles } from "../src/globe/visualStates";
 afterEach(() => vi.unstubAllGlobals());
 describe("camera travel", () => {
+  it("pulls away from Rottnest before rotating toward North America", () => {
+    let now = 0,
+      callback: FrameRequestCallback = () => {};
+    const origin = { lat: -32.02, lng: 115.66, altitude: 0.018 };
+    const destination = { lat: 29, lng: -101, altitude: 1.4 };
+    let position: Required<Focus> = { ...origin };
+    vi.stubGlobal("performance", { now: () => now });
+    vi.stubGlobal("requestAnimationFrame", (fn: FrameRequestCallback) => {
+      callback = fn;
+      return 7;
+    });
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    const travel = new CameraTravel();
+    travel.move(
+      {
+        pointOfView(target?: Focus) {
+          if (target) position = { ...position, ...target };
+          return position;
+        },
+      },
+      destination,
+      false,
+    );
+    for (now = 10; now <= 1200; now += 10) callback(now);
+    expect(position.lat).toBeCloseTo(origin.lat, 8);
+    expect(position.lng).toBeCloseTo(origin.lng, 8);
+    expect(position.altitude).toBeGreaterThan(1.7);
+    for (; now <= 3300; now += 10) {
+      callback(now);
+      if (now > 1300) expect(position.altitude).toBeCloseTo(1.8, 8);
+    }
+    expect(position.lat).not.toBeCloseTo(origin.lat, 1);
+    for (; now <= 4250 && travel.active; now += 10) callback(now);
+    expect(position.lat).toBe(destination.lat);
+    expect(position.lng).toBe(shortestLongitude(origin.lng, destination.lng));
+    expect(position.altitude).toBe(destination.altitude);
+    expect(travel.active).toBe(false);
+  });
   it.each([0.008, 0.06])(
     "spreads a city-to-country pullback over the flight from altitude %s",
     (altitude) => {

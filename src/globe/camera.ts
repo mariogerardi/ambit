@@ -90,8 +90,14 @@ export class CameraTravel {
       (lng - from.lng) * Math.cos(((from.lat + to.lat) * Math.PI) / 360),
     );
     const nearby = distance < 0.5;
+    const wideDeparture = from.altitude < 0.1 && distance > 45;
     const duration =
-      durationMs ?? (nearby ? 1400 : 2600 + Math.min(600, distance * 6));
+      durationMs ??
+      (wideDeparture
+        ? 4200
+        : nearby
+          ? 1400
+          : 2600 + Math.min(600, distance * 6));
     const cruise = Math.max(
       from.altitude,
       to.altitude,
@@ -129,23 +135,32 @@ export class CameraTravel {
         this.cancel();
         return;
       }
-      // Use the original close-up flight at every scale: establish coordinates
-      // along a great-circle arc, then let the gentle approach finish.
-      const pan = nearby ? ease(t) : 1 - (1 - ease(t / 0.62)) ** 2;
+      // Distant local departures establish an orbital view before following the arc.
+      const pan = wideDeparture
+        ? ease((t - 0.3) / 0.5)
+        : nearby
+          ? ease(t)
+          : 1 - (1 - ease(t / 0.62)) ** 2;
       const [arcLng, arcLat] = arc(pan);
       port.pointOfView(
         {
           lat: arcLat,
           lng: shortestLongitude(from.lng, arcLng),
-          altitude: nearby
-            ? zoom(from.altitude, to.altitude, t)
-            : t < ascentShare
-              ? zoom(from.altitude, cruise, t / ascentShare)
-              : zoom(
-                  cruise,
-                  to.altitude,
-                  (t - ascentShare) / (1 - ascentShare),
-                ),
+          altitude: wideDeparture
+            ? t < 0.3
+              ? zoom(from.altitude, cruise, t / 0.3)
+              : t < 0.8
+                ? cruise
+                : zoom(cruise, to.altitude, (t - 0.8) / 0.2)
+            : nearby
+              ? zoom(from.altitude, to.altitude, t)
+              : t < ascentShare
+                ? zoom(from.altitude, cruise, t / ascentShare)
+                : zoom(
+                    cruise,
+                    to.altitude,
+                    (t - ascentShare) / (1 - ascentShare),
+                  ),
         },
         0,
       );

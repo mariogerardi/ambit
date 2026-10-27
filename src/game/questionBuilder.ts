@@ -39,6 +39,7 @@ export function definePresentation<T extends QuestionPresentation>(
     "constructionExample",
     "constructionExampleFootprint",
     "constructionInitial",
+    "partialCredit",
   ];
   if (forbidden.some((key) => key in presentation))
     throw Error(
@@ -64,6 +65,18 @@ export function validateQuestionContract(q: Question): void {
   if (definition.single && q.count !== 1)
     fail("single answers require count 1");
   if (
+    q.partialCredit !== undefined &&
+    (q.partialCredit !== "one-of-two" ||
+      q.mode !== "map-multiple" ||
+      q.count !== 2 ||
+      q.rule.type !== "country-ids" ||
+      q.rule.ids.length !== 2 ||
+      new Set(q.rule.ids).size !== 2 ||
+      q.rule.ordered ||
+      q.rule.match === "any")
+  )
+    fail("partial credit requires an unordered pair of country answers");
+  if (
     q.candidateRegionIds &&
     (new Set(q.candidateRegionIds).size !== q.candidateRegionIds.length ||
       q.candidateRegionIds.some((id) => q.contextIds?.includes(id)))
@@ -80,6 +93,14 @@ export function validateQuestionContract(q: Question): void {
       "clue candidates require noninteractive geography and deferred identity feedback",
     );
   const city = definition.mapSelection === "places";
+  if (
+    q.disclosure.bearingDestination !== undefined &&
+    (q.mode !== "compass-bearing" ||
+      typeof q.disclosure.bearingDestination !== "boolean")
+  )
+    fail(
+      "bearing destination disclosure requires a compass question and a boolean",
+    );
   const suppliedAreas = new Set([
     ...(q.contextIds ?? []),
     ...(q.candidateRegionIds ?? []),

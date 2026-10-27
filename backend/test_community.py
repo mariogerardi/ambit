@@ -192,6 +192,17 @@ class CommunityTests(unittest.TestCase):
         self.assertEqual(community.journey_points([{**answer, "recall": {"version": 1, "entries": []}}], {}), (0, False))
         self.assertEqual(community.journey_points([{**answer, "points": 3}], {}), (2, False))
 
+    def test_partial_selection_rewards_are_frozen_and_capped_at_one_point(self):
+        answer = {"roundId": "panda", "correct": False, "points": 1, "pointsVersion": 1,
+                  "selectedIds": ["wurl:NPL", "wurl:BGD"], "partialCredit": {"matchedId": "wurl:NPL"}}
+        self.assertEqual(community.journey_points([answer], {}), (1, False))
+        self.assertEqual(community.journey_points([{**answer, "points": 3}], {"panda": "assisted"}), (1, False))
+        for credit, selected in [({"matchedId": "wurl:CHN"}, answer["selectedIds"]),
+                                 ({"matchedId": "wurl:NPL"}, ["wurl:NPL", "wurl:NPL"]),
+                                 ({"matchedId": "wurl:NPL"}, ["wurl:NPL", {}]),
+                                 ({"matchedId": 1}, answer["selectedIds"])]:
+            self.assertEqual(community.journey_points([{**answer, "partialCredit": credit, "selectedIds": selected}], {}), (0, False))
+
     def test_scores_unlock_only_for_mutual_friends_who_finished_the_same_journey_version(self):
         self.friends()
         self.db.saves = [self.daily_record("b")]

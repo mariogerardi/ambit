@@ -1,4 +1,5 @@
 import { validCountryRecall, hasRecallCredit } from "../game/countryRecall";
+import { validPartialSelectionCredit } from "../game/partialCredit";
 import {
   validConstruction,
   validConstructionResult,
@@ -219,6 +220,8 @@ export function validGame(
           a.construction?.kind === a.constructionResult.kind &&
           a.correct === (a.constructionResult.tier !== null))) &&
       strings(a.selectedIds) &&
+      (a.partialCredit === undefined ||
+        validPartialSelectionCredit(a.partialCredit, a.selectedIds)) &&
       strings(a.ordered) &&
       typeof a.text === "string" &&
       typeof a.correct === "boolean" &&
@@ -234,6 +237,8 @@ export function validGame(
           Number(a.points) <= 3 &&
           (a.correct ||
             a.points === 0 ||
+            (a.points === 1 &&
+              validPartialSelectionCredit(a.partialCredit, a.selectedIds)) ||
             (Number(a.points) <= 2 && hasRecallCredit(a.recall))))) &&
       (a.receiptLabel === undefined || typeof a.receiptLabel === "string"),
   );

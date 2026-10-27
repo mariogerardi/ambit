@@ -329,6 +329,23 @@ The Journey credits the following photographs after each question is answered. S
 | Øresund Bridge (`04.v1.jpg`)        | Philaweb / Paul Bischoff | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Oresund_Bridge.JPG)                           | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)       |
 | Qiansimen Bridge (`05.v1.jpg`)      | DvTor8303                | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Qiansimen_Bridge_at_night_20251027.jpg)       | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)   |
 
+## Small Wonders wildlife and habitat media
+
+The six wildlife photographs, Xochimilco aerial photograph, and published red
+panda distribution map in `public/journeys/small-wonders/` are served locally,
+with creator and license links shown alongside their reveal images. The five
+primary animal portraits also appear in the photo recap.
+The [source notes](public/journeys/small-wonders/SOURCES.md) record the source
+pages, selected licenses, thumbnail transformations, and geographic conventions.
+These image licenses apply independently of the application code. The axolotl,
+red panda, and Arctic fox photographs depict captive animals; they are not presented as
+photographs taken at the wild habitats discussed in the Journey.
+The distribution map retains its OpenStreetMap contributor attribution; its
+published band is not a precise habitat boundary. The question-local Rottnest
+coastline in `src/game/data/small-wonders-rottnest.v1.json` is extracted from
+public-domain Natural Earth v5.1.2 1:10m country geometry, without altering its
+source vertices. Source versions and transformations are recorded in the notes.
+
 ## Shared-name Journey map context
 
 `src/game/data/shared-names-context.v1.json` and the identical downloadable

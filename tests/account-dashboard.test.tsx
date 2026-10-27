@@ -319,13 +319,35 @@ it("opens a saved profile card before editing and cancels unsaved edits", async 
     host.querySelectorAll('.avatar-options input[type="radio"]'),
   ).toHaveLength(24);
   expect(host.querySelectorAll(".avatar-options input:disabled")).toHaveLength(
-    24,
+    0,
   );
-  expect(host.querySelectorAll(".avatar-options img")).toHaveLength(0);
+  expect(host.querySelectorAll(".avatar-options img")).toHaveLength(24);
   await click("← Back to profile");
   expect(host.querySelector(".profile-card")?.textContent).toContain("Alice");
   expect(host.textContent).not.toContain("Unsaved Alice");
   expect(profile.displayName).toBe("Alice");
+});
+it("saves a fixed theme avatar and renders the chosen local artwork", async () => {
+  await mount();
+  await click("Profile");
+  await click("Edit profile");
+  const choice = host.querySelector<HTMLInputElement>(
+    '.avatar-options input[value="avatar-08"]',
+  )!;
+  expect(choice.disabled).toBe(false);
+  await act(async () => choice.click());
+  await act(async () =>
+    host
+      .querySelector("form")!
+      .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+  );
+  expect(profile.avatar).toBe("avatar-08");
+  expect(
+    host
+      .querySelector(".account-heading .profile-avatar img")
+      ?.getAttribute("src"),
+  ).toBe("/avatars/avatar-08.svg");
+  expect(host.textContent).toContain("Your profile is saved.");
 });
 it("saves a country flag avatar and renders its local image", async () => {
   await mount();

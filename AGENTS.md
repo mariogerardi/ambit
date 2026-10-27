@@ -10,9 +10,14 @@ These instructions apply to every coding agent working in this repository.
   reuse what you have already learned instead of repeating discovery.
 - Start with the task-to-section map in `docs/README.md`; the owner/test map in
   `docs/DEVELOPMENT.md` identifies focused checks. Do not read every linked guide.
-- List code with `rg --files src tests scripts backend`. Search code and docs with
-  `rg -n -g '*.{ts,tsx,mjs,py,css,md}' 'pattern' src tests scripts backend docs`.
-  Inspect JSON/assets by explicit path; broad searches can emit megabytes per line.
+- Search the most likely implementation directory or files first, then expand
+  only if necessary. Use `rg --files src tests scripts backend` to locate files;
+  use `rg -l 'pattern' <relevant-path>` when only filenames are needed, and
+  `rg -n 'pattern' <relevant-path>` to inspect matching lines. For broader code
+  and docs searches, use
+  `rg -n -g '*.{ts,tsx,mjs,py,css,md}' 'pattern' src tests scripts backend docs`
+  only when a narrower search is insufficient. Inspect JSON/assets by explicit
+  path; broad searches can emit megabytes per line.
 - Preserve existing user changes, including untracked files. Never regenerate
   catalogs or geography unless the task requires it.
 - Continue authorized work without unnecessary permission checks. Ask only when
@@ -22,9 +27,12 @@ These instructions apply to every coding agent working in this repository.
 
 ## Focus verification: get in, get out
 
-- Select relevant test files before running checks. For mechanical moves, preserve
-  existing cases; add regression coverage for changed behavior and meaningful
-  failure modes, not file layout or assertions that repeat the implementation.
+- Select relevant test files before running checks. For mechanical moves,
+  preserve existing cases. Add or update tests when a change introduces meaningful
+  regression risk; prioritize grading, geography, persistence, authentication,
+  and shared contracts. For small, localized changes, existing checks or static
+  inspection may be sufficient. Do not add tests merely because code changed,
+  or for file layout or assertions that repeat the implementation.
 - Local checks stay focused even when CI will later run the full suite. Use static
   inspection or saved reports to inventory tests; do not run the suite to count them.
 - Use `npm test -- tests/<file>.test.ts` for local frontend checks; put test files
@@ -32,8 +40,10 @@ These instructions apply to every coding agent working in this repository.
   `npm run test:all` explicitly runs the full frontend suite. Passing test logs
   are suppressed; failure diagnostics remain visible. Do not rerun a passing
   command just to obtain more output.
-- Use a TypeScript check when changing typed code. Do not routinely run the full
-  test suite, production build, dependency audit, or all preparation scripts.
+- When changing typed code, run a TypeScript check once after a coherent set of
+  changes is complete. Repeat only if later edits could invalidate that result.
+  Do not routinely run the full test suite, production build, dependency audit,
+  or all preparation scripts.
 - For backend changes, use Python >=3.11 and
   `python3 scripts/run-python-tests.py backend/test_<area>.py` (or a dotted test
   name). No arguments intentionally runs the full backend suite for CI/releases.
@@ -91,5 +101,5 @@ These instructions apply to every coding agent working in this repository.
   as relevant. Code and tests establish current behavior when docs disagree.
 - Run `npm run check:env` once when setting up the workspace; it checks the pinned
   Node/npm and identifies a supported Python executable. Use that interpreter for
-  Python commands. Use the pinned Node version in `.nvmrc`. Typical focused checks are
-  `npm test -- tests/<relevant-file>` and `./node_modules/.bin/tsc --noEmit`.
+  Python commands. Use the pinned Node version in `.nvmrc`. Typical focused
+  checks are `npm test -- tests/<relevant-file>` and `./node_modules/.bin/tsc --noEmit`.

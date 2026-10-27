@@ -17,6 +17,7 @@ For an approved specification, start with
 
 | Title                              | Practice route                                | Definition                                                                     |
 | ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
+| Small Wonders                      | `/journey/small-wonders`                      | [smallWondersJourney.ts](../src/game/smallWondersJourney.ts)                   |
 | Within Reach                       | `/journey/within-reach`                       | [withinReachJourney.ts](../src/game/withinReachJourney.ts)                     |
 | The Shape of India                 | `/journey/the-shape-of-india`                 | [shapeOfIndiaJourney.ts](../src/game/shapeOfIndiaJourney.ts)                   |
 | Drawing the Sahara                 | `/journey/drawing-the-sahara`                 | [drawingSaharaJourney.ts](../src/game/drawingSaharaJourney.ts)                 |
@@ -113,8 +114,10 @@ selects 3/2/1 points, capped independently by help. The vaccine Journey uses
 Optional `guidance.assist.compassSector: { start, end }` highlights a broad
 clockwise dial sector (including wraparound), without constraining input or
 changing grading. Choose guides whose placement does not systematically disclose
-the answer through their midpoint. The origin is shown automatically; the
-destination and comparison arcs appear only after submission. Feedback compares
+the answer through their midpoint. The origin is shown automatically. By default,
+the destination appears only after submission; `disclosure.bearingDestination: true`
+supplies it as an equally styled reference for direction-estimation questions.
+Comparison arcs always remain hidden until submission. Feedback compares
 the correct route and a short segment of the chosen heading. Submission snapshots
 preserve coordinates, target, chosen angle, error, tier and feedback for receipts.
 See `recipe:compass-bearing`.
@@ -386,7 +389,10 @@ crops only the already-reviewed local flag vectors; it does not refresh the flag
 
 `feedbackImage` supplies reveal-only documentary media with `src`, `alt`,
 `caption`, and `credit` (`name`, source `url`, `license`, `licenseUrl`). It is
-rendered only after submission, including after an incorrect answer. Pre-answer
+rendered only after submission, including after an incorrect answer.
+`feedbackImages` adds further documentary images using that same contract, each
+with its own caption and credit. Small Wonders uses these for habitat context
+and the comparison fox; habitat maps remain concealed until submission.
 `image` is a separate pre-answer clue contract; it may remain during feedback
 unless reveal media such as `feedbackFlags` replaces it. Record asset provenance and license notices; do not put an answer-revealing photo
 in the clue field.
