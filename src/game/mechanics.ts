@@ -585,7 +585,7 @@ export const MECHANICS = {
     false,
   ),
   "choice-order": defineMechanic(
-    ["country-ids"],
+    ["country-ids", "choice-ids"],
     "Order cards",
     "cards",
     "ordered",
@@ -594,7 +594,11 @@ export const MECHANICS = {
     {
       ...cards,
       validate: (question, fail) => {
-        if (question.rule.type !== "country-ids" || !question.rule.ordered)
+        if (
+          (question.rule.type !== "country-ids" &&
+            question.rule.type !== "choice-ids") ||
+          !question.rule.ordered
+        )
           fail("card ordering requires ordered grading");
       },
     },

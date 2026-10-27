@@ -184,7 +184,7 @@ export function OrderAnswer({
             >
               <span className={matching ? "match-slot-copy" : undefined}>
                 {matching && id && <small>{label}</small>}
-                {id ? name(id) : matching ? label : "Place a country"}
+                {id ? name(id) : matching ? label : "Place a card"}
               </span>
               <i aria-hidden="true">
                 {locked ? "✓" : id ? "⠿" : matching ? "+" : "⠿"}

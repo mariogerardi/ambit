@@ -187,7 +187,8 @@ question is mounted. Hint/assist rerenders preserve those positions; grading use
 IDs. Do not infer answers from visual card order.
 
 `choice-order` stores candidate IDs in `Response.ordered`, with a
-`country-ids` rule marked `ordered: true`. It supports spare/distractor cards,
+`country-ids` or `choice-ids` rule marked `ordered: true`. Use `choice-ids` for
+landmarks or other cards whose identities are independent of countries. It supports spare/distractor cards,
 mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
 There is no current catalog example; focused ordering-control tests retain coverage.
 `assist.fixedSelections` can lock correct unordered picks, preserve existing picks,

@@ -106,7 +106,7 @@ export type KnowledgeRule =
       tiers?: { tolerance: number; feedback: string }[];
     }
   | { type: "region-ids"; ids: string[]; match?: "all" | "any" }
-  | { type: "choice-ids"; ids: string[] }
+  | { type: "choice-ids"; ids: string[]; ordered?: boolean }
   | { type: "slot-matches"; matches: { slotId: string; choiceId: string }[] }
   | { type: "capital-name"; countryId: string }
   | { type: "country-fact"; field: string; value: string }
