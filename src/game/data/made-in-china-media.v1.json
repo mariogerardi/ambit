@@ -154,17 +154,17 @@
     "sha256": "aa9a67a2c31ff3b6affa46ada36d1e31ab6eef3494319cb3a3c9f19c9e6ffdd5"
   },
   "shenzhen-now": {
-    "src": "/journeys/made-in-china/shenzhen-now.v1.jpg",
-    "alt": "Modern Shenzhen towers stretch across the horizon beyond the wetlands of northern Hong Kong.",
-    "caption": "Shenzhen in 2019 · the skyline seen from Hong Kong, across the boundary.",
+    "src": "/journeys/made-in-china/shenzhen-now.v2.jpg",
+    "alt": "Shenzhen’s Civic Centre surrounded by dense high-rise towers, with the tall Ping An Finance Centre above the skyline.",
+    "caption": "Futian, Shenzhen, in 2025 · the Civic Centre and surrounding skyscrapers, viewed from Lianhuashan Park.",
     "credit": {
-      "name": "Sparktour",
-      "url": "https://commons.wikimedia.org/wiki/File:Skyline_of_Shenzhen_from_Hong_Kong.jpg",
+      "name": "Pathfinbird",
+      "url": "https://commons.wikimedia.org/wiki/File:Civic_Centre_and_Futian_CBD,_Shenzhen_-_20251227,_views_from_Lianhuashan_Park.jpg",
       "license": "CC BY-SA 4.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
     },
-    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/91/Skyline_of_Shenzhen_from_Hong_Kong.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Skyline_of_Shenzhen_from_Hong_Kong.jpg/960px-Skyline_of_Shenzhen_from_Hong_Kong.jpg",
-    "sha256": "47f736876ab6541af3864df8d3facd4ce9c83a6866ce4f1a49272bce5a97b04d"
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/2/25/Civic_Centre_and_Futian_CBD%2C_Shenzhen_-_20251227%2C_views_from_Lianhuashan_Park.jpg",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Civic_Centre_and_Futian_CBD%2C_Shenzhen_-_20251227%2C_views_from_Lianhuashan_Park.jpg/960px-Civic_Centre_and_Futian_CBD%2C_Shenzhen_-_20251227%2C_views_from_Lianhuashan_Park.jpg",
+    "sha256": "8d519db75bba792ae83bc3ef25dd9135bb46ad621e1f5933265a5cbcc030ac2b"
   }
 }

@@ -17,6 +17,8 @@ import { applyTheme } from "../src/theme/themes";
 import "../src/fonts.css";
 import "../src/style.css";
 import "../src/game/game.css";
+import "../src/app/app.css";
+import "../src/app/mobile.css";
 import "../src/theme/themes.css";
 import "./made-in-china.css";
 
@@ -43,10 +45,14 @@ function Review({ regions }: { regions: RegionFeature[] }) {
   const [failed, setFailed] = useState(false);
   const [hover, setHover] = useState<RegionFeature>();
   const globe = useRef<GlobeHandle>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const world = journeyWorld(regions, journey, game, context);
   const round = journey.rounds[game.roundIndex];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const help = game.help?.[round.id];
+  useEffect(() => {
+    if (panel.current) panel.current.scrollTop = 0;
+  }, [round.id]);
   useEffect(() => {
     if (!ready) return;
     globe.current?.cancelFlyover();
@@ -137,7 +143,7 @@ function Review({ regions }: { regions: RegionFeature[] }) {
           />
         )}
       </div>
-      <div className="china-review-panel">
+      <div className="china-review-panel" ref={panel}>
         <GameShell
           journey={journey}
           context={context}

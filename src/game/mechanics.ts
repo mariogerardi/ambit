@@ -126,7 +126,7 @@ const validateCards: NonNullable<MechanicDefinition["validateContext"]> = (
     fixed.length >= question.count ||
     (question.orderLabels && question.orderLabels.length !== question.count) ||
     (question.orderInitial &&
-      (ids.length !== question.count + 1 ||
+      ((ids.length !== question.count && ids.length !== question.count + 1) ||
         question.orderInitial.length !== question.count ||
         new Set(question.orderInitial).size !== question.count ||
         question.orderInitial.some((id) => !ids.includes(id))))

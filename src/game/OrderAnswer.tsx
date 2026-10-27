@@ -69,6 +69,10 @@ export function OrderAnswer({
       ].map((photo) => [photo.src, photo]),
     ).values(),
   ];
+  const photoGrid = populated && !matching && photos.length > 0;
+  const hasUnplacedCards = question.choices?.some(
+    (choice) => !ordered.includes(choice.id),
+  );
   const place = (id: string, index: number) => {
     dispatch({ type: "order-card", id, index });
     setPicked(undefined);
@@ -287,7 +291,7 @@ export function OrderAnswer({
   );
   return (
     <div
-      className={`order-puzzle${populated ? " order-populated" : ""}${matching ? " match-puzzle" : ""}`}
+      className={`order-puzzle${populated ? " order-populated" : ""}${matching ? " match-puzzle" : ""}${photoGrid ? " order-photo-grid" : ""}`}
     >
       {populated && question.orderGroupLabel && (
         <p className="order-group-title">{question.orderGroupLabel}</p>
@@ -301,7 +305,7 @@ export function OrderAnswer({
         ) : (
           <>
             {slots}
-            {bank}
+            {hasUnplacedCards && bank}
           </>
         )}
       </div>

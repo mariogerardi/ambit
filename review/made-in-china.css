@@ -1,4 +1,4 @@
-.china-review {
+.experience.china-review {
   display: grid;
   grid-template-columns: minmax(340px, 450px) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
@@ -44,8 +44,8 @@
   min-height: 0;
   padding: 20px;
 }
-.china-review .question-card,
-.china-review .finish-story {
+.experience.china-review .question-card,
+.experience.china-review .finish-story {
   position: relative;
   inset: auto;
   width: 100%;
@@ -55,8 +55,20 @@
   box-sizing: border-box;
   overflow: visible;
 }
+.china-review .experience-footer {
+  position: static;
+  margin-top: 16px;
+}
+.china-review-panel .board-tools {
+  display: none;
+}
+.china-review .journey-progress {
+  position: static;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 @media (max-width: 760px) {
-  .china-review {
+  .experience.china-review {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(220px, 42dvh) minmax(0, 1fr);
   }

@@ -1,9 +1,14 @@
 import { definePresentation, defineQuestion } from "./questionBuilder";
-import { cityReference, areaLabel } from "./authoredPlaces";
+import { cityReference, areaLabel, explanationPlace } from "./authoredPlaces";
 import { ANSWER_PLACES } from "./answerTargets";
 import type { FactSource, Journey, Question } from "./questionContracts";
-import type { PlaceFeature, RegionFeature } from "../geography/types";
+import type {
+  MapOverlay,
+  PlaceFeature,
+  RegionFeature,
+} from "../geography/types";
 import provinceData from "./data/made-in-china-provinces.v1.json";
+import geography from "./data/made-in-china-context.v1.json";
 import media from "./data/made-in-china-media.v1.json";
 
 const source = (name: string, url: string): FactSource => ({
@@ -11,31 +16,29 @@ const source = (name: string, url: string): FactSource => ({
   url,
   reviewedOn: "2026-10-26",
 });
-const provinces = provinceData as RegionFeature[];
-const province = (code: string) =>
-  provinces.find((region) => region.id === `wurl:CHN-${code}`)!;
 const photo = (
   key: keyof typeof media,
 ): NonNullable<Question["feedbackImage"]> => {
   const { src, alt, caption, credit } = media[key];
   return { src, alt, caption, credit };
 };
-const clue = (key: keyof typeof media): NonNullable<Question["image"]> => {
-  const image = photo(key);
-  return {
-    src: image.src,
-    alt: image.alt,
-    feedbackAlt: image.alt,
-    presentation: "photo",
-  };
-};
+const clue = (key: keyof typeof media): NonNullable<Question["image"]> => ({
+  src: media[key].src,
+  alt: media[key].alt,
+  feedbackAlt: media[key].alt,
+  presentation: "photo",
+});
 const city = (id: string) => cityReference(ANSWER_PLACES.get(`place:${id}`)!);
-const chengdu = city("1815286"),
-  guangzhou = city("1809858"),
-  xian = city("1790630");
+const xian = city("1790630"),
+  chengdu = city("1815286"),
+  guangzhou = city("1809858");
 const jingdezhen = city("1805680"),
-  shenzhen = city("1795565");
-// Hong Kong's supplied center is outside all three Shenzhen acceptance bands.
+  shanghai = city("1796236"),
+  nanjing = city("1799962"),
+  ningbo = city("1799397");
+const shenzhen = city("1795565"),
+  dongguan = city("1812545"),
+  huizhou = city("1806776");
 const hongKong = cityReference({
   id: "place:1819729",
   name: "Hong Kong",
@@ -45,301 +48,177 @@ const hongKong = cityReference({
   lng: 114.17469,
   sourceId: "geonames:1819729",
 });
-const regionalSource = source(
-  "Natural Earth · provincial boundaries (public domain)",
-  "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/",
-);
-const wallSource = source(
-  "UNESCO · Great Wall history and fortifications",
-  "https://whc.unesco.org/en/list/438/",
-);
-const wallDistribution = source(
-  "China State Administration of Cultural Heritage · Great Wall conservation plan",
-  "https://whc.unesco.org/document/157507",
-);
+const label = (id: string, name: string, lat: number, lng: number) =>
+  areaLabel({
+    id: `made-in-china:${id}`,
+    name,
+    kind: "other",
+    lat,
+    lng,
+    sourceId: "made-in-china:context",
+    visualState: "hinted",
+    priority: 85,
+  });
 const locations = source(
   "GeoNames · populated-place coordinates",
   "https://www.geonames.org/",
 );
-const foods = [chengdu, guangzhou, xian];
-const dishNames = ["Mapo tofu", "Dim sum", "Biangbiang noodles"];
-const foodReveal = foods.map((place, index) => ({
-  ...place,
-  name: `${place.name} · ${dishNames[index]}`,
-  answerTarget: true,
-}));
+const terrainSource = source(
+  "NASA · Blue Marble shaded relief via GIBS",
+  "https://earthobservatory.nasa.gov/features/BlueMarble",
+);
+const named = {
+  hoverNames: true,
+  namedChoices: true,
+  committedNames: true,
+  previousVisits: false,
+};
 const common = definePresentation({
-  topic: "Chinese creations",
+  topic: "Why here?",
   instruction: "",
   failure: "feedback",
-  disclosure: {
-    hoverNames: false,
-    namedChoices: false,
-    committedNames: false,
-    previousVisits: false,
-  },
+  disclosure: named,
   map: { borders: true, hoverFeedback: false, muteOthers: true },
 });
-const provinceLabel = (code: string) => {
-  const region = province(code);
-  return areaLabel({
-    id: `made-in-china:province-label:${code}`,
-    name: region.name,
-    kind: "other",
-    lat: region.focus.lat,
-    lng: region.focus.lng,
-    sourceId: region.sourceId,
-    visualState: "hinted",
-    priority: 75,
-  });
-};
-export const MADE_IN_CHINA_WALL_ANSWERS = ["GS", "HE", "SX"].map(
-  (code) => province(code).id,
-);
-export const MADE_IN_CHINA_WALL_CANDIDATES = [
-  "GS",
-  "SC",
-  "HE",
-  "JS",
-  "SX",
-  "ZJ",
-].map((code) => province(code).id);
-export const MADE_IN_CHINA_WALL_REGIONS = [
-  "BJ",
-  "TJ",
-  "HE",
-  "SX",
-  "NM",
-  "LN",
-  "JL",
-  "HL",
-  "SD",
-  "HA",
-  "SN",
-  "GS",
-  "QH",
-  "NX",
-  "XJ",
-].map((code) => province(code).id);
-const otherWallRegions = MADE_IN_CHINA_WALL_REGIONS.filter(
-  (id) => !MADE_IN_CHINA_WALL_ANSWERS.includes(id),
-);
-const landmarks: PlaceFeature[] = [
-  {
-    id: "landmark:terracotta-army",
-    name: "Terracotta Army · late 3rd century BCE",
-    kind: "landmark",
-    lat: 34.384,
-    lng: 109.278,
-    parentId: "wurl:CHN",
-    sourceId: "made-in-china:terracotta",
-    answerTarget: true,
-    markerBadge: "1",
-  },
-  {
-    id: "landmark:forbidden-city",
-    name: "Forbidden City · 1420",
-    kind: "landmark",
-    lat: 39.9163,
-    lng: 116.3972,
-    parentId: "wurl:CHN",
-    sourceId: "made-in-china:forbidden-city",
-    answerTarget: true,
-    markerBadge: "2",
-  },
-  {
-    id: "landmark:shanghai-customs-house",
-    name: "Shanghai Customs House · 1927",
-    kind: "landmark",
-    lat: 31.239,
-    lng: 121.485,
-    parentId: "wurl:CHN",
-    sourceId: "made-in-china:customs-house",
-    answerTarget: true,
-    markerBadge: "3",
-  },
-  {
-    id: "landmark:birds-nest",
-    name: "Bird’s Nest · 2008",
-    kind: "landmark",
-    lat: 39.9928,
-    lng: 116.3967,
-    parentId: "wurl:CHN",
-    sourceId: "made-in-china:birds-nest",
-    answerTarget: true,
-    markerBadge: "4",
-  },
-];
-const chronology = defineQuestion({
-  ...common,
-  id: "made-in-china-four-frames-v1",
-  label: "Architecture",
-  title: "Four Frames of History",
-  leadIn:
-    "Across China’s long history, people have left remarkable structures behind. Some were made for emperors. Others reflected international commerce or a new vision of the future. Four photographs tell that story across more than two thousand years.",
-  prompt: "Arrange these four Chinese landmarks from oldest to newest.",
-  mode: "choice-order",
-  count: 4,
-  selection: { type: "none" },
-  commitment: "submit",
-  rule: {
-    type: "choice-ids",
-    ids: landmarks.map((place) => place.id),
-    ordered: true,
-  },
-  choices: [
-    {
-      id: landmarks[2].id,
-      label: "Shanghai Customs House · the Bund",
-      image: photo("customs-house"),
-    },
-    {
-      id: landmarks[3].id,
-      label: "Bird’s Nest · Beijing National Stadium",
-      image: photo("birds-nest"),
-    },
-    {
-      id: landmarks[0].id,
-      label: "Terracotta Army · near Xi’an",
-      image: photo("terracotta"),
-    },
-    {
-      id: landmarks[1].id,
-      label: "Forbidden City · Beijing",
-      image: photo("forbidden-city"),
-    },
-  ],
-  orderLabels: ["Oldest", "Second", "Third", "Newest"],
-  guidance: {
-    hint: "Two of these places belong to imperial China. The other two reflect the twentieth and twenty-first centuries.",
-    assist: {
-      text: "The Terracotta Army is locked in the earliest position. Arrange the remaining three.",
-      fixedSlots: [{ index: 0, id: landmarks[0].id }],
-    },
-  },
-  correctFeedback: "Well ordered.",
-  explanation:
-    "An army of clay soldiers was buried for China’s first emperor in the late third century BCE. More than sixteen centuries later, the Forbidden City, completed in 1420, became the seat of imperial power in Beijing. Shanghai’s waterfront grew into a showcase of international commerce: its Customs House was completed in 1927. The Bird’s Nest, completed in 2008, became an architectural centerpiece of the Beijing Olympics. Four creations, four radically different moments in China’s history. And the country’s transformation didn’t stop with its most famous monuments. Farther south, another city was changing almost beyond recognition.",
-  feedbackImages: [
-    photo("terracotta"),
-    photo("forbidden-city"),
-    photo("customs-house"),
-    photo("birds-nest"),
-  ],
-  scenes: {
-    play: {
-      focus: { lat: 35, lng: 113, altitude: 0.9 },
-      contextIds: ["wurl:CHN"],
-    },
-    reveal: {
-      focus: { lat: 35, lng: 115, altitude: 0.85 },
-      contextIds: ["wurl:CHN"],
-      places: landmarks,
-      views: landmarks.map((place) => ({
-        lat: place.lat,
-        lng: place.lng,
-        altitude: place.kind === "landmark" ? 0.16 : 0.4,
-      })),
-    },
-  },
-  source: source(
-    "UNESCO · Mausoleum of the First Qin Emperor",
-    "https://whc.unesco.org/en/list/441/",
-  ),
-  sources: [
-    source(
-      "Palace Museum · completed in 1420",
-      "https://www.dpm.org.cn/subject_600/buildingdetails/253789.html",
-    ),
-    source(
-      "Shanghai government · Customs House completed in 1927",
-      "https://touch.shio.gov.cn/jsp/zfxw_detail.jsp?id=20250929181837586",
-    ),
-    source(
-      "Beijing government · National Stadium",
-      "https://english.beijing.gov.cn/beijing2022/venues/beijing/202103/t20210316_2308893.html",
-    ),
-  ],
+const citySelection = (places: PlaceFeature[]) => ({
+  type: "ids" as const,
+  ids: places.map((p) => p.id),
 });
+const jiangxi = (provinceData as RegionFeature[]).find(
+  (p) => p.id === "wurl:CHN-JX",
+)!;
+const estuary: MapOverlay = {
+  id: "made-in-china:yangtze-estuary",
+  type: "raster-patch",
+  foreground: true,
+  assetUrl: geography.provenance.estuary.src,
+  bounds: geography.provenance.estuary.bounds as [
+    number,
+    number,
+    number,
+    number,
+  ],
+  opacity: 1,
+};
+// Terrain supplies a clue, never an answer surface. These are three discrete sites.
+const fortSites: PlaceFeature[] = [
+  {
+    id: "made-in-china:fort-north",
+    name: "Site A",
+    kind: "landmark" as const,
+    lat: 39.99,
+    lng: 98.0,
+    sourceId: "made-in-china:candidate",
+  },
+  {
+    id: "landmark:jiayuguan",
+    name: "Jiayuguan",
+    kind: "landmark" as const,
+    lat: 39.802,
+    lng: 98.217,
+    sourceId: "unesco:jiayuguan",
+  },
+  {
+    id: "made-in-china:fort-south",
+    name: "Site C",
+    kind: "landmark" as const,
+    lat: 39.43,
+    lng: 98.05,
+    sourceId: "made-in-china:candidate",
+  },
+].map((p, i) => ({
+  ...p,
+  parentId: "wurl:CHN",
+  markerSize: 24,
+  priority: 90,
+  markerBadge: "ABC"[i],
+  visualState: "hinted",
+  displayRole: "reference",
+  labelFlexible: true,
+}));
+const fort = { ...fortSites[1], name: "Jiayuguan · the mountain gateway" };
+const terrain: MapOverlay = {
+  id: "made-in-china:jiayuguan-terrain",
+  type: "raster-patch",
+  foreground: true,
+  assetUrl: "/journeys/made-in-china/jiayuguan-terrain.v1.jpg",
+  bounds: [96.4, 38.8, 100.0, 40.7],
+  opacity: 1,
+};
+const mountains = [
+  label("heishan", "Heishan Mountains", 40.12, 98.12),
+  label("qilian", "Qilian Mountains", 39.34, 98.38),
+];
+const coastalCities = [nanjing, shanghai, ningbo];
+const factoryCities = [dongguan, shenzhen, huizhou];
+const anonymousFactories = factoryCities.map((p, i) => ({
+  ...p,
+  name: p.name,
+  markerBadge: "ABC"[i],
+}));
 
-// Deliberately absent from journeys.ts and journeyIndex.json until publication is authorized.
 export const MADE_IN_CHINA_JOURNEY: Journey = {
   id: "made-in-china-v1",
-  saveRevision: 1,
+  addedAt: "2026-10-26",
+  saveRevision: 2,
+  legacyRoundLabels: {
+    "made-in-china-country-of-kitchens-v1": "Chengdu, Guangzhou & Xi’an",
+    "made-in-china-blue-and-white-v1": "Jingdezhen",
+    "made-in-china-wall-not-border-v1": "Gansu, Hebei & Shanxi",
+    "made-in-china-four-frames-v1": "Architecture",
+    "made-in-china-city-reinvented-v1": "Shenzhen",
+  },
   title: "Made in China",
   description:
-    "Five things people made. Five places with extraordinary stories.",
+    "From wheat noodles to a new metropolis: why did people make these things here?",
   rounds: [
     defineQuestion({
       ...common,
       id: "made-in-china-country-of-kitchens-v1",
-      label: "Regional kitchens",
-      title: "A Country of Kitchens",
-      resolvedLabel: "Chengdu, Guangzhou & Xi’an",
+      label: "A bowl of wheat",
+      title: "A Bowl of Wheat",
+      resolvedLabel: "Xi’an · wheat noodles",
       leadIn:
-        "China has given the world countless things to taste, admire, and wonder at. First, something familiar: food. But there is no single Chinese cuisine. Across this enormous country, regional kitchens have developed flavors and traditions all their own.",
-      prompt: "Match these three dishes to the cities that made them famous.",
-      mode: "choice-match",
-      count: 3,
-      selection: { type: "none" },
+        "These broad noodles are made from wheat, the traditional staple of northern China.",
+      prompt: "Which marked city is their most likely home?",
+      mode: "city-single",
+      count: 1,
+      selection: citySelection([chengdu, guangzhou, xian]),
       commitment: "submit",
-      rule: {
-        type: "slot-matches",
-        matches: [
-          { slotId: "mapo", choiceId: chengdu.id },
-          { slotId: "dim-sum", choiceId: guangzhou.id },
-          { slotId: "noodles", choiceId: xian.id },
-        ],
-      },
-      choices: [guangzhou, xian, chengdu].map((place) => ({
-        id: place.id,
-        label: place.name,
-      })),
-      orderAsideLabel: "Cities",
-      matchSlots: [
-        { id: "mapo", label: "Mapo tofu", image: photo("mapo") },
-        { id: "dim-sum", label: "Dim sum", image: photo("dim-sum") },
-        { id: "noodles", label: "Biangbiang noodles", image: photo("noodles") },
-      ],
+      rule: { type: "place-ids", ids: [xian.id] },
+      image: clue("noodles"),
+      feedbackImage: photo("noodles"),
       guidance: {
-        hint: "One city is famous for Sichuan’s fiery cooking. Another is a center of Cantonese cuisine, while the third is known for the hearty wheat noodles of Shaanxi.",
+        hint: "Compare the cities’ positions. Rice has traditionally been the main staple farther south.",
         assist: {
-          text: "Chengdu is matched to mapo tofu. Complete the remaining two associations.",
-          fixedSlots: [{ index: 0, id: chengdu.id }],
+          text: "Guangzhou, the farthest south, is ruled out. Compare Xi’an and Chengdu.",
+          candidateIds: [xian.id, chengdu.id],
         },
       },
-      correctFeedback: "Well matched.",
       explanation:
-        "From Sichuan’s famously fiery cooking to the delicate traditions of Cantonese dim sum, geography has helped shape what ends up on the table. Chengdu is associated with mapo tofu; Guangzhou with Cantonese dim sum; Xi’an with Shaanxi’s biangbiang noodles. Three cities, three very different traditions. And China’s influence traveled much farther than its kitchens.",
-      feedbackImages: [photo("mapo"), photo("dim-sum"), photo("noodles")],
+        "Xi’an’s biangbiang noodles belong to Shaanxi’s wheat-based cooking. Farther south, rice plays a larger role in everyday meals. Climate and farming helped shape regional kitchens; there has never been just one Chinese cuisine. Our next makers needed ingredients from the earth, too.",
+      qualification:
+        "Wheat in the north and rice in the south describe broad staple-food traditions, not exclusive growing areas or a precise boundary.",
       scenes: {
         play: {
-          focus: { lat: 31, lng: 108, altitude: 0.85 },
+          focus: { lat: 30.4, lng: 109.2, altitude: 0.58 },
           contextIds: ["wurl:CHN"],
+          places: [chengdu, guangzhou, xian],
         },
         reveal: {
-          contextIds: ["wurl:CHN"],
-          places: foodReveal,
-          views: foods.map((place) => ({
-            lat: place.lat,
-            lng: place.lng,
-            altitude: 0.3,
-          })),
+          focus: { lat: 31, lng: 109.2, altitude: 0.62 },
+          places: [
+            chengdu,
+            guangzhou,
+            { ...xian, name: "Xi’an · biangbiang noodles" },
+          ],
         },
       },
       source: source(
-        "UNESCO · Chengdu and Sichuan cuisine",
-        "https://www.unesco.org/en/creative-cities/chengdu",
+        "FAO · regional staple-food patterns",
+        "https://www.fao.org/4/J0962e/J0962e00.htm",
       ),
       sources: [
-        source(
-          "Chengdu · Chen Mapo tofu",
-          "https://europe.chinadaily.com.cn/life/2012-03/09/content_14800709.htm",
-        ),
-        source(
-          "Guangzhou Foreign Affairs Office · cuisine and dim sum",
-          "https://www.eguangzhou.gov.cn/gzspecialreports/intlblocks/fun/cuisine/content/post_31777.html",
-        ),
         source(
           "Xi’an local standard · biangbiang noodles",
           "https://std.samr.gov.cn/db/search/stdDBDetailed?id=0DA2AA7B7EC733EEE06397BE0A0A8797",
@@ -350,198 +229,248 @@ export const MADE_IN_CHINA_JOURNEY: Journey = {
     defineQuestion({
       ...common,
       id: "made-in-china-blue-and-white-v1",
-      label: "Porcelain",
-      title: "Blue and White",
-      resolvedLabel: "Jingdezhen",
+      label: "A place for porcelain",
+      title: "A Place for Porcelain",
+      resolvedLabel: "Jingdezhen · clay, fuel and rivers",
       leadIn:
-        "For centuries, another Chinese creation found its way onto tables around the world. Its delicate blue patterns became so desirable that an entire type of fine ceramic still carries the country’s name: china.",
-      prompt: "Find Jingdezhen, the city known as China’s porcelain capital.",
-      mode: "city-single",
+        "Jingdezhen’s kilns made porcelain for distant markets, far from the coast.",
+      prompt: "Which combination would help an inland workshop city thrive?",
+      mode: "choice-single",
       count: 1,
-      selection: {
-        type: "ids",
-        ids: ["place:1808722", jingdezhen.id, "place:1810821", "place:1800163"],
-      },
+      selection: { type: "none" },
       commitment: "submit",
-      rule: { type: "place-ids", ids: [jingdezhen.id] },
+      rule: { type: "choice-ids", ids: ["clay-wood-water"] },
+      choices: [
+        { id: "sea-imports", label: "A deep-sea harbor and imported clay" },
+        {
+          id: "clay-wood-water",
+          label: "Local clay, wood for kilns, and river transport",
+        },
+        {
+          id: "dry-caravans",
+          label: "Dry grassland and overland camel routes",
+        },
+      ],
       image: clue("porcelain"),
-      feedbackImage: photo("porcelain"),
-      feedbackImages: [photo("kiln")],
-      importedRegions: [province("JX")],
+      feedbackImage: photo("kiln"),
+      importedRegions: [jiangxi],
       guidance: {
-        hint: "Look inland in southeastern China. The city became a manufacturing center even though it wasn’t a major coastal port.",
+        hint: "Think about what a kiln consumes, then how heavy, fragile pots could reach buyers.",
         assist: {
-          text: "Jiangxi province is highlighted and labeled. Select the city marker for Jingdezhen.",
-          regionIds: [province("JX").id],
+          text: "Jiangxi is highlighted. This is a humid, river-connected part of inland China, rather than a dry caravan landscape.",
+          candidateIds: ["sea-imports", "clay-wood-water"],
+          regionIds: [jiangxi.id],
+          places: [label("jiangxi", "Jiangxi", 27.4, 115.5)],
         },
       },
       explanation:
-        "In Jingdezhen, generations of craftspeople transformed clay, minerals, and fire into porcelain prized around the world. Its workshops supplied imperial courts and international markets alike. Some Chinese creations were made to travel. Others were built to control who could cross a frontier.",
+        "Nearby kaolin and porcelain stone supplied the materials; surrounding forests supplied wood for the kilns. The Chang River connected the workshops to a wider waterway network. Skilled craftspeople turned those advantages into porcelain for imperial courts and overseas buyers. Location helped make an inland city a workshop for the world.",
       scenes: {
         play: {
-          focus: { lat: 29, lng: 117.5, altitude: 0.26 },
+          focus: { lat: 29.7, lng: 118.9, altitude: 0.37 },
           contextIds: ["wurl:CHN"],
+          places: [
+            explanationPlace(jingdezhen),
+            label("east-china-sea", "East China Sea", 28.7, 123.7),
+          ],
         },
-        assist: { places: [provinceLabel("JX")] },
         reveal: {
-          contextIds: ["wurl:CHN", province("JX").id],
-          places: [{ ...jingdezhen, visualState: "answer" }],
-          focus: { lat: 29, lng: 117.5, altitude: 0.26 },
+          contextIds: ["wurl:CHN", jiangxi.id],
+          places: [explanationPlace(jingdezhen)],
         },
       },
       source: source(
         "UNESCO · Jingdezhen porcelain industry sites",
         "https://whc.unesco.org/en/list/1765/",
       ),
-      sources: [regionalSource, locations],
+      sources: [
+        source(
+          "Smithsonian · Jingdezhen materials and trade",
+          "https://publications.asia.si.edu/seaceramics/place/location.php?group=7&key=102",
+        ),
+        source(
+          "Smithsonian Folklife Festival · porcelain and kiln fuel",
+          "https://festival.si.edu/2014/china/from-the-land/porcelain/smithsonian",
+        ),
+        source(
+          "UNESCO · Jingdezhen water transport and industrial landscape",
+          "https://whc.unesco.org/document/226090",
+        ),
+        locations,
+      ],
     }),
     defineQuestion({
       ...common,
       id: "made-in-china-wall-not-border-v1",
-      label: "Historic frontiers",
-      title: "The Wall That Wasn’t a Border",
-      resolvedLabel: "Gansu, Hebei & Shanxi",
-      leadIn:
-        "The Great Wall is one of the world’s most recognizable structures. But it doesn’t simply follow China’s modern border. And despite its name, it isn’t one uninterrupted wall.",
-      prompt:
-        "Which three of these six Chinese provinces contain historic sections of the Great Wall?",
-      mode: "map-multiple",
-      count: 3,
-      commitment: "submit",
-      selection: { type: "ids", ids: MADE_IN_CHINA_WALL_CANDIDATES },
-      rule: { type: "region-ids", ids: MADE_IN_CHINA_WALL_ANSWERS },
+      label: "Guard the gap",
       disclosure: {
-        ...common.disclosure,
-        namedChoices: true,
-        hoverNames: true,
-        committedNames: true,
+        ...named,
+        namedChoices: false,
+        hoverNames: false,
+        committedNames: false,
       },
-      choices: MADE_IN_CHINA_WALL_CANDIDATES.map((id) => ({
-        id,
-        label: provinces.find((region) => region.id === id)!.name,
-      })),
-      importedRegions: provinces.filter(
-        (region) =>
-          MADE_IN_CHINA_WALL_REGIONS.includes(region.id) ||
-          MADE_IN_CHINA_WALL_CANDIDATES.includes(region.id),
-      ),
+      title: "Guard the Gap",
+      resolvedLabel: "Jiayuguan · a mountain gateway",
+      leadIn:
+        "Travelers crossing this dry landscape must pass between mountains to the north and south.",
+      prompt: "Which site would let a fort guard the gap?",
+      mode: "city-single",
+      count: 1,
+      selection: citySelection(fortSites),
+      commitment: "submit",
+      rule: { type: "place-ids", ids: [fort.id] },
+      feedbackImage: photo("jiayuguan"),
       guidance: {
-        hint: "Think north. Different dynasties built defenses across China’s northern landscapes, from the dry northwest toward the mountains nearer the coast.",
+        hint: "A fort should watch the usable passage, rather than stand deep in the mountains.",
         assist: {
-          text: "Gansu is selected and locked. Jiayuguan’s fortifications mark a western gateway of the Ming Great Wall. Find two more provinces.",
-          fixedSelections: [province("GS").id],
-          images: [
-            {
-              src: photo("jiayuguan").src,
-              alt: photo("jiayuguan").alt,
-              caption: "Jiayuguan fortifications · Gansu",
-              credit: photo("jiayuguan").credit,
-            },
+          text: "The southern mountain site is ruled out. Look for the low ground between the two ranges.",
+          candidateIds: [fortSites[0].id, fort.id],
+        },
+      },
+      explanation:
+        "This is Jiayuguan, a fortified gateway of the Ming Great Wall. The Heishan Mountains to the north and the Qilian Mountains to the south narrow the passage. Walls and a fort helped control movement through it. The Great Wall was a changing network of defenses, often shaped by terrain, rather than a line along today’s national border.",
+      qualification:
+        "Site B marks Jiayuguan Fort approximately. Sites A and C are comparison locations, not proposed historical fort sites. The terrain image shows the modern landscape, not a reconstruction of the wall or a historical road.",
+      feedbackMapCaption:
+        "Jiayuguan guards the low passage between the Heishan and Qilian mountains.",
+      scenes: {
+        play: {
+          focus: { lat: 40.0, lng: 98.2, altitude: 0.04 },
+          contextIds: ["wurl:CHN"],
+          places: [...fortSites, ...mountains],
+          overlays: [terrain],
+        },
+        reveal: {
+          places: [
+            { ...fortSites[0], name: "A · northern mountains" },
+            fort,
+            { ...fortSites[2], name: "C · southern mountains" },
+            ...mountains,
           ],
         },
       },
-      explanation:
-        "The Great Wall is better understood as a vast network of fortifications, constructed and rebuilt by different dynasties over many centuries. Gansu, Hebei, and Shanxi are three examples among a much wider distribution. Some sections cross dry plains; others climb mountain ridges. Their locations tell stories about historic frontiers and changing military priorities, rather than the boundaries of today’s China. The wall was built to protect empires. Elsewhere, China’s rulers, merchants, and architects built monuments to wealth, power, and ambition.",
-      qualification:
-        "These six provinces are a limited candidate set. The reveal shades the fifteen provincial-level regions covered by China’s Great Wall conservation plan; it does not trace individual wall segments or imply that each region is entirely covered in remains.",
-      feedbackImage: photo("jiayuguan"),
-      feedbackMapCaption:
-        "Gansu, Hebei, and Shanxi are the three answers. Other highlighted regions show the wider distribution of recorded remains, not the wall’s course.",
-      scenes: {
-        play: {
-          focus: { lat: 35, lng: 110, altitude: 0.8 },
-          places: ["GS", "SC", "HE", "JS", "SX", "ZJ"].map(provinceLabel),
-          map: {
-            borders: true,
-            hoverFeedback: true,
-            muteOthers: true,
-            candidates: "highlighted",
-          },
-        },
-        reveal: {
-          focus: { lat: 40, lng: 105, altitude: 1.2 },
-          contextIds: otherWallRegions,
-          answerIds: MADE_IN_CHINA_WALL_ANSWERS,
-          places: [
-            "GS",
-            "HE",
-            "SX",
-            "NM",
-            "LN",
-            "SN",
-            "NX",
-            "QH",
-            "XJ",
-            "HL",
-            "JL",
-            "SD",
-            "HA",
-            "BJ",
-            "TJ",
-          ].map(provinceLabel),
-        },
-      },
-      source: wallSource,
-      sources: [wallDistribution, regionalSource],
+      source: source(
+        "UNESCO · Jiayuguan Pass and its mountain setting",
+        "https://whc.unesco.org/document/162535",
+      ),
+      sources: [
+        source(
+          "UNESCO · the Great Wall",
+          "https://whc.unesco.org/en/list/438/",
+        ),
+        terrainSource,
+      ],
     }),
-    chronology,
     defineQuestion({
       ...common,
-      id: "made-in-china-city-reinvented-v1",
-      label: "Modern metropolis",
-      title: "A City Reinvented",
-      resolvedLabel: "Shenzhen",
+      id: "made-in-china-four-frames-v1",
+      label: "A trading gateway",
+      title: "A Trading Gateway",
+      resolvedLabel: "Shanghai · river meets sea",
       leadIn:
-        "Our final stop takes us to a city transformed within living memory. In 1980, Shenzhen became one of China’s first special economic zones. Over the following decades, manufacturing, investment, and migration helped transform it into a major metropolis.",
-      prompt:
-        "Hong Kong is marked. Place a pin near Shenzhen, the city that grew just across the boundary.",
-      mode: "pin",
+        "This Customs House watched over a trading port. Its city links the Yangtze’s inland markets with the sea.",
+      prompt: "Which marked city fits that setting?",
+      mode: "city-single",
       count: 1,
+      selection: citySelection(coastalCities),
       commitment: "submit",
-      selection: { type: "none" },
-      rule: {
-        type: "pin-distance",
-        targetId: shenzhen.id,
-        radiusKm: 24,
-        tiers: [
-          { radiusKm: 8, feedback: "Bullseye!" },
-          { radiusKm: 16, feedback: "Very close." },
-          { radiusKm: 24, feedback: "In range." },
-        ],
-      },
+      rule: { type: "place-ids", ids: [shanghai.id] },
       image: {
-        ...clue("shenzhen-early"),
-        context: {
-          src: photo("shenzhen-now").src,
-          alt: photo("shenzhen-now").alt,
-        },
+        ...clue("customs-house"),
+        alt: "A stone Customs House with a tall clock tower, beside other waterfront buildings.",
       },
-      feedbackImage: photo("shenzhen-early"),
-      feedbackImages: [photo("shenzhen-now")],
+      feedbackImage: photo("customs-house"),
       guidance: {
-        hint: "Look directly north of Hong Kong, on the eastern side of the Pearl River estuary.",
+        hint: "Nanjing is farther upriver. Ningbo is coastal, but south of the Yangtze’s mouth.",
         assist: {
-          text: "Guangzhou is now marked as a second reference. Shenzhen lies much closer to Hong Kong.",
-          places: [guangzhou],
-          focus: { lat: 22.8, lng: 113.85, altitude: 0.09 },
+          text: "Ningbo is ruled out. Follow the Yangtze toward the coast, rather than farther inland.",
+          candidateIds: [nanjing.id, shanghai.id],
         },
       },
       explanation:
-        "Shenzhen’s factories helped connect China to global manufacturing networks. Its technology companies, dense neighborhoods, and skyscrapers tell another story: how rapidly a city—and an economy—can change. From ancient kilns to modern megacities, China’s creations have repeatedly reshaped the places where people live.",
+        "Shanghai sits near the Yangtze’s mouth. Its Bund waterfront faces the Huangpu, which joins the Yangtze estuary. The Customs House, completed in 1927, reflects the work of a trading gateway: connecting inland production with ocean shipping. A city’s connections can matter as much as the resources beside it.",
+      qualification:
+        "The satellite composite shows the modern river and estuary, not a historical port map. Shanghai’s marker is its city center, not the Customs House itself. This stop illustrates a port’s role, rather than claiming a single porcelain export route from Jingdezhen.",
       scenes: {
         play: {
-          focus: { lat: 22.65, lng: 114.03, altitude: 0.055 },
-          contextIds: ["wurl:CHN", "wurl:HKG"],
-          places: [hongKong],
+          focus: { lat: 31.3, lng: 120.9, altitude: 0.095 },
+          contextIds: ["wurl:CHN"],
+          places: [
+            ...coastalCities,
+            label("yangtze", "Yangtze River", 31.95, 119.6),
+            label("estuary", "Yangtze estuary", 31.72, 121.5),
+            label("sea", "East China Sea", 30.1, 123.5),
+          ],
+          overlays: [estuary],
         },
         reveal: {
-          contextIds: ["wurl:CHN", "wurl:HKG"],
-          places: [hongKong, { ...shenzhen, visualState: "answer" }],
-          focus: { lat: 22.6, lng: 114.03, altitude: 0.07 },
+          places: [
+            ...coastalCities,
+            label("yangtze", "Yangtze River", 31.95, 119.6),
+            label("estuary", "Yangtze estuary", 31.72, 121.5),
+            label("sea", "East China Sea", 30.1, 123.5),
+          ],
         },
       },
       source: source(
-        "World Bank · China’s special economic zones",
+        "Shanghai government · geographic setting",
+        "https://english.shanghai.gov.cn/en-Overview/20231209/705180b43f794c1ca43f4d1ddaa049a2.html",
+      ),
+      sources: [
+        source(
+          "Shanghai government · Customs House completed in 1927",
+          "https://touch.shio.gov.cn/jsp/zfxw_detail.jsp?id=20250929181837586",
+        ),
+        terrainSource,
+        locations,
+      ],
+    }),
+    defineQuestion({
+      ...common,
+      id: "made-in-china-city-reinvented-v1",
+      label: "A new connection",
+      disclosure: {
+        ...named,
+        namedChoices: false,
+        hoverNames: false,
+        committedNames: false,
+      },
+      title: "A New Connection",
+      resolvedLabel: "Shenzhen · beside Hong Kong",
+      leadIn:
+        "In 1980, China chose a new special economic zone beside Hong Kong, an established center of trade and investment.",
+      prompt: "Which site lies immediately across Hong Kong’s land boundary?",
+      mode: "city-single",
+      count: 1,
+      selection: citySelection(anonymousFactories),
+      commitment: "submit",
+      rule: { type: "place-ids", ids: [shenzhen.id] },
+      feedbackImage: photo("shenzhen-early"),
+      feedbackImages: [photo("shenzhen-now")],
+      guidance: {
+        hint: "Look directly north of Hong Kong, on the same side of the Pearl River estuary.",
+        assist: {
+          text: "The eastern site is ruled out. Choose the remaining site closest to Hong Kong’s northern boundary.",
+          candidateIds: [dongguan.id, shenzhen.id],
+        },
+      },
+      explanation:
+        "Shenzhen’s position beside Hong Kong helped connect its new factories with investment, business experience, and world markets. Policy, migration, and work transformed the city over the following decades. The photographs show Shenzhen in 1982 and its Futian skyline in 2025: a new manufacturing connection became a metropolis.",
+      qualification:
+        "The photographs show different viewpoints, not a precisely aligned repeat view. Shenzhen already had settlements and economic activity before 1980; the comparison does not depict an empty landscape becoming a city.",
+      scenes: {
+        play: {
+          focus: { lat: 22.7, lng: 114.05, altitude: 0.11 },
+          contextIds: ["wurl:CHN", "wurl:HKG"],
+          places: [...anonymousFactories, hongKong],
+        },
+        reveal: {
+          places: [...factoryCities, hongKong],
+          focus: { lat: 22.7, lng: 114.05, altitude: 0.11 },
+        },
+      },
+      source: source(
+        "World Bank · China’s special economic zones and Hong Kong connections",
         "https://documents1.worldbank.org/curated/en/310891468018256346/pdf/WPS5583.pdf",
       ),
       sources: [
@@ -556,32 +485,32 @@ export const MADE_IN_CHINA_JOURNEY: Journey = {
   completion: {
     mapMode: "authored",
     answerReviews: true,
-    focus: { lat: 34, lng: 108, altitude: 1.1 },
-    regionIds: MADE_IN_CHINA_WALL_ANSWERS,
+    focus: { lat: 33, lng: 110, altitude: 0.95 },
+    regionIds: [],
     views: [
-      { lat: 30, lng: 108, altitude: 0.85 },
+      { lat: 34.3, lng: 108.9, altitude: 0.3 },
       { lat: 29.3, lng: 117.2, altitude: 0.3 },
-      { lat: 40, lng: 105, altitude: 1.2 },
-      { lat: 35, lng: 115, altitude: 0.85 },
-      { lat: 22.6, lng: 114.03, altitude: 0.07 },
+      { lat: 39.8, lng: 98.2, altitude: 0.2 },
+      { lat: 31.2, lng: 121.5, altitude: 0.3 },
+      { lat: 22.7, lng: 114.05, altitude: 0.11 },
     ],
     loopViews: false,
     places: [
-      ...foodReveal,
-      jingdezhen,
-      ...landmarks,
-      shenzhen,
-      ...["GS", "HE", "SX"].map(provinceLabel),
-    ].map((place) => ({
-      ...place,
+      { ...xian, name: "Xi’an · wheat and noodles" },
+      { ...jingdezhen, name: "Jingdezhen · porcelain workshops" },
+      fort,
+      { ...shanghai, name: "Shanghai · trading gateway" },
+      { ...shenzhen, name: "Shenzhen · new connections" },
+    ].map((p) => ({
+      ...p,
       visualState: "visited",
       markerBadge: undefined,
       answerTarget: false,
     })),
     physicalFeatures: [],
     mapCaption:
-      "Regional kitchens · Jingdezhen porcelain · historic frontiers · four eras of architecture · Shenzhen’s transformation",
+      "Food · materials · defended crossings · trading gateways · new connections",
     caption:
-      "A meal. A porcelain vessel. A wall. A monument. A metropolis. Across centuries, the people of China have shaped how the world eats, trades, builds, and lives. These five creations tell only a fraction of that story—but each began somewhere.",
+      "What people make depends partly on where they are. Wheat shaped a meal; clay, fuel, and water supported workshops; a mountain gap invited a fort. Rivers and neighboring markets opened new possibilities for whole cities. Geography offered advantages. People decided what to make of them.",
   },
 };

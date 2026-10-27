@@ -707,15 +707,25 @@ export function GameShell({
                 (answer) => answer.roundId === question.id,
               );
               const help = game.help?.[question.id];
-              const recapDistance = answer && pinDistance(question, answer);
-              const recapTier = answer && pinDistanceTier(question, answer);
-              const reviewedGame = answer
+              // Revision receipts retain old grades/labels, but cannot be interpreted
+              // using a redesigned question's answer contract.
+              const currentAnswer =
+                answer &&
+                (!answer.receiptLabel ||
+                  answer.receiptLabel === resolvedRoundIdentity(question))
+                  ? answer
+                  : undefined;
+              const recapDistance =
+                currentAnswer && pinDistance(question, currentAnswer);
+              const recapTier =
+                currentAnswer && pinDistanceTier(question, currentAnswer);
+              const reviewedGame = currentAnswer
                 ? {
                     ...game,
-                    ...answer,
+                    ...currentAnswer,
                     phase: "feedback" as const,
                     roundIndex: i,
-                    answers: [answer],
+                    answers: [currentAnswer],
                   }
                 : undefined;
               return (

@@ -366,7 +366,7 @@ export interface Question {
     description?: string;
     image?: NonNullable<Question["feedbackImage"]>;
   }[];
-  /** Filled answer slots plus one implicit distractor. Dragging always swaps. */
+  /** Filled answer slots with zero or one spare card. Dragging always swaps. */
   orderInitial?: string[];
   orderGroupLabel?: string;
   orderAsideLabel?: string;

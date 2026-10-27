@@ -1,5 +1,6 @@
 import { WITHIN_REACH_JOURNEY } from "./withinReachJourney";
 import { SMALL_WONDERS_JOURNEY } from "./smallWondersJourney";
+import { MADE_IN_CHINA_JOURNEY } from "./madeInChinaJourney";
 import { SHAPE_OF_INDIA_JOURNEY } from "./shapeOfIndiaJourney";
 import { DRAWING_SAHARA_JOURNEY } from "./drawingSaharaJourney";
 import { SILK_ROAD_INTERSECTIONS_JOURNEY } from "./silkRoadIntersectionsJourney";
@@ -26,6 +27,7 @@ import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
 import { FAR_FROM_EVERYTHING_JOURNEY } from "./farFromEverythingJourney";
 import { REGGAETON_JOURNEY } from "./reggaetonJourney";
 export const JOURNEYS = [
+  MADE_IN_CHINA_JOURNEY,
   SMALL_WONDERS_JOURNEY,
   SHAPE_OF_INDIA_JOURNEY,
   WITHIN_REACH_JOURNEY,
@@ -56,6 +58,7 @@ export const JOURNEYS = [
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [MADE_IN_CHINA_JOURNEY.id]: "/journey/made-in-china",
     [SMALL_WONDERS_JOURNEY.id]: "/journey/small-wonders",
     [SHAPE_OF_INDIA_JOURNEY.id]: "/journey/the-shape-of-india",
     [WITHIN_REACH_JOURNEY.id]: "/journey/within-reach",

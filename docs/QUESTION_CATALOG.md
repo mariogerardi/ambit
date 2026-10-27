@@ -18,6 +18,7 @@ For an approved specification, start with
 | Title                              | Practice route                                | Definition                                                                     |
 | ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
 | Small Wonders                      | `/journey/small-wonders`                      | [smallWondersJourney.ts](../src/game/smallWondersJourney.ts)                   |
+| Made in China                      | `/journey/made-in-china`                      | [madeInChinaJourney.ts](../src/game/madeInChinaJourney.ts)                     |
 | Within Reach                       | `/journey/within-reach`                       | [withinReachJourney.ts](../src/game/withinReachJourney.ts)                     |
 | The Shape of India                 | `/journey/the-shape-of-india`                 | [shapeOfIndiaJourney.ts](../src/game/shapeOfIndiaJourney.ts)                   |
 | Drawing the Sahara                 | `/journey/drawing-the-sahara`                 | [drawingSaharaJourney.ts](../src/game/drawingSaharaJourney.ts)                 |
@@ -195,7 +196,10 @@ documentary feedback-image contract (source, alt text, caption and credit).
 The shared card control displays the photo and attribution while keeping its
 caption for the reveal, so dates or associations in that caption do not leak.
 Assist photographs can also provide a `credit` with source and license links.
-There is no current catalog example; focused ordering-control tests retain coverage.
+`orderInitial` can fill every slot with zero or one spare card. Photograph puzzles
+use a compact two-column grid; players drag to swap or select two cards. With no
+spare, all cards stay in the grid. Older partial drafts retain a tray for their
+unplaced cards. The card-order recipe demonstrates this pattern.
 `assist.fixedSelections` can lock correct unordered picks, preserve existing picks,
 and keep the anchors selected after clearing. Focused tests retain coverage of
 this supported behavior. The current authoring standard commits single-country and merged-territory
