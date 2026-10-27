@@ -228,6 +228,8 @@ function mediaPaths(question: Question) {
     question.image?.context?.src,
     question.feedbackImage?.src,
     ...(question.feedbackImages ?? []).map((image) => image.src),
+    ...(question.choices ?? []).map((choice) => choice.image?.src),
+    ...(question.matchSlots ?? []).map((slot) => slot.image?.src),
     ...(question.feedbackFlags ?? []).flatMap((flag) => [
       flag.src,
       flag.detail?.src,

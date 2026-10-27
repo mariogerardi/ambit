@@ -289,23 +289,27 @@ Across centuries, the people of China have shaped how the world eats, trades, bu
 
 **Publication:** Do not register or deploy without authorization.
 
-## Development handoff
+## Local implementation and review
 
-The chronology contract prototype is exported as `MADE_IN_CHINA_CHRONOLOGY_DRAFT`
-from `src/game/madeInChinaJourney.ts`. It is an isolated question, not a registered
-Journey. Its labelled cards exercise `choice-order` with arbitrary `choice-ids`
-and the Terracotta Army assist lock.
+The full five-stop definition is exported as `MADE_IN_CHINA_JOURNEY` from
+`src/game/madeInChinaJourney.ts`. Registration remains deferred: it is absent from
+`journeys.ts` and the generated index.
 
-Remaining work before the five-stop Journey is ready for review:
+Run `npm run dev` and open `/review/made-in-china.html` on the printed local URL
+for an isolated playable review. It uses the actual globe, controls, grading,
+help, reveals and completion. Its answers live only in memory; it does not write
+account data, player saves, catalog assignments, or API requests. The stop selector
+starts a fresh local review at that question. This entry point is excluded from
+the production entry graph.
 
-- Source licensed photography for the three dishes, porcelain and kiln, Great Wall,
-  four landmark cards, and archival/contemporary Shenzhen; retain credits and alt text.
-- Add photo rendering to the shared card control without changing matching or
-  chronological grading; the current chronology draft uses labelled cards.
-- Implement rounds 1–3 and 5, using canonical Chinese province geometry and
-  reviewed Great Wall coverage. Verify Jingdezhen candidates and pin bands.
-- Finish the chronology reveal with dated photographs and a geographic sequence.
-- Compose the five-stop completion and verify actual wrong/partial answers,
-  assists, disclosure, save restoration, and the direct-module Journey audit.
-- Keep the module out of `journeys.ts` and the generated index until registration
-  is separately authorized. Do not deploy this Journey during development.
+Photography credits and factual/geographic qualifications live in
+`public/journeys/made-in-china/SOURCES.md`. The comparison photographs show
+Shenzhen in 1982 and 2019 from different viewpoints. Canonical provincial geometry
+is copied from the existing Natural Earth snapshot, with no shared regeneration.
+
+Focused verification: `npm test -- tests/made-in-china-journey.test.tsx` includes
+the direct-module `auditJourney` check; the normal ID/slug checker intentionally
+cannot resolve unregistered content. Check TypeScript and the affected shared
+ordering, matching, presentation, support and completion tests after contract
+changes. Automated/DOM evidence does not establish actual WebGL appearance or
+touch calibration; review those on the local page before publication.

@@ -1,0 +1,79 @@
+.china-review {
+  display: grid;
+  grid-template-columns: minmax(340px, 450px) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+}
+.china-review-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+}
+.china-review-toolbar select,
+.china-review-toolbar button {
+  min-height: 36px;
+  max-width: 100%;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.4);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--ui-text);
+  background: rgb(var(--ui-surface-rgb));
+}
+.china-review-toolbar label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+.china-review-map {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+.china-review-panel {
+  grid-column: 1;
+  grid-row: 2;
+  overflow: auto;
+  min-height: 0;
+  padding: 20px;
+}
+.china-review .question-card,
+.china-review .finish-story {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+@media (max-width: 760px) {
+  .china-review {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(220px, 42dvh) minmax(0, 1fr);
+  }
+  .china-review-map {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .china-review-panel {
+    grid-column: 1;
+    grid-row: 3;
+    padding: 12px;
+  }
+  .china-review-toolbar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .china-review-toolbar strong {
+    flex-basis: 100%;
+  }
+}

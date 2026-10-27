@@ -190,6 +190,11 @@ IDs. Do not infer answers from visual card order.
 `country-ids` or `choice-ids` rule marked `ordered: true`. Use `choice-ids` for
 landmarks or other cards whose identities are independent of countries. It supports spare/distractor cards,
 mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
+Ordering `choices` and matching `matchSlots` can carry an `image` using the
+documentary feedback-image contract (source, alt text, caption and credit).
+The shared card control displays the photo and attribution while keeping its
+caption for the reveal, so dates or associations in that caption do not leak.
+Assist photographs can also provide a `credit` with source and license links.
 There is no current catalog example; focused ordering-control tests retain coverage.
 `assist.fixedSelections` can lock correct unordered picks, preserve existing picks,
 and keep the anchors selected after clearing. Focused tests retain coverage of

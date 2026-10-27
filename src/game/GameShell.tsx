@@ -709,6 +709,15 @@ export function GameShell({
               const help = game.help?.[question.id];
               const recapDistance = answer && pinDistance(question, answer);
               const recapTier = answer && pinDistanceTier(question, answer);
+              const reviewedGame = answer
+                ? {
+                    ...game,
+                    ...answer,
+                    phase: "feedback" as const,
+                    roundIndex: i,
+                    answers: [answer],
+                  }
+                : undefined;
               return (
                 <li
                   key={question.id}
@@ -771,6 +780,34 @@ export function GameShell({
                           </a>
                         </small>
                       )}
+                    {journey.completion?.answerReviews && reviewedGame && (
+                      <details className="journey-answer-recap">
+                        <summary>Review your answer</summary>
+                        <p>
+                          {
+                            correctAnswerSummary(
+                              question,
+                              context,
+                              reviewedGame,
+                            ).value
+                          }
+                        </p>
+                        {recapDistance !== undefined && (
+                          <p>
+                            Your pin was{" "}
+                            {recapDistance < 1
+                              ? "less than 1"
+                              : Math.round(recapDistance).toLocaleString()}{" "}
+                            km away.
+                          </p>
+                        )}
+                        <AnswerReview
+                          question={question}
+                          context={context}
+                          game={reviewedGame}
+                        />
+                      </details>
+                    )}
                   </div>
                   <span className="journey-round-result">
                     {help && (

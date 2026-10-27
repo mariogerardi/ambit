@@ -375,7 +375,9 @@ export function journeyWorld(
       ? authoredMap
         ? reviewingConstruction
           ? questionRegions(regions, constructionQuestion, "feedback")
-          : regions
+          : constructionCompletion
+            ? regions
+            : allRegions(regions, journey, game.answers)
         : allRegions(regions, journey, game.answers)
       : questionRegions(
           reachedRegions(regions, journey, game.roundIndex),
