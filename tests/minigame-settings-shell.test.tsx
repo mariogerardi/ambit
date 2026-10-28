@@ -63,6 +63,9 @@ it("customizes Shared Neighbors without changing an unfinished run until Start n
     document.querySelector(".minigame-carousel-card")?.textContent,
   ).toContain("Starting a new game replaces your current game.");
   await click("Start new game");
+  expect(createNeighborSave().load().run).toEqual(initial);
+  expect(document.querySelector('[role="alertdialog"]')).not.toBeNull();
+  await click("Discard and start");
   const run = createNeighborSave().load().run!;
   expect(run.id).not.toBe(initial.id);
   expect(run.settings).toMatchObject({
