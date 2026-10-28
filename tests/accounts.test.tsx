@@ -287,3 +287,14 @@ it("retains only recognized account tab destinations through sign-in", () => {
   expect(safeReturnPath("/account?tab=profile&section=tools")).toBe("/account");
   expect(safeReturnPath("/account?tab=profile&tab=admin")).toBe("/account");
 });
+
+it("retains validated Admin Journey/date context through sign-in", () => {
+  const link =
+    "/account?tab=admin&section=schedule&date=2026-10-29&journey=down-the-danube-v1";
+  expect(safeReturnPath(link)).toBe(link);
+  expect(safeReturnPath(link.replace("2026-10-29", "2026-02-30"))).toBe(
+    "/account",
+  );
+  expect(safeReturnPath(link + "&date=2026-10-30")).toBe("/account");
+  expect(safeReturnPath(link + "&token=secret")).toBe("/account");
+});

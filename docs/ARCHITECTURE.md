@@ -288,7 +288,12 @@ section headings and responsive side navigation. Admin uses the full workspace,
 without a personal greeting or the account sidebar; a back action returns to Progress. `/account?tab=dashboard`, `profile`, `friends`,
 `appearance`, or `admin` selects the content (the existing `dashboard` and `appearance`
 URL keys remain compatible with Progress and Settings); Admin uses `section=schedule`, `journeys`, `feedback`, or
-`tools` for its compact secondary controls. Tab navigation updates browser history
+`tools` for compatibility (Tools opens Maintenance); the visible navigation is
+Schedule, Journeys and Feedback. The agenda and optional calendar share one selected
+date; Journey browsing and picking share the same list and expandable outlines. Validated Admin `date` and `journey` parameters carry
+scheduling context across review/sign-in; optional review `question` selects a known
+question in the isolated reducer state. Date-first and Journey-first selection
+converge on one editor, with explicit publishing and themed confirmations. Tab navigation updates browser history
 without remounting the account shell or replaying its entry animation. Admin mounts
 on first use and stays mounted when switching account tabs, retaining its editor.
 Legacy `/admin` links replace their URL with the matching account destination.

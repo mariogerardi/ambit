@@ -26,7 +26,11 @@ import {
 } from "./app/archiveDates";
 import { LoadingScreen } from "./app/LoadingScreen";
 import { JourneySocial } from "./app/JourneySocial";
-import { accountIntent, accountTabLink } from "./app/accountNavigation";
+import {
+  accountIntent,
+  accountTabLink,
+  adminDate,
+} from "./app/accountNavigation";
 import {
   Suspense,
   lazy,
@@ -191,10 +195,18 @@ export function App() {
   const accountNavigation = useMemo(() => accountIntent(path), [path]);
   useEffect(() => {
     if (pathname !== "/admin") return;
-    const canonical = accountTabLink("admin", accountNavigation.section);
+    const canonical =
+      accountTabLink(
+        "admin",
+        accountNavigation.section,
+        accountNavigation.date,
+      ) +
+      (accountNavigation.journeyId
+        ? `&journey=${encodeURIComponent(accountNavigation.journeyId)}`
+        : "");
     history.replaceState(null, "", canonical);
     setPath(canonical);
-  }, [pathname, accountNavigation.section]);
+  }, [pathname, accountNavigation]);
   const requestedMode = modeForPath(path);
   const restricted = requestedMode === "practice" && !account.admin;
   const mode = restricted ? "home" : requestedMode;
@@ -1074,6 +1086,7 @@ export function App() {
                   embedded
                   section={accountNavigation.section ?? "schedule"}
                   initialJourneyId={accountNavigation.journeyId}
+                  initialDate={accountNavigation.date}
                   onNavigate={navigate}
                   onSectionChange={(section) =>
                     navigate(accountTabLink("admin", section))
@@ -1085,7 +1098,7 @@ export function App() {
                     !!subject && dailyLoaded && cloudSave.hydrated && canSave
                   }
                   onResetAttempt={() => account.admin && resetAttempt(today)}
-                  feedback={<FeedbackReview />}
+                  feedback={<FeedbackReview onNavigate={navigate} />}
                 />
               </Suspense>
             </div>
@@ -1276,6 +1289,13 @@ export function App() {
             <Suspense fallback={<p role="status">Opening review controls…</p>}>
               <AdminJourneyReview
                 journey={journey}
+                date={adminDate(
+                  new URLSearchParams(path.split("?")[1]).get("date"),
+                )}
+                initialQuestionId={
+                  new URLSearchParams(path.split("?")[1]).get("question") ??
+                  undefined
+                }
                 context={context}
                 game={game}
                 onChange={(next) =>

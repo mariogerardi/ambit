@@ -124,8 +124,19 @@ export function AccountProgressView({
           </button>
         </section>
       </div>
-      <section className="account-stat-group" aria-label="Journey statistics">
-        <h2>Journeys</h2>
+      <section
+        className="account-stat-group account-stat-journeys"
+        aria-label="Journey statistics"
+      >
+        <header className="account-stat-heading">
+          <span>
+            <ActionIcon name="journey" />
+          </span>
+          <div>
+            <h2>Journeys</h2>
+            <p>Daily discoveries</p>
+          </div>
+        </header>
         <dl className="account-stats">
           <div>
             <dt>Journeys finished</dt>
@@ -165,8 +176,19 @@ export function AccountProgressView({
           </div>
         </dl>
       </section>
-      <section className="account-stat-group" aria-label="Study statistics">
-        <h2>Study</h2>
+      <section
+        className="account-stat-group account-stat-study"
+        aria-label="Study statistics"
+      >
+        <header className="account-stat-heading">
+          <span>
+            <ActionIcon name="study" />
+          </span>
+          <div>
+            <h2>Study</h2>
+            <p>Practice over time</p>
+          </div>
+        </header>
         <dl className="account-stats">
           <div>
             <dt>Study sessions completed</dt>

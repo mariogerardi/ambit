@@ -29,28 +29,46 @@ Cognito access tokens with `openid` scope, and the Lambda checks group membershi
 Hiding a menu item is not the API authorization boundary. No password or account
 is created on the owner's behalf: use **Create account** and verify that address.
 
-The Admin account tab opens on **Schedule**, with secondary controls for
-**Journeys**, **Feedback** and **Tools**. These sections have URLs under
-`/account?tab=admin&section=...`; legacy `/admin` links redirect there. Select a
-calendar day, open **Choose a Journey**, then search/filter the selectable catalog
-and review the draft before assigning it. Previews open in a separate tab. Month
-navigation keeps the editor on a date in the displayed month; changing dates asks
-before discarding an unpublished choice. Drafts survive leaving Admin within the
-same browser tab using session storage and are removed after publication or
-discard. Loading or refreshing assignments does not create an unpublished edit
-or a browser leave-page warning. A restored deliberate edit keeps its original
-baseline until its date loads, including a choice to restore automatic selection.
-Calendar markers distinguish manual, locked automatic, and provisional
-automatic assignments. On mobile, selecting a date brings its editor into view.
+The Admin account tab opens on **Schedule**, with compact navigation for
+**Journeys** and **Feedback**. The default two-week agenda shows full Journey
+titles; a month calendar remains available. The selected date initially shows its
+assignment with Review and Change actions. Date editing is disclosed on demand,
+and Publish appears only for an unpublished change. Both date-first and Journey-first scheduling use one
+assignment editor. Choose a schedule day or a Journey from the library, inspect
+its proposed assignment, and explicitly **Publish**. Changing the editor's publish
+date carries its proposed Journey; choosing a different calendar day asks before
+discarding an unpublished change. The schedule browser is secondary to the editor on
+narrow screens. Manual, published-automatic and planned-automatic assignments have
+distinct markers and plain-language labels.
 
-**Journeys** is an independent searchable library with title/newest sorting and
-the selected Journey's five-question outline. Browsing, opening an outline and
-starting review do not create a scheduling draft. **Schedule this Journey** opens
-a date choice and shows the current and proposed assignments. **Preview assignment**
-stages the change in the existing date editor; only its explicit assignment action
-publishes. Review can return directly to this date-choice step.
+These sections have URLs under `/account?tab=admin&section=...`; optional `date`
+and `journey` parameters preserve review/scheduling context and survive sign-in
+only after validation. Legacy `/admin` links redirect there. **Review Journey**
+uses consistent in-app navigation from both library and schedule, carrying the
+publish date to the review's return links. Selecting a reviewed Journey stages a
+local draft in the same editor; it does not publish anything.
 
-**Review Journey** opens the protected practice route with `?review=1`, reusing
+Drafts survive leaving Admin within the same browser tab using session storage
+and are removed after publication or discard. Loading or refreshing assignments
+does not create an unpublished edit or leave-page warning. A restored deliberate
+edit keeps its baseline until that date loads, including a choice to restore
+automatic selection. Publishing waits for the selected date to load. Discarding a
+draft, rewriting an Archive day and resetting the admin's own Daily attempt use
+themed in-app confirmations; Archive rewriting still sends the explicit rewrite
+flag and preserves started player attempts.
+
+**Journeys** and the scheduling picker share the same searchable list, defaulting
+to newest first, with Review/Schedule actions, recorded last/next dates, and
+five-question outlines that expand in place. Browsing does not create a draft.
+**Feedback** puts New reports first and links recognized Journey/question context
+into isolated review. Filters appear when reports exist; counts are explicitly
+limited to loaded results when pagination remains. Technical context is in a
+disclosure. **Maintenance** contains the saved-attempt reset; legacy Tools links
+open that disclosure rather than a separate tab.
+
+**Review Journey** opens the protected practice route with `?review=1`, optionally
+with a validated `date` and a `question` ID to inspect. An unknown question ID is
+ignored. It reuses
 the real controls and persistent globe. Its game state is held only in memory,
 separately from normal practice, Daily/Archive attempts and account saves. Refresh
 discards it. Controls jump to or restart a question, restart the Journey, show

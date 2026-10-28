@@ -4,13 +4,17 @@
   top: max(16px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
-  width: min(380px, calc(100vw - 32px));
+  width: max-content;
+  max-width: min(340px, calc(100vw - 24px));
+  box-sizing: border-box;
   pointer-events: none;
   color: var(--ui-text);
   font: 13px/1.4 var(--font-ui);
 }
 .toast-region ul {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 6px;
   list-style: none;
   margin: 0;
@@ -19,8 +23,12 @@
 .toast {
   display: flex;
   align-items: center;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
   gap: 8px;
-  padding: 5px 6px 5px 12px;
+  padding: 4px 5px 4px 11px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.35);
   border-inline-start: 3px solid var(--ui-accent);
   border-radius: 10px;
@@ -31,21 +39,31 @@
 .toast-error {
   border-inline-start-color: var(--ui-text);
 }
-.toast p {
+.toast-region .toast p {
   flex: 1;
+  min-width: 0;
   margin: 0;
+  padding: 0;
+  font: 13px/1.4 var(--font-ui);
   overflow-wrap: anywhere;
 }
-.toast button {
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
+.toast-region .toast button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  margin: 0;
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--ui-text);
   cursor: pointer;
-  font: 24px var(--font-ui);
+  font: inherit;
+  line-height: 1;
 }
 .toast button:hover {
   background: rgb(var(--ui-line-rgb) / 0.1);

@@ -1,0 +1,734 @@
+/* Admin is a quiet working canvas; the player-facing account pages keep their globe. */
+.experience.mode-account:has(.account-dashboard[data-section="admin"])
+  .account-earth {
+  display: none;
+}
+.experience.page-layout .account-dashboard[data-section="admin"] {
+  width: min(100%, 1360px);
+  padding-top: 24px;
+}
+.account-dashboard[data-section="admin"] .account-heading {
+  margin-bottom: 12px;
+  align-items: center;
+}
+.account-dashboard[data-section="admin"] .account-heading h1.editorial-heading {
+  margin: 0;
+  font-size: 32px;
+}
+.admin-content {
+  width: 100%;
+}
+.admin-workbench {
+  display: block;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.admin-workbench-main {
+  min-width: 0;
+  padding-top: 26px;
+}
+.admin-workbench [hidden],
+.admin-maintenance [hidden] {
+  display: none !important;
+}
+.admin-workbench > .admin-tabs {
+  display: flex;
+  gap: 24px;
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 0;
+  background: none;
+}
+.experience .admin-workbench .admin-tabs [role="tab"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui-muted);
+  font: 15px var(--font-ui);
+}
+.experience .admin-workbench .admin-tabs [aria-selected="true"] {
+  border-bottom-color: var(--ui-accent);
+  color: var(--ui-accent);
+}
+.experience .admin-workbench .admin-tabs [role="tab"]:hover {
+  color: var(--ui-text);
+  background: transparent;
+}
+.admin-tabs .action-icon {
+  width: 18px;
+  height: 18px;
+}
+:root .experience.page-layout .admin-workbench .journey-scheduler-card {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.admin-workbench h2 {
+  font: 28px/1.2 var(--font-editorial);
+}
+.admin-workbench .journey-scheduler-heading {
+  margin: 0 0 20px;
+  align-items: center;
+}
+.admin-workbench .journey-scheduler-heading h2 {
+  margin: 0;
+}
+.admin-workbench .journey-scheduler-heading .scheduler-icon {
+  min-height: 36px;
+  width: 36px;
+}
+.admin-workbench .journey-scheduler {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.85fr);
+  gap: 28px;
+  align-items: start;
+}
+.admin-schedule-browser {
+  min-width: 0;
+}
+.admin-view-switch {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 3px;
+  border-radius: 8px;
+  background: rgb(var(--ui-line-rgb) / 0.06);
+}
+.experience .admin-view-switch button {
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ui-muted);
+  font: 14px var(--font-ui);
+}
+.experience .admin-view-switch button[aria-pressed="true"] {
+  background: rgb(var(--ui-raised-rgb));
+  color: var(--ui-text);
+}
+.admin-agenda,
+.admin-workbench .journey-month {
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb));
+  overflow: hidden;
+}
+.admin-agenda > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+}
+.admin-agenda h3 {
+  margin: 4px 0 0;
+  font: 19px var(--font-editorial);
+}
+.admin-agenda .overline {
+  font-size: 10px;
+}
+.admin-agenda-navigation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.experience .admin-agenda-navigation button {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.admin-agenda ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.admin-agenda li {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.12);
+}
+.experience .admin-agenda li > button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr) 20px;
+  gap: 16px;
+  align-items: center;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+  color: var(--ui-text);
+}
+.experience .admin-agenda li > button:hover {
+  background: rgb(var(--ui-line-rgb) / 0.045);
+}
+.experience .admin-agenda li > button[aria-pressed="true"] {
+  box-shadow: inset 3px 0 var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.075);
+}
+.admin-agenda time {
+  display: grid;
+  gap: 1px;
+}
+.admin-agenda time strong {
+  font: 25px var(--font-editorial);
+}
+.admin-agenda time span {
+  font: 11px var(--font-ui);
+  color: var(--ui-muted);
+}
+.admin-agenda-journey {
+  display: grid;
+  gap: 4px;
+}
+.admin-agenda-journey > strong {
+  font: 18px/1.3 var(--font-editorial);
+  color: var(--ui-editorial);
+}
+.admin-agenda-journey > span {
+  font: 12px/1.4 var(--font-ui);
+  color: var(--ui-muted);
+}
+.admin-agenda li > button > span:last-child {
+  color: var(--ui-muted);
+}
+.admin-workbench .journey-month {
+  padding: 18px;
+}
+.experience .admin-workbench .journey-calendar-day {
+  min-height: 75px;
+  padding: 8px;
+  border-color: transparent;
+  border-radius: 6px;
+  background: rgb(var(--ui-line-rgb) / 0.035);
+}
+.experience .admin-workbench .journey-calendar-day[aria-pressed="true"] {
+  border-color: var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.1);
+}
+.admin-workbench .journey-calendar-day strong {
+  font-size: 12px;
+  -webkit-line-clamp: 3;
+}
+.experience .admin-workbench .journey-calendar-day:disabled {
+  opacity: 0.35;
+}
+.admin-workbench .journey-calendar-legend {
+  font-size: 11px;
+  line-height: 1.6;
+  gap: 8px 14px;
+}
+.admin-workbench .journey-date-editor {
+  display: grid;
+  gap: 18px;
+  position: sticky;
+  top: 24px;
+  padding: 24px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.18);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb));
+}
+.admin-workbench .journey-date-editor .overline {
+  font-size: 10px;
+  color: var(--ui-muted);
+}
+.admin-workbench .journey-date-editor header h3 {
+  margin: 7px 0 10px;
+  font: 22px/1.35 var(--font-editorial);
+}
+.admin-workbench .journey-date-editor .field {
+  font-size: 14px;
+}
+.admin-workbench .journey-date-editor input {
+  font-size: 15px;
+}
+.admin-workbench .schedule-current {
+  padding: 12px 0;
+  margin: 0;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.admin-workbench .schedule-current > strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ui-text);
+}
+.admin-workbench .journey-date-editor[data-dirty="false"] .schedule-current {
+  display: none;
+}
+.admin-workbench .scheduled-journey-preview {
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.admin-workbench .scheduled-journey-preview h4 {
+  margin: 8px 0 12px;
+  color: var(--ui-editorial);
+  font: 27px/1.2 var(--font-editorial);
+}
+.admin-workbench .scheduled-journey-preview p {
+  margin: 0 0 18px;
+  color: var(--ui-muted);
+  font: 15px/1.65 var(--font-ui);
+}
+.admin-workbench .schedule-preview-label {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.experience .admin-workbench .journey-picker-trigger {
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-text);
+  font: 14px var(--font-ui);
+}
+.experience .admin-workbench .journey-picker-trigger:hover {
+  border-color: var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.05);
+}
+.admin-workbench .journey-assignment-actions {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  padding-top: 18px;
+  gap: 12px;
+}
+.admin-publish-scope {
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+.experience .admin-workbench .journey-assignment-actions .primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  gap: 16px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+.admin-workbench .schedule-footnote {
+  margin-top: 20px;
+  padding-top: 0;
+  border: 0;
+  font-size: 12px;
+}
+.admin-workbench .schedule-footnote summary,
+.admin-maintenance > summary {
+  cursor: pointer;
+  color: var(--ui-muted);
+}
+.admin-workbench .schedule-footnote p {
+  line-height: 1.6;
+  max-width: 80ch;
+}
+.admin-workbench .journey-picker-popover {
+  position: absolute;
+  inset-inline: auto 0;
+  top: calc(100% + 8px);
+  width: min(820px, calc(100vw - 64px));
+  max-height: min(72vh, 680px);
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.28);
+  border-radius: 12px;
+  background: rgb(var(--ui-raised-rgb));
+  box-shadow: 0 18px 60px rgb(var(--ui-shadow-rgb) / 0.5);
+  z-index: 8;
+}
+.admin-picker-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.admin-picker-heading h3 {
+  margin: 0 !important;
+}
+.experience .admin-picker-heading > button {
+  min-height: 32px;
+  padding: 4px 10px;
+}
+.admin-workbench .admin-journey-library > header h2 {
+  margin: 0;
+}
+.admin-workbench .admin-journey-library > header p {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+.admin-workbench .admin-library-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+.admin-workbench .admin-library-controls .field {
+  margin: 0;
+}
+.admin-workbench .admin-library-controls input,
+.admin-workbench .admin-library-controls select {
+  font-size: 15px;
+  height: 44px;
+}
+.admin-workbench .admin-library-controls select {
+  width: 180px;
+}
+.admin-workbench .admin-library-list {
+  display: block;
+  list-style: none;
+  max-height: none;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.admin-library-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 24px;
+  align-items: center;
+  padding: 20px 0;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.18);
+}
+.admin-library-row-main {
+  min-width: 0;
+}
+.experience .admin-workbench .admin-library-title {
+  display: flex;
+  justify-content: start;
+  align-items: baseline;
+  gap: 12px;
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  color: var(--ui-editorial);
+  font: 20px/1.3 var(--font-editorial);
+}
+.experience .admin-workbench .admin-library-title strong {
+  font-weight: 400;
+}
+.admin-library-title > span {
+  font: 16px var(--font-ui);
+  color: var(--ui-muted);
+}
+.admin-workbench .admin-library-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 6px 0;
+  color: var(--ui-muted);
+  font: 14px/1.5 var(--font-ui);
+}
+.admin-workbench .admin-library-history {
+  margin: 0;
+  color: var(--ui-muted);
+  font: 12px/1.5 var(--font-ui);
+}
+.admin-library-row-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.admin-workbench .admin-library-row-actions > a {
+  font-size: 14px;
+  white-space: nowrap;
+}
+.experience .admin-workbench .admin-schedule-action {
+  width: auto;
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid rgb(var(--ui-editorial-rgb) / 0.5);
+  border-radius: 8px;
+  color: var(--ui-editorial);
+  background: transparent;
+  font: 14px var(--font-ui);
+}
+.experience .admin-workbench .admin-schedule-action:hover {
+  background: rgb(var(--ui-editorial-rgb) / 0.1);
+}
+.admin-workbench .admin-journey-outline {
+  grid-column: 1 / -1;
+  padding: 18px 20px;
+  border: 0;
+  border-left: 2px solid rgb(var(--ui-accent-rgb) / 0.4);
+  border-radius: 0;
+  background: rgb(var(--ui-line-rgb) / 0.035);
+}
+.admin-journey-outline > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.admin-workbench .admin-journey-outline h3 {
+  margin: 0;
+  font: 20px var(--font-editorial);
+}
+.admin-workbench .admin-journey-outline ol {
+  padding-left: 22px;
+  margin-bottom: 0;
+}
+.admin-workbench .admin-journey-outline li {
+  margin: 18px 0;
+}
+.admin-workbench .admin-journey-outline h4 {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.admin-workbench .admin-journey-outline p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.admin-workbench .is-picking .admin-library-row {
+  gap: 10px 16px;
+  padding: 14px 0;
+}
+.admin-workbench .is-picking .admin-library-title {
+  font-size: 18px;
+}
+.admin-workbench .is-picking .admin-library-description {
+  display: none;
+}
+.admin-workbench .is-picking .admin-library-controls {
+  margin-block: 16px;
+}
+.admin-workbench .is-picking .admin-library-row-actions {
+  gap: 12px;
+}
+.admin-workbench .feedback-review {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.admin-workbench .feedback-review-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.admin-workbench .feedback-review h2 {
+  margin: 0;
+}
+.admin-feedback-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0;
+}
+.experience .admin-feedback-filters button {
+  display: inline-flex;
+  width: auto;
+  min-height: 36px;
+  padding: 7px 12px;
+  gap: 8px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 8px;
+  background: transparent;
+  font: 14px var(--font-ui);
+}
+.experience .admin-feedback-filters button[aria-pressed="true"] {
+  border-color: rgb(var(--ui-accent-rgb) / 0.5);
+  color: var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.07);
+}
+.admin-feedback-count-note {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.admin-workbench .feedback-review ul {
+  padding: 0;
+  list-style: none;
+}
+.experience.page-layout .admin-workbench .feedback-review li {
+  padding: 20px 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 0;
+  background: transparent;
+  font-size: 15px;
+}
+.admin-feedback-journey {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block: 16px;
+}
+.admin-feedback-journey > strong {
+  color: var(--ui-editorial);
+}
+.admin-feedback-context {
+  color: var(--ui-muted);
+  margin: 16px 0;
+  font-size: 13px;
+}
+.admin-empty {
+  max-width: 560px;
+  margin: 32px 0;
+  padding: 28px;
+  border-left: 2px solid rgb(var(--ui-accent-rgb) / 0.45);
+  background: rgb(var(--ui-surface-rgb));
+}
+.admin-empty h3 {
+  margin: 0 0 8px;
+  font: 25px var(--font-editorial);
+}
+.admin-empty p {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.admin-maintenance {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.15);
+  font: 12px var(--font-ui);
+}
+.admin-maintenance .admin-reset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.15);
+  border-radius: 10px;
+}
+.admin-maintenance h2 {
+  font: 20px var(--font-editorial);
+  margin: 0 0 8px;
+}
+.admin-maintenance p {
+  margin: 0;
+  font-size: 13px;
+}
+.admin-confirmation {
+  width: min(440px, calc(100vw - 40px));
+  box-sizing: border-box;
+  padding: 24px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 16px;
+  color: var(--ui-text);
+  background: rgb(var(--ui-raised-rgb));
+  box-shadow: 0 20px 70px rgb(var(--ui-shadow-rgb) / 0.4);
+  font-family: var(--font-ui);
+}
+.admin-confirmation::backdrop {
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(3px);
+}
+.admin-confirmation h2 {
+  margin: 0 0 12px;
+  font: 28px/1.2 var(--font-editorial);
+}
+.admin-confirmation p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui-muted);
+}
+.admin-confirmation-actions {
+  display: flex;
+  justify-content: end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+.experience .admin-confirmation-actions button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  font: 13px var(--font-ui);
+}
+@media (max-width: 900px) {
+  .admin-workbench .journey-scheduler {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-workbench .journey-date-editor {
+    position: static;
+    grid-row: 1;
+  }
+  .admin-workbench .journey-picker-popover {
+    inset-inline: 0 auto;
+    width: min(720px, calc(100vw - 64px));
+  }
+}
+@media (max-width: 600px) {
+  .experience.page-layout .account-dashboard[data-section="admin"] {
+    padding-top: 12px;
+  }
+  .admin-workbench > .admin-tabs {
+    gap: 20px;
+  }
+  .admin-workbench .admin-library-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin-workbench .admin-library-controls .field {
+    width: 100%;
+  }
+  .admin-workbench .admin-library-controls select {
+    width: 100%;
+  }
+  .admin-library-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 18px 0;
+  }
+  .admin-library-row-actions {
+    justify-content: start;
+  }
+  .admin-workbench .journey-date-editor {
+    padding: 18px;
+  }
+  .admin-workbench .journey-picker-popover {
+    width: calc(100vw - 64px);
+    padding: 14px;
+    max-height: 65vh;
+  }
+  .admin-agenda > header {
+    padding: 14px;
+  }
+  .experience .admin-agenda li > button {
+    grid-template-columns: 54px minmax(0, 1fr) 16px;
+    padding: 14px;
+    gap: 12px;
+  }
+  .admin-workbench .journey-calendar-day strong {
+    font-size: 10px;
+  }
+  .experience .admin-workbench .journey-calendar-day {
+    min-height: 68px;
+    padding: 5px;
+  }
+  .admin-workbench .journey-month {
+    padding: 10px;
+  }
+}

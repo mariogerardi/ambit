@@ -1765,3 +1765,60 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.account-progress-view .account-stat-group {
+  --stat-accent: var(--ui-editorial);
+  --stat-rgb: var(--ui-editorial-rgb);
+  padding: 20px;
+  border: 1px solid rgb(var(--stat-rgb) / 0.25);
+  border-top: 2px solid rgb(var(--stat-rgb) / 0.65);
+  border-radius: 14px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.account-progress-view .account-stat-study {
+  --stat-accent: var(--ui-accent);
+  --stat-rgb: var(--ui-accent-rgb);
+}
+.account-stat-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.account-stat-heading > span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: var(--stat-accent);
+  background: rgb(var(--stat-rgb) / 0.1);
+}
+.account-stat-heading .action-icon {
+  width: 23px;
+  height: 23px;
+}
+.account-stat-group .account-stat-heading h2 {
+  margin: 0;
+  font-size: 23px;
+}
+.account-stat-heading p {
+  margin: 4px 0 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.account-progress-view .account-stat-group .account-stats {
+  padding: 0;
+  border: 0;
+}
+.account-progress-view .account-stat-group .account-stats > div {
+  border-color: rgb(var(--stat-rgb) / 0.18);
+}
+.account-progress-view .account-stat-group .account-stats dd {
+  color: var(--stat-accent);
+}
+@media (max-width: 600px) {
+  .account-progress-view .account-stat-group {
+    padding: 16px;
+  }
+}

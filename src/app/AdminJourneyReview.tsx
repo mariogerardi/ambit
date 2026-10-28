@@ -19,16 +19,27 @@ export function AdminJourneyReview({
   game,
   onChange,
   onNavigate,
+  date,
+  initialQuestionId,
 }: {
   journey: Journey;
   context: QuestionContext;
   game: GameState;
   onChange(game: GameState): void;
   onNavigate(url: string): void;
+  date?: string;
+  initialQuestionId?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const request = useRef(0);
+  useEffect(() => {
+    if (!initialQuestionId) return;
+    const index = journey.rounds.findIndex(
+      (question) => question.id === initialQuestionId,
+    );
+    if (index >= 0) onChange(reviewRound(journey, index));
+  }, [journey.id, initialQuestionId]);
   useEffect(
     () => () => {
       request.current++;
@@ -107,14 +118,18 @@ export function AdminJourneyReview({
         <button
           type="button"
           className="quiet-button"
-          onClick={() => onNavigate(adminJourneyLink(journey.id))}
+          onClick={() =>
+            onNavigate(adminJourneyLink(journey.id, "journeys", date))
+          }
         >
           ← Journey library
         </button>
         <button
           type="button"
           className="quiet-button"
-          onClick={() => onNavigate(adminJourneyLink(journey.id, "schedule"))}
+          onClick={() =>
+            onNavigate(adminJourneyLink(journey.id, "schedule", date))
+          }
         >
           Schedule this Journey
         </button>

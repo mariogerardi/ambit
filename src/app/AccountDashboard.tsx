@@ -303,19 +303,21 @@ export function AccountDashboard({
               <h1 className="editorial-heading">
                 {ACCOUNT_SECTIONS[tab].label}
               </h1>
-              <p className="account-section-description">
-                {
+              {tab !== "admin" && (
+                <p className="account-section-description">
                   {
-                    dashboard:
-                      "Pick up your next stop. See how far you’ve come.",
-                    profile: "How you appear to other players.",
-                    friends: "A shared Journey. A little friendly curiosity.",
-                    appearance: "Make Ambit feel like home.",
-                    admin:
-                      "Review Journeys, manage the schedule, and follow up on feedback.",
-                  }[tab]
-                }
-              </p>
+                    {
+                      dashboard:
+                        "Pick up your next stop. See how far you’ve come.",
+                      profile: "How you appear to other players.",
+                      friends: "A shared Journey. A little friendly curiosity.",
+                      appearance: "Make Ambit feel like home.",
+                      admin:
+                        "Review Journeys, manage the schedule, and follow up on feedback.",
+                    }[tab]
+                  }
+                </p>
+              )}
             </div>
             {tab === "admin" && (
               <button
