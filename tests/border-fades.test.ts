@@ -1,0 +1,51 @@
+import { expect, it, vi } from "vitest";
+import { BorderFades } from "../src/globe/borderFades";
+
+it("fades borders both ways, preserving the visible opacity when interrupted", () => {
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  const fades = new BorderFades();
+  const line = { visible: false, material: { opacity: 0 } };
+  fades.update(line, 1);
+  clock.mockReturnValue(160);
+  fades.view();
+  expect(line.material.opacity).toBe(1);
+  fades.update(line, 0);
+  expect(line.visible).toBe(true);
+  clock.mockReturnValue(240);
+  fades.view();
+  expect(line.material.opacity).toBeCloseTo(0.5);
+  fades.update(line, 0.8);
+  expect(line.material.opacity).toBeCloseTo(0.5);
+  clock.mockReturnValue(400);
+  fades.view();
+  expect(line.material.opacity).toBe(0.8);
+  expect(fades.needsRefresh()).toBe(false);
+  fades.update(line, 0);
+  clock.mockReturnValue(560);
+  fades.view();
+  expect(line.visible).toBe(false);
+  fades.update(line, 1, true);
+  expect(line.visible).toBe(true);
+  expect(line.material.opacity).toBe(1);
+  expect(fades.needsRefresh()).toBe(false);
+  fades.dispose();
+  clock.mockRestore();
+});
+
+it("clears cached reveal outlines immediately when the question changes", () => {
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  const fades = new BorderFades();
+  const line = { visible: true, material: { opacity: 1 } };
+  fades.update(line, 1, false, "question-1");
+  fades.update(line, 0, false, "question-2");
+  expect(line.visible).toBe(false);
+  expect(line.material.opacity).toBe(0);
+  expect(fades.needsRefresh()).toBe(false);
+  fades.update(line, 1, false, "question-2");
+  expect(fades.needsRefresh()).toBe(true);
+  clock.mockReturnValue(160);
+  fades.view();
+  expect(line.material.opacity).toBe(1);
+  fades.dispose();
+  clock.mockRestore();
+});

@@ -32,6 +32,7 @@ export const savedStudy = () => createStudySave().load();
 interface GlobeProps {
   routes: RouteFeature[];
   regionReveal?: import("../../src/globe/regionFades").RegionReveal;
+  regionTransitionKey?: string;
   borderOmissions?: Record<string, number[][][]>;
   clueLocators?: ClueLocator[];
   overlays?: MapOverlay[];
@@ -88,6 +89,12 @@ vi.mock("../../src/globe/GlobeView", () => ({
     useImperativeHandle(
       ref,
       () => ({
+        orbitView(target) {
+          if (!target) return view.current;
+          probe.currentView = target;
+          view.current = target;
+          return target;
+        },
         focus(target, fit) {
           probe.fitModes.push(fit);
           probe.focus.push(target);
@@ -170,11 +177,10 @@ export async function click(text: string) {
   const buttons = [
     ...document.querySelectorAll<HTMLButtonElement>("button"),
   ].filter((b) => !b.closest("[inert]"));
-  let button =
-    buttons.find(
-      (b) =>
-        b.textContent?.trim() === text || b.getAttribute("aria-label") === text,
-    ) ?? buttons.find((b) => b.textContent?.trim().startsWith(text));
+  let button = buttons.find(
+    (b) =>
+      b.textContent?.trim() === text || b.getAttribute("aria-label") === text,
+  );
   if (!button && text === "Admin") {
     // Existing Admin behavior fixtures enter its protected deep link. Dedicated
     // account-navigation coverage exercises discovery through the Admin tab.
@@ -201,6 +207,7 @@ export async function click(text: string) {
       ...host.querySelectorAll<HTMLButtonElement>(".app-menu-content button"),
     ].find((b) => b.textContent === text);
   }
+  button ??= buttons.find((b) => b.textContent?.trim().startsWith(text));
   expect(button, `Button: ${text}`).toBeDefined();
   await act(async () => button!.click());
   await settleLoads();
@@ -212,6 +219,18 @@ export async function settleLoads() {
   });
   await act(async () => {
     await vi.dynamicImportSettled();
+  });
+  // JSDOM does not run CSS animations. Finish an exit as the browser would;
+  // dedicated ModePanels tests exercise the waiting phase and rapid navigation.
+  await act(async () => {
+    const outgoing = host.querySelector(".mode-outgoing");
+    // React selects the prefixed event when JSDOM lacks AnimationEvent.
+    for (const type of ["animationend", "webkitAnimationEnd"])
+      outgoing?.dispatchEvent(
+        Object.assign(new Event(type, { bubbles: true }), {
+          animationName: "mode-exit",
+        }),
+      );
   });
 }
 export async function mount() {

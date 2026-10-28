@@ -6,6 +6,7 @@ import { AdminPanel } from "../src/app/AdminPanel";
 import type { useJourneySchedule } from "../src/services/journeySchedule";
 import { dailyJourney, emptyDaily, openDaily } from "../src/app/dailyProgress";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
+import { ToastProvider } from "../src/app/Toast";
 
 const token = vi.hoisted(() =>
   vi.fn(async (): Promise<string | undefined> => "test-admin"),
@@ -169,7 +170,7 @@ it("blocks pre-opening dates, including stored history, typed dates and restored
   );
 });
 
-it("navigates all three tabs with the keyboard and keeps reset in Tools", async () => {
+it("navigates all four tabs with the keyboard and keeps reset in Tools", async () => {
   await render();
   const tabs = host.querySelector('[role="tablist"]')!;
   const press = async (key: string) =>
@@ -244,7 +245,7 @@ it("previews a draft before publishing and can explicitly restore the automatic 
   );
   expect(
     host.querySelector(".scheduled-journey-preview a")?.getAttribute("href"),
-  ).toBe("/journey/down-the-danube");
+  ).toBe("/journey/down-the-danube?review=1");
   expect(
     host.querySelector(".scheduled-journey-preview a")?.getAttribute("target"),
   ).toBe("_blank");
@@ -277,6 +278,98 @@ it("previews a draft before publishing and can explicitly restore the automatic 
   );
   expect(schedule.schedule?.assignments).toEqual({});
 });
+
+it("does not treat an arriving assignment as an unpublished edit", async () => {
+  schedule = { ...schedule, schedule: undefined, ready: false };
+  await render();
+  const listen = vi.spyOn(window, "addEventListener");
+  schedule = {
+    ...schedule,
+    ready: true,
+    schedule: {
+      today: "2026-10-11",
+      assignments: { "2026-10-11": "down-the-danube-v1" },
+      records: {
+        "2026-10-11": {
+          day: "2026-10-11",
+          journeyId: "down-the-danube-v1",
+          source: "assigned",
+          revision: 1,
+        },
+      },
+    },
+  };
+  await render();
+  expect(host.querySelector(".scheduled-journey-preview h4")?.textContent).toBe(
+    "Down the Danube",
+  );
+  expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
+  expect(listen.mock.calls.some(([event]) => event === "beforeunload")).toBe(
+    false,
+  );
+  expect(sessionStorage.getItem("ambit.admin.schedule-draft")).toBeNull();
+});
+
+it("ignores a stored selection that was never changed", async () => {
+  sessionStorage.setItem(
+    "ambit.admin.schedule-draft",
+    JSON.stringify({
+      day: "2026-10-11",
+      value: "down-the-danube-v1",
+      saved: "down-the-danube-v1",
+    }),
+  );
+  const listen = vi.spyOn(window, "addEventListener");
+  await render();
+  expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
+  expect(listen.mock.calls.some(([event]) => event === "beforeunload")).toBe(
+    false,
+  );
+  expect(sessionStorage.getItem("ambit.admin.schedule-draft")).toBeNull();
+});
+
+it("retains a restored automatic-selection edit until its date loads", async () => {
+  sessionStorage.setItem(
+    "ambit.admin.schedule-draft",
+    JSON.stringify({
+      day: "2026-11-03",
+      value: "",
+      saved: "down-the-danube-v1",
+    }),
+  );
+  await render();
+  expect(
+    host.querySelector(".scheduled-journey-preview.is-draft"),
+  ).not.toBeNull();
+  schedule = {
+    ...schedule,
+    loadedMonths: ["2026-11"],
+    schedule: {
+      today: "2026-10-11",
+      assignments: { "2026-11-03": "down-the-danube-v1" },
+      records: {
+        "2026-11-03": {
+          day: "2026-11-03",
+          journeyId: "down-the-danube-v1",
+          source: "assigned",
+          revision: 1,
+        },
+      },
+    },
+  };
+  await render();
+  expect(
+    host.querySelector(".scheduled-journey-preview.is-draft"),
+  ).not.toBeNull();
+  await click("Restore automatic selection");
+  expect(schedule.save).toHaveBeenCalledWith(
+    "2026-11-03",
+    undefined,
+    "test-admin",
+  );
+  expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
+});
+
 it("keeps an unsaved selection when a refreshed schedule changes in another session", async () => {
   schedule.schedule!.assignments["2026-10-11"] = "mediterranean-v1";
   await render();
@@ -398,7 +491,7 @@ it("preserves a draft across Feedback and leaving Admin, and clears it on discar
     host
       .querySelector('[role="tablist"]')!
       .dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }),
+        new KeyboardEvent("keydown", { key: "Home", bubbles: true }),
       ),
   );
   expect(host.querySelector<HTMLElement>("#admin-schedule")!.hidden).toBe(
@@ -420,6 +513,86 @@ it("preserves a draft across Feedback and leaving Admin, and clears it on discar
   expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
   expect(sessionStorage.getItem("ambit.admin.schedule-draft")).toBeNull();
   expect(schedule.save).not.toHaveBeenCalled();
+});
+
+it("browses questions without editing, then previews a reviewed Journey before publication", async () => {
+  schedule = { ...schedule, loadedMonths: ["2026-10"] };
+  await render();
+  await click("Journeys");
+  const button = [
+    ...host.querySelectorAll<HTMLButtonElement>(".admin-library-list button"),
+  ].find(
+    (item) => item.querySelector("strong")?.textContent === "Down the Danube",
+  )!;
+  await act(async () => {
+    button.click();
+    await vi.dynamicImportSettled();
+  });
+  expect(host.querySelectorAll(".admin-journey-outline ol li")).toHaveLength(5);
+  expect(
+    host.querySelector(".admin-journey-outline a")?.getAttribute("href"),
+  ).toBe("/journey/down-the-danube?review=1");
+  expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
+  expect(sessionStorage.getItem("ambit.admin.schedule-draft")).toBeNull();
+  const leaving = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(leaving);
+  expect(leaving.defaultPrevented).toBe(false);
+  await click("Schedule this Journey");
+  expect(
+    host.querySelector('[aria-label="Schedule reviewed Journey"]')?.textContent,
+  ).toContain("Proposed Journey: Down the Danube");
+  expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
+  expect(schedule.save).not.toHaveBeenCalled();
+  await click("Preview assignment");
+  expect(
+    host.querySelector(".scheduled-journey-preview.is-draft h4")?.textContent,
+  ).toBe("Down the Danube");
+  expect(schedule.save).not.toHaveBeenCalled();
+  await click("Assign for Oct 11");
+  expect(schedule.save).toHaveBeenCalledWith(
+    "2026-10-11",
+    "down-the-danube-v1",
+    "test-admin",
+  );
+});
+
+it("opens scheduling from review without creating an unpublished assignment", async () => {
+  await act(async () =>
+    root.render(
+      <AdminPanel
+        date="2026-10-11"
+        schedule={schedule}
+        section="schedule"
+        initialJourneyId="down-the-danube-v1"
+      />,
+    ),
+  );
+  expect(
+    host.querySelector('[aria-label="Schedule reviewed Journey"]'),
+  ).not.toBeNull();
+  expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
+  expect(sessionStorage.getItem("ambit.admin.schedule-draft")).toBeNull();
+  expect(schedule.save).not.toHaveBeenCalled();
+});
+
+it("keeps a failed assignment as a draft and announces the failure", async () => {
+  schedule.save = vi.fn(async () => false);
+  await act(async () =>
+    root.render(
+      <ToastProvider>
+        <AdminPanel date="2026-10-11" schedule={schedule} />
+      </ToastProvider>,
+    ),
+  );
+  await select("down-the-danube-v1");
+  await click("Assign for Oct 11");
+  expect(host.querySelector('.toast [role="alert"]')?.textContent).toContain(
+    "Couldn’t save the schedule",
+  );
+  expect(
+    host.querySelector(".scheduled-journey-preview.is-draft"),
+  ).not.toBeNull();
+  expect(sessionStorage.getItem("ambit.admin.schedule-draft")).not.toBeNull();
 });
 
 it("closes the picker with Escape and brings the selected date into view on mobile", async () => {

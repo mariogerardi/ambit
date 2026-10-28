@@ -1,3 +1,9 @@
+import {
+  pinpointSearchArea,
+  pinpointSearchContext,
+  pinpointSearchScale,
+  regionalPinpointBands,
+} from "./pinpointSearch";
 import { interiorAnchor } from "../geography/interiorAnchor";
 import { borderRunCrossings, borderRunPath, routeFocus } from "./borderRunPath";
 import type { RoutePair } from "./borderRunTopology";
@@ -25,6 +31,8 @@ export const extraGameBase = (kind: "border-run" | "pinpoint"): Journey => ({
 export interface PinpointPair extends NeighborPair {
   category: PinpointCategory;
   place?: PlaceFeature;
+  searchArea?: RegionFeature;
+  searchContext?: import("./pinpointSearch").PinpointSearchContext;
   region?: RegionFeature;
   name: string;
   sourceUrl?: string;
@@ -143,6 +151,7 @@ export function pinpointPairs(
     countries: [place.parentId ?? "", place.parentId ?? ""],
     name: place.name,
     place,
+    searchArea: pinpointSearchArea(place, regions),
     category,
   });
   if (categories.includes("cities")) {
@@ -171,6 +180,13 @@ export function pinpointPairs(
         photo: record.photo,
       })),
     );
+  for (const pair of pairs)
+    if (pair.searchArea)
+      // Pool construction must not frame every country before the menu can paint.
+      Object.defineProperty(pair, "searchContext", {
+        enumerable: true,
+        get: () => pinpointSearchContext(pair.searchArea!, regions),
+      });
   const area = (
     region: RegionFeature,
     category: PinpointCategory,
@@ -241,7 +257,39 @@ export function pinpointDeck(
 export function pinpointJourney(
   pair: PinpointPair,
   entryFocus?: { lat: number; lng: number; altitude?: number },
+  regional = false,
 ): Journey {
+  const search = regional && pair.place ? pair.searchArea : undefined;
+  const searchView = search
+    ? (pair.searchContext ?? {
+        name: search.name,
+        regions: [search],
+        focus: {
+          ...search.focus,
+          altitude: Math.max(0.3, Math.min(1.1, search.focus.altitude ?? 0.7)),
+        },
+      })
+    : undefined;
+  const scoringArea = search ? (pair.searchContext ?? search) : undefined;
+  const bands = scoringArea
+    ? regionalPinpointBands(scoringArea)
+    : PINPOINT_BANDS;
+  const maximum = search
+    ? pinpointSearchScale(scoringArea!).bullseyeKm +
+      pinpointSearchScale(scoringArea!).scaleKm * Math.log(1000)
+    : PINPOINT_ZERO_RADIUS;
+  const revealRadius = bands.at(-1)!.radiusKm / 6371.0088;
+  const revealAltitude = searchView
+    ? Math.min(
+        searchView.focus.altitude ?? 0.65,
+        Math.max(
+          0.2,
+          Math.cos(revealRadius) +
+            Math.sin(revealRadius) / Math.tan(Math.PI / 9) -
+            1,
+        ),
+      )
+    : undefined;
   const countryName = roster.members.find(
     (c) => c.id === pair.place?.parentId,
   )?.name;
@@ -253,10 +301,16 @@ export function pinpointJourney(
         title: pair.name,
         label: pair.name,
         topic: "world locations",
-        prompt: `Where is ${pair.name}?`,
+        prompt: search
+          ? searchView!.regions.length > 1
+            ? `Where is ${pair.name} in the highlighted region?`
+            : `Where is ${pair.name} in ${searchView!.name}?`
+          : `Where is ${pair.name}?`,
         instruction: pair.region
           ? "Place your pin anywhere inside the named area."
-          : "Place your pin as close as possible.",
+          : search
+            ? "Search the highlighted area. Place your pin as close as possible."
+            : "Place your pin as close as possible.",
         mode: "pin",
         count: 1,
         selection: { type: "none" },
@@ -267,9 +321,9 @@ export function pinpointJourney(
           : {
               type: "pin-distance",
               targetId: pair.place!.id,
-              radiusKm: PINPOINT_ZERO_RADIUS,
+              radiusKm: maximum,
               tiers: [
-                ...PINPOINT_BANDS.map((b) => ({
+                ...bands.map((b) => ({
                   radiusKm: b.radiusKm,
                   feedback:
                     b.points >= 900
@@ -278,7 +332,7 @@ export function pinpointJourney(
                         ? "Nicely placed."
                         : "On the map.",
                 })),
-                { radiusKm: PINPOINT_ZERO_RADIUS, feedback: "On the map." },
+                { radiusKm: maximum, feedback: "On the map." },
               ],
             },
         source: pair.region
@@ -290,7 +344,11 @@ export function pinpointJourney(
                 reviewedOn: landmarks.reviewedOn,
               }
             : capitalSource,
-        importedRegions: pair.category === "regions" ? US_STATES : undefined,
+        importedRegions:
+          pair.category === "regions" ||
+          searchView?.regions.some((r) => r.level === "ADM1")
+            ? US_STATES
+            : undefined,
         places: pair.place
           ? [{ ...pair.place, visualState: undefined }]
           : undefined,
@@ -305,20 +363,31 @@ export function pinpointJourney(
         },
         scenes: {
           play: {
-            focus: entryFocus ?? { lat: 15, lng: 0, altitude: 1.15 },
+            contextIds: searchView?.regions.map((r) => r.id),
+            focus: searchView?.focus ??
+              entryFocus ?? { lat: 15, lng: 0, altitude: 1.15 },
             map: {
               background: "open-search",
               borders: true,
               hoverFeedback: false,
-              muteOthers: false,
+              muteOthers: !!search,
               revealOnAnswer: true,
             },
           },
           reveal: {
-            focus: {
-              ...(pair.region?.focus ?? pair.place!),
-              altitude: pair.region ? 0.8 : 1.0,
-            },
+            focus:
+              searchView && pair.place
+                ? {
+                    lat: pair.place.lat,
+                    lng: pair.place.lng,
+                    altitude: revealAltitude,
+                  }
+                : {
+                    ...(pair.region?.focus ?? pair.place!),
+                    altitude: pair.region
+                      ? 0.8
+                      : Math.min(entryFocus?.altitude ?? 0.65, 0.65),
+                  },
           },
         },
       }),

@@ -228,7 +228,9 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     const canvas = host.querySelector("canvas");
     loader.mockRejectedValueOnce(Error("offline"));
     await click("Play");
-    expect(host.textContent).toContain("Couldn’t load this Journey. Please reload to try again.");
+    expect(host.textContent).toContain(
+      "Couldn’t load this Journey. Please reload to try again.",
+    );
     const attempt = JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts;
     await click("Try again");
     expect(host.querySelector(".mode-incoming .question-card")).not.toBeNull();
@@ -291,8 +293,8 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelectorAll(".mode-outgoing").length).toBeLessThanOrEqual(
       1,
     );
-    expect(host.querySelector(".mode-outgoing")?.hasAttribute("inert")).toBe(
-      true,
+    expect(host.querySelector(".mode-incoming")?.hasAttribute("inert")).toBe(
+      false,
     );
     await act(async () => vi.advanceTimersByTime(1000));
     expect(host.querySelector(".mode-outgoing")).toBeNull();
@@ -391,9 +393,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     await mount();
     expect(probe.mounts).toBe(0);
     expect(host.querySelector(".account-earth")).not.toBeNull();
-    expect(host.textContent).toContain(
-      "The 3D globe isn’t available",
-    );
+    expect(host.textContent).toContain("The 3D globe isn’t available");
     expect(
       host.querySelector<HTMLButtonElement>(".daily-menu .primary-button")
         ?.disabled,
@@ -401,8 +401,6 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector('[role="alert"]')).toBeNull();
     await click("Study");
     expect(probe.mounts).toBe(0);
-    expect(host.textContent).toContain(
-      "This activity requires the 3D globe",
-    );
+    expect(host.textContent).toContain("This activity requires the 3D globe");
   });
 });

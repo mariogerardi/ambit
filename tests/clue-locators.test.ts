@@ -208,3 +208,26 @@ it("anchors a border-crossing pulse at its supplied point rather than the countr
   expect(layer.element.querySelector("g")!.style.display).toBe("none");
   layer.dispose();
 });
+
+it("does not let a finish flag suppress its completion pulse, while still respecting real panels", () => {
+  const layer = new ClueLocators();
+  const c = new PerspectiveCamera(50, 1, 1, 1000);
+  c.position.set(0, 0, 300);
+  c.lookAt(0, 0, 0);
+  c.updateMatrixWorld();
+  const finish = {
+    ...clue(1),
+    pulseOnly: true,
+    appearance: "completion" as const,
+    anchor: { lat: 0, lng: 0 },
+  };
+  layer.update([finish], undefined, false);
+  const flagBox = { left: 380, right: 440, top: 350, bottom: 410 };
+  layer.view(c, 800, 800, 100, [flagBox], false, []);
+  const group = layer.element.querySelector("g")!;
+  expect(group.style.display).not.toBe("none");
+  expect(group.classList.contains("is-pulsing")).toBe(true);
+  layer.view(c, 800, 800, 100, [flagBox], false, [flagBox]);
+  expect(group.style.display).toBe("none");
+  layer.dispose();
+});

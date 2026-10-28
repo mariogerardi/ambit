@@ -28,6 +28,7 @@ import {
   pathLabel,
   viewPathLabel,
   viewPathArrowhead,
+  viewPathDashes,
 } from "./pathAnnotations";
 import type { GeoPoint } from "../game/geodesic";
 import type { MapOverlay } from "../geography/types";
@@ -92,8 +93,7 @@ export function overlayPositions(
   const radius =
     (overlay.type === "path" && overlay.surfaceAligned) ||
     (overlay.type === "circle" &&
-      !overlay.accuracyBand &&
-      overlay.radiusKm <= 100)
+      (overlay.accuracyBand || overlay.radiusKm <= 100))
       ? 1 + MAP_ANNOTATION_ALTITUDE
       : 1.005;
   for (let i = 1; i < coordinates.length; i++)
@@ -236,7 +236,8 @@ export function makeMapOverlay(
     new LineSegmentsGeometry().setPositions(overlayPositions(overlay)),
     new LineMaterial({
       color:
-        overlay.type === "circle" && overlay.accuracyBand
+        (overlay.type === "circle" || overlay.type === "path") &&
+        overlay.accuracyBand
           ? pinBandColor(
               overlay.accuracyBand.index,
               overlay.accuracyBand.count,
@@ -257,14 +258,20 @@ export function makeMapOverlay(
       alphaToCoverage: true,
       opacity: overlay.type === "path" ? (overlay.opacity ?? 1) : 1,
       dashed: overlay.type === "path" && !!overlay.dashed,
-      dashSize: 0.008,
-      gapSize: 0.005,
+      dashSize:
+        overlay.type === "path" && overlay.dashed === "dotted" ? 1.5 : 4,
+      gapSize: overlay.type === "path" && overlay.dashed === "dotted" ? 4.5 : 5,
     }),
   );
   line.renderOrder = overlay.type === "path" && overlay.foreground ? 6 : 4;
   if (overlay.type === "path" && overlay.dashed) line.computeLineDistances();
   line.raycast = () => {};
   group.add(line);
+  if (overlay.type === "circle" && overlay.fadeInMs) {
+    group.userData.fadeStarted = performance.now();
+    group.userData.fading = true;
+    line.material.opacity = 0;
+  }
   if (overlay.type === "path" && overlay.reveal) {
     line.geometry.instanceCount = 0;
     group.userData.revealStarted = performance.now();
@@ -435,11 +442,29 @@ export class MapOverlays {
   }
   needsRefresh() {
     return [...this.objects.values()].some(
-      ({ group }) => group.userData.revealing,
+      ({ group }) => group.userData.revealing || group.userData.fading,
     );
   }
   view(camera: PerspectiveCamera, width: number, height: number) {
     for (const { group, overlay } of this.objects.values()) {
+      if (overlay.type === "path" && overlay.dashed)
+        for (const child of group.children)
+          if (child instanceof LineSegments2)
+            viewPathDashes(child, group, camera, width, height);
+      if (
+        overlay.type === "circle" &&
+        overlay.fadeInMs &&
+        group.userData.fading
+      ) {
+        const t = Math.min(
+          1,
+          (performance.now() - group.userData.fadeStarted) / overlay.fadeInMs,
+        );
+        for (const child of group.children)
+          if (child instanceof LineSegments2)
+            child.material.opacity = t * t * (3 - 2 * t);
+        group.userData.fading = t < 1;
+      }
       if (
         overlay.type === "path" &&
         overlay.reveal &&
@@ -507,9 +532,15 @@ export class MapOverlays {
             : overlay.type === "bearing-sector"
               ? playColors(palette).hinted
               : overlay.type === "path"
-                ? overlay.visualState
-                  ? playColors(palette)[overlay.visualState]
-                  : playColors(palette).guide
+                ? overlay.accuracyBand
+                  ? pinBandColor(
+                      overlay.accuracyBand.index,
+                      overlay.accuracyBand.count,
+                      palette,
+                    )
+                  : overlay.visualState
+                    ? playColors(palette)[overlay.visualState]
+                    : playColors(palette).guide
                 : overlay.type === "circle" && overlay.accuracyBand
                   ? pinBandColor(
                       overlay.accuracyBand.index,
@@ -581,6 +612,7 @@ export class MapOverlays {
                       overlay.reveal,
                       overlay.foreground,
                       overlay.dashed,
+                      overlay.accuracyBand,
                       overlay.opacity,
                       overlay.opacityByAltitude,
                       overlay.arrowhead,
@@ -594,6 +626,7 @@ export class MapOverlays {
                         overlay.shade,
                         overlay.accuracyBand,
                         overlay.active,
+                        overlay.fadeInMs,
                       ]
                     : overlay.type === "parallel"
                       ? [overlay.type, overlay.latitude]

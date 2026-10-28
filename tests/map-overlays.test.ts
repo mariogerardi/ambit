@@ -18,6 +18,71 @@ import { MapOverlays, overlayPositions } from "../src/globe/overlays";
 import type { MapOverlay } from "../src/geography/types";
 
 describe("decorative map overlays", () => {
+  it("renders short dotted recap connectors and dashed answer connectors in the pin's tier color", () => {
+    const overlays = new MapOverlays();
+    const base = {
+      id: "connector",
+      type: "path" as const,
+      coordinates: [
+        [0, 0],
+        [2, 0],
+      ],
+      accuracyBand: { index: 1, count: 3 },
+      visualState: "correct" as const,
+      surfaceAligned: true,
+    };
+    const dotted = overlays.get({ ...base, dashed: "dotted" }, 100);
+    const dashed = overlays.get({ ...base, id: "dashed", dashed: true }, 100);
+    const dotLine = dotted.children.find(
+      (c) => c instanceof LineSegments2,
+    ) as LineSegments2;
+    const dashLine = dashed.children.find(
+      (c) => c instanceof LineSegments2,
+    ) as LineSegments2;
+    expect(dotLine.material.dashed).toBe(true);
+    expect(dotLine.material.dashSize).toBeLessThan(dashLine.material.dashSize);
+    expect(dashLine.material.dashSize).toBe(4);
+    expect(dashLine.material.gapSize).toBe(5);
+    expect(
+      dotLine.geometry.getAttribute("instanceDistanceStart"),
+    ).toBeDefined();
+    const camera = new PerspectiveCamera(50, 800 / 600, 0.1, 1000);
+    camera.position.set(0, 0, 400);
+    camera.updateMatrixWorld();
+    overlays.view(camera, 800, 600);
+    const distances = dashLine.geometry.getAttribute("instanceDistanceEnd");
+    const farLength = distances.getX(distances.count - 1);
+    expect(farLength).toBeGreaterThan(1);
+    const end = new Vector3()
+      .fromBufferAttribute(
+        dashLine.geometry.getAttribute("instanceEnd"),
+        distances.count - 1,
+      )
+      .applyMatrix4(dashed.matrixWorld)
+      .project(camera);
+    const start = new Vector3()
+      .fromBufferAttribute(dashLine.geometry.getAttribute("instanceStart"), 0)
+      .applyMatrix4(dashed.matrixWorld)
+      .project(camera);
+    expect(farLength).toBeCloseTo(
+      Math.hypot((end.x - start.x) * 400, (end.y - start.y) * 300),
+      1,
+    );
+    camera.position.z = 200;
+    camera.updateMatrixWorld();
+    overlays.view(camera, 800, 600);
+    expect(distances.getX(distances.count - 1)).toBeGreaterThan(farLength * 2);
+    expect(dashLine.material.dashSize).toBe(4);
+    const color = dotLine.material.color.clone();
+    overlays.setPalette("dusk");
+    expect(dotLine.material.color.getHexString()).not.toBe(
+      color.getHexString(),
+    );
+    expect(`#${dotLine.material.color.getHexString()}`).toBe(
+      pinBandColor(1, 3, "dusk"),
+    );
+    overlays.dispose();
+  });
   it("aligns kilometer-scale construction rings and fills with the shore surface", () => {
     const circle: MapOverlay = {
       id: "local-circle",
@@ -403,4 +468,51 @@ it("updates unclassified guide ink when switching palettes without rebuilding ge
     });
   }
   overlays.dispose();
+});
+
+it("fades a newly introduced accuracy ring without restarting existing rings", () => {
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  const overlays = new MapOverlays();
+  const circle: MapOverlay = {
+    id: "bullseye",
+    type: "circle",
+    center: { lat: 0, lng: 0 },
+    radiusKm: 1,
+    fadeInMs: 240,
+  };
+  const group = overlays.get(circle, 100),
+    line = group.children.find(
+      (o) => o instanceof LineSegments2,
+    ) as LineSegments2;
+  const camera = new PerspectiveCamera(50, 1, 1, 1000);
+  expect(line.material.opacity).toBe(0);
+  expect(overlays.needsRefresh()).toBe(true);
+  clock.mockReturnValue(120);
+  overlays.view(camera, 800, 800);
+  expect(line.material.opacity).toBeCloseTo(0.5);
+  overlays.get({ ...circle, id: "close", radiusKm: 1040 }, 100);
+  expect(overlays.get({ ...circle }, 100)).toBe(group);
+  expect(line.material.opacity).toBeCloseTo(0.5);
+  clock.mockReturnValue(400);
+  overlays.view(camera, 800, 800);
+  expect(line.material.opacity).toBe(1);
+  expect(overlays.needsRefresh()).toBe(false);
+  overlays.dispose();
+  clock.mockRestore();
+});
+
+it("keeps Pinpoint accuracy rings on the map annotation shell", () => {
+  const points = overlayPositions({
+    id: "accuracy",
+    type: "circle",
+    center: { lat: 0, lng: 0 },
+    radiusKm: 500,
+    accuracyBand: { index: 1, count: 3 },
+    shade: false,
+  });
+  for (let i = 0; i < points.length; i += 3)
+    expect(Math.hypot(points[i], points[i + 1], points[i + 2])).toBeCloseTo(
+      1 + MAP_ANNOTATION_ALTITUDE,
+      6,
+    );
 });

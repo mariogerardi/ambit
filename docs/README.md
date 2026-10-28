@@ -25,21 +25,22 @@ the task-specific guide above.
 
 ## Current guides
 
-| Guide                                                 | Use it for                                                                                             |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [Development](DEVELOPMENT.md)                         | Running checks, regenerating assets safely, and maintaining docs.                                      |
-| [Themes and visual styling](THEMES.md)                | Palette values, theme coverage, shared styles, and fixed-color exceptions.                             |
-| [Architecture](ARCHITECTURE.md)                       | Finding the owner of a behavior; shared globe, loading, and presentation contracts.                    |
-| [Question catalog and authoring](QUESTION_CATALOG.md) | Practice routes, answer modes, rules, factual scope, and adding a Journey.                             |
-| [Journey engine](JOURNEY_ENGINE.md)                   | Scene APIs, validation, presentation owners, and mechanic extension.                                   |
-| [Portable authoring kit](JOURNEY_AUTHORING_KIT.md)    | Exporting current guidance and examples for AI-assisted design.                                        |
-| [Journey crafting](JOURNEY_CRAFTING.md)               | Throughlines, prompt formatting, intentional difficulty, playable globe controls, reveals, and review. |
-| [Geographic catalog policy](CATALOG_POLICY.md)        | Stable IDs, hierarchy, eligibility, and territorial conventions.                                       |
-| [Explore data](EXPLORE_DATA.md)                       | Country details, subdivisions, physical features, and asset provenance.                                |
-| [Save persistence](SAVE_PERSISTENCE.md)               | Local save registers, migration, recovery, and concurrent tabs.                                        |
-| [Services](SERVICES.md)                               | Accounts, guest feedback, private review, Datadog configuration, and backend deployment.               |
-| [Hosting](HOSTING.md)                                 | Release acceptance, production deployment, HTTP configuration, and rollback.                           |
-| [Attribution](../NOTICE.md)                           | Source licenses, transformations, and redistribution notices.                                          |
+| Guide                                                                  | Use it for                                                                                              |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [Development](DEVELOPMENT.md)                                          | Running checks, regenerating assets safely, and maintaining docs.                                       |
+| [Themes and visual styling](THEMES.md)                                 | Palette values, theme coverage, shared styles, and fixed-color exceptions.                              |
+| [Architecture](ARCHITECTURE.md)                                        | Finding the owner of a behavior; shared globe, loading, and presentation contracts.                     |
+| [Question catalog and authoring](QUESTION_CATALOG.md)                  | Practice routes, answer modes, rules, factual scope, and adding a Journey.                              |
+| [Journey engine](JOURNEY_ENGINE.md)                                    | Scene APIs, validation, presentation owners, and mechanic extension.                                    |
+| [Portable authoring kit](JOURNEY_AUTHORING_KIT.md)                     | Exporting current guidance and examples for AI-assisted design.                                         |
+| [Journey crafting](JOURNEY_CRAFTING.md)                                | Throughlines, prompt formatting, intentional difficulty, playable globe controls, reveals, and review.  |
+| [Authored Journey archetypes](journey-authoring/JOURNEY_ARCHETYPES.md) | Finding recurring structures and relevant implementations across the catalog, without ranking examples. |
+| [Geographic catalog policy](CATALOG_POLICY.md)                         | Stable IDs, hierarchy, eligibility, and territorial conventions.                                        |
+| [Explore data](EXPLORE_DATA.md)                                        | Country details, subdivisions, physical features, and asset provenance.                                 |
+| [Save persistence](SAVE_PERSISTENCE.md)                                | Local save registers, migration, recovery, and concurrent tabs.                                         |
+| [Services](SERVICES.md)                                                | Accounts, guest feedback, private review, Datadog configuration, and backend deployment.                |
+| [Hosting](HOSTING.md)                                                  | Release acceptance, production deployment, HTTP configuration, and rollback.                            |
+| [Attribution](../NOTICE.md)                                            | Source licenses, transformations, and redistribution notices.                                           |
 
 Source code, generated catalogs, and source metadata are authoritative when a
 summary disagrees with implementation. Update the relevant guide when changing a

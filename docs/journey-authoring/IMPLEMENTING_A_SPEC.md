@@ -29,7 +29,9 @@ Read the editorial, visual and engine sections relevant to the approved experien
 In the repository, use the [task-to-section map](../README.md#find-the-relevant-section);
 in a portable kit, use the guide and references listed in `AUTHORING_KIT.md`.
 Start with the spec's implementation-fit notes and the closest current recipe or
-Journey. Consult the catalog and additional examples only to resolve relevant
+Journey. Use [authored archetypes](JOURNEY_ARCHETYPES.md) to locate a matching
+structure or recurring pattern; no Journey is a preferred catalog-wide template.
+Consult the catalog and additional examples only to resolve relevant
 mechanic, storytelling or geography questions. Review each chosen example's
 prompt, play scene, hint, assist, actual answer contract, reveal and completion.
 Distinguish capabilities verified in current source from proposed designs,
@@ -38,7 +40,7 @@ plausible mode name alone does not establish current support.
 
 In the repository, guides live in `docs/` and Journey definitions in
 `src/game/*Journey.ts`. In the portable kit, use `AUTHORING_KIT.md`,
-`FEATURED_EXAMPLES.md`, `examples/` and `references/`. `GPT_GUIDE.md` combines the
+`JOURNEY_ARCHETYPES.md`, `examples/` and `references/`. `GPT_GUIDE.md` combines the
 instructions, guides, specification template and all compact Journey walkthroughs
 for a single-file upload. Exported scenes are structural snapshots, not renders.
 

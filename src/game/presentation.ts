@@ -98,7 +98,9 @@ function resolveQuestionPlaces(
             ? item.state
             : place.visualState,
         markerBadge:
-          question.mode === "choice-match" && item.slot !== undefined
+          (question.mode === "choice-match" ||
+            question.mode === "choice-order") &&
+          item.slot !== undefined
             ? String(item.slot + 1)
             : place.markerBadge,
       };
@@ -136,8 +138,7 @@ function resolveQuestionPlaces(
         kind: "other",
         sourceId: "journey",
         markerHidden: true,
-        lat: region.focus.lat,
-        lng: region.focus.lng,
+        ...interiorAnchor(region),
         visualState: correct ? "correct" : "answer",
       };
     });
@@ -466,7 +467,11 @@ export function questionRegions(
         choice.geographyIds?.includes(region.id),
       );
     return (
-      question.contextIds?.includes(region.id) || mapTarget || choiceTarget
+      question.contextIds?.includes(region.id) ||
+      mapTarget ||
+      choiceTarget ||
+      (helpStage === "assisted" &&
+        question.guidance?.assist?.regionIds?.includes(region.id))
     );
   });
   const displays = Object.entries(question.displayGeometries ?? {});

@@ -24,8 +24,8 @@ to a coding agent with the repository and the implementation workflow.
   Historical reviews record earlier work and are not current instructions.
 - Begin with the premise and a compact five-stop outline. Explain the intended
   reasoning skill, given/withheld information, help and reveal for each stop.
-- Use the featured Journeys as strong examples, not compulsory templates. Consult
-  the broader catalog for other mechanics and structures. Repetition can be a
+- Use JOURNEY_ARCHETYPES.md to find relevant structures and implementations
+  across the catalog; no subset of Journeys is preferred. Repetition can be a
   throughline; avoid multiple choice when a better-fitting interaction exists.
 - Keep questions moving forward. Q5 should earn an ending rather than retest
   answers already supplied. Completion can recap the Journey.

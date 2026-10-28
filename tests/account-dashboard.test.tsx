@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { AccountDashboard } from "../src/app/AccountDashboard";
+import { ToastProvider } from "../src/app/Toast";
 import {
   accountProgress,
   openStudyChallenge,
@@ -139,15 +140,19 @@ afterEach(async () => {
 });
 async function mount(
   props: Partial<Parameters<typeof AccountDashboard>[0]> = {},
+  notifications = false,
 ) {
+  const dashboard = (
+    <AccountDashboard
+      subject="a"
+      email="alice@example.com"
+      client={{ request } as CommunityClient}
+      {...props}
+    />
+  );
   await act(async () =>
     root.render(
-      <AccountDashboard
-        subject="a"
-        email="alice@example.com"
-        client={{ request } as CommunityClient}
-        {...props}
-      />,
+      notifications ? <ToastProvider>{dashboard}</ToastProvider> : dashboard,
     ),
   );
 }
@@ -328,7 +333,7 @@ it("opens a saved profile card before editing and cancels unsaved edits", async 
   expect(profile.displayName).toBe("Alice");
 });
 it("saves a fixed theme avatar and renders the chosen local artwork", async () => {
-  await mount();
+  await mount({}, true);
   await click("Profile");
   await click("Edit profile");
   const choice = host.querySelector<HTMLInputElement>(
@@ -348,6 +353,10 @@ it("saves a fixed theme avatar and renders the chosen local artwork", async () =
       ?.getAttribute("src"),
   ).toBe("/avatars/avatar-08.svg");
   expect(host.textContent).toContain("Your profile is saved.");
+  expect(host.querySelector('.toast [role="status"]')?.textContent).toBe(
+    "Your profile is saved.",
+  );
+  expect(host.querySelector('.account-message[role="status"]')).toBeNull();
 });
 it("saves a country flag avatar and renders its local image", async () => {
   await mount();

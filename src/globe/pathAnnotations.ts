@@ -11,6 +11,41 @@ import {
   Vector3,
 } from "three";
 import type { PerspectiveCamera, Group } from "three";
+import type { LineSegments2 } from "three/addons/lines/LineSegments2.js";
+
+/** Measure dash spacing in CSS pixels, matching UI trails regardless of globe zoom. */
+export function viewPathDashes(
+  line: LineSegments2,
+  group: Group,
+  camera: PerspectiveCamera,
+  width: number,
+  height: number,
+) {
+  group.updateWorldMatrix(true, false);
+  const starts = line.geometry.getAttribute("instanceStart");
+  const ends = line.geometry.getAttribute("instanceEnd");
+  const distances = line.geometry.getAttribute("instanceDistanceStart");
+  const endDistances = line.geometry.getAttribute("instanceDistanceEnd");
+  const a = new Vector3(),
+    b = new Vector3();
+  let distance = 0;
+  for (let i = 0; i < starts.count; i++) {
+    a.fromBufferAttribute(starts, i)
+      .applyMatrix4(group.matrixWorld)
+      .project(camera);
+    b.fromBufferAttribute(ends, i)
+      .applyMatrix4(group.matrixWorld)
+      .project(camera);
+    distances.setX(i, distance);
+    distance += Math.hypot(
+      ((b.x - a.x) * width) / 2,
+      ((b.y - a.y) * height) / 2,
+    );
+    endDistances.setX(i, distance);
+  }
+  distances.needsUpdate = true;
+  endDistances.needsUpdate = true;
+}
 
 const point = ([lng, lat]: number[], radius = 1.005) => {
   const a = (lat * Math.PI) / 180,

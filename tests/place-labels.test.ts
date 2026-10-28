@@ -1383,3 +1383,157 @@ it("refreshes cached label ink when switching to Survey with unchanged places", 
   expect(labels.group.children[0]).toBe(survey);
   labels.dispose();
 });
+
+it("drops a pin vertically into its anchor and preserves its progress when feedback changes its color", () => {
+  canvasFactory();
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  const labels = new PlaceLabels(),
+    c = camera();
+  const pin: PlaceFeature = {
+    ...places[0],
+    kind: "pin",
+    labelHidden: true,
+    dropInMs: 340,
+  };
+  const layer = {
+    id: "drop",
+    kind: "place-labels" as const,
+    visible: true,
+    markers: true,
+    places: [pin],
+  };
+  labels.update(layer, 100);
+  labels.view(c, 800, 800);
+  const marker = () =>
+    labels.group.children.find((o) => o.userData.role === "marker") as Sprite;
+  const start = marker().position.y;
+  expect(start).toBeGreaterThan(0);
+  expect(marker().material.opacity).toBe(0);
+  clock.mockReturnValue(170);
+  labels.view(c, 800, 800);
+  const middle = marker().position.y;
+  expect(middle).toBeLessThan(start);
+  labels.update(
+    { ...layer, places: [{ ...pin, visualState: "correct" }] },
+    100,
+  );
+  labels.view(c, 800, 800);
+  expect(marker().position.y).toBeCloseTo(middle);
+  clock.mockReturnValue(340);
+  labels.view(c, 800, 800);
+  expect(marker().position.y).toBeCloseTo(0);
+  expect(marker().material.opacity).toBe(1);
+  expect(labels.needsRefresh()).toBe(false);
+  labels.dispose();
+  clock.mockRestore();
+});
+
+it("draws a pin above the target bullseye and keeps the place name clear of its body", () => {
+  canvasFactory();
+  const labels = new PlaceLabels(),
+    c = camera();
+  const pin: PlaceFeature = {
+    ...places[0],
+    id: "pin",
+    kind: "pin",
+    markerSize: 44,
+    labelHidden: true,
+  };
+  const target: PlaceFeature = {
+    ...places[0],
+    id: "target",
+    name: "Eiffel Tower",
+    kind: "pin",
+    markerRole: "target",
+    markerSize: 42,
+    labelFlexible: true,
+  };
+  labels.update(
+    {
+      id: "pin-reveal",
+      kind: "place-labels",
+      visible: true,
+      markers: true,
+      places: [pin, target],
+    },
+    100,
+  );
+  labels.view(c, 800, 800);
+  const marker = (id: string) =>
+    labels.group.children.find(
+      (o) => o.userData.role === "marker" && o.userData.placeId === id,
+    )!;
+  const label = labels.group.children.find(
+    (o) => o.userData.role === "label" && o.userData.placeId === target.id,
+  )!;
+  expect(marker(pin.id).renderOrder).toBeGreaterThan(
+    marker(target.id).renderOrder,
+  );
+  expect(label.renderOrder).toBeGreaterThan(marker(pin.id).renderOrder);
+  expect(label.visible).toBe(true);
+  const protectedPin = labels.priorityMarkerBoxes(c, 800, 800);
+  expect(protectedPin).toHaveLength(1);
+  expect(protectedPin[0].top).toBeLessThan(370);
+  const [box] = labels.labelBoxes();
+  expect(box).toBeDefined();
+  const pinBox = protectedPin[0];
+  expect(
+    box.right <= pinBox.left ||
+      box.left >= pinBox.right ||
+      box.bottom <= pinBox.top ||
+      box.top >= pinBox.bottom,
+  ).toBe(true);
+  labels.dispose();
+});
+
+it("renders a single placement ripple behind the pin with the pin's current color", () => {
+  canvasFactory();
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  const labels = new PlaceLabels(),
+    c = camera();
+  const pin: PlaceFeature = {
+    ...places[0],
+    kind: "pin",
+    name: "",
+    labelHidden: true,
+    placementPulse: true,
+    visualState: "selected",
+  };
+  const layer = {
+    id: "pulse",
+    kind: "place-labels" as const,
+    visible: true,
+    markers: true,
+    places: [pin],
+  };
+  labels.update(layer, 100);
+  labels.view(c, 800, 800);
+  const pulse = labels.group.children.find(
+    (o) => o.userData.role === "placement-pulse",
+  ) as Sprite;
+  const marker = labels.group.children.find(
+    (o) => o.userData.role === "marker",
+  ) as Sprite;
+  expect(pulse.renderOrder).toBeLessThan(marker.renderOrder);
+  expect(pulse.material.color.getHexString()).toBe(
+    playColors("ocean").selected.slice(1),
+  );
+  clock.mockReturnValue(500);
+  labels.view(c, 800, 800);
+  const opacity = pulse.material.opacity;
+  labels.update(
+    { ...layer, places: [{ ...pin, visualState: "incorrect" }] },
+    100,
+  );
+  labels.view(c, 800, 800);
+  expect(pulse.material.color.getHexString()).toBe(
+    playColors("ocean").incorrect.slice(1),
+  );
+  expect(pulse.material.opacity).toBeCloseTo(opacity);
+  clock.mockReturnValue(1200);
+  labels.view(c, 800, 800);
+  expect(pulse.visible).toBe(false);
+  expect(labels.needsRefresh()).toBe(false);
+  labels.dispose();
+  clock.mockRestore();
+});

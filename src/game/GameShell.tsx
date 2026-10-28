@@ -707,8 +707,27 @@ export function GameShell({
                 (answer) => answer.roundId === question.id,
               );
               const help = game.help?.[question.id];
-              const recapDistance = answer && pinDistance(question, answer);
-              const recapTier = answer && pinDistanceTier(question, answer);
+              // Revision receipts retain old grades/labels, but cannot be interpreted
+              // using a redesigned question's answer contract.
+              const currentAnswer =
+                answer &&
+                (!answer.receiptLabel ||
+                  answer.receiptLabel === resolvedRoundIdentity(question))
+                  ? answer
+                  : undefined;
+              const recapDistance =
+                currentAnswer && pinDistance(question, currentAnswer);
+              const recapTier =
+                currentAnswer && pinDistanceTier(question, currentAnswer);
+              const reviewedGame = currentAnswer
+                ? {
+                    ...game,
+                    ...currentAnswer,
+                    phase: "feedback" as const,
+                    roundIndex: i,
+                    answers: [currentAnswer],
+                  }
+                : undefined;
               return (
                 <li
                   key={question.id}
@@ -771,6 +790,34 @@ export function GameShell({
                           </a>
                         </small>
                       )}
+                    {journey.completion?.answerReviews && reviewedGame && (
+                      <details className="journey-answer-recap">
+                        <summary>Review your answer</summary>
+                        <p>
+                          {
+                            correctAnswerSummary(
+                              question,
+                              context,
+                              reviewedGame,
+                            ).value
+                          }
+                        </p>
+                        {recapDistance !== undefined && (
+                          <p>
+                            Your pin was{" "}
+                            {recapDistance < 1
+                              ? "less than 1"
+                              : Math.round(recapDistance).toLocaleString()}{" "}
+                            km away.
+                          </p>
+                        )}
+                        <AnswerReview
+                          question={question}
+                          context={context}
+                          game={reviewedGame}
+                        />
+                      </details>
+                    )}
                   </div>
                   <span className="journey-round-result">
                     {help && (

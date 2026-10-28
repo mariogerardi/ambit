@@ -156,3 +156,17 @@ it("restores Missing Borders selections independently of Shared Neighbors and ot
   expect(createNeighborSave("a").load().run).toBeUndefined();
   expect(createNeighborSave("b", "missing-borders").load().run).toBeUndefined();
 });
+
+it("round-trips regional Pinpoint rules while continuing to accept unversioned legacy runs", () => {
+  const legacy = { ...run(), kind: "pinpoint" as const };
+  const modern = { ...legacy, pinpointRules: "regional" as const };
+  const save = createNeighborSave("regional-player", "pinpoint");
+  expect(save.save({ version: 1, run: modern }).ok).toBe(true);
+  expect(
+    createNeighborSave("regional-player", "pinpoint").load().run?.pinpointRules,
+  ).toBe("regional");
+  expect(validNeighborRun(legacy)).toBe(true);
+  expect(validNeighborRun({ ...legacy, pinpointRules: "unrecognized" })).toBe(
+    false,
+  );
+});

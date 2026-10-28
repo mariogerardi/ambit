@@ -1,0 +1,34 @@
+{
+  "provenance": {
+    "terrain": {
+      "src": "/journeys/made-in-china/jiayuguan-terrain.v1.jpg",
+      "sha256": "df6cf5ff1c2a6a3cc3c52176a05762f3dd7faed0fa72e61ce156e054c2e6e240",
+      "bounds": [
+        96.4,
+        38.8,
+        100.0,
+        40.7
+      ],
+      "downloadUrl": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG:4326&LAYERS=BlueMarble_ShadedRelief_Bathymetry&FORMAT=image/jpeg&WIDTH=1840&HEIGHT=1280&BBOX=96.4,38.8,100.0,40.7",
+      "credit": "NASA Earth Observatory / NASA GIBS, Blue Marble shaded relief and bathymetry",
+      "sourceUrl": "https://earthobservatory.nasa.gov/features/BlueMarble",
+      "licenseUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "transformation": "Unchanged JPEG WMS response; displayed in geographic bounds. Modern composite, not historical reconstruction."
+    },
+    "estuary": {
+      "src": "/journeys/made-in-china/yangtze-estuary.v1.jpg",
+      "sha256": "0a7932c13d216f8920c012b5334b18e8c747b5ea47a56b731f6750e78aa1170b",
+      "bounds": [
+        114.0,
+        27.0,
+        127.5,
+        36.0
+      ],
+      "downloadUrl": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG:4326&LAYERS=BlueMarble_ShadedRelief_Bathymetry&FORMAT=image/jpeg&WIDTH=1600&HEIGHT=1280&BBOX=114.0,27.0,127.5,36.0",
+      "credit": "NASA Earth Observatory / NASA GIBS, Blue Marble shaded relief and bathymetry",
+      "sourceUrl": "https://earthobservatory.nasa.gov/features/BlueMarble",
+      "licenseUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "transformation": "Unchanged JPEG WMS response; displayed in geographic bounds. Modern composite, not historical reconstruction."
+    }
+  }
+}

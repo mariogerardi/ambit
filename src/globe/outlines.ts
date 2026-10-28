@@ -1,7 +1,7 @@
 import { geoDistance, geoInterpolate } from "d3-geo";
 import type { RegionFeature } from "../geography/types";
 import type { RouteFeature } from "../geography/types";
-import { boundaryAltitude } from "./geometry";
+import { boundaryAltitude, outlineSourceGeometry } from "./geometry";
 import type { VisualState } from "../geography/types";
 
 // The stock polygon stroke shares the cap's coarse tessellation and has only
@@ -63,13 +63,11 @@ export function boundaryOutlinePositions(
   region: RegionFeature,
   omissions?: number[][][],
 ) {
+  const geometry = outlineSourceGeometry(region);
   const filtered =
-    omittedCache.get(region.geometry) ??
-    new WeakMap<number[][][], Float32Array>();
-  if (omissions) omittedCache.set(region.geometry, filtered);
-  const cached = omissions
-    ? filtered.get(omissions)
-    : cache.get(region.geometry);
+    omittedCache.get(geometry) ?? new WeakMap<number[][][], Float32Array>();
+  if (omissions) omittedCache.set(geometry, filtered);
+  const cached = omissions ? filtered.get(omissions) : cache.get(geometry);
   if (cached) return cached;
   const radius = 1 + boundaryAltitude(region) + outlineClearance;
   const positions: number[] = [];
@@ -88,9 +86,7 @@ export function boundaryOutlinePositions(
     ) ?? [],
   );
   const parts =
-    region.geometry.type === "Polygon"
-      ? [region.geometry.coordinates]
-      : region.geometry.coordinates;
+    geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
   for (const part of parts)
     for (const ring of part) {
       for (let i = 1; i < ring.length; i++) {
@@ -112,7 +108,7 @@ export function boundaryOutlinePositions(
     }
   const result = new Float32Array(positions);
   if (omissions) filtered.set(omissions, result);
-  else cache.set(region.geometry, result);
+  else cache.set(geometry, result);
   return result;
 }
 

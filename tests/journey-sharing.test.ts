@@ -192,6 +192,15 @@ it("routes query links and rejects invalid comparison identities", () => {
     tab: "admin",
     section: "feedback",
   });
+  expect(
+    accountIntent(
+      "/account?tab=admin&section=journeys&journey=down-the-danube-v1",
+    ),
+  ).toEqual({
+    tab: "admin",
+    section: "journeys",
+    journeyId: "down-the-danube-v1",
+  });
   expect(accountIntent("/account?tab=admin&section=unknown")).toEqual({
     tab: "admin",
     section: "schedule",
@@ -237,9 +246,7 @@ it("accompanies the image with an invitation rather than repeating the receipt",
     "https://playambit.com",
   );
   const caption = resultCaption(result);
-  expect(caption).toBe(
-    `Take today’s Journey with me → ${result.playUrl}`,
-  );
+  expect(caption).toBe(`Take today’s Journey with me → ${result.playUrl}`);
   expect(caption).not.toContain("\n");
   expect(caption).toContain(result.playUrl);
   for (const detail of [result.title, "0/5", result.date, result.help])

@@ -48,21 +48,28 @@ it.each(["shared-neighbors", "missing-borders", "border-run", "pinpoint"])(
     expect(finish).toBeDefined();
     await act(async () => finish.click());
     expect(host.querySelector(".minigame-overview")).not.toBeNull();
+    const actions = host.querySelector(".minigame-results-actions")!;
+    expect(
+      [...actions.querySelectorAll(".minigame-session-actions button")].map(
+        (b) => b.textContent?.trim(),
+      ),
+    ).toEqual(["Play again →", "Choose another game"]);
+    expect(host.querySelector(".minigame-result-detail")).toBeNull();
+    expect(
+      actions.querySelector(".minigame-result-actions")?.textContent,
+    ).toContain("Share result");
+    expect(actions.textContent).not.toContain("Nothing to review");
   },
 );
 
-it("keeps Pinpoint scoring details behind Full rules", async () => {
+it("keeps Pinpoint's introduction concise without a scoring dropdown", async () => {
   history.replaceState(null, "", "/minigames/pinpoint");
   await mount();
-  const dialog = document.querySelector('[role="dialog"]')!;
-  const rules = dialog.querySelector<HTMLDetailsElement>("details")!;
-  expect(rules.open).toBe(false);
-  expect(rules.textContent).toContain("within 1 km earns full points");
-  expect(rules.textContent).toContain("1,040 km");
-  const introduction = dialog.cloneNode(true) as HTMLElement;
-  introduction.querySelector("details")!.remove();
-  expect(introduction.textContent).toContain("Play ten rounds");
-  expect(introduction.textContent).not.toContain("1,040 km");
+  const dialog = document.querySelector(".minigame-carousel-card")!;
+  expect(dialog.querySelector(".minigame-scoring")).toBeNull();
+  expect(dialog.textContent).not.toContain("How scoring works");
+  expect(dialog.textContent).toContain("Play ten rounds");
+  expect(dialog.textContent).not.toContain("1,040 km");
 });
 
 it("explains how to recover a Pinpoint pool with no categories", async () => {
@@ -72,18 +79,18 @@ it("explains how to recover a Pinpoint pool with no categories", async () => {
   });
   history.replaceState(null, "", "/minigames/pinpoint");
   await mount();
-  const dialog = document.querySelector('[role="dialog"]')!;
+  const dialog = document.querySelector(".minigame-carousel-card")!;
   expect(dialog.textContent).toContain("Try more place categories");
   expect(
     dialog.querySelector<HTMLButtonElement>(
-      ".activity-preview-actions .primary-button",
+      ".minigame-carousel-actions .primary-button",
     )!.disabled,
   ).toBe(true);
   await click("Customize");
   await click("Reset settings");
   expect(
     dialog.querySelector<HTMLButtonElement>(
-      ".activity-preview-actions .primary-button",
+      ".minigame-carousel-actions .primary-button",
     )!.disabled,
   ).toBe(false);
 });
@@ -136,6 +143,8 @@ it("plays a numeric country route, reveals numbered crossings, and saves a high 
     )!.set!.call(input, pair.answer);
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
+  const finishState = probe.props!.states[pair.route.at(-1)!];
+  expect(finishState).toBe("clue");
   vi.useFakeTimers();
   await act(async () =>
     host
@@ -145,6 +154,7 @@ it("plays a numeric country route, reveals numbered crossings, and saves a high 
   expect(
     probe.props!.places.filter((p) => p.id.startsWith("border-run:crossing:")),
   ).toHaveLength(0);
+  expect(probe.props!.states[pair.route.at(-1)!]).toBe(finishState);
   expect(probe.props!.states[pair.route[0]]).toBe("correct");
   expect(probe.props!.states[pair.route[1]]).toBe("disabled");
   await act(async () => vi.advanceTimersByTimeAsync(160));
@@ -220,11 +230,11 @@ it("customizes Pinpoint categories and prevents a game with none selected", asyn
   });
   expect(
     document.querySelector<HTMLButtonElement>(
-      ".activity-preview-actions .primary-button",
+      ".minigame-carousel-actions .primary-button",
     )!.disabled,
   ).toBe(true);
   await act(async () => toggles[2].click());
-  await click("Play");
+  await click("Start new game");
   expect(
     createNeighborSave(undefined, "pinpoint").load().run!.settings!.categories,
   ).toEqual(["countries"]);
@@ -267,10 +277,19 @@ it("scores ten landmark pins, restores feedback, and requires See results before
       p.id.startsWith("pinpoint:band:"),
     );
     expect(target.labelHidden).toBe(false);
+    expect(host.querySelector(".shared-neighbors-feedback h2")).toBeNull();
+    expect(
+      host.querySelector(".shared-neighbors-feedback")?.textContent,
+    ).not.toContain(`${deck[i].name} ·`);
     expect(target.labelFlexible).toBe(true);
     expect(bands.map((p) => p.name)).toEqual(["1000", "500", "100"]);
     expect(
-      probe.props!.routes.some((r) => r.id.startsWith("pin-distance:")),
+      probe.props!.overlays?.some(
+        (o) =>
+          o.id.startsWith("pin-distance:") &&
+          o.type === "path" &&
+          o.dashed === true,
+      ),
     ).toBe(true);
     expect(
       bands.every(
@@ -363,10 +382,159 @@ it("can enable Border Run borders for a new run without changing the default", a
   )!;
   expect(toggle.checked).toBe(false);
   await act(async () => toggle.click());
-  await click("Play");
+  await click("Start new game");
   expect(probe.props!.showBorders).toBe(true);
   expect(
     createNeighborSave(undefined, "border-run").load().run!.settings!
       .showBorders,
   ).toBe(true);
+});
+
+it("starts regional Pinpoint with a supplied search area and resumes it without replacing progress", async () => {
+  history.replaceState(null, "", "/minigames/pinpoint");
+  await mount();
+  expect(host.querySelector(".minigame-session")).not.toBeNull();
+  expect(host.querySelector(".minigame-session-progress")).toBeNull();
+  expect(host.querySelector(".minigame-high-score")?.textContent).toContain(
+    "High score",
+  );
+  await click("Start new game");
+  const save = createNeighborSave(undefined, "pinpoint");
+  const initial = save.load().run!;
+  expect(initial.pinpointRules).toBe("regional");
+  const pair = pinpointDeck(
+    pinpointPairs(world, defaultMinigameSettings),
+    initial.seed,
+    initial.cycle,
+  )[initial.index];
+  expect(pair.searchArea).toBeDefined();
+  expect(host.querySelector(".minigame-search-area")).toBeNull();
+  expect(host.textContent).not.toContain("Search area:");
+  expect(probe.props!.states[pair.searchArea!.id]).toBe("hinted");
+  await click("All games");
+  await click("Pinpoint");
+  expect(
+    host.querySelector(".minigame-session-progress")?.textContent,
+  ).toContain("1 / 10");
+  await click("Resume game");
+  expect(save.load().run?.id).toBe(initial.id);
+  await click("All games");
+  await click("Pinpoint");
+  const confirm = vi.spyOn(window, "confirm");
+  await click("Start new game");
+  expect(location.pathname).toBe("/minigames/pinpoint");
+  expect(save.load().run?.id).toBe(initial.id);
+  const dialog = document.querySelector<HTMLElement>('[role="alertdialog"]')!;
+  expect(dialog.textContent).toContain("unfinished game and current score");
+  const [keep, discard] = dialog.querySelectorAll<HTMLButtonElement>("button");
+  expect(document.activeElement).toBe(keep);
+  expect(document.querySelector("main.experience")?.hasAttribute("inert")).toBe(
+    true,
+  );
+  await act(async () => {
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Tab",
+        shiftKey: true,
+        cancelable: true,
+      }),
+    );
+  });
+  expect(document.activeElement).toBe(discard);
+  await act(async () => {
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", cancelable: true }),
+    );
+  });
+  expect(document.querySelector('[role="alertdialog"]')).toBeNull();
+  expect(save.load().run?.id).toBe(initial.id);
+  expect(document.activeElement?.getAttribute("aria-label")).toBe(
+    "Start new game",
+  );
+  expect(document.querySelector("main.experience")?.hasAttribute("inert")).toBe(
+    false,
+  );
+  await click("Start new game");
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>(
+        ".minigame-discard-actions .quiet-button",
+      )!
+      .click(),
+  );
+  expect(save.load().run?.id).toBe(initial.id);
+  await click("Start new game");
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>(
+        ".minigame-discard-actions .primary-button",
+      )!
+      .click(),
+  );
+  expect(save.load().run?.id).not.toBe(initial.id);
+  expect(document.querySelector('[role="alertdialog"]')).toBeNull();
+  expect(confirm).not.toHaveBeenCalled();
+});
+
+it("grades a Kingston pin against its full search region without recalculating earlier scores", async () => {
+  const pairs = pinpointPairs(world, defaultMinigameSettings);
+  let seed = 1;
+  while (!pinpointDeck(pairs, seed, 0).some((p) => p.name === "Kingston"))
+    seed++;
+  const deck = pinpointDeck(pairs, seed, 0);
+  const index = deck.findIndex((p) => p.name === "Kingston");
+  const pair = deck[index];
+  const { pointAlongBearing } = await import("../src/game/geodesic");
+  const { regionalPinpointPoints } = await import(
+    "../src/minigames/pinpointSearch"
+  );
+  const save = createNeighborSave(undefined, "pinpoint");
+  const run = {
+    ...startNeighborRun(pairs),
+    seed,
+    index,
+    answered: index,
+    points: 123,
+    kind: "pinpoint" as const,
+    pinpointRules: "regional" as const,
+    settings: defaultMinigameSettings,
+  };
+  save.save({ version: 1, run });
+  history.replaceState(null, "", "/minigames/pinpoint/play");
+  await mount();
+  const pin = pointAlongBearing(pair.place!, 90, 97 / 6371.0088);
+  await act(async () => probe.props!.onCoordinateTap!(pin));
+  await click("Check answer");
+  const points = regionalPinpointPoints(97, pair.searchContext!);
+  expect(points).toBeGreaterThan(500);
+  expect(save.load().run!.points).toBe(123 + points);
+  expect(save.load().run!.history!.at(-1)!.points).toBe(points);
+  expect(
+    probe.props!.routes.some((r) => r.id.startsWith("pin-distance:")),
+  ).toBe(false);
+  const connector = probe.props!.overlays!.find((o) =>
+    o.id.startsWith("pin-distance:"),
+  )!;
+  expect(connector).toMatchObject({ type: "path", dashed: true });
+  if (connector.type !== "path") throw Error("Expected connector");
+  expect(connector.coordinates[0][0]).toBeCloseTo(pin.lng);
+  expect(connector.coordinates.at(-1)![0]).toBeCloseTo(pair.place!.lng);
+  expect(probe.focus.at(-1)).toMatchObject({
+    lat: pair.place!.lat,
+    lng: pair.place!.lng,
+  });
+  if (save.load().run!.ended) await click("See results");
+  else {
+    await act(async () =>
+      host.querySelector<HTMLElement>(".minigame-menu summary")!.click(),
+    );
+    await click("Finish game");
+  }
+  const recap = probe.props!.overlays!.find(
+    (o) => o.id === "recap:connector:0",
+  )!;
+  expect(recap).toMatchObject({ type: "path", dashed: "dotted" });
+  if (recap.type !== "path") throw Error("Expected recap connector");
+  expect(recap.coordinates[0]).toEqual(connector.coordinates[0]);
+  expect(recap.coordinates.at(-1)).toEqual(connector.coordinates.at(-1));
 });

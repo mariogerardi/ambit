@@ -36,15 +36,20 @@ function renderGeometry(source: RegionFeature["geometry"]) {
   renderGeometryCache.set(source, result);
   return result;
 }
+const outlineSources = new WeakMap<RegionFeature, RegionFeature["geometry"]>();
+export const outlineSourceGeometry = (region: RegionFeature) =>
+  outlineSources.get(region) ?? region.geometry;
 export function prepareGlobeRegions(regions: RegionFeature[]): RegionFeature[] {
   // three-globe stamps its own bookkeeping IDs onto data objects; isolate those
   // renderer mutations from the canonical catalog as well as source geometry.
   return regions
     .filter((r) => r.displayGeometry !== null && !r.displayCovered)
-    .map((region) => ({
-      ...region,
-      geometry: renderGeometry(region.displayGeometry ?? region.geometry),
-    }));
+    .map((region) => {
+      const source = region.displayGeometry ?? region.geometry;
+      const rendered = { ...region, geometry: renderGeometry(source) };
+      outlineSources.set(rendered, source);
+      return rendered;
+    });
 }
 // Keep the library's per-object mesh bindings alive across data/color updates.
 // Each mounted renderer owns its cache: two globes must never share bindings.

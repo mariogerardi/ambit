@@ -499,3 +499,15 @@ Its prompt and generation record are in `sources/border-run-preview.md`.
 The active Border Run and Pinpoint preview illustrations
 (`public/previews/border-run.svg` and `public/previews/pinpoint.svg`) use the bundled
 map geometry, with game markers and scoring rings drawn as vector artwork.
+
+## Made in China photographs and geography
+
+The twelve documentary photographs in `public/journeys/made-in-china/` are
+Wikimedia Commons thumbnails licensed individually under CC0, CC BY, or CC BY-SA.
+The accompanying `SOURCES.md` identifies every photographer, source page and
+license. `src/game/data/made-in-china-media.v1.json` retains attribution, license
+links, download URLs and checksums. Files are unchanged from their downloaded
+thumbnails; the interface may crop their displayed frame. Attribution and
+share-alike requirements apply to the photographs independently of application
+code. Province geometry is an unchanged subset of the bundled Natural Earth
+5.1.2 public-domain snapshot; city locations reuse the credited GeoNames data.

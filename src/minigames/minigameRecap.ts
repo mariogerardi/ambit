@@ -66,6 +66,28 @@ export function minigameCompletion(
       ...new Set(visits.filter((v) => v.correct).flatMap((v) => v.ids)),
     ],
     places,
+    overlays:
+      run.kind === "pinpoint"
+        ? visits.flatMap((v, i) =>
+            v.pin
+              ? [
+                  {
+                    id: `recap:connector:${i}`,
+                    type: "path" as const,
+                    coordinates: [
+                      [v.pin.lng, v.pin.lat],
+                      [v.point.lng, v.point.lat],
+                    ],
+                    dashed: "dotted" as const,
+                    surfaceAligned: true,
+                    visualState: v.correct
+                      ? ("correct" as const)
+                      : ("incorrect" as const),
+                  },
+                ]
+              : [],
+          )
+        : undefined,
     physicalFeatures: [],
     borders: true,
   };

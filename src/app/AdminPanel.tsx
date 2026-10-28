@@ -7,9 +7,11 @@ import { dailyJourney, dateOrdinal } from "./dailyProgress";
 import type { AdminSection } from "./accountNavigation";
 import type { DailyAttempt } from "./dailyProgress";
 import { ARCHIVE_START_DATE } from "./archiveDates";
+import { AdminJourneys } from "./AdminJourneys";
+import { useToast } from "./Toast";
 
 type JourneySort = "alphabetical" | "newest" | "last" | "never";
-const ADMIN_SECTIONS = ["schedule", "feedback", "tools"] as const;
+const ADMIN_SECTIONS = ["schedule", "journeys", "feedback", "tools"] as const;
 const DRAFT_KEY = "ambit.admin.schedule-draft";
 type ScheduleDraft = { day: string; value: string; saved: string };
 function readDraft(): ScheduleDraft | undefined {
@@ -21,6 +23,7 @@ function readDraft(): ScheduleDraft | undefined {
       Number.isFinite(dateOrdinal(draft.day)) &&
       draft.day >= ARCHIVE_START_DATE &&
       typeof draft.saved === "string" &&
+      draft.value !== draft.saved &&
       (draft.value === "" ||
         JOURNEY_INDEX.some((journey) => journey.id === draft.value))
     )
@@ -100,6 +103,8 @@ export function AdminPanel({
   embedded = false,
   section: suppliedSection,
   onSectionChange,
+  initialJourneyId,
+  onNavigate,
 }: {
   date: string;
   schedule: ReturnType<typeof useJourneySchedule>;
@@ -110,8 +115,11 @@ export function AdminPanel({
   embedded?: boolean;
   section?: AdminSection;
   onSectionChange?(section: AdminSection): void;
+  initialJourneyId?: string;
+  onNavigate?(url: string): void;
 }) {
   const account = useAccount();
+  const notifications = useToast();
   const records = schedule.schedule?.records ?? {};
   const initialDay = date < ARCHIVE_START_DATE ? ARCHIVE_START_DATE : date;
   const [draft, setDraft] = useState<ScheduleDraft>(
@@ -132,6 +140,19 @@ export function AdminPanel({
   const [month, setMonth] = useState(draft.day.slice(0, 7));
   const [localSection, setLocalSection] = useState<AdminSection>("schedule");
   const section = suppliedSection ?? localSection;
+  const [libraryId, setLibraryId] = useState<string>();
+  const [candidateId, setCandidateId] = useState<string>();
+  const [candidateDate, setCandidateDate] = useState(initialDay);
+  const candidate = JOURNEY_INDEX.find((entry) => entry.id === candidateId);
+  useEffect(() => {
+    if (!JOURNEY_INDEX.some((entry) => entry.id === initialJourneyId)) return;
+    setLibraryId(initialJourneyId);
+    if (suppliedSection === "schedule") setCandidateId(initialJourneyId);
+  }, [initialJourneyId, suppliedSection]);
+  useEffect(() => {
+    if (candidate && /^\d{4}-\d{2}-\d{2}$/.test(candidateDate))
+      void schedule.refresh(candidateDate.slice(0, 7));
+  }, [candidate?.id, candidateDate, schedule.refresh]);
   function selectSection(next: AdminSection) {
     if (onSectionChange) onSectionChange(next);
     else setLocalSection(next);
@@ -180,6 +201,7 @@ export function AdminPanel({
   const saved =
     records[day]?.source === "assigned" ? (records[day].journeyId ?? "") : "";
   const [message, setMessage] = useState("");
+  const [messageSuccess, setMessageSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
   const [sort, setSort] = useState<JourneySort>(() =>
@@ -197,16 +219,25 @@ export function AdminPanel({
     }
   }, [sort]);
   useEffect(() => setResetMessage(""), [date]);
-  // Refresh published dates without erasing a Journey the admin is still choosing.
+  const dayLoaded =
+    !!records[day] || schedule.loadedMonths.includes(day.slice(0, 7));
+  // A server refresh is not an edit. Preserve a restored edit's original
+  // baseline until this date is loaded, including a choice to restore automatic.
   useEffect(() => {
-    setDraft((current) =>
-      current.day !== day || current.value === current.saved
-        ? { day, value: saved, saved }
-        : { ...current, saved },
-    );
-  }, [day, saved]);
+    if (!schedule.ready) return;
+    setDraft((current) => {
+      if (
+        current.day !== day ||
+        current.value === current.saved ||
+        (dayLoaded && current.value === saved)
+      )
+        return { day, value: saved, saved };
+      return current;
+    });
+  }, [day, saved, dayLoaded, schedule.ready]);
   useEffect(() => setMessage(""), [day]);
-  const selection = draft.day === day ? draft.value : saved;
+  const edited = draft.day === day && draft.value !== draft.saved;
+  const selection = edited ? draft.value : saved;
   const automaticChoices = { ...assignments };
   delete automaticChoices[day];
   if (records[day]?.autoJourneyId)
@@ -214,7 +245,7 @@ export function AdminPanel({
   const preview =
     JOURNEY_INDEX.find((journey) => journey.id === selection) ??
     resolve(day, automaticChoices);
-  const dirty = selection !== saved;
+  const dirty = edited && (!dayLoaded || selection !== saved);
   const busy = submitting || schedule.busy;
   useEffect(() => {
     try {
@@ -367,11 +398,33 @@ export function AdminPanel({
           >
             {tab === "schedule"
               ? "Schedule"
-              : tab === "feedback"
-                ? "Feedback"
-                : "Tools"}
+              : tab === "journeys"
+                ? "Journeys"
+                : tab === "feedback"
+                  ? "Feedback"
+                  : "Tools"}
           </button>
         ))}
+      </div>
+      <div
+        id="admin-journeys"
+        className="admin-tab-panel"
+        role="tabpanel"
+        aria-labelledby="admin-tab-journeys"
+        hidden={section !== "journeys"}
+      >
+        {section === "journeys" && (
+          <AdminJourneys
+            selectedId={libraryId}
+            onSelect={setLibraryId}
+            onNavigate={onNavigate}
+            onSchedule={(id) => {
+              setCandidateId(id);
+              setCandidateDate(day);
+              selectSection("schedule");
+            }}
+          />
+        )}
       </div>
       <div
         id="admin-schedule"
@@ -380,6 +433,91 @@ export function AdminPanel({
         aria-labelledby="admin-tab-schedule"
         hidden={section !== "schedule"}
       >
+        {candidate && (
+          <form
+            className="admin-schedule-candidate"
+            aria-label="Schedule reviewed Journey"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const loaded =
+                !!records[candidateDate] ||
+                schedule.loadedMonths.includes(candidateDate.slice(0, 7));
+              if (!loaded || busy || candidateDate < ARCHIVE_START_DATE) return;
+              if (
+                dirty &&
+                (candidateDate !== day || candidate.id !== selection) &&
+                !window.confirm(
+                  `Discard the unpublished change for ${formatDay(day)}?`,
+                )
+              )
+                return;
+              const baseline =
+                records[candidateDate]?.source === "assigned"
+                  ? (records[candidateDate].journeyId ?? "")
+                  : "";
+              setDay(candidateDate);
+              setMonth(candidateDate.slice(0, 7));
+              setDraft({
+                day: candidateDate,
+                value: candidate.id,
+                saved: baseline,
+              });
+              setCandidateId(undefined);
+              setMessage("");
+              setPickerOpen(false);
+            }}
+          >
+            <h2>Schedule {candidate.title}</h2>
+            <label className="field">
+              <span>Publish date</span>
+              <input
+                type="date"
+                min={ARCHIVE_START_DATE}
+                required
+                value={candidateDate}
+                onChange={(event) => setCandidateDate(event.target.value)}
+              />
+            </label>
+            <p>
+              Current assignment:{" "}
+              {records[candidateDate] ||
+              schedule.loadedMonths.includes(candidateDate.slice(0, 7))
+                ? (resolve(candidateDate, assignments)?.title ??
+                  "Journey unavailable")
+                : "Loading assignment…"}
+            </p>
+            <p>
+              Proposed Journey: <strong>{candidate.title}</strong>
+            </p>
+            <div className="admin-library-actions">
+              <button
+                className="primary-button"
+                type="submit"
+                disabled={
+                  busy ||
+                  candidateDate < ARCHIVE_START_DATE ||
+                  !(
+                    records[candidateDate] ||
+                    schedule.loadedMonths.includes(candidateDate.slice(0, 7))
+                  )
+                }
+              >
+                Preview assignment
+              </button>
+              <button
+                className="quiet-button"
+                type="button"
+                onClick={() => setCandidateId(undefined)}
+              >
+                Cancel scheduling
+              </button>
+            </div>
+            <p className="muted">
+              Previewing does not publish. You’ll confirm the assignment in the
+              date editor.
+            </p>
+          </form>
+        )}
         <div className="admin-journey-card journey-scheduler-card">
           <header className="journey-scheduler-heading">
             <div>
@@ -547,7 +685,12 @@ export function AdminPanel({
                 try {
                   const token = await account.accessToken();
                   if (!token) {
+                    setMessageSuccess(false);
                     setMessage("Sign in again to save the schedule.");
+                    notifications.notify(
+                      "Sign in again to save the schedule.",
+                      { tone: "error" },
+                    );
                     return;
                   }
                   const savedChange =
@@ -559,14 +702,25 @@ export function AdminPanel({
                           true,
                         )
                       : await schedule.save(day, selection || undefined, token);
-                  if (savedChange)
-                    setMessage(
-                      selection
-                        ? `Published ${preview?.title ?? "Journey"} for ${formatDay(day)}.`
-                        : `Restored automatic selection for ${formatDay(day)}.`,
+                  if (savedChange) {
+                    setMessageSuccess(true);
+                    const confirmation = selection
+                      ? `Published ${preview?.title ?? "Journey"} for ${formatDay(day)}.`
+                      : `Restored automatic selection for ${formatDay(day)}.`;
+                    setMessage(confirmation);
+                    notifications.notify(confirmation);
+                  } else
+                    notifications.notify(
+                      "Couldn’t save the schedule. Your selection is still a draft.",
+                      { tone: "error" },
                     );
                 } catch {
+                  setMessageSuccess(false);
                   setMessage("Couldn’t save the schedule. Please try again.");
+                  notifications.notify(
+                    "Couldn’t save the schedule. Please try again.",
+                    { tone: "error" },
+                  );
                 } finally {
                   setSubmitting(false);
                 }
@@ -747,7 +901,7 @@ export function AdminPanel({
                   <>
                     <p>{preview.description}</p>
                     <a
-                      href={preview.path}
+                      href={`${preview.path}?review=1`}
                       target="_blank"
                       rel="noreferrer"
                       className="tertiary-action"
@@ -797,7 +951,7 @@ export function AdminPanel({
                     Discard change
                   </button>
                 )}
-                {message && (
+                {message && (!notifications.enabled || !messageSuccess) && (
                   <p className="schedule-notice" role="status">
                     {message}
                   </p>
@@ -847,16 +1001,21 @@ export function AdminPanel({
                 )
               )
                 return;
-              setResetMessage(
-                onResetAttempt?.()
-                  ? "Attempt cleared. Start fresh from Home."
-                  : "Couldn’t clear the attempt. Please try again.",
-              );
+              const cleared = onResetAttempt?.() ?? false;
+              const confirmation = cleared
+                ? "Attempt cleared. Start fresh from Home."
+                : "Couldn’t clear the attempt. Please try again.";
+              setResetMessage(confirmation);
+              notifications.notify(confirmation, {
+                tone: cleared ? "success" : "error",
+              });
             }}
           >
             Clear my Journey attempt
           </button>
-          {resetMessage && <p role="status">{resetMessage}</p>}
+          {resetMessage && !notifications.enabled && (
+            <p role="status">{resetMessage}</p>
+          )}
         </section>
       </div>
     </section>

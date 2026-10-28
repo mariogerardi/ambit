@@ -1,3 +1,4 @@
+import { submittedMinigameRegion } from "./minigameAnswer";
 import {
   useCallback,
   useContext,
@@ -250,57 +251,66 @@ export function BorderMinigamePanel({
               </div>
             )}
           </dl>
-          <div className="minigame-result-detail">
-            {pinpoint && run.answered > 0 && (
-              <p>
-                <strong>
-                  {Math.round(points / run.answered).toLocaleString()}
-                </strong>{" "}
-                points per place ·{" "}
-                <strong>
-                  {(run.history ?? []).filter((v) => v.points === 1000).length}
-                </strong>{" "}
-                perfect pins
-              </p>
-            )}
-            {!shared.ranked && (
-              <p className="muted">
-                Custom rules · This run doesn’t count toward your personal best.
-              </p>
-            )}
-          </div>
-          <div className="minigame-result-actions result-actions">
-            <button
-              className="primary-button"
-              disabled={!reviewTargets.length}
-              onClick={() => onStudy(reviewTargets)}
-            >
-              <ActionIcon name="study" />
-              <span>
-                {reviewTargets.length
-                  ? `Study ${reviewTargets.length} missed ${reviewNoun}`
-                  : "Nothing to review"}
-              </span>
-            </button>
-            <button
-              className="study-repeat-button"
-              onClick={() => setSharing(true)}
-            >
-              <ActionIcon name="share" />
-              <span>Share result</span>
-            </button>
+          {((pinpoint && run.answered > 0) || !shared.ranked) && (
+            <div className="minigame-result-detail">
+              {pinpoint && run.answered > 0 && (
+                <p>
+                  <strong>
+                    {Math.round(points / run.answered).toLocaleString()}
+                  </strong>{" "}
+                  points per place ·{" "}
+                  <strong>
+                    {
+                      (run.history ?? []).filter((v) => v.points === 1000)
+                        .length
+                    }
+                  </strong>{" "}
+                  perfect pins
+                </p>
+              )}
+              {!shared.ranked && (
+                <p className="muted">
+                  Custom rules · This run doesn’t count toward your personal
+                  best.
+                </p>
+              )}
+            </div>
+          )}
+          <div
+            className="minigame-session minigame-results-actions"
+            aria-label="Game actions"
+          >
+            <div className="minigame-session-actions">
+              <button
+                className="primary-button"
+                aria-label="Play again"
+                onClick={shared.restart}
+              >
+                Play again <span aria-hidden="true">→</span>
+              </button>
+              <button className="secondary-button" onClick={onBack}>
+                Choose another game
+              </button>
+            </div>
+            <div className="minigame-result-actions">
+              {reviewTargets.length > 0 && (
+                <button
+                  className="quiet-button"
+                  onClick={() => onStudy(reviewTargets)}
+                >
+                  <ActionIcon name="study" />
+                  <span>{`Study ${reviewTargets.length} missed ${reviewNoun}`}</span>
+                </button>
+              )}
+              <button className="quiet-button" onClick={() => setSharing(true)}>
+                <ActionIcon name="share" />
+                <span>Share result</span>
+              </button>
+            </div>
           </div>
           {sharing && shareCard && (
             <JourneyShareDialog card={shareCard} onClose={closeSharing} />
           )}
-          <div className="minigame-actions">
-            <button className="primary-button" onClick={shared.restart}>
-              Play again
-            </button>
-            <button className="quiet-button" onClick={onBack}>
-              Choose another game
-            </button>
-          </div>
         </>
       ) : (
         <>
@@ -357,8 +367,28 @@ export function BorderMinigamePanel({
                       : " · Outside the area"}
                 </p>
               )}
-              <h2>{answer}</h2>
-              {!target?.region && (
+              {route ? (
+                <h2>{answer}</h2>
+              ) : !pinpoint ? (
+                <>
+                  <p className="study-response study-correction journey-correct-answer">
+                    <span>{run.result ? "Answer" : "Correct answer"}: </span>
+                    <strong>{answer}</strong>
+                  </p>
+                  {!run.result && (
+                    <p className="submitted-answer minigame-incorrect-answer">
+                      Your answer:{" "}
+                      <strong>
+                        {(shared.game &&
+                          submittedMinigameRegion(shared.game, shared.context)
+                            ?.name) ||
+                          (missing ? "Selected territory" : "Open water")}
+                      </strong>
+                    </p>
+                  )}
+                </>
+              ) : null}
+              {!pinpoint && !missing && (
                 <p>{shared.journey!.rounds[0].explanation}</p>
               )}
               {ended && (

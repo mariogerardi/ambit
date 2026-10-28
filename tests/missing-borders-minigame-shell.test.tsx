@@ -38,7 +38,7 @@ it("plays from the preview, restores country borders on reveal, and advances wit
   const pair = neighborDeck(pairs, run.seed, 0)[0];
   await mount();
   await click("Minigames");
-  await click("Preview Missing Borders");
+  await click("Missing Borders");
   await click("Resume game");
   expect(location.pathname).toBe("/minigames/missing-borders/play");
   expect(probe.props!.onCoordinateTap).toBeUndefined();
@@ -48,6 +48,8 @@ it("plays from the preview, restores country borders on reveal, and advances wit
     host.querySelector(".missing-borders-game")?.textContent,
   ).not.toContain("Check answer");
   const merged = probe.props!.regions.find((r) => r.id === pair.answer)!;
+  const questionKey = probe.props!.regionTransitionKey;
+  expect(questionKey).toBeDefined();
   expect(merged).toBeDefined();
   await act(async () => probe.props!.onSelect(merged));
   expect(
@@ -57,7 +59,9 @@ it("plays from the preview, restores country borders on reveal, and advances wit
     expect(probe.props!.states[id]).toBe("correct");
   expect(probe.props!.regions.some((r) => r.id === pair.answer)).toBe(false);
   expect(probe.props!.regionInteraction).toBe(false);
+  expect(probe.props!.regionTransitionKey).toBe(questionKey);
   await click("Next map");
+  expect(probe.props!.regionTransitionKey).not.toBe(questionKey);
   const second = neighborDeck(pairs, run.seed, 0)[1];
   expect(probe.props!.regions.some((r) => r.id === second.answer)).toBe(true);
   await act(async () =>
@@ -116,6 +120,13 @@ it("offers the next map after a miss, then ends on the third strike and restarts
         probe.props!.selectableRegionIds!.includes(r.id),
     )!;
     await act(async () => probe.props!.onSelect(wrong));
+    expect(host.querySelector(".submitted-answer")?.textContent).toContain(
+      wrong.name,
+    );
+    expect(probe.props!.states[wrong.id]).toBe("incorrect");
+    expect(
+      host.querySelector(".shared-neighbors-feedback")?.textContent,
+    ).not.toContain("The missing border separates");
     if (i < 3) await click("Next map");
   }
   expect(host.querySelector(".missing-borders-game h1")?.textContent).toBe(
@@ -124,7 +135,9 @@ it("offers the next map after a miss, then ends on the third strike and restarts
   expect(probe.props!.selectDisabled).toBe(true);
   expect(probe.props!.regionInteraction).toBe(false);
   expect(
-    host.querySelector(".shared-neighbors-feedback h2")?.textContent,
+    host.querySelector(
+      ".shared-neighbors-feedback .journey-correct-answer strong",
+    )?.textContent,
   ).toContain(" + ");
   await click("See results");
   expect(host.querySelector(".minigame-complete-label")).toBeNull();

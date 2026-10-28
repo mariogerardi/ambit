@@ -1,22 +1,4 @@
 {
-  "featured": [
-    {
-      "id": "along-the-andes-v1",
-      "reason": "A continuous route with terrain context, varied reasoning tasks, distance-pin tiers, purposeful reveals and a wildlife finale that moves forward."
-    },
-    {
-      "id": "chasing-the-sun-v2",
-      "reason": "The flags exemplar: a conceptual throughline across continents, motif clues, reveal-only flag comparisons and an authored completion."
-    },
-    {
-      "id": "mediterranean-v1",
-      "reason": "An itinerary with deliberate candidate sets, five different controls, hidden-feature disclosure, progressive help and a geographic payoff."
-    },
-    {
-      "id": "not-the-obvious-city-v1",
-      "reason": "Unexpected capitals explored through recall, pins, anonymous city markers and matching with a spare card; assists preserve real decisions."
-    }
-  ],
   "sourceReview": [
     "src/App.tsx",
     "src/app/useJourneyContent.ts",
@@ -113,6 +95,11 @@
     "src/game/countryRecall.ts",
     "src/game/CountryRecallAnswer.tsx",
     "src/game/MultiPinAnswer.tsx",
-    "scripts/prepare-india-journey.py"
+    "scripts/prepare-india-journey.py",
+    "src/app/AdminPanel.tsx",
+    "src/app/AdminJourneys.tsx",
+    "src/app/AdminJourneyReview.tsx",
+    "src/app/accountNavigation.ts",
+    "src/app/Toast.tsx"
   ]
 }

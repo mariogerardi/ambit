@@ -258,6 +258,7 @@ export class ClueLocators {
     radius: number,
     reserved: readonly LabelBox[] = [],
     settled = true,
+    pulseReserved: readonly LabelBox[] = reserved,
   ): LabelBox[] {
     this.pendingPulses = false;
     this.element.setAttribute("viewBox", `0 0 ${width} ${height}`);
@@ -274,7 +275,7 @@ export class ClueLocators {
       if (entry.clue.pulseOnly) {
         const behindPanel =
           point &&
-          reserved.some(
+          pulseReserved.some(
             (b) =>
               point.x >= b.left &&
               point.x <= b.right &&

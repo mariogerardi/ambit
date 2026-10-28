@@ -160,6 +160,7 @@
   border: 0;
   color: var(--ui-text, #e5e9dc);
 }
+.experience .globe-playback button,
 .experience .globe-controls button,
 .experience .globe-controls select {
   display: grid;
@@ -215,10 +216,12 @@
   background: var(--ui-input, #091b20);
   color: var(--ui-text, #fff);
 }
+.globe-playback svg,
 .globe-controls svg {
   width: 18px;
   height: 18px;
 }
+.globe-playback button:hover,
 .globe-controls button:hover,
 .globe-speed:hover {
   background: rgb(var(--ui-line-rgb) / 0.066);

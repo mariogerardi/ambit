@@ -1,0 +1,171 @@
+.admin-journey-library header h2 {
+  margin: 0 0 8px;
+}
+.admin-library-controls {
+  display: flex;
+  align-items: end;
+  gap: 16px;
+  margin: 24px 0;
+}
+.admin-library-controls .field:first-child {
+  flex: 1;
+}
+.admin-library-controls .field,
+.admin-schedule-candidate .field,
+.admin-review-toolbar .field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.admin-library-controls input,
+.admin-library-controls select,
+.admin-schedule-candidate input,
+.admin-review-toolbar select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 8px;
+  background: rgb(var(--ui-surface-rgb) / 0.9);
+  color: var(--ui-text);
+  font: 14px var(--font-ui);
+}
+.admin-library-controls input:focus-visible,
+.admin-library-controls select:focus-visible,
+.admin-schedule-candidate input:focus-visible,
+.admin-review-toolbar select:focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+.admin-library-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
+  gap: 24px;
+  align-items: start;
+}
+.admin-library-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 560px;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+}
+.experience .admin-library-list button {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 14px;
+  text-align: left;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 10px;
+  background: rgb(var(--ui-line-rgb) / 0.04);
+  color: var(--ui-text);
+}
+.experience .admin-library-list button[aria-current] {
+  border-color: var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.08);
+}
+.admin-library-list span {
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.admin-journey-outline {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb) / 0.8);
+}
+.admin-journey-outline h3 {
+  margin-top: 0;
+  font: 24px var(--font-editorial);
+}
+.admin-journey-outline ol {
+  padding-inline-start: 24px;
+}
+.admin-journey-outline li {
+  padding-inline-start: 4px;
+  margin: 24px 0;
+}
+.admin-journey-outline h4 {
+  margin: 0 0 8px;
+}
+.admin-journey-outline li p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.admin-library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.admin-library-actions > a,
+.admin-library-actions > button {
+  min-height: 44px;
+  box-sizing: border-box;
+}
+.admin-library-actions > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.admin-schedule-candidate {
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid var(--ui-accent);
+  border-radius: 12px;
+}
+.admin-schedule-candidate .field {
+  max-width: 260px;
+}
+.admin-review-toolbar {
+  padding: 16px;
+  margin: 0 0 24px;
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.4);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.admin-review-heading {
+  display: grid;
+  gap: 4px;
+}
+.admin-review-heading span,
+.admin-review-toolbar p {
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.admin-review-toolbar summary {
+  cursor: pointer;
+  min-height: 32px;
+}
+.admin-review-states {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 800px) {
+  .admin-library-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-library-list {
+    max-height: 300px;
+  }
+  .admin-library-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-library-controls .field {
+    width: 100%;
+  }
+}

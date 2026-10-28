@@ -126,7 +126,7 @@ const validateCards: NonNullable<MechanicDefinition["validateContext"]> = (
     fixed.length >= question.count ||
     (question.orderLabels && question.orderLabels.length !== question.count) ||
     (question.orderInitial &&
-      (ids.length !== question.count + 1 ||
+      ((ids.length !== question.count && ids.length !== question.count + 1) ||
         question.orderInitial.length !== question.count ||
         new Set(question.orderInitial).size !== question.count ||
         question.orderInitial.some((id) => !ids.includes(id))))
@@ -585,7 +585,7 @@ export const MECHANICS = {
     false,
   ),
   "choice-order": defineMechanic(
-    ["country-ids"],
+    ["country-ids", "choice-ids"],
     "Order cards",
     "cards",
     "ordered",
@@ -594,7 +594,11 @@ export const MECHANICS = {
     {
       ...cards,
       validate: (question, fail) => {
-        if (question.rule.type !== "country-ids" || !question.rule.ordered)
+        if (
+          (question.rule.type !== "country-ids" &&
+            question.rule.type !== "choice-ids") ||
+          !question.rule.ordered
+        )
           fail("card ordering requires ordered grading");
       },
     },

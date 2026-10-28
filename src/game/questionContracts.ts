@@ -106,7 +106,7 @@ export type KnowledgeRule =
       tiers?: { tolerance: number; feedback: string }[];
     }
   | { type: "region-ids"; ids: string[]; match?: "all" | "any" }
-  | { type: "choice-ids"; ids: string[] }
+  | { type: "choice-ids"; ids: string[]; ordered?: boolean }
   | { type: "slot-matches"; matches: { slotId: string; choiceId: string }[] }
   | { type: "capital-name"; countryId: string }
   | { type: "country-fact"; field: string; value: string }
@@ -166,7 +166,12 @@ export interface Question {
     hintMap?: { regionIds: readonly string[]; focus?: Focus };
     assist?: {
       text: string;
-      images?: { src: string; alt: string; caption: string }[];
+      images?: {
+        src: string;
+        alt: string;
+        caption: string;
+        credit?: NonNullable<Question["feedbackImage"]>["credit"];
+      }[];
       /** Display-only dial guide, measured clockwise from true north; may wrap through zero. */
       compassSector?: { start: number; end: number };
       /** Optional narrower regions to highlight in place of the hint regions. */
@@ -345,6 +350,8 @@ export interface Question {
   choices?: {
     id: string;
     label: string;
+    /** Documentary card photograph; captions are reserved for the reveal. */
+    image?: NonNullable<Question["feedbackImage"]>;
     /** What this option depicts, independently of its grading ID. Never grants map input. */
     geographyIds?: string[];
   }[];
@@ -353,8 +360,13 @@ export interface Question {
   /** Directional captions for an ordering puzzle's slots. */
   orderLabels?: string[];
   /** Stable role identities; matching answers refer to IDs, not display order. */
-  matchSlots?: { id: string; label: string; description?: string }[];
-  /** Filled answer slots plus one implicit distractor. Dragging always swaps. */
+  matchSlots?: {
+    id: string;
+    label: string;
+    description?: string;
+    image?: NonNullable<Question["feedbackImage"]>;
+  }[];
+  /** Filled answer slots with zero or one spare card. Dragging always swaps. */
   orderInitial?: string[];
   orderGroupLabel?: string;
   orderAsideLabel?: string;
@@ -401,6 +413,8 @@ export interface Journey {
     initialConstructionRoundId?: string;
     /** Resolved photo-and-distance recap for pin Journeys. */
     photoResults?: boolean;
+    /** Expand saved responses in the completion receipt without changing the map. */
+    answerReviews?: boolean;
   };
   mapAttribution?: { label: string; url: string };
   /** Keep previously visited display geography during subsequent camera travel. */

@@ -332,6 +332,49 @@
     ]
   },
   {
+    "id": "made-in-china-v1",
+    "addedAt": "2026-10-26",
+    "title": "Made in China",
+    "saveRevision": 2,
+    "legacyRoundLabels": {
+      "made-in-china-country-of-kitchens-v1": "Chengdu, Guangzhou & Xi’an",
+      "made-in-china-blue-and-white-v1": "Jingdezhen",
+      "made-in-china-wall-not-border-v1": "Gansu, Hebei & Shanxi",
+      "made-in-china-four-frames-v1": "Architecture",
+      "made-in-china-city-reinvented-v1": "Shenzhen"
+    },
+    "description": "From wheat noodles to a new metropolis: why did people make these things here?",
+    "path": "/journey/made-in-china",
+    "module": "./madeInChinaJourney.ts",
+    "rounds": [
+      {
+        "id": "made-in-china-country-of-kitchens-v1",
+        "label": "A bowl of wheat",
+        "resolvedLabel": "Xi’an · wheat noodles"
+      },
+      {
+        "id": "made-in-china-blue-and-white-v1",
+        "label": "A place for porcelain",
+        "resolvedLabel": "Jingdezhen · clay, fuel and rivers"
+      },
+      {
+        "id": "made-in-china-wall-not-border-v1",
+        "label": "Guard the gap",
+        "resolvedLabel": "Jiayuguan · a mountain gateway"
+      },
+      {
+        "id": "made-in-china-four-frames-v1",
+        "label": "A trading gateway",
+        "resolvedLabel": "Shanghai · river meets sea"
+      },
+      {
+        "id": "made-in-china-city-reinvented-v1",
+        "label": "A new connection",
+        "resolvedLabel": "Shenzhen · beside Hong Kong"
+      }
+    ]
+  },
+  {
     "id": "mediterranean-v1",
     "addedAt": "2026-10-10",
     "title": "Around the Mediterranean",

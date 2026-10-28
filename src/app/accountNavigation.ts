@@ -5,7 +5,7 @@ export interface ComparisonTarget {
   journeyId: string;
   version: number;
 }
-export type AdminSection = "schedule" | "feedback" | "tools";
+export type AdminSection = "journeys" | "schedule" | "feedback" | "tools";
 export type AccountSection =
   | "dashboard"
   | "profile"
@@ -15,6 +15,7 @@ export type AccountSection =
 export interface AccountIntent {
   tab?: AccountSection;
   section?: AdminSection;
+  journeyId?: string;
   friend?: string;
   player?: string;
   comparison?: ComparisonTarget;
@@ -25,10 +26,16 @@ export function accountIntent(url: string): AccountIntent {
   const params = parsed.searchParams;
   if (parsed.pathname === "/admin" || params.get("tab") === "admin") {
     const section = params.get("section");
+    const journeyId = params.get("journey");
     return {
       tab: "admin",
       section:
-        section === "feedback" || section === "tools" ? section : "schedule",
+        section === "journeys" || section === "feedback" || section === "tools"
+          ? section
+          : "schedule",
+      ...(journeyId && /^[a-zA-Z0-9:_-]{1,200}$/.test(journeyId)
+        ? { journeyId }
+        : {}),
     };
   }
   const friend = params.get("friend");
@@ -72,4 +79,11 @@ export function accountTabLink(tab: AccountSection, section?: AdminSection) {
   const params = new URLSearchParams({ tab });
   if (tab === "admin" && section) params.set("section", section);
   return `/account?${params}`;
+}
+
+export function adminJourneyLink(
+  journeyId: string,
+  section: "journeys" | "schedule" = "journeys",
+) {
+  return `${accountTabLink("admin", section)}&journey=${encodeURIComponent(journeyId)}`;
 }

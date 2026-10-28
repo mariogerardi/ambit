@@ -206,6 +206,15 @@ point guesses alongside its declared geography. Construction overviews with
 separate saved-response review keep their existing focused overview; the mistakes
 remain available in that review.
 
+Authored overviews without a separate construction review also retain imported
+province geometry, with only the declared completion regions and saved mistakes
+emphasized. Imported reveal geography requested by `assist.regionIds` becomes
+visible at the assisted stage; it stays withheld earlier. Card-order reveal
+markers use submitted slot badges, independently of canonical dates and grading.
+`completion.answerReviews: true` adds expandable saved-response reviews to the
+completion receipt, including slot assignments, mistaken selections and pin
+distance. These reviews preserve the overview and do not start a new attempt.
+
 ## Bearing Intersection composition
 
 `PRESENTATION_RECIPES` in `recipes.ts` includes `recipe:bearing-intersection`.

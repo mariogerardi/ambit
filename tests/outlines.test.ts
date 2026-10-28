@@ -235,3 +235,52 @@ it("omits detailed France/Italy shared edges after renderer geometry preparation
       boundaryOutlinePositions(r).length,
     );
 });
+
+it("omits original shared segments even when the renderer subdivides them into many smaller edges", () => {
+  const a: RegionFeature = {
+    id: "a",
+    name: "a",
+    level: "ADM0",
+    sourceId: "test",
+    focus: { lat: 0, lng: -1 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-2, -2],
+          [0, -2],
+          [0, 2],
+          [-2, 2],
+          [-2, -2],
+        ],
+      ],
+    },
+  };
+  const b: RegionFeature = {
+    ...a,
+    id: "b",
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, -2],
+          [2, -2],
+          [2, 2],
+          [0, 2],
+          [0, -2],
+        ],
+      ],
+    },
+  };
+  const omitted = sharedBoundary(a, b);
+  expect(omitted).toHaveLength(1);
+  const rendered = prepareGlobeRegions([a, b]);
+  for (const [i, source] of [a, b].entries()) {
+    expect(boundaryOutlinePositions(rendered[i], omitted)).toEqual(
+      boundaryOutlinePositions(source, omitted),
+    );
+    expect(boundaryOutlinePositions(rendered[i], omitted).length).toBeLessThan(
+      boundaryOutlinePositions(rendered[i]).length,
+    );
+  }
+});

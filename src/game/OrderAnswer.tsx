@@ -48,6 +48,31 @@ export function OrderAnswer({
   const spareCopy = spareCount === 1 ? "one card" : `${spareCount} cards`;
   const name = (id: string) =>
     question.choices?.find((choice) => choice.id === id)?.label ?? id;
+  const card = (id: string) => {
+    const photo = question.choices?.find((choice) => choice.id === id)?.image;
+    return (
+      <span className="order-card-content">
+        {photo && <img src={photo.src} alt={photo.alt} draggable={false} />}
+        <span>{name(id)}</span>
+      </span>
+    );
+  };
+  const photos = [
+    ...new Map(
+      [
+        ...(question.matchSlots ?? []).flatMap((slot) =>
+          slot.image ? [slot.image] : [],
+        ),
+        ...(question.choices ?? []).flatMap((choice) =>
+          choice.image ? [choice.image] : [],
+        ),
+      ].map((photo) => [photo.src, photo]),
+    ).values(),
+  ];
+  const photoGrid = populated && !matching && photos.length > 0;
+  const hasUnplacedCards = question.choices?.some(
+    (choice) => !ordered.includes(choice.id),
+  );
   const place = (id: string, index: number) => {
     dispatch({ type: "order-card", id, index });
     setPicked(undefined);
@@ -183,8 +208,16 @@ export function OrderAnswer({
               }}
             >
               <span className={matching ? "match-slot-copy" : undefined}>
+                {slot?.image && (
+                  <img
+                    className="match-slot-photo"
+                    src={slot.image.src}
+                    alt={slot.image.alt}
+                    draggable={false}
+                  />
+                )}
                 {matching && id && <small>{label}</small>}
-                {id ? name(id) : matching ? label : "Place a country"}
+                {id ? card(id) : matching ? label : "Place a card"}
               </span>
               <i aria-hidden="true">
                 {locked ? "✓" : id ? "⠿" : matching ? "+" : "⠿"}
@@ -239,7 +272,7 @@ export function OrderAnswer({
                 else choose(choice.id);
               }}
             >
-              <span>{choice.label}</span>
+              {card(choice.id)}
               <i aria-hidden="true">⠿</i>
             </button>
           ))}
@@ -258,7 +291,7 @@ export function OrderAnswer({
   );
   return (
     <div
-      className={`order-puzzle${populated ? " order-populated" : ""}${matching ? " match-puzzle" : ""}`}
+      className={`order-puzzle${populated ? " order-populated" : ""}${matching ? " match-puzzle" : ""}${photoGrid ? " order-photo-grid" : ""}`}
     >
       {populated && question.orderGroupLabel && (
         <p className="order-group-title">{question.orderGroupLabel}</p>
@@ -272,7 +305,7 @@ export function OrderAnswer({
         ) : (
           <>
             {slots}
-            {bank}
+            {hasUnplacedCards && bank}
           </>
         )}
       </div>
@@ -283,6 +316,27 @@ export function OrderAnswer({
             ? `All slots filled.${spareCount > 0 ? ` Leave ${spareCopy} aside.` : ""}`
             : "Fill each slot before submitting."}
       </p>
+      {!!photos.length && (
+        <p className="card-photo-credits">
+          Photos:{" "}
+          {photos.map((photo, index) => (
+            <span key={photo.src}>
+              {index > 0 && "; "}
+              <a href={photo.credit.url} target="_blank" rel="noreferrer">
+                {photo.credit.name}
+              </a>
+              {" · "}
+              <a
+                href={photo.credit.licenseUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {photo.credit.license}
+              </a>
+            </span>
+          ))}
+        </p>
+      )}
       <QuestionActions
         mapKey={mapKey}
         pointScoring
@@ -298,7 +352,7 @@ export function OrderAnswer({
             style={dragPosition}
             aria-hidden="true"
           >
-            <span>{name(dragging)}</span>
+            {card(dragging)}
             <i>⠿</i>
           </div>,
           document.body,

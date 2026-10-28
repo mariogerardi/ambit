@@ -263,6 +263,41 @@
   font-style: normal;
   color: var(--ui-muted);
 }
+.order-card-content {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+.order-card-content img,
+.match-slot-photo {
+  display: block;
+  width: 100%;
+  height: 104px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+.match-slot-photo {
+  margin-bottom: 8px;
+}
+.card-photo-credits {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ui-muted);
+  overflow-wrap: anywhere;
+}
+.journey-answer-recap {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.journey-answer-recap summary {
+  cursor: pointer;
+  color: var(--ui-accent);
+}
+.journey-answer-recap p {
+  line-height: 1.5;
+}
 .order-card.chosen,
 .drop-target .order-card {
   border-color: var(--ui-accent);
@@ -1672,6 +1707,30 @@
 
 .order-populated .order-slots li {
   grid-template-columns: 46px minmax(0, 1fr);
+}
+.order-photo-grid .order-slots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.order-photo-grid .order-slots li {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  align-content: stretch;
+  align-items: stretch;
+  gap: 5px;
+}
+.order-photo-grid .order-card {
+  width: 100%;
+  height: 100%;
+  align-items: start;
+}
+.order-photo-grid .order-card-content img {
+  height: 88px;
+}
+.order-photo-grid .order-card > span {
+  flex: 1;
+  min-width: 0;
 }
 .order-group-title {
   font-size: 12px;

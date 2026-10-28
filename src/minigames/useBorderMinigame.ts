@@ -1,19 +1,17 @@
-import type { RegionReveal } from "../globe/regionFades";
+import { regionalPinpointPoints } from "./pinpointSearch";
+import { minigameBase } from "./minigameContext";
+import { minigameWorld } from "./minigameWorld";
 import { useRevealSequence } from "./useRevealSequence";
-import { borderRunCrossings } from "./borderRunPath";
 import { geoDistance } from "d3-geo";
 import { useEffect, useMemo, useState } from "react";
-import { pointAlongBearing } from "../game/geodesic";
 import type { Focus, RegionFeature } from "../geography/types";
 import { createQuestionContext } from "../game/questionPreparation";
-import { journeyWorld } from "../app/journeyWorld";
 import { createNeighborSave } from "./sharedNeighborsSave";
 import {
   sharedNeighborPairs,
   poolSignature,
   neighborDeck,
   startNeighborRun,
-  neighborJourneyBase,
   neighborJourney,
   neighborGame,
   neighborReducer,
@@ -29,7 +27,6 @@ import {
   borderRunPairs,
   borderRunJourney,
   landTopology,
-  PINPOINT_BANDS,
   pinpointPairs,
   pinpointDeck,
   pinpointJourney,
@@ -52,18 +49,6 @@ import {
   smallCountryIds,
 } from "./minigameSettings";
 
-const bases = new WeakMap<
-  RegionFeature[],
-  ReturnType<typeof createQuestionContext>
->();
-function minigameBase(regions: RegionFeature[]) {
-  let base = bases.get(regions);
-  if (!base) {
-    base = createQuestionContext(regions, [], neighborJourneyBase);
-    bases.set(regions, base);
-  }
-  return base;
-}
 export function useBorderMinigame(
   regions: RegionFeature[],
   subject: string | undefined,
@@ -93,7 +78,7 @@ export function useBorderMinigame(
   );
   const [scoresStore] = useState(() => createMinigameScores(subject, kind));
   const [scores, setScores] = useState(() => scoresStore.load());
-  const scoreKey = `best:${kind === "border-run" || kind === "pinpoint" ? "v2:" : ""}${kind === "pinpoint" ? [...(runSettings.categories ?? defaultMinigameSettings.categories!)].sort().join("|") : JSON.stringify(kind === "missing-borders" ? [runSettings.region, runSettings.framing, runSettings.excludeSmallCountries ?? true, [...runSettings.excludedCountries].sort()] : kind === "border-run" ? [runSettings.showBorders ?? false, [...runSettings.excludedCountries].sort()] : [runSettings.includeTerritories, runSettings.excludeAdjacentClues, [...runSettings.excludedCountries].sort()])}`;
+  const scoreKey = `best:${kind === "pinpoint" && (!run || run.pinpointRules === "regional") ? "v3:" : kind === "border-run" || kind === "pinpoint" ? "v2:" : ""}${kind === "pinpoint" ? [...(runSettings.categories ?? defaultMinigameSettings.categories!)].sort().join("|") : JSON.stringify(kind === "missing-borders" ? [runSettings.region, runSettings.framing, runSettings.excludeSmallCountries ?? true, [...runSettings.excludedCountries].sort()] : kind === "border-run" ? [runSettings.showBorders ?? false, [...runSettings.excludedCountries].sort()] : [runSettings.includeTerritories, runSettings.excludeAdjacentClues, [...runSettings.excludedCountries].sort()])}`;
   const ranked = usesDefaultMinigameRules(runSettings, kind);
   const base = useMemo(
     () => (regions.length ? minigameBase(regions) : undefined),
@@ -219,7 +204,11 @@ export function useBorderMinigame(
                 runSettings.showBorders ?? false,
               )
             : kind === "pinpoint"
-              ? pinpointJourney(pair as PinpointPair, entryFocus)
+              ? pinpointJourney(
+                  pair as PinpointPair,
+                  entryFocus,
+                  current?.pinpointRules === "regional",
+                )
               : neighborJourney(pair, base)
         : undefined,
     [
@@ -232,6 +221,7 @@ export function useBorderMinigame(
       runSettings.framing,
       runSettings.showBorders,
       entryFocus,
+      current?.pinpointRules,
     ],
   );
   const overview =
@@ -266,127 +256,22 @@ export function useBorderMinigame(
   );
   const world = useMemo(() => {
     if (!journey || !context || !game) return undefined;
-    const view: ReturnType<typeof journeyWorld> & {
-      regionReveal?: RegionReveal;
-      borderOmissions?: Record<string, number[][][]>;
-    } = journeyWorld(regions, journey, game, context);
-    if (
-      kind === "border-run" &&
-      game.phase === "playing" &&
-      !(runSettings.showBorders ?? false)
-    )
-      view.borderRegionIds = [];
-    if (kind === "border-run" && current?.result !== undefined && !overview) {
-      const route = pair as RoutePair;
-      // Reveal the route through countries and border portals, without a center-to-center line.
-      route.route.forEach((id, index) => {
-        view.states[id] =
-          index <= Math.floor(revealStep / 2) ? "correct" : "disabled";
-      });
-      view.places = view.places.filter(
-        (place) =>
-          !place.id.startsWith("border-run:crossing:") ||
-          Number(place.markerBadge) <= Math.ceil(revealStep / 2),
-      );
-      if (!reduced) {
-        view.regionReveal = {
-          key: `${current.id}:${current.cycle}:${current.index}`,
-          ids: route.route.slice(0, Math.floor(revealStep / 2) + 1),
-          clueIds: route.countries,
-          durationMs: 180,
-        };
-        view.places = view.places.map((p) =>
-          p.id.startsWith("border-run:crossing:") ? { ...p, fadeInMs: 180 } : p,
-        );
-      }
-      if (revealStep >= routeLength * 2 - 1) {
-        const [lng, lat] = borderRunCrossings(route).at(-1)!;
-        view.clueLocators.push({
-          id: `border-run:${route.id}:finish`,
-          label: "",
-          pulseOnly: true,
-          repeat: true,
-          appearance: "completion",
-          region: route.components.at(-1)!.region,
-          anchor: { lng, lat },
-        });
-      }
-    }
-    if (
-      kind === "missing-borders" &&
-      current?.result !== undefined &&
-      !overview
-    ) {
-      const segments =
-        journey.rounds[0].feedbackOverlays?.flatMap((o) =>
-          o.type === "path" ? [o.coordinates] : [],
-        ) ?? [];
-      view.borderOmissions = Object.fromEntries(
-        pair!.countries.map((id) => [id, segments]),
-      );
-    }
-    if (kind === "missing-borders" && reduced)
-      view.overlays = view.overlays?.map((o) =>
-        o.type === "path" ? { ...o, reveal: undefined } : o,
-      );
-    if (
-      kind === "pinpoint" &&
-      current?.result !== undefined &&
-      !overview &&
-      (pair as PinpointPair).place
-    ) {
-      const target = (pair as PinpointPair).place!;
-      view.focus = journey.rounds[0].feedbackFocus!;
-      view.places = view.places.map((place) =>
-        place.id === target.id
-          ? {
-              ...place,
-              priority: 1000,
-              markerSize: 42,
-              labelHidden: false,
-              labelFlexible: true,
-            }
-          : place,
-      );
-
-      const visibleBands = PINPOINT_BANDS.filter((b) =>
-        [1000, 500, 100].includes(b.points),
-      );
-      view.overlays = view.overlays
-        ?.filter(
-          (o) =>
-            o.type !== "circle" ||
-            visibleBands.some((b) => b.radiusKm === o.radiusKm),
-        )
-        .map((o) =>
-          o.type === "circle" && o.id.startsWith("pin-tolerance:")
-            ? { ...o, shade: false }
-            : o,
-        );
-      view.places.push(
-        ...visibleBands.map((b) => {
-          const { lng, lat } = pointAlongBearing(
-            target,
-            115,
-            b.radiusKm / 6371.0088,
-          );
-          return {
-            id: `pinpoint:band:${b.points}`,
-            name: String(b.points),
-            kind: "other" as const,
-            lat,
-            lng,
-            sourceId: "pinpoint-score-band",
-            markerHidden: true,
-            labelTypography: "numeric" as const,
-            labelScale: 1.35,
-            labelFlexible: false,
-            visualState: "hinted" as const,
-            priority: 90,
-          };
-        }),
-      );
-    }
+    const view = minigameWorld({
+      regions,
+      journey,
+      context,
+      game,
+      kind,
+      pair: pair!,
+      showBorders: runSettings.showBorders,
+      revealStep,
+      reduced,
+      overview,
+      regionalPinpoint: current?.pinpointRules === "regional",
+      revealKey: current
+        ? `${current.id}:${current.cycle}:${current.index}`
+        : undefined,
+    });
     if (overview) {
       view.regionInteraction = false;
       for (const visit of current?.history ?? [])
@@ -488,16 +373,18 @@ export function useBorderMinigame(
         setRun((previous) => ({
           ...startNeighborRun(pairs, previous?.startedAt),
           settings: runSettings,
+          pinpointRules: kind === "pinpoint" ? "regional" : undefined,
           kind,
         }));
     },
-    start: () => {
+    start: (forceNew = false) => {
       if (kind === "pinpoint") {
         const view = readView?.();
         if (view) setEntryFocus({ ...view, altitude: 1.15 });
       }
       if (choices.length)
         setRun((previous) =>
+          !forceNew &&
           previous?.signature === signature &&
           previous.index < (kind === "pinpoint" ? 10 : pairs.length) &&
           !neighborRunEnded(previous) &&
@@ -506,6 +393,7 @@ export function useBorderMinigame(
             : {
                 ...startNeighborRun(choices, previous?.startedAt),
                 settings,
+                pinpointRules: kind === "pinpoint" ? "regional" : undefined,
                 kind,
               },
         );
@@ -559,7 +447,14 @@ export function useBorderMinigame(
                   kind === "pinpoint"
                     ? distanceKm === undefined
                       ? Number(next.result) * 1000
-                      : pinpointPoints(distanceKm)
+                      : current?.pinpointRules === "regional" &&
+                          (pair as PinpointPair).searchArea
+                        ? regionalPinpointPoints(
+                            distanceKm,
+                            (pair as PinpointPair).searchContext ??
+                              (pair as PinpointPair).searchArea!,
+                          )
+                        : pinpointPoints(distanceKm)
                     : undefined;
                 const result = points === undefined ? next.result! : points > 0;
                 const pinpointTarget =

@@ -60,7 +60,29 @@ export function QuestionActions({
                   {guidance.content.assist.images.map((image) => (
                     <figure key={image.src}>
                       <img src={image.src} alt={image.alt} />
-                      <figcaption>{image.caption}</figcaption>
+                      <figcaption>
+                        {image.caption}
+                        {image.credit && (
+                          <>
+                            {" "}
+                            <a
+                              href={image.credit.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {image.credit.name}
+                            </a>
+                            {" · "}
+                            <a
+                              href={image.credit.licenseUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {image.credit.license}
+                            </a>
+                          </>
+                        )}
+                      </figcaption>
                     </figure>
                   ))}
                 </div>

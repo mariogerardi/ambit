@@ -50,8 +50,17 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     await mount();
     expect(
       host.querySelector('.daily-menu [data-dd-action-name="Home Archive"]'),
-    ).not.toBeNull();
+    ).toBeNull();
     probe.currentView = { lat: 12, lng: 112, altitude: 1.65 };
+    const archiveButton = host.querySelector(
+      '[data-dd-action-name="Home Archive"]',
+    )!;
+    expect(archiveButton.closest(".menu-secondary")).not.toBeNull();
+    expect(
+      archiveButton
+        .querySelector(".home-archive-face")
+        ?.getAttribute("aria-hidden"),
+    ).toBe("true");
     const flights = probe.focus.length;
     await click("Journey archive");
     expect(location.pathname).toBe("/archive");
@@ -277,7 +286,8 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     expect(preview).toBeDefined();
     expect(
       journeyRegistry.JOURNEY_INDEX.some(
-        (journey) => journey.path === preview!.getAttribute("href"),
+        (journey) =>
+          `${journey.path}?review=1` === preview!.getAttribute("href"),
       ),
     ).toBe(true);
     for (const id of [

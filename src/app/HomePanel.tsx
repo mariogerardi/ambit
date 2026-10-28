@@ -145,19 +145,6 @@ export function HomePanel({
               →
             </span>
           </button>
-          {onArchive && (
-            <button
-              className="daily-menu-action home-archive-link"
-              data-dd-action-name="Home Archive"
-              onClick={onArchive}
-            >
-              <ActionIcon name="archive" />
-              <span className="daily-menu-action-label">Journey archive</span>
-              <span className="daily-menu-action-arrow" aria-hidden="true">
-                →
-              </span>
-            </button>
-          )}
         </div>
       </div>
       {scheduleError && (
@@ -173,6 +160,24 @@ export function HomePanel({
         </p>
       )}
       <div className="menu-secondary">
+        {onArchive && (
+          <button
+            className="home-archive"
+            data-dd-action-name="Home Archive"
+            aria-label="Journey archive"
+            onClick={onArchive}
+          >
+            <span className="home-archive-face" aria-hidden="true" />
+            <strong>
+              <ActionIcon name="archive" />
+              <span className="menu-secondary-label">Archive</span>
+              <span className="menu-secondary-arrow" aria-hidden="true">
+                →
+              </span>
+            </strong>
+            <small>Dive into past Journeys.</small>
+          </button>
+        )}
         <button
           className="home-minigames"
           data-dd-action-name="Home Minigames"

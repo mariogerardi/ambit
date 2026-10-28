@@ -37,14 +37,6 @@
   line-height: 1;
   transition: transform 160ms ease;
 }
-.daily-menu .home-archive-link {
-  background: transparent;
-  color: var(--ui-editorial);
-  font-size: 13px;
-}
-.daily-menu .home-archive-link:is(:hover, :focus-visible) {
-  background: rgb(var(--ui-editorial-rgb) / 0.08);
-}
 @media (prefers-reduced-motion: no-preference) {
   .daily-menu-action:not(:disabled):is(:hover, :focus-visible)
     .daily-menu-action-arrow {

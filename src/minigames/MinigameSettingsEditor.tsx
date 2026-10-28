@@ -42,13 +42,8 @@ export function MinigameSettingsEditor({
   );
   return (
     <div className="minigame-settings">
-      <div className="minigame-settings-heading">
-        <h3 ref={heading} tabIndex={-1}>
-          Game options
-        </h3>
-      </div>
       <section className="minigame-setting-group" aria-labelledby={`${id}-map`}>
-        <h4 id={`${id}-map`}>
+        <h4 id={`${id}-map`} ref={heading} tabIndex={-1}>
           {pinpoint
             ? "Places in play"
             : missing
@@ -58,8 +53,8 @@ export function MinigameSettingsEditor({
         {pinpoint ? (
           <>
             <p>
-              Ten rounds. Point locations score by distance; areas score for a
-              pin inside.
+              Ten rounds. Cities and landmarks have a highlighted search area
+              and score by distance; areas score for a pin inside.
             </p>
             {Object.entries(PINPOINT_CATEGORIES).map(([value, label]) => (
               <label className="minigame-setting-row" key={value}>

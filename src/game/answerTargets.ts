@@ -60,10 +60,17 @@ export function responsePlaceForName(
 /** The point-selection control also supports summits and other authored places. */
 export function pointAnswerNoun(question: Question) {
   const ids = question.selection.type === "ids" ? question.selection.ids : [];
-  return ids.length &&
+  if (
+    ids.length &&
     ids.every((id) => answerPlace(question, id)?.kind === "mountain")
-    ? "summit"
-    : "city";
+  )
+    return "summit";
+  if (
+    ids.length &&
+    ids.every((id) => answerPlace(question, id)?.kind === "landmark")
+  )
+    return "site";
+  return "city";
 }
 export function validPin(
   value: unknown,

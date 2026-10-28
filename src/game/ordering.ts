@@ -5,7 +5,7 @@ import type { Question, Response } from "./questionContracts";
 export const isSlotAnswer = (question: Pick<Question, "mode">) =>
   mechanicFor(question).control === "cards";
 
-/** Populated puzzles keep the remaining card in their single distractor group. */
+/** Populated puzzles start with every slot filled, with at most one spare card. */
 export function orderedCards(
   question: Question,
   response: Pick<Response, "ordered">,
@@ -27,13 +27,14 @@ export function swapOrderCard(
   );
   const from = ordered.indexOf(id);
   if (from === index) return ordered;
+  const spare = question.choices?.find(
+    (choice) => !ordered.includes(choice.id),
+  );
+  // A fully populated puzzle without a spare can only swap existing cards.
+  if (from >= 0 && index < 0 && question.orderInitial && !spare) return ordered;
   if (from >= 0)
     ordered[from] =
-      index >= 0
-        ? ordered[index]
-        : question.orderInitial
-          ? question.choices!.find((choice) => !ordered.includes(choice.id))!.id
-          : "";
+      index >= 0 ? ordered[index] : question.orderInitial ? spare!.id : "";
   if (index >= 0) ordered[index] = id;
   return ordered;
 }
