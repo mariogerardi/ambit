@@ -248,14 +248,16 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
         return fetcher(url, init);
       }),
     );
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     history.replaceState(null, "", "/admin");
     await mount();
     // Let the initial account hydration run, without waiting for any real service.
     await act(async () => new Promise((resolve) => setTimeout(resolve, 30)));
-    await click("Tools");
+    await act(async () =>
+      host.querySelector<HTMLElement>(".admin-maintenance > summary")!.click(),
+    );
     await click("Clear my Journey attempt");
-    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(document.querySelector("dialog[open]")).not.toBeNull();
+    await click("Reset my attempt");
     expect(host.textContent).toContain("Attempt cleared.");
     expect(save.load().attempts[day]).toBeUndefined();
     await click("Home");
@@ -281,13 +283,13 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
       new Set(journeyRegistry.JOURNEY_INDEX.map((journey) => journey.id)),
     );
     const preview = [...host.querySelectorAll<HTMLAnchorElement>("a")].find(
-      (link) => link.textContent?.includes("Preview five questions"),
+      (link) => link.textContent?.trim().startsWith("Review"),
     );
     expect(preview).toBeDefined();
     expect(
       journeyRegistry.JOURNEY_INDEX.some(
         (journey) =>
-          `${journey.path}?review=1` === preview!.getAttribute("href"),
+          journey.path === preview!.getAttribute("href")?.split("?")[0],
       ),
     ).toBe(true);
     for (const id of [
@@ -383,7 +385,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
         )!
         .click(),
     );
-    await click("Assign for Oct 11");
+    await click("Publish for Oct 11");
     expect(scheduleState.assignments["2026-10-11"]).toBe("mediterranean-v1");
     expect(host.textContent).toContain(
       "Published Around the Mediterranean for Sun, Oct 11.",
@@ -451,7 +453,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
         )!
         .click(),
     );
-    await click("Assign for Oct 12");
+    await click("Publish for Oct 12");
     expect(scheduleState.assignments).toEqual({
       "2026-10-12": ANDES_JOURNEY.id,
     });
@@ -464,7 +466,8 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Admin");
     await click("Mon, Oct 12");
-    await click("Use automatic selection instead");
+    await click("Choose a Journey");
+    await click("Use automatic rotation");
     await click("Restore automatic selection");
     expect(scheduleState.assignments).toEqual({});
     expect(host.textContent).toContain(
