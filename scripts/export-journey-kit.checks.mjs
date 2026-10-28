@@ -27,6 +27,7 @@ test("options and highlighted IDs fail closed on mistakes", () => {
   assert.throws(() => parseArgs(["--include-cdoe"]), /Unknown option/);
   const entries = [{ id: "test-v1", path: "/journey/test", title: "Test" }];
   const config = { featured: [{ id: "test-v1", reason: "Good example" }] };
+  assert.deepEqual(featuredEntries(entries, config, []), []);
   assert.equal(
     featuredEntries(entries, config, ["test"])[0].reason,
     "Good example",
@@ -134,12 +135,10 @@ test(
       );
       assert.equal(report.journeys, index.length);
       assert.equal(manifest.journeys.length, index.length);
-      assert.deepEqual(manifest.highlightedJourneyIds, [
-        "along-the-andes-v1",
-        "chasing-the-sun-v2",
-        "mediterranean-v1",
-        "not-the-obvious-city-v1",
-      ]);
+      assert.deepEqual(manifest.highlightedJourneyIds, []);
+      await assert.rejects(
+        access(path.join(directory, "FEATURED_EXAMPLES.md")),
+      );
       assert.ok(
         manifest.inputs.some(
           ({ path: file }) => file === "src/game/data/andes-relief.v1.json",
@@ -199,7 +198,7 @@ test(
       assert.match(kit, /### choice-match/);
       assert.match(kit, /### choice-order/);
       assert.match(kit, /city-multiple/);
-      assert.match(kit, /not the only models/);
+      assert.match(kit, /No Journeys are ranked or preferred/);
       const workflow = await readFile(
         path.join(ROOT, "docs/journey-authoring/IMPLEMENTING_A_SPEC.md"),
         "utf8",
@@ -209,6 +208,15 @@ test(
         workflow,
       );
       assert.ok(kit.includes(workflow));
+      const archetypes = await readFile(
+        path.join(ROOT, "docs/journey-authoring/JOURNEY_ARCHETYPES.md"),
+        "utf8",
+      );
+      assert.equal(
+        await readFile(path.join(directory, "JOURNEY_ARCHETYPES.md"), "utf8"),
+        archetypes,
+      );
+      assert.ok(kit.includes(archetypes));
       const gptGuide = await readFile(
         path.join(directory, "GPT_GUIDE.md"),
         "utf8",
@@ -216,6 +224,7 @@ test(
       for (const file of [
         "PROJECT_INSTRUCTIONS.md",
         "AUTHORING_KIT.md",
+        "JOURNEY_ARCHETYPES.md",
         "JOURNEY_SPEC_TEMPLATE.md",
       ])
         assert.ok(
@@ -229,15 +238,9 @@ test(
         assert.ok(gptGuide.includes(`## ${journey.title}\n`));
       const sliderNotes = kit.match(/### slider[^]*?(?=\n###|\n##)/)[0];
       assert.match(sliderNotes, /free Accuracy information/);
-      const featured = await readFile(
-        path.join(directory, "FEATURED_EXAMPLES.md"),
-        "utf8",
-      );
-      assert.equal((featured.match(/^### \d\./gm) ?? []).length, 20);
-      assert.match(featured, /"radiusKm":450/);
-      assert.match(featured, /"matchSlots"/);
-      assert.match(featured, /reviewed \d{4}-\d{2}-\d{2}/);
-      assert.ok(!featured.includes('"coordinates":'));
+      assert.match(gptGuide, /"radiusKm":450/);
+      assert.match(gptGuide, /"matchSlots"/);
+      assert.match(gptGuide, /reviewed \d{4}-\d{2}-\d{2}/);
       const review = await readFile(
         path.join(directory, "SOURCE_REVIEW.md"),
         "utf8",
@@ -271,7 +274,7 @@ test(
         "utf8",
       );
       assert.match(mediterranean, /"markerRole": "annotation"/);
-      assert.match(featured, /"markerRole":"annotation"/);
+      assert.match(gptGuide, /"markerRole":"annotation"/);
       const template = await readFile(
         path.join(directory, "JOURNEY_SPEC_TEMPLATE.md"),
         "utf8",
@@ -289,6 +292,17 @@ test(
         await readFile(path.join(directory, "manifest.json"), "utf8"),
       );
       assert.deepEqual(refreshed.highlightedJourneyIds, ["down-the-danube-v1"]);
+      const selected = await readFile(
+        path.join(directory, "FEATURED_EXAMPLES.md"),
+        "utf8",
+      );
+      assert.equal((selected.match(/^### \d\./gm) ?? []).length, 5);
+      assert.match(selected, /## Down the Danube/);
+      assert.doesNotMatch(selected, /## Along the Andes/);
+      await exportJourneyKit({ ...options, includeCode: false });
+      await assert.rejects(
+        access(path.join(directory, "FEATURED_EXAMPLES.md")),
+      );
       await assert.rejects(access(path.join(directory, "SOURCE_REVIEW.md")));
       await assert.rejects(access(path.join(directory, "code/src/App.tsx")));
       assert.equal(

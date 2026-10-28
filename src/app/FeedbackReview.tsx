@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useAccount } from "../services/accounts";
 import { feedbackApi } from "../services/feedback";
 import type { FeedbackItem } from "../services/feedback";
+import { useToast } from "./Toast";
 
 export function FeedbackReview() {
   const account = useAccount();
+  const { notify } = useToast();
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [cursor, setCursor] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -80,17 +82,21 @@ export function FeedbackReview() {
         "PATCH",
         request.signal,
       );
-      if (!request.signal.aborted)
+      if (!request.signal.aborted) {
         setItems((old) =>
           old.map((item) => (item.id === id ? { ...item, status } : item)),
         );
+        notify(`Feedback marked ${status.toLowerCase()}.`);
+      }
     } catch (failure) {
-      if (!request.signal.aborted)
-        setError(
+      if (!request.signal.aborted) {
+        const message =
           failure instanceof Error
             ? failure.message
-            : "Couldn’t update feedback.",
-        );
+            : "Couldn’t update feedback.";
+        setError(message);
+        notify(message, { tone: "error" });
+      }
     } finally {
       inFlight.current = false;
       if (!request.signal.aborted) setBusy(false);

@@ -237,17 +237,36 @@ export function placeLabelPlacement(
       return { box, cx, cy };
   }
 }
+function markerColor(place: PlaceFeature, palette: ThemeId) {
+  return place.accuracyBand
+    ? pinBandColor(place.accuracyBand.index, place.accuracyBand.count, palette)
+    : place.visualState
+      ? (playStateColor(place.visualState, palette) ??
+        (place.visualState === "hover" ? "#ffe391" : "#849899"))
+      : placeStyle(place.kind, palette).marker;
+}
+function pinMarkerBox(x: number, y: number, size: number): LabelBox {
+  return {
+    left: x - size * 0.35,
+    right: x + size * 0.35,
+    top: y - size * 0.9,
+    bottom: y + size * 0.1,
+  };
+}
 interface Entry {
   place: PlaceFeature;
   position: Vector3;
   label?: Sprite;
   marker?: Sprite;
+  pulse?: Sprite;
+  pulseStarted?: number;
 }
 /** Cached screen-sized place symbols/text, drawn above land but culled at Earth's horizon. */
 export class PlaceLabels {
   readonly group = new Group();
   private sprites = new Map<string, Sprite>();
   private markers = new Map<string, Sprite>();
+  private pulseTexture?: CanvasTexture;
   private markerMaterials = new Map<string, SpriteMaterial>();
   private active: Entry[] = [];
   private data?: PlaceFeature[];
@@ -262,7 +281,7 @@ export class PlaceLabels {
   needsRefresh() {
     return this.pendingLabels;
   }
-  /** Screen-space flags take priority over DOM island rings on the same frame. */
+  /** Pins and flags take priority over DOM island rings on the same frame. */
   priorityMarkerBoxes(
     camera: PerspectiveCamera,
     width: number,
@@ -270,7 +289,8 @@ export class PlaceLabels {
   ): LabelBox[] {
     return this.active.flatMap(({ place, position }) => {
       if (
-        !["start", "finish"].includes(place.markerRole ?? "") ||
+        ((place.kind !== "pin" || place.markerRole === "target") &&
+          !["start", "finish"].includes(place.markerRole ?? "")) ||
         !this.showMarkers ||
         position.clone().normalize().dot(camera.position.clone().normalize()) <=
           this.radius / camera.position.length()
@@ -280,6 +300,8 @@ export class PlaceLabels {
       const x = ((p.x + 1) * width) / 2,
         y = ((1 - p.y) * height) / 2;
       const size = placeMarkerSize(place, this.contextual);
+      if (place.kind === "pin" && place.markerRole !== "target")
+        return [pinMarkerBox(x, y, size)];
       return [
         {
           left: x - size * 0.25,
@@ -360,7 +382,7 @@ export class PlaceLabels {
         opacity: 1,
       }),
     );
-    sprite.renderOrder = 21;
+    sprite.renderOrder = 22;
     sprite.center.set(0.5, -0.32);
     sprite.userData.aspect = canvas.width / canvas.height;
     sprite.userData.placeId = place.id;
@@ -378,16 +400,7 @@ export class PlaceLabels {
     const style = place.answerTarget
       ? { ...placeStyle(place.kind, this.palette), shape: "circle" }
       : placeStyle(place.kind, this.palette);
-    const color = place.accuracyBand
-      ? pinBandColor(
-          place.accuracyBand.index,
-          place.accuracyBand.count,
-          this.palette,
-        )
-      : place.visualState
-        ? (playStateColor(place.visualState, this.palette) ??
-          (place.visualState === "hover" ? "#ffe391" : "#849899"))
-        : style.marker;
+    const color = markerColor(place, this.palette);
     const badge =
       place.markerBadge ??
       (place.visualState === "correct"
@@ -397,7 +410,7 @@ export class PlaceLabels {
           : place.visualState === "answer"
             ? "◎"
             : "");
-    const key = `${place.fadeInMs ? place.id : ""}:${style.shape}:${color}:${!!place.answerTarget}:${place.markerRole}:${badge}:${this.contextual}:${place.visualState}`;
+    const key = `${place.fadeInMs || place.dropInMs ? place.id : ""}:${style.shape}:${color}:${!!place.answerTarget}:${place.markerRole}:${badge}:${this.contextual}:${place.visualState}`;
     if (sprite && sprite.userData.markerStyle === key) return sprite;
     let material = this.markerMaterials.get(key);
     if (!material) {
@@ -573,7 +586,8 @@ export class PlaceLabels {
           ? 6 / 64
           : 0.5,
     );
-    sprite.renderOrder = 20;
+    sprite.renderOrder =
+      place.kind === "pin" && place.markerRole !== "target" ? 21 : 20;
     sprite.userData.placeId = place.id;
     sprite.userData.role = "marker";
     const group = this.group;
@@ -583,6 +597,31 @@ export class PlaceLabels {
     };
     this.markers.set(place.id, sprite);
     return sprite;
+  }
+  private pulse() {
+    if (!this.pulseTexture) {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 64;
+      const ctx = canvas.getContext("2d")!;
+      ctx.beginPath();
+      ctx.arc(32, 32, 25, 0, Math.PI * 2);
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      this.pulseTexture = placeTexture(canvas);
+    }
+    const pulse = new Sprite(
+      new SpriteMaterial({
+        map: this.pulseTexture,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+      }),
+    );
+    pulse.renderOrder = 19;
+    pulse.userData.role = "placement-pulse";
+    pulse.raycast = () => {};
+    return pulse;
   }
   update(layer: PlaceLabelLayer, radius: number) {
     const markers = !!layer.markers;
@@ -601,7 +640,8 @@ export class PlaceLabels {
       this.palette === (layer.palette ?? DEFAULT_THEME)
     )
       return;
-    const previousIds = new Set(this.active.map((e) => e.place.id));
+    const previousEntries = new Map(this.active.map((e) => [e.place.id, e]));
+    const previousIds = new Set(previousEntries.keys());
     this.data = layer.places;
     this.radius = radius;
     this.showLabels = layer.visible;
@@ -629,16 +669,41 @@ export class PlaceLabels {
             : undefined;
       label?.position.copy(position);
       marker?.position.copy(position);
+      if (marker && place.dropInMs) {
+        const previous = this.active.find(
+          (entry) => entry.place.id === place.id,
+        )?.marker;
+        marker.userData.dropStarted =
+          previous?.userData.dropStarted ?? performance.now();
+      }
       if (marker && place.fadeInMs && !previousIds.has(place.id)) {
         marker.userData.fadeStarted = performance.now();
         marker.material.opacity = 0;
       }
-      return { place, position, label, marker };
+      const previous = previousEntries.get(place.id);
+      const pulse =
+        place.placementPulse && marker
+          ? (previous?.pulse ?? this.pulse())
+          : undefined;
+      const pulseStarted = pulse
+        ? previous?.place.lat === place.lat && previous?.place.lng === place.lng
+          ? (previous.pulseStarted ?? performance.now())
+          : performance.now()
+        : undefined;
+      return { place, position, label, marker, pulse, pulseStarted };
     });
     this.group.clear();
-    for (const { label, marker } of this.active) {
+    for (const previous of previousEntries.values()) {
+      if (
+        previous.pulse &&
+        !this.active.some((e) => e.pulse === previous.pulse)
+      )
+        previous.pulse.material.dispose();
+    }
+    for (const { label, marker, pulse } of this.active) {
       if (label) this.group.add(label);
       if (marker) this.group.add(marker);
+      if (pulse) this.group.add(pulse);
     }
   }
   view(
@@ -754,9 +819,24 @@ export class PlaceLabels {
           )
           .map(({ entry, x, y }) => ({
             id: entry.place.id,
-            box: { left: x - 8, right: x + 8, top: y - 8, bottom: y + 8 },
+            box:
+              entry.place.kind === "pin" && entry.place.markerRole !== "target"
+                ? pinMarkerBox(
+                    x,
+                    y,
+                    placeMarkerSize(entry.place, this.contextual),
+                  )
+                : { left: x - 8, right: x + 8, top: y - 8, bottom: y + 8 },
           }))
       : [];
+    const hasPins =
+      this.showMarkers &&
+      candidates.some(
+        ({ entry }) =>
+          entry.place.kind === "pin" &&
+          entry.place.markerRole !== "target" &&
+          !entry.place.markerHidden,
+      );
     const occupied: LabelBox[] = [...reserved];
     const named = new Set<string>();
     const nameCounts = new Map<string, number>();
@@ -797,8 +877,31 @@ export class PlaceLabels {
                 place.markerSize,
               )
             : placeMarkerSize(place, this.contextual);
+        if (entry.pulse && entry.pulseStarted !== undefined) {
+          const t = Math.min(
+            1,
+            (performance.now() - entry.pulseStarted) / 1200,
+          );
+          entry.pulse.position.copy(position);
+          entry.pulse.scale.setScalar(scale * size * (0.8 + 1.8 * t));
+          entry.pulse.material.color.set(markerColor(place, this.palette));
+          entry.pulse.material.opacity = 0.65 * (1 - t) ** 2;
+          entry.pulse.visible = t < 1;
+          if (t < 1) this.pendingLabels = true;
+        }
         marker.scale.set(scale * size, scale * size, 1);
         marker.visible = size > 0;
+        if (place.dropInMs && marker.userData.dropStarted !== undefined) {
+          const t = Math.min(
+            1,
+            (performance.now() - marker.userData.dropStarted) / place.dropInMs,
+          );
+          // Camera-up keeps the drop vertical on screen while the Earth turns beneath it.
+          const lift = new Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+          marker.position.addScaledVector(lift, scale * 32 * (1 - t) ** 3);
+          marker.material.opacity = Math.min(1, t * 4);
+          if (t < 1) this.pendingLabels = true;
+        }
         if (place.fadeInMs && marker.userData.fadeStarted !== undefined) {
           const t = Math.min(
             1,
@@ -853,12 +956,15 @@ export class PlaceLabels {
             .filter(
               (marker) =>
                 marker.id !== place.id ||
+                place.kind === "pin" ||
                 place.answerTarget ||
                 place.labelFlexible,
             )
             .map((marker) => marker.box),
         ],
-        !!place.answerTarget || !!place.labelFlexible,
+        !!place.answerTarget ||
+          !!place.labelFlexible ||
+          (!this.contextual && hasPins),
         !!place.surfaceAligned,
       );
       if (!placement) continue;
@@ -893,6 +999,8 @@ export class PlaceLabels {
       material.map?.dispose();
       material.dispose();
     }
+    for (const entry of this.active) entry.pulse?.material.dispose();
+    this.pulseTexture?.dispose();
     this.sprites.clear();
     this.markers.clear();
     this.markerMaterials.clear();

@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { useToast } from "./Toast";
 import { useAccount } from "../services/accounts";
 import { AccountDashboard } from "./AccountDashboard";
 import type { DailyProgress } from "./dailyProgress";
@@ -26,6 +28,10 @@ export function AccountPanel({
   appearanceContent?: ReactNode;
 }) {
   const account = useAccount();
+  const { notify } = useToast();
+  useEffect(() => {
+    if (account.error) notify(account.error, { tone: "error" });
+  }, [account.error, notify]);
   if (!account.loading && account.user)
     return (
       <>

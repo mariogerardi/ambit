@@ -28,7 +28,7 @@ it("plays, reveals, advances, and resumes the same shuffled deck without remount
   const pair = neighborDeck(pairs, run.seed, 0)[0];
   await mount();
   await click("Minigames");
-  await click("Preview Shared Neighbors");
+  await click("Shared Neighbors");
   await click("Resume game");
   expect(location.pathname).toBe("/minigames/shared-neighbors/play");
   expect(document.querySelector('[role="dialog"]')).toBeNull();
@@ -61,7 +61,9 @@ it("plays, reveals, advances, and resumes the same shuffled deck without remount
   ).not.toContain("Borders are hidden.");
   await click("Check answer");
   expect(
-    host.querySelector(".shared-neighbors-feedback h2")?.textContent,
+    host.querySelector(
+      ".shared-neighbors-feedback .journey-correct-answer strong",
+    )?.textContent,
   ).toBeTruthy();
   expect(host.querySelector(".shared-neighbors-score")?.textContent).toContain(
     "1 correct",
@@ -78,7 +80,7 @@ it("plays, reveals, advances, and resumes the same shuffled deck without remount
   await act(async () => root.unmount());
   resetRoot();
   await mount();
-  await click("Preview Shared Neighbors");
+  await click("Shared Neighbors");
   await click("Resume game");
   expect(probe.props!.borderRegionIds).toEqual(second.countries);
   expect(host.querySelector(".shared-neighbors-score")?.textContent).toContain(
@@ -102,13 +104,23 @@ it("ends after three strikes, reveals the answer, and starts a fresh shuffled ru
   for (let strike = 1; strike <= 3; strike++) {
     await act(async () => probe.props!.onCoordinateTap!({ lat: 0, lng: -140 }));
     await click("Check answer");
+    expect(host.querySelector(".submitted-answer")?.textContent).toContain(
+      "Open water",
+    );
+    expect(
+      probe.props!.places.some(
+        (p) => p.kind === "pin" && p.visualState === "incorrect",
+      ),
+    ).toBe(true);
     if (strike < 3) await click("Next pair");
   }
   expect(host.querySelector(".shared-neighbors-game h1")?.textContent).toBe(
     "Which country borders both?",
   );
   expect(
-    host.querySelector(".shared-neighbors-feedback h2")?.textContent,
+    host.querySelector(
+      ".shared-neighbors-feedback .journey-correct-answer strong",
+    )?.textContent,
   ).toBeTruthy();
   expect(host.querySelector(".shared-neighbors-results")).toBeNull();
   expect(
@@ -157,11 +169,11 @@ it("finishes early, restores the results after reload, and offers Play from the 
     "Your neighbors, found.",
   );
   await click("Choose another game");
-  await click("Preview Shared Neighbors");
-  expect(document.querySelector('[role="dialog"]')?.textContent).not.toContain(
-    "Resume game",
-  );
-  await click("Play");
+  await click("Shared Neighbors");
+  expect(
+    document.querySelector(".minigame-carousel-card")?.textContent,
+  ).not.toContain("Resume game");
+  await click("Start new game");
   expect(createNeighborSave().load().run).toMatchObject({
     answered: 0,
     correct: 0,

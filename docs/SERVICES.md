@@ -29,16 +29,37 @@ Cognito access tokens with `openid` scope, and the Lambda checks group membershi
 Hiding a menu item is not the API authorization boundary. No password or account
 is created on the owner's behalf: use **Create account** and verify that address.
 
-The Admin account tab opens on **Schedule**, with compact secondary controls for
-**Feedback** and **Tools**. These sections have URLs under
+The Admin account tab opens on **Schedule**, with secondary controls for
+**Journeys**, **Feedback** and **Tools**. These sections have URLs under
 `/account?tab=admin&section=...`; legacy `/admin` links redirect there. Select a
 calendar day, open **Choose a Journey**, then search/filter the selectable catalog
 and review the draft before assigning it. Previews open in a separate tab. Month
 navigation keeps the editor on a date in the displayed month; changing dates asks
 before discarding an unpublished choice. Drafts survive leaving Admin within the
 same browser tab using session storage and are removed after publication or
-discard. Calendar markers distinguish manual, locked automatic, and provisional
+discard. Loading or refreshing assignments does not create an unpublished edit
+or a browser leave-page warning. A restored deliberate edit keeps its original
+baseline until its date loads, including a choice to restore automatic selection.
+Calendar markers distinguish manual, locked automatic, and provisional
 automatic assignments. On mobile, selecting a date brings its editor into view.
+
+**Journeys** is an independent searchable library with title/newest sorting and
+the selected Journey's five-question outline. Browsing, opening an outline and
+starting review do not create a scheduling draft. **Schedule this Journey** opens
+a date choice and shows the current and proposed assignments. **Preview assignment**
+stages the change in the existing date editor; only its explicit assignment action
+publishes. Review can return directly to this date-choice step.
+
+**Review Journey** opens the protected practice route with `?review=1`, reusing
+the real controls and persistent globe. Its game state is held only in memory,
+separately from normal practice, Daily/Archive attempts and account saves. Refresh
+discards it. Controls jump to or restart a question, restart the Journey, show
+hint/assist, evaluate sample correct/missed responses and preview an all-correct
+completion. Samples use the same reducer-based response generation as the
+structural audit; an unavailable sample is reported instead of fabricating a
+grade. Answer normally to inspect a particular wrong/partial response. Only
+registered Journeys are available here; this does not introduce an unlisted state
+or load arbitrary modules. Non-admin practice/review access remains blocked.
 
 Scheduling starts on October 11, 2026, matching the public Archive. Earlier
 calendar cells have no Journey and cannot be selected or assigned.
@@ -49,6 +70,14 @@ admin's current-day attempt, including its answers, score, and help use. Other
 dates and users remain intact. Start again from Home to use the currently
 scheduled Journey. The reset saves locally and synchronizes through the existing
 account save service.
+
+Shared toast notifications confirm profile/friend actions, appearance saves,
+schedule publication, attempt reset and feedback status changes. Brief notices
+expire after six seconds, with dismissal paused while hovered, focused or in a
+hidden tab. Failure notices remain dismissible until removed; field-specific
+validation and contextual errors stay inline. Notifications do not replace
+confirmation for destructive actions or publish an unsaved draft. The provider
+lives above account-specific workspaces so notices survive navigation.
 
 ## Public Journey archive
 

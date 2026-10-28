@@ -4,7 +4,12 @@ import { useWorldGeography } from "./app/useWorldGeography";
 import { useCameraOrchestration } from "./app/useCameraOrchestration";
 import { usePlayerProgress } from "./app/usePlayerProgress";
 import { HomePanel } from "./app/HomePanel";
-import { MinigamesPanel } from "./app/MinigamesPanel";
+import {
+  MinigamesPanel,
+  MinigameTourCaption,
+  selectedMinigame,
+} from "./app/MinigamesPanel";
+import { useMinigameTour } from "./minigames/useMinigameTour";
 import { useSharedNeighbors } from "./minigames/useSharedNeighbors";
 import { BorderMinigamePanel } from "./minigames/BorderMinigamePanel";
 import { startPlaceStudy } from "./study/engine";
@@ -55,6 +60,7 @@ import { appRelease } from "./services/config";
 import { trackAction, trackView, reportFailure } from "./services/monitoring";
 import type { FeedbackRequest } from "./services/feedback";
 import { AccountPanel, AdminAccess } from "./app/AccountPanel";
+import { ToastProvider, useToast } from "./app/Toast";
 import { FeedbackDialog } from "./app/FeedbackDialog";
 import { FeedbackReview } from "./app/FeedbackReview";
 import { AppearancePanel } from "./app/AppearancePanel";
@@ -67,6 +73,11 @@ import type { ThemeId } from "./theme/themes";
 import { ThemeContext } from "./theme/ThemedImage";
 const GameShell = lazy(() =>
   import("./game/GameShell").then((m) => ({ default: m.GameShell })),
+);
+const AdminJourneyReview = lazy(() =>
+  import("./app/AdminJourneyReview").then((module) => ({
+    default: module.AdminJourneyReview,
+  })),
 );
 import { JOURNEY_INDEX } from "./game/journeyRegistry";
 import { canSelect, responseCount } from "./game/questionPreparation";
@@ -125,11 +136,19 @@ const emptyRegions: RegionFeature[] = [];
 const noAction = () => {};
 export function PlayerWorkspace() {
   const account = useAccount();
-  if (account.loading) return <LoadingScreen />;
-  return <App key={account.user?.profile.sub ?? "guest"} />;
+  return (
+    <ToastProvider>
+      {account.loading ? (
+        <LoadingScreen />
+      ) : (
+        <App key={account.user?.profile.sub ?? "guest"} />
+      )}
+    </ToastProvider>
+  );
 }
 export function App() {
   const account = useAccount();
+  const { notify } = useToast();
   const subject = account.user?.profile.sub;
   const schedule = useJourneySchedule();
   const playerProfile = usePlayerProfile(subject, account.accessToken);
@@ -179,6 +198,9 @@ export function App() {
   const requestedMode = modeForPath(path);
   const restricted = requestedMode === "practice" && !account.admin;
   const mode = restricted ? "home" : requestedMode;
+  const reviewing =
+    mode === "practice" &&
+    new URLSearchParams(path.split("?")[1] ?? "").get("review") === "1";
   useEffect(() => {
     if (restricted && !account.loading) {
       history.replaceState(null, "", "/");
@@ -199,7 +221,11 @@ export function App() {
   }, []);
   const changeTheme = (value: ThemeId) => {
     setTheme(value);
-    saveTheme(value);
+    if (saveTheme(value)) notify("Appearance saved on this device.");
+    else
+      notify("Appearance changed, but couldn’t be saved on this device.", {
+        tone: "error",
+      });
   };
   const [defaultLayers, setDefaultLayers] = useState(readGlobeLayers);
   const [breakdown, setBreakdown] = useState<string>();
@@ -211,6 +237,8 @@ export function App() {
   const [studyBuilder, setStudyBuilder] = useState(false);
   const [studyBrowsingHistory, setStudyBrowsingHistory] = useState(false);
   const [practice, setPractice] = useState<Record<string, GameState>>({});
+  const [demoCustomizing, setDemoCustomizing] = useState(false);
+  const [reviews, setReviews] = useState<Record<string, GameState>>({});
   const [hover, setHover] = useState<RegionFeature>(),
     [selected, setSelected] = useState<string>();
   const [exploreSearch, setExploreSearch] = useState("");
@@ -227,9 +255,10 @@ export function App() {
     mode === "minigames" && pathname === "/minigames/pinpoint/play";
   const minigamePlaying =
     sharedPlaying || missingPlaying || borderRunPlaying || pinpointPlaying;
+  const minigameLanding = mode === "minigames" && !minigamePlaying;
+  const demoKind = selectedMinigame(pathname);
   const unrestricted =
     mode === "home" ||
-    (mode === "minigames" && !minigamePlaying) ||
     mode === "account" ||
     (mode === "study" && (studySetup || !study.session));
   const displayLayers =
@@ -348,7 +377,11 @@ export function App() {
   const game =
     mode === "daily"
       ? (activeAttempt?.game ?? { ...initialGame, phase: "playing" as const })
-      : (practice[journey.id] ?? { ...initialGame, phase: "playing" as const });
+      : ((reviewing ? reviews : practice)[journey.id] ?? {
+          ...initialGame,
+          phase: "playing" as const,
+          ordered: [...(journey.rounds[0]?.orderInitial ?? [])],
+        });
   const [constructionReviewIndex, setConstructionReviewIndex] = useState<
     number | undefined
   >(undefined);
@@ -361,23 +394,31 @@ export function App() {
     setConstructionReviewIndex(index >= 0 ? index : undefined);
   }, [journey.id, game.phase, journey.completion?.initialConstructionRoundId]);
   const sharedNeighbors = useSharedNeighbors(
-    mode === "minigames" ? namedRegions : emptyRegions,
+    sharedPlaying || (minigameLanding && demoKind === "shared-neighbors")
+      ? namedRegions
+      : emptyRegions,
     subject,
   );
   const missingBorders = useBorderMinigame(
-    mode === "minigames" ? namedRegions : emptyRegions,
+    missingPlaying || (minigameLanding && demoKind === "missing-borders")
+      ? namedRegions
+      : emptyRegions,
     subject,
     "missing-borders",
   );
   const borderRun = useBorderMinigame(
-    mode === "minigames" ? namedRegions : emptyRegions,
+    borderRunPlaying || (minigameLanding && demoKind === "border-run")
+      ? namedRegions
+      : emptyRegions,
     subject,
     "border-run",
     undefined,
     borderRunPlaying,
   );
   const pinpoint = useBorderMinigame(
-    mode === "minigames" ? namedRegions : emptyRegions,
+    pinpointPlaying || (minigameLanding && demoKind === "pinpoint")
+      ? namedRegions
+      : emptyRegions,
     subject,
     "pinpoint",
     () => globe.current?.view(),
@@ -393,7 +434,7 @@ export function App() {
     if (minigamePlaying && webgl && activeMinigame.count && !activeMinigame.run)
       activeMinigame.start();
   }, [minigamePlaying, webgl, activeMinigame.count, !!activeMinigame.run]);
-  const world = useMemo(
+  const playWorld = useMemo(
     () =>
       minigamePlaying
         ? activeMinigame.world
@@ -471,6 +512,7 @@ export function App() {
     scene,
     regions: namedRegions,
     clearHover,
+    externalCamera: minigameLanding,
     journey: {
       active: isJourney || (minigamePlaying && !!activeMinigame.world),
       definition:
@@ -478,7 +520,7 @@ export function App() {
           ? activeMinigame.journey
           : journey,
       context: minigamePlaying ? activeMinigame.context : context,
-      focus: world?.focus,
+      focus: playWorld?.focus,
       phase: minigamePlaying
         ? (activeMinigame.game?.phase ?? "playing")
         : game.phase,
@@ -498,6 +540,26 @@ export function App() {
       capitalFocus: studyPresentation.capitalFocus,
     },
   });
+  const demoController =
+    demoKind === "missing-borders"
+      ? missingBorders
+      : demoKind === "border-run"
+        ? borderRun
+        : demoKind === "pinpoint"
+          ? pinpoint
+          : sharedNeighbors;
+  const tour = useMinigameTour({
+    active: minigameLanding && ready && webgl,
+    kind: demoKind,
+    regions: namedRegions,
+    blockedId:
+      demoController.hasUnfinished && demoController.game?.phase === "playing"
+        ? demoController.journey?.rounds[0].id
+        : undefined,
+    reduced,
+    globe,
+  });
+  const world = minigameLanding ? tour.world : playWorld;
   const mobileStep = `${path}:${minigamePlaying ? `${activeMinigame.run?.cycle}:${activeMinigame.run?.index}:${activeMinigame.run?.result ?? "playing"}:${activeMinigame.ended}` : isJourney ? `${journey.id}:${game.roundIndex}:${game.phase}` : studying ? `${session!.prompt.ordinal}:${session!.phase}` : mode === "explore" ? `${selected}:${selectedRegion?.id}:${selectedCity?.id}` : "setup"}`;
   useEffect(() => {
     setGlobeExpanded(false);
@@ -784,7 +846,7 @@ export function App() {
           };
         });
       else
-        setPractice((p) => ({
+        (reviewing ? setReviews : setPractice)((p) => ({
           ...p,
           [journey.id]: gameReducer(
             p[journey.id] ?? { ...initialGame, phase: "playing" },
@@ -794,7 +856,7 @@ export function App() {
           ),
         }));
     },
-    [context, mode, journey, allJourneys, playDate, archiveDate],
+    [context, mode, reviewing, journey, allJourneys, playDate, archiveDate],
   );
   const studyAction = useCallback(
     (action: StudyAction) =>
@@ -960,6 +1022,9 @@ export function App() {
         borderRun={borderRun}
         pinpoint={pinpoint}
         webgl={webgl}
+        tour={tour}
+        customizing={demoCustomizing}
+        onCustomize={setDemoCustomizing}
       />
     ) : mode === "archive" ? (
       <JourneyArchive
@@ -995,6 +1060,8 @@ export function App() {
                 <AdminPanel
                   embedded
                   section={accountNavigation.section ?? "schedule"}
+                  initialJourneyId={accountNavigation.journeyId}
+                  onNavigate={navigate}
                   onSectionChange={(section) =>
                     navigate(accountTabLink("admin", section))
                   }
@@ -1192,7 +1259,22 @@ export function App() {
         }}
         canReplay={mode === "practice"}
         contextNavigation={
-          archiveDate ? (
+          reviewing ? (
+            <Suspense fallback={<p role="status">Opening review controls…</p>}>
+              <AdminJourneyReview
+                journey={journey}
+                context={context}
+                game={game}
+                onChange={(next) =>
+                  setReviews((previous) => ({
+                    ...previous,
+                    [journey.id]: next,
+                  }))
+                }
+                onNavigate={navigate}
+              />
+            </Suspense>
+          ) : archiveDate ? (
             <div className="journey-archive-context">
               <button
                 className="quiet-button"
@@ -1265,7 +1347,6 @@ export function App() {
           ? session!.phase
           : "playing";
   const motionControls = (mode === "home" ||
-    (mode === "minigames" && !minigamePlaying) ||
     mode === "explore" ||
     mode === "archive" ||
     (mode === "study" &&
@@ -1292,7 +1373,7 @@ export function App() {
   );
   const content = (
     <main
-      className={`experience mode-${mode} phase-${phase} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
+      className={`experience ${minigameLanding ? "minigame-touring" : ""} mode-${mode} phase-${phase} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
       style={
         mobile.enabled
           ? ({
@@ -1347,6 +1428,7 @@ export function App() {
                 placeContextual={!!displayLayers || !!studyDisplay}
                 placeDensity={studyDisplay ? "study" : undefined}
                 selectDisabled={
+                  minigameLanding ||
                   (minigamePlaying && activeMinigame.ended) ||
                   world?.selectDisabled ||
                   mode === "explore" ||
@@ -1359,14 +1441,25 @@ export function App() {
                 overlays={world?.overlays}
                 clueLocators={world?.clueLocators}
                 regionReveal={
-                  minigamePlaying
-                    ? activeMinigame.world?.regionReveal
-                    : undefined
+                  minigameLanding
+                    ? tour.world?.regionReveal
+                    : minigamePlaying
+                      ? activeMinigame.world?.regionReveal
+                      : undefined
+                }
+                regionTransitionKey={
+                  minigameLanding
+                    ? tour.world?.regionTransitionKey
+                    : minigamePlaying
+                      ? activeMinigame.world?.regionTransitionKey
+                      : undefined
                 }
                 borderOmissions={
-                  minigamePlaying
-                    ? activeMinigame.world?.borderOmissions
-                    : undefined
+                  minigameLanding
+                    ? tour.world?.borderOmissions
+                    : minigamePlaying
+                      ? activeMinigame.world?.borderOmissions
+                      : undefined
                 }
                 showBorders={borders}
                 borderRegionIds={
@@ -1376,15 +1469,17 @@ export function App() {
                 surfaceRoutes
                 regionNames={names}
                 regionInteraction={
-                  !studying || !session || !isStudyPinPrompt(session.prompt)
-                    ? (!minigamePlaying ||
-                        (!activeMinigame.ended &&
-                          activeMinigame.run?.result === undefined)) &&
-                      mode !== "archive" &&
-                      !studyBrowsingHistory &&
-                      !studyEditing &&
-                      (world?.regionInteraction ?? true)
-                    : false
+                  minigameLanding
+                    ? false
+                    : !studying || !session || !isStudyPinPrompt(session.prompt)
+                      ? (!minigamePlaying ||
+                          (!activeMinigame.ended &&
+                            activeMinigame.run?.result === undefined)) &&
+                        mode !== "archive" &&
+                        !studyBrowsingHistory &&
+                        !studyEditing &&
+                        (world?.regionInteraction ?? true)
+                      : false
                 }
                 namedRegionIds={
                   world?.namedRegionIds ?? studyPresentation.namedRegionIds
@@ -1440,7 +1535,9 @@ export function App() {
                 }
                 onCoordinateTap={
                   studying &&
-                  session && isStudyPinPrompt(session.prompt) && !studyEditing &&
+                  session &&
+                  isStudyPinPrompt(session.prompt) &&
+                  !studyEditing &&
                   session.phase === "playing"
                     ? (point) => {
                         stop();
@@ -1509,10 +1606,10 @@ export function App() {
                   if (region) choose(region);
                 }}
                 rotationSpeed={rotationSpeed}
-                motion={motion}
+                motion={minigameLanding ? false : motion}
                 reduced={reduced}
                 onReady={onReady}
-                onInteraction={stop}
+                onInteraction={minigameLanding ? tour.pause : stop}
                 onFailure={contextLost}
                 onTextureFallback={noAction}
                 onSurfaceTap={
@@ -1535,6 +1632,7 @@ export function App() {
           </BoardBoundary>
         )}
       </div>
+      {minigameLanding && webgl && <MinigameTourCaption tour={tour} />}
       <header className="experience-header">
         <button
           className="experience-logo"
@@ -1637,7 +1735,13 @@ export function App() {
         </div>
       )}
       <ModePanels
-        mode={mode === "account" ? "account" : path}
+        mode={
+          mode === "account"
+            ? "account"
+            : minigameLanding
+              ? "minigames-menu"
+              : path
+        }
         animateExit={
           !(mode === "study" && (studyEditorOpen || studyCustomizing))
         }
@@ -1647,7 +1751,15 @@ export function App() {
         hidden={expanded}
         scrollKey={mobile.enabled ? mobileStep : undefined}
       >
-        <PanelBoundary key={mode === "account" ? "account" : path}>
+        <PanelBoundary
+          key={
+            mode === "account"
+              ? "account"
+              : minigameLanding
+                ? "minigames-menu"
+                : path
+          }
+        >
           <Suspense
             fallback={
               <section className="info-view" role="status">

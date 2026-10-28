@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 
+const REVEAL_FIRST_MS = 160;
+const REVEAL_INTERVAL_MS = 110;
+export function revealSequenceStep(elapsed: number, total: number) {
+  return elapsed < REVEAL_FIRST_MS
+    ? 0
+    : Math.min(
+        total,
+        1 + Math.floor((elapsed - REVEAL_FIRST_MS) / REVEAL_INTERVAL_MS),
+      );
+}
+
 /** Reveal steps belong to the view, never the saved answer or score. */
 export function useRevealSequence(
   key: string | undefined,
@@ -22,9 +33,9 @@ export function useRevealSequence(
     let step = 0;
     const advance = () => {
       setProgress({ key, step: ++step });
-      if (step < total) timer = setTimeout(advance, 110);
+      if (step < total) timer = setTimeout(advance, REVEAL_INTERVAL_MS);
     };
-    let timer = setTimeout(advance, 160);
+    let timer = setTimeout(advance, REVEAL_FIRST_MS);
     return () => clearTimeout(timer);
   }, [key, total, active, reduced]);
   return {

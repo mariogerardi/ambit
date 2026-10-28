@@ -20,6 +20,11 @@ it("customizes Shared Neighbors without changing an unfinished run until Start n
   history.replaceState(null, "", "/minigames/shared-neighbors");
   await mount();
   await click("Customize");
+  const playback = document.querySelector<HTMLButtonElement>(
+    '[aria-label="Pause globe tour"]',
+  )!;
+  expect(playback.disabled).toBe(false);
+  expect(playback.getAttribute("aria-pressed")).toBe("true");
   const toggles = document.querySelectorAll<HTMLInputElement>(
     ".minigame-setting-row input",
   );
@@ -54,9 +59,9 @@ it("customizes Shared Neighbors without changing an unfinished run until Start n
     excludeAdjacentClues: true,
     excludedCountries: ["wurl:BRA"],
   });
-  expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
-    "Starting a new game replaces your current game.",
-  );
+  expect(
+    document.querySelector(".minigame-carousel-card")?.textContent,
+  ).toContain("Starting a new game replaces your current game.");
   await click("Start new game");
   const run = createNeighborSave().load().run!;
   expect(run.id).not.toBe(initial.id);
@@ -87,7 +92,7 @@ it("starts Missing Borders centered on the chosen continent", async () => {
   ).toBe("Continent-wide");
   await click("Regional");
   await click("Continent-wide");
-  await click("Play");
+  await click("Start new game");
   expect(
     createNeighborSave(undefined, "missing-borders").load().run?.settings,
   ).toMatchObject({
@@ -109,12 +114,12 @@ it("explains an empty pool, prevents starting it, and restores playable defaults
   await mount();
   expect(
     document.querySelector<HTMLButtonElement>(
-      ".activity-preview-actions .primary-button",
+      ".minigame-carousel-actions .primary-button",
     )!.disabled,
   ).toBe(true);
-  expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
-    "No puzzles match your settings.",
-  );
+  expect(
+    document.querySelector(".minigame-carousel-card")?.textContent,
+  ).toContain("No puzzles match your settings.");
   expect(createNeighborSave().load().run).toBeUndefined();
   await click("Customize");
   await click("Reset settings");
@@ -123,10 +128,10 @@ it("explains an empty pool, prevents starting it, and restores playable defaults
   ).toContain("Default rules");
   expect(
     document.querySelector<HTMLButtonElement>(
-      ".activity-preview-actions .primary-button",
+      ".minigame-carousel-actions .primary-button",
     )!.disabled,
   ).toBe(false);
-  await click("Play");
+  await click("Start new game");
   expect(createNeighborSave().load().run?.settings).toEqual(
     defaultMinigameSettings,
   );

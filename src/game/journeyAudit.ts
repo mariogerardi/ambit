@@ -44,7 +44,7 @@ function invalidCamera(focus: Focus) {
 }
 
 /** Exercise real input actions; no empty response with a fabricated grade. */
-function submitSample(
+export function submitSample(
   journey: Journey,
   question: Question,
   context: QuestionContext,

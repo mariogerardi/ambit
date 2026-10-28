@@ -641,15 +641,18 @@
     pointer-events: auto;
     z-index: 5;
   }
+  .experience .globe-playback svg,
   .experience .globe-controls svg {
     width: 16px;
     height: 16px;
   }
+  .experience .globe-playback button,
   .experience .globe-controls button,
   .experience .globe-controls select {
     height: 44px;
     min-height: 44px;
   }
+  .experience .globe-playback button,
   .experience .globe-controls button,
   .experience .globe-speed {
     width: 44px;
@@ -756,6 +759,12 @@
   }
   .experience.experience .question-card {
     padding-top: 20px;
+  }
+  .experience.experience .home-menu {
+    padding-bottom: 0;
+  }
+  .experience.experience.mode-home .mode-layer {
+    padding-bottom: 0;
   }
   .experience.experience .study-editor {
     height: 100%;

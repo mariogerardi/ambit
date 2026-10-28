@@ -26,6 +26,7 @@ import { AccountTabs } from "./AccountTabs";
 import type { AccountSection } from "./AccountTabs";
 import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
 import "./account.css";
+import { useToast } from "./Toast";
 
 const newProfile = (id: string): AccountProfile => ({
   id,
@@ -79,6 +80,7 @@ export function AccountDashboard({
   adminContent?: ReactNode;
   appearanceContent?: ReactNode;
 }) {
+  const notifications = useToast();
   const intent = useMemo(
     () => suppliedIntent ?? accountIntent(location.pathname + location.search),
     [suppliedIntent],
@@ -204,10 +206,15 @@ export function AccountDashboard({
       if (controller.current?.signal.aborted) return false;
       if (reload) await load(controller.current?.signal);
       setNotice(message);
+      notifications.notify(message);
       return true;
     } catch (e) {
-      if (!controller.current?.signal.aborted)
-        setError(e instanceof Error ? e.message : "Please try again.");
+      if (!controller.current?.signal.aborted) {
+        const message = e instanceof Error ? e.message : "Please try again.";
+        setError(message);
+        if (!(e instanceof CommunityError && e.field))
+          notifications.notify(message, { tone: "error" });
+      }
       return false;
     } finally {
       setWorking(false);
@@ -315,7 +322,7 @@ export function AccountDashboard({
             </button>
           </div>
         )}
-        {notice && (
+        {notice && !notifications.enabled && (
           <p className="account-message" role="status">
             {notice}
           </p>
@@ -480,8 +487,9 @@ export function AccountDashboard({
                       }
                     />
                     <small id="handle-help">
-                      Use 3–24 characters: letters, numbers, or underscores, starting
-                      with a letter. Friends can find you by this handle.
+                      Use 3–24 characters: letters, numbers, or underscores,
+                      starting with a letter. Friends can find you by this
+                      handle.
                     </small>
                     <div
                       id="handle-availability"

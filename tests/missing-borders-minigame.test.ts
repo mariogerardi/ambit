@@ -2,7 +2,7 @@ import { sharedBoundary } from "../src/minigames/sharedBoundary";
 import { compositeRegion } from "../src/game/compositeRegions";
 import { sphericalGeometry } from "../src/geography/sphericalGeometry.mjs";
 import { readFileSync } from "node:fs";
-import { geoArea, geoDistance } from "d3-geo";
+import { geoArea, geoDistance, geoContains } from "d3-geo";
 import { expect, it } from "vitest";
 import type { RegionFeature } from "../src/geography/types";
 import { createQuestionContext } from "../src/game/questionPreparation";
@@ -28,6 +28,36 @@ const regions = JSON.parse(
 ) as RegionFeature[];
 const base = createQuestionContext(regions, [], missingBordersBase);
 const pairs = missingBorderPairs(regions);
+
+it("anchors generic France reveal labels inside mainland France rather than at its global camera focus", () => {
+  const pair = pairs.find((p) => p.id === "wurl:FRA|wurl:LUX")!;
+  const journey = missingBorderJourney(pair, base, regions, 123);
+  const context = createQuestionContext(regions, [], journey, base);
+  const run = neighborReducer(
+    startNeighborRun(pairs),
+    { type: "select", id: pair.answer },
+    journey,
+    context,
+    pairs.length,
+  );
+  const reveal = journeyWorld(
+    regions,
+    journey,
+    neighborGame(run, journey),
+    context,
+  );
+  const label = reveal.places.find((p) => p.id === "territory-label:wurl:FRA")!;
+  const france = regions.find((r) => r.id === "wurl:FRA")!;
+  expect(
+    geoContains(sphericalGeometry(france.displayGeometry ?? france.geometry), [
+      label.lng,
+      label.lat,
+    ]),
+  ).toBe(true);
+  expect(label.lng).toBeGreaterThan(-5);
+  expect(label.lat).toBeGreaterThan(43);
+  expect(label.lat).toBeLessThan(51);
+});
 
 it("generates a stable pool of real land borders, including overseas components", () => {
   expect(pairs.length).toBeGreaterThan(200);

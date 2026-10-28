@@ -224,8 +224,10 @@ export function readTheme(): ThemeId {
 export function saveTheme(theme: ThemeId) {
   try {
     localStorage.setItem(THEME_KEY, JSON.stringify({ version: 1, theme }));
+    return true;
   } catch {
     /* The live selection still works when storage is unavailable. */
+    return false;
   }
 }
 export function applyTheme(id: ThemeId, root = document.documentElement) {

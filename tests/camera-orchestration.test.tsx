@@ -54,6 +54,7 @@ beforeEach(() => {
   vi.stubGlobal("matchMedia", () => media);
   view = { lat: 12, lng: 28, altitude: 1.65 };
   port = {
+    orbitView: vi.fn(),
     focus: vi.fn(),
     cancelFocus: vi.fn(),
     flyover: vi.fn(),

@@ -25,6 +25,7 @@ interface CameraOptions {
   scene: RefObject<HTMLDivElement | null>;
   regions: RegionFeature[];
   clearHover(): void;
+  externalCamera?: boolean;
   journey: {
     active: boolean;
     definition: Journey;
@@ -56,6 +57,7 @@ export function useCameraOrchestration({
   scene,
   regions: namedRegions,
   clearHover,
+  externalCamera = false,
   journey: journeyCamera,
   study,
 }: CameraOptions) {
@@ -202,6 +204,10 @@ export function useCameraOrchestration({
   // Frame questions on transitions; overview screens share the current orbit.
   useEffect(() => {
     if (!ready) return;
+    if (externalCamera) {
+      previous.current = cameraKey;
+      return;
+    }
     const old = previous.current;
     if (isJourney && (phase === "finished" || phase === "failed")) {
       previous.current = cameraKey;
@@ -266,6 +272,7 @@ export function useCameraOrchestration({
   }, [
     ready,
     cameraKey,
+    externalCamera,
     isJourney,
     !!journeyFocus,
     mode === "minigames" ? journeyFocus?.lat : undefined,

@@ -138,8 +138,7 @@ function resolveQuestionPlaces(
         kind: "other",
         sourceId: "journey",
         markerHidden: true,
-        lat: region.focus.lat,
-        lng: region.focus.lng,
+        ...interiorAnchor(region),
         visualState: correct ? "correct" : "answer",
       };
     });

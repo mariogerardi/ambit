@@ -39,6 +39,7 @@ export interface NeighborPair {
   answer: string;
 }
 export interface NeighborRun {
+  pinpointRules?: "regional";
   /** Misses survive the capped visual recap of long runs. */
   review?: MinigameVisit[];
   id: string;

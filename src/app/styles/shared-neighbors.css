@@ -59,7 +59,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  margin: 0 0 24px;
+  margin: 0 0 12px;
   padding: 20px 0;
   border-block: 1px solid rgb(var(--ui-line-rgb) / 0.25);
 }
@@ -181,23 +181,17 @@
   margin: 0;
   line-height: 21px;
 }
-.experience .minigame-answer-area .primary-button,
-.experience .minigame-actions .primary-button {
+.experience .minigame-answer-area .primary-button {
   min-height: 44px;
   width: 100%;
   margin: 0;
   font-size: 14px;
 }
-.minigame-actions {
-  display: grid;
-  gap: 8px;
-  margin-top: 20px;
-}
 .minigame-overview {
   padding-top: 0;
 }
 .minigame-result-detail {
-  padding: 0 0 8px;
+  margin: 0 0 12px;
 }
 .minigame-result-detail p {
   font-size: 14px;
@@ -207,14 +201,39 @@
 .minigame-result-detail .muted {
   font-size: 12px;
 }
-.minigame-result-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 12px 0 18px;
+.minigame-result-detail p:last-child {
+  margin-bottom: 0;
 }
-.experience .minigame-result-actions > button {
+.minigame-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 20px;
+  margin: 12px 0 -4px;
+}
+.minigame-results-actions {
+  margin-top: 0;
+}
+.experience .minigame-result-actions > .quiet-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-accent);
+  font-size: 12px;
+}
+.experience .minigame-result-actions > .quiet-button:hover {
+  text-decoration: underline;
+}
+.minigame-result-actions svg {
+  width: 16px;
+  height: 16px;
 }
 .shared-neighbors-feedback .minigame-ended-notice {
   font-size: 12px;

@@ -17,7 +17,7 @@ provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
 | Owner                                                                                                                              | Responsibility                                                                                |
 | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | [`src/App.tsx`](../src/App.tsx)                                                                                                    | Navigation, shared data, presentation composition, player actions and sessions.               |
-| [`src/app/modes.ts`](../src/app/modes.ts), [`ModePanels.tsx`](../src/app/ModePanels.tsx)                                           | Route-to-mode mapping and overlapping panel transitions.                                      |
+| [`src/app/modes.ts`](../src/app/modes.ts), [`ModePanels.tsx`](../src/app/ModePanels.tsx)                                           | Route-to-mode mapping and sequential panel transitions.                                       |
 | [`src/app/dailyProgress.ts`](../src/app/dailyProgress.ts)                                                                          | New York daily scheduling and date-pinned Journey progress.                                   |
 | [`src/app/recordSave.ts`](../src/app/recordSave.ts), [`progressSaves.ts`](../src/app/progressSaves.ts)                             | Independent save registers and domain-specific merges.                                        |
 | [`src/app/registerStorage.ts`](../src/app/registerStorage.ts)                                                                      | Transactional history storage, durable edit journal and cross-tab cache updates.              |
@@ -44,7 +44,8 @@ provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
 `src/app/daily.ts` and `src/game/journeys.ts` provide synchronous full-catalog APIs
 for tooling/tests. Runtime scheduling uses the small generated
 [`journeyIndex.json`](../src/game/journeyIndex.json), keeping clue geometry deferred.
-Admin’s “Preview five questions” loads only the selected Journey through its practice route.
+Admin's library loads only the selected Journey for its outline. Review uses the
+protected practice route with `?review=1` and separate in-memory game state.
 
 `src/game/questions.ts` remains a compatibility facade for tools and existing clients.
 Current source imports contracts, preparation, evaluation or text helpers directly.
@@ -79,12 +80,20 @@ The following modules own their own lifetimes and can be read independently:
   reframing retains its existing smooth scale change; reduced motion jumps directly.
 - [`HomePanel.tsx`](../src/app/HomePanel.tsx): today's Journey title, progress,
   Play/Resume/View result action and navigation; readiness is supplied by the shell.
-- [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Feedback/Tools tabs, calendar
+- [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Journeys/Feedback/Tools tabs, calendar
   selection from the October 11 opening date, searchable Journey picker, explicit assignment, and compact reset
   tools. Tabs retain the editor; unpublished selections survive navigation within
   the browser tab through session storage. Date/month switches confirm before
   discarding a draft. The shell supplies protected feedback and account reset;
   choosing a Journey alone never publishes or alters a player's attempt.
+- [`AdminJourneys.tsx`](../src/app/AdminJourneys.tsx) and
+  [`AdminJourneyReview.tsx`](../src/app/AdminJourneyReview.tsx): catalog browsing,
+  five-question outlines and isolated review controls. Review reuses the shell,
+  reducer and audit response samples; it never writes a Daily attempt. A reviewed
+  Journey passes to a date-choice preview before explicit publication.
+- [`Toast.tsx`](../src/app/Toast.tsx): shared bounded, dismissible notifications
+  above account workspaces; transient confirmations pause on focus/hover and
+  failures remain visible. Inline validation remains owned by its form.
 - [`JourneyArchive.tsx`](../src/app/JourneyArchive.tsx) and [`archiveDates.ts`](../src/app/archiveDates.ts): public monthly archive, fixed October 11, 2026 opening date, historical assignment/edition resolution, and dated play routes. Missing history is unavailable, never replaced by a new seeded choice. The route date owns the visible attempt independently of the shared `activeDate` pointer.
 - [`useStudyPresentation.ts`](../src/study/useStudyPresentation.ts): declarative
   Study globe state for the builder preview, visible session and summary review.
@@ -121,8 +130,13 @@ supports cancellation, cache reuse, and error reporting. Manifest checksums are
 preparation/test evidence; the runtime loader does not hash every fetched asset.
 
 Ordinary mode switches retain the mounted globe, country bindings, and camera
-memory. Panels transition for 220 ms, with the outgoing layer immediately inert.
-Reduced motion removes that animation. Regional caps are built in short frame
+memory. Animated panel switches finish the 220 ms exit before starting the 220 ms
+entrance. The outgoing layer is immediately inert; incoming content can load but
+stays hidden, inert and inactive for focus effects until the exit's animation-end
+event. A 320 ms fallback recovers from a missing event. Rapid navigation retains
+one visible exit and opens the latest requested destination. Reduced motion removes
+animation; existing no-exit/page-layout paths skip the exit wait. The mobile tray retains its
+mounted node and existing motion behavior. Regional caps are built in short frame
 batches and cached by renderer instance; country backing stays visible while a
 new branch is prepared. Cold heavy-geometry entry still needs device profiling.
 
@@ -251,27 +265,90 @@ Activity pages contain at most 24 friends, with bounded server fan-out and cache
 summaries invalidated by progress sync. See [services](SERVICES.md) for API behavior.
 Dashboard, Profile, Friends, Appearance, and the protected Admin tab share one persistent
 account header and navigation bar. `/account?tab=dashboard`, `profile`, `friends`,
-`appearance`, or `admin` selects the content; Admin uses `section=schedule`, `feedback`, or
+`appearance`, or `admin` selects the content; Admin uses `section=schedule`, `journeys`, `feedback`, or
 `tools` for its compact secondary controls. Tab navigation updates browser history
 without remounting the account shell or replaying its entry animation. Admin mounts
 on first use and stays mounted when switching account tabs, retaining its editor.
 Legacy `/admin` links replace their URL with the matching account destination.
 Home places a full-width Minigames card with a NEW! badge above Explore and Study.
-`/minigames` uses Study's preset card styles for Shared Neighbors, Missing
-Borders, Border Run and Pinpoint. Minigame landing cards use touching hexagon motifs with reduced-motion-aware hover cues.
-Minigame cards and Study preset cards open `ActivityPreviewDialog` with a
-local illustration, description, session/control details, and how-to-play copy.
-Study previews offer Start session and Customize; opening or dismissing one does
-not change saved settings. An unfinished-session replacement warning appears
-before starting. Minigames show Controls, a short How to play, and expandable Full rules, including previews opened
-directly under `/minigames/`. The shared dialog uses the existing settings/feedback modal
-styles, with a scrollable body, persistent actions, trapped focus, an inert
-workspace, Escape/backdrop dismissal, and focus restored to its card. The content
-body only becomes keyboard-scrollable when its measured height overflows;
-resize/content observers keep that state current. Minigame previews offer
-Customize within the same modal. Preferences do not interrupt an unfinished
-run; a settings snapshot applies when starting a new game, with a replacement
-notice when necessary. An empty filtered pool disables starting and offers reset.
+Journey archive is a separate full-width card above Minigames, using the Journey
+panel's editorial colors and two empty shapes peeking out to the left. The stack
+stays inside one button's footprint and adds no extra focus or hit targets.
+`/minigames` presents one selected game card, with its name between previous/next
+arrows and a full-width, horizontally scrollable game menu above the title.
+`/minigames/<slug>` selects that card, with inline instructions and Play/Resume.
+Customization opens from a small disclosure below Play. A permanent session panel
+contains a high-score callout and Start new game.
+Replacing an unfinished run requires a themed in-app confirmation; canceling or
+pressing Escape preserves its progress and score. The dialog traps focus and
+keeps the underlying workspace inert. Pinpoint omits the scoring dropdown.
+Unfinished sessions add progress (Correct so far/Strikes, or Round/Points) and
+equal-width Resume/Start new game actions. Resume leaves the saved run intact. The menu does not use preview
+modals or illustrations; result sharing still uses its existing artwork.
+Entry prepares only the selected game's controller and preview examples. Other
+games prepare on selection; Pinpoint search contexts are computed on first use
+and cached, rather than framing every target country during pool construction.
+
+`useMinigameTour.ts` drives a repeating westward 360-degree orbit with four Shared
+Neighbors, four Missing Borders, four Border Run and five Pinpoint examples.
+The curated questions and evaluated example responses in `minigameDemos.ts` use
+existing contracts. `minigameWorld.ts` supplies the same reveal presentation to
+live games and demos; `minigameContext.ts` shares canonical context preparation.
+A single animation clock advances the camera and logical scene stages; React
+updates only at stage changes. The globe's `orbitView` applies immediate,
+viewport-fitted camera positions while normal camera orchestration yields control.
+Country state fills and border opacity blend globally over 160 ms (instant for reduced motion),
+including interrupted changes; explicit Border Run reveals retain their timing.
+Dropped pins draw above target bullseyes and other map markers, below place names. Label placement reserves
+the pin’s body above its geographic tip, and island/clue locators avoid pins. A finite, pin-colored placement ripple draws in the Three.js marker layer below
+the pin, so it cannot cover the pin like a DOM overlay. Border Run pulse occlusion
+reserves actual panels, not the flags it explains. Boundary outlines retain source edges before
+renderer subdivision so hidden-border omissions cannot leave small resampled remnants.
+No second globe, new response mode or demo save register is introduced.
+
+The tour begins near the current view, slows through each example and crosses the
+remaining ocean/land arc before repeating. Matching endpoint velocities smooth
+acceleration into each leg; examples use regional framing, with zoom easing outward during travel.
+Missing Borders has an authored eight-country search neighborhood per example.
+Upcoming demo pairs are merged before arrival. Missing Borders skips the selected
+phase and separates the answer directly on reveal. The revealed pair stays separate
+as the camera leaves, avoiding a cached composite-color flash; travel uses normal globe colors.
+Preview color transitions share a continuous scope, and newly separated answer
+countries explicitly fade from the unrevealed fill. Live questions retain their
+per-question reset. Its camera closes in over 2.2 seconds while continuing
+westward, with matching speed at the following travel leg. Demo names use interior
+anchors and flexible placement to avoid hiding neighboring names. Questions
+remain visible for 4.3 seconds before the example response, then reveal at 5.1 seconds. Switching
+games keeps the animation clock running and joins the nearest example from the
+current pose and velocity. A small caption below the globe contains the question (or a touring message
+between examples) and play/pause styled like Home. Travel restores
+default country borders. Demo pins drop into position; Pinpoint bands
+use dark gray outside the highlighted country even before reveal. Shared Neighbors
+and Border Run use light gray for their open search before reveal and dark gray
+afterward; Missing Borders keeps excluded land dark in both phases. Pinpoint rings
+fade in from the bullseye outward without score labels. Three equally spaced
+illustrative distance rings scale to the highlighted country's distance bands,
+capped at 650 km, with two rings inside the outer ring; they do not depict the
+1 km scoring boundary. The bullseye marker is 34 pixels.
+These menu rings do not change live scoring. Demo pins land on the bullseye. Border Run uses the live reveal cadence and keeps the finish country
+in the bright clue fill until the route reaches it, matching the reveal fade's
+starting color. Pinpoint previews frame the highlighted country's search footprint,
+rather than centering the hidden target. Pause/Resume and dragging are supported;
+hidden tabs suspend its clock; customization leaves the tour running. Leaving the menu cancels animation.
+Reduced motion has static examples with manual answer/next controls. Demo questions
+matching an unfinished run's current question are excluded. Demos never call live
+start/answer/save actions. Shibuya Crossing is a sourced demo-only landmark and
+does not enter the live Pinpoint pool. Switching games clears previous example
+geometry and overlays during the camera join, preserving the shared globe. An empty filtered live
+pool disables Play and offers settings reset, independently of demo availability.
+
+Study preset cards retain `ActivityPreviewDialog` with a local illustration,
+description, session details and how-to-play copy. Study previews offer Start
+session and Customize; opening/dismissing one does not change saved settings.
+The shared dialog retains its scrollable body, persistent actions, trapped focus,
+inert workspace, Escape/backdrop dismissal and focus restoration. Minigame
+settings snapshots apply when starting a new game, with an unfinished-run
+replacement notice when necessary.
 Shared Neighbors plays at `/minigames/shared-neighbors/play` on the same mounted
 globe. `src/minigames/sharedNeighbors.ts` derives every eligible pair with one
 common neighbor from the complete canonical border graph, including adjacent
@@ -337,16 +414,38 @@ of at least one million, 60 curated Wikidata landmarks across 60 countries, elig
 countries and the 50 bundled US states. There are 58 attributed, locally bundled
 landmark photos. Category choices are random; selection then chooses a country
 before a place, avoiding repeated countries within a run where possible. This
-keeps large Chinese/Indian city catalogs from dominating the draw. Point scores
-are `round(1000 * exp(-max(0, km-1)/1500))`; areas earn 1,000 for canonical
-containment. Feedback shows three reference rings (1,000, 500 and 100 points),
-retaining every scoring tier for grading. The target name has label priority over
-ring numbers; the distance connector links the guessed and actual locations.
-The red crossed pin is reserved for zero-point guesses. Pinpoint keeps the previous orientation
-on advancement at altitude 1.15 and reveals at altitude 1.0, avoiding a repeated
-world-sized reset. The controller caches base graphs, land topologies and display
-meshes; images and location APIs are not queried during play.
+keeps large Chinese/Indian city catalogs from dominating the draw. New runs persist
+`pinpointRules: regional`: cities and landmarks highlight a country, or a bundled
+U.S. state when available. Areas with at least six bundled reference cities stand
+alone; smaller areas broaden to seven nearby reference cities and highlight their
+countries/states equally, without identifying which country contains the answer.
+These references frame the search; they do not add answers or change saved decks.
+Question framing fits the highlighted regional footprints,
+including nearby islands but excluding remote overseas outposts. Reference-city
+positions select the countries/states; their geometry determines the view and scoring
+radius. The distance score remains 1–1,000; the exponential scale is one quarter of
+that search radius, bounded to 20–500 km, with a 0.1–1 km bullseye. Broader searches
+therefore broaden the feedback rings too. Submitted scores are not recalculated.
+Reveals center the answer at a scale fitted to its rings, without pulling back beyond
+the search view. Pin-to-answer connectors are dashed during feedback and dotted
+on the end-of-game results flyover.
+Dash spacing stays in screen pixels, matching the short strokes used by UI trails.
+Area targets retain canonical
+containment scoring. Existing unversioned runs retain the world-search curve
+`round(1000 * exp(-max(0, km-1)/1500))` and their deck. The two editions use separate
+personal-best keys (`v3` regional, `v2` legacy), while preserving saved runs and history.
+Feedback rings preserve the active edition's radii, use distinct preview-tier colors,
+and sit on the map annotation shell rather than above the land. Demos highlight the supplied country;
+no image or location API is queried during play. The controller caches base graphs,
+land topologies and display meshes.
 
+Shared Neighbors and Missing Borders use the Journey answer treatment, show the
+submitted mistake separately, and mark its geography as incorrect.
+Pinpoint feedback keeps the score/distance beneath its existing question/photo;
+it does not repeat the target name and explanation. Missing Borders omits the
+generic explanation that restates the answer. Search-area callouts are omitted.
+Missing Borders scopes fill/border fades to the current question so a new map cannot
+briefly inherit cached answer colors or outlines; reveal transitions within that map still fade.
 All four games share a compact score/strikes row, Journey-style answer feedback and separate results
 overview. A terminal answer stays in feedback until **See results**; finishing
 early goes directly to the overview. The latest 64 submitted visits preserve
@@ -357,7 +456,9 @@ Personal bests are recorded only for each game’s default rules, using the acti
 run’s settings snapshot. Custom games retain progress but do not record or display
 a personal best. The settings footer announces eligibility beside Reset settings.
 Default-rule records survive replay and merge by maximum.
-Results pair equal-width Study and Share actions. `minigameReview.ts` deduplicates
+Results group equal-width Play again and Choose another game actions using the
+preview session-panel styles. Study and Share sit below as quieter actions; Study
+appears only when review targets exist. `minigameReview.ts` deduplicates
 missed countries (neighbors, merged-border pairs, or route countries); Pinpoint
 reviews targets scoring below 500. Misses are retained independently of the
 64-visit recap, with target metadata for Pinpoint's named places. `placeReview.ts`

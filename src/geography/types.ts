@@ -56,6 +56,10 @@ export interface PlaceFeature {
   markerBadge?: string;
   /** Fade a newly introduced authored marker on the render clock. */
   fadeInMs?: number;
+  /** Drop a newly introduced pin into its anchored position. */
+  dropInMs?: number;
+  /** One screen-space ripple beneath a newly placed pin. */
+  placementPulse?: boolean;
   markerRole?: "target" | "annotation" | "start" | "finish";
   accuracyBand?: { index: number; count: number };
   /** Authored answer markers use semantic colors independently of countries. */
@@ -159,6 +163,8 @@ export type MapOverlay =
       visualState?: "selected" | "correct" | "answer" | "incorrect" | "visited";
       /** Reveal-only accuracy bands share the pin's display palette. */
       accuracyBand?: { index: number; count: number };
+      /** Fade a newly introduced accuracy ring on the render clock. */
+      fadeInMs?: number;
       active?: boolean;
     }
   | { id: string; type: "parallel"; latitude: number }
@@ -184,7 +190,9 @@ export type MapOverlay =
       /** Noninteractive direction and along-path annotation. */
       arrowhead?: boolean;
       label?: string;
-      dashed?: boolean;
+      dashed?: boolean | "dotted";
+      /** Match a scored pin's tier color on its connector. */
+      accuracyBand?: { index: number; count: number };
       opacity?: number;
       /** Fade explanatory context toward overview strength as the camera pulls back. */
       opacityByAltitude?: { near: number; far: number; opacity: number };

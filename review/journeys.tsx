@@ -37,7 +37,7 @@ window.fetch = (input, options) => {
 applyTheme("ocean");
 const slug =
   new URLSearchParams(location.search).get("journey") ?? "down-the-danube";
-history.replaceState(null, "", `/journey/${slug}`);
+history.replaceState(null, "", `/journey/${slug}?review=1`);
 void registerStorage.initialize().then(() =>
   createRoot(document.getElementById("root")!).render(
     <AccountContext.Provider value={account}>

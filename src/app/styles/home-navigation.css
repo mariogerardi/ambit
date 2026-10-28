@@ -25,6 +25,63 @@
   grid-column: 1 / -1;
   border-color: rgb(var(--ui-accent-rgb) / 0.4);
 }
+/* Keep the entire stack inside the card's footprint so the Home scroller cannot clip it. */
+/* The button qualifier also outranks the shared theme's surface-fill rule. */
+:root .home-menu .menu-secondary button.home-archive {
+  grid-column: 1 / -1;
+  position: relative;
+  isolation: isolate;
+  padding-left: 30px;
+  border-color: transparent;
+  background: transparent;
+}
+.home-menu .globe-invitation {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.home-archive::before,
+.home-archive::after,
+.home-archive-face {
+  content: "";
+  position: absolute;
+  width: calc(100% - 14px);
+  border: 1px solid rgb(var(--ui-editorial-rgb) / 0.4);
+  border-radius: inherit;
+  background: rgb(var(--ui-surface-rgb));
+  pointer-events: none;
+}
+.home-archive::before {
+  z-index: -3;
+  inset: 8px auto 8px 0;
+}
+.home-archive::after {
+  z-index: -2;
+  inset: 4px auto 4px 7px;
+}
+.home-archive-face {
+  z-index: -1;
+  inset: 0 0 0 auto;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+.home-menu
+  .menu-secondary
+  .home-archive
+  :is(.menu-secondary-label, .menu-secondary-arrow, .action-icon) {
+  color: var(--ui-editorial);
+}
+:root
+  .home-menu
+  .menu-secondary
+  button.home-archive:is(:hover, :focus-visible, :active) {
+  border-color: transparent;
+  background: transparent;
+}
+.home-archive:is(:hover, :focus-visible) .home-archive-face {
+  border-color: var(--ui-editorial);
+  background: rgb(var(--ui-raised-rgb));
+}
 .home-menu .menu-secondary .menu-new-badge {
   padding: 4px 7px;
   border-radius: 5px;
@@ -78,10 +135,18 @@
   .home-menu .menu-secondary .menu-secondary-arrow {
     transition: none;
   }
+  .home-archive-face {
+    transition: none;
+  }
   .home-menu
     .menu-secondary
     button:is(:hover, :focus-visible)
     .menu-secondary-arrow {
     transform: none;
+  }
+}
+@media (max-width: 400px) {
+  :root .home-menu .menu-secondary button.home-archive {
+    padding-left: 26px;
   }
 }

@@ -1,8 +1,7 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { MinigameMotif } from "../minigames/MinigameMotif";
+import type { useMinigameTour } from "../minigames/useMinigameTour";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { DiscardMinigameDialog } from "./DiscardMinigameDialog";
 import type { BorderMinigame } from "../minigames/sharedNeighbors";
-import { ActivityPreviewDialog } from "./ActivityPreviewDialog";
-import { PanelActive } from "./ModePanels";
 import { MinigameSettingsEditor } from "../minigames/MinigameSettingsEditor";
 import type { useBorderMinigame } from "../minigames/useBorderMinigame";
 
@@ -54,11 +53,18 @@ export const games = [
     imageAlt: "A location pin and distance rings on a map of South America.",
     controls: "Place a pin",
     instruction:
-      "Find cities, landmarks, countries, and U.S. states by placing pins on the globe. Cities and landmarks score by distance; countries and states score for a pin inside their boundaries. Play ten rounds, earning up to 1,000 points each.",
+      "Find cities and landmarks within a highlighted search region. Closer pins earn more, with distances scaled to the search area. Country and state rounds score for a pin inside their boundaries. Play ten rounds, up to 1,000 points each.",
     rules:
-      "Play ten rounds with your chosen categories. Cities and landmarks earn up to 1,000 points by distance: within 1 km earns full points, and the score halves about every 1,040 km. Countries and U.S. states earn 1,000 points for a pin anywhere inside. Each run brings a fresh mix of places.",
+      "Cities and landmarks earn 1–1,000 points by distance. Large countries can stand alone; smaller countries and states get a surrounding search region with roughly six to eight plausible city locations. Scoring distances scale to the whole search region. Countries and U.S. states earn 1,000 points for a pin anywhere inside. Older world-search games keep their original scoring.",
   },
 ];
+
+export function selectedMinigame(path: string): BorderMinigame {
+  return (
+    (games.find((game) => path === `/minigames/${game.slug}`)
+      ?.slug as BorderMinigame) ?? "shared-neighbors"
+  );
+}
 
 export function MinigamesPanel({
   path,
@@ -68,6 +74,9 @@ export function MinigamesPanel({
   borderRun,
   pinpoint,
   webgl,
+  tour,
+  customizing,
+  onCustomize,
 }: {
   path: string;
   onNavigate(path: string): void;
@@ -76,119 +85,291 @@ export function MinigamesPanel({
   borderRun: ReturnType<typeof useBorderMinigame>;
   pinpoint: ReturnType<typeof useBorderMinigame>;
   webgl: boolean;
+  tour: ReturnType<typeof useMinigameTour>;
+  customizing: boolean;
+  onCustomize(value: boolean): void;
 }) {
-  const [customizing, setCustomizing] = useState(false);
-  const [selected, setSelected] = useState(() =>
-    games.find((item) => path === `/minigames/${item.slug}`),
-  );
-  const trigger = useRef<HTMLButtonElement | null>(null);
-  const panelActive = useContext(PanelActive);
-  useEffect(() => {
-    setSelected(games.find((item) => path === `/minigames/${item.slug}`));
-    setCustomizing(false);
-  }, [path]);
-  useEffect(() => {
-    if (!panelActive) {
-      setSelected(undefined);
-      setCustomizing(false);
-    }
-  }, [panelActive]);
-  const closePreview = () => {
-    setSelected(undefined);
-    setCustomizing(false);
-    if (path !== "/minigames") onNavigate("/minigames");
-  };
+  const kind = selectedMinigame(path);
+  const index = games.findIndex((game) => game.slug === kind);
+  const selected = games[index];
   const game =
-    selected?.slug === "missing-borders"
+    kind === "missing-borders"
       ? missing
-      : selected?.slug === "border-run"
+      : kind === "border-run"
         ? borderRun
-        : selected?.slug === "pinpoint"
+        : kind === "pinpoint"
           ? pinpoint
           : shared;
+  const [confirming, setConfirming] = useState(false);
+  const startButton = useRef<HTMLButtonElement>(null);
+  const cancelDiscard = useCallback(() => setConfirming(false), []);
+  useEffect(() => setConfirming(false), [path, game.run?.id]);
+  const startNew = () => {
+    setConfirming(false);
+    onCustomize(false);
+    game.start(true);
+    onNavigate(`/minigames/${kind}/play`);
+  };
+  const select = (next: number) => {
+    onCustomize(false);
+    onNavigate(
+      `/minigames/${games[(next + games.length) % games.length].slug}`,
+    );
+  };
+  const notice = !game.settingsSaved
+    ? "Settings couldn’t be saved on this device."
+    : game.ready && !game.count
+      ? kind === "pinpoint"
+        ? "No puzzles match your settings. Try more place categories, a broader area, or fewer exclusions."
+        : "No puzzles match your settings. Try a broader area or fewer exclusions."
+      : game.hasUnfinished && !game.canResume
+        ? "Starting a new game replaces your current game."
+        : undefined;
+  const label = !webgl
+    ? "Globe unavailable"
+    : !game.ready
+      ? "Loading…"
+      : "Start new game";
   return (
-    <section className="info-view study-landing minigames-landing">
-      {panelActive && selected && (
-        <ActivityPreviewDialog
-          preview={{
-            title: selected.title,
-            description: selected.description,
-            image: selected.image,
-            imageAlt: selected.imageAlt,
-            facts: [{ label: "Controls", value: selected.controls }],
-            howToPlay: selected.instruction,
-            rules: selected.rules,
-          }}
-          onClose={closePreview}
-          returnFocus={trigger.current}
-          customize={{
-            label: customizing ? "Back to preview" : "Customize",
-            onClick: () => setCustomizing(!customizing),
-          }}
-          content={
-            customizing ? (
-              <MinigameSettingsEditor
-                kind={game.kind}
-                settings={game.settings}
-                onChange={game.onSettings}
-              />
-            ) : undefined
+    <section className="info-view minigames-carousel" aria-label="Minigames">
+      <div
+        className="minigame-game-names"
+        role="tablist"
+        aria-label="Choose a minigame"
+        onKeyDown={(event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+            return;
+          event.preventDefault();
+          const next =
+            event.key === "Home"
+              ? 0
+              : event.key === "End"
+                ? games.length - 1
+                : (index +
+                    (event.key === "ArrowLeft" ? -1 : 1) +
+                    games.length) %
+                  games.length;
+          select(next);
+          event.currentTarget
+            .querySelector<HTMLButtonElement>(
+              `[data-game="${games[next].slug}"]`,
+            )
+            ?.focus();
+        }}
+      >
+        {games.map((item, i) => (
+          <button
+            key={item.slug}
+            data-game={item.slug}
+            type="button"
+            aria-label={item.title}
+            role="tab"
+            id={`minigame-tab-${item.slug}`}
+            aria-selected={i === index}
+            aria-controls="minigame-card"
+            tabIndex={i === index ? 0 : -1}
+            onClick={() => select(i)}
+          >
+            {item.title}
+          </button>
+        ))}
+      </div>
+      <div className="minigame-carousel-heading">
+        <div className="minigame-carousel-arrows">
+          <button
+            type="button"
+            className="quiet-button"
+            aria-label="Previous minigame"
+            onClick={() => select(index - 1)}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="m10 3-5 5 5 5" />
+            </svg>
+          </button>
+          <h1 className="editorial-heading">{selected.title}</h1>
+          <button
+            type="button"
+            className="quiet-button"
+            aria-label="Next minigame"
+            onClick={() => select(index + 1)}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="m6 3 5 5-5 5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <article
+        id="minigame-card"
+        className="minigame-carousel-card"
+        role="tabpanel"
+        aria-labelledby={`minigame-tab-${kind}`}
+      >
+        <p className="minigame-premise">{selected.description}</p>
+        {tour.error && (
+          <p className="minigame-tour-note" role="status">
+            {tour.error}
+          </p>
+        )}
+        <p className="minigame-instructions">{selected.instruction}</p>
+        {notice && (
+          <p className="minigame-menu-notice" role="status">
+            {notice}
+          </p>
+        )}
+        <div className="minigame-carousel-actions minigame-session">
+          {game.hasUnfinished && game.run && (
+            <dl className="minigame-session-progress">
+              {kind === "pinpoint" && (
+                <div>
+                  <dt>Round</dt>
+                  <dd>{Math.min(10, game.run.index + 1)} / 10</dd>
+                </div>
+              )}
+              <div>
+                <dt>{kind === "pinpoint" ? "Points" : "Correct so far"}</dt>
+                <dd>
+                  {kind === "pinpoint"
+                    ? (game.run.points ?? 0).toLocaleString()
+                    : game.run.correct}
+                </dd>
+              </div>
+              {kind !== "pinpoint" && (
+                <div>
+                  <dt>Strikes</dt>
+                  <dd>{game.run.answered - game.run.correct} / 3</dd>
+                </div>
+              )}
+            </dl>
+          )}
+          <div className="minigame-high-score">
+            <span>High score{!game.ranked ? " · default rules" : ""}</span>
+            <strong>
+              {game.best === undefined ? "—" : game.best.toLocaleString()}
+              {kind === "pinpoint" && game.best !== undefined ? " pts" : ""}
+            </strong>
+          </div>
+          <div className="minigame-session-actions">
+            {game.hasUnfinished && (
+              <button
+                className="primary-button"
+                disabled={!webgl || !game.ready}
+                onClick={() => {
+                  onCustomize(false);
+                  onNavigate(`/minigames/${kind}/play`);
+                }}
+              >
+                Resume game<span aria-hidden="true">→</span>
+              </button>
+            )}
+            <button
+              className={
+                game.hasUnfinished
+                  ? "secondary-button minigame-new-game"
+                  : "primary-button minigame-new-game"
+              }
+              aria-label="Start new game"
+              ref={startButton}
+              disabled={!webgl || !game.ready || !game.count}
+              onClick={() => {
+                if (game.hasUnfinished) setConfirming(true);
+                else startNew();
+              }}
+            >
+              <span aria-hidden="true">+</span>
+              {label}
+            </button>
+          </div>
+        </div>
+        <button
+          className="minigame-customize-toggle"
+          type="button"
+          aria-expanded={customizing}
+          aria-controls="minigame-customization"
+          onClick={() => onCustomize(!customizing)}
+        >
+          {customizing ? "Close customization" : "Customize"}
+        </button>
+        {customizing && (
+          <div id="minigame-customization">
+            <MinigameSettingsEditor
+              kind={game.kind}
+              settings={game.settings}
+              onChange={game.onSettings}
+            />
+          </div>
+        )}
+      </article>
+      {confirming && (
+        <DiscardMinigameDialog
+          title={selected.title}
+          returnFocus={startButton.current}
+          score={
+            kind === "pinpoint"
+              ? `${(game.run?.points ?? 0).toLocaleString()} points`
+              : `${game.run?.correct ?? 0} correct so far`
           }
-          notice={
-            !game.settingsSaved
-              ? "Settings couldn’t be saved on this device."
-              : game.ready && !game.count
-                ? game.kind === "pinpoint"
-                  ? "No puzzles match your settings. Try more place categories, a broader area, or fewer exclusions."
-                  : "No puzzles match your settings. Try a broader area or fewer exclusions."
-                : game.hasUnfinished && !game.canResume
-                  ? "Starting a new game replaces your current game."
-                  : undefined
-          }
-          primary={{
-            label: !webgl
-              ? "Globe unavailable"
-              : !game.ready
-                ? "Loading…"
-                : game.canResume
-                  ? "Resume game"
-                  : game.hasUnfinished
-                    ? "Start new game"
-                    : "Play",
-            disabled: !webgl || !game.ready || !game.count,
-            onClick: () => {
-              setSelected(undefined);
-              setCustomizing(false);
-              game.start();
-              onNavigate(`/minigames/${selected.slug}/play`);
-            },
-          }}
+          onCancel={cancelDiscard}
+          onDiscard={startNew}
         />
       )}
-      <h1 className="editorial-heading">
-        A world to <em>play with.</em>
-      </h1>
-      <p className="muted study-introduction">
-        Find unlikely connections, uncover hidden borders, and follow your instincts across the globe.
-      </p>
-      <div className="study-paths">
-        {games.map((item) => (
-          <article className="study-path minigame-card" key={item.slug}>
+    </section>
+  );
+}
+
+/** A small caption belongs to the globe, rather than the game’s rules card. */
+export function MinigameTourCaption({
+  tour,
+}: {
+  tour: ReturnType<typeof useMinigameTour>;
+}) {
+  const prompt = !tour.example
+    ? "Preparing the globe tour…"
+    : tour.phase === "travel"
+      ? tour.paused
+        ? "Explore the globe. Play to continue the tour."
+        : "Touring the globe. Next example coming up."
+      : tour.example.kind === "missing-borders"
+        ? "Which territory is hiding two countries?"
+        : tour.example.journey.rounds[0].prompt;
+  return (
+    <section
+      className={`minigame-globe-caption${tour.reduced ? " reduced" : ""}`}
+      aria-label="Globe demonstration"
+    >
+      <div className="minigame-globe-prompt">
+        <p>{prompt}</p>
+        {tour.reduced ? (
+          <>
+            <button className="quiet-button" onClick={tour.reveal}>
+              {tour.answer ? "Hide answer" : "Show answer"}
+            </button>
+            <button className="quiet-button" onClick={tour.next}>
+              Next example
+            </button>
+          </>
+        ) : tour.count > 0 ? (
+          <span className="globe-playback minigame-tour-playback">
             <button
-              className="study-path-start"
-              onClick={(event) => {
-                trigger.current = event.currentTarget;
-                setSelected(item);
-              }}
-              aria-label={`Preview ${item.title}`}
-              aria-haspopup="dialog"
-              data-dd-action-name={`Minigames Preview ${item.title}`}
-            />
-            <MinigameMotif kind={item.slug as BorderMinigame} />
-            <h3>{item.title}</h3>
-            <p>{item.description}</p>
-          </article>
-        ))}
+              onClick={tour.toggle}
+              aria-label={
+                tour.paused ? "Resume globe tour" : "Pause globe tour"
+              }
+              title={tour.paused ? "Resume globe tour" : "Pause globe tour"}
+              aria-pressed={!tour.paused}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                <path
+                  d={
+                    tour.paused
+                      ? "m8 5 11 7-11 7z"
+                      : "M7 5h3v14H7zm7 0h3v14h-3z"
+                  }
+                />
+              </svg>
+            </button>
+          </span>
+        ) : null}
       </div>
     </section>
   );

@@ -20,7 +20,8 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 | `PROJECT_INSTRUCTIONS.md`  | Instructions to paste into a ChatGPT Project or other AI workspace.                                                                                                            |
 | `IMPLEMENTING_A_SPEC.md`   | Coding-agent entry point: read the approved brief, inspect relevant Journeys, inherit shared conventions, implement and verify.                                                |
 | `JOURNEY_SPEC_TEMPLATE.md` | Record the approved design for implementation, including scenes, help, answer contracts, completion and sources.                                                               |
-| `FEATURED_EXAMPLES.md`     | One upload containing the preferred examples: Andes, Chasing the Sun (flags), Mediterranean and Not the Obvious City.                                                          |
+| `JOURNEY_ARCHETYPES.md`    | Recurring authored structures, implementation boundaries and relevant examples across the catalog; no preferred subset.                                                        |
+| `FEATURED_EXAMPLES.md`     | Optional collection of examples explicitly requested with `--highlight`; absent from a default export.                                                                         |
 | `examples/*.md`            | Every current Journey individually, including copy, rules, candidates, help, effective stage changes, sources, media descriptions and completion. Load only relevant examples. |
 | `references/*.md`          | Full crafting guide, engine, architecture, question catalog and geographic policy. Consult as needed rather than loading all at once.                                          |
 | `manifest.json`            | Repository revision, local-change indicator, highlighted IDs, and SHA-256 hashes/sizes of inputs and outputs.                                                                  |
@@ -42,10 +43,10 @@ supported APIs, and the specification records the design. Generated capability
 metadata can include compatibility/internal behavior that is not the recommended
 standard. Historical review notes are not exported as current policy.
 
-The highlights identify our most complete experiences, not a compulsory template.
-The current Journeys are the reference set for new authoring; the
-four highlighted examples are convenient starting points. Preserve their
-established contracts and styles when proposing new content. Fresh local changes
+The entire catalog is the reference set for new authoring; no Journeys are ranked
+or preferred. Use [authored archetypes](journey-authoring/JOURNEY_ARCHETYPES.md)
+to find relevant structures and inspect matching examples and recipes. Preserve
+approved contracts and shared styles when proposing new content. Fresh local changes
 still need player review; neither a source snapshot nor automated checks certify
 every rendered view. Current Dailies award 15 points: three per question, with
 3/2/1 distance-pin tiers and hint/assist ceilings of two/one. The crafting guide
@@ -53,10 +54,9 @@ owns the full scoring contract; variable weights and timers are not implemented.
 Completion headings follow earned points through shared UI; authors supply the
 caption and geographic payoff. Daily and Archive results do not offer replay,
 including for admins; practice routes retain replay.
-The kit encourages consulting other Journeys for repeated mechanics, different
-structures and unusual geography. Edit
-[`scripts/journey-export.config.json`](../scripts/journey-export.config.json) to
-maintain the preferred examples and their reasons. For a one-off selection:
+The kit includes every Journey for repeated mechanics, different structures and
+unusual geography. For a collection selected for one task, without assigning
+catalog-wide preference:
 
 ```sh
 npm run export:journeys -- --highlight along-the-andes --highlight down-the-danube
@@ -116,8 +116,9 @@ For the single-file workflow, replace the previous `GPT_GUIDE.md` upload with th
 new export. It includes the implementation entry point and every compact Journey
 walkthrough, including Journeys added since the previous snapshot.
 
-Replace the previous uploaded copies of `AUTHORING_KIT.md` and
-`FEATURED_EXAMPLES.md` with the new files. Paste the refreshed
+Replace the previous uploaded `AUTHORING_KIT.md` and remove any old default
+`FEATURED_EXAMPLES.md` upload. An explicitly selected collection can still be
+uploaded for a particular task. Keep `JOURNEY_ARCHETYPES.md` available, and paste the refreshed
 `PROJECT_INSTRUCTIONS.md` into the project's instructions. Keep
 `JOURNEY_SPEC_TEMPLATE.md` available for recording approved designs, and add
 individual `examples/*.md` or references only when relevant. `SOURCE_REVIEW.md`

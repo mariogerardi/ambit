@@ -37,6 +37,7 @@ export function validNeighborRun(value: unknown): value is NeighborRun {
         "border-run",
         "pinpoint",
       ].includes(String(value.kind))) &&
+    (value.pinpointRules === undefined || value.pinpointRules === "regional") &&
     typeof value.id === "string" &&
     value.id.length > 0 &&
     integer(value.startedAt) &&
