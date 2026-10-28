@@ -13,6 +13,7 @@ import type {
   CommunityClient,
   Friendship,
   PlayerProfile,
+  FriendActivityPage,
 } from "../services/community";
 import { useAccount } from "../services/accounts";
 import { emptyDaily } from "./dailyProgress";
@@ -111,6 +112,9 @@ export function AccountDashboard({
   const [editingProfile, setEditingProfile] = useState(false);
   const dirty = useRef(false);
   const [friends, setFriends] = useState<Friendship[]>([]);
+  const friendActivity = useRef<{ subject: string; page: FriendActivityPage }>(
+    undefined,
+  );
   const [comparisonFocus, setComparisonFocus] = useState(!!intent.comparison);
   const consumeComparisonFocus = useCallback(
     () => setComparisonFocus(false),
@@ -323,7 +327,9 @@ export function AccountDashboard({
             )}
           </header>
           <div hidden={tab === "admin"}>
-            {loading && <p role="status">Opening your account…</p>}
+            {loading && tab !== "friends" && (
+              <p role="status">Opening your account…</p>
+            )}
             {error && (
               <div className="account-message" role="alert">
                 <p>{error}</p>
@@ -579,6 +585,14 @@ export function AccountDashboard({
             )}
             {tab === "friends" && (
               <FriendsPanel
+                initialActivity={
+                  friendActivity.current?.subject === subject
+                    ? friendActivity.current.page
+                    : undefined
+                }
+                onActivity={(page) => {
+                  friendActivity.current = { subject, page };
+                }}
                 defaultComparison={defaultComparison}
                 intent={intent}
                 focusComparison={comparisonFocus}

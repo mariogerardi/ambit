@@ -1608,3 +1608,160 @@
 .account-session-footer .account-email {
   color: var(--ui-text);
 }
+
+.friend-value-placeholder,
+.friend-heading-placeholder,
+.friend-identity-placeholder {
+  display: inline-block;
+  border-radius: 5px;
+  background: rgb(var(--ui-line-rgb) / 0.1);
+}
+.friend-value-placeholder {
+  width: 80px;
+  height: 15px;
+}
+.friend-identity-placeholder {
+  width: 140px;
+  height: 22px;
+}
+.friend-heading-placeholder {
+  width: 65%;
+  height: 28px;
+  margin-bottom: 36px;
+}
+.friend-comparison-skeleton {
+  height: 300px;
+  margin-top: 16px;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 49px,
+    rgb(var(--ui-line-rgb) / 0.1) 49px 50px
+  );
+}
+.friend-comparison-loading {
+  min-height: 366px;
+  box-sizing: border-box;
+}
+.friend-detail {
+  gap: 18px;
+}
+.friend-detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.experience .friend-detail-toolbar > button {
+  justify-content: start;
+  text-align: left;
+  width: auto;
+}
+.friend-detail .friend-manage {
+  position: relative;
+  margin: 0;
+}
+.friend-detail .friend-manage .account-row-actions {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  top: 100%;
+  display: grid;
+  width: 180px;
+  padding: 8px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 10px;
+  background: rgb(var(--ui-surface-rgb));
+}
+.friend-detail .friend-profile {
+  padding: 20px;
+}
+.friend-detail .friend-profile .profile-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 28px;
+}
+.friend-detail .friend-profile .friend-identity strong {
+  font-size: 28px;
+}
+.friend-detail .friend-profile .profile-bio {
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.friend-detail .friend-profile > .muted {
+  margin-bottom: 0;
+}
+.friend-detail .friend-stats {
+  margin: 0;
+  padding: 18px 0;
+  gap: 16px;
+}
+.friend-detail .friend-stats dd {
+  color: var(--ui-editorial);
+}
+.friend-detail-today,
+.friend-detail-results {
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 14px;
+  padding: 20px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.friend-detail-today {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.friend-detail-today > div {
+  flex: 1;
+  min-width: 180px;
+}
+.friend-detail-today h3 {
+  margin: 8px 0;
+  color: var(--ui-editorial);
+  font: 25px/1.2 var(--font-editorial);
+}
+.friend-detail-today p {
+  margin: 0;
+}
+.friend-detail-today .comparison-score {
+  font: 28px var(--font-editorial);
+  color: var(--ui-editorial);
+}
+.friend-detail-locked {
+  width: 100%;
+}
+.friend-detail-results h3 {
+  margin: 0;
+  font: 24px var(--font-editorial);
+}
+.friend-detail-results table {
+  margin-top: 12px;
+}
+.friend-detail-results :is(th, td) {
+  padding: 12px 8px;
+}
+.friend-detail-results td small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.friend-detail-results :is(th, td):not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.friend-detail .friend-data-note {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .friend-detail-today,
+  .friend-detail-results,
+  .friend-detail .friend-profile {
+    padding: 16px;
+  }
+  .friend-detail .friend-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -73,9 +73,9 @@ account save service.
 
 Shared toast notifications confirm profile/friend actions, appearance saves,
 schedule publication, attempt reset and feedback status changes. Brief notices
-expire after six seconds, with dismissal paused while hovered, focused or in a
-hidden tab. Failure notices remain dismissible until removed; field-specific
-validation and contextual errors stay inline. Notifications do not replace
+appear as compact top-centered notices, animate in/out, and expire after three
+seconds (five for failures). Dismissal pauses while hovered, focused or in a
+hidden tab. Field-specific validation and contextual errors stay inline. Notifications do not replace
 confirmation for destructive actions or publish an unsaved draft. The provider
 lives above account-specific workspaces so notices survive navigation.
 

@@ -3,6 +3,7 @@ import type {
   Friendship,
   JourneyScore,
   PlayerProfile,
+  FriendActivityPage,
 } from "../services/community";
 import { useEffect, useRef } from "react";
 import type { ComparisonTarget } from "./accountNavigation";
@@ -32,8 +33,14 @@ export function FriendJourneyComparison({
   focus = false,
   focusReady = true,
   onFocused,
+  initialPage,
+  waitingForPage = false,
+  onRefresh,
 }: {
   focus?: boolean;
+  initialPage?: FriendActivityPage;
+  waitingForPage?: boolean;
+  onRefresh?(): void;
   focusReady?: boolean;
   onFocused?(): void;
   api: CommunityClient;
@@ -50,9 +57,10 @@ export function FriendJourneyComparison({
   const activity = useFriendActivity(
     api,
     target.date,
-    !disabled,
+    !waitingForPage && !disabled,
     sync?.status,
     friends,
+    initialPage,
   );
   const page = activity.page;
   const section = useRef<HTMLElement>(null);
@@ -146,8 +154,13 @@ export function FriendJourneyComparison({
           </p>
         </div>
       </header>
-      <SyncComparisonNote status={sync?.status} onRetry={sync?.retry} />
-      <ul className="friend-comparison-list">
+      {(sync?.status === "offline" || sync?.status === "error") && (
+        <SyncComparisonNote status={sync.status} onRetry={sync.retry} />
+      )}
+      <ul
+        className="friend-comparison-list"
+        aria-busy={!page && !activity.failure}
+      >
         <li className="comparison-you">
           <div className="friend-comparison-row">
             <span className="friend-comparison-identity">
@@ -166,21 +179,32 @@ export function FriendJourneyComparison({
               ) : page ? (
                 <ComparisonStatus activity={page.you} target={target} />
               ) : (
-                "Opening your result…"
+                <span
+                  className="friend-value-placeholder"
+                  aria-label="Opening your result"
+                />
               )}
             </span>
           </div>
-          {!mine && localScore && (
-            <small className="comparison-sync-pending">
-              Waiting for synced comparison
-            </small>
-          )}
         </li>
+        {!page &&
+          !entries.length &&
+          !activity.failure &&
+          waitingForPage &&
+          Array.from({ length: 5 }, (_, index) => (
+            <li key={`pending-${index}`} aria-hidden="true">
+              <div className="friend-comparison-row">
+                <span className="friend-identity-placeholder" />
+                <span className="friend-value-placeholder" />
+              </div>
+            </li>
+          ))}
         {entries.map((friend) => (
           <li key={friend.player.id}>
             <button
               className="friend-comparison-row"
               onClick={() => onProfile(friend.player.id)}
+              disabled={disabled}
             >
               <span className="friend-comparison-identity">
                 <ProfileAvatar
@@ -195,25 +219,26 @@ export function FriendJourneyComparison({
                     activity={friend.activity}
                     target={target}
                   />
+                ) : activity.failure ? (
+                  <span>Activity unavailable</span>
                 ) : (
-                  <span>
-                    {activity.failure
-                      ? "Activity unavailable"
-                      : "Loading activity…"}
-                  </span>
+                  <span
+                    className="friend-value-placeholder"
+                    aria-label="Loading activity"
+                  />
                 )}
               </span>
             </button>
           </li>
         ))}
       </ul>
-      {activity.loading && !page && (
-        <p role="status">Opening friend activity…</p>
-      )}
       {activity.failure && (
         <p role="alert">
           {activity.failure}{" "}
-          <button className="quiet-button" onClick={activity.refresh}>
+          <button
+            className="quiet-button"
+            onClick={onRefresh ?? activity.refresh}
+          >
             Retry comparisons
           </button>
         </p>

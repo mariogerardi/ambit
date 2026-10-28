@@ -9,13 +9,17 @@ export async function readFriendActivity(
   api: CommunityClient,
   date: string,
   signal: AbortSignal,
+  initialPage?: FriendActivityPage,
 ) {
-  let page = await api.request<FriendActivityPage>(
-    `friends/activity?date=${date}`,
-    "GET",
-    undefined,
-    signal,
-  );
+  let page =
+    initialPage?.date === date
+      ? initialPage
+      : await api.request<FriendActivityPage>(
+          `friends/activity?date=${date}`,
+          "GET",
+          undefined,
+          signal,
+        );
   const seen = new Set<string>();
   while (page.cursor) {
     if (seen.has(page.cursor))
@@ -47,29 +51,33 @@ export function useFriendActivity(
   enabled: boolean,
   syncStatus?: string,
   refreshKey?: unknown,
+  initialPage?: FriendActivityPage,
 ) {
-  const [page, setPage] = useState<FriendActivityPage>();
+  const [response, setResponse] = useState<{
+    api: CommunityClient;
+    page?: FriendActivityPage;
+  }>(() => ({ api, page: initialPage?.cursor ? undefined : initialPage }));
+  const page = response.api === api ? response.page : undefined;
   const [failure, setFailure] = useState("");
   const [loading, setLoading] = useState(false);
   const [revision, setRevision] = useState(0);
   const request = useRef(0);
   useEffect(() => {
     if (!enabled) {
-      setPage(undefined);
       return;
     }
     const abort = new AbortController(),
       current = ++request.current;
     setLoading(true);
     setFailure("");
-    void readFriendActivity(api, date, abort.signal)
+    void readFriendActivity(api, date, abort.signal, initialPage)
       .then((value) => {
         if (!abort.signal.aborted && current === request.current)
-          setPage(value);
+          setResponse({ api, page: value });
       })
       .catch((error) => {
         if (!abort.signal.aborted && current === request.current) {
-          setPage(undefined);
+          setResponse({ api });
           setFailure(
             error instanceof Error
               ? error.message
@@ -82,9 +90,17 @@ export function useFriendActivity(
           setLoading(false);
       });
     return () => abort.abort();
-  }, [api, date, enabled, syncStatus, refreshKey, revision]);
+  }, [
+    api,
+    date,
+    enabled,
+    initialPage ? undefined : syncStatus,
+    refreshKey,
+    revision,
+    initialPage,
+  ]);
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || initialPage) return;
     const refresh = () => {
       if (!document.hidden) setRevision((value) => value + 1);
     };
@@ -94,9 +110,9 @@ export function useFriendActivity(
       removeEventListener("focus", refresh);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, [enabled]);
+  }, [enabled, initialPage]);
   return {
-    page: enabled && page?.date === date ? page : undefined,
+    page: page?.date === date ? page : undefined,
     failure,
     loading,
     refresh: () => setRevision((value) => value + 1),

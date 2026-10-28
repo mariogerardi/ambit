@@ -268,7 +268,13 @@ Profile contains public identity, with a compact preset-avatar picker beside the
 flag selector. Settings contains Appearance and a small signed-in identity/sign-out
 footer. Sync warnings and a retry action appear only when syncing needs attention;
 there is no separate Account & sync panel. Friends leads with the matching Journey’s
-comparison, followed by finding, inviting and managing friends.
+comparison, followed by finding, inviting and managing friends. The directory and
+same-day comparison share their first activity response; comparison pagination only
+fetches remaining pages. The account shell retains the last same-day response in
+memory across account tabs, scoped to its signed-in subject. Refreshes keep settled
+rows visible; cold loads reserve the comparison footprint without transient sync
+messages. Friend profiles separate identity, aggregate stats, today’s Journey and
+shared results. Scores still come from server-permitted activity responses.
 Accepted friends can open profiles and aggregate Study stats; scores unlock only
 when the viewer has synced completion for the same date, Journey and game version.
 Study sessions vary in difficulty and are not ranked. Account IDs own friendships

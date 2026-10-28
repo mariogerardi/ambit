@@ -30,19 +30,28 @@ function Toast({
 }) {
   const [paused, setPaused] = useState(false);
   const [hidden, setHidden] = useState(document.hidden);
+  const [leaving, setLeaving] = useState(false);
   useEffect(() => {
     const change = () => setHidden(document.hidden);
     document.addEventListener("visibilitychange", change);
     return () => document.removeEventListener("visibilitychange", change);
   }, []);
   useEffect(() => {
-    if (item.tone === "error" || paused || hidden) return;
-    const timer = window.setTimeout(() => dismiss(item.id), 6000);
+    if (paused || hidden || leaving) return;
+    const timer = window.setTimeout(
+      () => setLeaving(true),
+      item.tone === "error" ? 5000 : 3000,
+    );
     return () => clearTimeout(timer);
-  }, [item, paused, hidden, dismiss]);
+  }, [item, paused, hidden, leaving]);
+  useEffect(() => {
+    if (!leaving) return;
+    const timer = window.setTimeout(() => dismiss(item.id), 180);
+    return () => clearTimeout(timer);
+  }, [leaving, item.id, dismiss]);
   return (
     <li
-      className={`toast toast-${item.tone}`}
+      className={`toast toast-${item.tone}${leaving ? " toast-leaving" : ""}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -57,7 +66,7 @@ function Toast({
       <button
         type="button"
         aria-label={`Dismiss notification: ${item.message}`}
-        onClick={() => dismiss(item.id)}
+        onClick={() => setLeaving(true)}
       >
         ×
       </button>
