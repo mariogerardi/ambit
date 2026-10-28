@@ -622,7 +622,9 @@
     flex: 0 0 44px;
     justify-content: center;
   }
-  .experience .profile-toggle > span:last-child:not(.profile-avatar) {
+  .experience
+    .profile-toggle
+    > :is(.account-menu-handle, .account-menu-chevron) {
     display: none;
   }
   .experience .app-menu-content {

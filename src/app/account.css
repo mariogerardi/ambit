@@ -2,7 +2,7 @@
 .review-main .account-dashboard {
   position: relative;
   inset: auto;
-  width: min(100% - 48px, 1040px);
+  width: min(100%, 1120px);
   margin: 0 auto;
   padding-bottom: 40px;
   max-height: none;
@@ -10,12 +10,14 @@
 .account-heading {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 22px;
   margin-bottom: 24px;
 }
 .account-dashboard .account-heading h1.editorial-heading {
-  margin: 8px 0 0;
-  line-height: 1.05;
+  margin: 6px 0 8px;
+  font-size: clamp(30px, 4vw, 40px);
+  line-height: 1.1;
 }
 .account-heading .account-handle {
   margin: 0;
@@ -364,10 +366,7 @@
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.18);
 }
 .account-profile-layout {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: 28px;
+  display: block;
 }
 .account-profile-layout.is-editing {
   display: block;
@@ -1115,4 +1114,365 @@
   padding: 0;
   margin: 0;
   border: 0;
+}
+
+/* Account navigation stays beside the task; Admin gets the whole workspace. */
+.account-workspace {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: start;
+  gap: 40px;
+}
+.account-workspace-main {
+  min-width: 0;
+}
+.account-sidebar {
+  padding-top: 8px;
+}
+.account-sidebar > .overline {
+  display: block;
+  margin: 0 12px 18px;
+}
+.account-sidebar .account-tabs {
+  display: grid;
+  gap: 4px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.account-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.account-tabs .action-icon {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+.account-sidebar .account-admin-link {
+  margin-top: 18px;
+  border-top-color: rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 0 0 8px 8px;
+}
+.account-section-description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui-muted);
+}
+.account-dashboard[data-section="admin"] .account-workspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+.account-dashboard[data-section="admin"] .account-sidebar {
+  display: none;
+}
+.account-dashboard .account-profile-layout {
+  max-width: 760px;
+}
+.account-continuations {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+}
+.account-continue-card,
+.account-login-details,
+.account-settings-appearance {
+  padding: 22px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 16px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.account-continue-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.account-journey-card {
+  border-color: rgb(var(--ui-editorial-rgb) / 0.4);
+}
+.account-continue-card > .overline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.account-continue-card .action-icon {
+  width: 18px;
+  height: 18px;
+}
+.account-dashboard .account-continue-card h2 {
+  margin: 16px 0 10px;
+  font-size: 27px;
+}
+.account-journey-card h2 {
+  color: var(--ui-editorial);
+}
+.account-continue-card p {
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ui-muted);
+  flex: 1;
+}
+.experience .account-continue-card button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 13px 16px;
+  min-height: 48px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.experience .account-secondary-button {
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.5);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--ui-accent);
+}
+.experience .account-secondary-button:hover {
+  border-color: var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.1);
+}
+.account-progress-view .account-stats {
+  margin: 24px 0;
+  gap: 0;
+  padding-block: 20px;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+}
+.account-progress-view .account-stats > div {
+  padding: 0 16px;
+  border-radius: 0;
+  background: transparent;
+  border-right: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+}
+.account-progress-view .account-stats > div:first-child {
+  padding-left: 0;
+}
+.account-progress-view .account-stats > div:last-child {
+  border: 0;
+}
+.account-progress-view .account-stats dd {
+  font-size: 32px;
+  color: var(--ui-editorial);
+}
+.account-recent > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.account-recent h2 {
+  margin: 0;
+}
+.account-recent ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.account-recent li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.13);
+}
+.account-recent li > .action-icon {
+  width: 21px;
+  height: 21px;
+  color: var(--ui-accent);
+  flex-shrink: 0;
+}
+.account-recent li > span:first-of-type {
+  flex: 1;
+  min-width: 0;
+}
+.account-recent strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.account-recent small {
+  display: block;
+  margin-top: 4px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.account-recent-result {
+  font-size: 12px;
+  color: var(--ui-accent);
+  white-space: nowrap;
+}
+.account-settings {
+  display: grid;
+  gap: 20px;
+}
+.account-dashboard .account-login-details h2 {
+  margin-top: 0;
+}
+.account-login-details > .account-secondary-button {
+  margin-top: 12px;
+}
+.account-sync {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.account-sync p {
+  flex: 1;
+  min-width: 160px;
+  line-height: 1.6;
+}
+.account-sync-indicator {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ui-muted);
+}
+.account-sync-indicator:is(.sync-saved, .sync-synced) {
+  background: var(--ui-accent);
+}
+.account-sync-indicator:is(.sync-error, .sync-offline) {
+  background: var(--ui-editorial);
+}
+.account-settings-appearance .account-appearance > p {
+  margin-bottom: 18px;
+}
+.account-dashboard .friend-journey-comparison {
+  margin: 0 0 16px;
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 16px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.account-dashboard .friend-comparison-list {
+  padding: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+.account-dashboard
+  .friend-comparison-list
+  .comparison-you
+  .friend-comparison-row {
+  min-height: 56px;
+  padding-block: 10px;
+}
+.account-dashboard .comparison-you .comparison-sync-pending {
+  padding-bottom: 8px;
+}
+.account-dashboard .friends-directory .friends-workspace {
+  grid-template-columns: minmax(230px, 0.85fr) minmax(0, 1fr);
+}
+.account-dashboard .friends-directory .friend-cards {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.experience .account-dashboard .friends-directory button.friend-card {
+  min-height: 64px;
+  padding: 12px;
+}
+.experience.mode-account .account-earth {
+  opacity: 0.06;
+}
+@media (max-width: 900px) {
+  .account-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .account-sidebar {
+    padding: 0;
+  }
+  .account-sidebar > .overline {
+    display: none;
+  }
+  .account-sidebar .account-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+    padding-bottom: 12px;
+  }
+  .account-sidebar .account-admin-link {
+    margin-top: 0;
+    margin-left: auto;
+    border: 0;
+    border-radius: 8px;
+  }
+}
+@media (max-width: 600px) {
+  .account-continuations {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .account-continue-card,
+  .account-login-details,
+  .account-settings-appearance,
+  .account-dashboard .friend-journey-comparison {
+    padding: 18px;
+  }
+  .account-sidebar .account-tabs button {
+    padding: 10px;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .account-sidebar .account-tabs .action-icon {
+    display: none;
+  }
+  .account-dashboard .friends-directory .friends-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .account-progress-view .account-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 0;
+  }
+  .account-progress-view .account-stats > div:nth-child(odd) {
+    padding-left: 0;
+  }
+  .account-progress-view .account-stats > div:nth-child(even) {
+    border: 0;
+  }
+  .account-recent li {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .account-recent-result {
+    margin-left: auto;
+  }
+  .account-heading {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Admin stays directly available in the avatar menu on narrow screens. */
+  .account-sidebar .account-tabs .account-admin-link {
+    display: none;
+  }
+  .account-dashboard .friend-comparison-list .friend-comparison-row {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .account-dashboard .friend-comparison-row > .friend-comparison-result {
+    margin-left: 0;
+    max-width: 48%;
+    font-size: 12px;
+  }
+  .account-dashboard .comparison-score-summary {
+    grid-template-columns: auto;
+    gap: 5px;
+    justify-items: end;
+  }
+  .account-dashboard .friend-comparison-name strong {
+    font-size: 14px;
+  }
+  .account-dashboard .comparison-you .comparison-sync-pending {
+    padding-left: 12px;
+  }
 }

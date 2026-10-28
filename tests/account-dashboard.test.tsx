@@ -176,7 +176,7 @@ async function input(selector: string, value: string) {
 }
 it("loads private account data and accepts an incoming request for the displayed player", async () => {
   await mount();
-  expect(host.textContent).toContain("Hello, Alice.");
+  expect(host.textContent).toContain("Pick up your next stop.");
   expect(host.textContent).not.toContain("alice@example.com");
   await click("Friends · New");
   await click("Accept");
@@ -186,7 +186,7 @@ it("loads private account data and accepts an incoming request for the displayed
   expect(host.textContent).toContain("@bob");
   expect(host.querySelector(".friend-card")?.textContent).toContain("@bob");
 });
-it("keeps email and sign-out beside the profile card and off Dashboard and Friends", async () => {
+it("keeps private email, sync and sign-out in Settings, separate from Profile and Friends", async () => {
   const onSignOut = vi.fn();
   const retry = vi.fn();
   await mount({
@@ -201,18 +201,17 @@ it("keeps email and sign-out beside the profile card and off Dashboard and Frien
   expect(host.textContent).not.toContain("alice@example.com");
   expect(host.textContent).not.toContain("Sign out");
   await click("Profile");
-  const side = host.querySelector(
-    ".account-profile-layout > .account-profile-aside",
-  )!;
   expect(
     host.querySelector(".account-profile-layout > .profile-card"),
   ).not.toBeNull();
+  expect(host.textContent).not.toContain("alice@example.com");
+  expect(host.textContent).not.toContain("Sign out");
+  await click("Settings");
+  const side = host.querySelector('[aria-label="Private account details"]')!;
   expect(side.textContent).toContain("alice@example.com");
   expect(side.textContent).toContain("Only you can see your email.");
-  expect(side.textContent).toContain("Your account");
-  expect(side.textContent).not.toContain("Your profile link");
-  expect(side.textContent).not.toContain("Copy profile link");
-  expect(host.textContent).not.toContain("Sign in on another device");
+  expect(side.textContent).toContain("Account & sync");
+  expect(side.textContent).toContain("Sign in on another device");
   await click("Sign out");
   expect(onSignOut).toHaveBeenCalledOnce();
   await click("Friends · New");
@@ -268,9 +267,12 @@ it("checks handles without changing saved identity and offers available alternat
       host.querySelector<HTMLButtonElement>(".profile-form .primary-button")
         ?.disabled,
     ).toBe(true);
+    expect(profile.handle).toBe("alice");
     expect(
-      host.querySelector(".account-heading .account-handle")?.textContent,
-    ).toBe("@alice");
+      request.mock.calls.some(
+        ([path, method]) => path === "profile" && method === "PATCH",
+      ),
+    ).toBe(false);
     await click("@bob_world");
     await act(async () => vi.advanceTimersByTimeAsync(400));
     expect(host.textContent).toContain("This handle is available");
@@ -349,7 +351,7 @@ it("saves a fixed theme avatar and renders the chosen local artwork", async () =
   expect(profile.avatar).toBe("avatar-08");
   expect(
     host
-      .querySelector(".account-heading .profile-avatar img")
+      .querySelector(".profile-card .profile-avatar img")
       ?.getAttribute("src"),
   ).toBe("/avatars/avatar-08.svg");
   expect(host.textContent).toContain("Your profile is saved.");
@@ -377,7 +379,7 @@ it("saves a country flag avatar and renders its local image", async () => {
   expect(profile.avatar).toBe("flag:wurl:CAN");
   expect(
     host
-      .querySelector(".account-heading .profile-avatar img")
+      .querySelector(".profile-card .profile-avatar img")
       ?.getAttribute("src"),
   ).toMatch(/^\/flags\/study\//);
   expect(host.textContent).toContain("Your profile is saved.");
@@ -408,23 +410,39 @@ it("keeps profile editing available when only friends fail to load", async () =>
   );
   expect(host.textContent).not.toContain("No friends yet");
 });
-it("keeps the dashboard compact and never requests the removed challenges feature", async () => {
+it("offers Study continuation and recent activity without requesting the removed challenges feature", async () => {
+  const onStudy = vi.fn();
+  const onJourney = vi.fn();
+  const session = startStudy(sharedSettings, 42);
   await mount({
+    onStudy,
+    onJourney,
     study: {
       version: 1,
       settings: sharedSettings,
-      session: startStudy(sharedSettings, 42),
+      session,
     },
   });
   for (const label of [
     "Your Journeys",
     "Past Study sessions",
     "Saved Study setups",
-    "Continue your Study session",
     "Challenges",
   ])
     expect(host.textContent).not.toContain(label);
   expect(host.textContent).toContain("Journey streak");
+  expect(host.textContent).toContain("Resume Study");
+  expect(host.querySelector('[aria-label="Recent activity"]')).not.toBeNull();
+  await click("Resume Study→");
+  await click("Play today’s Journey→");
+  expect(onStudy).toHaveBeenCalledOnce();
+  expect(onJourney).toHaveBeenCalledOnce();
+  expect(session.history).toEqual([]);
+  expect(
+    request.mock.calls.some(
+      ([, method]) => method === "PATCH" || method === "POST",
+    ),
+  ).toBe(false);
   expect(request.mock.calls.some(([path]) => path === "challenges")).toBe(
     false,
   );
@@ -608,7 +626,7 @@ it("consumes comparison arrival so switching account tabs does not scroll there 
         new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
     );
     expect(scroll).toHaveBeenCalledTimes(1);
-    await click("Dashboard");
+    await click("Progress");
     await click("Friends");
     await act(
       async () =>
@@ -645,7 +663,7 @@ it("retains a profile draft and mounted admin content while route intent changes
   const heading = host.querySelector(".account-heading");
   await click("Edit profile");
   await input('input[autocomplete="nickname"]', "Alice traveling");
-  await click("Dashboard");
+  await click("Progress");
   expect(onNavigate).toHaveBeenLastCalledWith("/account?tab=dashboard");
   await mount({ ...props, intent: { tab: "admin", section: "tools" } });
   const adminDraft = host.querySelector<HTMLInputElement>(

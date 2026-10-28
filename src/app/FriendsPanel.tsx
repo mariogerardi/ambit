@@ -546,6 +546,23 @@ export function FriendsPanel({
   return (
     <div className="friends-panel">
       {notices}
+      {(defaultComparison !== null || intent?.comparison) && (
+        <FriendJourneyComparison
+          focus={focusComparison ?? !!intent?.comparison}
+          onFocused={onComparisonFocused}
+          focusReady={relationshipsLoaded && !loading && (!!page || !!failure)}
+          api={api}
+          target={target}
+          friends={friends}
+          player={player}
+          localScore={localScore}
+          sync={sync}
+          disabled={disabled || !!error}
+          onProfile={(id) => void viewProfile(id)}
+          canInvite={!!player}
+          onInvite={() => void invite()}
+        />
+      )}
       <section className="friends-directory" aria-label="Friend directory">
         <div className="friends-workspace">
           <aside className="friends-search-column">
@@ -844,23 +861,6 @@ export function FriendsPanel({
           </section>
         </div>
       </section>
-      {(defaultComparison !== null || intent?.comparison) && (
-        <FriendJourneyComparison
-          focus={focusComparison ?? !!intent?.comparison}
-          onFocused={onComparisonFocused}
-          focusReady={relationshipsLoaded && !loading && (!!page || !!failure)}
-          api={api}
-          target={target}
-          friends={friends}
-          player={player}
-          localScore={localScore}
-          sync={sync}
-          disabled={disabled || !!error}
-          onProfile={(id) => void viewProfile(id)}
-          canInvite={!!player}
-          onInvite={() => void invite()}
-        />
-      )}
     </div>
   );
 }

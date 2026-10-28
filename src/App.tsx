@@ -55,7 +55,7 @@ import {
 } from "./app/worldPreferences";
 import { useAccount } from "./services/accounts";
 import { usePlayerProfile } from "./services/playerProfile";
-import { ProfileAvatar } from "./app/ProfileAvatar";
+import { AccountMenu } from "./app/AccountMenu";
 import { appRelease } from "./services/config";
 import { trackAction, trackView, reportFailure } from "./services/monitoring";
 import type { FeedbackRequest } from "./services/feedback";
@@ -1049,6 +1049,19 @@ export function App() {
       />
     ) : mode === "account" ? (
       <AccountPanel
+        onJourney={() => playDaily(today)}
+        journeyReady={
+          !!regions.length &&
+          dailyLoaded &&
+          cloudSave.ready &&
+          schedule.ready &&
+          webgl
+        }
+        onStudy={() => {
+          if (study.session && study.session.phase !== "summary")
+            setStudySetup(false);
+          navigate("/study");
+        }}
         appearanceContent={
           <AppearancePanel theme={theme} onTheme={changeTheme} />
         }
@@ -1643,48 +1656,33 @@ export function App() {
           <AmbitLogo />
         </button>
         <div className="experience-header-right">
-          <button
-            className="profile-toggle"
-            data-dd-action-name="Menu Account"
-            aria-label="Account"
-            aria-current={mode === "account" ? "page" : undefined}
-            title={
-              account.user
-                ? "Your profile, stats and friends"
-                : "Sign in or create an account"
-            }
-            onClick={() => navigate("/account")}
-            data-dd-privacy="mask"
-          >
-            {playerProfile ? (
-              <ProfileAvatar
-                avatar={playerProfile.avatar}
-                label="Your profile picture"
-              />
-            ) : (
-              <svg
-                viewBox="0 0 24 24"
-                width="22"
-                height="22"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="3.5" />
-                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
-              </svg>
-            )}
-            <span>
-              {playerProfile
-                ? `@${playerProfile.handle}`
-                : account.user
-                  ? "Profile"
-                  : "Sign in"}
-            </span>
-          </button>
+          <AccountMenu
+            signedIn={!!account.user}
+            player={playerProfile}
+            admin={account.admin}
+            path={path}
+            onNavigate={navigate}
+            journey={{
+              title: todayJourney.title,
+              progress: !todayAttempt
+                ? "Not started"
+                : ["finished", "failed"].includes(todayAttempt.game.phase)
+                  ? "Complete"
+                  : `${todayAttempt.game.answers.length} of 5 stops`,
+              action: !todayAttempt
+                ? "Play"
+                : ["finished", "failed"].includes(todayAttempt.game.phase)
+                  ? "View result"
+                  : "Resume",
+              ready:
+                !!regions.length &&
+                dailyLoaded &&
+                cloudSave.ready &&
+                schedule.ready &&
+                webgl,
+              open: () => playDaily(today),
+            }}
+          />
           <AppMenu
             onJourney={() => playDaily(today)}
             journeyReady={

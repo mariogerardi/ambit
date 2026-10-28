@@ -249,6 +249,7 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       authProbe.subject = "owner";
       await mount();
       await click("Account");
+      if (authProbe.subject) await click("Progress");
       const adminTab = host.querySelector<HTMLButtonElement>(
         '[data-dd-action-name="Account Open Admin"]',
       );

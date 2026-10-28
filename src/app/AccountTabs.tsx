@@ -1,7 +1,16 @@
 import "./account.css";
+import { ActionIcon } from "./ActionIcon";
 
 import type { AccountSection } from "./accountNavigation";
 export type { AccountSection } from "./accountNavigation";
+
+export const ACCOUNT_SECTIONS = {
+  dashboard: { label: "Progress", icon: "progress" },
+  friends: { label: "Friends", icon: "friends" },
+  profile: { label: "Profile", icon: "profile" },
+  appearance: { label: "Settings", icon: "settings" },
+  admin: { label: "Admin", icon: "admin" },
+} as const;
 
 export function AccountTabs({
   active,
@@ -18,7 +27,7 @@ export function AccountTabs({
 }) {
   const sections: AccountSection[] = guest
     ? ["profile", "appearance"]
-    : ["dashboard", "profile", "friends", "appearance"];
+    : ["dashboard", "friends", "profile", "appearance"];
   if (admin && !guest) sections.push("admin");
   return (
     <nav className="account-tabs" aria-label="Account sections">
@@ -27,11 +36,12 @@ export function AccountTabs({
           key={section}
           type="button"
           data-dd-action-name={`Account Open ${section[0].toUpperCase() + section.slice(1)}`}
-          className={active === section ? "selected" : ""}
+          className={`${active === section ? "selected" : ""} ${section === "admin" ? "account-admin-link" : ""}`}
           aria-current={active === section ? "page" : undefined}
           onClick={() => onSelect(section)}
         >
-          {section[0].toUpperCase() + section.slice(1)}
+          <ActionIcon name={ACCOUNT_SECTIONS[section].icon} />
+          {ACCOUNT_SECTIONS[section].label}
           {section === "friends" && newFriends ? " · New" : ""}
         </button>
       ))}

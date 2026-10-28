@@ -17,6 +17,9 @@ export function AccountPanel({
   onNavigate,
   adminContent,
   appearanceContent,
+  onJourney,
+  journeyReady,
+  onStudy,
 }: {
   defaultComparison?: ComparisonTarget | null;
   intent?: AccountIntent;
@@ -26,6 +29,9 @@ export function AccountPanel({
   onNavigate?(url: string): void;
   adminContent?: ReactNode;
   appearanceContent?: ReactNode;
+  onJourney?(): void;
+  journeyReady?: boolean;
+  onStudy?(): void;
 }) {
   const account = useAccount();
   const { notify } = useToast();
@@ -48,6 +54,9 @@ export function AccountPanel({
           onNavigate={onNavigate}
           adminContent={adminContent}
           appearanceContent={appearanceContent}
+          onJourney={onJourney}
+          journeyReady={journeyReady}
+          onStudy={onStudy}
         />
         {account.error && (
           <p className="account-auth-error" role="alert">

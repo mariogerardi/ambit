@@ -140,7 +140,7 @@
   border: 0;
   background: transparent;
 }
-.profile-toggle > span:last-child {
+.profile-toggle > .account-menu-handle {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -225,4 +225,66 @@
 .globe-controls button:hover,
 .globe-speed:hover {
   background: rgb(var(--ui-line-rgb) / 0.066);
+}
+
+.account-menu {
+  position: relative;
+  pointer-events: auto;
+}
+.experience-header .profile-toggle[aria-expanded="true"] {
+  border-color: rgb(var(--ui-accent-rgb) / 0.5);
+  background: rgb(var(--ui-surface-rgb));
+}
+.profile-toggle .account-menu-chevron {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+.profile-toggle .account-menu-guest-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+.account-menu-content {
+  background: rgb(var(--ui-surface-rgb) / 0.98);
+}
+.account-menu-content .action-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-right: 12px;
+  color: var(--ui-accent);
+}
+.experience .account-menu-content .account-menu-today {
+  margin-top: 12px;
+  padding: 14px 12px;
+  border: 1px solid rgb(var(--ui-editorial-rgb) / 0.3);
+  border-radius: 12px;
+}
+.account-menu-today > span {
+  display: grid;
+  gap: 7px;
+}
+.account-menu-today small {
+  color: var(--ui-muted);
+  font-size: 11px;
+}
+.account-menu-today strong {
+  font: 22px/1.2 var(--font-editorial);
+  color: var(--ui-editorial);
+}
+.account-menu-today > span > span {
+  color: var(--ui-editorial);
+  font-size: 12px;
+}
+.account-menu-admin {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  margin-top: 12px;
+  padding-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .account-menu-content {
+    right: -54px;
+  }
 }

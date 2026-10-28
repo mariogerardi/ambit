@@ -424,7 +424,7 @@ it("shows every accepted friend with completed players first and unfinished prog
   const directory = host.querySelector(".friends-directory")!;
   const comparison = host.querySelector("#journey-comparison")!;
   expect(
-    directory.compareDocumentPosition(comparison) &
+    comparison.compareDocumentPosition(directory) &
       Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy();
 });
