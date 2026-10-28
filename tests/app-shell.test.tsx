@@ -249,6 +249,7 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       authProbe.subject = "owner";
       await mount();
       await click("Account");
+      if (authProbe.subject) await click("Progress");
       const adminTab = host.querySelector<HTMLButtonElement>(
         '[data-dd-action-name="Account Open Admin"]',
       );
@@ -320,8 +321,8 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Feedback");
     expect(location.search).toBe("?tab=admin&section=feedback");
-    await click("Tools");
-    expect(location.search).toBe("?tab=admin&section=tools");
+    await click("Journeys");
+    expect(location.search).toBe("?tab=admin&section=journeys");
     await act(async () => {
       history.back();
       await new Promise((resolve) => setTimeout(resolve, 25));
@@ -334,8 +335,8 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       history.forward();
       await new Promise((resolve) => setTimeout(resolve, 25));
     });
-    expect(location.search).toBe("?tab=admin&section=tools");
-    expect(host.querySelector("#admin-tools")?.hasAttribute("hidden")).toBe(
+    expect(location.search).toBe("?tab=admin&section=journeys");
+    expect(host.querySelector("#admin-journeys")?.hasAttribute("hidden")).toBe(
       false,
     );
     await section("Dashboard");
@@ -356,11 +357,13 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       history.replaceState(null, "", "/account?tab=admin&section=tools");
       await mount();
       if (admin) {
-        expect(host.querySelector("#admin-tools")?.hasAttribute("hidden")).toBe(
-          false,
-        );
         expect(
-          host.querySelector("#admin-tab-tools")?.getAttribute("aria-selected"),
+          host.querySelector<HTMLDetailsElement>(".admin-maintenance")?.open,
+        ).toBe(true);
+        expect(
+          host
+            .querySelector("#admin-tab-schedule")
+            ?.getAttribute("aria-selected"),
         ).toBe("true");
       } else {
         expect(host.textContent).toContain("Admin access required.");

@@ -65,22 +65,24 @@ it("announces success, survives a panel change and pauses dismissal while focuse
   await act(async () =>
     host.querySelector<HTMLButtonElement>("button")!.focus(),
   );
-  await act(async () => vi.advanceTimersByTime(6000));
+  await act(async () => vi.advanceTimersByTime(3000));
+  expect(host.querySelector(".toast-leaving")).not.toBeNull();
+  await act(async () => vi.advanceTimersByTime(180));
   expect(host.querySelector(".toast")).toBeNull();
 });
-it("keeps failures visible until dismissed and does not repeat identical notices", async () => {
+it("announces failures once and dismisses them after a brief readable interval", async () => {
   const fail = host.querySelectorAll<HTMLButtonElement>("button")[1];
   await act(async () => {
     fail.click();
     fail.click();
   });
   expect(host.querySelectorAll(".toast")).toHaveLength(1);
-  await act(async () => vi.advanceTimersByTime(60000));
+  await act(async () => vi.advanceTimersByTime(4999));
   expect(host.querySelector('[role="alert"]')?.textContent).toContain(
     "Couldn’t save",
   );
-  await act(async () =>
-    host.querySelector<HTMLButtonElement>(".toast button")!.click(),
-  );
+  await act(async () => vi.advanceTimersByTime(1));
+  expect(host.querySelector(".toast-leaving")).not.toBeNull();
+  await act(async () => vi.advanceTimersByTime(180));
   expect(host.querySelector(".toast")).toBeNull();
 });

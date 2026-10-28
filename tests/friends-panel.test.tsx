@@ -50,6 +50,7 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date("2026-10-10T16:00:00Z"));
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   history.replaceState(null, "", "/account");
   host = document.createElement("div");
   document.body.append(host);
@@ -86,6 +87,7 @@ afterEach(async () => {
   host.remove();
   vi.unstubAllGlobals();
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 async function mount(props: Partial<Parameters<typeof FriendsPanel>[0]> = {}) {
   await act(async () =>
@@ -262,6 +264,63 @@ it("shows all accepted friends before their paged activity arrives", async () =>
   ).not.toContain("Not started");
 });
 
+it("shares the initial activity response with the comparison and reuses it after visiting a profile", async () => {
+  await mount();
+  expect(
+    request.mock.calls.filter(([path]) => path.startsWith("friends/activity?")),
+  ).toHaveLength(1);
+  await click("View Bob’s profile");
+  expect(host.querySelector(".friend-detail-today")).not.toBeNull();
+  expect(host.querySelector(".friend-detail-results")).not.toBeNull();
+  await click("← Back to friends");
+  expect(host.textContent).not.toContain("Loading activity");
+  expect(host.textContent).not.toContain("Waiting for synced comparison");
+  expect(
+    request.mock.calls.filter(([path]) => path.startsWith("friends/activity?")),
+  ).toHaveLength(1);
+});
+
+it("retains settled permitted scores while refreshing, without transient loading or sync copy", async () => {
+  page.you.journeys = [score];
+  page.friends[0].journeys = [score];
+  page.friends[0].today = {
+    date: score.date,
+    status: "completed",
+    scoreLocked: false,
+    score,
+  };
+  const settled = structuredClone(page);
+  let finish!: (page: FriendActivityPage) => void;
+  const pending = new Promise<FriendActivityPage>((resolve) => {
+    finish = resolve;
+  });
+  request.mockImplementation(async () => pending);
+  const api = { request } as CommunityClient;
+  await mount({
+    api,
+    initialActivity: settled,
+    defaultComparison: {
+      date: score.date,
+      journeyId: score.journeyId,
+      version: 1,
+    },
+    sync: { status: "syncing", retry: vi.fn() },
+  });
+  const row = host.querySelector(".comparison-you .friend-comparison-row");
+  expect(row?.textContent).toContain("12/15");
+  expect(host.textContent).not.toContain("Loading activity");
+  expect(host.textContent).not.toContain("Waiting for synced comparison");
+  expect(host.textContent).not.toContain("Syncing your result");
+  await act(async () => finish(settled));
+  expect(host.querySelector(".comparison-you .friend-comparison-row")).toBe(
+    row,
+  );
+  expect(row?.textContent).toContain("12/15");
+  expect(
+    request.mock.calls.filter(([path]) => path.startsWith("friends/activity?")),
+  ).toHaveLength(1);
+});
+
 it("compares you first and friends alphabetically, excluding other Journey editions", async () => {
   const target = { date: score.date, journeyId: score.journeyId, version: 1 };
   page.you.journeys = [{ ...score, correct: 3 }];
@@ -424,7 +483,7 @@ it("shows every accepted friend with completed players first and unfinished prog
   const directory = host.querySelector(".friends-directory")!;
   const comparison = host.querySelector("#journey-comparison")!;
   expect(
-    directory.compareDocumentPosition(comparison) &
+    comparison.compareDocumentPosition(directory) &
       Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy();
 });

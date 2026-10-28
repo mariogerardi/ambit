@@ -2,7 +2,7 @@
 .review-main .account-dashboard {
   position: relative;
   inset: auto;
-  width: min(100% - 48px, 1040px);
+  width: min(100%, 1120px);
   margin: 0 auto;
   padding-bottom: 40px;
   max-height: none;
@@ -10,12 +10,14 @@
 .account-heading {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 22px;
   margin-bottom: 24px;
 }
 .account-dashboard .account-heading h1.editorial-heading {
-  margin: 8px 0 0;
-  line-height: 1.05;
+  margin: 6px 0 8px;
+  font-size: clamp(30px, 4vw, 40px);
+  line-height: 1.1;
 }
 .account-heading .account-handle {
   margin: 0;
@@ -275,9 +277,27 @@
   margin-bottom: 12px;
 }
 .avatar-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 8;
+  width: min(350px, calc(100vw - 80px));
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb));
+  box-shadow: 0 12px 36px rgb(var(--ui-shadow-rgb) / 0.3);
+}
+.avatar-options[hidden] {
+  display: none;
+}
+.avatar-options-above {
+  top: auto;
+  bottom: calc(100% + 8px);
 }
 .avatar-options .avatar-pending {
   cursor: default;
@@ -301,8 +321,8 @@
   display: grid;
   justify-items: center;
   gap: 8px;
-  padding: 12px 6px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  padding: 6px;
+  border: 1px solid transparent;
   border-radius: 12px;
   cursor: pointer;
 }
@@ -364,10 +384,7 @@
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.18);
 }
 .account-profile-layout {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: 28px;
+  display: block;
 }
 .account-profile-layout.is-editing {
   display: block;
@@ -418,7 +435,7 @@
     width: 100%;
   }
   .avatar-options {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
   .experience.experience .account-dashboard {
     width: 100%;
@@ -456,8 +473,8 @@
     flex-wrap: wrap;
     gap: 6px;
   }
-  .avatar-picker label {
-    padding: 9px;
+  .avatar-options label {
+    padding: 6px;
   }
   .account-row-actions {
     justify-content: start;
@@ -834,35 +851,35 @@
 }
 .friend-comparison-list .comparison-score {
   color: var(--ui-editorial);
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .comparison-score-summary {
   display: grid;
-  grid-template-columns: auto 64px;
+  grid-template-columns: minmax(0, auto) auto;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 .comparison-score-summary .comparison-score {
   text-align: right;
   white-space: nowrap;
 }
 .friend-comparison-list .comparison-you .friend-comparison-row {
-  min-height: 76px;
-  padding-block: 14px;
+  min-height: 50px;
+  padding-block: 8px;
 }
 .friends-panel .comparison-you .friend-comparison-identity .profile-avatar {
-  width: 44px;
-  height: 44px;
-  font-size: 28px;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
 }
 .comparison-you .friend-comparison-identity strong {
   font-size: 16px;
 }
 .friend-comparison-list .comparison-you .comparison-score {
-  font-size: 34px;
+  font-size: 22px;
 }
 .comparison-you .comparison-sync-pending {
   display: block;
@@ -871,7 +888,7 @@
 }
 .comparison-score > span {
   color: var(--ui-muted);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 500;
 }
 .comparison-help,
@@ -900,8 +917,10 @@
   box-shadow: inset 3px 0 var(--ui-editorial);
 }
 .friend-comparison-name {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
 }
 .friend-comparison-list .comparison-you-label {
   color: var(--ui-editorial);
@@ -1115,4 +1134,691 @@
   padding: 0;
   margin: 0;
   border: 0;
+}
+
+/* Account navigation stays beside the task; Admin gets the whole workspace. */
+.account-workspace {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: start;
+  gap: 40px;
+}
+.account-workspace-main {
+  min-width: 0;
+}
+.account-sidebar {
+  padding-top: 8px;
+}
+.account-sidebar > .overline {
+  display: block;
+  margin: 0 12px 18px;
+}
+.account-sidebar .account-tabs {
+  display: grid;
+  gap: 4px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.account-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.account-tabs .action-icon {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+.account-sidebar .account-admin-link {
+  margin-top: 18px;
+  border-top-color: rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 0 0 8px 8px;
+}
+.account-section-description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui-muted);
+}
+.account-dashboard[data-section="admin"] .account-workspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+.account-dashboard[data-section="admin"] .account-sidebar {
+  display: none;
+}
+.account-dashboard .account-profile-layout {
+  max-width: 760px;
+}
+.account-continuations {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+}
+.account-continue-card,
+.account-settings-appearance {
+  padding: 22px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 16px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.account-continue-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.account-journey-card {
+  border-color: rgb(var(--ui-editorial-rgb) / 0.4);
+}
+.account-continue-card > .overline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.account-continue-card .action-icon {
+  width: 18px;
+  height: 18px;
+}
+.account-dashboard .account-continue-card h2 {
+  margin: 16px 0 10px;
+  font-size: 27px;
+}
+.account-journey-card h2 {
+  color: var(--ui-editorial);
+}
+.account-continue-card p {
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ui-muted);
+  flex: 1;
+}
+.experience .account-continue-card button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 13px 16px;
+  min-height: 48px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.experience .account-secondary-button {
+  border: 1px solid rgb(var(--ui-accent-rgb) / 0.5);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--ui-accent);
+}
+.experience .account-secondary-button:hover {
+  border-color: var(--ui-accent);
+  background: rgb(var(--ui-accent-rgb) / 0.1);
+}
+.account-progress-view .account-stats {
+  margin: 24px 0;
+  gap: 0;
+  padding-block: 20px;
+  border-block: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+}
+.account-progress-view .account-stats > div {
+  padding: 0 16px;
+  border-radius: 0;
+  background: transparent;
+  border-right: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+}
+.account-progress-view .account-stats > div:first-child {
+  padding-left: 0;
+}
+.account-progress-view .account-stats > div:last-child {
+  border: 0;
+}
+.account-progress-view .account-stats dd {
+  font-size: 32px;
+  color: var(--ui-editorial);
+}
+.account-recent > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.account-recent h2 {
+  margin: 0;
+}
+.account-recent ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.account-recent li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.13);
+}
+.account-recent li > .action-icon {
+  width: 21px;
+  height: 21px;
+  color: var(--ui-accent);
+  flex-shrink: 0;
+}
+.account-recent li > span:first-of-type {
+  flex: 1;
+  min-width: 0;
+}
+.account-recent strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.account-recent small {
+  display: block;
+  margin-top: 4px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.account-recent-result {
+  font-size: 12px;
+  color: var(--ui-accent);
+  white-space: nowrap;
+}
+.account-settings {
+  display: grid;
+  gap: 20px;
+}
+.account-settings-appearance .account-appearance > p {
+  margin-bottom: 18px;
+}
+.account-dashboard .friend-journey-comparison {
+  margin: 0 0 16px;
+  padding: 20px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 16px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.account-dashboard .friend-comparison-list {
+  padding: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+.account-dashboard
+  .friend-comparison-list
+  .comparison-you
+  .friend-comparison-row {
+  min-height: 50px;
+  padding-block: 8px;
+}
+.account-dashboard .comparison-you .comparison-sync-pending {
+  padding-bottom: 8px;
+}
+.account-dashboard .friends-directory .friends-workspace {
+  grid-template-columns: minmax(230px, 0.85fr) minmax(0, 1fr);
+}
+.account-dashboard .friends-directory .friend-cards {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.experience .account-dashboard .friends-directory button.friend-card {
+  min-height: 64px;
+  padding: 12px;
+}
+.experience.mode-account .account-earth {
+  opacity: 0.06;
+}
+@media (max-width: 900px) {
+  .account-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .account-sidebar {
+    padding: 0;
+  }
+  .account-sidebar > .overline {
+    display: none;
+  }
+  .account-sidebar .account-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+    padding-bottom: 12px;
+  }
+  .account-sidebar .account-admin-link {
+    margin-top: 0;
+    margin-left: auto;
+    border: 0;
+    border-radius: 8px;
+  }
+}
+@media (max-width: 600px) {
+  .account-continuations {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .account-continue-card,
+  .account-settings-appearance,
+  .account-dashboard .friend-journey-comparison {
+    padding: 18px;
+  }
+  .account-sidebar .account-tabs button {
+    padding: 10px;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .account-sidebar .account-tabs .action-icon {
+    display: none;
+  }
+  .account-dashboard .friends-directory .friends-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .account-progress-view .account-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 0;
+  }
+  .account-progress-view .account-stats > div:nth-child(odd) {
+    padding-left: 0;
+  }
+  .account-progress-view .account-stats > div:nth-child(even) {
+    border: 0;
+  }
+  .account-recent li {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .account-recent-result {
+    margin-left: auto;
+  }
+  .account-heading {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Admin stays directly available in the avatar menu on narrow screens. */
+  .account-sidebar .account-tabs .account-admin-link {
+    display: none;
+  }
+  .account-dashboard .friend-comparison-list .friend-comparison-row {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .account-dashboard .friend-comparison-row > .friend-comparison-result {
+    margin-left: 0;
+    max-width: 55%;
+    font-size: 12px;
+  }
+  .account-dashboard .comparison-score-summary {
+    grid-template-columns: minmax(0, auto) auto;
+    gap: 8px;
+    justify-items: end;
+  }
+  .account-dashboard .friend-comparison-name strong {
+    font-size: 14px;
+  }
+  .account-dashboard .comparison-you .comparison-sync-pending {
+    padding-left: 12px;
+  }
+}
+
+.comparison-score-notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: end;
+  gap: 4px 12px;
+}
+.comparison-score-notes small {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.comparison-score-notes .comparison-help {
+  white-space: nowrap;
+}
+.avatar-picker-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 16px;
+}
+.avatar-preset-picker {
+  position: relative;
+  min-width: 0;
+}
+.avatar-picker-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.experience .profile-form .avatar-picker-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 10px;
+  text-align: left;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.22);
+  border-radius: 7px;
+  background: var(--ui-input);
+  color: var(--ui-text);
+}
+.avatar-picker-trigger .profile-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 22px;
+}
+.avatar-picker-trigger > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+.avatar-picker-row .flag-avatar-choice {
+  margin: 0;
+  min-width: 0;
+}
+.avatar-picker-row .flag-avatar-select {
+  gap: 8px;
+}
+.avatar-picker-row select {
+  min-width: 0;
+}
+.account-stat-group {
+  margin: 28px 0;
+}
+.account-stat-group h2 {
+  margin: 0 0 16px;
+  font-size: 23px;
+}
+.account-progress-view .account-stat-group .account-stats {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: 0;
+  margin: 0;
+  padding: 0 0 22px;
+}
+.account-stat-group .account-stats dt {
+  line-height: 1.5;
+  min-height: 3em;
+}
+@media (max-width: 700px) {
+  .account-progress-view .account-stat-group .account-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px 0;
+  }
+  .account-progress-view .account-stat-group .account-stats > div {
+    padding: 0 12px;
+    border: 0;
+  }
+  .account-progress-view
+    .account-stat-group
+    .account-stats
+    > div:nth-child(3n + 1) {
+    padding-left: 0;
+  }
+}
+@media (max-width: 480px) {
+  .avatar-picker-row {
+    gap: 10px;
+  }
+  .avatar-picker-trigger .profile-avatar {
+    width: 26px;
+    height: 26px;
+  }
+  .account-progress-view .account-stat-group .account-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .account-progress-view .account-stat-group .account-stats > div {
+    padding: 0 12px;
+  }
+  .account-progress-view
+    .account-stat-group
+    .account-stats
+    > div:nth-child(odd) {
+    padding-left: 0;
+  }
+  .account-progress-view .account-stat-group .account-stats dt {
+    min-height: 0;
+  }
+}
+
+.account-dashboard .account-appearance > h2 {
+  margin: 0 0 8px;
+}
+.account-session-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding: 4px 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.account-session-footer p {
+  margin: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.account-session-footer .account-email {
+  color: var(--ui-text);
+}
+
+.friend-value-placeholder,
+.friend-heading-placeholder,
+.friend-identity-placeholder {
+  display: inline-block;
+  border-radius: 5px;
+  background: rgb(var(--ui-line-rgb) / 0.1);
+}
+.friend-value-placeholder {
+  width: 80px;
+  height: 15px;
+}
+.friend-identity-placeholder {
+  width: 140px;
+  height: 22px;
+}
+.friend-heading-placeholder {
+  width: 65%;
+  height: 28px;
+  margin-bottom: 36px;
+}
+.friend-comparison-skeleton {
+  height: 300px;
+  margin-top: 16px;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 49px,
+    rgb(var(--ui-line-rgb) / 0.1) 49px 50px
+  );
+}
+.friend-comparison-loading {
+  min-height: 366px;
+  box-sizing: border-box;
+}
+.friend-detail {
+  gap: 18px;
+}
+.friend-detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.experience .friend-detail-toolbar > button {
+  justify-content: start;
+  text-align: left;
+  width: auto;
+}
+.friend-detail .friend-manage {
+  position: relative;
+  margin: 0;
+}
+.friend-detail .friend-manage .account-row-actions {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  top: 100%;
+  display: grid;
+  width: 180px;
+  padding: 8px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 10px;
+  background: rgb(var(--ui-surface-rgb));
+}
+.friend-detail .friend-profile {
+  padding: 20px;
+}
+.friend-detail .friend-profile .profile-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 28px;
+}
+.friend-detail .friend-profile .friend-identity strong {
+  font-size: 28px;
+}
+.friend-detail .friend-profile .profile-bio {
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.friend-detail .friend-profile > .muted {
+  margin-bottom: 0;
+}
+.friend-detail .friend-stats {
+  margin: 0;
+  padding: 18px 0;
+  gap: 16px;
+}
+.friend-detail .friend-stats dd {
+  color: var(--ui-editorial);
+}
+.friend-detail-today,
+.friend-detail-results {
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 14px;
+  padding: 20px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.friend-detail-today {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.friend-detail-today > div {
+  flex: 1;
+  min-width: 180px;
+}
+.friend-detail-today h3 {
+  margin: 8px 0;
+  color: var(--ui-editorial);
+  font: 25px/1.2 var(--font-editorial);
+}
+.friend-detail-today p {
+  margin: 0;
+}
+.friend-detail-today .comparison-score {
+  font: 28px var(--font-editorial);
+  color: var(--ui-editorial);
+}
+.friend-detail-locked {
+  width: 100%;
+}
+.friend-detail-results h3 {
+  margin: 0;
+  font: 24px var(--font-editorial);
+}
+.friend-detail-results table {
+  margin-top: 12px;
+}
+.friend-detail-results :is(th, td) {
+  padding: 12px 8px;
+}
+.friend-detail-results td small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.friend-detail-results :is(th, td):not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.friend-detail .friend-data-note {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .friend-detail-today,
+  .friend-detail-results,
+  .friend-detail .friend-profile {
+    padding: 16px;
+  }
+  .friend-detail .friend-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.account-progress-view .account-stat-group {
+  --stat-accent: var(--ui-editorial);
+  --stat-rgb: var(--ui-editorial-rgb);
+  padding: 20px;
+  border: 1px solid rgb(var(--stat-rgb) / 0.25);
+  border-top: 2px solid rgb(var(--stat-rgb) / 0.65);
+  border-radius: 14px;
+  background: rgb(var(--ui-surface-rgb) / 0.85);
+}
+.account-progress-view .account-stat-study {
+  --stat-accent: var(--ui-accent);
+  --stat-rgb: var(--ui-accent-rgb);
+}
+.account-stat-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.account-stat-heading > span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: var(--stat-accent);
+  background: rgb(var(--stat-rgb) / 0.1);
+}
+.account-stat-heading .action-icon {
+  width: 23px;
+  height: 23px;
+}
+.account-stat-group .account-stat-heading h2 {
+  margin: 0;
+  font-size: 23px;
+}
+.account-stat-heading p {
+  margin: 4px 0 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.account-progress-view .account-stat-group .account-stats {
+  padding: 0;
+  border: 0;
+}
+.account-progress-view .account-stat-group .account-stats > div {
+  border-color: rgb(var(--stat-rgb) / 0.18);
+}
+.account-progress-view .account-stat-group .account-stats dd {
+  color: var(--stat-accent);
+}
+@media (max-width: 600px) {
+  .account-progress-view .account-stat-group {
+    padding: 16px;
+  }
 }

@@ -30,14 +30,24 @@ export function safeReturnPath(value: unknown) {
     if (
       !parsed.hash &&
       intent.tab &&
-      [...parsed.searchParams.keys()].every(
-        (key) => key === "tab" || key === "section",
+      [...parsed.searchParams.keys()].every((key) =>
+        intent.tab === "admin"
+          ? ["tab", "section", "journey", "date"].includes(key) &&
+            parsed.searchParams.getAll(key).length === 1
+          : key === "tab",
       ) &&
+      (!parsed.searchParams.has("journey") || !!intent.journeyId) &&
+      (!parsed.searchParams.has("date") || !!intent.date) &&
       parsed.searchParams.getAll("tab").length === 1 &&
       parsed.searchParams.getAll("section").length <= 1 &&
       (intent.tab === "admin" || !parsed.searchParams.has("section"))
     )
-      return accountTabLink(intent.tab, intent.section);
+      return (
+        accountTabLink(intent.tab, intent.section, intent.date) +
+        (intent.journeyId
+          ? `&journey=${encodeURIComponent(intent.journeyId)}`
+          : "")
+      );
     if (
       intent.comparison &&
       (parsed.hash === "" || parsed.hash === "#journey-comparison") &&

@@ -1,4 +1,10 @@
 const paths = {
+  progress: "M4 20h16M6 16v-4m6 4V8m6 8V4",
+  profile: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21v-1a8 8 0 0 1 16 0v1",
+  friends:
+    "M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2 21v-1a7 7 0 0 1 14 0v1m1-17a4 4 0 0 1 0 8m2 3a6 6 0 0 1 3 5v1",
+  settings: "M4 7h16M4 17h16M8 4v6M16 14v6",
+  admin: "m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6",
   share: "M12 16V3m-5 5 5-5 5 5M5 13v7h14v-7",
   paint:
     "m14 4 6 6M4 20c0-4 1-6 4-6l2 2c0 3-2 4-6 4Zm4-6L18 3a2 2 0 0 1 3 3L10 16",

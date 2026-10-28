@@ -1,4 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { useAccount } from "../services/accounts";
@@ -9,9 +15,11 @@ import type { DailyAttempt } from "./dailyProgress";
 import { ARCHIVE_START_DATE } from "./archiveDates";
 import { AdminJourneys } from "./AdminJourneys";
 import { useToast } from "./Toast";
+import { ActionIcon } from "./ActionIcon";
+import { AdminConfirmation } from "./AdminConfirmation";
+import { adminDate, journeyReviewLink } from "./accountNavigation";
 
-type JourneySort = "alphabetical" | "newest" | "last" | "never";
-const ADMIN_SECTIONS = ["schedule", "journeys", "feedback", "tools"] as const;
+const ADMIN_SECTIONS = ["schedule", "journeys", "feedback"] as const;
 const DRAFT_KEY = "ambit.admin.schedule-draft";
 type ScheduleDraft = { day: string; value: string; saved: string };
 function readDraft(): ScheduleDraft | undefined {
@@ -32,20 +40,6 @@ function readDraft(): ScheduleDraft | undefined {
     /* An unpublished selection is optional local state. */
   }
 }
-function storedChoice<T extends string>(
-  key: string,
-  allowed: readonly T[],
-  fallback: T,
-): T {
-  try {
-    const value = localStorage.getItem(key);
-    if (allowed.includes(value as T)) return value as T;
-  } catch {
-    /* Display preferences remain optional. */
-  }
-  return fallback;
-}
-
 const formatDay = (date: string, long = false) =>
   new Date(`${date}T12:00:00`).toLocaleDateString(
     undefined,
@@ -104,6 +98,7 @@ export function AdminPanel({
   section: suppliedSection,
   onSectionChange,
   initialJourneyId,
+  initialDate,
   onNavigate,
 }: {
   date: string;
@@ -116,12 +111,15 @@ export function AdminPanel({
   section?: AdminSection;
   onSectionChange?(section: AdminSection): void;
   initialJourneyId?: string;
+  initialDate?: string;
   onNavigate?(url: string): void;
 }) {
   const account = useAccount();
   const notifications = useToast();
   const records = schedule.schedule?.records ?? {};
-  const initialDay = date < ARCHIVE_START_DATE ? ARCHIVE_START_DATE : date;
+  const initialDay =
+    adminDate(initialDate) ??
+    (date < ARCHIVE_START_DATE ? ARCHIVE_START_DATE : date);
   const [draft, setDraft] = useState<ScheduleDraft>(
     () =>
       readDraft() ?? {
@@ -139,30 +137,61 @@ export function AdminPanel({
   const [day, setDay] = useState(draft.day);
   const [month, setMonth] = useState(draft.day.slice(0, 7));
   const [localSection, setLocalSection] = useState<AdminSection>("schedule");
-  const section = suppliedSection ?? localSection;
+  const requestedSection = suppliedSection ?? localSection;
+  const section = requestedSection === "tools" ? "schedule" : requestedSection;
   const [libraryId, setLibraryId] = useState<string>();
   const [candidateId, setCandidateId] = useState<string>();
-  const [candidateDate, setCandidateDate] = useState(initialDay);
-  const candidate = JOURNEY_INDEX.find((entry) => entry.id === candidateId);
+  const [confirmation, setConfirmation] = useState<{
+    title: string;
+    message: string;
+    confirmLabel: string;
+  }>();
+  const pendingConfirmation = useRef<((accepted: boolean) => void) | undefined>(
+    undefined,
+  );
+  const confirmChange = useCallback(
+    (title: string, message: string, confirmLabel: string) =>
+      new Promise<boolean>((resolve) => {
+        pendingConfirmation.current?.(false);
+        pendingConfirmation.current = resolve;
+        setConfirmation({ title, message, confirmLabel });
+      }),
+    [],
+  );
+  function finishConfirmation(accepted: boolean) {
+    pendingConfirmation.current?.(accepted);
+    pendingConfirmation.current = undefined;
+    setConfirmation(undefined);
+  }
+  useEffect(
+    () => () => {
+      pendingConfirmation.current?.(false);
+    },
+    [],
+  );
+  const incomingRequest = useRef("");
   useEffect(() => {
     if (!JOURNEY_INDEX.some((entry) => entry.id === initialJourneyId)) return;
     setLibraryId(initialJourneyId);
-    if (suppliedSection === "schedule") setCandidateId(initialJourneyId);
-  }, [initialJourneyId, suppliedSection]);
-  useEffect(() => {
-    if (candidate && /^\d{4}-\d{2}-\d{2}$/.test(candidateDate))
-      void schedule.refresh(candidateDate.slice(0, 7));
-  }, [candidate?.id, candidateDate, schedule.refresh]);
+    const key = `${initialJourneyId}/${initialDate ?? ""}/${suppliedSection}`;
+    if (suppliedSection === "schedule" && incomingRequest.current !== key) {
+      incomingRequest.current = key;
+      setCandidateId(initialJourneyId);
+    }
+  }, [initialJourneyId, initialDate, suppliedSection]);
   function selectSection(next: AdminSection) {
     if (onSectionChange) onSectionChange(next);
     else setLocalSection(next);
     setPickerOpen(false);
   }
-  const [search, setSearch] = useState("");
+  const [scheduleView, setScheduleView] = useState<"upcoming" | "month">(
+    "upcoming",
+  );
+  const [agendaStart, setAgendaStart] = useState(initialDay);
+  const [editingDate, setEditingDate] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const picker = useRef<HTMLDivElement>(null);
   const pickerButton = useRef<HTMLButtonElement>(null);
-  const searchInput = useRef<HTMLInputElement>(null);
   const editorHeading = useRef<HTMLHeadingElement>(null);
   const editorVisit = useRef(false);
   useLayoutEffect(() => {
@@ -172,13 +201,22 @@ export function AdminPanel({
     editorHeading.current?.scrollIntoView?.({ block: "start" });
   }, [day]);
   useEffect(() => {
-    void schedule.refresh(month);
-  }, [month]);
-  useEffect(() => {
     void account.accessToken().then((token) => {
       if (token) void schedule.refreshAll(token);
     });
   }, [schedule.refreshAll]);
+  useEffect(() => {
+    if (!schedule.loadedMonths.includes(month)) {
+      void schedule.refresh(month);
+      return;
+    }
+    if (scheduleView !== "upcoming") return;
+    const end = new Date((dateOrdinal(agendaStart) + 13) * 86400000)
+      .toISOString()
+      .slice(0, 7);
+    if (end !== month && !schedule.loadedMonths.includes(end))
+      void schedule.refresh(end);
+  }, [agendaStart, scheduleView, month, schedule.loadedMonths]);
   const assignments = schedule.schedule?.assignments ?? {};
   const resolve = (selectedDay: string, choices: Record<string, string>) => {
     if (selectedDay < ARCHIVE_START_DATE) return undefined;
@@ -204,20 +242,6 @@ export function AdminPanel({
   const [messageSuccess, setMessageSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
-  const [sort, setSort] = useState<JourneySort>(() =>
-    storedChoice(
-      "ambit.admin.journey-sort",
-      ["alphabetical", "newest", "last", "never"],
-      "alphabetical",
-    ),
-  );
-  useEffect(() => {
-    try {
-      localStorage.setItem("ambit.admin.journey-sort", sort);
-    } catch {
-      /* Display preferences remain optional. */
-    }
-  }, [sort]);
   useEffect(() => setResetMessage(""), [date]);
   const dayLoaded =
     !!records[day] || schedule.loadedMonths.includes(day.slice(0, 7));
@@ -248,6 +272,33 @@ export function AdminPanel({
   const dirty = edited && (!dayLoaded || selection !== saved);
   const busy = submitting || schedule.busy;
   useEffect(() => {
+    if (candidateId === undefined || !dayLoaded) return;
+    let live = true;
+    async function stage() {
+      if (
+        dirty &&
+        selection !== candidateId &&
+        !(await confirmChange(
+          "Replace this draft?",
+          `The unpublished change for ${formatDay(day)} will be replaced. Nothing has been published.`,
+          "Replace draft",
+        ))
+      ) {
+        if (live) setCandidateId(undefined);
+        return;
+      }
+      if (!live) return;
+      setDraft({ day, value: candidateId!, saved });
+      setCandidateId(undefined);
+      setMessage("");
+    }
+    void stage();
+    return () => {
+      live = false;
+    };
+  }, [candidateId, dayLoaded, day, saved, dirty, selection, confirmChange]);
+
+  useEffect(() => {
     try {
       if (dirty) sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
       else sessionStorage.removeItem(DRAFT_KEY);
@@ -266,60 +317,32 @@ export function AdminPanel({
   }, [dirty]);
   useEffect(() => {
     if (!pickerOpen) return;
-    searchInput.current?.focus();
+    picker.current
+      ?.querySelector<HTMLInputElement>('input[type="search"]')
+      ?.focus();
     const outside = (event: PointerEvent) => {
       if (!picker.current?.contains(event.target as Node)) setPickerOpen(false);
     };
     document.addEventListener("pointerdown", outside);
     return () => document.removeEventListener("pointerdown", outside);
   }, [pickerOpen]);
-  const scheduledDates = (id: string) =>
-    Object.entries(records)
-      .filter(
-        ([, record]) =>
-          record.day >= ARCHIVE_START_DATE &&
-          record.journeyId === id &&
-          record.source !== "provisional",
-      )
-      .map(([scheduled]) => scheduled)
-      .sort();
-  const displayedJourneys = JOURNEY_INDEX.filter((journey) =>
-    journey.title
-      .toLocaleLowerCase()
-      .includes(search.trim().toLocaleLowerCase()),
-  ).sort((a, b) => {
-    if (sort === "newest")
-      return b.addedAt.localeCompare(a.addedAt) || a.id.localeCompare(b.id);
-    if (sort === "last")
-      return (
-        (
-          scheduledDates(b.id)
-            .filter((item) => item <= date)
-            .at(-1) ?? ""
-        ).localeCompare(
-          scheduledDates(a.id)
-            .filter((item) => item <= date)
-            .at(-1) ?? "",
-        ) || a.title.localeCompare(b.title)
-      );
-    if (sort === "never")
-      return (
-        Number(scheduledDates(a.id).length > 0) -
-          Number(scheduledDates(b.id).length > 0) ||
-        a.title.localeCompare(b.title)
-      );
-    return a.title.localeCompare(b.title) || a.id.localeCompare(b.id);
-  });
-  function chooseDay(next: string) {
-    if (next < ARCHIVE_START_DATE) return;
+  async function chooseDay(next: string) {
+    if (next < ARCHIVE_START_DATE) return false;
     if (
       next !== day &&
       dirty &&
-      !window.confirm(`Discard the unpublished change for ${formatDay(day)}?`)
+      !(await confirmChange(
+        "Leave this unpublished change?",
+        `The draft for ${formatDay(day)} will be discarded. The published assignment will stay as it is.`,
+        "Discard change",
+      ))
     )
-      return;
+      return false;
     setDay(next);
     setMonth(next.slice(0, 7));
+    if (next < agendaStart || dateOrdinal(next) > dateOrdinal(agendaStart) + 13)
+      setAgendaStart(next);
+    setEditingDate(false);
     setPickerOpen(false);
     if (window.matchMedia?.("(max-width: 800px)").matches) {
       if (next !== day) editorVisit.current = true;
@@ -328,6 +351,28 @@ export function AdminPanel({
         editorHeading.current?.scrollIntoView?.({ block: "start" });
       }
     }
+    return true;
+  }
+  useEffect(() => {
+    const next = adminDate(initialDate);
+    if (next && next !== day) void chooseDay(next);
+  }, [initialDate]);
+  function movePublishDate(next: string) {
+    if (!adminDate(next) || next === day) return;
+    if (!dirty) {
+      void chooseDay(next);
+      return;
+    }
+    const baseline =
+      records[next]?.source === "assigned"
+        ? (records[next].journeyId ?? "")
+        : "";
+    setDay(next);
+    setMonth(next.slice(0, 7));
+    setAgendaStart(next);
+    setDraft({ day: next, value: selection, saved: baseline });
+    setCandidateId(selection);
+    setPickerOpen(false);
   }
   function changeMonth(offset: number) {
     const next = monthStart(month, offset);
@@ -338,7 +383,6 @@ export function AdminPanel({
     setDraft({ day, value, saved });
     setMessage("");
     setPickerOpen(false);
-    setSearch("");
     pickerButton.current?.focus();
   }
   return (
@@ -357,631 +401,728 @@ export function AdminPanel({
           </p>
         </>
       )}
-      <div
-        className="admin-tabs"
-        role="tablist"
-        aria-label="Admin sections"
-        onKeyDown={(event) => {
-          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
-            return;
-          event.preventDefault();
-          const index = ADMIN_SECTIONS.indexOf(section);
-          const next =
-            ADMIN_SECTIONS[
-              event.key === "Home"
-                ? 0
-                : event.key === "End"
-                  ? ADMIN_SECTIONS.length - 1
-                  : (index +
-                      (event.key === "ArrowLeft" ? -1 : 1) +
-                      ADMIN_SECTIONS.length) %
-                    ADMIN_SECTIONS.length
-            ];
-          selectSection(next);
-          event.currentTarget
-            .querySelector<HTMLButtonElement>(`#admin-tab-${next}`)
-            ?.focus();
-        }}
-      >
-        {ADMIN_SECTIONS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            role="tab"
-            id={`admin-tab-${tab}`}
-            aria-selected={section === tab}
-            aria-controls={`admin-${tab}`}
-            tabIndex={section === tab ? 0 : -1}
-            onClick={() => {
-              selectSection(tab);
-            }}
-          >
-            {tab === "schedule"
-              ? "Schedule"
-              : tab === "journeys"
-                ? "Journeys"
-                : tab === "feedback"
-                  ? "Feedback"
-                  : "Tools"}
-          </button>
-        ))}
-      </div>
-      <div
-        id="admin-journeys"
-        className="admin-tab-panel"
-        role="tabpanel"
-        aria-labelledby="admin-tab-journeys"
-        hidden={section !== "journeys"}
-      >
-        {section === "journeys" && (
-          <AdminJourneys
-            selectedId={libraryId}
-            onSelect={setLibraryId}
-            onNavigate={onNavigate}
-            onSchedule={(id) => {
-              setCandidateId(id);
-              setCandidateDate(day);
-              selectSection("schedule");
-            }}
-          />
-        )}
-      </div>
-      <div
-        id="admin-schedule"
-        className="admin-tab-panel"
-        role="tabpanel"
-        aria-labelledby="admin-tab-schedule"
-        hidden={section !== "schedule"}
-      >
-        {candidate && (
-          <form
-            className="admin-schedule-candidate"
-            aria-label="Schedule reviewed Journey"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const loaded =
-                !!records[candidateDate] ||
-                schedule.loadedMonths.includes(candidateDate.slice(0, 7));
-              if (!loaded || busy || candidateDate < ARCHIVE_START_DATE) return;
-              if (
-                dirty &&
-                (candidateDate !== day || candidate.id !== selection) &&
-                !window.confirm(
-                  `Discard the unpublished change for ${formatDay(day)}?`,
-                )
-              )
-                return;
-              const baseline =
-                records[candidateDate]?.source === "assigned"
-                  ? (records[candidateDate].journeyId ?? "")
-                  : "";
-              setDay(candidateDate);
-              setMonth(candidateDate.slice(0, 7));
-              setDraft({
-                day: candidateDate,
-                value: candidate.id,
-                saved: baseline,
-              });
-              setCandidateId(undefined);
-              setMessage("");
-              setPickerOpen(false);
-            }}
-          >
-            <h2>Schedule {candidate.title}</h2>
-            <label className="field">
-              <span>Publish date</span>
-              <input
-                type="date"
-                min={ARCHIVE_START_DATE}
-                required
-                value={candidateDate}
-                onChange={(event) => setCandidateDate(event.target.value)}
-              />
-            </label>
-            <p>
-              Current assignment:{" "}
-              {records[candidateDate] ||
-              schedule.loadedMonths.includes(candidateDate.slice(0, 7))
-                ? (resolve(candidateDate, assignments)?.title ??
-                  "Journey unavailable")
-                : "Loading assignment…"}
-            </p>
-            <p>
-              Proposed Journey: <strong>{candidate.title}</strong>
-            </p>
-            <div className="admin-library-actions">
-              <button
-                className="primary-button"
-                type="submit"
-                disabled={
-                  busy ||
-                  candidateDate < ARCHIVE_START_DATE ||
-                  !(
-                    records[candidateDate] ||
-                    schedule.loadedMonths.includes(candidateDate.slice(0, 7))
-                  )
-                }
-              >
-                Preview assignment
-              </button>
-              <button
-                className="quiet-button"
-                type="button"
-                onClick={() => setCandidateId(undefined)}
-              >
-                Cancel scheduling
-              </button>
-            </div>
-            <p className="muted">
-              Previewing does not publish. You’ll confirm the assignment in the
-              date editor.
-            </p>
-          </form>
-        )}
-        <div className="admin-journey-card journey-scheduler-card">
-          <header className="journey-scheduler-heading">
-            <div>
-              <h2>Daily Journey schedule</h2>
-              <p className="muted">
-                Choose a day, pick a Journey, then publish it for everyone.
-              </p>
-            </div>
+      <div className="admin-workbench">
+        <div
+          className="admin-tabs"
+          role="tablist"
+          aria-label="Admin sections"
+          aria-orientation="horizontal"
+          onKeyDown={(event) => {
+            if (
+              ![
+                "ArrowLeft",
+                "ArrowRight",
+                "ArrowUp",
+                "ArrowDown",
+                "Home",
+                "End",
+              ].includes(event.key)
+            )
+              return;
+            event.preventDefault();
+            const index = ADMIN_SECTIONS.indexOf(section);
+            const next =
+              ADMIN_SECTIONS[
+                event.key === "Home"
+                  ? 0
+                  : event.key === "End"
+                    ? ADMIN_SECTIONS.length - 1
+                    : (index +
+                        (["ArrowLeft", "ArrowUp"].includes(event.key)
+                          ? -1
+                          : 1) +
+                        ADMIN_SECTIONS.length) %
+                      ADMIN_SECTIONS.length
+              ];
+            selectSection(next);
+            event.currentTarget
+              .querySelector<HTMLButtonElement>(`#admin-tab-${next}`)
+              ?.focus();
+          }}
+        >
+          {ADMIN_SECTIONS.map((tab) => (
             <button
-              className="quiet-button scheduler-icon"
-              aria-label="Refresh schedule"
-              title="Refresh schedule"
-              onClick={() => void schedule.refresh()}
-              disabled={busy}
-            >
-              <RefreshIcon />
-            </button>
-          </header>
-          {schedule.error && (
-            <p role="alert" className="schedule-notice">
-              {schedule.error}
-            </p>
-          )}
-          {unavailableRecord && (
-            <p role="alert" className="schedule-notice">
-              This date references a Journey no longer in the catalog.{" "}
-              {day < date
-                ? "Its history stays fixed."
-                : "Choose another Journey or restore the automatic choice."}
-            </p>
-          )}
-          {!schedule.ready && !schedule.error && (
-            <p role="status">Opening the schedule…</p>
-          )}
-          <div className="journey-scheduler">
-            <section className="journey-month" aria-label="Journey calendar">
-              <header className="journey-month-heading">
-                <div className="journey-month-navigation">
-                  <button
-                    className="quiet-button scheduler-icon"
-                    aria-label="Previous month"
-                    title="Previous month"
-                    onClick={() => changeMonth(-1)}
-                    disabled={busy || month <= ARCHIVE_START_DATE.slice(0, 7)}
-                  >
-                    ‹
-                  </button>
-                  <h3>
-                    {new Date(`${month}-01T12:00:00`).toLocaleDateString(
-                      undefined,
-                      { month: "long", year: "numeric" },
-                    )}
-                  </h3>
-                  <button
-                    className="quiet-button scheduler-icon"
-                    aria-label="Next month"
-                    title="Next month"
-                    onClick={() => changeMonth(1)}
-                    disabled={busy}
-                  >
-                    ›
-                  </button>
-                </div>
-                <button
-                  className="quiet-button scheduler-today"
-                  title="Jump to today"
-                  onClick={() => chooseDay(initialDay)}
-                  disabled={busy}
-                >
-                  Today
-                </button>
-              </header>
-              <div className="journey-calendar-weekdays" aria-hidden="true">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                  (name) => (
-                    <span key={name}>{name}</span>
-                  ),
-                )}
-              </div>
-              <div className="journey-calendar">
-                {calendarDays(month).map((calendarDay) => {
-                  const available = calendarDay >= ARCHIVE_START_DATE;
-                  const journey = resolve(calendarDay, assignments);
-                  const source = records[calendarDay]?.source ?? "provisional";
-                  const assigned = source === "assigned";
-                  const status = assigned
-                    ? "Scheduled"
-                    : source === "auto"
-                      ? "Auto (locked)"
-                      : "Auto (provisional)";
-                  return (
-                    <button
-                      className={`journey-calendar-day${calendarDay.slice(0, 7) !== month ? " is-outside-month" : ""}${calendarDay === date ? " is-today" : ""}`}
-                      key={calendarDay}
-                      onClick={() => chooseDay(calendarDay)}
-                      disabled={busy || !available}
-                      aria-pressed={calendarDay === day}
-                      aria-current={calendarDay === date ? "date" : undefined}
-                      aria-label={formatDay(calendarDay)}
-                      aria-describedby={`${calendarDay}-journey ${calendarDay}-status`}
-                      title={
-                        available
-                          ? `${formatDay(calendarDay, true)} · ${journey?.title ?? "Journey unavailable"} · ${status}`
-                          : "Journeys begin October 11, 2026"
-                      }
-                    >
-                      <span className="journey-calendar-date">
-                        <time dateTime={calendarDay}>
-                          {Number(calendarDay.slice(-2))}
-                        </time>
-                        {available && (
-                          <span
-                            className={`schedule-dot${assigned ? " is-assigned" : source === "auto" ? " is-locked" : " is-provisional"}`}
-                            aria-label={status}
-                          />
-                        )}
-                      </span>
-                      <strong id={`${calendarDay}-journey`}>
-                        {available
-                          ? (journey?.title ?? "Journey unavailable")
-                          : ""}
-                      </strong>
-                      <span id={`${calendarDay}-status`} className="sr-only">
-                        {available ? status : "Before the first Journey"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="journey-calendar-legend">
-                <span>
-                  <i className="schedule-dot is-assigned" /> Scheduled
-                </span>
-                <span>
-                  <i className="schedule-dot is-locked" /> Automatic · locked
-                </span>
-                <span>
-                  <i className="schedule-dot is-provisional" /> Automatic ·
-                  provisional
-                </span>
-              </p>
-            </section>
-            <form
-              className="journey-date-editor"
-              aria-label="Schedule selected date"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                if (
-                  day < ARCHIVE_START_DATE ||
-                  pickerOpen ||
-                  !dirty ||
-                  busy ||
-                  !schedule.ready
-                )
-                  return;
-                if (
-                  day < date &&
-                  !window.confirm(
-                    `Rewrite the Journey for ${formatDay(day, true)}? This changes the permanent Archive record. Players who already started keep their own Journey.`,
-                  )
-                )
-                  return;
-                setMessage("");
-                setSubmitting(true);
-                try {
-                  const token = await account.accessToken();
-                  if (!token) {
-                    setMessageSuccess(false);
-                    setMessage("Sign in again to save the schedule.");
-                    notifications.notify(
-                      "Sign in again to save the schedule.",
-                      { tone: "error" },
-                    );
-                    return;
-                  }
-                  const savedChange =
-                    day < date
-                      ? await schedule.save(
-                          day,
-                          selection || undefined,
-                          token,
-                          true,
-                        )
-                      : await schedule.save(day, selection || undefined, token);
-                  if (savedChange) {
-                    setMessageSuccess(true);
-                    const confirmation = selection
-                      ? `Published ${preview?.title ?? "Journey"} for ${formatDay(day)}.`
-                      : `Restored automatic selection for ${formatDay(day)}.`;
-                    setMessage(confirmation);
-                    notifications.notify(confirmation);
-                  } else
-                    notifications.notify(
-                      "Couldn’t save the schedule. Your selection is still a draft.",
-                      { tone: "error" },
-                    );
-                } catch {
-                  setMessageSuccess(false);
-                  setMessage("Couldn’t save the schedule. Please try again.");
-                  notifications.notify(
-                    "Couldn’t save the schedule. Please try again.",
-                    { tone: "error" },
-                  );
-                } finally {
-                  setSubmitting(false);
-                }
+              key={tab}
+              type="button"
+              role="tab"
+              id={`admin-tab-${tab}`}
+              aria-selected={section === tab}
+              aria-controls={`admin-${tab}`}
+              tabIndex={section === tab ? 0 : -1}
+              onClick={() => {
+                selectSection(tab);
               }}
             >
-              <header>
-                <span className="overline">SELECTED DAY</span>
-                <h3 ref={editorHeading} tabIndex={-1}>
-                  {formatDay(day, true)}
-                </h3>
-              </header>
-              <label className="field">
-                <span>Journey date</span>
-                <input
-                  type="date"
-                  min={ARCHIVE_START_DATE}
-                  required
-                  value={day}
-                  disabled={busy}
-                  onChange={(event) => {
-                    if (event.target.value) chooseDay(event.target.value);
-                  }}
-                />
-              </label>
-              <p className="schedule-current">
-                Current assignment:{" "}
-                <strong>{current?.title ?? "Journey unavailable"}</strong>
-                <span>
-                  {saved
-                    ? "Manual assignment"
-                    : records[day]?.source === "auto"
-                      ? "Automatic · locked"
-                      : "Automatic · provisional"}
-                </span>
-              </p>
-              <div
-                className="journey-picker"
-                ref={picker}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape" && pickerOpen) {
-                    event.preventDefault();
-                    setPickerOpen(false);
-                    pickerButton.current?.focus();
-                  }
+              <ActionIcon
+                name={
+                  tab === "schedule"
+                    ? "archive"
+                    : tab === "journeys"
+                      ? "journey"
+                      : tab === "feedback"
+                        ? "review"
+                        : "settings"
+                }
+              />
+              <span>
+                {tab === "schedule"
+                  ? "Schedule"
+                  : tab === "journeys"
+                    ? "Journeys"
+                    : tab === "feedback"
+                      ? "Feedback"
+                      : "Tools"}
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className="admin-workbench-main">
+          <div
+            id="admin-journeys"
+            className="admin-tab-panel"
+            role="tabpanel"
+            aria-labelledby="admin-tab-journeys"
+            hidden={section !== "journeys"}
+          >
+            {section === "journeys" && (
+              <AdminJourneys
+                selectedId={libraryId}
+                onSelect={setLibraryId}
+                onNavigate={onNavigate}
+                date={day}
+                today={date}
+                records={records}
+                onSchedule={(id) => {
+                  setCandidateId(id);
+                  selectSection("schedule");
                 }}
-              >
+              />
+            )}
+          </div>
+          <div
+            id="admin-schedule"
+            className="admin-tab-panel"
+            role="tabpanel"
+            aria-labelledby="admin-tab-schedule"
+            hidden={section !== "schedule"}
+          >
+            <div className="admin-journey-card journey-scheduler-card">
+              <header className="journey-scheduler-heading">
+                <div>
+                  <h2>Schedule</h2>
+                </div>
                 <button
-                  ref={pickerButton}
-                  className="journey-picker-trigger"
-                  type="button"
-                  aria-label="Choose a Journey"
-                  aria-expanded={pickerOpen}
-                  aria-controls="admin-journey-picker"
-                  aria-haspopup="dialog"
-                  disabled={busy || !schedule.ready}
-                  onClick={() => setPickerOpen((open) => !open)}
+                  className="quiet-button scheduler-icon"
+                  aria-label="Refresh schedule"
+                  title="Refresh schedule"
+                  onClick={() => void schedule.refresh(month)}
+                  disabled={busy}
                 >
-                  <span>Choose a Journey</span>
-                  <span aria-hidden="true">⌄</span>
+                  <RefreshIcon />
                 </button>
-                {pickerOpen && (
+              </header>
+              {schedule.error && (
+                <p role="alert" className="schedule-notice">
+                  {schedule.error}
+                </p>
+              )}
+              {unavailableRecord && (
+                <p role="alert" className="schedule-notice">
+                  This date references a Journey no longer in the catalog.{" "}
+                  {day < date
+                    ? "Its history stays fixed."
+                    : "Choose another Journey or restore the automatic choice."}
+                </p>
+              )}
+              {!schedule.ready && !schedule.error && (
+                <p role="status">Opening the schedule…</p>
+              )}
+              <div className="journey-scheduler">
+                <div className="admin-schedule-browser">
                   <div
-                    id="admin-journey-picker"
-                    className="journey-picker-popover"
-                    role="dialog"
-                    aria-label="Choose a Journey"
+                    className="admin-view-switch"
+                    role="group"
+                    aria-label="Schedule view"
                   >
-                    <div className="journey-picker-search">
-                      <label className="field">
-                        <span>Search Journeys</span>
-                        <input
-                          ref={searchInput}
-                          type="search"
-                          value={search}
-                          placeholder="Search by title"
-                          onChange={(event) => setSearch(event.target.value)}
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        className="quiet-button"
-                        aria-label="Close Journey picker"
-                        onClick={() => {
-                          setPickerOpen(false);
-                          pickerButton.current?.focus();
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <div className="journey-list-controls">
-                      <label className="field">
-                        <span>Sort Journeys</span>
-                        <select
-                          value={sort}
-                          onChange={(event) =>
-                            setSort(event.target.value as JourneySort)
+                    <button
+                      type="button"
+                      aria-pressed={scheduleView === "upcoming"}
+                      onClick={() => setScheduleView("upcoming")}
+                    >
+                      Upcoming
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={scheduleView === "month"}
+                      onClick={() => setScheduleView("month")}
+                    >
+                      Month
+                    </button>
+                  </div>
+                  {scheduleView === "upcoming" && (
+                    <section
+                      className="admin-agenda"
+                      aria-label="Upcoming Journeys"
+                    >
+                      <header>
+                        <div>
+                          <span className="overline">Two-week schedule</span>
+                          <h3>{formatDay(agendaStart)}</h3>
+                        </div>
+                        <div className="admin-agenda-navigation">
+                          <button
+                            type="button"
+                            className="quiet-button scheduler-icon"
+                            aria-label="Previous two weeks"
+                            disabled={busy || agendaStart <= ARCHIVE_START_DATE}
+                            onClick={() => {
+                              const next = new Date(
+                                (dateOrdinal(agendaStart) - 14) * 86400000,
+                              )
+                                .toISOString()
+                                .slice(0, 10);
+                              void chooseDay(
+                                next < ARCHIVE_START_DATE
+                                  ? ARCHIVE_START_DATE
+                                  : next,
+                              );
+                            }}
+                          >
+                            ‹
+                          </button>
+                          <button
+                            type="button"
+                            className="quiet-button"
+                            disabled={busy}
+                            onClick={() => {
+                              const next =
+                                date < ARCHIVE_START_DATE
+                                  ? ARCHIVE_START_DATE
+                                  : date;
+                              void chooseDay(next).then((changed) => {
+                                if (changed) setAgendaStart(next);
+                              });
+                            }}
+                          >
+                            Today
+                          </button>
+                          <button
+                            type="button"
+                            className="quiet-button scheduler-icon"
+                            aria-label="Next two weeks"
+                            disabled={busy}
+                            onClick={() => {
+                              const next = new Date(
+                                (dateOrdinal(agendaStart) + 14) * 86400000,
+                              )
+                                .toISOString()
+                                .slice(0, 10);
+                              void chooseDay(next);
+                            }}
+                          >
+                            ›
+                          </button>
+                        </div>
+                      </header>
+                      <ol>
+                        {Array.from({ length: 14 }, (_, index) =>
+                          new Date(
+                            (dateOrdinal(agendaStart) + index) * 86400000,
+                          )
+                            .toISOString()
+                            .slice(0, 10),
+                        ).map((agendaDay) => {
+                          const journey = resolve(agendaDay, assignments);
+                          const source = records[agendaDay]?.source;
+                          const loaded =
+                            !!records[agendaDay] ||
+                            schedule.loadedMonths.includes(
+                              agendaDay.slice(0, 7),
+                            );
+                          return (
+                            <li key={agendaDay}>
+                              <button
+                                type="button"
+                                aria-label={formatDay(agendaDay)}
+                                aria-pressed={day === agendaDay}
+                                disabled={busy}
+                                onClick={() => void chooseDay(agendaDay)}
+                              >
+                                <time dateTime={agendaDay}>
+                                  <strong>
+                                    {new Date(
+                                      `${agendaDay}T12:00:00`,
+                                    ).toLocaleDateString(undefined, {
+                                      day: "numeric",
+                                    })}
+                                  </strong>
+                                  <span>
+                                    {new Date(
+                                      `${agendaDay}T12:00:00`,
+                                    ).toLocaleDateString(undefined, {
+                                      weekday: "short",
+                                      month: "short",
+                                    })}
+                                  </span>
+                                </time>
+                                <span className="admin-agenda-journey">
+                                  <strong>
+                                    {journey?.title ?? "Journey unavailable"}
+                                  </strong>
+                                  <span>
+                                    {agendaDay === date ? "Today · " : ""}
+                                    {!loaded
+                                      ? "Loading assignment…"
+                                      : source === "assigned"
+                                        ? "Scheduled"
+                                        : source === "auto"
+                                          ? "Published automatically"
+                                          : "Automatic rotation"}
+                                  </span>
+                                </span>
+                                <span aria-hidden="true">→</span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </section>
+                  )}
+
+                  <section
+                    className="journey-month"
+                    hidden={scheduleView !== "month"}
+                    aria-label="Journey calendar"
+                  >
+                    <header className="journey-month-heading">
+                      <div className="journey-month-navigation">
+                        <button
+                          className="quiet-button scheduler-icon"
+                          aria-label="Previous month"
+                          title="Previous month"
+                          onClick={() => changeMonth(-1)}
+                          disabled={
+                            busy || month <= ARCHIVE_START_DATE.slice(0, 7)
                           }
                         >
-                          <option value="alphabetical">Alphabetical</option>
-                          <option value="newest">Newest first</option>
-                          <option value="last">Last scheduled</option>
-                          <option value="never">Never scheduled</option>
-                        </select>
-                      </label>
-                    </div>
-
-                    <ul
-                      className="journey-catalog-list"
-                      aria-label="Available Journeys"
-                    >
-                      <li>
-                        <button
-                          type="button"
-                          aria-pressed={selection === ""}
-                          onClick={() => chooseJourney("")}
-                        >
-                          <strong>Automatic selection</strong>
-                          <span className="muted">
-                            Use the shared daily rotation.
-                          </span>
+                          ‹
                         </button>
-                      </li>
-                      {displayedJourneys.map((journey) => {
-                        const dates = scheduledDates(journey.id);
-                        const nextAssigned = Object.entries(records)
-                          .filter(
-                            ([scheduled, record]) =>
-                              scheduled > date &&
-                              record.source === "assigned" &&
-                              record.journeyId === journey.id,
+                        <h3>
+                          {new Date(`${month}-01T12:00:00`).toLocaleDateString(
+                            undefined,
+                            { month: "long", year: "numeric" },
+                          )}
+                        </h3>
+                        <button
+                          className="quiet-button scheduler-icon"
+                          aria-label="Next month"
+                          title="Next month"
+                          onClick={() => changeMonth(1)}
+                          disabled={busy}
+                        >
+                          ›
+                        </button>
+                      </div>
+                      <button
+                        className="quiet-button scheduler-today"
+                        title="Jump to today"
+                        onClick={() =>
+                          chooseDay(
+                            date < ARCHIVE_START_DATE
+                              ? ARCHIVE_START_DATE
+                              : date,
                           )
-                          .map(([scheduled]) => scheduled)
-                          .sort()[0];
+                        }
+                        disabled={busy}
+                      >
+                        Today
+                      </button>
+                    </header>
+                    <div
+                      className="journey-calendar-weekdays"
+                      aria-hidden="true"
+                    >
+                      {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                        (name) => (
+                          <span key={name}>{name}</span>
+                        ),
+                      )}
+                    </div>
+                    <div className="journey-calendar">
+                      {calendarDays(month).map((calendarDay) => {
+                        const available = calendarDay >= ARCHIVE_START_DATE;
+                        const journey = resolve(calendarDay, assignments);
+                        const source =
+                          records[calendarDay]?.source ?? "provisional";
+                        const assigned = source === "assigned";
+                        const status = assigned
+                          ? "Scheduled"
+                          : source === "auto"
+                            ? "Published automatically"
+                            : "Planned automatically";
                         return (
-                          <li key={journey.id}>
-                            <button
-                              type="button"
-                              aria-pressed={selection === journey.id}
-                              data-journey-id={journey.id}
-                              onClick={() => chooseJourney(journey.id)}
+                          <button
+                            className={`journey-calendar-day${calendarDay.slice(0, 7) !== month ? " is-outside-month" : ""}${calendarDay === date ? " is-today" : ""}`}
+                            key={calendarDay}
+                            onClick={() => chooseDay(calendarDay)}
+                            disabled={busy || !available}
+                            aria-pressed={calendarDay === day}
+                            aria-current={
+                              calendarDay === date ? "date" : undefined
+                            }
+                            aria-label={formatDay(calendarDay)}
+                            aria-describedby={`${calendarDay}-journey ${calendarDay}-status`}
+                            title={
+                              available
+                                ? `${formatDay(calendarDay, true)} · ${journey?.title ?? "Journey unavailable"} · ${status}`
+                                : "Journeys begin October 11, 2026"
+                            }
+                          >
+                            <span className="journey-calendar-date">
+                              <time dateTime={calendarDay}>
+                                {Number(calendarDay.slice(-2))}
+                              </time>
+                              {available && (
+                                <span
+                                  className={`schedule-dot${assigned ? " is-assigned" : source === "auto" ? " is-locked" : " is-provisional"}`}
+                                  aria-label={status}
+                                />
+                              )}
+                            </span>
+                            <strong id={`${calendarDay}-journey`}>
+                              {available
+                                ? (journey?.title ?? "Journey unavailable")
+                                : ""}
+                            </strong>
+                            <span
+                              id={`${calendarDay}-status`}
+                              className="sr-only"
                             >
-                              <strong>{journey.title}</strong>
-                              <span className="muted">
-                                Last:{" "}
-                                {dates.filter((item) => item <= date).at(-1) ??
-                                  "Never"}{" "}
-                                · Next: {nextAssigned ?? "None"}
-                              </span>
-                            </button>
-                          </li>
+                              {available ? status : "Before the first Journey"}
+                            </span>
+                          </button>
                         );
                       })}
-                    </ul>
-                    {!displayedJourneys.length && (
-                      <p className="schedule-notice" role="status">
-                        No Journeys match your search.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-              <article
-                className={`scheduled-journey-preview${dirty ? " is-draft" : ""}`}
-                aria-label="Journey preview"
-              >
-                <span className="schedule-preview-label">
-                  {dirty
-                    ? "Unpublished change"
-                    : saved
-                      ? "Scheduled"
-                      : records[day]?.source === "auto"
-                        ? "Auto (locked)"
-                        : "Auto (provisional)"}
-                </span>
-                <h4>{preview?.title ?? "Journey unavailable"}</h4>
-                {preview ? (
-                  <>
-                    <p>{preview.description}</p>
-                    <a
-                      href={`${preview.path}?review=1`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="tertiary-action"
-                    >
-                      Preview five questions <span aria-hidden="true">↗</span>
-                    </a>
-                  </>
-                ) : (
-                  <p>This saved Journey is no longer in the catalog.</p>
-                )}
-              </article>
-              <div className="journey-assignment-actions">
-                <button
-                  className="primary-button"
-                  type="submit"
-                  disabled={!schedule.ready || busy || !dirty}
+                    </div>
+                    <p className="journey-calendar-legend">
+                      <span>
+                        <i className="schedule-dot is-assigned" /> Scheduled
+                      </span>
+                      <span>
+                        <i className="schedule-dot is-locked" /> Published
+                        automatically
+                      </span>
+                      <span>
+                        <i className="schedule-dot is-provisional" /> Planned
+                        automatically
+                      </span>
+                    </p>
+                  </section>
+                </div>
+                <form
+                  className="journey-date-editor"
+                  data-dirty={dirty}
+                  aria-label="Schedule selected date"
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    if (
+                      day < ARCHIVE_START_DATE ||
+                      pickerOpen ||
+                      !dirty ||
+                      busy ||
+                      !dayLoaded ||
+                      candidateId !== undefined ||
+                      !schedule.ready
+                    )
+                      return;
+                    if (
+                      day < date &&
+                      !(await confirmChange(
+                        "Rewrite this Archive day?",
+                        `This changes the permanent assignment for ${formatDay(day, true)}. Players who already started keep their own Journey.`,
+                        "Rewrite Archive day",
+                      ))
+                    )
+                      return;
+                    setMessage("");
+                    setSubmitting(true);
+                    try {
+                      const token = await account.accessToken();
+                      if (!token) {
+                        setMessageSuccess(false);
+                        setMessage("Sign in again to save the schedule.");
+                        notifications.notify(
+                          "Sign in again to save the schedule.",
+                          { tone: "error" },
+                        );
+                        return;
+                      }
+                      const savedChange =
+                        day < date
+                          ? await schedule.save(
+                              day,
+                              selection || undefined,
+                              token,
+                              true,
+                            )
+                          : await schedule.save(
+                              day,
+                              selection || undefined,
+                              token,
+                            );
+                      if (savedChange) {
+                        setMessageSuccess(true);
+                        const confirmation = selection
+                          ? `Published ${preview?.title ?? "Journey"} for ${formatDay(day)}.`
+                          : `Restored automatic selection for ${formatDay(day)}.`;
+                        setMessage(confirmation);
+                        notifications.notify(confirmation);
+                      } else
+                        notifications.notify(
+                          "Couldn’t save the schedule. Your selection is still a draft.",
+                          { tone: "error" },
+                        );
+                    } catch {
+                      setMessageSuccess(false);
+                      setMessage(
+                        "Couldn’t save the schedule. Please try again.",
+                      );
+                      notifications.notify(
+                        "Couldn’t save the schedule. Please try again.",
+                        { tone: "error" },
+                      );
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
                 >
-                  {busy
-                    ? "Publishing…"
-                    : !dirty
-                      ? "Assignment up to date"
-                      : selection
-                        ? `Assign for ${formatDay(day).replace(/^[^,]+, /, "")}`
-                        : "Restore automatic selection"}
-                  <span aria-hidden="true">→</span>
-                </button>
-                {saved && selection && (
-                  <button
-                    type="button"
-                    className="quiet-button tertiary-action schedule-restore"
-                    disabled={busy}
-                    onClick={() => chooseJourney("")}
+                  <header>
+                    <span className="overline">
+                      {dirty ? "Proposed assignment" : "Scheduled Journey"}
+                    </span>
+                    <h3 ref={editorHeading} tabIndex={-1}>
+                      {formatDay(day, true)}
+                    </h3>
+                    <button
+                      type="button"
+                      className="quiet-button tertiary-action"
+                      onClick={() => setEditingDate((open) => !open)}
+                      aria-expanded={editingDate}
+                      hidden={dirty}
+                    >
+                      Change date
+                    </button>
+                  </header>
+                  <label className="field" hidden={!editingDate && !dirty}>
+                    <span>Publish date</span>
+                    <input
+                      type="date"
+                      min={ARCHIVE_START_DATE}
+                      required
+                      value={day}
+                      disabled={busy}
+                      onChange={(event) => {
+                        if (event.target.value)
+                          movePublishDate(event.target.value);
+                      }}
+                    />
+                  </label>
+                  <p className="schedule-current">
+                    Current assignment:{" "}
+                    <strong>{current?.title ?? "Journey unavailable"}</strong>
+                    <span>
+                      {saved
+                        ? "Chosen by you"
+                        : records[day]?.source === "auto"
+                          ? "Published automatically"
+                          : "Planned automatically"}
+                    </span>
+                  </p>
+                  <article
+                    className={`scheduled-journey-preview${dirty ? " is-draft" : ""}`}
+                    aria-label="Journey preview"
                   >
-                    Use automatic selection instead
-                  </button>
-                )}
-                {dirty && (
-                  <button
-                    type="button"
-                    className="quiet-button schedule-discard"
-                    disabled={busy}
-                    onClick={() => {
-                      setDraft({ day, value: saved, saved });
-                      setMessage("");
+                    <span className="schedule-preview-label">
+                      {dirty
+                        ? "Unpublished change"
+                        : saved
+                          ? "Current Journey"
+                          : records[day]?.source === "auto"
+                            ? "Published automatically"
+                            : "Planned automatically"}
+                    </span>
+                    <h4>{preview?.title ?? "Journey unavailable"}</h4>
+                    {preview ? (
+                      <>
+                        <p>{preview.description}</p>
+                        <a
+                          href={journeyReviewLink(preview.path, day)}
+                          onClick={(event) => {
+                            if (onNavigate) {
+                              event.preventDefault();
+                              onNavigate(journeyReviewLink(preview.path, day));
+                            }
+                          }}
+                          className="tertiary-action"
+                        >
+                          Review Journey <span aria-hidden="true">→</span>
+                        </a>
+                      </>
+                    ) : (
+                      <p>This saved Journey is no longer in the catalog.</p>
+                    )}
+                  </article>
+                  <div
+                    className="journey-picker"
+                    ref={picker}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape" && pickerOpen) {
+                        event.preventDefault();
+                        setPickerOpen(false);
+                        pickerButton.current?.focus();
+                      }
                     }}
                   >
-                    Discard change
-                  </button>
-                )}
-                {message && (!notifications.enabled || !messageSuccess) && (
-                  <p className="schedule-notice" role="status">
-                    {message}
-                  </p>
-                )}
+                    <button
+                      ref={pickerButton}
+                      className="journey-picker-trigger"
+                      type="button"
+                      aria-label="Choose a Journey"
+                      aria-expanded={pickerOpen}
+                      aria-controls="admin-journey-picker"
+                      aria-haspopup="dialog"
+                      disabled={busy || !schedule.ready}
+                      onClick={() => setPickerOpen((open) => !open)}
+                    >
+                      <span>
+                        {preview ? "Change Journey" : "Choose a Journey"}
+                      </span>
+                      <span aria-hidden="true">⌄</span>
+                    </button>
+                    {pickerOpen && (
+                      <div
+                        id="admin-journey-picker"
+                        className="journey-picker-popover"
+                        role="dialog"
+                        aria-label="Choose a Journey"
+                      >
+                        <header className="admin-picker-heading">
+                          <h3>Choose a Journey</h3>
+                          <button
+                            type="button"
+                            className="quiet-button"
+                            aria-label="Close Journey picker"
+                            onClick={() => {
+                              setPickerOpen(false);
+                              pickerButton.current?.focus();
+                            }}
+                          >
+                            ×
+                          </button>
+                        </header>
+                        <AdminJourneys
+                          selectedId={selection || undefined}
+                          onSelect={setLibraryId}
+                          onSchedule={chooseJourney}
+                          onNavigate={onNavigate}
+                          date={day}
+                          today={date}
+                          records={records}
+                          picking
+                        />
+                        <button
+                          type="button"
+                          className="quiet-button tertiary-action"
+                          onClick={() => chooseJourney("")}
+                        >
+                          Use automatic rotation
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="journey-assignment-actions" hidden={!dirty}>
+                    <p className="admin-publish-scope">
+                      {dirty
+                        ? "Started attempts keep their Journey when you publish."
+                        : "Choose a Journey to change this day. Browsing doesn’t publish."}
+                    </p>
+                    <button
+                      className="primary-button"
+                      type="submit"
+                      disabled={
+                        !schedule.ready ||
+                        !dayLoaded ||
+                        candidateId !== undefined ||
+                        busy ||
+                        !dirty
+                      }
+                    >
+                      {busy
+                        ? "Publishing…"
+                        : !dirty
+                          ? "Assignment up to date"
+                          : selection
+                            ? `Publish for ${formatDay(day).replace(/^[^,]+, /, "")}`
+                            : "Restore automatic selection"}
+                      <span aria-hidden="true">→</span>
+                    </button>
+                    {saved && selection && dirty && (
+                      <button
+                        type="button"
+                        className="quiet-button tertiary-action schedule-restore"
+                        disabled={busy}
+                        onClick={() => chooseJourney("")}
+                      >
+                        Use automatic selection instead
+                      </button>
+                    )}
+                    {dirty && (
+                      <button
+                        type="button"
+                        className="quiet-button schedule-discard"
+                        disabled={busy}
+                        onClick={() => {
+                          setDraft({ day, value: saved, saved });
+                          setMessage("");
+                        }}
+                      >
+                        Discard change
+                      </button>
+                    )}
+                  </div>
+                  {message && (!notifications.enabled || !messageSuccess) && (
+                    <p className="schedule-notice" role="status">
+                      {message}
+                    </p>
+                  )}
+                </form>
               </div>
-            </form>
+              <details className="schedule-footnote">
+                <summary>Automatic scheduling &amp; past dates</summary>
+                <p>
+                  Unassigned days use a shared automatic choice. Today and
+                  future dates are editable. Rewriting a past day requires
+                  confirmation; players who already started keep their Journey.
+                </p>
+              </details>
+            </div>
           </div>
-          <p className="schedule-footnote">
-            Unassigned days use a shared automatic choice. Today and future
-            dates are editable. Rewriting a past day requires confirmation;
-            players who already started keep their Journey.
-          </p>
+          <div
+            id="admin-feedback"
+            className="admin-tab-panel"
+            role="tabpanel"
+            aria-labelledby="admin-tab-feedback"
+            hidden={section !== "feedback"}
+          >
+            {feedback}
+          </div>
         </div>
       </div>
-      <div
-        id="admin-feedback"
-        className="admin-tab-panel"
-        role="tabpanel"
-        aria-labelledby="admin-tab-feedback"
-        hidden={section !== "feedback"}
+      <details
+        className="admin-maintenance"
+        open={requestedSection === "tools" || undefined}
       >
-        {feedback}
-      </div>
-      <div
-        id="admin-tools"
-        className="admin-tab-panel admin-tools"
-        role="tabpanel"
-        aria-labelledby="admin-tab-tools"
-        hidden={section !== "tools"}
-      >
+        <summary>Maintenance</summary>
         <section className="admin-reset" aria-label="Your Journey attempt">
           <div>
             <h2>Reset today’s run</h2>
@@ -994,11 +1135,13 @@ export function AdminPanel({
           <button
             className="quiet-button tertiary-action"
             disabled={!attempt || !resetReady || !onResetAttempt}
-            onClick={() => {
+            onClick={async () => {
               if (
-                !window.confirm(
-                  "Clear your current Journey attempt? Your answers, score, and help use for today will be removed from your account. You can then start fresh from Home.",
-                )
+                !(await confirmChange(
+                  "Reset your saved Daily attempt?",
+                  "Your answers, score and help use for today will be removed from your account. Other players and isolated review sessions are unaffected.",
+                  "Reset my attempt",
+                ))
               )
                 return;
               const cleared = onResetAttempt?.() ?? false;
@@ -1017,7 +1160,14 @@ export function AdminPanel({
             <p role="status">{resetMessage}</p>
           )}
         </section>
-      </div>
+      </details>
+      {confirmation && (
+        <AdminConfirmation
+          {...confirmation}
+          onConfirm={() => finishConfirmation(true)}
+          onCancel={() => finishConfirmation(false)}
+        />
+      )}
     </section>
   );
 }

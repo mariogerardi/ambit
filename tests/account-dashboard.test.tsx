@@ -10,6 +10,9 @@ import {
   openStudyChallenge,
 } from "../src/app/accountProgress";
 import { emptyDaily } from "../src/app/dailyProgress";
+import type { DailyAttempt } from "../src/app/dailyProgress";
+import { initialGame } from "../src/game/state";
+import type { StudyAnswer } from "../src/study/engine";
 import { CommunityError, challengeSettings } from "../src/services/community";
 import type {
   AccountProfile,
@@ -176,7 +179,7 @@ async function input(selector: string, value: string) {
 }
 it("loads private account data and accepts an incoming request for the displayed player", async () => {
   await mount();
-  expect(host.textContent).toContain("Hello, Alice.");
+  expect(host.textContent).toContain("Pick up your next stop.");
   expect(host.textContent).not.toContain("alice@example.com");
   await click("Friends · New");
   await click("Accept");
@@ -186,13 +189,14 @@ it("loads private account data and accepts an incoming request for the displayed
   expect(host.textContent).toContain("@bob");
   expect(host.querySelector(".friend-card")?.textContent).toContain("@bob");
 });
-it("keeps email and sign-out beside the profile card and off Dashboard and Friends", async () => {
+it("keeps private identity and sign-out in a small Settings footer without a sync panel", async () => {
   const onSignOut = vi.fn();
   const retry = vi.fn();
   await mount({
     onSignOut,
+    appearanceContent: <section aria-label="Appearance">Appearance</section>,
     sync: {
-      status: "synced",
+      status: "saved",
       message:
         "Progress is saved to your account. Sign in on another device to continue.",
       retry,
@@ -201,24 +205,45 @@ it("keeps email and sign-out beside the profile card and off Dashboard and Frien
   expect(host.textContent).not.toContain("alice@example.com");
   expect(host.textContent).not.toContain("Sign out");
   await click("Profile");
-  const side = host.querySelector(
-    ".account-profile-layout > .account-profile-aside",
-  )!;
   expect(
     host.querySelector(".account-profile-layout > .profile-card"),
   ).not.toBeNull();
-  expect(side.textContent).toContain("alice@example.com");
-  expect(side.textContent).toContain("Only you can see your email.");
-  expect(side.textContent).toContain("Your account");
-  expect(side.textContent).not.toContain("Your profile link");
-  expect(side.textContent).not.toContain("Copy profile link");
+  expect(host.textContent).not.toContain("alice@example.com");
+  expect(host.textContent).not.toContain("Sign out");
+  await click("Settings");
+  const footer = host.querySelector('[aria-label="Signed-in account"]')!;
+  expect(footer.textContent).toContain("alice@example.com");
+  expect(host.textContent).not.toContain("Account & sync");
   expect(host.textContent).not.toContain("Sign in on another device");
+  expect(
+    host.querySelector(".account-settings")?.firstElementChild?.className,
+  ).toBe("account-settings-appearance");
+  expect(
+    host.querySelector('[data-dd-action-name="Account Retry Sync"]'),
+  ).toBeNull();
   await click("Sign out");
   expect(onSignOut).toHaveBeenCalledOnce();
   await click("Friends · New");
   expect(host.textContent).not.toContain("alice@example.com");
   expect(host.textContent).not.toContain("Sign out");
   expect(host.textContent).not.toContain("Sign in on another device");
+});
+it("shows an actionable sync warning in Settings when attention is needed", async () => {
+  const retry = vi.fn();
+  await mount({
+    intent: { tab: "appearance" },
+    sync: {
+      status: "offline",
+      message:
+        "Progress is saved on this device. Sync will retry when you reconnect.",
+      retry,
+    },
+  });
+  expect(host.querySelector('[role="status"]')?.textContent).toContain(
+    "Progress is saved on this device",
+  );
+  await click("Retry sync");
+  expect(retry).toHaveBeenCalledOnce();
 });
 it("retains an edited profile and shows a handle collision instead of silently losing changes", async () => {
   await mount();
@@ -268,9 +293,12 @@ it("checks handles without changing saved identity and offers available alternat
       host.querySelector<HTMLButtonElement>(".profile-form .primary-button")
         ?.disabled,
     ).toBe(true);
+    expect(profile.handle).toBe("alice");
     expect(
-      host.querySelector(".account-heading .account-handle")?.textContent,
-    ).toBe("@alice");
+      request.mock.calls.some(
+        ([path, method]) => path === "profile" && method === "PATCH",
+      ),
+    ).toBe(false);
     await click("@bob_world");
     await act(async () => vi.advanceTimersByTimeAsync(400));
     expect(host.textContent).toContain("This handle is available");
@@ -336,11 +364,21 @@ it("saves a fixed theme avatar and renders the chosen local artwork", async () =
   await mount({}, true);
   await click("Profile");
   await click("Edit profile");
+  await act(async () =>
+    host.querySelector<HTMLButtonElement>(".avatar-picker-trigger")!.click(),
+  );
   const choice = host.querySelector<HTMLInputElement>(
     '.avatar-options input[value="avatar-08"]',
   )!;
   expect(choice.disabled).toBe(false);
   await act(async () => choice.click());
+  expect(host.querySelector(".avatar-options")?.hasAttribute("hidden")).toBe(
+    true,
+  );
+  expect(document.activeElement).toBe(
+    host.querySelector(".avatar-picker-trigger"),
+  );
+  expect(profile.avatar).not.toBe("avatar-08");
   await act(async () =>
     host
       .querySelector("form")!
@@ -349,7 +387,7 @@ it("saves a fixed theme avatar and renders the chosen local artwork", async () =
   expect(profile.avatar).toBe("avatar-08");
   expect(
     host
-      .querySelector(".account-heading .profile-avatar img")
+      .querySelector(".profile-card .profile-avatar img")
       ?.getAttribute("src"),
   ).toBe("/avatars/avatar-08.svg");
   expect(host.textContent).toContain("Your profile is saved.");
@@ -377,7 +415,7 @@ it("saves a country flag avatar and renders its local image", async () => {
   expect(profile.avatar).toBe("flag:wurl:CAN");
   expect(
     host
-      .querySelector(".account-heading .profile-avatar img")
+      .querySelector(".profile-card .profile-avatar img")
       ?.getAttribute("src"),
   ).toMatch(/^\/flags\/study\//);
   expect(host.textContent).toContain("Your profile is saved.");
@@ -408,23 +446,39 @@ it("keeps profile editing available when only friends fail to load", async () =>
   );
   expect(host.textContent).not.toContain("No friends yet");
 });
-it("keeps the dashboard compact and never requests the removed challenges feature", async () => {
+it("offers Study continuation and recent activity without requesting the removed challenges feature", async () => {
+  const onStudy = vi.fn();
+  const onJourney = vi.fn();
+  const session = startStudy(sharedSettings, 42);
   await mount({
+    onStudy,
+    onJourney,
     study: {
       version: 1,
       settings: sharedSettings,
-      session: startStudy(sharedSettings, 42),
+      session,
     },
   });
   for (const label of [
     "Your Journeys",
     "Past Study sessions",
     "Saved Study setups",
-    "Continue your Study session",
     "Challenges",
   ])
     expect(host.textContent).not.toContain(label);
   expect(host.textContent).toContain("Journey streak");
+  expect(host.textContent).toContain("Resume Study");
+  expect(host.querySelector('[aria-label="Recent activity"]')).not.toBeNull();
+  await click("Resume Study→");
+  await click("Play today’s Journey→");
+  expect(onStudy).toHaveBeenCalledOnce();
+  expect(onJourney).toHaveBeenCalledOnce();
+  expect(session.history).toEqual([]);
+  expect(
+    request.mock.calls.some(
+      ([, method]) => method === "PATCH" || method === "POST",
+    ),
+  ).toBe(false);
   expect(request.mock.calls.some(([path]) => path === "challenges")).toBe(
     false,
   );
@@ -520,6 +574,133 @@ it("counts a streak by calendar days and avoids duplicate Journey totals", () =>
   expect(metrics.accuracy).toBeUndefined();
 });
 
+it("derives historical stats without double counting, regrading legacy points, or joining Study streaks across sessions", () => {
+  const attempt = (
+    date: string,
+    correct: boolean[],
+    modern = true,
+  ): DailyAttempt => ({
+    date,
+    journeyId: "test",
+    scheduleVersion: 1,
+    startedAt: 2,
+    game: {
+      ...initialGame,
+      phase: "finished",
+      answers: correct.map((value, i) => ({
+        ...initialGame,
+        roundId: `q${i}`,
+        correct: value,
+        ...(modern ? { points: value ? 3 : 0, pointsVersion: 1 } : {}),
+      })),
+    },
+  });
+  const old = attempt("2026-10-05", [true, true, true, true, true], false);
+  const hinted = attempt("2026-10-06", [true, true, true, true, false]);
+  hinted.game.help = { q0: "hinted" };
+  const perfect = attempt("2026-10-07", [true, true, true, true, true]);
+  const failed = attempt("2026-10-09", [true, false]);
+  failed.game.phase = "failed";
+  const playing = attempt("2026-10-10", [true]);
+  playing.game.phase = "playing";
+  const stale = attempt("2026-10-07", [false]);
+  stale.startedAt = 1;
+  const answer = (
+    targetId: string,
+    correct: boolean,
+    topic: "countries" | "flags" | "places" = "countries",
+  ): StudyAnswer => ({
+    prompt: { targetId, topic, style: "choices", choices: [], ordinal: 0 },
+    response: targetId,
+    correct,
+  });
+  const first = {
+    ...startStudy(sharedSettings, 1),
+    history: [
+      answer("wurl:CAN", true),
+      answer("wurl:CAN", true, "flags"),
+      answer("wurl:FRA", false),
+      answer("wurl:FRA", true),
+    ],
+  };
+  const second = {
+    ...startStudy(sharedSettings, 2),
+    history: [
+      answer("wurl:BRA", true, "places"),
+      answer("wurl:FRA", true),
+      answer("wurl:CAN", false),
+      answer("wurl:CAN", true),
+    ],
+  };
+  const metrics = accountProgress(
+    {
+      ...emptyDaily,
+      attempts: Object.fromEntries(
+        [old, hinted, perfect, failed, playing].map((attempt) => [
+          attempt.date,
+          attempt,
+        ]),
+      ),
+      archivedAttempts: { duplicate: stale },
+    },
+    {
+      version: 1,
+      settings: sharedSettings,
+      history: [
+        { id: "one", finishedAt: 1, session: first },
+        { id: "two", finishedAt: 2, session: second },
+        { id: "one", finishedAt: 1, session: first },
+      ],
+    },
+    "2026-10-10",
+  );
+  expect(metrics).toMatchObject({
+    streak: 1,
+    longestStreak: 3,
+    perfectJourneys: 2,
+    journeyAnswers: 17,
+    journeyCorrect: 15,
+    journeyAccuracy: 88,
+    questions: 8,
+    studyCorrect: 6,
+    accuracy: 75,
+    countriesPracticed: 2,
+    bestStudyStreak: 2,
+  });
+  expect(metrics.journeys).toHaveLength(4);
+  expect(
+    metrics.journeys.find((journey) => journey.date === "2026-10-06")?.points,
+  ).toBe(11);
+});
+
+it("closes the compact avatar picker on Escape and outside focus without saving the draft", async () => {
+  await mount();
+  await click("Profile");
+  await click("Edit profile");
+  const trigger = host.querySelector<HTMLButtonElement>(
+    ".avatar-picker-trigger",
+  )!;
+  await act(async () => trigger.click());
+  expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  await act(async () =>
+    dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", cancelable: true }),
+    ),
+  );
+  expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  expect(document.activeElement).toBe(trigger);
+  await act(async () => trigger.click());
+  await act(async () =>
+    host
+      .querySelector<HTMLSelectElement>('[aria-label="Country flag avatar"]')!
+      .focus(),
+  );
+  expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  expect(request.mock.calls.some(([, method]) => method === "PATCH")).toBe(
+    false,
+  );
+});
+
 it("keeps an invitation through profile creation and returns to its actionable card", async () => {
   const baseRequest = request.getMockImplementation()! as (
     path: string,
@@ -608,7 +789,7 @@ it("consumes comparison arrival so switching account tabs does not scroll there 
         new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
     );
     expect(scroll).toHaveBeenCalledTimes(1);
-    await click("Dashboard");
+    await click("Progress");
     await click("Friends");
     await act(
       async () =>
@@ -645,7 +826,7 @@ it("retains a profile draft and mounted admin content while route intent changes
   const heading = host.querySelector(".account-heading");
   await click("Edit profile");
   await input('input[autocomplete="nickname"]', "Alice traveling");
-  await click("Dashboard");
+  await click("Progress");
   expect(onNavigate).toHaveBeenLastCalledWith("/account?tab=dashboard");
   await mount({ ...props, intent: { tab: "admin", section: "tools" } });
   const adminDraft = host.querySelector<HTMLInputElement>(

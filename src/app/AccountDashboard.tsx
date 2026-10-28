@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { CommunityError, createCommunityClient } from "../services/community";
-import { AVATARS, FLAG_AVATARS, ProfileAvatar } from "./ProfileAvatar";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { AvatarPicker } from "./AvatarPicker";
 import {
   cachedProfile,
   loadPlayerProfile,
@@ -12,6 +13,7 @@ import type {
   CommunityClient,
   Friendship,
   PlayerProfile,
+  FriendActivityPage,
 } from "../services/community";
 import { useAccount } from "../services/accounts";
 import { emptyDaily } from "./dailyProgress";
@@ -27,6 +29,8 @@ import type { AccountSection } from "./AccountTabs";
 import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
 import "./account.css";
 import { useToast } from "./Toast";
+import { AccountProgressView } from "./AccountProgressView";
+import { ACCOUNT_SECTIONS } from "./AccountTabs";
 
 const newProfile = (id: string): AccountProfile => ({
   id,
@@ -65,6 +69,9 @@ export function AccountDashboard({
   onNavigate,
   adminContent,
   appearanceContent,
+  onJourney,
+  journeyReady,
+  onStudy,
 }: {
   defaultComparison?: ComparisonTarget | null;
   intent?: AccountIntent;
@@ -79,6 +86,9 @@ export function AccountDashboard({
   onNavigate?(url: string): void;
   adminContent?: ReactNode;
   appearanceContent?: ReactNode;
+  onJourney?(): void;
+  journeyReady?: boolean;
+  onStudy?(): void;
 }) {
   const notifications = useToast();
   const intent = useMemo(
@@ -102,6 +112,9 @@ export function AccountDashboard({
   const [editingProfile, setEditingProfile] = useState(false);
   const dirty = useRef(false);
   const [friends, setFriends] = useState<Friendship[]>([]);
+  const friendActivity = useRef<{ subject: string; page: FriendActivityPage }>(
+    undefined,
+  );
   const [comparisonFocus, setComparisonFocus] = useState(!!intent.comparison);
   const consumeComparisonFocus = useCallback(
     () => setComparisonFocus(false),
@@ -271,383 +284,371 @@ export function AccountDashboard({
   return (
     <section
       className="info-view account-dashboard"
-      aria-label="Account dashboard"
+      aria-label="Your account"
+      data-section={tab}
     >
-      <div className="account-heading">
-        <Avatar player={profile ?? draft} />
-        <div>
-          <span className="overline">YOUR CORNER OF THE WORLD</span>
-          <h1 className="editorial-heading">
-            {profile ? (
-              <>
-                Hello, <em>{profile.displayName}.</em>
-              </>
-            ) : loading ? (
-              <>
-                Opening your <em>account.</em>
-              </>
-            ) : (
-              <>
-                Make yourself <em>at home.</em>
-              </>
-            )}
-          </h1>
-          {profile && <p className="account-handle">@{profile.handle}</p>}
-        </div>
-      </div>
-      <AccountTabs
-        active={tab}
-        admin={account.admin && !!adminContent}
-        newFriends={friends.some((friend) => friend.status === "incoming")}
-        onSelect={selectTab}
-      />
-      <div hidden={tab === "admin" || tab === "appearance"}>
-        {loading && <p role="status">Opening your account…</p>}
-        {error && (
-          <div className="account-message" role="alert">
-            <p>{error}</p>
-            <button
-              className="quiet-button tertiary-action"
-              data-dd-action-name="Account Refresh"
-              disabled={working}
-              onClick={() =>
-                void perform(
-                  () => load(controller.current?.signal),
-                  "Account refreshed.",
-                  false,
-                )
-              }
-            >
-              Refresh account
-            </button>
-          </div>
-        )}
-        {notice && !notifications.enabled && (
-          <p className="account-message" role="status">
-            {notice}
-          </p>
-        )}
-        {!loading && available && !profile && tab !== "profile" && (
-          <div className="account-callout">
-            <p>
-              Choose a name and handle to make your profile and connect with
-              friends.
-            </p>
-            <button
-              className="quiet-button tertiary-action"
-              data-dd-action-name="Account Create Profile"
-              onClick={() => selectTab("profile")}
-            >
-              Create your profile →
-            </button>
-          </div>
-        )}
-        {tab === "dashboard" && (
-          <>
-            <dl className="account-stats">
-              <div>
-                <dt>Journey streak</dt>
-                <dd>
-                  {metrics.streak}
-                  <small> days</small>
-                </dd>
-              </div>
-              <div>
-                <dt>Journeys finished</dt>
-                <dd>{metrics.journeys.length}</dd>
-              </div>
-              <div>
-                <dt>Study sessions completed</dt>
-                <dd>{metrics.sessions}</dd>
-              </div>
-              <div>
-                <dt>Study accuracy</dt>
-                <dd>
-                  {metrics.accuracy === undefined
-                    ? "—"
-                    : `${metrics.accuracy}%`}
-                  <small>{metrics.questions} answers</small>
-                </dd>
-              </div>
-            </dl>
-          </>
-        )}
-        {tab === "profile" && (
-          <div
-            className={`account-profile-layout${editingProfile || !profile ? " is-editing" : ""}`}
-          >
-            {!profile && loading ? (
-              <p className="muted">Opening your profile…</p>
-            ) : profile && !editingProfile ? (
-              <article className="profile-card" aria-label="Your profile">
-                <header>
-                  <Avatar player={profile} />
-                  <div>
-                    <span className="overline">EXPLORER</span>
-                    <h2>{profile.displayName}</h2>
-                    <p className="account-handle">@{profile.handle}</p>
-                  </div>
-                  <button
-                    className="quiet-button profile-edit-button"
-                    data-dd-action-name="Account Edit Profile"
-                    aria-label="Edit profile"
-                    title="Edit profile"
-                    onClick={() => {
-                      dirty.current = false;
-                      setDraft(profile);
-                      setEditingProfile(true);
-                    }}
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="20"
-                      height="20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="m15 4 5 5M4 20l4-1L20 7a2 2 0 0 0-4-4L4 15Z" />
-                    </svg>
-                  </button>
-                </header>
-                <p className="profile-bio">
-                  {profile.bio || "A curious mind. A world to explore."}
+      <div className="account-workspace">
+        <aside className="account-sidebar" hidden={tab === "admin"}>
+          <span className="overline">Your space</span>
+          <AccountTabs
+            active={tab}
+            admin={account.admin && !!adminContent}
+            newFriends={friends.some((friend) => friend.status === "incoming")}
+            onSelect={selectTab}
+          />
+        </aside>
+        <div className="account-workspace-main">
+          <header className="account-heading">
+            <div>
+              <h1 className="editorial-heading">
+                {ACCOUNT_SECTIONS[tab].label}
+              </h1>
+              {tab !== "admin" && (
+                <p className="account-section-description">
+                  {
+                    {
+                      dashboard:
+                        "Pick up your next stop. See how far you’ve come.",
+                      profile: "How you appear to other players.",
+                      friends: "A shared Journey. A little friendly curiosity.",
+                      appearance: "Make Ambit feel like home.",
+                      admin:
+                        "Review Journeys, manage the schedule, and follow up on feedback.",
+                    }[tab]
+                  }
                 </p>
-                <dl className="profile-card-details">
-                  <div>
-                    <dt>Favorite place</dt>
-                    <dd>{profile.favoriteRegion || "Still exploring"}</dd>
-                  </div>
-                  <div>
-                    <dt>Journeys finished</dt>
-                    <dd>{metrics.journeys.length}</dd>
-                  </div>
-                </dl>
-              </article>
-            ) : (
-              <form
-                className="profile-form"
-                onSubmit={submitProfile}
-                onChange={() => {
-                  dirty.current = true;
-                }}
+              )}
+            </div>
+            {tab === "admin" && (
+              <button
+                className="quiet-button tertiary-action"
+                onClick={() => selectTab("dashboard")}
               >
-                <header className="profile-form-heading">
-                  <h2>Make it yours.</h2>
-                  <p className="muted">Choose how you appear around Ambit.</p>
-                  {profile && (
-                    <button
-                      type="button"
-                      className="quiet-button profile-edit-cancel"
-                      data-dd-action-name="Account Cancel Profile Edit"
-                      onClick={() => {
-                        setDraft(profile);
-                        dirty.current = false;
-                        setEditingProfile(false);
-                      }}
-                    >
-                      ← Back to profile
-                    </button>
-                  )}
-                </header>
-                <div className="profile-fields">
-                  <label className="field">
-                    <span>Display name</span>
-                    <input
-                      autoComplete="nickname"
-                      maxLength={40}
-                      required
-                      value={draft.displayName}
-                      onChange={(e) =>
-                        setDraft({ ...draft, displayName: e.target.value })
-                      }
-                    />
-                  </label>
-                  <label className="field">
-                    <span>Handle</span>
-                    <input
-                      aria-label="Handle"
-                      aria-describedby="handle-help handle-availability"
-                      aria-invalid={!!takenHandle}
-                      autoComplete="off"
-                      autoCapitalize="none"
-                      spellCheck={false}
-                      pattern="[a-zA-Z][a-zA-Z0-9_]{2,23}"
-                      maxLength={24}
-                      required
-                      value={draft.handle}
-                      onChange={(e) =>
-                        setDraft({
-                          ...draft,
-                          handle: e.target.value.toLowerCase(),
-                        })
-                      }
-                    />
-                    <small id="handle-help">
-                      Use 3–24 characters: letters, numbers, or underscores,
-                      starting with a letter. Friends can find you by this
-                      handle.
-                    </small>
-                    <div
-                      id="handle-availability"
-                      className="handle-availability"
-                      role="status"
-                      aria-live="polite"
-                    >
-                      {takenHandle ? (
-                        <>
-                          <span>That handle is already in use.</span>
-                          <div className="handle-suggestions">
-                            {takenHandle.suggestions.map((suggestion) => (
-                              <button
-                                type="button"
-                                key={suggestion}
-                                data-dd-action-name="Account Choose Handle Suggestion"
-                                onClick={() =>
-                                  setDraft({ ...draft, handle: suggestion })
-                                }
-                              >
-                                @{suggestion}
-                              </button>
-                            ))}
-                          </div>
-                        </>
-                      ) : handleAvailability?.state === "checking" ? (
-                        "Checking availability…"
-                      ) : handleAvailability?.state === "available" ? (
-                        "This handle is available."
-                      ) : handleAvailability?.state === "offline" ? (
-                        "Couldn’t check availability. We’ll check again when you save."
-                      ) : null}
-                    </div>
-                  </label>
-                </div>
-                <fieldset className="avatar-picker">
-                  <legend>Choose your avatar</legend>
-                  <div className="avatar-options">
-                    {Object.entries(AVATARS)
-                      .filter(([, preset]) => !preset.hidden)
-                      .map(([value, preset]) => (
-                        <label
-                          key={value}
-                          data-dd-action-name="Account Choose Avatar"
-                          className={`${draft.avatar === value ? "chosen" : ""} ${preset.image && !__AVATAR_IMAGES__.includes(preset.image) ? "avatar-pending" : ""}`}
-                        >
-                          <input
-                            type="radio"
-                            data-dd-action-name="Account Choose Avatar"
-                            name="avatar"
-                            value={value}
-                            checked={draft.avatar === value}
-                            disabled={
-                              !!preset.image &&
-                              !__AVATAR_IMAGES__.includes(preset.image)
-                            }
-                            onChange={() =>
-                              setDraft({
-                                ...draft,
-                                avatar: value as AccountProfile["avatar"],
-                              })
-                            }
-                          />
-                          {preset.image &&
-                          !__AVATAR_IMAGES__.includes(preset.image) ? (
-                            <span className="avatar-slot" aria-hidden="true">
-                              {value.slice(-2)}
-                            </span>
-                          ) : (
-                            <ProfileAvatar
-                              avatar={value as AccountProfile["avatar"]}
-                              label={preset.label}
-                            />
-                          )}
-                          <small>{preset.label}</small>
-                        </label>
-                      ))}
-                  </div>
-                  {!__AVATAR_IMAGES__.length && (
-                    <p className="muted avatar-coming-soon">
-                      Choose a country flag as your avatar.
-                    </p>
-                  )}
-                  <label className="field flag-avatar-choice">
-                    <span>Or use a country flag</span>
-                    <div className="flag-avatar-select">
-                      <ProfileAvatar avatar={draft.avatar} />
-                      <select
-                        aria-label="Country flag avatar"
-                        data-dd-action-name="Account Choose Flag Avatar"
-                        value={
-                          draft.avatar.startsWith("flag:") ? draft.avatar : ""
-                        }
-                        onChange={(event) => {
-                          if (event.target.value)
-                            setDraft({
-                              ...draft,
-                              avatar: event.target
-                                .value as AccountProfile["avatar"],
-                            });
+                ← Your progress
+              </button>
+            )}
+          </header>
+          <div hidden={tab === "admin"}>
+            {loading && tab !== "friends" && (
+              <p role="status">Opening your account…</p>
+            )}
+            {error && (
+              <div className="account-message" role="alert">
+                <p>{error}</p>
+                <button
+                  className="quiet-button tertiary-action"
+                  data-dd-action-name="Account Refresh"
+                  disabled={working}
+                  onClick={() =>
+                    void perform(
+                      () => load(controller.current?.signal),
+                      "Account refreshed.",
+                      false,
+                    )
+                  }
+                >
+                  Refresh account
+                </button>
+              </div>
+            )}
+            {notice && !notifications.enabled && (
+              <p className="account-message" role="status">
+                {notice}
+              </p>
+            )}
+          </div>
+          <div hidden={tab === "admin" || tab === "appearance"}>
+            {!loading && available && !profile && tab !== "profile" && (
+              <div className="account-callout">
+                <p>
+                  Choose a name and handle to make your profile and connect with
+                  friends.
+                </p>
+                <button
+                  className="quiet-button tertiary-action"
+                  data-dd-action-name="Account Create Profile"
+                  onClick={() => selectTab("profile")}
+                >
+                  Create your profile →
+                </button>
+              </div>
+            )}
+            {tab === "dashboard" && (
+              <AccountProgressView
+                daily={daily}
+                study={study}
+                comparison={defaultComparison}
+                onJourney={onJourney}
+                journeyReady={journeyReady}
+                onStudy={onStudy}
+                onNavigate={onNavigate}
+              />
+            )}
+            {tab === "profile" && (
+              <div
+                className={`account-profile-layout${editingProfile || !profile ? " is-editing" : ""}`}
+              >
+                {!profile && loading ? (
+                  <p className="muted">Opening your profile…</p>
+                ) : profile && !editingProfile ? (
+                  <article className="profile-card" aria-label="Your profile">
+                    <header>
+                      <Avatar player={profile} />
+                      <div>
+                        <span className="overline">EXPLORER</span>
+                        <h2>{profile.displayName}</h2>
+                        <p className="account-handle">@{profile.handle}</p>
+                      </div>
+                      <button
+                        className="quiet-button profile-edit-button"
+                        data-dd-action-name="Account Edit Profile"
+                        aria-label="Edit profile"
+                        title="Edit profile"
+                        onClick={() => {
+                          dirty.current = false;
+                          setDraft(profile);
+                          setEditingProfile(true);
                         }}
                       >
-                        <option value="">Choose a country</option>
-                        {FLAG_AVATARS.map((country) => (
-                          <option key={country.id} value={`flag:${country.id}`}>
-                            {country.name}
-                          </option>
-                        ))}
-                      </select>
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="20"
+                          height="20"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.7"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="m15 4 5 5M4 20l4-1L20 7a2 2 0 0 0-4-4L4 15Z" />
+                        </svg>
+                      </button>
+                    </header>
+                    <p className="profile-bio">
+                      {profile.bio || "A curious mind. A world to explore."}
+                    </p>
+                    <dl className="profile-card-details">
+                      <div>
+                        <dt>Favorite place</dt>
+                        <dd>{profile.favoriteRegion || "Still exploring"}</dd>
+                      </div>
+                      <div>
+                        <dt>Journeys finished</dt>
+                        <dd>{metrics.journeys.length}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                ) : (
+                  <form
+                    className="profile-form"
+                    onSubmit={submitProfile}
+                    onChange={() => {
+                      dirty.current = true;
+                    }}
+                  >
+                    <header className="profile-form-heading">
+                      <h2>Make it yours.</h2>
+                      <p className="muted">
+                        Choose how you appear around Ambit.
+                      </p>
+                      {profile && (
+                        <button
+                          type="button"
+                          className="quiet-button profile-edit-cancel"
+                          data-dd-action-name="Account Cancel Profile Edit"
+                          onClick={() => {
+                            setDraft(profile);
+                            dirty.current = false;
+                            setEditingProfile(false);
+                          }}
+                        >
+                          ← Back to profile
+                        </button>
+                      )}
+                    </header>
+                    <div className="profile-fields">
+                      <label className="field">
+                        <span>Display name</span>
+                        <input
+                          autoComplete="nickname"
+                          maxLength={40}
+                          required
+                          value={draft.displayName}
+                          onChange={(e) =>
+                            setDraft({ ...draft, displayName: e.target.value })
+                          }
+                        />
+                      </label>
+                      <label className="field">
+                        <span>Handle</span>
+                        <input
+                          aria-label="Handle"
+                          aria-describedby="handle-help handle-availability"
+                          aria-invalid={!!takenHandle}
+                          autoComplete="off"
+                          autoCapitalize="none"
+                          spellCheck={false}
+                          pattern="[a-zA-Z][a-zA-Z0-9_]{2,23}"
+                          maxLength={24}
+                          required
+                          value={draft.handle}
+                          onChange={(e) =>
+                            setDraft({
+                              ...draft,
+                              handle: e.target.value.toLowerCase(),
+                            })
+                          }
+                        />
+                        <small id="handle-help">
+                          Use 3–24 characters: letters, numbers, or underscores,
+                          starting with a letter. Friends can find you by this
+                          handle.
+                        </small>
+                        <div
+                          id="handle-availability"
+                          className="handle-availability"
+                          role="status"
+                          aria-live="polite"
+                        >
+                          {takenHandle ? (
+                            <>
+                              <span>That handle is already in use.</span>
+                              <div className="handle-suggestions">
+                                {takenHandle.suggestions.map((suggestion) => (
+                                  <button
+                                    type="button"
+                                    key={suggestion}
+                                    data-dd-action-name="Account Choose Handle Suggestion"
+                                    onClick={() =>
+                                      setDraft({ ...draft, handle: suggestion })
+                                    }
+                                  >
+                                    @{suggestion}
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          ) : handleAvailability?.state === "checking" ? (
+                            "Checking availability…"
+                          ) : handleAvailability?.state === "available" ? (
+                            "This handle is available."
+                          ) : handleAvailability?.state === "offline" ? (
+                            "Couldn’t check availability. We’ll check again when you save."
+                          ) : null}
+                        </div>
+                      </label>
                     </div>
-                  </label>
-                </fieldset>
-                <label className="field">
-                  <span>
-                    Favorite place or region <small>Optional</small>
-                  </span>
-                  <input
-                    maxLength={60}
-                    value={draft.favoriteRegion}
-                    onChange={(e) =>
-                      setDraft({ ...draft, favoriteRegion: e.target.value })
-                    }
-                    placeholder="The Mediterranean"
-                  />
-                </label>
-                <label className="field">
-                  <span>
-                    A little about you <small>Optional · 160 characters</small>
-                  </span>
-                  <textarea
-                    maxLength={160}
-                    rows={3}
-                    value={draft.bio}
-                    onChange={(e) =>
-                      setDraft({ ...draft, bio: e.target.value })
-                    }
-                    placeholder="What sparks your curiosity?"
-                  />
-                </label>
-                <button
-                  className="primary-button"
-                  data-dd-action-name="Account Save Profile"
-                  disabled={disabled || !!takenHandle}
-                >
-                  Save profile
-                </button>
-              </form>
+                    <AvatarPicker
+                      value={draft.avatar}
+                      onChange={(avatar) => {
+                        dirty.current = true;
+                        setDraft({ ...draft, avatar });
+                      }}
+                    />
+                    <label className="field">
+                      <span>
+                        Favorite place or region <small>Optional</small>
+                      </span>
+                      <input
+                        maxLength={60}
+                        value={draft.favoriteRegion}
+                        onChange={(e) =>
+                          setDraft({ ...draft, favoriteRegion: e.target.value })
+                        }
+                        placeholder="The Mediterranean"
+                      />
+                    </label>
+                    <label className="field">
+                      <span>
+                        A little about you{" "}
+                        <small>Optional · 160 characters</small>
+                      </span>
+                      <textarea
+                        maxLength={160}
+                        rows={3}
+                        value={draft.bio}
+                        onChange={(e) =>
+                          setDraft({ ...draft, bio: e.target.value })
+                        }
+                        placeholder="What sparks your curiosity?"
+                      />
+                    </label>
+                    <button
+                      className="primary-button"
+                      data-dd-action-name="Account Save Profile"
+                      disabled={disabled || !!takenHandle}
+                    >
+                      Save profile
+                    </button>
+                  </form>
+                )}
+              </div>
             )}
-            <aside
-              className="account-profile-aside"
-              aria-label="Account details"
-            >
-              <section className="account-login-details">
-                <h2>Your account</h2>
+            {tab === "friends" && (
+              <FriendsPanel
+                initialActivity={
+                  friendActivity.current?.subject === subject
+                    ? friendActivity.current.page
+                    : undefined
+                }
+                onActivity={(page) => {
+                  friendActivity.current = { subject, page };
+                }}
+                defaultComparison={defaultComparison}
+                intent={intent}
+                focusComparison={comparisonFocus}
+                onComparisonFocused={consumeComparisonFocus}
+                daily={daily}
+                sync={sync}
+                api={api}
+                friends={friends}
+                relationshipsLoaded={relationshipsLoaded}
+                player={profile}
+                disabled={disabled}
+                error={friendsError}
+                onAction={friendAction}
+                onRefresh={async () => {
+                  try {
+                    const value = await api.request<Friendship[]>(
+                      "friends",
+                      "GET",
+                      undefined,
+                      controller.current?.signal,
+                    );
+                    if (!controller.current?.signal.aborted) {
+                      setFriends(value);
+                      setFriendsError("");
+                    }
+                  } catch (error) {
+                    if (!controller.current?.signal.aborted)
+                      setFriendsError(
+                        "Couldn’t load your friends. Please refresh your account.",
+                      );
+                    throw error;
+                  }
+                }}
+                onRequest={(handle) =>
+                  perform(
+                    () => api.request("friends", "POST", { handle }),
+                    "Friend request sent.",
+                  )
+                }
+              />
+            )}
+          </div>
+          {tab === "appearance" && (
+            <div className="account-settings">
+              <div className="account-settings-appearance">
+                {appearanceContent}
+              </div>
+              <footer
+                className="account-session-footer"
+                aria-label="Signed-in account"
+              >
                 {email && (
-                  <p className="account-email">
-                    {email}
-                    <small>Only you can see your email.</small>
+                  <p>
+                    Signed in as <span className="account-email">{email}</span>
                   </p>
                 )}
                 {onSignOut && (
@@ -660,72 +661,28 @@ export function AccountDashboard({
                     Sign out
                   </button>
                 )}
-              </section>
-            </aside>
-          </div>
-        )}
-        {tab === "friends" && (
-          <FriendsPanel
-            defaultComparison={defaultComparison}
-            intent={intent}
-            focusComparison={comparisonFocus}
-            onComparisonFocused={consumeComparisonFocus}
-            daily={daily}
-            sync={sync}
-            api={api}
-            friends={friends}
-            relationshipsLoaded={relationshipsLoaded}
-            player={profile}
-            disabled={disabled}
-            error={friendsError}
-            onAction={friendAction}
-            onRefresh={async () => {
-              try {
-                const value = await api.request<Friendship[]>(
-                  "friends",
-                  "GET",
-                  undefined,
-                  controller.current?.signal,
-                );
-                if (!controller.current?.signal.aborted) {
-                  setFriends(value);
-                  setFriendsError("");
-                }
-              } catch (error) {
-                if (!controller.current?.signal.aborted)
-                  setFriendsError(
-                    "Couldn’t load your friends. Please refresh your account.",
-                  );
-                throw error;
-              }
-            }}
-            onRequest={(handle) =>
-              perform(
-                () => api.request("friends", "POST", { handle }),
-                "Friend request sent.",
-              )
-            }
-          />
-        )}
-        {sync && (sync.status === "offline" || sync.status === "error") && (
-          <div className="account-message" role="status">
-            <p role="status" className="muted">
-              {sync.message}
-            </p>
-            <button
-              className="quiet-button tertiary-action"
-              data-dd-action-name="Account Retry Sync"
-              onClick={sync.retry}
-            >
-              Retry sync
-            </button>
-          </div>
-        )}
+              </footer>
+            </div>
+          )}
+          {tab !== "admin" &&
+            sync &&
+            (sync.status === "offline" || sync.status === "error") && (
+              <div className="account-message" role="status">
+                <p>{sync.message}</p>
+                <button
+                  className="quiet-button tertiary-action"
+                  data-dd-action-name="Account Retry Sync"
+                  onClick={sync.retry}
+                >
+                  Retry sync
+                </button>
+              </div>
+            )}
+          {(tab === "admin" || adminVisited) && (
+            <div hidden={tab !== "admin"}>{adminContent}</div>
+          )}
+        </div>
       </div>
-      {tab === "appearance" && appearanceContent}
-      {(tab === "admin" || adminVisited) && (
-        <div hidden={tab !== "admin"}>{adminContent}</div>
-      )}
     </section>
   );
 }

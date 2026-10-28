@@ -69,8 +69,10 @@ it("previews a complete recap and returns to scheduling without publishing", asy
   expect(location.search).toContain("section=schedule");
   expect(
     host.querySelector('[aria-label="Schedule reviewed Journey"]'),
-  ).not.toBeNull();
-  expect(host.querySelector(".scheduled-journey-preview.is-draft")).toBeNull();
+  ).toBeNull();
+  expect(
+    host.querySelector(".scheduled-journey-preview.is-draft h4")?.textContent,
+  ).toBe("Down the Danube");
 });
 
 it("rejects review URLs for non-admin players", async () => {
@@ -79,4 +81,27 @@ it("rejects review URLs for non-admin players", async () => {
   await mount();
   expect(location.pathname).toBe("/");
   expect(host.querySelector('[aria-label="Journey review"]')).toBeNull();
+});
+
+it("opens a reported question and carries the publish date back to scheduling", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-27T16:00:00Z"));
+  history.replaceState(
+    null,
+    "",
+    `/journey/down-the-danube?review=1&date=2026-10-29&question=${encodeURIComponent(DANUBE_JOURNEY.rounds[2].id)}`,
+  );
+  await mount();
+  expect(
+    host.querySelector<HTMLSelectElement>(
+      '[aria-label="Journey review"] select',
+    )?.value,
+  ).toBe("2");
+  await click("Schedule this Journey");
+  expect(location.search).toContain("date=2026-10-29");
+  expect(
+    host.querySelector<HTMLInputElement>(
+      '.journey-date-editor input[type="date"]',
+    )?.value,
+  ).toBe("2026-10-29");
 });

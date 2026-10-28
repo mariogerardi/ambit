@@ -34,7 +34,7 @@ provisioning use `scripts/deploy-backend.py`. See [Services](SERVICES.md).
 | [`src/study/useStudyPresentation.ts`](../src/study/useStudyPresentation.ts)                                                        | Study globe colors, scoped labels and borders, capital disclosure and clue focus.             |
 | [`src/study/StudySetup.tsx`](../src/study/StudySetup.tsx), [`scopeFocus.ts`](../src/study/scopeFocus.ts)                           | Builder configuration and geographic scope framing.                                           |
 | [`src/app/ExplorePanel.tsx`](../src/app/ExplorePanel.tsx)                                                                          | Search, country/subdivision details, and display settings.                                    |
-| [`src/app/AccountDashboard.tsx`](../src/app/AccountDashboard.tsx), [`src/services/community.ts`](../src/services/community.ts)     | Profiles, compact progress dashboard and friends.                                             |
+| [`src/app/AccountDashboard.tsx`](../src/app/AccountDashboard.tsx), [`src/services/community.ts`](../src/services/community.ts)     | Profiles, Progress, private Settings and friends.                                             |
 | [`src/geography/types.ts`](../src/geography/types.ts), [`loadLayer.ts`](../src/geography/loadLayer.ts)                             | Canonical geometry contracts and cancellable, cached layer loading.                           |
 | [`src/globe/GlobeView.tsx`](../src/globe/GlobeView.tsx)                                                                            | Sole product renderer adapter: regions, places, routes, and overlays.                         |
 | [`src/globe/camera.ts`](../src/globe/camera.ts)                                                                                    | Interruptible camera travel, fitting, and looping flyovers.                                   |
@@ -131,7 +131,9 @@ preparation/test evidence; the runtime loader does not hash every fetched asset.
 
 Ordinary mode switches retain the mounted globe, country bindings, and camera
 memory. Animated panel switches finish the 220 ms exit before starting the 220 ms
-entrance. The outgoing layer is immediately inert; incoming content can load but
+entrance. Desktop exits retain the same panel DOM and component state so completion
+animations do not restart during departure. Returning to the exiting page cancels
+that exit without mounting a duplicate. The outgoing layer is immediately inert; incoming content can load but
 stays hidden, inert and inactive for focus effects until the exit's animation-end
 event. A 320 ms fallback recovers from a missing event. Rapid navigation retains
 one visible exit and opens the latest requested destination. Reduced motion removes
@@ -253,8 +255,26 @@ the canvas presentation; navigation never repeats it or changes the camera to
 produce it. Reduced motion reveals the globe immediately. Loading copy is omitted,
 but geography and WebGL errors remain visible.
 
-Account access lives beside the menu in the header, opening profile, stats, and
-friends. Friends mixes daily activity cards with comparisons for matching Journeys.
+The header avatar opens direct navigation to Progress, Friends, Profile, Settings,
+and (for administrators) a separated Admin entry. Guests go directly to sign-in. The account menu dismisses
+on outside interaction, focus leaving it, Escape, or navigation. Progress offers
+today’s Journey, Study continuation, and recent Journey/Study activity. Its Journey
+stats include current/longest day streak, finished runs, perfect point totals and
+answer accuracy. Study stats include completed sessions, answers/accuracy, distinct
+countries practiced and the best correct-answer streak within one session. These
+are derived from saved history, deduplicating Journey attempts and Study record IDs;
+ongoing attempts are excluded. Historical points keep their existing scoring rules.
+Profile contains public identity, with a compact preset-avatar picker beside the
+flag selector. Settings contains Appearance and a small signed-in identity/sign-out
+footer. Sync warnings and a retry action appear only when syncing needs attention;
+there is no separate Account & sync panel. Friends leads with the matching Journey’s
+comparison, followed by finding, inviting and managing friends. The directory and
+same-day comparison share their first activity response; comparison pagination only
+fetches remaining pages. The account shell retains the last same-day response in
+memory across account tabs, scoped to its signed-in subject. Refreshes keep settled
+rows visible; cold loads reserve the comparison footprint without transient sync
+messages. Friend profiles separate identity, aggregate stats, today’s Journey and
+shared results. Scores still come from server-permitted activity responses.
 Accepted friends can open profiles and aggregate Study stats; scores unlock only
 when the viewer has synced completion for the same date, Journey and game version.
 Study sessions vary in difficulty and are not ranked. Account IDs own friendships
@@ -263,10 +283,17 @@ The editor checks availability and suggests alternatives, while saving remains
 protected against concurrent claims. Profile links prefill the friend finder.
 Activity pages contain at most 24 friends, with bounded server fan-out and cached
 summaries invalidated by progress sync. See [services](SERVICES.md) for API behavior.
-Dashboard, Profile, Friends, Appearance, and the protected Admin tab share one persistent
-account header and navigation bar. `/account?tab=dashboard`, `profile`, `friends`,
-`appearance`, or `admin` selects the content; Admin uses `section=schedule`, `journeys`, `feedback`, or
-`tools` for its compact secondary controls. Tab navigation updates browser history
+Progress, Friends, Profile and Settings share a persistent account shell with compact
+section headings and responsive side navigation. Admin uses the full workspace,
+without a personal greeting or the account sidebar; a back action returns to Progress. `/account?tab=dashboard`, `profile`, `friends`,
+`appearance`, or `admin` selects the content (the existing `dashboard` and `appearance`
+URL keys remain compatible with Progress and Settings); Admin uses `section=schedule`, `journeys`, `feedback`, or
+`tools` for compatibility (Tools opens Maintenance); the visible navigation is
+Schedule, Journeys and Feedback. The agenda and optional calendar share one selected
+date; Journey browsing and picking share the same list and expandable outlines. Validated Admin `date` and `journey` parameters carry
+scheduling context across review/sign-in; optional review `question` selects a known
+question in the isolated reducer state. Date-first and Journey-first selection
+converge on one editor, with explicit publishing and themed confirmations. Tab navigation updates browser history
 without remounting the account shell or replaying its entry animation. Admin mounts
 on first use and stays mounted when switching account tabs, retaining its editor.
 Legacy `/admin` links replace their URL with the matching account destination.
@@ -475,8 +502,8 @@ The menu groups Home, Journey (with Archive nested beneath it), Minigames, Explo
 above feedback and World credits. The Archive hierarchy connector sits outside
 the row's selected/hover background. World credits opens a modal with source and
 license links, trapped keyboard focus, Escape/backdrop dismissal and focus return.
-Theme settings live in the account's Appearance tab and save on this device;
-guests can open Appearance alongside the sign-in Profile tab. The menu heading
+Theme settings live in the account's Settings section and save on this device;
+guests can open Settings alongside the sign-in Profile section. The menu heading
 is simply “Ambit”. Explore opens search
 through the underlined introduction link. Selected-country
 details keep the input out of their layout; “Search another country or territory” opens a

@@ -27,7 +27,7 @@ describe("app preferences shell (DOM only; no browser or WebGL)", () => {
       await act(async () => probe.props!.onSelect(member("wurl:CAN")));
       const earth = host.querySelector("canvas");
       await click("Account");
-      await click("Appearance");
+      await click("Settings");
       expect(location.pathname + location.search).toBe(
         "/account?tab=appearance",
       );

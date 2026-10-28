@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type {
   CommunityClient,
   FriendActivity,
@@ -16,6 +16,7 @@ import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
 import { invitationLink } from "./accountNavigation";
 import { copyShareText, shareCancelled } from "./journeySharing";
 import { FriendJourneyComparison } from "./FriendJourneyComparison";
+import { ScoreSummary } from "./FriendComparison";
 import { dailyJourney, SCHEDULE_VERSION } from "./dailyProgress";
 import type { DailyProgress } from "./dailyProgress";
 import { helpSummary } from "../game/guidance";
@@ -106,7 +107,11 @@ export function FriendsPanel({
   daily,
   sync,
   defaultComparison,
+  initialActivity,
+  onActivity,
 }: {
+  initialActivity?: FriendActivityPage;
+  onActivity?(page: FriendActivityPage): void;
   defaultComparison?: ComparisonTarget | null;
   intent?: AccountIntent;
   focusComparison?: boolean;
@@ -123,9 +128,19 @@ export function FriendsPanel({
   onRequest(handle: string): Promise<boolean>;
   onRefresh?(): Promise<void>;
 }) {
-  const [page, setPage] = useState<FriendActivityPage>();
+  const [page, setPage] = useState<FriendActivityPage | undefined>(() =>
+    initialActivity?.date === localDateKey() ? initialActivity : undefined,
+  );
+  const rememberActivity = useRef(onActivity);
+  rememberActivity.current = onActivity;
   const [invitationActive, setInvitationActive] = useState(!!intent?.friend);
   const [selected, setSelected] = useState<FriendActivity>();
+  const profilePanel = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    if (!selected) return;
+    window.scrollTo({ top: 0, behavior: "auto" });
+    profilePanel.current?.focus({ preventScroll: true });
+  }, [selected?.player.id]);
   const [loading, setLoading] = useState(false);
   const [failure, setFailure] = useState("");
   const [handle, setHandle] = useState(
@@ -140,6 +155,9 @@ export function FriendsPanel({
   const [notice, setNotice] = useState("");
   const [revision, setRevision] = useState(0);
   const [today, setToday] = useState(localDateKey);
+  useEffect(() => {
+    if (page?.date === today) rememberActivity.current?.(page);
+  }, [page, today]);
   useEffect(() => {
     setToday(localDateKey());
   }, [defaultComparison?.date]);
@@ -386,6 +404,14 @@ export function FriendsPanel({
       {(error || failure) && (
         <p className="account-message" role="alert">
           {error || failure}
+          {failure && !error && (
+            <button
+              className="quiet-button tertiary-action"
+              onClick={() => setRevision((value) => value + 1)}
+            >
+              Refresh friends
+            </button>
+          )}
         </p>
       )}
       {notice && (
@@ -432,40 +458,44 @@ export function FriendsPanel({
       : undefined;
   if (selected)
     return (
-      <div className="friends-panel">
-        <button
-          className="quiet-button tertiary-action"
-          onClick={() => {
-            profileRequest.current++;
-            setSelected(undefined);
-          }}
-        >
-          ← Back to friends
-        </button>
+      <div className="friends-panel friend-detail">
+        <div className="friend-detail-toolbar">
+          <button
+            className="quiet-button tertiary-action"
+            onClick={() => {
+              profileRequest.current++;
+              setSelected(undefined);
+            }}
+          >
+            ← Back to friends
+          </button>
+          <details className="friend-manage">
+            <summary>Manage friendship</summary>
+            <div className="account-row-actions">
+              <button
+                disabled={disabled}
+                onClick={() => void onAction(selected.player.id, "remove")}
+              >
+                Remove friend
+              </button>
+              <button
+                disabled={disabled}
+                onClick={() => void onAction(selected.player.id, "block")}
+              >
+                Block
+              </button>
+            </div>
+          </details>
+        </div>
         {notices}
         <article
           className="profile-card friend-profile"
+          ref={profilePanel}
+          tabIndex={-1}
           aria-label={`${selected.player.displayName}’s profile`}
         >
           <header>
             <Identity player={selected.player} />
-            <details className="friend-manage">
-              <summary>Manage friendship</summary>
-              <div className="account-row-actions">
-                <button
-                  disabled={disabled}
-                  onClick={() => void onAction(selected.player.id, "remove")}
-                >
-                  Remove friend
-                </button>
-                <button
-                  disabled={disabled}
-                  onClick={() => void onAction(selected.player.id, "block")}
-                >
-                  Block
-                </button>
-              </div>
-            </details>
           </header>
           <p className="profile-bio">
             {selected.player.bio || "A curious mind. A world to explore."}
@@ -475,77 +505,135 @@ export function FriendsPanel({
               Favorite place · {selected.player.favoriteRegion}
             </p>
           )}
-          <Stats value={selected.stats} />
-          <p className={`friend-daily-status status-${selected.today.status}`}>
-            Today’s Journey · {statusLabel[selected.today.status]}
-            {selected.today.score &&
-              ` · ${pointFraction(selected.today.score)}`}
-          </p>
+        </article>
+        <Stats value={selected.stats} />
+        <section
+          className="friend-detail-today"
+          aria-label="Friend’s Journey today"
+        >
+          <div>
+            <span className="overline">Today’s Journey</span>
+            {(selected.today.journeyId || selected.today.score?.journeyId) && (
+              <h3>
+                {titleFor(
+                  (selected.today.journeyId ??
+                    selected.today.score?.journeyId)!,
+                )}
+              </h3>
+            )}
+            <p
+              className={`friend-daily-status status-${selected.today.status}`}
+            >
+              {statusLabel[selected.today.status]}
+            </p>
+          </div>
+          {selected.today.score && (
+            <ScoreSummary score={selected.today.score} />
+          )}
           {selected.today.scoreLocked && (
-            <p className="muted">
+            <p className="muted friend-detail-locked">
               Finish the same Journey to reveal their score.
             </p>
           )}
-          <section
-            className="account-comparison"
-            aria-label="Shared Journey results"
-          >
-            <h3>Your shared Journeys</h3>
-            <p className="muted">
-              Only Journeys you’ve both finished. Answers stay private.
-            </p>
-            {selected.journeys.length ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Journey</th>
-                    <th>You</th>
-                    <th>{selected.player.displayName}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selected.journeys.map((score) => {
-                    const yours = page?.you.journeys.find(
-                      (item) =>
-                        item.date === score.date &&
-                        item.journeyId === score.journeyId &&
-                        item.gameVersion === score.gameVersion,
-                    );
-                    return (
-                      <tr key={`${score.date}/${score.journeyId}`}>
-                        <td>
-                          {titleFor(score.journeyId)}
-                          <small>{score.date}</small>
-                        </td>
-                        <td>
-                          {yours ? pointFraction(yours) : "—"}
-                          {yours && <ScoreHelp score={yours} />}
-                        </td>
-                        <td>
-                          {pointFraction(score)}
-                          <ScoreHelp score={score} />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            ) : (
-              <p className="muted">
-                Shared results will appear after you both finish a Journey.
-              </p>
-            )}
-          </section>
-          <p className="friend-data-note">
-            Study sessions vary in difficulty, so these stats aren’t ranked.
-            Progress updates when syncing is complete.
+        </section>
+        <section
+          className="account-comparison friend-detail-results"
+          aria-label="Shared Journey results"
+        >
+          <h3>Your shared Journeys</h3>
+          <p className="muted">
+            Only Journeys you’ve both finished. Answers stay private.
           </p>
-        </article>
+          {selected.journeys.length ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Journey</th>
+                  <th>You</th>
+                  <th>{selected.player.displayName}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selected.journeys.map((score) => {
+                  const yours = page?.you.journeys.find(
+                    (item) =>
+                      item.date === score.date &&
+                      item.journeyId === score.journeyId &&
+                      (item.gameVersion ?? 1) === (score.gameVersion ?? 1),
+                  );
+                  return (
+                    <tr key={`${score.date}/${score.journeyId}`}>
+                      <td>
+                        {titleFor(score.journeyId)}
+                        <small>{score.date}</small>
+                      </td>
+                      <td>
+                        {yours ? pointFraction(yours) : "—"}
+                        {yours && <ScoreHelp score={yours} />}
+                      </td>
+                      <td>
+                        {pointFraction(score)}
+                        <ScoreHelp score={score} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <p className="muted">
+              Shared results will appear after you both finish a Journey.
+            </p>
+          )}
+        </section>
+        <p className="friend-data-note">
+          Study sessions vary in difficulty, so these stats aren’t ranked.
+          Progress updates when syncing is complete.
+        </p>
       </div>
     );
   return (
     <div className="friends-panel">
       {notices}
+      {(defaultComparison !== null || intent?.comparison) && (
+        <FriendJourneyComparison
+          focus={focusComparison ?? !!intent?.comparison}
+          onFocused={onComparisonFocused}
+          focusReady={relationshipsLoaded && !loading && (!!page || !!failure)}
+          api={api}
+          initialPage={
+            target.date === today && page?.date === today ? page : undefined
+          }
+          waitingForPage={
+            !relationshipsLoaded ||
+            (target.date === today && page?.date !== today)
+          }
+          onRefresh={
+            target.date === today
+              ? () => setRevision((value) => value + 1)
+              : undefined
+          }
+          target={target}
+          friends={friends}
+          player={player}
+          localScore={localScore}
+          sync={sync}
+          disabled={disabled || !!error}
+          onProfile={(id) => void viewProfile(id)}
+          canInvite={!!player}
+          onInvite={() => void invite()}
+        />
+      )}
+      {defaultComparison === null && !intent?.comparison && (
+        <section
+          className="friend-journey-comparison friend-comparison-loading"
+          aria-busy="true"
+          aria-label="Opening Journey comparison"
+        >
+          <div className="friend-heading-placeholder" />
+          <div className="friend-comparison-skeleton" />
+        </section>
+      )}
       <section className="friends-directory" aria-label="Friend directory">
         <div className="friends-workspace">
           <aside className="friends-search-column">
@@ -798,9 +886,9 @@ export function FriendsPanel({
               </h3>
             </header>
             {loading && !page && accepted.length > 0 && (
-              <p role="status" className="muted">
+              <span className="sr-only" role="status">
                 Opening your friends…
-              </p>
+              </span>
             )}
             <div className="friend-cards">
               {accepted.map((relationship) => {
@@ -844,23 +932,6 @@ export function FriendsPanel({
           </section>
         </div>
       </section>
-      {(defaultComparison !== null || intent?.comparison) && (
-        <FriendJourneyComparison
-          focus={focusComparison ?? !!intent?.comparison}
-          onFocused={onComparisonFocused}
-          focusReady={relationshipsLoaded && !loading && (!!page || !!failure)}
-          api={api}
-          target={target}
-          friends={friends}
-          player={player}
-          localScore={localScore}
-          sync={sync}
-          disabled={disabled || !!error}
-          onProfile={(id) => void viewProfile(id)}
-          canInvite={!!player}
-          onInvite={() => void invite()}
-        />
-      )}
     </div>
   );
 }

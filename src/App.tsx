@@ -26,7 +26,11 @@ import {
 } from "./app/archiveDates";
 import { LoadingScreen } from "./app/LoadingScreen";
 import { JourneySocial } from "./app/JourneySocial";
-import { accountIntent, accountTabLink } from "./app/accountNavigation";
+import {
+  accountIntent,
+  accountTabLink,
+  adminDate,
+} from "./app/accountNavigation";
 import {
   Suspense,
   lazy,
@@ -55,7 +59,7 @@ import {
 } from "./app/worldPreferences";
 import { useAccount } from "./services/accounts";
 import { usePlayerProfile } from "./services/playerProfile";
-import { ProfileAvatar } from "./app/ProfileAvatar";
+import { AccountMenu } from "./app/AccountMenu";
 import { appRelease } from "./services/config";
 import { trackAction, trackView, reportFailure } from "./services/monitoring";
 import type { FeedbackRequest } from "./services/feedback";
@@ -191,10 +195,18 @@ export function App() {
   const accountNavigation = useMemo(() => accountIntent(path), [path]);
   useEffect(() => {
     if (pathname !== "/admin") return;
-    const canonical = accountTabLink("admin", accountNavigation.section);
+    const canonical =
+      accountTabLink(
+        "admin",
+        accountNavigation.section,
+        accountNavigation.date,
+      ) +
+      (accountNavigation.journeyId
+        ? `&journey=${encodeURIComponent(accountNavigation.journeyId)}`
+        : "");
     history.replaceState(null, "", canonical);
     setPath(canonical);
-  }, [pathname, accountNavigation.section]);
+  }, [pathname, accountNavigation]);
   const requestedMode = modeForPath(path);
   const restricted = requestedMode === "practice" && !account.admin;
   const mode = restricted ? "home" : requestedMode;
@@ -1049,6 +1061,19 @@ export function App() {
       />
     ) : mode === "account" ? (
       <AccountPanel
+        onJourney={() => playDaily(today)}
+        journeyReady={
+          !!regions.length &&
+          dailyLoaded &&
+          cloudSave.ready &&
+          schedule.ready &&
+          webgl
+        }
+        onStudy={() => {
+          if (study.session && study.session.phase !== "summary")
+            setStudySetup(false);
+          navigate("/study");
+        }}
         appearanceContent={
           <AppearancePanel theme={theme} onTheme={changeTheme} />
         }
@@ -1061,6 +1086,7 @@ export function App() {
                   embedded
                   section={accountNavigation.section ?? "schedule"}
                   initialJourneyId={accountNavigation.journeyId}
+                  initialDate={accountNavigation.date}
                   onNavigate={navigate}
                   onSectionChange={(section) =>
                     navigate(accountTabLink("admin", section))
@@ -1072,7 +1098,7 @@ export function App() {
                     !!subject && dailyLoaded && cloudSave.hydrated && canSave
                   }
                   onResetAttempt={() => account.admin && resetAttempt(today)}
-                  feedback={<FeedbackReview />}
+                  feedback={<FeedbackReview onNavigate={navigate} />}
                 />
               </Suspense>
             </div>
@@ -1263,6 +1289,13 @@ export function App() {
             <Suspense fallback={<p role="status">Opening review controls…</p>}>
               <AdminJourneyReview
                 journey={journey}
+                date={adminDate(
+                  new URLSearchParams(path.split("?")[1]).get("date"),
+                )}
+                initialQuestionId={
+                  new URLSearchParams(path.split("?")[1]).get("question") ??
+                  undefined
+                }
                 context={context}
                 game={game}
                 onChange={(next) =>
@@ -1643,48 +1676,13 @@ export function App() {
           <AmbitLogo />
         </button>
         <div className="experience-header-right">
-          <button
-            className="profile-toggle"
-            data-dd-action-name="Menu Account"
-            aria-label="Account"
-            aria-current={mode === "account" ? "page" : undefined}
-            title={
-              account.user
-                ? "Your profile, stats and friends"
-                : "Sign in or create an account"
-            }
-            onClick={() => navigate("/account")}
-            data-dd-privacy="mask"
-          >
-            {playerProfile ? (
-              <ProfileAvatar
-                avatar={playerProfile.avatar}
-                label="Your profile picture"
-              />
-            ) : (
-              <svg
-                viewBox="0 0 24 24"
-                width="22"
-                height="22"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="3.5" />
-                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
-              </svg>
-            )}
-            <span>
-              {playerProfile
-                ? `@${playerProfile.handle}`
-                : account.user
-                  ? "Profile"
-                  : "Sign in"}
-            </span>
-          </button>
+          <AccountMenu
+            signedIn={!!account.user}
+            player={playerProfile}
+            admin={account.admin}
+            path={path}
+            onNavigate={navigate}
+          />
           <AppMenu
             onJourney={() => playDaily(today)}
             journeyReady={

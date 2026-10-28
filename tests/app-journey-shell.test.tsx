@@ -298,9 +298,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
       (b) => !b.closest("[inert]") && b.textContent?.includes("Next"),
     )!;
     await act(async () => next.click());
-    expect(host.textContent).toContain(
-      "minimum number of state borders",
-    );
+    expect(host.textContent).toContain("minimum number of state borders");
     expect(probe.props!.showBorders).toBe(false);
     await enter(
       host.querySelector<HTMLInputElement>(
@@ -314,7 +312,9 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
       "California → Arizona → New Mexico → Oklahoma → Missouri",
     );
     await click("Admin");
-    expect(host.textContent).toContain("Daily Journey schedule");
+    expect(
+      host.querySelector(".journey-scheduler-heading h2")?.textContent,
+    ).toBe("Schedule");
     await click("Choose a Journey");
     expect(
       host.querySelector('[data-journey-id="north-america-v2"]'),

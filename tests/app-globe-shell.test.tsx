@@ -2,6 +2,7 @@
 // Install shared mocks before importing the application.
 import {
   click,
+  authProbe,
   host,
   member,
   mount,
@@ -364,8 +365,10 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
         removeEventListener() {},
       }));
       await mount();
-      if (page === "account") await click("Account");
-      else {
+      if (page === "account") {
+        await click("Account");
+        if (authProbe.subject) await click("Progress");
+      } else {
         await click("Study");
         await click("Custom");
       }

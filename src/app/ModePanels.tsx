@@ -1,5 +1,11 @@
 import { createContext, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+type PanelSnapshot = {
+  mode: string;
+  children: ReactNode;
+  page: boolean;
+  animateExit: boolean;
+};
 export const PanelActive = createContext(true);
 export function ModePanels({
   mode,
@@ -25,7 +31,7 @@ export function ModePanels({
     if (panel.current) panel.current.scrollTop = 0;
   }, [mode, scrollKey]);
   const previous = useRef({ mode, children, page, animateExit });
-  const [outgoing, setOutgoing] = useState<ReactNode>();
+  const [outgoing, setOutgoing] = useState<PanelSnapshot>();
   const switching = previous.current.mode !== mode;
   const exitEligible =
     !reduced &&
@@ -33,24 +39,29 @@ export function ModePanels({
     !previous.current.page &&
     previous.current.animateExit &&
     !!previous.current.children;
-  // Derive the first waiting frame too, before child layout effects can focus
-  // controls in the incoming panel.
-  const waiting =
-    !reduced && !page && (!!outgoing || (switching && exitEligible));
+  // Include the first exit frame in reconciliation: the outgoing layer keeps
+  // its existing key, DOM and component state instead of mounting a fresh copy.
+  const exit =
+    !reduced && !page
+      ? (outgoing ?? (switching && exitEligible ? previous.current : undefined))
+      : undefined;
+  const returning = exit?.mode === mode;
+  const leaving = returning ? undefined : exit;
+  const waiting = !!leaving;
   useLayoutEffect(() => {
     const before = previous.current;
-    if (reduced || page) setOutgoing(undefined);
+    if (reduced || page || returning) setOutgoing(undefined);
     else if (before.mode !== mode) {
       const snapshot =
         !before.page && before.animateExit && before.children
-          ? before.children
+          ? before
           : undefined;
       // Keep the visible exit when navigation changes again; pending content
       // has never appeared and must not become a new outgoing panel.
       setOutgoing((current) => current ?? snapshot);
     }
     previous.current = { mode, children, page, animateExit };
-  }, [mode, children, reduced, page, animateExit]);
+  }, [mode, children, reduced, page, animateExit, returning]);
   useLayoutEffect(() => {
     if (!outgoing) return;
     // animationend owns normal sequencing. Recover if CSS is suppressed or the
@@ -60,8 +71,9 @@ export function ModePanels({
   }, [outgoing]);
   return (
     <>
-      {!reduced && outgoing && (
+      {leaving && (
         <div
+          key={persistent ? `outgoing-${leaving.mode}` : leaving.mode}
           className="mode-layer mode-outgoing"
           inert
           aria-hidden="true"
@@ -73,7 +85,7 @@ export function ModePanels({
               setOutgoing(undefined);
           }}
         >
-          <PanelActive value={false}>{outgoing}</PanelActive>
+          <PanelActive value={false}>{leaving.children}</PanelActive>
         </div>
       )}
       <div

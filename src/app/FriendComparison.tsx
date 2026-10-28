@@ -46,32 +46,34 @@ export function ScoreSummary({ score }: { score: JourneyScore }) {
   const description = help ? `${label} · ${helpCountCopy(help)}` : label;
   return (
     <span className="comparison-score-summary">
-      {status === "unassisted" ? (
-        <small className="comparison-unassisted">Unassisted</small>
-      ) : (
-        <span
-          className="comparison-help"
-          role="img"
-          aria-label={description}
-          title={description}
-        >
-          {!!help?.hints && (
-            <span>
-              <ActionIcon name="hint" />
-              {help.hints}
-            </span>
-          )}
-          {!!help?.assists && (
-            <span>
-              <ActionIcon name="assist" />
-              {help.assists}
-            </span>
-          )}
-        </span>
-      )}
-      {(score.legacyPoints || score.points === undefined) && (
-        <small className="comparison-legacy">Earlier scoring</small>
-      )}
+      <span className="comparison-score-notes">
+        {status === "unassisted" ? (
+          <small className="comparison-unassisted">Unassisted</small>
+        ) : (
+          <span
+            className="comparison-help"
+            role="img"
+            aria-label={description}
+            title={description}
+          >
+            {!!help?.hints && (
+              <span>
+                <ActionIcon name="hint" />
+                {help.hints}
+              </span>
+            )}
+            {!!help?.assists && (
+              <span>
+                <ActionIcon name="assist" />
+                {help.assists}
+              </span>
+            )}
+          </span>
+        )}
+        {(score.legacyPoints || score.points === undefined) && (
+          <small className="comparison-legacy">Earlier scoring</small>
+        )}
+      </span>
       <strong className="comparison-score">
         {points.earned}
         <span>/{points.maximum}</span>
