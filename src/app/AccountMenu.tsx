@@ -12,20 +12,12 @@ export function AccountMenu({
   admin,
   path,
   onNavigate,
-  journey,
 }: {
   signedIn: boolean;
   player?: PlayerProfile | null;
   admin: boolean;
   path: string;
   onNavigate(path: string): void;
-  journey: {
-    title: string;
-    action: string;
-    progress: string;
-    ready: boolean;
-    open(): void;
-  };
 }) {
   const [open, setOpen] = useState(false);
   const shell = useRef<HTMLDivElement>(null);
@@ -130,21 +122,6 @@ export function AccountMenu({
               </button>
             ),
           )}
-          <button
-            className="account-menu-today"
-            disabled={!journey.ready}
-            onClick={() => {
-              setOpen(false);
-              trigger.current?.focus();
-              journey.open();
-            }}
-          >
-            <span>
-              <small>Today’s Journey · {journey.progress}</small>
-              <strong>{journey.title}</strong>
-              <span>{journey.action} →</span>
-            </span>
-          </button>
           {admin && (
             <div className="account-menu-admin">
               <button onClick={() => go("admin")}>

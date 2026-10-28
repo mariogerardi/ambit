@@ -1662,26 +1662,6 @@ export function App() {
             admin={account.admin}
             path={path}
             onNavigate={navigate}
-            journey={{
-              title: todayJourney.title,
-              progress: !todayAttempt
-                ? "Not started"
-                : ["finished", "failed"].includes(todayAttempt.game.phase)
-                  ? "Complete"
-                  : `${todayAttempt.game.answers.length} of 5 stops`,
-              action: !todayAttempt
-                ? "Play"
-                : ["finished", "failed"].includes(todayAttempt.game.phase)
-                  ? "View result"
-                  : "Resume",
-              ready:
-                !!regions.length &&
-                dailyLoaded &&
-                cloudSave.ready &&
-                schedule.ready &&
-                webgl,
-              open: () => playDaily(today),
-            }}
           />
           <AppMenu
             onJourney={() => playDaily(today)}

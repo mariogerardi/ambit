@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { CommunityError, createCommunityClient } from "../services/community";
-import { AVATARS, FLAG_AVATARS, ProfileAvatar } from "./ProfileAvatar";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { AvatarPicker } from "./AvatarPicker";
 import {
   cachedProfile,
   loadPlayerProfile,
@@ -295,9 +296,6 @@ export function AccountDashboard({
         <div className="account-workspace-main">
           <header className="account-heading">
             <div>
-              <span className="overline">
-                {tab === "admin" ? "Workspace" : "Your account"}
-              </span>
               <h1 className="editorial-heading">
                 {ACCOUNT_SECTIONS[tab].label}
               </h1>
@@ -533,91 +531,13 @@ export function AccountDashboard({
                         </div>
                       </label>
                     </div>
-                    <fieldset className="avatar-picker">
-                      <legend>Choose your avatar</legend>
-                      <div className="avatar-options">
-                        {Object.entries(AVATARS)
-                          .filter(([, preset]) => !preset.hidden)
-                          .map(([value, preset]) => (
-                            <label
-                              key={value}
-                              data-dd-action-name="Account Choose Avatar"
-                              className={`${draft.avatar === value ? "chosen" : ""} ${preset.image && !__AVATAR_IMAGES__.includes(preset.image) ? "avatar-pending" : ""}`}
-                            >
-                              <input
-                                type="radio"
-                                data-dd-action-name="Account Choose Avatar"
-                                name="avatar"
-                                value={value}
-                                checked={draft.avatar === value}
-                                disabled={
-                                  !!preset.image &&
-                                  !__AVATAR_IMAGES__.includes(preset.image)
-                                }
-                                onChange={() =>
-                                  setDraft({
-                                    ...draft,
-                                    avatar: value as AccountProfile["avatar"],
-                                  })
-                                }
-                              />
-                              {preset.image &&
-                              !__AVATAR_IMAGES__.includes(preset.image) ? (
-                                <span
-                                  className="avatar-slot"
-                                  aria-hidden="true"
-                                >
-                                  {value.slice(-2)}
-                                </span>
-                              ) : (
-                                <ProfileAvatar
-                                  avatar={value as AccountProfile["avatar"]}
-                                  label={preset.label}
-                                />
-                              )}
-                              <small>{preset.label}</small>
-                            </label>
-                          ))}
-                      </div>
-                      {!__AVATAR_IMAGES__.length && (
-                        <p className="muted avatar-coming-soon">
-                          Choose a country flag as your avatar.
-                        </p>
-                      )}
-                      <label className="field flag-avatar-choice">
-                        <span>Or use a country flag</span>
-                        <div className="flag-avatar-select">
-                          <ProfileAvatar avatar={draft.avatar} />
-                          <select
-                            aria-label="Country flag avatar"
-                            data-dd-action-name="Account Choose Flag Avatar"
-                            value={
-                              draft.avatar.startsWith("flag:")
-                                ? draft.avatar
-                                : ""
-                            }
-                            onChange={(event) => {
-                              if (event.target.value)
-                                setDraft({
-                                  ...draft,
-                                  avatar: event.target
-                                    .value as AccountProfile["avatar"],
-                                });
-                            }}
-                          >
-                            <option value="">Choose a country</option>
-                            {FLAG_AVATARS.map((country) => (
-                              <option
-                                key={country.id}
-                                value={`flag:${country.id}`}
-                              >
-                                {country.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </label>
-                    </fieldset>
+                    <AvatarPicker
+                      value={draft.avatar}
+                      onChange={(avatar) => {
+                        dirty.current = true;
+                        setDraft({ ...draft, avatar });
+                      }}
+                    />
                     <label className="field">
                       <span>
                         Favorite place or region <small>Optional</small>
@@ -703,38 +623,21 @@ export function AccountDashboard({
           </div>
           {tab === "appearance" && (
             <div className="account-settings">
-              <section
-                className="account-login-details"
-                aria-label="Private account details"
+              <div className="account-settings-appearance">
+                {appearanceContent}
+              </div>
+              <footer
+                className="account-session-footer"
+                aria-label="Signed-in account"
               >
-                <h2>Account &amp; sync</h2>
                 {email && (
-                  <p className="account-email">
-                    {email}
-                    <small>Only you can see your email.</small>
+                  <p>
+                    Signed in as <span className="account-email">{email}</span>
                   </p>
-                )}
-                {sync && (
-                  <div className="account-sync" role="status">
-                    <span
-                      className={`account-sync-indicator sync-${sync.status}`}
-                      aria-hidden="true"
-                    />
-                    <p>{sync.message}</p>
-                    {(sync.status === "offline" || sync.status === "error") && (
-                      <button
-                        className="quiet-button tertiary-action"
-                        data-dd-action-name="Account Retry Sync"
-                        onClick={sync.retry}
-                      >
-                        Retry sync
-                      </button>
-                    )}
-                  </div>
                 )}
                 {onSignOut && (
                   <button
-                    className="quiet-button account-secondary-button"
+                    className="quiet-button tertiary-action"
                     data-dd-action-name="Account Sign Out"
                     disabled={busy}
                     onClick={onSignOut}
@@ -742,14 +645,10 @@ export function AccountDashboard({
                     Sign out
                   </button>
                 )}
-              </section>
-              <div className="account-settings-appearance">
-                {appearanceContent}
-              </div>
+              </footer>
             </div>
           )}
-          {tab !== "appearance" &&
-            tab !== "admin" &&
+          {tab !== "admin" &&
             sync &&
             (sync.status === "offline" || sync.status === "error") && (
               <div className="account-message" role="status">

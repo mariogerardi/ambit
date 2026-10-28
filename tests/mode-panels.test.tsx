@@ -103,6 +103,56 @@ it("keeps one visible exit and goes straight to the latest requested destination
   expect(document.activeElement?.textContent).toBe("Explore");
 });
 
+it("keeps mounted results and their animation nodes intact throughout exit", async () => {
+  let mounts = 0,
+    cleanups = 0;
+  function Results() {
+    useLayoutEffect(() => {
+      mounts++;
+      return () => {
+        cleanups++;
+      };
+    }, []);
+    return (
+      <section>
+        <input aria-label="Result state" defaultValue="Settled score" />
+        <span className="point-orb">★</span>
+      </section>
+    );
+  }
+  await act(async () =>
+    root.render(
+      <ModePanels mode="results" reduced={false}>
+        <Results />
+      </ModePanels>,
+    ),
+  );
+  const layer = host.querySelector(".mode-incoming");
+  const input = host.querySelector<HTMLInputElement>("input")!;
+  const orb = host.querySelector(".point-orb");
+  input.value = "Already revealed";
+  await render("Home");
+  expect(host.querySelector(".mode-outgoing")).toBe(layer);
+  expect(host.querySelector(".mode-outgoing input")).toBe(input);
+  expect(input.value).toBe("Already revealed");
+  expect(host.querySelector(".mode-outgoing .point-orb")).toBe(orb);
+  expect(mounts).toBe(1);
+  expect(cleanups).toBe(0);
+  await finishExit();
+  expect(cleanups).toBe(1);
+});
+
+it("cancels an exit when returning to its page without duplicating or remounting it", async () => {
+  await render("Home");
+  const original = host.querySelector(".mode-incoming");
+  await render("Study");
+  await render("Home");
+  expect(host.querySelector(".mode-outgoing")).toBeNull();
+  expect(host.querySelectorAll(".mode-layer")).toHaveLength(1);
+  expect(host.querySelector(".mode-incoming")).toBe(original);
+  expect(host.querySelector(".mode-waiting")).toBeNull();
+});
+
 it("recovers if an animation-end event is missing without restarting the exit on navigation", async () => {
   await render("Home");
   await render("Minigames");

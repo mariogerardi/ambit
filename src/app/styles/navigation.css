@@ -255,28 +255,6 @@
   margin-right: 12px;
   color: var(--ui-accent);
 }
-.experience .account-menu-content .account-menu-today {
-  margin-top: 12px;
-  padding: 14px 12px;
-  border: 1px solid rgb(var(--ui-editorial-rgb) / 0.3);
-  border-radius: 12px;
-}
-.account-menu-today > span {
-  display: grid;
-  gap: 7px;
-}
-.account-menu-today small {
-  color: var(--ui-muted);
-  font-size: 11px;
-}
-.account-menu-today strong {
-  font: 22px/1.2 var(--font-editorial);
-  color: var(--ui-editorial);
-}
-.account-menu-today > span > span {
-  color: var(--ui-editorial);
-  font-size: 12px;
-}
 .account-menu-admin {
   border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
   margin-top: 12px;

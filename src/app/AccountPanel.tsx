@@ -78,7 +78,6 @@ export function AccountPanel({
   if (intent?.tab === "admin" && adminContent) return adminContent;
   return (
     <section className="info-view account-panel" aria-label="Account">
-      <span className="overline">YOUR ACCOUNT</span>
       <h1>
         {intent?.friend
           ? `Connect with @${intent.friend}`

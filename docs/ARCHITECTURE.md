@@ -131,7 +131,9 @@ preparation/test evidence; the runtime loader does not hash every fetched asset.
 
 Ordinary mode switches retain the mounted globe, country bindings, and camera
 memory. Animated panel switches finish the 220 ms exit before starting the 220 ms
-entrance. The outgoing layer is immediately inert; incoming content can load but
+entrance. Desktop exits retain the same panel DOM and component state so completion
+animations do not restart during departure. Returning to the exiting page cancels
+that exit without mounting a duplicate. The outgoing layer is immediately inert; incoming content can load but
 stays hidden, inert and inactive for focus effects until the exit's animation-end
 event. A 320 ms fallback recovers from a missing event. Rapid navigation retains
 one visible exit and opens the latest requested destination. Reduced motion removes
@@ -254,12 +256,18 @@ produce it. Reduced motion reveals the globe immediately. Loading copy is omitte
 but geography and WebGL errors remain visible.
 
 The header avatar opens direct navigation to Progress, Friends, Profile, Settings,
-and (for administrators) a separated Admin entry. It also offers today’s Journey
-with its current status. Guests go directly to sign-in. The account menu dismisses
+and (for administrators) a separated Admin entry. Guests go directly to sign-in. The account menu dismisses
 on outside interaction, focus leaving it, Escape, or navigation. Progress offers
-today’s Journey, Study continuation, aggregate stats and recent Journey/Study activity.
-Profile contains public identity; private email, sync status/retry, sign-out and
-appearance controls live in Settings. Friends leads with the matching Journey’s
+today’s Journey, Study continuation, and recent Journey/Study activity. Its Journey
+stats include current/longest day streak, finished runs, perfect point totals and
+answer accuracy. Study stats include completed sessions, answers/accuracy, distinct
+countries practiced and the best correct-answer streak within one session. These
+are derived from saved history, deduplicating Journey attempts and Study record IDs;
+ongoing attempts are excluded. Historical points keep their existing scoring rules.
+Profile contains public identity, with a compact preset-avatar picker beside the
+flag selector. Settings contains Appearance and a small signed-in identity/sign-out
+footer. Sync warnings and a retry action appear only when syncing needs attention;
+there is no separate Account & sync panel. Friends leads with the matching Journey’s
 comparison, followed by finding, inviting and managing friends.
 Accepted friends can open profiles and aggregate Study stats; scores unlock only
 when the viewer has synced completion for the same date, Journey and game version.

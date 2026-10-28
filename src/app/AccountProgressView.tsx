@@ -124,30 +124,80 @@ export function AccountProgressView({
           </button>
         </section>
       </div>
-      <dl className="account-stats" aria-label="Your progress">
-        <div>
-          <dt>Journey streak</dt>
-          <dd>
-            {metrics.streak}
-            <small>days</small>
-          </dd>
-        </div>
-        <div>
-          <dt>Journeys finished</dt>
-          <dd>{metrics.journeys.length}</dd>
-        </div>
-        <div>
-          <dt>Study sessions completed</dt>
-          <dd>{metrics.sessions}</dd>
-        </div>
-        <div>
-          <dt>Study accuracy</dt>
-          <dd>
-            {metrics.accuracy === undefined ? "—" : `${metrics.accuracy}%`}
-            <small>{metrics.questions} answers</small>
-          </dd>
-        </div>
-      </dl>
+      <section className="account-stat-group" aria-label="Journey statistics">
+        <h2>Journeys</h2>
+        <dl className="account-stats">
+          <div>
+            <dt>Journeys finished</dt>
+            <dd>{metrics.journeys.length}</dd>
+          </div>
+          <div>
+            <dt>Journey streak</dt>
+            <dd>
+              {metrics.streak}
+              <small>days</small>
+            </dd>
+          </div>
+          <div>
+            <dt>Longest streak</dt>
+            <dd>
+              {metrics.longestStreak}
+              <small>days</small>
+            </dd>
+          </div>
+          <div>
+            <dt>Perfect Journeys</dt>
+            <dd>
+              {metrics.perfectJourneys}
+              <small>15 / 15 points</small>
+            </dd>
+          </div>
+          <div>
+            <dt>Answer accuracy</dt>
+            <dd>
+              {metrics.journeyAccuracy === undefined
+                ? "—"
+                : `${metrics.journeyAccuracy}%`}
+              <small>
+                {metrics.journeyCorrect} of {metrics.journeyAnswers} answers
+              </small>
+            </dd>
+          </div>
+        </dl>
+      </section>
+      <section className="account-stat-group" aria-label="Study statistics">
+        <h2>Study</h2>
+        <dl className="account-stats">
+          <div>
+            <dt>Study sessions completed</dt>
+            <dd>{metrics.sessions}</dd>
+          </div>
+          <div>
+            <dt>Questions answered</dt>
+            <dd>
+              {metrics.questions}
+              <small>{metrics.studyCorrect} correct</small>
+            </dd>
+          </div>
+          <div>
+            <dt>Study accuracy</dt>
+            <dd>
+              {metrics.accuracy === undefined ? "—" : `${metrics.accuracy}%`}
+            </dd>
+          </div>
+          <div>
+            <dt>Countries practiced</dt>
+            <dd>{metrics.countriesPracticed}</dd>
+          </div>
+          <div>
+            <dt>Best answer streak</dt>
+            <dd>
+              {metrics.bestStudyStreak}
+              <small>in a Study session</small>
+            </dd>
+          </div>
+        </dl>
+      </section>
       <section className="account-recent" aria-label="Recent activity">
         <header>
           <h2>Recent activity</h2>

@@ -5,25 +5,16 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { AccountMenu } from "../src/app/AccountMenu";
 
 let host: HTMLDivElement, root: ReturnType<typeof createRoot>;
-const onNavigate = vi.fn(),
-  openJourney = vi.fn();
+const onNavigate = vi.fn();
 const props = {
   signedIn: true,
   admin: false,
   path: "/",
   onNavigate,
-  journey: {
-    title: "Island Instincts",
-    action: "Resume",
-    progress: "2 of 5 stops",
-    ready: true,
-    open: openJourney,
-  },
 };
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   onNavigate.mockClear();
-  openJourney.mockClear();
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
@@ -85,16 +76,6 @@ it("dismisses with Escape, focus leaving, outside presses and navigation", async
   other.remove();
   await click("Account");
   await mount({ path: "/explore" });
-  expect(host.querySelector("nav")).toBeNull();
-});
-it("opens the existing Journey action without changing a save itself", async () => {
-  await mount();
-  await click("Account");
-  const journey = host.querySelector<HTMLButtonElement>(".account-menu-today")!;
-  expect(journey.textContent).toContain("2 of 5 stops");
-  await act(async () => journey.click());
-  expect(openJourney).toHaveBeenCalledOnce();
-  expect(onNavigate).not.toHaveBeenCalled();
   expect(host.querySelector("nav")).toBeNull();
 });
 it("takes guests straight to sign-in and closes account navigation on sign-out", async () => {
