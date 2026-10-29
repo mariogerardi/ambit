@@ -252,7 +252,8 @@ export function App() {
   const studyRoute = studyIntent(path);
   const studySetup = !["session", "results"].includes(studyRoute.view);
   const studyBrowsingHistory =
-    studyRoute.view === "history" || studyRoute.view === "review";
+    mode === "study" &&
+    (studyRoute.view === "history" || studyRoute.view === "review");
   const studyRecord =
     studyRoute.view === "results"
       ? study.history?.find((record) => record.id === studyRoute.record)
