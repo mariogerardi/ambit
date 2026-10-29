@@ -86,6 +86,7 @@ export function accountProgress(
   ).length;
   const practiced = new Set(
     answers
+      .filter((answer) => answer.prompt.topic !== "places")
       .map((answer) => answer.prompt.place?.countryId ?? answer.prompt.targetId)
       .filter((id) => countryIds.has(id)),
   );
