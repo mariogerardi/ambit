@@ -167,7 +167,7 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 8px 16px;
-  margin: 24px 0 28px;
+  margin: 20px 0;
   color: var(--ui-text, #c2d1c9);
 }
 .study-result-score > strong {

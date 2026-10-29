@@ -78,8 +78,9 @@ describe("Study results and targeted review", () => {
         onStart={() => {}}
       />,
     );
-    expect(html).toContain("Session <em>complete.</em>");
+    expect(html).toContain("Session <em>finished.</em>");
     expect(html).toContain("2 places to review");
+    expect(html).not.toContain("study-history-link");
     expect(html).toContain("Repeat this session");
     expect(html).not.toMatch(
       /Correct answer:|Find Zambia|A LITTLE MORE FAMILIAR|Look what you learned|→/,
@@ -95,10 +96,17 @@ describe("Study results and targeted review", () => {
     expect(empty).not.toContain("NaN");
   });
   it("reserves clean sweeps for nonempty perfect scores and pluralizes missed answers", () => {
-    const render = (history: StudyAnswer[]) => renderToStaticMarkup(
-      <StudyResults session={summary(history)} onSetup={() => {}} onStart={() => {}} />,
+    const render = (history: StudyAnswer[]) =>
+      renderToStaticMarkup(
+        <StudyResults
+          session={summary(history)}
+          onSetup={() => {}}
+          onStart={() => {}}
+        />,
+      );
+    expect(render([answer("wurl:ZMB", "countries", true)])).toContain(
+      "A clean sweep.",
     );
-    expect(render([answer("wurl:ZMB", "countries", true)])).toContain("A clean sweep.");
     expect(render([])).not.toContain("A clean sweep.");
     const recovered = render([
       answer("wurl:ZMB", "countries"),
@@ -106,11 +114,12 @@ describe("Study results and targeted review", () => {
     ]);
     expect(recovered).not.toContain("A clean sweep.");
     expect(recovered).toContain("No places left to review.");
-    expect(render([answer("wurl:ZMB", "countries")])).toContain("Review missed answer<");
-    expect(render([
-      answer("wurl:ZMB", "countries"),
-      answer("wurl:ZMB", "capitals"),
-    ])).toContain("Review missed answers<");
+    expect(render([answer("wurl:ZMB", "countries")])).toContain(
+      "Review missed answer<",
+    );
+    expect(
+      render([answer("wurl:ZMB", "countries"), answer("wurl:ZMB", "capitals")]),
+    ).toContain("Review missed answers<");
   });
   it("locates a selected missed place and reviews only the exact missed pairs once", async () => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);

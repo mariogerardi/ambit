@@ -1442,11 +1442,18 @@
     display: none;
   }
   .account-dashboard .friend-comparison-list .friend-comparison-row {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
   }
-  .account-dashboard .friend-comparison-row > .friend-comparison-result {
-    margin-left: 0;
+  .account-dashboard .friend-comparison-identity {
+    flex: 1 0 120px;
+    max-width: 100%;
+  }
+  .account-dashboard
+    .friend-comparison-list
+    .friend-comparison-row
+    > .friend-comparison-result {
+    margin-left: auto;
     max-width: 55%;
     font-size: 12px;
   }
@@ -1820,5 +1827,21 @@
 @media (max-width: 600px) {
   .account-progress-view .account-stat-group {
     padding: 16px;
+  }
+}
+
+@media (max-width: 700px), (max-width: 1000px) and (max-height: 500px) {
+  :is(.experience, .review-main)
+    .account-dashboard
+    :is(.profile-form, .friend-find-form)
+    :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .avatar-picker-row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

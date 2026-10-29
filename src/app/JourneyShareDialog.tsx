@@ -189,6 +189,7 @@ export function JourneyShareDialog(
         <div className="study-options-heading">
           <h2 id={id}>{card?.heading ?? "Share your Journey"}</h2>
           <button
+            className="study-options-close"
             data-dd-action-name="Journey Share Close"
             aria-label="Close sharing"
             onClick={onClose}

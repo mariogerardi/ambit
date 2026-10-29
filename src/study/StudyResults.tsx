@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { StudyNavigation } from "./StudyNavigation";
 import type { StudyPlaceTarget } from "./placeReview";
 import { isStudyPinPrompt, studyPinFeedback } from "./pins";
 import { ActionIcon } from "../app/ActionIcon";
 import {
   TOPICS,
+  studyComplete,
   answerLabel,
   countryName,
   missedStudyAnswers,
@@ -16,6 +18,49 @@ import type {
   StudySettings,
 } from "./engine";
 
+export function beginStudyReview(
+  session: StudySession,
+  onStart: (settings: StudySettings, targets?: StudyReviewTarget[]) => void,
+  onStartPlaces?: (targets: StudyPlaceTarget[]) => void,
+) {
+  const missed = missedStudyAnswers(session);
+  const missedIds = [
+    ...new Set(missed.map((answer) => answer.prompt.targetId)),
+  ];
+  if (session.placeReview) {
+    onStartPlaces?.(
+      missed.flatMap((a) => (a.prompt.place ? [a.prompt.place] : [])),
+    );
+    return;
+  }
+  const settings: StudySettings = {
+    ...session.settings,
+    scope: "custom",
+    countryIds: [
+      ...new Set(
+        missed.map(
+          (answer) => answer.prompt.place?.countryId ?? answer.prompt.targetId,
+        ),
+      ),
+    ],
+    topics: TOPICS.filter((topic) =>
+      missed.some((a) => a.prompt.topic === topic),
+    ),
+    length: "all",
+    revisitMissed: false,
+    styles: { ...session.settings.styles },
+  };
+  // A single-country review cannot supply multiple-choice distractors.
+  if (missedIds.length < 2)
+    for (const topic of settings.topics)
+      if (settings.styles[topic] === "choices")
+        settings.styles[topic] = "typing";
+  onStart(
+    settings,
+    missed.map((a) => a.prompt),
+  );
+}
+
 export function StudyResults({
   session,
   onSetup,
@@ -23,7 +68,7 @@ export function StudyResults({
   onStartPlaces,
   onLocate,
   onHome,
-  onHistory,
+  onReview,
 }: {
   session: StudySession;
   onSetup(): void;
@@ -31,7 +76,7 @@ export function StudyResults({
   onStartPlaces?(targets: StudyPlaceTarget[]): void;
   onLocate?(answer: StudyAnswer): void;
   onHome?(): void;
-  onHistory?(): void;
+  onReview?(): void;
 }) {
   const [opened, setOpened] = useState<string>();
   const missed = missedStudyAnswers(session);
@@ -42,40 +87,25 @@ export function StudyResults({
     capitals: "Capital",
     flags: "Flag",
     places: "Place",
+    cities: "Major city",
+    landmarks: "Landmark",
   };
-  function review() {
-    if (session.placeReview) {
-      onStartPlaces?.(
-        missed.flatMap((a) => (a.prompt.place ? [a.prompt.place] : [])),
-      );
-      return;
-    }
-    const settings: StudySettings = {
-      ...session.settings,
-      scope: "custom",
-      countryIds: missedIds,
-      topics: TOPICS.filter((topic) =>
-        missed.some((a) => a.prompt.topic === topic),
-      ),
-      length: "all",
-      revisitMissed: false,
-      styles: { ...session.settings.styles },
-    };
-    // A single-country review cannot supply multiple-choice distractors.
-    if (missedIds.length < 2)
-      for (const topic of settings.topics)
-        if (settings.styles[topic] === "choices")
-          settings.styles[topic] = "typing";
-    onStart(
-      settings,
-      missed.map((a) => a.prompt),
-    );
-  }
+  const review = () => beginStudyReview(session, onStart, onStartPlaces);
   return (
-    <section className="info-view study-summary">
+    <section className="info-view study-view study-summary">
+      <StudyNavigation />
       <div className="info-heading">
         <h1 className="editorial-heading">
-          Session <em>complete.</em>
+          {session.learningReview ? (
+            <>
+              Review <em>{studyComplete(session) ? "complete." : "saved."}</em>
+            </>
+          ) : (
+            <>
+              Session{" "}
+              <em>{studyComplete(session) ? "complete." : "finished."}</em>
+            </>
+          )}
         </h1>
       </div>
       {session.history.length ? (
@@ -168,29 +198,45 @@ export function StudyResults({
       <div
         className={`study-result-actions result-actions${missed.length ? "" : " study-result-actions-perfect"}`}
       >
-        {missed.length > 0 && (
+        {missed.length > 0 && !session.learningReview && (
           <button
             className="primary-button"
             data-dd-action-name="Study Review Missed"
-            onClick={review}
+            onClick={onReview ?? review}
           >
             <ActionIcon name="review" />
             <span>
-              Review missed {missed.length === 1 ? "answer" : "answers"}
+              {onReview ? (
+                "Open Review"
+              ) : (
+                <>Review missed {missed.length === 1 ? "answer" : "answers"}</>
+              )}
             </span>
           </button>
         )}
         <button
-          className={missed.length ? "study-repeat-button" : "primary-button"}
+          className={
+            missed.length && !session.learningReview
+              ? "study-repeat-button"
+              : "primary-button"
+          }
           data-dd-action-name="Study Repeat Session"
           onClick={() =>
-            session.placeReview
-              ? onStartPlaces?.(session.placeReview)
-              : onStart(session.settings, studyReplayTargets(session))
+            session.learningReview
+              ? onReview?.()
+              : session.placeReview
+                ? onStartPlaces?.(session.placeReview)
+                : onStart(session.settings, studyReplayTargets(session))
           }
         >
           <ActionIcon name="repeat" />
-          <span>Repeat this session</span>
+          <span>
+            {session.learningReview
+              ? "Continue review"
+              : session.settings.length === "all"
+                ? "Repeat this session"
+                : "Practice again"}
+          </span>
         </button>
         <button
           className="study-repeat-button"
@@ -211,14 +257,10 @@ export function StudyResults({
           </button>
         )}
       </div>
-      {onHistory && (
-        <button
-          className="quiet-button tertiary-action study-history-link"
-          data-dd-action-name="Study Past Sessions"
-          onClick={onHistory}
-        >
-          Past study sessions
-        </button>
+      {session.learningReview && (
+        <p className="study-review-note">
+          Progress is saved. Items that need more work will return in Review.
+        </p>
       )}
     </section>
   );

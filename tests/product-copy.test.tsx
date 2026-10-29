@@ -26,7 +26,7 @@ import type { RegionFeature } from "../src/geography/types";
 import { gameReducer, initialGame } from "../src/game/state";
 import type { Action, GameState } from "../src/game/state";
 import { StudyPanel } from "../src/study/StudyPanel";
-import { StudyEditor } from "../src/study/StudySetup";
+import { StudySetup } from "../src/study/StudySetup";
 import {
   answerLabel,
   defaultSettings,
@@ -388,6 +388,7 @@ describe("product copy follows the answer and visible reveal", () => {
       <StudyPanel
         save={{ ...emptyStudy, settings }}
         setup
+        view="practice"
         active
         webgl
         onSettings={() => {}}
@@ -397,7 +398,7 @@ describe("product copy follows the answer and visible reveal", () => {
       />,
     );
     const builder = renderToStaticMarkup(
-      <StudyEditor
+      <StudySetup
         settings={settings}
         onSettings={() => {}}
         onStart={() => {}}
@@ -405,14 +406,14 @@ describe("product copy follows the answer and visible reveal", () => {
     );
     expect(builder).toContain(">Mixed<");
     expect(builder).not.toContain("Mixed methods combine");
-    expect(builder).not.toContain("study-method-help");
+    expect(builder).toContain("Choose a unique answer method for each topic");
     expect(setup).not.toContain("Your own session");
-    expect(setup).toContain("Custom");
+    expect(setup).toContain("Session Builder");
     expect(setup).not.toContain(
       "Choose a path, or build a session of your own.",
     );
-    expect(setup).toContain("African capitals");
-    expect(setup).toContain("Recognize the flags of countries worldwide.");
+    expect(setup).toContain("Your next challenge <em>awaits.</em>");
+    expect(setup).toContain("Discover Asia");
     expect(setup).not.toContain("Tap globe · 10 questions");
     expect(setup).not.toContain("your pool");
   });

@@ -175,10 +175,75 @@ Keep these responsibilities separate:
 - **Response:** pending selections and pins, then graded feedback.
 - **Camera:** frames the clue or selected scope without silently revealing an answer.
 
-The Study builder configures the actual `studyPool` and hint settings. Building
-or customizing a session on mobile raises the content panel and hides the mounted globe;
-desktop keeps its sidebar and previews the selected Study area on the live globe.
-Configuration changes do not reposition the hidden mobile camera. Scoped sessions
+Study opens **Your Sessions** at `/study`, showing the current unfinished run
+above compact past-result rows, or starting/review actions when no run is active.
+Its globe previews the current session's declared geographic scope without
+framing or revealing its current answer. Separate
+**Study Packs**, **Session Builder**, and **Review** tabs use `view=packs`,
+`view=builder`, and `view=review`. Legacy `view=history` and `view=custom` links
+still resolve. Historical results use `view=results&record=<id>` without replacing
+the active run. Starting another run confirms replacement, archives answered
+progress, and pauses automatic advance while the dialog is open. Ending an
+unanswered session returns to Your Sessions without creating an empty result.
+
+Study Packs previews one of ten ready-made configurations at a time on the live globe.
+Previous/next arrows wrap through the packs; the selected pack contains its
+premise, settings, Start action and Customize link to Session Builder.
+Previewing a pack changes no running session or saved configuration. The builder
+provides clickable Topics, Area, Answer method, Session length, and Advanced
+options sections, with at most one expanded at a time; all can be closed. Headers
+retain current selections; changing a selection does not advance sections.
+Area supports single continents, whole-continent combinations (stored as custom
+country IDs), and individual countries. Advanced options summarizes changes from
+the standard defaults and can reset those options without changing the exercise.
+The per-topic
+control is disabled and shown unchecked for fewer than two topics, retaining its
+saved preference and methods internally. With multiple topics, this checkbox
+switches between a shared dropdown and individual topic dropdowns. Historical
+rows use compact topic/area titles and open results through the main row; replay
+and Review actions live on the result page.
+Active questions omit section navigation and the setup recap; results retain
+section navigation without a duplicate Your Sessions footer link. Study panel
+styles attach to each `.study-view` rather than the app's current mode, so outgoing
+content retains its typography and sizing until its exit animation finishes.
+
+`study/learning.ts` derives a personal review queue from retained Study answers,
+including minigame map-review sessions. It separates recognition, location and
+capital skills, deduplicates saved session snapshots and schedules checkups using
+a conservative interval heuristic. Misses return sooner. Immediate repetitions
+and assisted answers do not increase confidence; recognition-only successes
+cannot establish confidence alone. Review varies compatible response methods;
+location-only skills retain their applicable pin method. New reviews offer exactly
+10, 20, 50, or 100 questions, defaulting to 10; retries count toward that length.
+The full retained review pool is shuffled deterministically from skill identities
+and attempt counts; unchanged history gives the same order after reload, and
+longer reviews extend the same prefix. A shorter pool cycles through
+available items with compatible methods; misses return after other items.
+Older saved reviews without a question count retain their queue-based finish and
+30-answer cap. The review globe continuously circles the next ten distinct
+country/capital locations at a steady zoom, with anonymous labels and gentle
+latitude changes. It pauses for interaction and holds one view for reduced motion.
+Preview settings and locations pass together between visible panels, retaining
+the outgoing globe until the incoming panel takes over. Builder uses the same
+exit animation sequencing as other Study panels. Scene and camera handoffs retain
+the outgoing result or preview until the destination supplies its complete preview. Raw minigame
+results are not automatically imported into this queue.
+The Review summary separates skills due now from confidence: due skills can be
+either building confidence or confident. An inline explanation clarifies these
+overlapping counts and that a place can contribute more than one skill.
+
+Study topics include countries, capitals, flags, major cities, and landmarks.
+`study/placeTopics.ts` reuses the shipped major-city catalog and minigame landmark
+catalog, including landmark photography and attribution. Geographic scopes filter
+places by their parent country. For cities and landmarks, Select on globe asks
+for the containing country, Place a pin checks a 50 km radius, and typing/choices
+identify an anonymous map marker. Landmark questions also show their photograph.
+Recognition, country association, and exact location remain separate Review skills.
+Complete passes cover each eligible place/topic pair once.
+
+Study setup configures the actual `studyPool` and hint settings. Inline
+customization keeps the globe visible on desktop and mobile; only the in-session
+mobile preferences panel temporarily hides it. Scoped sessions
 frame their eligible area; country-identification and typed/choice
 capital questions can frame their visible clue. Capital map questions keep the
 answer country undisclosed. Capital feedback reveals the target capital's marker
@@ -198,7 +263,10 @@ actual country or distance, including old minigame-review saves. The existing
 Mixed method retains its select/type/choice rotation; pin placement is opt-in.
 `study/pins.ts` shares target resolution, grading and feedback with minigame reviews.
 
-The Study cog groups report/edit/finish actions on desktop and mobile. On phones,
+The Study cog offers hints/pacing, pause and finish actions on desktop and mobile.
+Minigame map reviews use ordinary session controls rather than friend-challenge
+copy. Typing and choice questions remain usable without WebGL; pin and named-country
+map questions explain their globe requirement. On phones,
 correct answers stay visible longer before automatic advance. Explore selections use tighter
 camera framing. Home magnifies the mobile globe projection by 20% behind its
 transparent bars. Explore measures its content to fit the open tray, capping long
@@ -369,13 +437,13 @@ does not enter the live Pinpoint pool. Switching games clears previous example
 geometry and overlays during the camera join, preserving the shared globe. An empty filtered live
 pool disables Play and offers settings reset, independently of demo availability.
 
-Study preset cards retain `ActivityPreviewDialog` with a local illustration,
-description, session details and how-to-play copy. Study previews offer Start
-session and Customize; opening/dismissing one does not change saved settings.
-The shared dialog retains its scrollable body, persistent actions, trapped focus,
-inert workspace, Escape/backdrop dismissal and focus restoration. Minigame
-settings snapshots apply when starting a new game, with an unfinished-run
-replacement notice when necessary.
+Study packs use the same declarative scope preview and camera framing as the
+builder, with Start and Edit in Session Builder actions. Scoped previews
+frame their eligible area; worldwide previews return to the rotating world view.
+Preview labels/markers explain the selected geography separately from the actual
+quiz hints. Mobile setup and inline customization keep the globe visible. Custom country
+selection accepts globe picks; ordinary template previews do not change the list. Minigame settings snapshots apply when starting a
+new game, with an unfinished-run replacement notice when necessary.
 Shared Neighbors plays at `/minigames/shared-neighbors/play` on the same mounted
 globe. `src/minigames/sharedNeighbors.ts` derives every eligible pair with one
 common neighbor from the complete canonical border graph, including adjacent

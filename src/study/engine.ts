@@ -1,4 +1,16 @@
 import {
+  LEARNING_METHODS,
+  REVIEW_LENGTHS,
+  assistedStudyAnswer,
+  learningTarget,
+  validAnswerTime,
+} from "./learning";
+import type {
+  LearningRun,
+  LearningTarget,
+  ReviewQuestionCount,
+} from "./learning";
+import {
   CAPITAL_DISTRACTORS,
   capitalChoicePool,
   capitalChoiceName,
@@ -21,6 +33,12 @@ import {
 } from "./placeReview";
 import type { StudyPlaceTarget } from "./placeReview";
 import {
+  isPlaceTopic,
+  placeTarget,
+  STUDY_PLACES,
+  studyPlace,
+} from "./placeTopics";
+import {
   gradeStudyPin,
   isStudyPinPrompt,
   studyPinTarget,
@@ -30,7 +48,13 @@ export const COUNTRIES = roster.members;
 export const FLAGS = new Map(
   flagCatalog.flags.map((f) => [f.countryId, f.src]),
 );
-export const TOPICS = ["countries", "capitals", "flags"] as const;
+export const TOPICS = [
+  "countries",
+  "capitals",
+  "flags",
+  "cities",
+  "landmarks",
+] as const;
 export type StudyTopic = (typeof TOPICS)[number];
 export type StudyStyle = "map" | "pin" | "typing" | "choices" | "mixed";
 type PromptStyle = Exclude<StudyStyle, "mixed">;
@@ -39,7 +63,8 @@ export interface StudySettings {
   scope: "all" | "continent" | "custom";
   continent: string;
   countryIds: string[];
-  styles: Record<StudyTopic, StudyStyle>;
+  styles: Record<"countries" | "capitals" | "flags", StudyStyle> &
+    Partial<Record<"cities" | "landmarks", StudyStyle>>;
   perTopicMethods?: boolean;
   borders: boolean;
   countryNames: boolean;
@@ -76,6 +101,8 @@ export interface StudyPrompt {
   ordinal: number;
 }
 export interface StudyAnswer {
+  answeredAt?: number;
+  assisted?: boolean;
   pin?: { lat: number; lng: number };
   prompt: StudyPrompt;
   response: string;
@@ -92,6 +119,7 @@ export function missedStudyAnswers(session: StudySession): StudyAnswer[] {
   return [...latest.values()].filter((answer) => !answer.correct);
 }
 export interface StudySession {
+  learningReview?: LearningRun;
   placeReview?: StudyPlaceTarget[];
   pin?: { lat: number; lng: number };
   id?: string;
@@ -148,12 +176,55 @@ export function studyPool(settings: StudySettings): string[] {
 export function usesPerTopicMethods(settings: StudySettings) {
   return (
     settings.perTopicMethods ??
-    new Set(settings.topics.map((topic) => settings.styles[topic])).size > 1
+    new Set(settings.topics.map((topic) => studyStyle(settings, topic))).size >
+      1
   );
 }
+export const studyStyle = (settings: StudySettings, topic: StudyTopic) =>
+  settings.styles[topic] ?? "pin";
+export function studyTopicPool(
+  settings: StudySettings,
+  topic: StudyTopic,
+): string[] {
+  const countries = studyPool(settings);
+  return isPlaceTopic(topic)
+    ? STUDY_PLACES.filter(
+        (place) => place.topic === topic && countries.includes(place.countryId),
+      ).map((place) => place.id)
+    : countries;
+}
+export function studyTargets(settings: StudySettings): StudyReviewTarget[] {
+  const core = settings.topics.filter((topic) => !isPlaceTopic(topic));
+  return [
+    ...studyPool(settings).flatMap((targetId) =>
+      core.map((topic) => ({ targetId, topic })),
+    ),
+    ...settings.topics.filter(isPlaceTopic).flatMap((topic) =>
+      studyTopicPool(settings, topic).map((targetId) => ({
+        targetId,
+        topic,
+      })),
+    ),
+  ];
+}
+const validTopicTarget = (
+  id: string,
+  topic: StudyTopic,
+  countries: string[],
+) =>
+  isPlaceTopic(topic)
+    ? studyPlace(id)?.topic === topic &&
+      countries.includes(studyPlace(id)!.countryId)
+    : countries.includes(id);
 export function settingsError(settings: StudySettings): string | undefined {
   if (!settings.topics.length) return "Choose at least one topic.";
   const pool = studyPool(settings);
+  if (
+    settings.topics.some(
+      (topic) => isPlaceTopic(topic) && !studyTopicPool(settings, topic).length,
+    )
+  )
+    return "This area has no listed places for one of your topics. Choose a wider area or another topic.";
   if (!pool.length)
     return settings.capitalDistractors === "countryCities" &&
       settings.topics.includes("capitals") &&
@@ -163,10 +234,10 @@ export function settingsError(settings: StudySettings): string | undefined {
   if (
     settings.topics.some(
       (topic) =>
-        settings.styles[topic] === "choices" &&
+        studyStyle(settings, topic) === "choices" &&
         (topic === "capitals"
           ? pool.some((id) => capitalChoicePool(settings, pool, id).length < 2)
-          : pool.length < 2),
+          : studyTopicPool(settings, topic).length < 2),
     )
   )
     return "Include at least two countries for multiple choice.";
@@ -203,22 +274,39 @@ function draw(
     session.settings.length === "all"
       ? session.remaining?.[0]?.split("/")
       : undefined;
-  const targetId = review?.targetId ?? pair?.[0] ?? deck[0];
-  const rest = review ? deck : deck.slice(1);
+  let targetId = review?.targetId ?? pair?.[0] ?? deck[0];
   const topic =
     review?.topic ??
     (pair?.[1] as StudyTopic | undefined) ??
     session.settings.topics[ordinal % session.settings.topics.length];
-  let style = session.settings.styles[topic];
+  const rest = review || isPlaceTopic(topic) ? deck : deck.slice(1);
+  const topicPool = studyTopicPool(session.settings, topic);
+  if (isPlaceTopic(topic) && !review && !pair) {
+    const recent = new Set(
+      session.history
+        .filter((answer) => answer.prompt.topic === topic)
+        .slice(-Math.max(0, topicPool.length - 1))
+        .map((answer) => answer.prompt.targetId),
+    );
+    const available = topicPool.filter((id) => !recent.has(id));
+    const next = shuffle(available.length ? available : topicPool, seed);
+    targetId = next.values[0];
+    seed = next.seed;
+  }
+  let style = studyStyle(session.settings, topic);
   if (style === "mixed") {
     seed = random(seed);
     const available: PromptStyle[] = (
       topic === "capitals"
         ? capitalChoicePool(session.settings, session.pool, targetId).length < 2
-        : session.pool.length < 2
+        : topicPool.length < 2
     )
-      ? ["map", "typing"]
-      : ["map", "typing", "choices"];
+      ? isPlaceTopic(topic)
+        ? ["map", "typing", "pin"]
+        : ["map", "typing"]
+      : isPlaceTopic(topic)
+        ? ["map", "typing", "choices", "pin"]
+        : ["map", "typing", "choices"];
     style = available[seed % available.length];
   }
   let choices: string[] = [];
@@ -226,13 +314,17 @@ function draw(
     // Distinct display answers, including countries whose primary capitals share a name.
     const label = (id: string) =>
       normalizeAnswer(
-        topic === "capitals" ? capitalChoiceName(id)! : countryName(id),
+        isPlaceTopic(topic)
+          ? studyPlace(id)!.name
+          : topic === "capitals"
+            ? capitalChoiceName(id)!
+            : countryName(id),
       );
     const seen = new Set([label(targetId)]);
     const shuffled = shuffle(
       (topic === "capitals"
         ? capitalChoicePool(session.settings, session.pool, targetId)
-        : session.pool
+        : topicPool
       ).filter((id) => id !== targetId),
       seed,
     );
@@ -261,7 +353,208 @@ function draw(
     text: "",
     choiceId: "",
     pin: undefined,
-    prompt: { targetId, topic, style, choices, ordinal },
+    prompt: {
+      targetId,
+      topic,
+      style,
+      choices,
+      ordinal,
+      ...(isPlaceTopic(topic)
+        ? { place: placeTarget(studyPlace(targetId)!) }
+        : {}),
+    },
+  };
+}
+function drawLearning(session: StudySession, ordinal: number): StudySession {
+  const savedRun = session.learningReview!;
+  const run =
+    savedRun.questionCount && !savedRun.pending.length
+      ? { ...savedRun, pending: savedRun.targets.map((target) => target.key) }
+      : savedRun;
+  const target = run.targets.find((item) => item.key === run.pending[0])!;
+  const methods = LEARNING_METHODS[target.skill];
+  const attempts = session.history.filter(
+    (answer) => learningTargetKey(answer.prompt) === target.key,
+  ).length;
+  const style =
+    methods[
+      (target.attempts + run.targets.indexOf(target) + attempts) %
+        methods.length
+    ];
+  const next = {
+    ...session,
+    learningReview: { ...run, pending: run.pending.slice(1) },
+    text: "",
+    choiceId: "",
+    pin: undefined,
+    phase: "playing" as const,
+  };
+  if (target.place && !isPlaceTopic(target.topic))
+    return {
+      ...next,
+      prompt: {
+        targetId: target.targetId,
+        topic: "places",
+        style: "pin",
+        place: target.place,
+        choices: [],
+        ordinal,
+      },
+    };
+  const generated = draw(
+    {
+      ...next,
+      settings: {
+        ...next.settings,
+        length: "all",
+        styles: { ...next.settings.styles, [target.topic]: style },
+      },
+      remaining: [`${target.targetId}/${target.topic}`],
+    },
+    ordinal,
+  );
+  return {
+    ...generated,
+    settings: session.settings,
+    remaining: [],
+    learningReview: next.learningReview,
+  };
+}
+function learningTargetKey(prompt: StudyPrompt) {
+  return learningTarget(prompt).key;
+}
+export function startLearningReview(
+  targets: LearningTarget[],
+  seed = Date.now() >>> 0,
+  questionCount?: ReviewQuestionCount,
+): StudySession {
+  if (
+    !targets.length ||
+    targets.length > 100 ||
+    (questionCount !== undefined && !REVIEW_LENGTHS.includes(questionCount)) ||
+    new Set(targets.map((item) => item.key)).size !== targets.length ||
+    !targets.every(validLearningTarget)
+  )
+    throw Error("Choose valid review items.");
+  const settings = {
+    ...defaultSettings,
+    topics: [...TOPICS],
+    scope: "all" as const,
+    length: "all" as const,
+    autoAdvance: false,
+    revisitMissed: false,
+  };
+  return drawLearning(
+    {
+      settings,
+      pool: studyPool(settings),
+      deck: [],
+      seed,
+      remaining: [],
+      history: [],
+      phase: "playing",
+      text: "",
+      choiceId: "",
+      prompt: {
+        targetId: "",
+        topic: "countries",
+        style: "map",
+        choices: [],
+        ordinal: 0,
+      },
+      learningReview: {
+        ...(questionCount !== undefined ? { questionCount } : {}),
+        targets: structuredClone(targets),
+        pending: targets.map((item) => item.key),
+      },
+    },
+    0,
+  );
+}
+function validLearningTarget(value: unknown): value is LearningTarget {
+  if (
+    !isRecord(value) ||
+    typeof value.key !== "string" ||
+    typeof value.targetId !== "string" ||
+    !Number.isSafeInteger(value.attempts) ||
+    Number(value.attempts) < 0 ||
+    !Object.hasOwn(LEARNING_METHODS, String(value.skill))
+  )
+    return false;
+  if (value.key !== `${value.targetId}/${value.skill}`) return false;
+  const skill = String(value.skill);
+  if (isPlaceTopic(value.topic)) {
+    const place = studyPlace(String(value.targetId));
+    const savedPlace = value.place;
+    return (
+      !!place &&
+      place.topic === value.topic &&
+      skill.startsWith(`${value.topic === "cities" ? "city" : "landmark"}-`) &&
+      validStudyPlace(savedPlace) &&
+      savedPlace.regionId === undefined &&
+      Object.entries(placeTarget(place)).every(
+        ([key, expected]) =>
+          savedPlace[key as keyof typeof savedPlace] === expected,
+      )
+    );
+  }
+  if (skill === "place-location")
+    return (
+      value.topic === "places" &&
+      validStudyPlace(value.place) &&
+      value.place.id === value.targetId
+    );
+  return (
+    memberIds.has(value.targetId) &&
+    value.place === undefined &&
+    value.topic ===
+      (skill.startsWith("country")
+        ? "countries"
+        : skill.startsWith("flag")
+          ? "flags"
+          : "capitals")
+  );
+}
+function validLearningRun(value: unknown): value is LearningRun {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.targets) &&
+    value.targets.length > 0 &&
+    value.targets.length <= 100 &&
+    (value.questionCount === undefined ||
+      (typeof value.questionCount === "number" &&
+        REVIEW_LENGTHS.some((count) => count === value.questionCount))) &&
+    value.targets.every(validLearningTarget) &&
+    new Set(value.targets.map((item) => item.key)).size ===
+      value.targets.length &&
+    strings(value.pending) &&
+    new Set(value.pending).size === value.pending.length &&
+    value.pending.every((key) =>
+      (value.targets as LearningTarget[]).some((item) => item.key === key),
+    )
+  );
+}
+function reviewAnswer(
+  session: StudySession,
+  updated: StudySession,
+): StudySession {
+  if (session.history.length === updated.history.length) return updated;
+  const answer = {
+    ...updated.history.at(-1)!,
+    answeredAt: Date.now(),
+    assisted: assistedStudyAnswer(session.settings, session.prompt),
+  };
+  let run = updated.learningReview;
+  if (run && !answer.correct) {
+    const key = learningTargetKey(answer.prompt);
+    const pending = run.pending.filter((item) => item !== key);
+    pending.splice(Math.min(2, pending.length), 0, key);
+    run = { ...run, pending };
+  }
+  return {
+    ...updated,
+    history: [...updated.history.slice(0, -1), answer],
+    ...(run ? { learningReview: run } : {}),
   };
 }
 export function startPlaceStudy(targets: StudyPlaceTarget[]): StudySession {
@@ -304,8 +597,11 @@ export function startStudy(
       !targets.length ||
       targets.some(
         ({ targetId, topic }) =>
-          !studyPool(settings).includes(targetId) ||
-          !settings.topics.includes(topic as StudyTopic),
+          !validTopicTarget(
+            targetId,
+            topic as StudyTopic,
+            studyPool(settings),
+          ) || !settings.topics.includes(topic as StudyTopic),
       ))
   )
     throw Error("Choose valid places and topics for review.");
@@ -318,8 +614,8 @@ export function startStudy(
                   targets.map(({ targetId, topic }) => `${targetId}/${topic}`),
                 ),
               ]
-            : studyPool(settings).flatMap((id) =>
-                settings.topics.map((topic) => `${id}/${topic}`),
+            : studyTargets(settings).map(
+                ({ targetId, topic }) => `${targetId}/${topic}`,
               ),
           seed,
         )
@@ -371,6 +667,14 @@ export type StudyAction =
   | { type: "next" }
   | { type: "finish" };
 export function studyComplete(session: StudySession) {
+  if (session.learningReview?.questionCount !== undefined)
+    return session.history.length >= session.learningReview.questionCount;
+  if (session.learningReview)
+    return (
+      session.history.length >= 30 ||
+      (!session.learningReview.pending.length &&
+        session.history.at(-1)?.prompt.ordinal === session.prompt.ordinal)
+    );
   return session.settings.length === "all"
     ? !session.remaining?.length &&
         session.history.at(-1)?.prompt.ordinal === session.prompt.ordinal
@@ -388,12 +692,14 @@ export function studyReducer(
   if (action.type === "next") {
     if (session.phase !== "feedback") return session;
     if (studyComplete(session)) return { ...session, phase: "summary" };
+    if (session.learningReview)
+      return drawLearning(session, session.prompt.ordinal + 1);
     return session.placeReview
       ? drawPlaceReview(session, session.prompt.ordinal + 1)
       : draw(session, session.prompt.ordinal + 1);
   }
-  if (session.placeReview) return reducePlaceReview(session, action, regions);
-  if (session.prompt.topic === "places") return session;
+  if (session.placeReview || session.prompt.topic === "places")
+    return reviewAnswer(session, reducePlaceReview(session, action, regions));
   if (session.phase !== "playing") return session;
   if (action.type === "pin")
     return session.prompt.style === "pin" && validStudyPin(action)
@@ -439,7 +745,7 @@ export function studyReducer(
   } else {
     response = session.text.trim();
     if (!response) return session;
-    if (topic !== "capitals" || style === "map")
+    if (style === "map" || (!isPlaceTopic(topic) && topic !== "capitals"))
       selectedId =
         countryIdForName(
           {
@@ -455,14 +761,19 @@ export function studyReducer(
   }
   const correct = pinResult
     ? pinResult.correct
-    : selectedId
-      ? selectedId === targetId
-      : topic === "capitals" &&
-        style !== "map" &&
-        [capitalOf(targetId).name, ...capitalOf(targetId).aliases].some(
-          (a) => normalizeAnswer(a) === normalizeAnswer(response),
-        );
-  return {
+    : isPlaceTopic(topic) && style === "map"
+      ? selectedId === session.prompt.place?.countryId
+      : isPlaceTopic(topic) && style === "typing"
+        ? normalizeAnswer(response) ===
+          normalizeAnswer(session.prompt.place!.name)
+        : selectedId
+          ? selectedId === targetId
+          : topic === "capitals" &&
+            style !== "map" &&
+            [capitalOf(targetId).name, ...capitalOf(targetId).aliases].some(
+              (a) => normalizeAnswer(a) === normalizeAnswer(response),
+            );
+  return reviewAnswer(session, {
     ...session,
     phase: "feedback",
     reviews: session.settings.revisitMissed
@@ -485,9 +796,13 @@ export function studyReducer(
         ...(style === "pin" ? { pin: session.pin } : {}),
       },
     ],
-  };
+  });
 }
 export function answerLabel(prompt: StudyPrompt, id = prompt.targetId): string {
+  if (isPlaceTopic(prompt.topic))
+    return prompt.style === "map"
+      ? countryName(prompt.place!.countryId!)
+      : (studyPlace(id)?.name ?? id);
   if (prompt.place) return prompt.place.name;
   return prompt.topic === "capitals" && prompt.style !== "map"
     ? (capitalChoiceName(id) ?? id)
@@ -500,6 +815,14 @@ export const canTypeStudyAnswer = (prompt: StudyPrompt) =>
     prompt.style === "map"
   );
 export function studyPrompt(prompt: StudyPrompt): string {
+  if (isPlaceTopic(prompt.topic) && prompt.place)
+    return prompt.style === "map"
+      ? `Find the country containing ${prompt.place.name}.`
+      : prompt.style === "pin"
+        ? `Place a pin at ${prompt.place.name}.`
+        : prompt.topic === "cities"
+          ? "Which major city is marked?"
+          : "Which landmark is shown?";
   if (prompt.place)
     return `Place a pin ${prompt.place.regionId ? "inside" : "at"} ${prompt.place.name}.`;
   const name = countryName(prompt.targetId),
@@ -528,10 +851,11 @@ export function studyStates(
       ...(session.phase === "feedback" &&
       (session.prompt.place?.regionId || session.prompt.style === "pin")
         ? {
-            [session.prompt.place?.regionId ?? session.prompt.targetId]:
-              session.history.at(-1)?.correct
-                ? ("correct" as const)
-                : ("answer" as const),
+            [session.prompt.place?.regionId ??
+            session.prompt.place?.countryId ??
+            session.prompt.targetId]: session.history.at(-1)?.correct
+              ? ("correct" as const)
+              : ("answer" as const),
           }
         : {}),
     };
@@ -542,10 +866,12 @@ export function studyStates(
     if (session.prompt.style === "map")
       session.pool.forEach((id) => (states[id] = "selectable"));
     else if (session.prompt.topic !== "flags")
-      states[session.prompt.targetId] = "selected";
+      states[session.prompt.place?.countryId ?? session.prompt.targetId] =
+        "selected";
   } else if (session.phase === "feedback") {
     const answer = session.history.at(-1)!;
-    states[session.prompt.targetId] = answer.correct ? "correct" : "answer";
+    states[session.prompt.place?.countryId ?? session.prompt.targetId] =
+      answer.correct ? "correct" : "answer";
     if (
       !answer.correct &&
       answer.selectedId &&
@@ -553,9 +879,13 @@ export function studyStates(
     )
       states[answer.selectedId] = "incorrect";
   } else {
-    session.history.forEach((a) => (states[a.prompt.targetId] = "correct"));
+    session.history.forEach(
+      (a) =>
+        (states[a.prompt.place?.countryId ?? a.prompt.targetId] = "correct"),
+    );
     for (const answer of missedStudyAnswers(session))
-      states[answer.prompt.targetId] = "incorrect";
+      states[answer.prompt.place?.countryId ?? answer.prompt.targetId] =
+        "incorrect";
   }
   return states;
 }
@@ -563,7 +893,7 @@ export function validSettings(value: unknown): value is StudySettings {
   return (
     isRecord(value) &&
     Array.isArray(value.topics) &&
-    value.topics.length <= 3 &&
+    value.topics.length <= TOPICS.length &&
     new Set(value.topics).size === value.topics.length &&
     value.topics.every((t) => TOPICS.includes(t)) &&
     ["all", "continent", "custom"].includes(String(value.scope)) &&
@@ -571,10 +901,13 @@ export function validSettings(value: unknown): value is StudySettings {
     strings(value.countryIds) &&
     value.countryIds.every((id) => memberIds.has(id)) &&
     isRecord(value.styles) &&
-    TOPICS.every((t) =>
-      ["map", "pin", "typing", "choices", "mixed"].includes(
-        String((value.styles as Record<string, unknown>)[t]),
-      ),
+    TOPICS.every(
+      (t) =>
+        (isPlaceTopic(t) &&
+          (value.styles as Record<string, unknown>)[t] === undefined) ||
+        ["map", "pin", "typing", "choices", "mixed"].includes(
+          String((value.styles as Record<string, unknown>)[t]),
+        ),
     ) &&
     [
       "borders",
@@ -599,6 +932,35 @@ export function validSettings(value: unknown): value is StudySettings {
   );
 }
 function validPrompt(value: unknown, pool: string[]): value is StudyPrompt {
+  if (isRecord(value) && isPlaceTopic(value.topic)) {
+    const place = studyPlace(String(value.targetId));
+    return (
+      !!place &&
+      place.topic === value.topic &&
+      pool.includes(place.countryId) &&
+      validStudyPlace(value.place) &&
+      value.place.regionId === undefined &&
+      ["id", "name", "lat", "lng", "countryId", "radiusKm", "sourceUrl"].every(
+        (key) =>
+          Reflect.get(value.place as object, key) ===
+          Reflect.get(placeTarget(place), key),
+      ) &&
+      ["map", "pin", "typing", "choices"].includes(String(value.style)) &&
+      strings(value.choices) &&
+      value.choices.length <= 6 &&
+      new Set(value.choices).size === value.choices.length &&
+      value.choices.every(
+        (id) =>
+          studyPlace(id)?.topic === value.topic &&
+          pool.includes(studyPlace(id)!.countryId),
+      ) &&
+      (value.style === "choices"
+        ? value.choices.length >= 2 && value.choices.includes(place.id)
+        : value.choices.length === 0) &&
+      Number.isInteger(value.ordinal) &&
+      Number(value.ordinal) >= 0
+    );
+  }
   return (
     isRecord(value) &&
     typeof value.targetId === "string" &&
@@ -619,6 +981,43 @@ function validPrompt(value: unknown, pool: string[]): value is StudyPrompt {
     Number.isInteger(value.ordinal) &&
     Number(value.ordinal) >= 0
   );
+}
+function validLearningPrompt(
+  value: unknown,
+  pool: string[],
+  run: LearningRun,
+): value is StudyPrompt {
+  if (!isRecord(value)) return false;
+  const target = run.targets.find(
+    (item) => item.key === learningTargetKey(value as unknown as StudyPrompt),
+  );
+  if (!target || !LEARNING_METHODS[target.skill].includes(value.style as never))
+    return false;
+  if (!target.place || isPlaceTopic(target.topic))
+    return validPrompt(value, pool);
+  return (
+    value.topic === "places" &&
+    value.style === "pin" &&
+    validStudyPlace(value.place) &&
+    ["id", "name", "lat", "lng", "regionId", "sourceUrl", "radiusKm"].every(
+      (key) =>
+        Reflect.get(value.place as object, key) ===
+        Reflect.get(target.place!, key),
+    ) &&
+    Array.isArray(value.choices) &&
+    !value.choices.length &&
+    Number.isInteger(value.ordinal) &&
+    Number(value.ordinal) >= 0
+  );
+}
+function validSessionPrompt(
+  value: unknown,
+  pool: string[],
+  run: unknown,
+): value is StudyPrompt {
+  return run
+    ? validLearningPrompt(value, pool, run as LearningRun)
+    : validPrompt(value, pool);
 }
 export function validStudy(value: unknown): value is StudySave {
   if (!isRecord(value) || value.version !== 1 || !validSettings(value.settings))
@@ -652,6 +1051,7 @@ export function validStudy(value: unknown): value is StudySave {
     (s.challengeId === undefined ||
       (typeof s.challengeId === "string" &&
         /^[a-f0-9-]{36}$/.test(s.challengeId))) &&
+    (s.learningReview === undefined || validLearningRun(s.learningReview)) &&
     validSettings(s.settings) &&
     !settingsError(s.settings) &&
     strings(s.pool) &&
@@ -666,7 +1066,7 @@ export function validStudy(value: unknown): value is StudySave {
         s.remaining.every((pair) => {
           const [id, topic] = pair.split("/");
           return (
-            (s.pool as string[]).includes(id) &&
+            validTopicTarget(id, topic as StudyTopic, s.pool as string[]) &&
             (s.settings as StudySettings).topics.includes(
               topic as StudyTopic,
             ) &&
@@ -674,7 +1074,9 @@ export function validStudy(value: unknown): value is StudySave {
           );
         }))) &&
     Number.isInteger(s.seed) &&
-    validPrompt(s.prompt, s.pool) &&
+    (s.learningReview
+      ? validLearningPrompt(s.prompt, s.pool, s.learningReview as LearningRun)
+      : validPrompt(s.prompt, s.pool)) &&
     (s.coverage === undefined ||
       (Array.isArray(s.coverage) &&
         s.coverage.length > 0 &&
@@ -682,7 +1084,11 @@ export function validStudy(value: unknown): value is StudySave {
         s.coverage.every(
           (target) =>
             isRecord(target) &&
-            (s.pool as string[]).includes(String(target.targetId)) &&
+            validTopicTarget(
+              String(target.targetId),
+              target.topic as StudyTopic,
+              s.pool as string[],
+            ) &&
             (s.settings as StudySettings).topics.includes(
               target.topic as StudyTopic,
             ),
@@ -695,7 +1101,9 @@ export function validStudy(value: unknown): value is StudySave {
     s.history.every(
       (a) =>
         isRecord(a) &&
-        validPrompt(a.prompt, s.pool as string[]) &&
+        validSessionPrompt(a.prompt, s.pool as string[], s.learningReview) &&
+        validAnswerTime(a.answeredAt) &&
+        (a.assisted === undefined || typeof a.assisted === "boolean") &&
         typeof a.correct === "boolean" &&
         typeof a.response === "string" &&
         (a.pin === undefined || validStudyPin(a.pin)) &&

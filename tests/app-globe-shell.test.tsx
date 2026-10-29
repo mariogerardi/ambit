@@ -33,8 +33,8 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     );
     await mount();
     await click("Study");
-    await click("Custom");
-    await click("Start studying");
+    await click("Build a session");
+    await click("Start session");
     const input = host.querySelector<HTMLInputElement>(
       ".study-question input",
     )!;
@@ -357,7 +357,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
   );
 
   it.each(["account", "builder"])(
-    "fits Home to its live viewport after leaving the hidden %s globe",
+    "fits Home to its live viewport after leaving %s",
     async (page) => {
       vi.stubGlobal("matchMedia", (query: string) => ({
         matches: query === MOBILE_LAYOUT_QUERY,
@@ -370,9 +370,9 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
         if (authProbe.subject) await click("Progress");
       } else {
         await click("Study");
-        await click("Custom");
+        await click("Build a session");
       }
-      expect(probe.props!.active).toBe(false);
+      expect(probe.props!.active).toBe(page === "builder");
       const scene = host.querySelector(".game-scene")!;
       Object.defineProperty(scene, "clientWidth", {
         configurable: true,
@@ -403,7 +403,10 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     ).toBe(true);
     expect(host.querySelector('[role="alert"]')).toBeNull();
     await click("Study");
+    await click("Build a session");
     expect(probe.mounts).toBe(0);
-    expect(host.textContent).toContain("This activity requires the 3D globe");
+    expect(host.textContent).toContain(
+      "The globe is unavailable. Typing and multiple choice still work.",
+    );
   });
 });

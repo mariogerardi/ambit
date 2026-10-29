@@ -12,10 +12,12 @@ export function StudySessionOptions({
   onClose,
   onFinish,
   locked = false,
+  review = false,
   onPause,
   onPreferencesChange,
 }: {
   locked?: boolean;
+  review?: boolean;
   onPause?(): void;
   onPreferencesChange?(visible: boolean): void;
   settings: StudySettings;
@@ -45,7 +47,7 @@ export function StudySessionOptions({
       if (event.key !== "Tab") return;
       const controls = [
         ...(dialog.current?.querySelectorAll<HTMLElement>(
-          "button:not(:disabled), input, a[href]",
+          "button:not(:disabled), input, select, summary, a[href]",
         ) ?? []),
       ];
       const first = controls[0],
@@ -117,7 +119,7 @@ export function StudySessionOptions({
                 className="quiet-button"
                 onClick={() => setPreferences(true)}
               >
-                Edit this session
+                Hints &amp; pacing
               </button>
             )}
             {locked && (
@@ -126,9 +128,9 @@ export function StudySessionOptions({
                 same questions.
               </p>
             )}
-            {locked && onPause && (
+            {onPause && (
               <button className="quiet-button" onClick={onPause}>
-                Pause challenge
+                {locked ? "Pause challenge" : "Pause session"}
               </button>
             )}
             {!locked && onFinish && (
@@ -143,7 +145,11 @@ export function StudySessionOptions({
               label="Back to session actions"
               onClick={() => setPreferences(false)}
             />
-            <StudyPreferences settings={draft} onSettings={setDraft} />
+            <StudyPreferences
+              settings={draft}
+              onSettings={setDraft}
+              allowRevisit={!review}
+            />
             <div className="study-options-actions">
               <button className="primary-button" onClick={() => onApply(draft)}>
                 Apply &amp; resume

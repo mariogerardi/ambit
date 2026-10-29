@@ -1,3 +1,10 @@
+import type { ReactNode } from "react";
+import { StudyNavigation, StudyWorkspace } from "./StudyNavigation";
+import type { StudyView } from "./StudyNavigation";
+import type { LearningTarget, ReviewQuestionCount } from "./learning";
+import { StudyReview } from "./StudyReview";
+import { StudyPacks } from "./StudyPacks";
+import { isPlaceTopic, studyPlace } from "./placeTopics";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   FLAGS,
@@ -40,6 +47,7 @@ export function StudyPanel({
   onSettings,
   onStart,
   onStartPlaces,
+  onStartReview,
   onAction,
   onSetup,
   onResume,
@@ -52,11 +60,16 @@ export function StudyPanel({
   onHistoryChange,
   onBuilderChange,
   onCustomizeChange,
-  builder = false,
   paused = false,
   onReport,
   compact = false,
+  view,
+  record,
+  onNavigateView,
 }: {
+  view?: StudyView;
+  record?: StudyRecord;
+  onNavigateView?(view: StudyView): void;
   paused?: boolean;
   onReport?(prompt: StudyPrompt): void;
   compact?: boolean;
@@ -67,24 +80,60 @@ export function StudyPanel({
   onSettings(settings: StudySettings): void;
   onStart(settings: StudySettings, targets?: StudyReviewTarget[]): void;
   onStartPlaces?(targets: StudyPlaceTarget[]): void;
+  onStartReview?(
+    targets: LearningTarget[],
+    questionCount: ReviewQuestionCount,
+  ): void;
   onLocate?(answer: StudyAnswer): void;
   onAction(action: StudyAction): void;
   onSetup(): void;
   onResume?(): void;
   onEditingChange?(editing: boolean): void;
-  onPreview?(settings?: StudySettings): void;
+  onPreview?(
+    settings?: StudySettings,
+    places?: StudyPlaceTarget[],
+    targets?: LearningTarget[],
+  ): void;
   onHome?(): void;
   onViewRecord?(record: StudyRecord): void;
   onHistoryChange?(visible: boolean): void;
-  builder?: boolean;
   onBuilderChange?(editing: boolean): void;
   onCustomizeChange?(editing: boolean): void;
 }) {
   const panelActive = useContext(PanelActive);
   active = active && panelActive;
-  const { settings, session } = save;
+  const { settings } = save;
+  const session = record?.session ?? save.session;
   const [editing, setEditing] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [localView, setLocalView] = useState<StudyView>();
+  const currentView =
+    view ?? localView ?? (setup || !session ? "history" : "session");
+  const showHistory = currentView === "history";
+  const navigateView = (next: StudyView) => {
+    setEditing(false);
+    if (onNavigateView) onNavigateView(next);
+    else {
+      setLocalView(next);
+      if (next === "session") onResume?.();
+    }
+  };
+  const workspace = (children: ReactNode) => (
+    <StudyWorkspace
+      view={currentView}
+      reviewing={!!session?.learningReview && currentView === "session"}
+      onNavigate={navigateView}
+    >
+      {children}
+    </StudyWorkspace>
+  );
+  useEffect(() => {
+    if (
+      active &&
+      currentView === "session" &&
+      (!session || (session.phase === "summary" && !session.history.length))
+    )
+      onNavigateView?.("history");
+  }, [active, currentView, session, onNavigateView]);
   useEffect(() => {
     if (panelActive) onHistoryChange?.(showHistory);
   }, [panelActive, showHistory, onHistoryChange]);
@@ -148,54 +197,95 @@ export function StudyPanel({
     return () => window.removeEventListener("keydown", key);
   }, [active, setup, editing, paused, session?.phase, onAction, session]);
   if (showHistory)
-    return (
+    return workspace(
       <StudyHistory
         onStartPlaces={(targets) => {
-          setShowHistory(false);
+          setLocalView(undefined);
           onStartPlaces?.(targets);
         }}
         records={save.history ?? []}
-        onBack={() => setShowHistory(false)}
+        session={save.session}
+        onResume={() => navigateView("session")}
+        onPacks={() => navigateView("practice")}
+        onBuild={() => navigateView("custom")}
+        onReview={() => navigateView("review")}
         onView={(record) => {
-          setShowHistory(false);
+          setLocalView(undefined);
           onViewRecord?.(record);
         }}
         onStart={(settings, targets) => {
-          setShowHistory(false);
+          setLocalView(undefined);
           onStart(settings, targets);
         }}
-      />
+      />,
     );
-  if (!webgl && session?.phase !== "summary")
-    return (
-      <section className="info-view" role="status">
+  if (currentView === "review")
+    return workspace(
+      <StudyReview
+        save={save}
+        onStart={onStartReview}
+        onResume={() => navigateView("session")}
+        onPreview={active ? onPreview : undefined}
+      />,
+    );
+  if (currentView === "results" && !record)
+    return workspace(
+      <section className="info-view study-view">
+        <StudyNavigation />
+        <h1>Session unavailable</h1>
         <p>
-          This activity requires the 3D globe. Try another browser or device.
+          This saved session is no longer available. Your current session has
+          not changed.
         </p>
-        {onHome && (
-          <button className="quiet-button" onClick={onHome}>
-            Home
-          </button>
-        )}
-      </section>
+        <button
+          className="quiet-button"
+          onClick={() => navigateView("history")}
+        >
+          Your Sessions
+        </button>
+      </section>,
     );
-  if (setup || !session) {
-    return (
+  if (currentView === "session" && !session)
+    return workspace(
+      <section className="info-view study-view">
+        <StudyNavigation />
+        <h1>
+          Ready when <em>you are.</em>
+        </h1>
+        <p>Choose a practice session to get started.</p>
+        <button
+          className="primary-button"
+          onClick={() => navigateView("practice")}
+        >
+          Browse Study Packs <span aria-hidden="true">→</span>
+        </button>
+      </section>,
+    );
+  if (currentView === "practice")
+    return workspace(
+      <StudyPacks
+        onStart={onStart}
+        onBuild={(settings) => {
+          onSettings(settings);
+          navigateView("custom");
+        }}
+        onPreview={active ? onPreview : undefined}
+      />,
+    );
+  if (currentView === "custom" || !session) {
+    return workspace(
       <StudySetup
         settings={settings}
         onPreview={active ? onPreview : undefined}
         onSettings={onSettings}
         onStart={onStart}
-        initialEditor={builder}
         onEditorChange={active ? onBuilderChange : undefined}
-        onHistory={() => setShowHistory(true)}
-        onResume={session && session.phase !== "summary" ? onResume : undefined}
-        resumeLabel="Resume session"
-      />
+        webgl={webgl}
+      />,
     );
   }
   if (session.phase === "summary")
-    return (
+    return workspace(
       <StudyResults
         onStartPlaces={onStartPlaces}
         session={session}
@@ -203,25 +293,25 @@ export function StudyPanel({
         onStart={onStart}
         onLocate={onLocate}
         onHome={onHome}
-        onHistory={() => setShowHistory(true)}
-      />
+        onReview={() => navigateView("review")}
+      />,
     );
   const prompt = session.prompt;
-  return (
+  const photo = isPlaceTopic(prompt.topic)
+    ? studyPlace(prompt.targetId)?.photo
+    : undefined;
+  return workspace(
     <>
       {editing && active && (
         <StudySessionOptions
           settings={session.settings}
-          locked={!!session.challengeId || !!session.placeReview}
+          locked={!!session.challengeId}
+          review={!!session.placeReview || !!session.learningReview}
           onPreferencesChange={onCustomizeChange}
-          onPause={
-            onHome
-              ? () => {
-                  closeSettings();
-                  onHome();
-                }
-              : undefined
-          }
+          onPause={() => {
+            closeSettings();
+            navigateView("history");
+          }}
           onFinish={() => {
             closeSettings();
             onAction({ type: "finish" });
@@ -244,7 +334,7 @@ export function StudyPanel({
         />
       )}
       <section
-        className="info-view study-question"
+        className="info-view study-view study-question"
         aria-label="Study prompt"
         inert={editing}
       >
@@ -257,11 +347,15 @@ export function StudyPanel({
           </span>
           <span className="overline">{prompt.topic.toUpperCase()}</span>
           <span className="round-of">
-            {session.settings.length === "continuous"
-              ? "KEEP GOING"
-              : session.settings.length === "all"
-                ? "ONE FULL PASS"
-                : `OF ${session.settings.length}`}
+            {session.learningReview
+              ? session.learningReview.questionCount
+                ? `OF ${session.learningReview.questionCount} · REVIEW`
+                : "REVIEW"
+              : session.settings.length === "continuous"
+                ? "KEEP GOING"
+                : session.settings.length === "all"
+                  ? "ONE FULL PASS"
+                  : `OF ${session.settings.length}`}
           </span>
           <QuestionHelp
             key={`${prompt.ordinal}/${prompt.targetId}`}
@@ -316,6 +410,28 @@ export function StudyPanel({
           </button>
         </div>
         <h1>{studyPrompt(prompt)}</h1>
+        {photo && (
+          <figure className="minigame-photo study-place-photo">
+            <img
+              src={photo.src}
+              alt={
+                session.phase === "playing" &&
+                ["typing", "choices"].includes(prompt.style)
+                  ? "Landmark to identify"
+                  : prompt.place!.name
+              }
+            />
+            <figcaption>
+              <a href={photo.url} target="_blank" rel="noreferrer">
+                {photo.author}
+              </a>{" "}
+              ·{" "}
+              <a href={photo.licenseUrl} target="_blank" rel="noreferrer">
+                {photo.license}
+              </a>
+            </figcaption>
+          </figure>
+        )}
         {prompt.topic === "flags" && (
           <figure className="flag-clue">
             <img
@@ -339,14 +455,14 @@ export function StudyPanel({
                       : prompt.style === "pin" && prompt.topic === "capitals"
                         ? `Place a pin within ${CAPITAL_PIN_RADIUS_KM} km of the capital, then submit.`
                         : prompt.place && !prompt.place.regionId
-                          ? "Place a pin within about 1,042 km, then submit."
+                          ? `Place a pin within ${prompt.place.radiusKm ?? "about 1,042"} km, then submit.`
                           : "Tap land or water to place your pin, then submit."
                     : "Select your answer on the globe."
                   : isStudyPinPrompt(prompt)
                     ? "The globe isn’t available. Try another browser or device."
                     : canTypeStudyAnswer(prompt)
                       ? "The globe isn’t available. Answer by country name below."
-                      : "The globe isn’t available. Open session settings to choose another answer method."}
+                      : "The globe isn’t available. Choose typing or multiple choice in Practice."}
               </p>
               {isStudyPinPrompt(prompt) ? (
                 <QuestionActions
@@ -424,7 +540,11 @@ export function StudyPanel({
                   <label className="field">
                     {prompt.topic === "capitals"
                       ? "Capital name"
-                      : "Country name"}
+                      : prompt.topic === "cities"
+                        ? "City name"
+                        : prompt.topic === "landmarks"
+                          ? "Landmark name"
+                          : "Country name"}
                     <AnswerInput
                       autoComplete="off"
                       spellCheck={false}
@@ -488,7 +608,7 @@ export function StudyPanel({
           </div>
         )}
       </section>
-    </>
+    </>,
   );
 }
 // Exported default remains the source of all fresh setups.

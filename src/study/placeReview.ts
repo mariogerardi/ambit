@@ -1,3 +1,4 @@
+import { validAnswerTime } from "./learning";
 import type { RegionFeature } from "../geography/types";
 import { isRecord } from "../app/storage";
 import type { StudyAction, StudySession } from "./engine";
@@ -9,6 +10,8 @@ export interface StudyPlaceTarget {
   lat: number;
   lng: number;
   regionId?: string;
+  /** Context only; distance, not the country's boundary, grades a city/landmark pin. */
+  countryId?: string;
   sourceUrl?: string;
   radiusKm?: number;
 }
@@ -25,6 +28,7 @@ export const validStudyPlace = (value: unknown): value is StudyPlaceTarget =>
   Number.isFinite(value.lng) &&
   Math.abs(value.lng) <= 180 &&
   (value.regionId === undefined || typeof value.regionId === "string") &&
+  (value.countryId === undefined || typeof value.countryId === "string") &&
   (value.radiusKm === undefined ||
     (typeof value.radiusKm === "number" &&
       Number.isFinite(value.radiusKm) &&
@@ -116,6 +120,7 @@ export function validPlaceReview(value: Record<string, unknown>): boolean {
   return (
     (value.id === undefined || typeof value.id === "string") &&
     value.challengeId === undefined &&
+    value.learningReview === undefined &&
     new Set(ids).size === ids.length &&
     Array.isArray(value.pool) &&
     JSON.stringify(value.pool) === JSON.stringify(ids) &&
@@ -138,6 +143,8 @@ export function validPlaceReview(value: Record<string, unknown>): boolean {
       (a) =>
         isRecord(a) &&
         prompt(a.prompt) &&
+        validAnswerTime(a.answeredAt) &&
+        (a.assisted === undefined || typeof a.assisted === "boolean") &&
         typeof a.correct === "boolean" &&
         typeof a.response === "string" &&
         a.pin !== undefined &&
