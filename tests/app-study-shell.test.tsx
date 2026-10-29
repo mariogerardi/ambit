@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // Install shared mocks before importing the application.
 import {
-  click,
+  click as clickButton,
   host,
   member,
   mount,
@@ -9,6 +9,7 @@ import {
   resetRoot,
   root,
   savedStudy,
+  settleLoads,
 } from "./helpers/appShell";
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -26,6 +27,48 @@ import {
   studyReducer,
 } from "../src/study/engine";
 import { STUDY_PATHS } from "../src/study/paths";
+
+async function click(name: string) {
+  const labels: Record<string, string> = {
+    Custom: "Session Builder",
+    History: "Your Sessions",
+    "Study Packs": "Study Packs",
+    Review: "Review",
+  };
+  if (labels[name]) {
+    if (!host.querySelector(".mode-incoming .study-navigation")) {
+      await clickButton("Session settings");
+      await clickButton("Pause session");
+      if (name === "History") return;
+    }
+    const link = [
+      ...host.querySelectorAll<HTMLAnchorElement>(
+        ".mode-incoming .study-navigation a",
+      ),
+    ].find((a) => a.textContent === labels[name]);
+    expect(link, `Study tab ${labels[name]}`).toBeDefined();
+    await act(async () => link!.click());
+    await settleLoads();
+    return;
+  }
+  if (
+    name.startsWith("Preview ") &&
+    !host.querySelector(".mode-incoming .study-packs")
+  )
+    await click("Study Packs");
+  if (name.startsWith("Preview ")) {
+    const title = name.slice(8);
+    for (
+      let i = 0;
+      i < 10 && host.querySelector("#study-pack-title")?.textContent !== title;
+      i++
+    )
+      await clickButton("Next study pack");
+    expect(host.querySelector("#study-pack-title")?.textContent).toBe(title);
+    return;
+  }
+  return clickButton(name);
+}
 
 describe("app study shell (DOM only; no browser or WebGL)", () => {
   it("selects Study countries through Earth and previews each hint independently", async () => {
@@ -85,7 +128,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.regionNames).toBe("none");
   });
 
-  it("hides the globe only in the mobile Study builder and leaves its orbit alone while settings change", async () => {
+  it("keeps Customize inline and the globe visible on mobile while area and hint settings change", async () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: query === MOBILE_LAYOUT_QUERY,
       addEventListener() {},
@@ -94,49 +137,45 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     history.replaceState(null, "", "/study");
     await mount();
     await click("Custom");
-    const where = [...host.querySelectorAll<HTMLLabelElement>("label")].find(
-      (label) => label.textContent === "Where",
+    expect(location.pathname + location.search).toBe("/study?view=builder");
+    expect(probe.props!.states["wurl:CAN"]).toBe("selectable");
+    expect(host.querySelector(".mode-outgoing")).toBeNull();
+    expect(
+      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
+    ).toBe(false);
+    expect(host.querySelector("#mobile-map")?.hasAttribute("inert")).toBe(
+      false,
+    );
+    const area = [...host.querySelectorAll<HTMLLabelElement>("label")].find(
+      (label) => label.textContent === "Area",
     )!.control as HTMLSelectElement;
     await act(async () => {
-      where.value = "continent";
-      where.dispatchEvent(new Event("change", { bubbles: true }));
+      area.value = "AF";
+      area.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    const pool = studyPool({
+    for (const id of studyPool({
       ...defaultSettings,
       scope: "continent",
       continent: "AF",
-    });
-    for (const id of pool) expect(probe.props!.states[id]).toBe("selectable");
+    }))
+      expect(probe.props!.states[id]).toBe("selectable");
     expect(probe.props!.states["wurl:CAN"]).toBe("disabled");
-    expect(
-      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
-    ).toBe(true);
-    expect(host.querySelector("#mobile-map")?.hasAttribute("inert")).toBe(true);
-    expect(probe.focus).toHaveLength(0);
     const flights = probe.focus.length;
     await act(async () =>
       host.querySelector<HTMLElement>(".study-advanced > summary")!.click(),
     );
     await act(async () => {
-      const label = [...host.querySelectorAll<HTMLLabelElement>("label")].find(
-        (element) => element.textContent?.trim() === "Country borders",
-      )!;
-      label.querySelector<HTMLInputElement>("input")!.click();
+      [...host.querySelectorAll<HTMLLabelElement>("label")]
+        .find((label) => label.textContent?.trim() === "Country borders")!
+        .querySelector<HTMLInputElement>("input")!
+        .click();
     });
     expect(probe.focus).toHaveLength(flights);
-    await act(async () => {
-      where.value = "all";
-      where.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    expect(probe.focus).toHaveLength(flights);
-    for (const id of studyPool(defaultSettings))
-      expect(probe.props!.states[id]).toBe("selectable");
-    await click("Back to Study");
-    expect(host.querySelector(".experience.page-layout")).toBeNull();
-    expect(probe.props!.states["wurl:EGY"]).toBe("disabled");
+    await click("History");
     expect(
-      host.querySelector(".experience")?.hasAttribute("data-panel-only"),
-    ).toBe(false);
+      Object.values(probe.props!.states).every((state) => state === "disabled"),
+    ).toBe(true);
+    expect(probe.mounts).toBe(1);
   });
 
   it.each([false, true])(
@@ -150,7 +189,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
       history.replaceState(null, "", "/study");
       await mount();
       await click("Custom");
-      expect(host.querySelector(".study-editor")).not.toBeNull();
+      expect(host.querySelector(".study-extra-options")).not.toBeNull();
       await click("Home");
       expect(host.querySelector(".home-menu")).not.toBeNull();
       expect(host.querySelector(".study-landing")).toBeNull();
@@ -171,7 +210,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Study");
     await click("Custom");
-    await click("Start studying");
+    await click("Start session");
     const earth = host.querySelector("canvas");
     const question = host.querySelector(".mode-incoming .study-question")!;
     const input = question.querySelector<HTMLInputElement>("input")!;
@@ -200,7 +239,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     expect(probe.props!.regionInteraction).toBe(false);
     await act(async () => probe.props!.onSelect(member("wurl:BRA")));
     expect(question.querySelector(".round-feedback")).toBeNull();
-    await click("Edit this session");
+    await click("Hints & pacing");
     const borders = [...dialog.querySelectorAll("label")]
       .find((label) => label.textContent === "Country borders")!
       .querySelector<HTMLInputElement>("input")!;
@@ -250,7 +289,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
       await mount();
       await click("Study");
       await click("Custom");
-      await click("Start studying");
+      await click("Start session");
       const input = host.querySelector<HTMLInputElement>(
         `.mode-incoming .study-choices input[value="${correct ? session.prompt.targetId : session.prompt.choices.find((id) => id !== session.prompt.targetId)}"]`,
       )!;
@@ -321,6 +360,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
       await mount();
       await click("Study");
       await click("Custom");
+      await click("Start session");
       await click("Start new session");
       expect(probe.focus.at(-1)).toEqual(member(session.prompt.targetId).focus);
       if (style === "choices") {
@@ -364,11 +404,12 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await click("Study");
     await click("Custom");
     const count = probe.focus.length;
+    await click("Start session");
     await click("Start new session");
     expect(probe.focus).toHaveLength(count);
   });
 
-  it("raises the panel only for mobile Study customization and restores the mounted globe on close", async () => {
+  it("keeps inline setup visible beside the globe and raises only the mobile session-preferences panel", async () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: query === MOBILE_LAYOUT_QUERY,
       addEventListener() {},
@@ -379,8 +420,8 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await click("Custom");
     expect(
       host.querySelector(".experience")?.hasAttribute("data-panel-only"),
-    ).toBe(true);
-    await click("Start studying");
+    ).toBe(false);
+    await click("Start session");
     expect(
       host.querySelector(".experience")?.hasAttribute("data-panel-only"),
     ).toBe(false);
@@ -393,7 +434,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     ).toBe(false);
     const edit = [
       ...document.querySelectorAll<HTMLButtonElement>("button"),
-    ].find((b) => b.textContent === "Edit this session")!;
+    ].find((b) => b.textContent === "Hints & pacing")!;
     await act(async () => edit.click());
     expect(
       host.querySelector(".experience")?.hasAttribute("data-panel-only"),
@@ -417,6 +458,8 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await click("Study");
     await click("Preview Discover Asia");
     await click("Start session");
+    expect(host.querySelector(".study-question .study-navigation")).toBeNull();
+    expect(host.querySelector(".study-session-context")).toBeNull();
     expect(probe.focus.at(-1)).toMatchObject({ lat: 35, lng: 90 });
     const session = startStudy(STUDY_PATHS[0].settings, 24);
     await act(async () =>
@@ -432,24 +475,42 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     expect(saved.session?.phase).toBe("summary");
     expect(saved.history![0].session.history[0].correct).toBe(true);
     expect(host.querySelector(".study-summary .settings-button")).toBeNull();
-    await click("Past study sessions");
+    await act(async () =>
+      host
+        .querySelector<HTMLAnchorElement>('.study-navigation a[href="/study"]')!
+        .click(),
+    );
+    await settleLoads();
     expect(host.textContent).toContain("Ended early");
     expect(
       Object.values(probe.props!.states).every((state) => state === "disabled"),
     ).toBe(true);
     expect(probe.props!.regionInteraction).toBe(false);
     expect(probe.focus.at(-1)!.altitude).toBeGreaterThanOrEqual(1.65);
-    await click("Back to Study");
-    expect(probe.props!.states[session.prompt.targetId]).toBe("correct");
+    await act(async () =>
+      host
+        .querySelector<HTMLAnchorElement>('.study-navigation a[href="/study"]')!
+        .click(),
+    );
+    await settleLoads();
+    expect(host.querySelector(".study-history")).not.toBeNull();
+    expect(savedStudy().session?.phase).toBe("summary");
     await click("Home");
     await click("Study");
-    expect(host.querySelector(".study-paths")).not.toBeNull();
+    expect(host.querySelector(".study-history")).not.toBeNull();
     expect(host.querySelector(".study-summary")).toBeNull();
     expect(host.textContent).not.toContain("Return to results");
-    await click("Past study sessions");
-    await click("1 / 1 correct");
+    await act(async () =>
+      host
+        .querySelector<HTMLAnchorElement>('.study-navigation a[href="/study"]')!
+        .click(),
+    );
+    await settleLoads();
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>(".study-history-view")!.click(),
+    );
     expect(host.querySelector(".study-summary")).not.toBeNull();
-    await click("Repeat this session");
+    await click("Practice again");
     expect(
       host.querySelector(".study-question .round-number")?.textContent,
     ).toBe("1");
@@ -461,15 +522,18 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     });
     await mount();
     await click("Study");
-    await click("Past study sessions");
-    expect(host.querySelectorAll(".study-history-list li")).toHaveLength(1);
     await act(async () =>
       host
-        .querySelector<HTMLButtonElement>(
-          '.study-history-list [aria-label^="Replay session"]',
-        )!
+        .querySelector<HTMLAnchorElement>('.study-navigation a[href="/study"]')!
         .click(),
     );
+    await settleLoads();
+    expect(host.querySelectorAll(".study-history-list li")).toHaveLength(1);
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>(".study-history-view")!.click(),
+    );
+    await click("Practice again");
+    await click("Start new session");
     expect(
       host.querySelector(".study-question .round-number")?.textContent,
     ).toBe("1");
@@ -485,7 +549,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Study");
     await click("Custom");
-    await click("Start studying");
+    await click("Start session");
     let session = startStudy(settings, 42);
     await act(async () =>
       probe.props!.onSelect(member(session.prompt.targetId)),
@@ -519,7 +583,12 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
       true,
     );
     expect(host.querySelector(".study-summary")).not.toBeNull();
-    await click("Past study sessions");
+    await act(async () =>
+      host
+        .querySelector<HTMLAnchorElement>('.study-navigation a[href="/study"]')!
+        .click(),
+    );
+    await settleLoads();
     expect(document.querySelectorAll(".study-history-list li")).toHaveLength(2);
   });
 
@@ -534,7 +603,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Study");
     await click("Custom");
-    await click("Start studying");
+    await click("Start session");
     await act(async () =>
       probe.props!.onSelect(member(session.prompt.targetId)),
     );
@@ -585,7 +654,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Study");
     await click("Custom");
-    await click("Start studying");
+    await click("Start session");
     const question = host.querySelector(".mode-incoming .study-question")!;
     expect(question.querySelector("input")).toBeNull();
     expect(question.textContent).not.toContain("Answer by name");
@@ -623,7 +692,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Study");
     await click("Custom");
-    await click("Start studying");
+    await click("Start session");
     expect(probe.props!.showBorders).toBe(false);
     await act(async () => probe.props!.onSelect(member("wurl:USA")));
     await click("Home");
@@ -632,7 +701,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     expect(saved.session?.history).toHaveLength(1);
     expect(saved.history).toBeUndefined();
     await click("Study");
-    expect(host.querySelector(".study-paths")).not.toBeNull();
+    expect(host.querySelector(".study-history")).not.toBeNull();
     await click("Resume session");
     expect(host.querySelector(".round-feedback")).not.toBeNull();
     await click("Home");
@@ -645,7 +714,7 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await click("Resume session");
     expect(savedStudy().session?.id).toBe(saved.session?.id);
     await click("Session settings");
-    await click("Edit this session");
+    await click("Hints & pacing");
     expect(
       document.querySelector(".study-options-dialog")?.textContent,
     ).not.toContain("Build a new session");
@@ -653,8 +722,9 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     await click("Home");
     await click("Study");
     await click("Custom");
-    expect(host.querySelector(".study-editor")).not.toBeNull();
+    expect(host.querySelector(".study-extra-options")).not.toBeNull();
     expect(host.textContent).not.toContain("Return to results");
+    await click("Start session");
     await click("Start new session");
     expect(
       host.querySelector(".study-question .round-number")?.textContent,
@@ -662,4 +732,272 @@ describe("app study shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector(".round-feedback")).toBeNull();
     expect(savedStudy().history).toHaveLength(1);
   });
+});
+
+it("inspects historical results without replacing active answers and confirms replacement only when starting", async () => {
+  const initial = startStudy(
+    {
+      ...defaultSettings,
+      styles: { ...defaultSettings.styles, countries: "typing" },
+      autoAdvance: false,
+    },
+    42,
+  );
+  let current = studyReducer(
+    studyReducer(initial, {
+      type: "text",
+      value: initial.prompt.targetId === "wurl:CAN" ? "Canada" : "wrong",
+    }),
+    { type: "submit" },
+  );
+  current = {
+    ...studyReducer(current, { type: "next" }),
+    id: crypto.randomUUID(),
+    text: "pending answer",
+  };
+  const old = {
+    ...studyReducer(current, { type: "finish" }),
+    id: crypto.randomUUID(),
+  };
+  const record = { id: old.id, finishedAt: 42, session: old };
+  createStudySave().save({
+    ...emptyStudy,
+    settings: current.settings,
+    session: current,
+    history: [record],
+  });
+  history.replaceState(null, "", "/study?view=history");
+  await mount();
+  await act(async () =>
+    host.querySelector<HTMLButtonElement>(".study-history-view")!.click(),
+  );
+  await settleLoads();
+  expect(location.search).toContain(`record=${old.id}`);
+  expect(host.querySelector(".study-summary")).not.toBeNull();
+  expect(savedStudy().session).toMatchObject({
+    id: current.id,
+    phase: "playing",
+    text: "pending answer",
+  });
+  await click("History");
+  await click("Resume session");
+  expect(
+    host.querySelector<HTMLInputElement>(".study-question input")?.value,
+  ).toBe("pending answer");
+  await click("History");
+  await click("Custom");
+  await click("Start session");
+  expect(
+    document.querySelector(".study-replacement-dialog[open]"),
+  ).not.toBeNull();
+  expect(savedStudy().session?.id).toBe(current.id);
+  await click("Keep current session");
+  expect(savedStudy().session?.id).toBe(current.id);
+  expect(savedStudy().history).toHaveLength(1);
+  await click("Start session");
+  await click("Start new session");
+  expect(savedStudy().session?.id).not.toBe(current.id);
+  expect(savedStudy().history).toHaveLength(2);
+});
+
+it.each([false, true])(
+  "previews Study presets on the shared globe without changing saves (mobile: %s)",
+  async (mobile) => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: mobile && query === MOBILE_LAYOUT_QUERY,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    const settings = {
+      ...defaultSettings,
+      scope: "custom" as const,
+      countryIds: ["wurl:CAN"],
+    };
+    createStudySave().save({ ...emptyStudy, settings });
+    history.replaceState(null, "", "/study");
+    await mount();
+    await click("Preview Discover Asia");
+    expect(probe.focus.at(-1)).toMatchObject({ lat: 35, lng: 90 });
+    expect(probe.props!.motion).toBe(false);
+    expect(probe.props!.states["wurl:IND"]).toBe("selectable");
+    expect(probe.props!.states["wurl:CAN"]).toBe("disabled");
+    const saved = savedStudy();
+    await act(async () => probe.props!.onSelect(member("wurl:CAN")));
+    expect(savedStudy()).toEqual(saved);
+    await click("Preview African capitals");
+    expect(probe.focus.at(-1)).toMatchObject({ lat: 3, lng: 20 });
+    expect(probe.props!.states["wurl:KEN"]).toBe("selectable");
+    expect(probe.props!.states["wurl:IND"]).toBe("disabled");
+    expect(
+      probe.props!.places.some(
+        (place) =>
+          place.kind === "capital" && place.id === capitalOf("wurl:KEN").id,
+      ),
+    ).toBe(true);
+    expect(savedStudy()).toEqual(saved);
+    await click("Preview World flags");
+    expect(probe.props!.states["wurl:CAN"]).toBe("selectable");
+    expect(probe.props!.motion).toBe(true);
+    expect(probe.props!.places.some((place) => place.kind === "capital")).toBe(
+      false,
+    );
+    expect(savedStudy()).toEqual(saved);
+    await click("Preview African capitals");
+    expect(probe.focus.at(-1)).toMatchObject({ lat: 3, lng: 20 });
+    expect(probe.mounts).toBe(1);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  },
+);
+
+it("starts a global learning review and returns an unanswered ended run to Your Sessions", async () => {
+  let old = startStudy({ ...defaultSettings, autoAdvance: false }, 42);
+  const wrong = old.pool.find((id) => id !== old.prompt.targetId)!;
+  old = studyReducer(old, { type: "pick", id: wrong });
+  old = { ...studyReducer(old, { type: "finish" }), id: crypto.randomUUID() };
+  createStudySave().save({
+    ...emptyStudy,
+    history: [{ id: old.id!, finishedAt: Date.now(), session: old }],
+  });
+  history.replaceState(null, "", "/study?view=review");
+  await mount();
+  expect(host.querySelector(".study-learning-summary")?.textContent).toContain(
+    "ready to review",
+  );
+  expect(host.querySelector(".study-navigation")?.textContent).not.toContain(
+    "Current session",
+  );
+  await click("Start review");
+  expect(savedStudy().session?.learningReview?.targets).toHaveLength(1);
+  expect(host.querySelector(".study-question")).not.toBeNull();
+  const started = savedStudy().session;
+  await click("Review");
+  await click("Resume review");
+  expect(savedStudy().session).toEqual(started);
+  await click("Session settings");
+  await click("Finish this session");
+  expect(location.pathname + location.search).toBe("/study");
+  expect(savedStudy().session).toBeUndefined();
+  expect(host.querySelector(".study-summary")).toBeNull();
+  expect(savedStudy().history).toHaveLength(1);
+});
+it("hands Review's globe to Builder without clearing the preview, and animates Builder exits normally", async () => {
+  let session = startStudy({ ...defaultSettings, autoAdvance: false }, 42);
+  session = studyReducer(session, {
+    type: "pick",
+    id: session.pool.find((id) => id !== session.prompt.targetId)!,
+  });
+  session = studyReducer(session, { type: "finish" });
+  createStudySave().save({
+    ...emptyStudy,
+    history: [{ id: "old-review", finishedAt: Date.now(), session }],
+  });
+  history.replaceState(null, "", "/study?view=review");
+  await mount();
+  const saved = savedStudy();
+  expect(probe.props!.places.some((place) => place.name === "???")).toBe(true);
+  const builder = [
+    ...host.querySelectorAll<HTMLAnchorElement>(
+      ".mode-incoming .study-navigation a",
+    ),
+  ].find((link) => link.textContent === "Session Builder")!;
+  await act(async () => builder.click());
+  expect(host.querySelector(".mode-outgoing .study-mistakes")).not.toBeNull();
+  expect(host.querySelector(".mode-waiting .study-builder")).not.toBeNull();
+  expect(probe.props!.places.some((place) => place.name === "???")).toBe(true);
+  await settleLoads();
+  expect(probe.props!.places.some((place) => place.name === "???")).toBe(false);
+  const packs = [
+    ...host.querySelectorAll<HTMLAnchorElement>(
+      ".mode-incoming .study-navigation a",
+    ),
+  ].find((link) => link.textContent === "Study Packs")!;
+  await act(async () => packs.click());
+  expect(host.querySelector(".mode-outgoing .study-builder")).not.toBeNull();
+  expect(host.querySelector(".mode-waiting .study-packs")).not.toBeNull();
+  await settleLoads();
+  expect(savedStudy()).toEqual(saved);
+});
+
+it.each([false, true])(
+  "lands on Your Sessions with the current run or starting actions (active run: %s)",
+  async (activeRun) => {
+    const current = {
+      ...startStudy(
+        {
+          ...defaultSettings,
+          scope: "continent",
+          continent: "AF",
+          autoAdvance: false,
+        },
+        42,
+      ),
+      id: "active-study",
+    };
+    createStudySave().save({
+      ...emptyStudy,
+      ...(activeRun ? { session: current } : {}),
+    });
+    history.replaceState(null, "", "/study");
+    await mount();
+    expect(host.querySelector(".study-history h1")?.textContent).toBe(
+      "Keep exploring.",
+    );
+    expect(
+      [...host.querySelectorAll(".mode-incoming .study-navigation a")].map(
+        (a) => a.textContent,
+      ),
+    ).toEqual(["Your Sessions", "Study Packs", "Session Builder", "Review"]);
+    if (activeRun) {
+      expect(host.querySelector(".study-current-card")).not.toBeNull();
+      expect(probe.focus.at(-1)).toMatchObject({ lat: 3, lng: 20 });
+      expect(probe.props!.states["wurl:KEN"]).toBe("selectable");
+      expect(probe.props!.states["wurl:CAN"]).toBe("disabled");
+      expect(probe.props!.regionInteraction).toBe(false);
+      await click("Resume session");
+      expect(savedStudy().session?.id).toBe(current.id);
+      expect(location.search).toBe("?view=session");
+    } else {
+      expect(host.querySelector(".study-current-card")).toBeNull();
+      await click("Browse Study Packs");
+      expect(location.search).toBe("?view=packs");
+      expect(host.querySelector(".study-packs")).not.toBeNull();
+      expect(savedStudy().session).toBeUndefined();
+    }
+  },
+);
+
+it("keeps a result scene and camera intact until the destination preview is ready, including revisiting a cached Builder", async () => {
+  const settings = { ...defaultSettings, autoAdvance: false };
+  let session = startStudy(settings, 42);
+  session = studyReducer(session, {
+    type: "pick",
+    id: session.prompt.targetId,
+  });
+  session = studyReducer(session, { type: "finish" });
+  createStudySave().save({
+    ...emptyStudy,
+    settings,
+    history: [{ id: "transition-result", finishedAt: Date.now(), session }],
+  });
+  history.replaceState(null, "", "/study?view=builder");
+  await mount();
+  await click("History");
+  await act(async () =>
+    host.querySelector<HTMLButtonElement>(".study-history-view")!.click(),
+  );
+  await settleLoads();
+  const before = probe.props!.states;
+  const cameraCount = probe.focus.length;
+  const builder = [
+    ...host.querySelectorAll<HTMLAnchorElement>(
+      ".mode-incoming .study-navigation a",
+    ),
+  ].find((link) => link.textContent === "Session Builder")!;
+  await act(async () => builder.click());
+  expect(host.querySelector(".mode-outgoing .study-summary")).not.toBeNull();
+  expect(probe.props!.states).toEqual(before);
+  expect(probe.focus).toHaveLength(cameraCount);
+  await settleLoads();
+  expect(host.querySelector(".mode-incoming .study-builder")).not.toBeNull();
+  expect(probe.props!.states[session.prompt.targetId]).toBe("selectable");
 });

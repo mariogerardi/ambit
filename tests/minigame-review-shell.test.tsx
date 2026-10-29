@@ -9,6 +9,7 @@ import {
   world,
   root,
   resetRoot,
+  settleLoads,
 } from "./helpers/appShell";
 import { createNeighborSave } from "../src/minigames/sharedNeighborsSave";
 import { createMinigameSettingsSave } from "../src/minigames/minigameSettingsSave";
@@ -79,7 +80,7 @@ it("starts an exact saved Study review from a minigame, accepts a map pin, archi
   await act(async () => root.unmount());
   resetRoot();
   await mount();
-  await click("Resume session");
+  expect(host.querySelector(".study-question")).not.toBeNull();
   expect(createStudySave().load().session!.pin).toEqual({
     lat: point.lat,
     lng: point.lng,
@@ -98,8 +99,18 @@ it("starts an exact saved Study review from a minigame, accepts a map pin, archi
   await act(async () => root.unmount());
   resetRoot();
   await mount();
-  await click("Past study sessions");
-  await click("View results");
+  await act(async () =>
+    host
+      .querySelector<HTMLAnchorElement>(
+        '.mode-incoming .study-navigation a[href="/study"]',
+      )!
+      .click(),
+  );
+  await settleLoads();
+  await act(async () =>
+    host.querySelector<HTMLButtonElement>(".study-history-view")!.click(),
+  );
+  await settleLoads();
   expect(host.querySelector(".study-summary")).not.toBeNull();
   await click("Repeat this session");
   expect(createStudySave().load().session!.placeReview).toHaveLength(1);
@@ -129,7 +140,7 @@ it.each(["countries", "capitals"] as const)(
     await act(async () => root.unmount());
     resetRoot();
     await mount();
-    await click("Resume session");
+    expect(host.querySelector(".study-question")).not.toBeNull();
     expect(createStudySave().load().session!.pin).toEqual({ lat: 0, lng: 0 });
     await click("Submit answer");
     expect(createStudySave().load().session!.history[0].correct).toBe(false);

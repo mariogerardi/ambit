@@ -132,6 +132,10 @@ import type {
 } from "./study/engine";
 import { useStudyPresentation } from "./study/useStudyPresentation";
 import { StudyPanel } from "./study/StudyPanel";
+import { studyIntent, studyLink } from "./study/StudyNavigation";
+import { startLearningReview } from "./study/engine";
+import type { LearningTarget } from "./study/learning";
+import { StudyReplacementDialog } from "./study/StudyReplacementDialog";
 const GlobeView = lazy(() =>
   import("./globe/GlobeView").then((m) => ({ default: m.GlobeView })),
 );
@@ -244,10 +248,22 @@ export function App() {
   const [selectedRegion, setSelectedRegion] = useState<RegionFeature>();
   const [selectedCity, setSelectedCity] = useState<ExploreCity>();
   const [retry, setRetry] = useState(0);
-  const [today, setToday] = useState(localDateKey),
-    [studySetup, setStudySetup] = useState(true);
-  const [studyBuilder, setStudyBuilder] = useState(false);
-  const [studyBrowsingHistory, setStudyBrowsingHistory] = useState(false);
+  const [today, setToday] = useState(localDateKey);
+  const studyRoute = studyIntent(path);
+  const studySetup = !["session", "results"].includes(studyRoute.view);
+  const studyBrowsingHistory =
+    mode === "study" &&
+    (studyRoute.view === "history" || studyRoute.view === "review");
+  const studyRecord =
+    studyRoute.view === "results"
+      ? study.history?.find((record) => record.id === studyRoute.record)
+      : undefined;
+  const [studyReplacement, setStudyReplacement] = useState<() => void>();
+  const requestStudyStart = (run: () => void) => {
+    if (study.session && study.session.phase !== "summary")
+      setStudyReplacement(() => run);
+    else run();
+  };
   const [practice, setPractice] = useState<Record<string, GameState>>({});
   const [demoCustomizing, setDemoCustomizing] = useState(false);
   const [reviews, setReviews] = useState<Record<string, GameState>>({});
@@ -471,28 +487,100 @@ export function App() {
       activeMinigame.world,
     ],
   );
-  const session = study.session;
+  const session =
+    studyRoute.view === "results" ? studyRecord?.session : study.session;
   const [studyReview, setStudyReview] = useState<StudyAnswer>();
   const [studyEditing, setStudyEditing] = useState(false);
   const [studyEditorOpen, setStudyEditorOpen] = useState(false);
   const [studyCustomizing, setStudyCustomizing] = useState(false);
   const panelOnly =
     mode === "account" ||
-    (mobile.enabled &&
-      mode === "study" &&
-      (studyEditorOpen || studyCustomizing));
-  const pageLayout =
-    mode === "account" ||
-    (mobile.enabled && mode === "study" && studyEditorOpen);
-  const [studyPreview, setStudyPreview] = useState<StudySettings>();
+    (mobile.enabled && mode === "study" && studyCustomizing);
+  const pageLayout = mode === "account";
+  const studyPreviewVisit = useMemo(() => ({}), [path]);
+  const [studyPreviewState, setStudyPreviewState] = useState<{
+    settings: StudySettings;
+    places?: StudyPlaceTarget[];
+    targets?: LearningTarget[];
+    visit: object;
+  }>();
+  const previewStudy = useCallback(
+    (
+      settings?: StudySettings,
+      places?: StudyPlaceTarget[],
+      targets?: LearningTarget[],
+    ) => {
+      // Keep the outgoing preview until the next visible panel supplies its
+      // complete replacement. Unmount cleanup must not flash an empty globe.
+      if (settings)
+        setStudyPreviewState({
+          settings,
+          places,
+          targets,
+          visit: studyPreviewVisit,
+        });
+    },
+    [studyPreviewVisit],
+  );
+  // Your Sessions previews only the declared exercise area, never its current answer.
+  const historyPreview = useMemo(() => {
+    const current = study.session;
+    return current &&
+      current.phase !== "summary" &&
+      !current.placeReview &&
+      !current.learningReview
+      ? {
+          ...current.settings,
+          countryNames: true,
+          capitalNames: false,
+          capitalMarkers: false,
+        }
+      : undefined;
+  }, [study.session]);
+  // The route changes before the incoming panel becomes active. Keep the whole
+  // outgoing scene (including its camera key) until a matching preview arrives.
+  const nextStudyScene = {
+    cameraKey,
+    session:
+      mode === "study" && !studyBrowsingHistory && !studySetup
+        ? session
+        : undefined,
+    preview:
+      mode === "study"
+        ? studyRoute.view === "history"
+          ? historyPreview
+          : ["practice", "custom", "review"].includes(studyRoute.view)
+            ? studyPreviewState?.settings
+            : undefined
+        : undefined,
+    places:
+      studyRoute.view !== "history" ? studyPreviewState?.places : undefined,
+    targets:
+      studyRoute.view !== "history" ? studyPreviewState?.targets : undefined,
+    review: studyReview,
+  };
+  const lastStudyScene = useRef(nextStudyScene);
+  const pendingStudyPreview =
+    mode === "study" &&
+    ["practice", "custom", "review"].includes(studyRoute.view) &&
+    studyPreviewState?.visit !== studyPreviewVisit;
+  const studyScene = pendingStudyPreview
+    ? lastStudyScene.current
+    : nextStudyScene;
+  useEffect(() => {
+    if (!pendingStudyPreview) lastStudyScene.current = nextStudyScene;
+  });
+  const studyPreview = studyScene.preview;
   const studying =
     mode === "study" && !studyBrowsingHistory && !studySetup && !!session;
   const studyPresentation = useStudyPresentation({
     active: mode === "study",
-    session: studying ? session : undefined,
+    session: studyScene.session,
     preview: studyPreview,
+    previewPlaces: studyPreview ? studyScene.places : undefined,
+    previewReviewTargets: studyPreview ? studyScene.targets : undefined,
     settings: study.settings,
-    review: studyReview,
+    review: studyScene.review,
     regions: namedRegions,
     neutral,
   });
@@ -517,7 +605,9 @@ export function App() {
     mode,
     transitionKey: minigamePlaying
       ? `${cameraKey}:${activeMinigame.run?.id}:${activeMinigame.run?.cycle}:${activeMinigame.run?.index}`
-      : cameraKey,
+      : mode === "study"
+        ? studyScene.cameraKey
+        : cameraKey,
     ready,
     mobile: mobile.enabled,
     globe,
@@ -544,9 +634,11 @@ export function App() {
       dailyReady: minigamePlaying || dailyReady,
     },
     study: {
-      active: studying,
-      session,
+      active: mode === "study" && !!studyScene.session,
+      session: studyScene.session,
       preview: studyPreview,
+      previewPlaces: studyPreview ? studyScene.places : undefined,
+      previewViews: studyPreview ? studyPresentation.previewViews : undefined,
       editorOpen: studyEditorOpen,
       highlight: studyPresentation.highlight,
       capitalFocus: studyPresentation.capitalFocus,
@@ -757,9 +849,6 @@ export function App() {
   }, [mode, clearBranches]);
   useEffect(() => {
     if (mode === "study") return;
-    setStudySetup(true);
-    setStudyBuilder(false);
-    setStudyBrowsingHistory(false);
     setStudyReview(undefined);
   }, [mode]);
   function navigate(url: string) {
@@ -871,7 +960,9 @@ export function App() {
     [context, mode, reviewing, journey, allJourneys, playDate, archiveDate],
   );
   const studyAction = useCallback(
-    (action: StudyAction) =>
+    (action: StudyAction) => {
+      const emptyFinish =
+        action.type === "finish" && !study.session?.history.length;
       setStudy((p) =>
         p.session
           ? (() => {
@@ -880,27 +971,31 @@ export function App() {
                 session: studyReducer(p.session, action, regions),
               };
               return updated.session.phase === "summary"
-                ? archiveStudy(updated)
+                ? updated.session.history.length
+                  ? archiveStudy(updated)
+                  : leaveStudy(updated)
                 : updated;
             })()
           : p,
-      ),
-    [regions],
+      );
+      if (emptyFinish) navigate(studyLink());
+    },
+    [regions, study.session],
   );
-  const start = (settings: StudySettings, targets?: StudyReviewTarget[]) => {
-    if (!webgl) return;
-    setStudyReview(undefined);
-    setStudy((previous) => ({
-      ...leaveStudy(previous),
-      settings,
-      session: {
-        ...startStudy(settings, undefined, targets),
-        id: crypto.randomUUID(),
-      },
-    }));
-    setStudySetup(false);
-    stop();
-  };
+  const start = (settings: StudySettings, targets?: StudyReviewTarget[]) =>
+    requestStudyStart(() => {
+      setStudyReview(undefined);
+      setStudy((previous) => ({
+        ...leaveStudy(previous),
+        settings,
+        session: {
+          ...startStudy(settings, undefined, targets),
+          id: crypto.randomUUID(),
+        },
+      }));
+      navigate(studyLink("session"));
+      stop();
+    });
   const choose = useCallback(
     (region: RegionFeature, point?: Focus) => {
       stop();
@@ -909,7 +1004,12 @@ export function App() {
         if (!activeMinigame.ended && activeMinigame.run?.result === undefined)
           activeMinigame.action({ type: "select", id: region.id });
       } else if (mode === "explore") selectExplore(region.id);
-      else if (mode === "study" && studyPreview && !studying) {
+      else if (
+        mode === "study" &&
+        studyPreview &&
+        !studying &&
+        studyEditorOpen
+      ) {
         if (!studyPool({ ...studyPreview, scope: "all" }).includes(region.id))
           return;
         setStudy((p) => ({
@@ -945,6 +1045,7 @@ export function App() {
       activeMinigame.run?.result,
       studying,
       studyPreview,
+      studyEditorOpen,
       studyEditing,
       studyAction,
       isJourney,
@@ -979,15 +1080,22 @@ export function App() {
   }
   const todayAttempt = daily.attempts[today];
   const startPlaces = (targets: StudyPlaceTarget[]) => {
-    if (!webgl || !targets.length) return;
-    setStudy((previous) => ({
-      ...leaveStudy(previous),
-      session: { ...startPlaceStudy(targets), id: crypto.randomUUID() },
-    }));
-    setStudySetup(false);
-    setStudyReview(undefined);
-    stop();
-    navigate("/study");
+    if (!targets.length) return;
+    if (!webgl) {
+      notify("Map review needs the globe. Try again once it is available.", {
+        tone: "error",
+      });
+      return;
+    }
+    requestStudyStart(() => {
+      setStudy((previous) => ({
+        ...leaveStudy(previous),
+        session: { ...startPlaceStudy(targets), id: crypto.randomUUID() },
+      }));
+      setStudyReview(undefined);
+      stop();
+      navigate(studyLink("session"));
+    });
   };
   const todayJourney =
     allJourneys.find((j) => j.id === todayAttempt?.journeyId) ??
@@ -1070,9 +1178,11 @@ export function App() {
           webgl
         }
         onStudy={() => {
-          if (study.session && study.session.phase !== "summary")
-            setStudySetup(false);
-          navigate("/study");
+          navigate(
+            study.session && study.session.phase !== "summary"
+              ? studyLink("session")
+              : studyLink(),
+          );
         }}
         appearanceContent={
           <AppearancePanel theme={theme} onTheme={changeTheme} />
@@ -1160,7 +1270,7 @@ export function App() {
       />
     ) : mode === "study" ? (
       <StudyPanel
-        paused={!!feedback}
+        paused={!!feedback || !!studyReplacement}
         onReport={(prompt) =>
           setFeedback({
             kind: "question",
@@ -1174,27 +1284,41 @@ export function App() {
             },
           })
         }
-        onPreview={setStudyPreview}
+        onPreview={previewStudy}
         onBuilderChange={setStudyEditorOpen}
         onCustomizeChange={setStudyCustomizing}
-        onHistoryChange={setStudyBrowsingHistory}
         compact={mobile.enabled}
         save={study}
         setup={studySetup}
         active={mode === "study"}
         webgl={webgl}
         onSettings={(settings) => setStudy((p) => ({ ...p, settings }))}
-        builder={studyBuilder}
+        view={studyRoute.view}
+        record={studyRecord}
+        onNavigateView={(view) => {
+          setStudyReview(undefined);
+          navigate(studyLink(view));
+        }}
         onHome={() => navigate("/")}
         onViewRecord={(record: StudyRecord) => {
-          setStudy((previous) => ({
-            ...leaveStudy(previous),
-            session: { ...record.session, id: record.id },
-          }));
-          setStudySetup(false);
           setStudyReview(undefined);
+          navigate(studyLink("results", record.id));
         }}
         onStart={start}
+        onStartReview={(targets, questionCount) =>
+          requestStudyStart(() => {
+            setStudyReview(undefined);
+            setStudy((previous) => ({
+              ...leaveStudy(previous),
+              session: {
+                ...startLearningReview(targets, undefined, questionCount),
+                id: crypto.randomUUID(),
+              },
+            }));
+            navigate(studyLink("session"));
+            stop();
+          })
+        }
         onStartPlaces={startPlaces}
         onLocate={(answer) => {
           setStudyReview(answer);
@@ -1205,12 +1329,8 @@ export function App() {
         }}
         onAction={studyAction}
         onEditingChange={setStudyEditing}
-        onResume={() => setStudySetup(false)}
-        onSetup={() => {
-          setStudy((previous) => leaveStudy(previous));
-          setStudyBuilder(true);
-          setStudySetup(true);
-        }}
+        onResume={() => navigate(studyLink("session"))}
+        onSetup={() => navigate(studyLink("custom"))}
       />
     ) : archiveDate && !canOpenDate ? (
       <section className="info-view" role="status">
@@ -1704,6 +1824,7 @@ export function App() {
         <div className="mobile-map-tools" aria-label="Globe controls">
           <button
             data-dd-action-name="Globe Recenter"
+            aria-label="◎ Recenter"
             disabled={!ready || !webgl}
             onClick={() =>
               selectedCity && mode === "explore"
@@ -1714,21 +1835,49 @@ export function App() {
                   )
             }
           >
-            ◎ Recenter
+            <span aria-hidden="true">◎</span>
+            <span className="mobile-map-tool-label"> Recenter</span>
           </button>
           {motionControls}
           <button
             data-dd-action-name="Globe Toggle Size"
             aria-expanded={expanded}
             aria-controls="mobile-map"
+            aria-label={
+              expanded
+                ? isJourney || studying
+                  ? "Show question ↓"
+                  : "Show details ↓"
+                : "Enlarge globe"
+            }
             disabled={!webgl}
             onClick={() => setGlobeExpanded((v) => !v)}
           >
-            {expanded
-              ? isJourney || studying
-                ? "Show question ↓"
-                : "Show details ↓"
-              : "Enlarge globe"}
+            <svg
+              className="mobile-map-size-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d={
+                  expanded
+                    ? "m6 9 6 6 6-6"
+                    : "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"
+                }
+              />
+            </svg>
+            <span className="mobile-map-tool-label">
+              {expanded
+                ? isJourney || studying
+                  ? "Show question ↓"
+                  : "Show details ↓"
+                : "Enlarge globe"}
+            </span>
           </button>
         </div>
       )}
@@ -1739,9 +1888,6 @@ export function App() {
             : minigameLanding
               ? "minigames-menu"
               : path
-        }
-        animateExit={
-          !(mode === "study" && (studyEditorOpen || studyCustomizing))
         }
         page={pageLayout}
         reduced={reduced || mobile.enabled}
@@ -1795,6 +1941,18 @@ export function App() {
           {expanded && studying && session!.phase === "playing" && (
             <p className="mobile-map-prompt">{studyPrompt(session!.prompt)}</p>
           )}
+          {expanded &&
+            minigamePlaying &&
+            activeMinigame.game?.phase === "playing" &&
+            activeMinigame.journey &&
+            activeMinigame.context && (
+              <p className="mobile-map-prompt">
+                {questionPrompt(
+                  activeMinigame.journey.rounds[0],
+                  activeMinigame.context,
+                )}
+              </p>
+            )}
         </>
       )}
       {!isJourney && (
@@ -1843,6 +2001,17 @@ export function App() {
           Some progress, preferences, or Study results won’t be saved after this
           visit.
         </div>
+      )}
+      {studyReplacement && (
+        <StudyReplacementDialog
+          answered={study.session?.history.length ?? 0}
+          onCancel={() => setStudyReplacement(undefined)}
+          onConfirm={() => {
+            const run = studyReplacement;
+            setStudyReplacement(undefined);
+            run();
+          }}
+        />
       )}
       {feedback && (
         <FeedbackDialog request={feedback} onClose={closeFeedback} />

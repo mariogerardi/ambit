@@ -8,7 +8,7 @@ import type { StudyPlaceTarget } from "./placeReview";
 
 export const CAPITAL_PIN_RADIUS_KM = 50;
 export const isStudyPinPrompt = (prompt: StudyPrompt) =>
-  !!prompt.place || prompt.style === "pin";
+  prompt.topic === "places" || prompt.style === "pin";
 export const validStudyPin = (
   pin: unknown,
 ): pin is { lat: number; lng: number } => {
@@ -80,7 +80,9 @@ export function gradeStudyPin(
 export function studyPinFeedback(answer: StudyAnswer, targetName: string) {
   const region =
     !!answer.prompt.place?.regionId ||
-    (answer.prompt.style === "pin" && answer.prompt.topic !== "capitals");
+    (answer.prompt.style === "pin" &&
+      !answer.prompt.place &&
+      answer.prompt.topic !== "capitals");
   if (region) {
     if (answer.correct) return `Your pin is inside ${targetName}.`;
     return answer.response !== "Pin placed" &&

@@ -14,6 +14,8 @@ import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { GameState } from "../game/state";
 import type { StudySession, StudySettings } from "../study/engine";
 import { studyScopeFocus } from "../study/scopeFocus";
+import { reviewTourFrame, REVIEW_TOUR_ALTITUDE } from "../study/reviewTour";
+import type { StudyPlaceTarget } from "../study/placeReview";
 import type { AppMode } from "./modes";
 
 interface CameraOptions {
@@ -41,6 +43,8 @@ interface CameraOptions {
     active: boolean;
     session?: StudySession;
     preview?: StudySettings;
+    previewPlaces?: StudyPlaceTarget[];
+    previewViews?: Focus[];
     editorOpen: boolean;
     highlight?: Focus;
     capitalFocus?: Focus;
@@ -85,11 +89,13 @@ export function useCameraOrchestration({
     active: studying,
     session,
     preview: studyPreview,
-    editorOpen: studyEditorOpen,
+    previewPlaces,
+    previewViews,
     highlight: studyHighlight,
     capitalFocus: studyCapitalFocus,
   } = study;
   const [motion, setMotion] = useState(mode === "home");
+  const [reviewTourPaused, setReviewTourPaused] = useState(false);
   const [reduced, setReduced] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -103,7 +109,10 @@ export function useCameraOrchestration({
     (focus: Focus) => globe.current?.focus(focus),
     [globe],
   );
-  const stop = useCallback(() => setMotion(false), []);
+  const stop = useCallback(() => {
+    setMotion(false);
+    setReviewTourPaused(true);
+  }, []);
   const altitude = (compact = mobile) =>
     worldAltitude(
       scene.current?.clientWidth || innerWidth,
@@ -139,8 +148,8 @@ export function useCameraOrchestration({
         ));
   const builderFocus = useMemo(
     () =>
-      studyPreview
-        ? studyScopeFocus(studyPreview, namedRegions, altitude(false))
+      studyPreview && !previewPlaces?.length
+        ? studyScopeFocus(studyPreview, namedRegions, altitude(mobile))
         : undefined,
     // Hint and answer-method edits update layers without restarting the flight.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -149,23 +158,24 @@ export function useCameraOrchestration({
       studyPreview?.continent,
       studyPreview?.countryIds,
       namedRegions,
+      mobile,
+      previewPlaces,
     ],
   );
   useEffect(() => {
     if (
       !ready ||
-      mobile ||
       mode !== "study" ||
-      !studyEditorOpen ||
-      !studyPreview?.scope
+      !studyPreview?.scope ||
+      previewViews?.length
     )
       return;
     if (builderFocus) {
       stop();
       frame(builderFocus);
-    } else if (studyPreview.scope === "all") {
+    } else if (studyPreview.scope === "all" || previewPlaces?.length) {
       const view = globe.current?.view();
-      const worldZoom = altitude(false);
+      const worldZoom = altitude(mobile);
       if (view && !normalWorldView(view, worldZoom))
         globe.current?.focus({ ...view, altitude: worldZoom }, "world");
       setMotion(true);
@@ -174,11 +184,54 @@ export function useCameraOrchestration({
     ready,
     mobile,
     mode,
-    studyEditorOpen,
     builderFocus,
+    cameraKey,
     studyPreview?.scope,
+    studyPreview?.countryIds,
+    previewPlaces,
+    previewViews,
     stop,
     frame,
+  ]);
+  useEffect(() => {
+    if (!ready || mode !== "study" || !studyPreview || !previewViews?.length)
+      return;
+    setMotion(false);
+    setReviewTourPaused(false);
+    if (reduced) frame({ ...previewViews[0], altitude: REVIEW_TOUR_ALTITUDE });
+  }, [ready, mode, studyPreview, previewViews, reduced, frame]);
+  useEffect(() => {
+    if (
+      !ready ||
+      mode !== "study" ||
+      !studyPreview ||
+      !previewViews?.length ||
+      reduced ||
+      reviewTourPaused
+    )
+      return;
+    globe.current?.cancelFocus();
+    const origin =
+      globe.current?.orbitView() ?? globe.current?.view() ?? previewViews[0];
+    let request = 0,
+      elapsed = 0,
+      last = performance.now();
+    const tick = (now: number) => {
+      if (!document.hidden) elapsed += Math.max(0, Math.min(100, now - last));
+      last = now;
+      globe.current?.orbitView(reviewTourFrame(previewViews, origin, elapsed));
+      request = requestAnimationFrame(tick);
+    };
+    request = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(request);
+  }, [
+    ready,
+    mode,
+    studyPreview,
+    previewViews,
+    reduced,
+    reviewTourPaused,
+    globe,
   ]);
   const focusExplore = useCallback(
     (region: RegionFeature) => {
@@ -216,6 +269,11 @@ export function useCameraOrchestration({
     if (old !== cameraKey) {
       if (old === undefined && mode === "home") {
         setMotion(true);
+        previous.current = cameraKey;
+        return;
+      }
+      if (mode === "study" && studyPreview) {
+        // The selected preview owns framing; hidden mobile builders preserve orbit.
         previous.current = cameraKey;
         return;
       }
@@ -374,13 +432,17 @@ export function useCameraOrchestration({
   }, [ready, mode, namedRegions, focusExplore, stop]);
 
   const prepareNavigation = (url: string) => {
+    // Study replaces its preview atomically when the destination panel is ready.
+    if (mode === "study" && url.split("?")[0] === "/study") return;
     if (url !== "/" && url !== "/explore" && url.split("?")[0] !== "/archive")
       stop();
     globe.current?.cancelFocus();
   };
   const toggleMotion = () => {
     globe.current?.cancelFidget();
-    setMotion((value) => !value);
+    if (mode === "study" && studyPreview && previewViews?.length && !reduced)
+      setReviewTourPaused((value) => !value);
+    else setMotion((value) => !value);
   };
   const fidget = () => globe.current?.fidget();
   const locateStudyAnswer = (targetId: string) => {
@@ -401,7 +463,10 @@ export function useCameraOrchestration({
     );
   };
   return {
-    motion,
+    motion:
+      mode === "study" && studyPreview && previewViews?.length && !reduced
+        ? !reviewTourPaused
+        : motion,
     reduced,
     initialFocus,
     frame,

@@ -3,7 +3,9 @@ import type { StudySettings } from "./engine";
 export function StudyPreferences({
   settings,
   onSettings,
+  allowRevisit = true,
 }: {
+  allowRevisit?: boolean;
   settings: StudySettings;
   onSettings(settings: StudySettings): void;
 }) {
@@ -34,7 +36,8 @@ export function StudyPreferences({
           </label>
         ))}
         <aside className="study-hint-note">
-          <span aria-hidden="true">ⓘ</span> Labels and markers may reveal answers.
+          <span aria-hidden="true">ⓘ</span> Labels and markers may reveal
+          answers.
         </aside>
       </fieldset>
       <fieldset className="display-settings">
@@ -50,17 +53,19 @@ export function StudyPreferences({
           />
           Automatically advance after correct answers
         </label>
-        <label data-dd-action-name="Study Toggle Missed Review">
-          <input
-            type="checkbox"
-            data-dd-action-name="Study Toggle Missed Review"
-            checked={settings.revisitMissed ?? false}
-            onChange={(event) =>
-              onSettings({ ...settings, revisitMissed: event.target.checked })
-            }
-          />
-          Revisit missed questions
-        </label>
+        {allowRevisit && (
+          <label data-dd-action-name="Study Toggle Missed Review">
+            <input
+              type="checkbox"
+              data-dd-action-name="Study Toggle Missed Review"
+              checked={settings.revisitMissed ?? false}
+              onChange={(event) =>
+                onSettings({ ...settings, revisitMissed: event.target.checked })
+              }
+            />
+            Revisit missed questions
+          </label>
+        )}
       </fieldset>
     </div>
   );

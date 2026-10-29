@@ -17,6 +17,7 @@ import type { JourneySummary } from "../game/journeyRegistry";
 import {
   STUDY_KEY,
   defaultSettings,
+  TOPICS,
   emptyStudy,
   validStudy,
   validSettings,
@@ -141,7 +142,7 @@ export const studySaveCodec: SaveCodec<StudySave> = {
     if (field.startsWith("styles.")) {
       const topic = field.slice(7);
       return (
-        Object.hasOwn(defaultSettings.styles, topic) &&
+        TOPICS.includes(topic as (typeof TOPICS)[number]) &&
         validSettings({
           ...defaultSettings,
           styles: { ...defaultSettings.styles, [topic]: value },

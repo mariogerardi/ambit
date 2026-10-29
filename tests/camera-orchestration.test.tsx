@@ -9,7 +9,9 @@ import { DANUBE_JOURNEY } from "../src/game/danubeJourney";
 import { REGGAETON_JOURNEY } from "../src/game/reggaetonJourney";
 import { createQuestionContext } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
+import { reviewTourFrame, REVIEW_TOUR_ALTITUDE } from "../src/study/reviewTour";
 import { worldAltitude } from "../src/globe/camera";
+import { defaultSettings as defaultStudySettings } from "../src/study/engine";
 import type { GlobeHandle } from "../src/globe/GlobeView";
 import type { Focus, RegionFeature } from "../src/geography/types";
 
@@ -97,6 +99,65 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount());
   vi.unstubAllGlobals();
+});
+it("sweeps Review continuously, pauses for interaction, and holds a static view for reduced motion", async () => {
+  const pending = new Map<number, FrameRequestCallback>();
+  let serial = 0;
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    pending.set(++serial, callback);
+    return serial;
+  });
+  vi.stubGlobal("cancelAnimationFrame", (id: number) => pending.delete(id));
+  const stops = [
+    { lat: 10, lng: 20, altitude: 0.8 },
+    { lat: -20, lng: 40, altitude: 0.55 },
+  ];
+  const preview = {
+    ...defaultStudySettings,
+    scope: "custom" as const,
+    countryIds: ["wurl:CAN"],
+  };
+  await render({
+    mode: "study",
+    transitionKey: "/study?view=review",
+    study: { active: false, editorOpen: false, preview, previewViews: stops },
+  });
+  expect(port.flyover).not.toHaveBeenCalled();
+  expect(pending.size).toBe(1);
+  const [id, tick] = [...pending][0];
+  pending.delete(id);
+  await act(async () => tick(performance.now() + 16));
+  expect(port.orbitView).toHaveBeenLastCalledWith(
+    expect.objectContaining({ lng: expect.any(Number) }),
+  );
+  await act(async () => result.stop());
+  expect(pending.size).toBe(0);
+  await act(async () => result.toggleMotion());
+  expect(pending.size).toBe(1);
+  await render({ mode: "home", transitionKey: "/" });
+  expect(pending.size).toBe(0);
+  Object.defineProperty(media, "matches", { value: true });
+  await act(async () => mediaChange?.());
+  await render({ mode: "study", transitionKey: "/study?view=review" });
+  expect(pending.size).toBe(0);
+  expect(port.focus).toHaveBeenLastCalledWith({
+    ...stops[0],
+    altitude: REVIEW_TOUR_ALTITUDE,
+  });
+});
+it("keeps Review's orbit speed and zoom steady across a full globe revolution", () => {
+  const stops = [
+    { lat: 40, lng: 30 },
+    { lat: -25, lng: 140 },
+    { lat: 20, lng: -70 },
+  ];
+  const origin = { lat: 10, lng: 0, altitude: 1.8 };
+  const first = reviewTourFrame(stops, origin, 2000),
+    later = reviewTourFrame(stops, origin, 62000);
+  expect(first.lng - later.lng).toBe(360);
+  expect(first.altitude).toBe(REVIEW_TOUR_ALTITUDE);
+  expect(later.altitude).toBe(REVIEW_TOUR_ALTITUDE);
+  expect(later.lat).toBeCloseTo(first.lat);
 });
 
 it("waits for a deferred Journey when restoring a playing attempt with saved help", async () => {

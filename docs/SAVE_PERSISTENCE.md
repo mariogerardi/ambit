@@ -334,3 +334,38 @@ fields for pending drafts and completed receipts. Do not regrade restored
 constructions or replace their geometry with an authored example. Geometry and
 metric validation rejects corrupt or excessive payloads. Changes to frozen
 scoring sources require an explicit edition/save-continuity decision.
+
+### Study navigation and historical inspection
+
+Study view/record query parameters select UI destinations and do not create save
+registers. `/study` opens Your Sessions; packs and the builder have independent
+UI destinations. Opening historical results leaves the current attempt, typed draft,
+pin and preferences untouched. Starting a new session, replay or personal review
+confirms replacement of an unfinished session, then uses the existing
+`leaveStudy` archival path. Answered progress is retained under past sessions; an
+unanswered replaced run has no result to archive. Cancelling replacement changes
+no progress. These controls require no save-format migration.
+
+### Study learning evidence
+
+Study answers optionally retain submission time (`answeredAt`) and whether hints
+assisted the answer (`assisted`). Older records remain valid; the review model
+uses their session finish time and hint settings as fallback evidence. The queue
+is derived from retained history and the active run, deduplicated by session ID;
+viewing a record adds no evidence and no new save namespace is introduced.
+
+An adaptive review session stores validated `learningReview` targets and pending
+order alongside its ordinary prompt, history and draft. New reviews also retain
+`questionCount` (10, 20, 50, or 100), including retries; older reviews without this
+field keep their original completion behavior. Existing independent
+session/history registers preserve that state through reload and account sync.
+Unresolved items remain in the derived queue when a batch ends or is paused.
+Confidence is a scheduling heuristic based on spaced, unassisted successes and
+compatible method variety, not a claim of permanent mastery. Review evidence is
+currently limited to Study answers, including minigame map-review sessions.
+
+City and landmark Study prompts retain validated catalog IDs, coordinates, country
+context, and pin radius. Country context is separate from `regionId`: these pins
+use distance grading, while existing territory-review pins retain boundary grading.
+Their optional topic methods use the existing independent style registers. Older
+three-topic settings and sessions remain valid without a save migration.

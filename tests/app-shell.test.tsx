@@ -126,12 +126,12 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     await act(async () => root.render(<PlayerWorkspace />));
     await settleLoads();
     await click("Study");
-    await click("Past study sessions");
+    expect(host.querySelector(".study-history")).not.toBeNull();
     expect(host.querySelectorAll(".study-history-list li")).toHaveLength(1);
     authProbe.subject = "b";
     await act(async () => root.render(<PlayerWorkspace />));
     await settleLoads();
-    await click("Past study sessions");
+    expect(host.querySelector(".study-history")).not.toBeNull();
     expect(host.querySelectorAll(".study-history-list li")).toHaveLength(1);
     expect(
       createStudySave("b")
@@ -141,7 +141,7 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     authProbe.subject = undefined;
     await act(async () => root.render(<PlayerWorkspace />));
     await settleLoads();
-    await click("Past study sessions");
+    expect(host.querySelector(".study-history")).not.toBeNull();
     expect(host.querySelectorAll(".study-history-list li")).toHaveLength(0);
   });
 

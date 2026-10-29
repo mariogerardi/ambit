@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type {
   PlaceFeature,
+  Focus,
   RegionFeature,
   VisualState,
 } from "../geography/types";
@@ -8,13 +9,18 @@ import { DISPLAY_CAPITALS } from "../geography/places";
 import { US_STATES } from "../geography/usStates";
 import { capitalOf, studyPool, studyStates } from "./engine";
 import type { StudyAnswer, StudySession, StudySettings } from "./engine";
+import type { StudyPlaceTarget } from "./placeReview";
+import type { LearningTarget } from "./learning";
 import { isStudyPinPrompt, studyPinTarget } from "./pins";
+import { isPlaceTopic, STUDY_PLACES } from "./placeTopics";
 
 interface StudyPresentationOptions {
   active: boolean;
   /** Supply only the session currently being shown, not a saved background session. */
   session?: StudySession;
   preview?: StudySettings;
+  previewPlaces?: StudyPlaceTarget[];
+  previewReviewTargets?: LearningTarget[];
   settings: StudySettings;
   review?: StudyAnswer;
   regions: RegionFeature[];
@@ -26,6 +32,8 @@ export function useStudyPresentation({
   active,
   session: savedSession,
   preview,
+  previewPlaces,
+  previewReviewTargets,
   settings,
   review,
   regions,
@@ -51,10 +59,12 @@ export function useStudyPresentation({
         ...studyStates(session),
         ...(session.phase === "summary" && review
           ? {
-              [review.prompt.place?.regionId ?? review.prompt.targetId]:
-                "answer",
+              [review.prompt.place?.regionId ??
+              review.prompt.place?.countryId ??
+              review.prompt.targetId]: "answer",
               ...(review.selectedId &&
-              review.selectedId !== review.prompt.targetId
+              review.selectedId !==
+                (review.prompt.place?.countryId ?? review.prompt.targetId)
                 ? { [review.selectedId]: "incorrect" }
                 : {}),
             }
@@ -79,8 +89,86 @@ export function useStudyPresentation({
     session && shownPrompt && isStudyPinPrompt(shownPrompt)
       ? session
       : undefined;
+  const previewTargets = session ? undefined : previewPlaces;
+  const recognitionPlace =
+    session &&
+    shownPrompt &&
+    isPlaceTopic(shownPrompt.topic) &&
+    ["typing", "choices"].includes(shownPrompt.style)
+      ? shownPrompt.place
+      : undefined;
+  const recognitionFocus = useMemo(
+    () =>
+      recognitionPlace
+        ? {
+            lat: recognitionPlace.lat,
+            lng: recognitionPlace.lng,
+            altitude: 0.65,
+          }
+        : undefined,
+    [recognitionPlace],
+  );
+  const recognitionRevealed = session?.phase !== "playing";
+  const reviewTourTargets =
+    active && !session ? previewReviewTargets : undefined;
+  const reviewTourPlaces = useMemo<PlaceFeature[]>(
+    () =>
+      !reviewTourTargets
+        ? []
+        : reviewTourTargets.flatMap((target) => {
+            const region = regions.find(
+              (region) =>
+                region.id === (target.place?.countryId ?? target.targetId),
+            );
+            const capital =
+              target.topic === "capitals"
+                ? capitalOf(target.targetId)
+                : undefined;
+            const location = target.place ?? capital ?? region?.focus;
+            if (!location) return [];
+            return [
+              {
+                id: `study-review-preview:${target.key}`,
+                name: "???",
+                lat: location.lat,
+                lng: location.lng,
+                kind: capital ? "capital" : target.place ? "pin" : "landform",
+                parentId: region?.id,
+                sourceId: "study:review",
+                visualState: "hinted",
+                markerHidden: !capital && !target.place,
+                priority: 1000,
+              },
+            ];
+          }),
+    [reviewTourTargets, regions],
+  );
+  const previewViews = useMemo<Focus[]>(
+    () =>
+      reviewTourPlaces.map((place) => ({
+        lat: place.lat,
+        lng: place.lng,
+        altitude:
+          place.kind === "capital" || place.kind === "pin"
+            ? 0.55
+            : (regions.find((region) => region.id === place.parentId)?.focus
+                .altitude ?? 0.85),
+      })),
+    [reviewTourPlaces, regions],
+  );
   const places = useMemo<PlaceFeature[] | undefined>(() => {
     if (!display) return undefined;
+    if (recognitionPlace)
+      return [
+        {
+          ...recognitionPlace,
+          name: recognitionRevealed ? recognitionPlace.name : "?",
+          kind: "pin",
+          sourceId: "study:recognition",
+          priority: 1000,
+          visualState: recognitionRevealed ? "answer" : "hinted",
+        },
+      ];
     if (placeSession) {
       const session = placeSession;
       const answer =
@@ -138,6 +226,33 @@ export function useStudyPresentation({
       ];
     }
     return [
+      ...reviewTourPlaces,
+      ...(!session
+        ? STUDY_PLACES.filter(
+            (place) =>
+              display.topics.includes(place.topic) && ids.has(place.countryId),
+          ).map(
+            (place): PlaceFeature => ({
+              id: place.id,
+              name: place.name,
+              lat: place.lat,
+              lng: place.lng,
+              parentId: place.countryId,
+              kind: place.topic === "cities" ? "city" : "landmark",
+              sourceId: place.sourceUrl!,
+            }),
+          )
+        : []),
+      ...(previewTargets ?? []).map(
+        (target): PlaceFeature => ({
+          ...target,
+          id: `study-preview:${target.id}`,
+          kind: "pin",
+          sourceId: "study:review",
+          visualState: "hinted",
+          priority: 1000,
+        }),
+      ),
       ...(display.capitalMarkers || display.capitalNames || capitalReveal
         ? DISPLAY_CAPITALS.filter(
             (c) =>
@@ -171,6 +286,11 @@ export function useStudyPresentation({
     ];
   }, [
     display,
+    previewTargets,
+    reviewTourPlaces,
+    !!session,
+    recognitionPlace,
+    recognitionRevealed,
     ids,
     capitalReveal,
     regions,
@@ -195,6 +315,7 @@ export function useStudyPresentation({
     return state ? [...regions, state] : regions;
   }, [regions, revealRegionId]);
   return {
+    previewViews,
     regions: mapRegions,
     display,
     states,
@@ -214,15 +335,29 @@ export function useStudyPresentation({
       : undefined,
     namedRegionIds: display ? regionIds : undefined,
     placeMarkers: display
-      ? !!placeSession || display.capitalMarkers || !!capitalReveal
+      ? !!placeSession ||
+        !!recognitionPlace ||
+        (!session && display.topics.some(isPlaceTopic)) ||
+        !!previewPlaces?.length ||
+        !!reviewTourPlaces.length ||
+        display.capitalMarkers ||
+        !!capitalReveal
       : true,
     placeLabels: display
       ? !!placeSession ||
+        !!recognitionPlace ||
+        (!session && display.topics.some(isPlaceTopic)) ||
+        !!previewPlaces?.length ||
+        !!reviewTourPlaces.length ||
         display.capitalNames ||
         display.countryNames ||
         !!capitalReveal
       : true,
     highlight: session?.prompt.topic === "countries" ? clueFocus : undefined,
-    capitalFocus: session?.prompt.topic === "capitals" ? clueFocus : undefined,
+    capitalFocus: recognitionFocus
+      ? recognitionFocus
+      : session?.prompt.topic === "capitals"
+        ? clueFocus
+        : undefined,
   };
 }

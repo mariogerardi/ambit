@@ -10,6 +10,7 @@ import {
   defaultSettings,
   emptyStudy,
   startStudy,
+  startPlaceStudy,
   studyReducer,
   studyComplete,
   studyReplayTargets,
@@ -108,12 +109,7 @@ describe("Study completion, replay, and alternate answers", () => {
           />,
         ),
       );
-      await act(async () =>
-        host
-          .querySelector<HTMLButtonElement>('[aria-label^="Replay session"]')!
-          .click(),
-      );
-      expect(onStart).toHaveBeenLastCalledWith(session.settings, targets);
+      expect(host.querySelector('[aria-label^="Replay session"]')).toBeNull();
       const replay = startStudy(
         ...([session.settings, 43, studyReplayTargets(session)] as const),
       );
@@ -129,72 +125,67 @@ describe("Study completion, replay, and alternate answers", () => {
       vi.unstubAllGlobals();
     }
   });
-  it(
-    "offers keyboard answers on map prompts when WebGL is available",
-    async () => {
-      const webgl = true;
-      vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-      const host = document.createElement("div"),
-        root = createRoot(host);
-      const initial = startStudy(
-        {
-          ...settings,
-          topics: ["capitals"],
-          styles: { ...settings.styles, capitals: "map" },
-        },
-        42,
+  it("offers keyboard answers on map prompts when WebGL is available", async () => {
+    const webgl = true;
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div"),
+      root = createRoot(host);
+    const initial = startStudy(
+      {
+        ...settings,
+        topics: ["capitals"],
+        styles: { ...settings.styles, capitals: "map" },
+      },
+      42,
+    );
+    function Harness() {
+      const [session, setSession] = useState(initial);
+      return (
+        <StudyPanel
+          save={{ ...emptyStudy, settings: initial.settings, session }}
+          setup={false}
+          active
+          webgl={webgl}
+          onSettings={() => {}}
+          onStart={() => {}}
+          onSetup={() => {}}
+          onAction={(action) =>
+            setSession((current) => studyReducer(current, action))
+          }
+        />
       );
-      function Harness() {
-        const [session, setSession] = useState(initial);
-        return (
-          <StudyPanel
-            save={{ ...emptyStudy, settings: initial.settings, session }}
-            setup={false}
-            active
-            webgl={webgl}
-            onSettings={() => {}}
-            onStart={() => {}}
-            onSetup={() => {}}
-            onAction={(action) =>
-              setSession((current) => studyReducer(current, action))
-            }
-          />
-        );
-      }
-      try {
-        await act(async () => root.render(<Harness />));
-        const details = host.querySelector("details")!;
-        expect(details.open).toBe(!webgl);
-        if (webgl)
-          await act(async () => {
-            details.open = true;
-          });
-        const input = host.querySelector("input")!;
+    }
+    try {
+      await act(async () => root.render(<Harness />));
+      const details = host.querySelector("details")!;
+      expect(details.open).toBe(!webgl);
+      if (webgl)
         await act(async () => {
-          Object.getOwnPropertyDescriptor(
-            HTMLInputElement.prototype,
-            "value",
-          )!.set!.call(input, countryName(initial.prompt.targetId));
-          input.dispatchEvent(new Event("input", { bubbles: true }));
+          details.open = true;
         });
-        await act(async () =>
-          host
-            .querySelector("form")!
-            .dispatchEvent(
-              new Event("submit", { bubbles: true, cancelable: true }),
-            ),
-        );
-        expect(host.textContent).toContain("Well spotted.");
-        expect(host.textContent).toContain(
-          countryName(initial.prompt.targetId),
-        );
-        expect(host.querySelector(".round-feedback")).not.toBeNull();
-      } finally {
-        await act(async () => root.unmount());
-        vi.unstubAllGlobals();
-      }
-    },
-  );
+      const input = host.querySelector("input")!;
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value",
+        )!.set!.call(input, countryName(initial.prompt.targetId));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () =>
+        host
+          .querySelector("form")!
+          .dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true }),
+          ),
+      );
+      expect(host.textContent).toContain("Well spotted.");
+      expect(host.textContent).toContain(countryName(initial.prompt.targetId));
+      expect(host.querySelector(".round-feedback")).not.toBeNull();
+    } finally {
+      await act(async () => root.unmount());
+      vi.unstubAllGlobals();
+    }
+  });
 });
 
 it.each([false, true])(
@@ -239,7 +230,7 @@ it.each([false, true])(
       expect(host.textContent).not.toContain("Finish session");
       expect(host.querySelector("input")).toBeNull();
       await click("Session settings");
-      await click("Edit this session");
+      await click("Hints & pacing");
       expect(
         document.querySelector(".study-options-dialog")?.textContent,
       ).toContain("Apply & resume");
@@ -279,7 +270,8 @@ it.each([true, false])(
     );
     expect(html).not.toContain("Answer by name");
     expect(html).not.toContain("<input");
-    if (!webgl) expect(html).toContain("requires the 3D globe");
+    if (!webgl)
+      expect(html).toContain("Choose typing or multiple choice in Practice.");
   },
 );
 it("gives mobile correct-answer feedback time to read before automatic advance", async () => {
@@ -316,6 +308,73 @@ it("gives mobile correct-answer feedback time to read before automatic advance",
   } finally {
     await act(async () => root.unmount());
     vi.useRealTimers();
+    vi.unstubAllGlobals();
+  }
+});
+
+it("keeps typing available when WebGL is unavailable", () => {
+  const session = startStudy(
+    { ...settings, styles: { ...settings.styles, countries: "typing" } },
+    42,
+  );
+  const html = renderToStaticMarkup(
+    <StudyPanel
+      save={{ ...emptyStudy, session }}
+      setup={false}
+      active
+      webgl={false}
+      onSettings={() => {}}
+      onStart={() => {}}
+      onSetup={() => {}}
+      onAction={() => {}}
+    />,
+  );
+  expect(html).toContain("Your answer…");
+  expect(html).toContain("Submit answer");
+  expect(html).not.toContain("requires the 3D globe");
+});
+
+it("offers ordinary pause and finish controls for Minigame map review", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host),
+    onAction = vi.fn();
+  const session = startPlaceStudy([
+    { id: "test-place", name: "Test place", lat: 10, lng: 10 },
+  ]);
+  try {
+    await act(async () =>
+      root.render(
+        <StudyPanel
+          save={{ ...emptyStudy, session }}
+          setup={false}
+          active
+          webgl
+          onSettings={() => {}}
+          onStart={() => {}}
+          onSetup={() => {}}
+          onAction={onAction}
+        />,
+      ),
+    );
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>('[aria-label="Session settings"]')!
+        .click(),
+    );
+    const dialog = document.querySelector('[role="dialog"]')!;
+    expect(dialog.textContent).not.toContain("your friend");
+    expect(dialog.textContent).not.toContain("Pause challenge");
+    expect(dialog.textContent).toContain("Pause session");
+    const finish = [
+      ...dialog.querySelectorAll<HTMLButtonElement>("button"),
+    ].find((button) => button.textContent === "Finish this session")!;
+    await act(async () => finish.click());
+    expect(onAction).toHaveBeenCalledWith({ type: "finish" });
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
     vi.unstubAllGlobals();
   }
 });

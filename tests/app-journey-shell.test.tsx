@@ -228,7 +228,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
         await click("Study");
         expect(location.pathname).toBe("/study");
         expect(
-          host.querySelector('.mode-incoming [aria-label="Study setup"]'),
+          host.querySelector(".mode-incoming .study-history"),
         ).not.toBeNull();
       } else {
         expect(

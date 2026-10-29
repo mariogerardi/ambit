@@ -1,35 +1,163 @@
-import { StudyBack } from "./StudyBack";
+import { StudyNavigation } from "./StudyNavigation";
 import type { StudyPlaceTarget } from "./placeReview";
-import { studyComplete, studyReplayTargets } from "./engine";
-import type { StudyRecord, StudySettings, StudyReviewTarget } from "./engine";
+import { studyComplete, studyTargets } from "./engine";
+import type {
+  StudyRecord,
+  StudySettings,
+  StudyReviewTarget,
+  StudySession,
+} from "./engine";
 import { ActionIcon } from "../app/ActionIcon";
-import { studyDescription } from "./StudySetup";
+import {
+  sessionTitle,
+  sessionMethod,
+  sessionArea,
+  sessionTopics,
+} from "./sessionDescription";
 export function StudyHistory({
   records,
-  onBack,
   onView,
-  onStart,
-  onStartPlaces,
+  onReview,
+  session,
+  onResume,
+  onBuild,
+  onPacks,
 }: {
   records: StudyRecord[];
-  onBack(): void;
+  onBack?(): void;
   onView(record: StudyRecord): void;
   onStart(settings: StudySettings, targets?: StudyReviewTarget[]): void;
   onStartPlaces?(targets: StudyPlaceTarget[]): void;
+  onReview?(): void;
+  session?: StudySession;
+  onResume?(): void;
+  onBuild?(): void;
+  onPacks?(): void;
 }) {
+  const current = session && session.phase !== "summary" ? session : undefined;
+  const answered = current?.history.length ?? 0;
+  const correct =
+    current?.history.filter((answer) => answer.correct).length ?? 0;
+  const completePass =
+    !!current && !current.learningReview && current.settings.length === "all";
+  const total =
+    !current || current.learningReview
+      ? undefined
+      : current.placeReview
+        ? current.placeReview.length
+        : typeof current.settings.length === "number"
+          ? current.settings.length
+          : completePass
+            ? (current.coverage?.length ??
+              studyTargets(current.settings).length)
+            : undefined;
+  const completed =
+    completePass && current
+      ? new Set(
+          current.history.map(
+            ({ prompt }) => `${prompt.targetId}/${prompt.topic}`,
+          ),
+        ).size
+      : answered;
   const dateFormat = new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric",
     hour: "numeric",
     minute: "2-digit",
   });
   return (
-    <section className="info-view study-history">
-      <StudyBack label="Back to Study" onClick={onBack} />
+    <section className="info-view study-view study-history">
+      <StudyNavigation />
       <h1 className="editorial-heading">
-        Past <em>sessions.</em>
+        Keep <em>exploring.</em>
       </h1>
+      {current ? (
+        <section
+          className="study-current-card"
+          aria-label="Current Study session"
+        >
+          <span className="overline">
+            <ActionIcon name="study" />
+            Current session
+          </span>
+          <h2>{sessionArea(current)}</h2>
+          <p className="study-current-description">
+            {!current.placeReview && !current.learningReview && (
+              <>{sessionTopics(current)} · </>
+            )}
+            {sessionMethod(current)}
+          </p>
+          {!!answered && (
+            <p className="study-current-stats">
+              <span>
+                {completed}
+                {total !== undefined && ` of ${total}`}{" "}
+                {completePass ? "covered" : "answered"}
+              </span>
+              <span>{correct} correct so far</span>
+            </p>
+          )}
+          {total !== undefined && total > 0 && (
+            <progress
+              className="study-current-progress"
+              aria-label="Session progress"
+              value={Math.min(completed, total)}
+              max={total}
+            />
+          )}
+          <button className="primary-button" onClick={onResume}>
+            Resume session <span aria-hidden="true">→</span>
+          </button>
+        </section>
+      ) : (
+        <section className="study-session-prompt">
+          <div className="study-session-choices">
+            <button
+              className="study-session-destination study-session-packs"
+              aria-label="Browse Study Packs"
+              onClick={onPacks}
+            >
+              <strong>
+                <ActionIcon name="study" />
+                <span>Study Packs</span>
+                <span className="study-destination-arrow" aria-hidden="true">
+                  →
+                </span>
+              </strong>
+              <small>Choose a ready-made challenge.</small>
+            </button>
+            <button
+              className="study-session-destination"
+              aria-label="Build a session"
+              onClick={onBuild}
+            >
+              <strong>
+                <ActionIcon name="custom" />
+                <span>Build a session</span>
+                <span className="study-destination-arrow" aria-hidden="true">
+                  →
+                </span>
+              </strong>
+              <small>Customize your study session.</small>
+            </button>
+            <button
+              className="study-session-destination"
+              aria-label="Go to Review"
+              onClick={onReview}
+            >
+              <strong>
+                <ActionIcon name="review" />
+                <span>Review</span>
+                <span className="study-destination-arrow" aria-hidden="true">
+                  →
+                </span>
+              </strong>
+              <small>Revisit what you’ve practiced.</small>
+            </button>
+          </div>
+        </section>
+      )}
+      <h2>Past sessions</h2>
       {!records.length && (
         <p className="muted">
           Your Study sessions will appear here, including sessions ended early.
@@ -49,9 +177,7 @@ export function StudyHistory({
                 ? "Ended"
                 : "Ended early";
             const date = dateFormat.format(record.finishedAt);
-            const description = record.session.placeReview
-              ? `Map review · ${record.session.placeReview.length} places`
-              : studyDescription(record.session.settings);
+            const description = sessionTitle(record.session);
             return (
               <li key={record.id}>
                 <button
@@ -59,41 +185,30 @@ export function StudyHistory({
                   aria-label={`View results: ${description}, ${date}`}
                   onClick={() => onView(record)}
                 >
+                  <span className="study-history-description">
+                    <strong>{description}</strong>
+                    <small>
+                      {sessionMethod(record.session)} ·{" "}
+                      <time
+                        dateTime={new Date(record.finishedAt).toISOString()}
+                      >
+                        {date}
+                      </time>
+                    </small>
+                  </span>
                   <span className="study-history-score">
                     <strong>
                       {right} / {count} correct
                     </strong>
                     <small>{status}</small>
                   </span>
-                  <span className="study-history-description">
-                    {description}
+                  <span
+                    className="study-history-results-cue"
+                    aria-hidden="true"
+                  >
+                    ›
                   </span>
-                  <time dateTime={new Date(record.finishedAt).toISOString()}>
-                    {date}
-                  </time>
                 </button>
-                <div className="study-history-actions">
-                  <button
-                    className="quiet-button tertiary-action"
-                    onClick={() => onView(record)}
-                  >
-                    View results
-                  </button>
-                  <button
-                    className="quiet-button tertiary-action"
-                    aria-label={`Replay session from ${date}`}
-                    onClick={() =>
-                      record.session.placeReview
-                        ? onStartPlaces?.(record.session.placeReview)
-                        : onStart(
-                            record.session.settings,
-                            studyReplayTargets(record.session),
-                          )
-                    }
-                  >
-                    <ActionIcon name="repeat" /> Replay
-                  </button>
-                </div>
               </li>
             );
           })}

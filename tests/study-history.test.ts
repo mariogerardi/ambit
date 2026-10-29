@@ -55,8 +55,8 @@ describe("Study history and scope framing", () => {
     expect(html).toContain("Completed");
     expect(html).toContain("Ended early");
     expect(html).toContain(new Date(2000).toISOString());
-    expect(html).toContain("View results");
-    expect(html).toContain("Replay session from");
+    expect(html).toContain("View results:");
+    expect(html).not.toContain("Replay session from");
     expect(records.map((record) => record.id)).toEqual(["old", "new"]);
   });
   it("archives answers once, persists results without an active attempt and preserves the old result on replay", () => {

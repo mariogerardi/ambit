@@ -3,6 +3,8 @@ import { act, useContext, useLayoutEffect, useRef } from "react";
 import type { ComponentProps } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { StudyHistory } from "../src/study/StudyHistory";
 import { ModePanels, PanelActive } from "../src/app/ModePanels";
 
 let host: HTMLDivElement, root: ReturnType<typeof createRoot>;
@@ -197,4 +199,51 @@ it("keeps a persistent tray mounted and preserves same-page content updates", as
   );
   await finishExit();
   expect(host.querySelector(".mode-incoming")).toBe(tray);
+});
+
+it("keeps Study and other page typography stable while the app mode changes around an outgoing panel", async () => {
+  const styles = document.createElement("style");
+  styles.textContent =
+    readFileSync("src/app/styles/shell-base.css", "utf8") +
+    readFileSync("src/app/styles/study-workspace.css", "utf8");
+  document.head.append(styles);
+  const page = async (mode: string) =>
+    act(async () =>
+      root.render(
+        <div className={`experience mode-${mode}`}>
+          <ModePanels mode={mode} reduced={false}>
+            {mode === "study" ? (
+              <StudyHistory records={[]} onView={() => {}} onStart={() => {}} />
+            ) : (
+              <section className="info-view">
+                <h1 className="editorial-heading">Other page</h1>
+              </section>
+            )}
+          </ModePanels>
+        </div>,
+      ),
+    );
+  try {
+    await page("explore");
+    const otherSize = getComputedStyle(host.querySelector("h1")!).fontSize;
+    await page("study");
+    expect(
+      getComputedStyle(host.querySelector(".mode-outgoing h1")!).fontSize,
+    ).toBe(otherSize);
+    await finishExit();
+    const studySize = getComputedStyle(
+      host.querySelector(".mode-incoming h1")!,
+    ).fontSize;
+    expect(studySize).not.toBe(otherSize);
+    await page("minigames");
+    expect(
+      getComputedStyle(host.querySelector(".mode-outgoing h1")!).fontSize,
+    ).toBe(studySize);
+    await finishExit();
+    expect(getComputedStyle(host.querySelector("h1")!).fontSize).toBe(
+      otherSize,
+    );
+  } finally {
+    styles.remove();
+  }
 });

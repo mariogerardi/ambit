@@ -685,7 +685,12 @@
     padding-top: 12px;
   }
   .admin-workbench > .admin-tabs {
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .experience .admin-workbench .admin-tabs [role="tab"] {
+    gap: 6px;
+    font-size: 13px;
   }
   .admin-workbench .admin-library-controls {
     flex-direction: column;

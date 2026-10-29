@@ -77,6 +77,42 @@ it("withholds exact review targets until submission and clears pins between ques
   await render({ session });
   expect(result.places).toEqual([]);
 });
+it("labels review-preview countries and capitals anonymously and returns their flyover stops", async () => {
+  await render({
+    preview: {
+      ...settings,
+      countryNames: false,
+      capitalNames: false,
+      capitalMarkers: false,
+    },
+    previewReviewTargets: [
+      {
+        key: "wurl:CAN/country-location",
+        targetId: "wurl:CAN",
+        topic: "countries",
+        skill: "country-location",
+        attempts: 0,
+      },
+      {
+        key: "wurl:BRA/capital-name",
+        targetId: "wurl:BRA",
+        topic: "capitals",
+        skill: "capital-name",
+        attempts: 0,
+      },
+    ],
+  });
+  expect(result.regionNames).toBe("none");
+  expect(result.places?.map((place) => place.name)).toEqual(["???", "???"]);
+  expect(result.places?.[1]).toMatchObject({
+    kind: "capital",
+    lat: capitalOf("wurl:BRA").lat,
+  });
+  expect(result.states?.["wurl:CAN"]).toBe("selected");
+  expect(result.previewViews).toHaveLength(2);
+  await render({ active: false });
+  expect(result.previewViews).toEqual([]);
+});
 it("keeps normal capital pin targets hidden, shows the movable pin, and reveals the capital after submission", async () => {
   let session = startStudy(
     {
@@ -280,4 +316,46 @@ it("shows a reviewed mistake temporarily without losing summary colors when revi
   expect(result.highlight).toBeUndefined();
   await render({ session });
   expect(result.states![review.prompt.targetId]).toBe("incorrect");
+});
+
+it("hides city names until submission and keeps the recognition camera stable while typing", async () => {
+  const value: StudySettings = {
+    ...settings,
+    scope: "all",
+    topics: ["cities"],
+    styles: { ...settings.styles, cities: "typing" },
+  };
+  let session = startStudy(value, 42);
+  await render({ session });
+  expect(result.places?.[0].name).toBe("?");
+  const focus = result.capitalFocus;
+  session = studyReducer(session, {
+    type: "text",
+    value: session.prompt.place!.name,
+  });
+  await render({ session });
+  expect(result.capitalFocus).toBe(focus);
+  expect(result.places?.[0].name).toBe("?");
+  session = studyReducer(session, { type: "submit" });
+  await render({ session });
+  expect(result.places?.[0].name).toBe(session.prompt.place!.name);
+});
+
+it("does not mark a correct city-country answer as incorrect when inspecting results", async () => {
+  const value: StudySettings = {
+    ...settings,
+    scope: "all",
+    topics: ["cities"],
+    styles: { ...settings.styles, cities: "map" },
+    autoAdvance: false,
+  };
+  let session = startStudy(value, 42);
+  session = studyReducer(session, {
+    type: "pick",
+    id: session.prompt.place!.countryId!,
+  });
+  const review = session.history[0];
+  session = studyReducer(session, { type: "finish" });
+  await render({ session, review });
+  expect(result.states?.[review.prompt.place!.countryId!]).toBe("answer");
 });

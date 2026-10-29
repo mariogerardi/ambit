@@ -124,9 +124,9 @@ it("does not reset focus when parent callbacks change", async () => {
   expect(onClose).toHaveBeenCalledWith("new");
 });
 
-it("ships an illustration for every preset and minigame", () => {
+it("ships every referenced legacy preview illustration", () => {
   const paths = [
-    ...STUDY_PATHS.map((path) => path.image),
+    ...STUDY_PATHS.flatMap((path) => (path.image ? [path.image] : [])),
     "/previews/shared-neighbors.svg",
     "/previews/missing-borders.svg",
     "/previews/border-run.svg",
