@@ -43,7 +43,7 @@ export function dateOrdinal(key: string): number {
     throw Error("Invalid Journey date");
   return date.getTime() / 86400000;
 }
-/** FNV-1a 32-bit over the ASCII YYYY-MM-DD date, version 1. Mirrors the backend. */
+/** FNV-1a 32-bit over ASCII text, version 1. Mirrors the backend. */
 export function dailyHash(date: string): number {
   let value = 2166136261;
   for (const character of date)
@@ -62,6 +62,14 @@ export function seededJourney<T extends JourneySummary>(
   const first = dateOrdinal(FIRST_DAILY_DATE);
   const target = dateOrdinal(date);
   const memo = new Map<string, string>();
+  const cycle =
+    candidates.length > NO_REPEAT_DAYS
+      ? [...candidates].sort(
+          (a, b) =>
+            dailyHash(a.id) - dailyHash(b.id) ||
+            (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+        )
+      : undefined;
   for (let ordinal = Math.min(first, target); ordinal <= target; ordinal++) {
     const day = new Date(ordinal * 86400000).toISOString().slice(0, 10);
     const stored = records[day];
@@ -83,6 +91,17 @@ export function seededJourney<T extends JourneySummary>(
           new Date((ordinal - offset) * 86400000).toISOString().slice(0, 10),
         )!,
       );
+    if (cycle) {
+      const position =
+        ((ordinal - first) % cycle.length + cycle.length) % cycle.length;
+      const selected = Array.from(
+        { length: cycle.length },
+        (_, offset) => cycle[(position + offset) % cycle.length],
+      ).find((journey) => !recent.includes(journey.id));
+      if (!selected) throw Error("No eligible Journeys are available");
+      memo.set(day, selected.id);
+      continue;
+    }
     for (let window = recent.length; window >= 0; window--) {
       const eligible = candidates.filter(
         (journey) => !recent.slice(0, window).includes(journey.id),

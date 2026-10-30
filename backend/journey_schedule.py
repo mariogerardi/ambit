@@ -32,7 +32,7 @@ def day_key(day):
 
 
 def hash_date(day):
-    """FNV-1a 32-bit over the ASCII YYYY-MM-DD date, version 1."""
+    """FNV-1a 32-bit over ASCII text, version 1."""
     value = 2166136261
     for character in day:
         value = ((value ^ ord(character)) * 16777619) & 0xffffffff
@@ -53,6 +53,11 @@ def choose(day, records, catalog=CATALOG, memo=None):
     candidates = sorted(catalog)
     if not candidates:
         raise ValueError("No Journeys are available")
+    cycle = (
+        sorted(candidates, key=lambda item: (hash_date(item), item))
+        if len(candidates) > NO_REPEAT_DAYS
+        else None
+    )
     target = parse_day(day)
     today = current_day().isoformat()
     current = min(FIRST_DAY, target)
@@ -69,6 +74,18 @@ def choose(day, records, catalog=CATALOG, memo=None):
             if key not in memo:
                 recent = [memo[(current - timedelta(days=offset)).isoformat()]
                           for offset in range(1, min(NO_REPEAT_DAYS, (current - FIRST_DAY).days) + 1)]
+                if cycle:
+                    position = (current - FIRST_DAY).days % len(cycle)
+                    selected = next(
+                        (cycle[(position + offset) % len(cycle)]
+                         for offset in range(len(cycle))
+                         if cycle[(position + offset) % len(cycle)] not in recent),
+                        None,
+                    )
+                    if selected is None:
+                        raise ValueError("No eligible Journeys are available")
+                    memo[key] = selected
+                    continue
                 for window in range(len(recent), -1, -1):
                     eligible = [item for item in candidates if item not in recent[:window]]
                     if len(eligible) >= (2 if len(candidates) > 2 else 1):
