@@ -65,6 +65,50 @@
     ]
   },
   {
+    "id": "beasts-on-banners-v1",
+    "addedAt": "2026-10-29",
+    "title": "Beasts on Banners",
+    "saveRevision": 2,
+    "legacyRoundLabels": {
+      "beasts-mexico-sign-v1": "Mexico City · a founding legend"
+    },
+    "description": "Five creatures on five flags: uncover the legends, inherited emblems and living landscapes behind them.",
+    "path": "/journey/beasts-on-banners",
+    "module": "./beastsOnBannersJourney.ts",
+    "rounds": [
+      {
+        "id": "beasts-mexico-sign-v1",
+        "label": "Founding legend",
+        "progressLabel": "Mexico",
+        "resolvedLabel": "Mexico City · Founding legend"
+      },
+      {
+        "id": "beasts-andorra-heraldry-v1",
+        "label": "Inherited heraldry",
+        "progressLabel": "Andorra",
+        "resolvedLabel": "Andorra · Inherited heraldry"
+      },
+      {
+        "id": "beasts-bhutan-dragon-v1",
+        "label": "Mythology and identity",
+        "progressLabel": "Bhutan",
+        "resolvedLabel": "Bhutan · Mythology and identity"
+      },
+      {
+        "id": "beasts-sri-lanka-lion-v1",
+        "label": "Sovereignty",
+        "progressLabel": "Sri Lanka",
+        "resolvedLabel": "Sri Lanka · Sovereignty"
+      },
+      {
+        "id": "beasts-bolivia-animal-v1",
+        "label": "Living wildlife",
+        "progressLabel": "Bolivia",
+        "resolvedLabel": "Bolivia · Living wildlife"
+      }
+    ]
+  },
+  {
     "id": "beyond-the-maple-leaf-v1",
     "addedAt": "2026-10-11",
     "title": "Beyond the Maple Leaf",

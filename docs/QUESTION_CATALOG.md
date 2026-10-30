@@ -37,6 +37,7 @@ For an approved specification, start with
 | Exceptions to the Rule             | `/journey/exceptions-to-the-rule`             | [twelfthJourney.ts](../src/game/twelfthJourney.ts)                             |
 | On Russia’s Doorstep               | `/journey/try-not-to-click-russia`            | [fifteenthJourney.ts](../src/game/fifteenthJourney.ts)                         |
 | Chasing the Sun                    | `/journey/chasing-the-sun`                    | [sunFlagsJourney.ts](../src/game/sunFlagsJourney.ts)                           |
+| Beasts on Banners                  | `/journey/beasts-on-banners`                  | [beastsOnBannersJourney.ts](../src/game/beastsOnBannersJourney.ts)             |
 | Down the Danube                    | `/journey/down-the-danube`                    | [danubeJourney.ts](../src/game/danubeJourney.ts)                               |
 | Same Hour, Different Worlds        | `/journey/same-hour-different-worlds`         | [sameHourJourney.ts](../src/game/sameHourJourney.ts)                           |
 | Same Name, Different Place         | `/journey/same-name-different-place`          | [sharedNamesJourney.ts](../src/game/sharedNamesJourney.ts)                     |

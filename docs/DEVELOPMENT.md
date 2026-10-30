@@ -88,6 +88,12 @@ For deferred, unregistered content, normal routes and the library cannot load an
 arbitrary module. `/review/made-in-china.html` is the existing direct-import,
 in-memory fixture; adapting an isolated fixture is an explicit development step,
 not temporary registration or server-side draft publication.
+`/review/beasts-on-banners.html` directly reviews Beasts on Banners with the shared
+globe, pin/choice controls, help, reveals and completion. Its state stays in memory;
+restarting or reloading clears the review. The registered Journey can also be
+opened in the full App review at
+`/review/journeys.html?journey=beasts-on-banners`, or through its Admin-only
+practice route `/journey/beasts-on-banners`.
 
 Vitest covers logic, local assets, and DOM integration with a
 mocked globe. It does not exercise browser/WebGL rendering or actual mobile input.
