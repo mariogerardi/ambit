@@ -61,6 +61,18 @@ class JourneyScheduleTests(unittest.TestCase):
         self.assertTrue(all(choices[index] != choices[index + 1] for index in range(len(choices) - 1)))
         self.assertEqual(choices, [schedule.choose(date.fromordinal(day).isoformat(), {}, dict(reversed(list(pool.items())))) for day in days])
 
+    def test_automatic_schedule_covers_every_registered_journey_within_90_days(self):
+        memo = {}
+        choices = [
+            schedule.choose(
+                date.fromordinal(date(2027, 1, 1).toordinal() + offset).isoformat(),
+                {},
+                memo=memo,
+            )
+            for offset in range(90)
+        ]
+        self.assertEqual(set(choices), set(schedule.CATALOG))
+
     def test_expanding_catalog_preserves_locked_and_assigned_choices(self):
         original = {"one": {"id": "one"}}
         expanded = {**original, "two": {"id": "two"}, "three": {"id": "three"}}

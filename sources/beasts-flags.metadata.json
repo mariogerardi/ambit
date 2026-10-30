@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "sourceCommit": "c09927e63705529bbf59ca6684cd9b23225dddad",
+  "license": "Public domain per source README; originals from Wikimedia Commons",
+  "assets": [
+    {
+      "round": 1,
+      "countryId": "wurl:MEX",
+      "originalFull": "/flags/study/flag-110.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/mx.svg",
+      "sourceSha256": "96daac3e66e1a8d5bca90b8abdca9c283bd54c497053fa18d5f6583d20e6b146",
+      "originalDetail": {
+        "asset": "/journeys/beasts-on-banners/01-original-detail.svg",
+        "sha256": "0171e7abc85927f5a272b1064588c84dba1d72fbb268b2c7c22d81d411c619a0",
+        "viewBox": "350 145 280 265"
+      }
+    },
+    {
+      "round": 2,
+      "countryId": "wurl:AND",
+      "originalFull": "/flags/study/flag-004.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/ad.svg",
+      "sourceSha256": "3a0b78b2fdf725bb9607bcbd3d88d14b571bf2b93a921c13337727bc53ddca04",
+      "originalDetail": {
+        "asset": "/journeys/beasts-on-banners/02-original-detail.svg",
+        "sha256": "4f22bc02a55e62abeaca77288343dbebc54bd81663c9e674c94066ae6c90b0ea",
+        "viewBox": "340 180 320 340"
+      },
+      "changes": "Removed cow group and duplicate; added red vector question mark.",
+      "clueFull": {
+        "asset": "/journeys/beasts-on-banners/02-clue.svg",
+        "sha256": "0298a60aaba02aa91d6d284501180965243d76d2d98fadc4bda4475f7596a621",
+        "viewBox": "0 0 1000 700"
+      },
+      "clueDetail": {
+        "asset": "/journeys/beasts-on-banners/02-clue-detail.svg",
+        "sha256": "4045ec6c285033e5046dc4ece8249f641edd5c7feb6b173a3b3881afde0654c9",
+        "viewBox": "340 180 320 340"
+      }
+    },
+    {
+      "round": 3,
+      "countryId": "wurl:BTN",
+      "originalFull": "/flags/study/flag-019.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/bt.svg",
+      "sourceSha256": "4bd19c7ff9d662d0d8bc1acf20c1aa0c1e8172c800ad5562a2b1b3df2e168e98",
+      "originalDetail": {
+        "asset": "/journeys/beasts-on-banners/03-original-detail.svg",
+        "sha256": "ed503eec958357a419c5c739de8360eede08761e05854c04e7f4ff51b06c0290",
+        "viewBox": "85 55 730 490"
+      }
+    },
+    {
+      "round": 4,
+      "countryId": "wurl:LKA",
+      "originalFull": "/flags/study/flag-164.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/lk.svg",
+      "sourceSha256": "9b3baf492e13631d8a902a43434e88039d650f3fbe496ff6065a7f8f46192a92",
+      "originalDetail": {
+        "asset": "/journeys/beasts-on-banners/04-original-detail.svg",
+        "sha256": "80c4c61a705a0d11ec664bf4d9f488050806b71af510ec53ac17deb79faa2524",
+        "viewBox": "424 56 720 488"
+      },
+      "changes": "Removed blade, guard and hilt subpaths; retained paw/fingers and lion.",
+      "clueFull": {
+        "asset": "/journeys/beasts-on-banners/04-clue.svg",
+        "sha256": "981b958c5fce7d1c6a164e368d18f2ad4f7cb9635bdf3efcf894cfc89c8c792c",
+        "viewBox": "0 0 1200 600"
+      },
+      "clueDetail": {
+        "asset": "/journeys/beasts-on-banners/04-clue-detail.svg",
+        "sha256": "c05dbbed8ca73dce67564f9dabbb8311be679035fcfaaf534f12488c3b7b863a",
+        "viewBox": "424 56 720 488"
+      }
+    },
+    {
+      "round": 5,
+      "countryId": "wurl:BOL",
+      "originalFull": "/flags/study/flag-020.svg",
+      "sourceUrl": "https://raw.githubusercontent.com/hampusborgos/country-flags/c09927e63705529bbf59ca6684cd9b23225dddad/svg/bo.svg",
+      "sourceSha256": "cb037b0dd478653b5536bc75074c6ac15c7da5799cb8ecc818f369a00a88fd7f",
+      "originalDetail": {
+        "asset": "/journeys/beasts-on-banners/05-original-detail.svg",
+        "sha256": "bdbf8284a97a9458d02adb0d6341b40369a05706cf6bddb5f650d8d1a21434ba",
+        "viewBox": "133 89 25 31"
+      },
+      "changes": "Removed 18 animal fill/outline paths; retained original landscape beneath.",
+      "clueFull": {
+        "asset": "/journeys/beasts-on-banners/05-clue.svg",
+        "sha256": "8da9f06c8504898228f734fd7b3949e511cfba9dd5162f665549a5b127e69f7c",
+        "viewBox": "0 0 291.042 198.438"
+      },
+      "clueDetail": {
+        "asset": "/journeys/beasts-on-banners/05-clue-detail.svg",
+        "sha256": "e4e91025567497c744ffb9c60599789d12192defb5fcab8634940f33c7588c4a",
+        "viewBox": "133 89 25 31"
+      }
+    }
+  ]
+}

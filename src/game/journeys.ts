@@ -11,6 +11,7 @@ import { DANUBE_JOURNEY } from "./danubeJourney";
 import { SHARED_NAMES_JOURNEY } from "./sharedNamesJourney";
 import { SAME_HOUR_JOURNEY } from "./sameHourJourney";
 import { SUN_FLAGS_JOURNEY } from "./sunFlagsJourney";
+import { BEASTS_ON_BANNERS_JOURNEY } from "./beastsOnBannersJourney";
 import { CANADA_JOURNEY } from "./canadaJourney";
 import { ANDES_JOURNEY } from "./andesJourney";
 import { LATITUDE_JOURNEY } from "./latitudeJourney";
@@ -27,6 +28,7 @@ import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
 import { FAR_FROM_EVERYTHING_JOURNEY } from "./farFromEverythingJourney";
 import { REGGAETON_JOURNEY } from "./reggaetonJourney";
 export const JOURNEYS = [
+  BEASTS_ON_BANNERS_JOURNEY,
   MADE_IN_CHINA_JOURNEY,
   SMALL_WONDERS_JOURNEY,
   SHAPE_OF_INDIA_JOURNEY,
@@ -58,6 +60,7 @@ export const JOURNEYS = [
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
+    [BEASTS_ON_BANNERS_JOURNEY.id]: "/journey/beasts-on-banners",
     [MADE_IN_CHINA_JOURNEY.id]: "/journey/made-in-china",
     [SMALL_WONDERS_JOURNEY.id]: "/journey/small-wonders",
     [SHAPE_OF_INDIA_JOURNEY.id]: "/journey/the-shape-of-india",

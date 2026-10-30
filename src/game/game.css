@@ -1537,6 +1537,10 @@
   height: auto;
   max-height: 180px;
 }
+.flag-comparison-single .flag-full:only-child {
+  width: min(100%, 360px);
+  max-height: 240px;
+}
 .flag-clue-with-context > img {
   width: min(48%, 200px);
 }
@@ -1568,6 +1572,10 @@
 }
 .flag-collection .flag-full {
   height: 60px;
+}
+.flag-collection .flag-full:only-child {
+  width: 100%;
+  height: 172px;
 }
 @media (max-width: 560px) {
   .flag-collection {

@@ -292,6 +292,13 @@
     max-width: 100%;
     object-fit: contain;
   }
+  .experience .flag-clue-with-context > img {
+    width: min(48%, 200px);
+    min-width: 0;
+  }
+  .experience .flag-context img {
+    width: 100%;
+  }
   .experience .custom-pool {
     max-height: 220px;
   }

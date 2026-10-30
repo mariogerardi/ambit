@@ -154,6 +154,15 @@ SHA-256 checksums, and native dimensions are recorded for each asset in
 `sources/flags.metadata.json`. `scripts/prepare-flags.py` reproduces the catalog;
 it is a preparation tool only. No flag, capital, or geography API/CDN is used at runtime.
 
+The Beasts on Banners details and puzzle illustrations in
+`public/journeys/beasts-on-banners/` derive only from those same pinned flag
+vectors. Original full flags remain unchanged. `sources/beasts-flags.metadata.json`
+records inputs, transformations, viewports and output hashes;
+`scripts/prepare-beasts-flags.py` reproduces these local derivatives. The altered
+clues are puzzle illustrations, not official flag variants. Their source notice
+and factual references are retained in that directory's `SOURCES.md`. No
+PST-Flags artwork or embedded raster strips from the design handoff are included.
+
 ## Major-city display catalog
 
 **GeoNames**, CC BY 4.0 (https://www.geonames.org/ and
