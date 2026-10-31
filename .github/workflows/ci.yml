@@ -14,8 +14,39 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  validate:
-    name: Tests and production build
+  frontend-tests:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up pinned Node runtime
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run unit, asset, and DOM tests
+        run: npm run test:all -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest.xml
+      - name: Upload frontend test results to Datadog
+        if: always()
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+          DD_ENV: ci
+        run: |
+          if [ -n "$DATADOG_API_KEY" ] && [ -f reports/vitest.xml ]; then
+            if ! npx --yes @datadog/datadog-ci@5.25.0 junit upload --service ambit-web reports/vitest.xml; then
+              echo "::warning::Could not upload frontend test results to Datadog."
+            fi
+          fi
+
+  build-and-backend:
+    name: Backend, tooling, and build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -34,22 +65,16 @@ jobs:
         run: npm run check:docs
       - name: Check backend security and feedback behavior
         run: python3 scripts/run-python-tests.py
-      - name: Run unit, asset, and DOM tests
-        if: always()
-        run: npm run test:all -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest.xml
-      - name: Upload test results to Datadog
+      - name: Upload backend test results to Datadog
         if: always()
         env:
           DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
           DATADOG_SITE: datadoghq.com
           DD_ENV: ci
         run: |
-          if [ -n "$DATADOG_API_KEY" ]; then
-            if [ -f reports/python.xml ]; then
-              npx --yes @datadog/datadog-ci@5.25.0 junit upload --service ambit-api reports/python.xml
-            fi
-            if [ -f reports/vitest.xml ]; then
-              npx --yes @datadog/datadog-ci@5.25.0 junit upload --service ambit-web reports/vitest.xml
+          if [ -n "$DATADOG_API_KEY" ] && [ -f reports/python.xml ]; then
+            if ! npx --yes @datadog/datadog-ci@5.25.0 junit upload --service ambit-api reports/python.xml; then
+              echo "::warning::Could not upload backend test results to Datadog."
             fi
           fi
       - name: Check portable Journey exporter
@@ -69,7 +94,9 @@ jobs:
           DATADOG_SITE: datadoghq.com
         run: |
           if [ -n "$DATADOG_API_KEY" ]; then
-            npx --yes @datadog/datadog-ci@5.25.0 sourcemaps upload dist --service ambit-web --release-version "$GITHUB_SHA" --minified-path-prefix https://playambit.com
+            if ! npx --yes @datadog/datadog-ci@5.25.0 sourcemaps upload dist --service ambit-web --release-version "$GITHUB_SHA" --minified-path-prefix https://playambit.com; then
+              echo "::warning::Could not upload production source maps to Datadog; RUM errors may lack original source locations."
+            fi
           else
             echo "::notice::Set DATADOG_API_KEY to enable RUM source map uploads."
           fi
@@ -77,13 +104,28 @@ jobs:
         run: find dist -type f -name '*.map' -delete
       - name: Check dependency advisories
         run: npm audit --audit-level=high
-      - name: Retain verified production artifact
+      - name: Retain production artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: production-site
           path: dist/
           if-no-files-found: error
           retention-days: 90
+
+  validate:
+    name: Tests and production build
+    if: always()
+    needs: [frontend-tests, build-and-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all validation jobs to succeed
+        env:
+          FRONTEND_RESULT: ${{ needs.frontend-tests.result }}
+          BUILD_RESULT: ${{ needs.build-and-backend.result }}
+        run: |
+          echo "Frontend tests: $FRONTEND_RESULT"
+          echo "Backend, tooling, and build: $BUILD_RESULT"
+          test "$FRONTEND_RESULT" = success && test "$BUILD_RESULT" = success
 
   deploy:
     name: Deploy production
@@ -116,7 +158,7 @@ jobs:
           role-session-name: ambit-${{ github.run_id }}
       - name: Publish verified artifact
         run: python3 scripts/deploy-production.py --expected-commit "$GITHUB_SHA"
-      - name: Mark production deployment in Datadog
+      - name: Mark frontend deployment in Datadog
         env:
           DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
           DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
@@ -125,6 +167,7 @@ jobs:
           DD_BETA_COMMANDS_ENABLED: "1"
         run: |
           if [ -n "$DATADOG_API_KEY" ]; then
-            npx --yes @datadog/datadog-ci@5.25.0 deployment mark --env production --service ambit-web --revision "$GITHUB_SHA"
-            npx --yes @datadog/datadog-ci@5.25.0 deployment mark --env production --service ambit-api --revision "$GITHUB_SHA"
+            if ! npx --yes @datadog/datadog-ci@5.25.0 deployment mark --env production --service ambit-web --revision "$GITHUB_SHA"; then
+              echo "::warning::Could not mark the frontend deployment in Datadog."
+            fi
           fi

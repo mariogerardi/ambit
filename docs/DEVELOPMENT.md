@@ -149,9 +149,22 @@ backend files go after `python3 scripts/run-python-tests.py`.
 | Backend APIs/SDK: `backend/handler.py`, `community.py`, `dynamodb.py`                                      | `backend/test_services.py`, `backend/test_community.py`, `backend/test_dynamodb.py`.                                                                                                                                                                                                                                                                               |
 | Schedule/staging: `journey_schedule.py`, `journey_lock.py`, `staging_demo.py`                              | `backend/test_journey_schedule.py`, `backend/test_journey_lock.py`, `backend/test_staging_demo.py`.                                                                                                                                                                                                                                                                |
 
-Use TypeScript checks for typed changes. For catalog metadata/registration changes,
-include `tests/catalog-invariants.test.ts` locally. CI runs the complete suites
-and build before merge; do not repeat that full run locally by default.
+For changes that cross these areas, also select checks at the affected boundaries:
+
+- Journey registration or eligibility: run `tests/catalog-invariants.test.ts`,
+  `tests/journey-schedule.test.ts`, and `backend/test_journey_schedule.py` to
+  cover catalog and frontend/backend scheduling behavior. For metadata-only
+  changes, use the catalog invariant check.
+- Shared `App.tsx` state, navigation, or interaction guards: inspect which modes
+  consume the changed behavior and run their relevant shell tests. For example,
+  Study history guards can affect `tests/minigame-review-shell.test.tsx` as well
+  as `tests/app-study-shell.test.tsx`.
+- Renamed controls, routes, or confirmation dialogs: inspect existing integration
+  flows that use them, including cross-mode callers, and run the matching shell
+  tests. Update expectations only when the behavior intentionally changed.
+
+Use TypeScript checks for typed changes. CI runs the complete suites and build
+before merge; do not repeat that full run locally by default.
 
 Date-selection parity uses the frozen catalogs and vectors in
 `tests/fixtures/journey-schedule-vectors.json`, shared by

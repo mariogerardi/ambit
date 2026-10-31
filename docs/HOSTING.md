@@ -8,16 +8,18 @@ and DNS are managed through Route 53.
 
 Pushes to `main` run the [CI workflow](../.github/workflows/ci.yml). After locked
 dependency installation, documentation checks, tests, the production build, and
-the dependency audit pass, GitHub retains the exact `dist/` artifact. Deployment
-to Amplify also requires `DAILY_SCHEDULE_CUTOVER_READY=true`; see
+the dependency audit pass, the retained `dist/` artifact is eligible for
+deployment. Deployment to Amplify also requires `DAILY_SCHEDULE_CUTOVER_READY=true`; see
 [Schedule cutover](SERVICES.md#schedule-cutover). Pull requests validate and retain
 their artifact without deploying. A manual workflow run on `main` can redeploy
 the current source when the cutover gate is enabled.
 
 `main` requires a pull request and an up-to-date, passing **Tests and production
 build** check. The rule applies to administrators, blocks force pushes and branch
-deletion, and requires no reviewer approval. This check runs the frontend and
-backend tests; the production deploy job depends on it.
+deletion, and requires no reviewer approval. This aggregate check requires both
+the frontend test job and the backend, tooling, and build job to succeed; the
+production deploy job depends on it. An artifact from a failed or incomplete run
+has not passed the full gate and must not be used for release or rollback.
 
 For a Journey catalog change, run relevant Journey/catalog tests and TypeScript
 locally. CI runs the full suites and build before merge; a duplicate full local
@@ -26,6 +28,28 @@ separate; use the tested commit and procedure in [Services](SERVICES.md).
 Local deployments use the supported `--no-wait` path and report the job/stack ID
 and status link promptly. Wait for completion or verify hosted behavior only when
 the task explicitly requires it.
+
+### Merge and release handoff
+
+In the PR description or release handoff, record the following as applicable:
+
+- The PR link, source branch and exact head commit; after merge, identify the
+  resulting `main` commit separately, especially for a squash merge.
+- The checks run and their results, including the required CI check for the
+  current PR commit. State what was not verified and distinguish mocked tests
+  from browser, device, or hosted checks.
+- Backend, migration, or configuration dependencies, including required release
+  order and compatibility with the currently deployed frontend and backend.
+- The actual state: PR open or merged; frontend and backend deployments not
+  started, initiated, succeeded, failed, or unknown. Include workflow, job, or
+  stack links or IDs when available. A merged PR alone does not establish that a
+  deployment started or succeeded.
+
+Before an authorized merge, check that the PR targets `main`, is up to date, and
+the required check has passed for its current head. Merging can trigger production
+frontend deployment after main-branch validation; backend deployment is separate.
+Report the known status without polling unless verification is explicitly requested
+or required to complete the task. Do not deploy without authorization.
 
 AWS credentials are issued through GitHub OIDC. The IAM role trusts only this
 repository's immutable GitHub identity and `main` branch, and permits deployment operations on Ambit's production

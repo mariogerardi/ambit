@@ -428,7 +428,12 @@ private GitHub Actions `DATADOG_API_KEY` secret. Main-branch CI uploads hidden m
 with `service:ambit-web`, the build's Git SHA, and the `https://playambit.com` URL
 prefix, then removes maps from the site artifact. The deployment packager also
 excludes maps for local builds. The upload step skips with a notice when the secret
-is absent; the key is never a Vite variable or bundled in browser code.
+is absent; the key is never a Vite variable or bundled in browser code. CI test
+result uploads, source-map uploads, and frontend deployment markers are best
+effort: failures produce GitHub Actions warnings but do not block validation or
+change a successful deployment result. Missing source maps can leave RUM errors
+without original source locations. The frontend workflow marks only `ambit-web`;
+backend deployment events are sent separately as described below.
 
 ## Backend deployment
 
