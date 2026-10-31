@@ -25,6 +25,23 @@ These instructions apply to every coding agent working in this repository.
 - Keep updates and handoffs concise: what changed, what was verified, and any
   unresolved limitation.
 
+## Branches and worktrees
+
+- For a new independent change, fetch `origin` and start a dedicated branch from
+  current `origin/main`. Continue an existing branch when the task belongs to its
+  ongoing work or the user specifies it; preserve uncommitted changes.
+- Before switching branches or creating a worktree, inspect Git status and
+  `git worktree list`. Use separate worktrees for concurrent independent work;
+  do not disturb another worktree or its branch.
+- After a squash merge, start the next independent change from freshly fetched
+  `origin/main` rather than continuing the merged feature branch.
+- Review a branch's commits, uncommitted work, remote state, and worktree use
+  before cleanup. Do not infer that it is safe to delete solely from
+  `git branch --merged`; squash-merged histories may not appear there.
+- For PRs and releases, use the merge and release handoff in `docs/HOSTING.md`:
+  identify the PR and commit, checks and limitations, backend dependencies, and
+  the actual merge and deployment status. A merge may trigger production deployment.
+
 ## Focus verification: get in, get out
 
 - Select relevant test files before running checks. For mechanical moves,
