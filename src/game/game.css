@@ -89,12 +89,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 22px;
-  min-height: 48px;
+  min-height: var(--action-min-height);
   border-radius: 8px;
-  padding: 13px 18px;
+  padding: var(--action-padding);
   background: var(--ui-action, #e5cf94);
   color: var(--ui-on-accent, #203b3b);
-  font-size: 12px;
+  font-size: var(--action-font-size);
   font-weight: 500;
 }
 .primary-button:hover {

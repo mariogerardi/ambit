@@ -1,6 +1,28 @@
 import { GlobeDisplaySettings } from "./GlobeDisplaySettings";
 import type { GlobeLayers } from "./worldPreferences";
 
+export function GlobeRecenter({
+  ready,
+  onRecenter,
+}: {
+  ready: boolean;
+  onRecenter(): void;
+}) {
+  return (
+    <button
+      className="globe-recenter-button"
+      data-dd-action-name="Globe Recenter"
+      aria-label="Recenter"
+      title="Recenter"
+      disabled={!ready}
+      onClick={onRecenter}
+    >
+      <span aria-hidden="true">◎</span>
+      <span className="mobile-map-tool-label"> Recenter</span>
+    </button>
+  );
+}
+
 export function GlobeControls({
   compact = false,
   motion,
@@ -13,6 +35,7 @@ export function GlobeControls({
   layers,
   onLayers,
   scope,
+  onRecenter,
 }: {
   compact?: boolean;
   motion: boolean;
@@ -25,6 +48,7 @@ export function GlobeControls({
   layers: GlobeLayers;
   onLayers(layers: GlobeLayers): void;
   scope: string;
+  onRecenter?(): void;
 }) {
   const rotationLabel = reduced
     ? "Rotation disabled by reduced motion preference"
@@ -37,6 +61,7 @@ export function GlobeControls({
       role="group"
       aria-label="Globe rotation controls"
     >
+      {onRecenter && <GlobeRecenter ready={ready} onRecenter={onRecenter} />}
       <div className="globe-playback" role="group" aria-label="Earth rotation">
         <button
           data-dd-action-name="Globe Toggle Rotation"

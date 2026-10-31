@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 import type { JourneySummary } from "../game/journeyRegistry";
 import { unfinished } from "./dailyProgress";
 import type { DailyAttempt } from "./dailyProgress";
@@ -28,6 +28,7 @@ export function HomePanel({
   onExplore(): void;
   onStudy(): void;
 }) {
+  const titleId = useId();
   const title = useRef<HTMLHeadingElement>(null);
   useLayoutEffect(() => {
     const heading = title.current;
@@ -82,7 +83,7 @@ export function HomePanel({
     <section className="home-story home-menu">
       <div className="daily-menu">
         <span className="overline daily-menu-eyebrow">TODAY’S JOURNEY</span>
-        <h2 ref={title}>
+        <h2 ref={title} id={titleId}>
           <span>{journey.title}</span>
         </h2>
         <p className="daily-menu-description">{journey.description}</p>
@@ -132,20 +133,21 @@ export function HomePanel({
             );
           })}
         </div>
-        <div className="daily-menu-actions">
-          <button
-            className="primary-button daily-menu-action"
-            data-dd-action-name="Home Journey"
-            disabled={!ready}
-            onClick={onPlay}
-          >
-            <ActionIcon name="journey" />
-            <span className="daily-menu-action-label">{label}</span>
-            <span className="daily-menu-action-arrow" aria-hidden="true">
-              →
-            </span>
-          </button>
-        </div>
+        <button
+          className="daily-menu-action"
+          data-dd-action-name="Home Journey"
+          aria-label={label}
+          aria-describedby={titleId}
+          disabled={!ready}
+          onClick={onPlay}
+        >
+          <span className={attempt ? "daily-menu-state" : "sr-only"}>
+            {label}
+          </span>
+          <span className="daily-menu-action-arrow" aria-hidden="true">
+            →
+          </span>
+        </button>
       </div>
       {scheduleError && (
         <p role="alert">

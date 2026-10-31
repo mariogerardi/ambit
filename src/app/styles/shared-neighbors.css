@@ -37,10 +37,10 @@
 }
 .experience .minigame-action-row .primary-button {
   width: 100%;
-  min-height: 44px;
+  min-height: var(--action-min-height);
   margin: 0;
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: var(--action-padding);
+  font-size: var(--action-font-size);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -120,7 +120,7 @@
   line-height: 1.6;
 }
 .experience .shared-neighbors-game > .primary-button {
-  min-height: 44px;
+  min-height: var(--action-min-height);
 }
 .minigame-progress {
   display: flex;
@@ -182,10 +182,10 @@
   line-height: 21px;
 }
 .experience .minigame-answer-area .primary-button {
-  min-height: 44px;
+  min-height: var(--action-min-height);
   width: 100%;
   margin: 0;
-  font-size: 14px;
+  font-size: var(--action-font-size);
 }
 .minigame-overview {
   padding-top: 0;

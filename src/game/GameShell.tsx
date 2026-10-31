@@ -900,12 +900,6 @@ export function GameShell({
             <span className="hover-place" aria-live="polite">
               {visibleHover ?? "Drag to rotate"}
             </span>
-            <button
-              data-dd-action-name="Journey Recenter"
-              onClick={() => frame(round.focus)}
-            >
-              ◎ Recenter
-            </button>
           </>
         )}
       </div>

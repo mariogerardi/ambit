@@ -96,6 +96,17 @@ freshness, preserved geography and live image switching.
 
 ## What a theme changes
 
+Shared action sizing is defined by `--action-min-height`, `--action-font-size`,
+and `--action-padding` in `src/style.css`. Journey, Study, and minigame actions
+share a 48px minimum height and may grow for wrapped text or help/points metadata.
+Study Packs and Minigames use `carousel-navigation` from
+`src/app/styles/shared-controls.css` for matching 44px arrow controls and icons.
+Home cards share raised hover/focus surfaces and full-strength borders while
+Archive retains its stacked shape and editorial accent. Question help is omitted
+when unavailable; exhausted authored help remains visibly disabled.
+Home's Daily Journey card is one full-card action with a top-right arrow; Resume
+and View result appear as compact state labels, and readiness gates the entire card.
+
 | Area                 | Theme-controlled appearance                                                           | Boundary                                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Page and text        | Background, primary/muted/faint text, editorial emphasis                              | Font families, sizes, weights, spacing, and heading italics are shared.                                                               |

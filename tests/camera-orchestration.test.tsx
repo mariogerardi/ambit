@@ -11,7 +11,10 @@ import { createQuestionContext } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
 import { reviewTourFrame, REVIEW_TOUR_ALTITUDE } from "../src/study/reviewTour";
 import { worldAltitude } from "../src/globe/camera";
-import { defaultSettings as defaultStudySettings } from "../src/study/engine";
+import {
+  defaultSettings as defaultStudySettings,
+  startStudy,
+} from "../src/study/engine";
 import type { GlobeHandle } from "../src/globe/GlobeView";
 import type { Focus, RegionFeature } from "../src/geography/types";
 
@@ -132,6 +135,14 @@ it("sweeps Review continuously, pauses for interaction, and holds a static view 
   );
   await act(async () => result.stop());
   expect(pending.size).toBe(0);
+  await act(async () => result.toggleMotion());
+  expect(pending.size).toBe(1);
+  await act(async () => result.recenter());
+  expect(pending.size).toBe(0);
+  expect(port.focus).toHaveBeenLastCalledWith({
+    ...stops[0],
+    altitude: REVIEW_TOUR_ALTITUDE,
+  });
   await act(async () => result.toggleMotion());
   expect(pending.size).toBe(1);
   await render({ mode: "home", transitionKey: "/" });
@@ -457,6 +468,40 @@ it.each(["/archive", "/archive?date=2026-10-11"])(
     });
   },
 );
+
+it("retains an explicit pause across overview navigation and temporary gameplay stops", async () => {
+  await render();
+  await act(async () => result.toggleMotion());
+  expect(result.motion).toBe(false);
+  for (const mode of ["explore", "archive", "study", "home"] as const) {
+    await act(async () => result.prepareNavigation(`/${mode}`));
+    await render({ mode, transitionKey: `/${mode}` });
+    expect(result.motion).toBe(false);
+  }
+  await act(async () => result.toggleMotion());
+  expect(result.motion).toBe(true);
+  await act(async () => result.stop());
+  await render({ mode: "explore", transitionKey: "/explore-again" });
+  expect(result.motion).toBe(true);
+});
+
+it("recenters a Study question on its eligible scope after a pan without disclosing the answer", async () => {
+  const session = startStudy(
+    { ...defaultStudySettings, scope: "continent", continent: "EU" },
+    42,
+  );
+  await render({
+    mode: "study",
+    transitionKey: "/study?view=session",
+    study: { active: true, session, editorOpen: false },
+  });
+  const original = vi.mocked(port.focus).mock.lastCall![0];
+  expect(original).toMatchObject({ lat: 50, lng: 20 });
+  view = { ...original, lat: -20, lng: 130 };
+  vi.mocked(port.focus).mockClear();
+  await act(async () => result.recenter());
+  expect(port.focus).toHaveBeenCalledExactlyOnceWith(original);
+});
 
 it("uses live viewport dimensions for recentering and tighter mobile Explore framing", async () => {
   await render({ mobile: true });
