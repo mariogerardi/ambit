@@ -69,7 +69,7 @@ import { FeedbackReview } from "./app/FeedbackReview";
 import { AppearancePanel } from "./app/AppearancePanel";
 import { WorldCreditsDialog } from "./app/WorldCreditsDialog";
 import { AppMenu } from "./app/AppMenu";
-import { GlobeControls } from "./app/GlobeControls";
+import { GlobeControls, GlobeRecenter } from "./app/GlobeControls";
 import { AmbitLogo } from "./app/AmbitLogo";
 import { applyTheme, readTheme, saveTheme, THEME_KEY } from "./theme/themes";
 import type { ThemeId } from "./theme/themes";
@@ -1507,6 +1507,10 @@ export function App() {
         : studying
           ? session!.phase
           : "playing";
+  const recenterView = () =>
+    selectedCity && mode === "explore"
+      ? focusExploreCity(selectedCity)
+      : recenter(selectedRegion ?? namedRegions.find((r) => r.id === selected));
   const motionControls = (mode === "home" ||
     mode === "explore" ||
     mode === "archive" ||
@@ -1530,6 +1534,7 @@ export function App() {
       onToggle={toggleMotion}
       onSpeed={setRotationSpeed}
       onFidget={fidget}
+      onRecenter={mobile.enabled ? undefined : recenterView}
     />
   );
   const content = (
@@ -1830,22 +1835,7 @@ export function App() {
       </header>
       {mobile.enabled && (
         <div className="mobile-map-tools" aria-label="Globe controls">
-          <button
-            data-dd-action-name="Globe Recenter"
-            aria-label="◎ Recenter"
-            disabled={!ready || !webgl}
-            onClick={() =>
-              selectedCity && mode === "explore"
-                ? focusExploreCity(selectedCity)
-                : recenter(
-                    selectedRegion ??
-                      namedRegions.find((r) => r.id === selected),
-                  )
-            }
-          >
-            <span aria-hidden="true">◎</span>
-            <span className="mobile-map-tool-label"> Recenter</span>
-          </button>
+          <GlobeRecenter ready={ready && webgl} onRecenter={recenterView} />
           {motionControls}
           <button
             data-dd-action-name="Globe Toggle Size"
@@ -1923,7 +1913,18 @@ export function App() {
           </Suspense>
         </PanelBoundary>
       </ModePanels>
-      {!mobile.enabled && motionControls}
+      {!mobile.enabled &&
+        !panelOnly &&
+        (motionControls ||
+          (!minigameLanding && (
+            <div
+              className="globe-controls"
+              role="group"
+              aria-label="Globe controls"
+            >
+              <GlobeRecenter ready={ready && webgl} onRecenter={recenterView} />
+            </div>
+          )))}
       {mobile.enabled && (
         <>
           {!globeInteracted && (

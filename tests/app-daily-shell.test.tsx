@@ -486,9 +486,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
       ),
     );
     await mount();
-    const play = host.querySelector<HTMLButtonElement>(
-      ".daily-menu .primary-button",
-    )!;
+    const play = host.querySelector<HTMLButtonElement>(".daily-menu-action")!;
     expect(play.disabled).toBe(true);
     expect(host.textContent).toContain("Retry schedule");
     expect(JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts).toEqual({});

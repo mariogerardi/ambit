@@ -110,6 +110,9 @@
 :root .study-history-list li:hover {
   background: rgb(var(--ui-raised-rgb));
 }
+:root .home-menu .menu-secondary button:is(:hover, :focus-visible) {
+  border-color: var(--ui-accent);
+}
 :root :is(.primary-button, .order-card, .point-orb-earned) {
   box-shadow: none;
 }

@@ -98,52 +98,52 @@ export function QuestionActions({
         </aside>
       )}
       {mapKey}
-      <div className="question-answer-actions">
-        <button
-          type="button"
-          data-dd-action-name={assist ? "Answer Assist" : "Answer Hint"}
-          className={`primary-button answer-hint-button${assist ? " answer-assist-button" : ""}`}
-          disabled={!guidance || exhausted}
-          aria-label={
-            pointScoring
-              ? assist
-                ? "Need an assist?"
-                : "Get a hint"
-              : undefined
-          }
-          aria-describedby={pointScoring && guidance ? ceilingId : undefined}
-          title={
-            !guidance
-              ? "No hint available for this question."
-              : exhausted
-                ? "All available help has been used."
-                : undefined
-          }
-          aria-controls={
-            guidance?.stage ? "current-question-guidance" : undefined
-          }
-          onClick={assist ? guidance?.onAssist : guidance?.onHint}
-        >
-          {assist ? "Need an assist?" : "Get a hint"}{" "}
-          <ActionIcon name={assist ? "assist" : "hint"} />
-          {pointScoring && guidance && (
-            <small id={ceilingId} className="help-point-ceiling">
-              Play for up to {ceiling} {ceiling === 1 ? "point" : "points"}
-            </small>
+      {(guidance || showSubmit) && (
+        <div className="question-answer-actions">
+          {guidance && (
+            <button
+              type="button"
+              data-dd-action-name={assist ? "Answer Assist" : "Answer Hint"}
+              className={`primary-button answer-hint-button${assist ? " answer-assist-button" : ""}`}
+              disabled={exhausted}
+              aria-label={
+                pointScoring
+                  ? assist
+                    ? "Need an assist?"
+                    : "Get a hint"
+                  : undefined
+              }
+              aria-describedby={pointScoring ? ceilingId : undefined}
+              title={
+                exhausted ? "All available help has been used." : undefined
+              }
+              aria-controls={
+                guidance?.stage ? "current-question-guidance" : undefined
+              }
+              onClick={assist ? guidance?.onAssist : guidance?.onHint}
+            >
+              {assist ? "Need an assist?" : "Get a hint"}{" "}
+              <ActionIcon name={assist ? "assist" : "hint"} />
+              {pointScoring && (
+                <small id={ceilingId} className="help-point-ceiling">
+                  Play for up to {ceiling} {ceiling === 1 ? "point" : "points"}
+                </small>
+              )}
+            </button>
           )}
-        </button>
-        {showSubmit && (
-          <button
-            type={submitType}
-            data-dd-action-name="Answer Submit"
-            className="primary-button answer-submit-button"
-            disabled={disabled}
-            onClick={onSubmit}
-          >
-            {label} <span aria-hidden="true">→</span>
-          </button>
-        )}
-      </div>
+          {showSubmit && (
+            <button
+              type={submitType}
+              data-dd-action-name="Answer Submit"
+              className="primary-button answer-submit-button"
+              disabled={disabled}
+              onClick={onSubmit}
+            >
+              {label} <span aria-hidden="true">→</span>
+            </button>
+          )}
+        </div>
+      )}
     </>
   );
 }

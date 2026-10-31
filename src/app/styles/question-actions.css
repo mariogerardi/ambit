@@ -6,14 +6,17 @@
   width: 100%;
   margin-top: 18px;
 }
+.experience .question-answer-actions:has(> :only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
 .experience .question-answer-actions > .primary-button {
   width: 100%;
   min-width: 0;
-  min-height: 48px;
+  min-height: var(--action-min-height);
   margin: 0;
-  padding: 12px 10px;
+  padding: var(--action-padding);
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--action-font-size);
   line-height: 1.35;
 }
 .experience .question-answer-actions .answer-hint-button {
@@ -132,4 +135,3 @@
     inset: -6px;
   }
 }
-

@@ -1,46 +1,55 @@
-/* The archive shares the Daily save model while keeping its navigation separate. */
-.daily-menu-actions {
-  display: grid;
-  gap: 4px;
-  margin-top: 10px;
-}
+/* Home's Journey is one keyboard-accessible card, with its action at the top right. */
 .daily-menu .daily-menu-action {
+  position: absolute;
+  inset: 0;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 8px;
   width: 100%;
-  min-height: 44px;
-  margin: 0;
-  padding: 8px 14px;
-  border: 1px solid transparent;
-  border-radius: 11px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
-  text-align: left;
-  text-shadow: none;
+  height: 100%;
+  padding: inherit;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--ui-editorial);
+  text-align: right;
+}
+.daily-menu-state {
+  font: 500 11px/18px var(--font-ui);
+}
+.daily-menu-action-arrow {
+  font: 400 18px/18px var(--font-ui);
+  transition: transform 180ms ease;
+}
+.daily-menu-action:disabled {
+  color: var(--ui-muted);
+  cursor: default;
+}
+.daily-menu .daily-levels {
+  margin-bottom: 0;
+}
+:root .home-menu .daily-menu {
   transition:
-    background 160ms ease,
-    border-color 160ms ease;
+    background-color 180ms ease,
+    border-color 180ms ease;
 }
-.daily-menu .daily-menu-action .action-icon {
-  width: 21px;
-  height: 21px;
-  flex-shrink: 0;
-}
-.daily-menu .daily-menu-action-label {
-  flex: 1;
-  font: inherit;
-}
-.daily-menu .daily-menu-action-arrow {
-  font-size: 22px;
-  line-height: 1;
-  transition: transform 160ms ease;
+:root
+  .home-menu
+  .daily-menu:has(.daily-menu-action:enabled):is(:hover, :focus-within) {
+  background: rgb(var(--ui-raised-rgb));
+  border-color: var(--ui-editorial);
 }
 @media (prefers-reduced-motion: no-preference) {
   .daily-menu-action:not(:disabled):is(:hover, :focus-visible)
     .daily-menu-action-arrow {
     transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .home-menu .daily-menu,
+  .daily-menu-action-arrow {
+    transition: none;
   }
 }
 .archive-heading {

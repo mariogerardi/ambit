@@ -175,7 +175,7 @@ export function MinigamesPanel({
         ))}
       </div>
       <div className="minigame-carousel-heading">
-        <div className="minigame-carousel-arrows">
+        <div className="minigame-carousel-arrows carousel-navigation">
           <button
             type="button"
             className="quiet-button"

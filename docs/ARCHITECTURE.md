@@ -117,6 +117,18 @@ answer typing must not restart a flight. Home-country entry intent is captured
 before effects consume its queued focus, so Explore retains the tapped selection.
 Completion effects cancel their flyover on exit or reduced-motion changes.
 
+An explicit rotation pause survives navigation for the lifetime of the workspace;
+temporary stops for interaction or question framing do not overwrite it. Scripted
+Journey, Study Review, and minigame tours retain their own playback controls. Recenter is shared
+across desktop and mobile: it restores the current scene, Study scope, or selected
+Explore place without changing an answer or revealing a hidden target.
+
+[`globe/motion.ts`](../src/globe/motion.ts) owns bounded animation frame time and
+focus/tour timing. Camera travel, Journey flyovers, Study review, and minigame tours
+use the same frame-time limit, including tour approaches after a delayed frame.
+Ordinary focus, slower close-up departures, and deliberate tour legs keep distinct
+timings; viewport fitting and authored clue/reveal destinations remain separate.
+
 ## Loading and transitions
 
 Startup requests the world layer and manifest in parallel. The renderer, Journey

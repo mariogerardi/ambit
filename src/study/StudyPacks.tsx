@@ -42,7 +42,7 @@ export function StudyPacks({
       <h1 className="editorial-heading">
         Your next challenge <em>awaits.</em>
       </h1>
-      <div className="study-pack-navigation">
+      <div className="study-pack-navigation carousel-navigation">
         <button
           type="button"
           className="quiet-button"

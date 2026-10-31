@@ -2,6 +2,7 @@
 @import "./styles/shell-base.css";
 @import "./styles/panel-tools.css";
 @import "./styles/navigation.css";
+@import "./styles/shared-controls.css";
 @import "./styles/explore.css";
 @import "./styles/study-options.css";
 @import "./styles/home-navigation.css";

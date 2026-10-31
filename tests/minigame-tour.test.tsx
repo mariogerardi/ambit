@@ -27,8 +27,8 @@ async function render(update: Partial<Options> = {}) {
 }
 async function advance(time: number) {
   await act(async () => {
-    for (let step = 0; step < time; step += 100) {
-      now += 100;
+    for (let step = 0; step < time; step += 16) {
+      now += Math.min(16, time - step);
       const callbacks = [...frames.values()];
       frames.clear();
       callbacks.forEach((callback) => callback(now));
@@ -137,7 +137,7 @@ it("keeps the animation loop and current velocity when switching games and clear
   });
   const after = poses().at(-1)!;
   // The new join begins at the old velocity, then accelerates gradually.
-  const oldVelocity = (before[1].lng - before[0].lng) / 100;
+  const oldVelocity = (before[1].lng - before[0].lng) / 16;
   expect(Math.abs((after.lng - before[1].lng) / 30 - oldVelocity)).toBeLessThan(
     0.001,
   );
@@ -146,4 +146,22 @@ it("keeps the animation loop and current velocity when switching games and clear
   await advance(6000);
   expect(tour.example?.kind).toBe("border-run");
   expect(tour.phase).not.toBe("travel");
+});
+
+it("does not skip the tour approach when one animation frame is delayed", async () => {
+  await render();
+  await advance(1000);
+  const orbit = vi.mocked(options.globe.current!.orbitView);
+  const before = orbit.mock.lastCall![0]!;
+  await act(async () => {
+    now += 5000;
+    const callbacks = [...frames.values()];
+    frames.clear();
+    callbacks.forEach((callback) => callback(now));
+  });
+  const after = orbit.mock.lastCall![0]!;
+  expect(Math.abs(after.lng - before.lng)).toBeLessThan(1);
+  expect(Math.abs(after.lat - before.lat)).toBeLessThan(1);
+  expect(Math.abs(after.altitude! - before.altitude!)).toBeLessThan(0.05);
+  expect(tour.phase).toBe("travel");
 });
