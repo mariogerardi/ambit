@@ -1,5 +1,8 @@
 import { geoAzimuthalEquidistant, geoDistance, geoInterpolate } from "d3-geo";
-import { ShapeUtils, Vector2 } from "three";
+// Routing needs only triangulation/math; keep the renderer behind the globe's
+// lazy import instead of pulling Three's bundled entry into startup code.
+import { ShapeUtils } from "three/src/extras/ShapeUtils.js";
+import { Vector2 } from "three/src/math/Vector2.js";
 import { interiorAnchor } from "../geography/interiorAnchor";
 import type { Focus } from "../geography/types";
 import type {

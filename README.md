@@ -1,16 +1,52 @@
 # Ambit
 
-A geography game built around one shared, interactive globe. Play a five-question
-Journey, explore places, or build a Study session. React, TypeScript, Vite, and
-Three.js power a static web app; geography, flags, and fonts are bundled locally.
-Guest play uses local assets and saves. Optional Cognito accounts and a feedback
-API run on AWS; Datadog monitors configured releases. Signed-in players synchronize
-Journey progress and Study settings, active sessions, and results across devices.
+A geography game built around one persistent, interactive globe. Play a daily
+five-question Journey, try a minigame, explore the world, or build a Study session.
+The application runs at [playambit.com](https://playambit.com).
 
-## Quick start
+Ambit uses React, TypeScript, Vite, and Three.js. Geography, flags, fonts, and
+Journey media are bundled with the application. Guest progress is saved locally;
+optional accounts synchronize Journey progress and Study settings, sessions, and
+results. AWS provides hosting, accounts, and backend APIs; configured releases use
+Datadog for monitoring.
 
-Use **Node.js 24.21.0** (pinned in [.nvmrc](.nvmrc)) and its bundled npm 11.19.0.
-With nvm installed, run `nvm install` and `nvm use` in this directory first.
+## Experiences
+
+| View                             | What it offers                                                                                                                                                               |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Home** (`/`)                   | Today's Journey, saved progress, and entry points to Minigames, Explore, and Study.                                                                                          |
+| **Daily Journey** (`/daily`)     | Five connected questions using map picks, pins, recall, choices, matching, and geographic reasoning.                                                                         |
+| **Archive** (`/archive`)         | Past Daily Journeys from October 11, 2026: play, resume, or revisit a saved result.                                                                                          |
+| **Minigames** (`/minigames`)     | Shared Neighbors, Missing Borders, Border Run, and Pinpoint, with globe demonstrations, settings, and saved runs.                                                            |
+| **Explore** (`/explore`)         | Countries, capitals, cities, subdivisions, physical features, and place details.                                                                                             |
+| **Study** (`/study`)             | Your Sessions, curated Study Packs, a Session Builder, and personal Review; topics include countries, capitals, flags, major cities, and landmarks.                          |
+| **Account** (`/account`)         | Progress, Friends, Profile, and Settings, with optional signup, sign-in, and account recovery.                                                                               |
+| **Admin** (`/account?tab=admin`) | Authorized administrators manage the Daily schedule, browse and review Journeys, triage feedback, and access Maintenance controls. `/admin` remains a supported entry point. |
+
+Daily dates use New York midnight. Registered Journeys participate in automatic
+selection; locked dates and explicit assignments retain their chosen edition.
+Changing an assignment does not replace a player's started attempt. Archive
+completions earn points without retroactively extending Daily streaks. Direct
+Journey practice and review routes require Admin access. The
+[Journey catalog](docs/QUESTION_CATALOG.md) lists current titles and routes.
+
+Study offers globe, typing, multiple-choice, and mixed answer methods, with options
+that depend on the topic. Sessions, draft answers, and results survive navigation
+and reloads; saved sessions can be continued and results reviewed. See
+[Save persistence](docs/SAVE_PERSISTENCE.md) for recovery and synchronization details.
+
+All modes share the same globe. Display geometry and scoring geometry have
+separate responsibilities. Discovery, Odyssey, Expedition, and Safari themes
+change the interface and globe styling while preserving the session. Responsive
+layouts, reduced motion, and written answer alternatives support different ways
+to play; automated DOM tests do not establish real device or WebGL behavior.
+
+## Local development
+
+Use **Node.js 24.21.0** from [.nvmrc](.nvmrc) and **npm 11.19.0** from
+[package.json](package.json). With nvm installed, run `nvm install` and `nvm use`
+first. Python 3.11+ is needed for backend tests and selected tooling; the runtime
+check identifies a supported interpreter.
 
 ```sh
 npm run check:env
@@ -19,120 +55,69 @@ npm run dev
 ```
 
 Open the URL printed by Vite, normally `http://127.0.0.1:5173`. The dev server binds
-to loopback and requires its configured port to be available. Generated assets
-are included; no data preparation or API keys are needed to run the app.
+to loopback and requires its port to be available. Prepared assets are committed;
+ordinary setup does not require regeneration or API keys. Optional account and
+feedback services use the configuration described in [Services](docs/SERVICES.md).
+
+Use focused checks for the behavior you change:
 
 ```sh
-npm test -- tests/themes.test.ts  # Focused unit/DOM tests; list files before options
-npm run test:all                  # Intentional full frontend suite; no browser/WebGL
-npm run build    # Strict TypeScript checks, then the production build in dist/
-npm run preview  # Inspect dist/ locally; this is not a production server
+npm test -- tests/themes.test.ts
+./node_modules/.bin/tsc --noEmit
 ```
 
-See [Development](docs/DEVELOPMENT.md) for preparation commands and troubleshooting.
-[Hosting](docs/HOSTING.md) covers release acceptance, deployment, and rollback.
+Put test filenames before options. Bare `npm test` intentionally refuses to run
+the full suite. The [development owner/test map](docs/DEVELOPMENT.md#choose-focused-checks)
+helps select coverage, including cross-feature behavior. `npm run test:all` is
+available when a full local frontend run is explicitly needed; CI owns the full
+frontend/backend suites and production build gate.
 
-## What is included
+`npm run build` creates `dist/`; `npm run preview` serves that build locally.
+Development-only review fixtures are documented in [Development](docs/DEVELOPMENT.md).
 
-| View                     | Behavior                                                                                                        |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| **Home** (`/`)           | Today's Journey, saved progress, and entry points to Explore and Study.                                         |
-| **Journey**              | Five-question editions covering pins, map picks, recall, choices, matching, and geographic reasoning.           |
-| **Archive** (`/archive`) | Past Daily Journeys from October 11, 2026: play, resume, or revisit a saved result.                             |
-| **Explore** (`/explore`) | Country search/details, flags, capitals, cities, subdivisions, physical features, and a saved default view.     |
-| **Study** (`/study`)     | Discover Asia, African capitals, World flags, and a Custom session builder; results, review, and past sessions. |
-| **Account** (`/account`) | Optional verified-email signup, sign-in, recovery, and sign-out.                                                |
-| **Admin** (`/admin`)     | Verified owner only: review feedback and publish shared date-to-Journey assignments.                            |
+## Repository map
 
-Daily dates use New York midnight. Unassigned future dates use provisional seeded
-selection from all registered Journeys; locking or an Admin assignment makes the
-date permanent. Any current Journey can be assigned in Admin. The old eleven-ID rotation is migration history, not the current
-selection algorithm. Started attempts keep their edition and progress when an
-assignment changes. The public archive starts on October 11, 2026 and uses stored
-historical assignments. Past attempts can be resumed through `/archive/YYYY-MM-DD`;
-new archive completions earn points without retroactively extending Daily streaks. Direct practice routes require Admin access; use
-“Preview five questions.” See the [Journey catalog](docs/QUESTION_CATALOG.md) for
-current titles and routes.
-The removed editor/AI generator is not part of the current app; legacy locally
-published packs remain readable.
+| Path                                         | Purpose                                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `src/App.tsx`, `src/app/`                    | Modes, navigation, sessions, account/Admin interfaces, and persistence coordination.                                |
+| `src/game/`                                  | Journey definitions, answer contracts, grading, presentation, and generated catalog metadata.                       |
+| `src/study/`, `src/minigames/`               | Study and minigame engines, controls, and results.                                                                  |
+| `src/globe/`, `src/geography/`, `src/theme/` | Shared globe rendering, geographic helpers/data, and visual themes.                                                 |
+| `public/`, `sources/`                        | Shipped assets and source provenance. Raw preparation inputs may be ignored; retain committed metadata and notices. |
+| `backend/`, `deployment/`                    | Python services, infrastructure, and deployment configuration.                                                      |
+| `scripts/`, `tests/`, `review/`              | Preparation and maintenance tools, automated checks, and local review fixtures.                                     |
+| `docs/`                                      | Maintained development, architecture, authoring, and operational guides.                                            |
 
-Study supports countries, capitals, and flags for 193 UN members. Choose worldwide,
-a continent, or a custom country pool; answer by globe, typing, multiple choice,
-or Mixed. **Cover everything once** exhausts the selected country/topic pairs.
-**Bring back missed answers** explicitly enables additional mistake reviews.
-Ordinary fixed-length/continuous decks reshuffle after exhausting their pool;
-that can revisit a country even with mistake reviews disabled.
+`node_modules/`, `.cache/`, `dist/`, `reports/`, and `artifacts/` are ignored local
+outputs or working files. Data preparation is an intentional maintenance task,
+not part of installation or deployment. Stable internal `wurl:` IDs remain for
+data and save compatibility; the product and npm package are named Ambit.
 
-Study settings, results, active sessions, and draft answers persist through
-navigation, refresh, and tab closure. Use **Resume session** to continue; explicitly
-finishing or replacing a run archives its submitted answers. Past sessions can be
-viewed or replayed, including the exact
-coverage of targeted reviews. [Save persistence](docs/SAVE_PERSISTENCE.md) explains
-recovery, tab synchronization, and remaining durability limits.
+## Contributing and releasing
 
-## Globe and presentation
+Coding agents should follow [AGENTS.md](AGENTS.md). Start independent work from
+current `origin/main`, preserve existing work, and keep changes and local checks
+focused. Use the [documentation index](docs/README.md) to find the relevant guide.
 
-All product views share the same mounted decorative globe. Selected regions,
-question clues, and feedback use semantic states; display geometry and grading
-geometry remain separate. Home starts idle rotation after focusing. Entering
-Explore preserves enabled rotation until interaction; Fidget restores the prior
-playback state. Speeds range from 0.25× to 8×. Reduced motion disables idle
-rotation, Fidget, and animated travel.
+[CI](.github/workflows/ci.yml) runs frontend tests separately from backend, tooling,
+and build checks. The required **Tests and production build** check passes only
+when both jobs succeed. Pull requests do not deploy. After an authorized merge,
+main-branch CI validates the merged commit and can deploy its artifact to Amplify
+when the production cutover flag is enabled. Backend releases are separate.
 
-On narrow screens, the globe and scrolling content occupy separate areas, with
-navigation in the hamburger menu and an **Enlarge globe** action. Desktop layouts put content
-beside the globe. Keyboard answer controls remain available for written answers;
-Study map prompts include **Answer by name**, automatically expanded without
-WebGL. Capital map prompts expect the country name in this alternative.
-Actual browser/GPU, screen-reader, and physical mobile behavior still require
-separate verification; unit/DOM coverage does not certify those experiences.
+See [Hosting](docs/HOSTING.md) for the merge/release handoff, deployment, and
+rollback, and [Services](docs/SERVICES.md) for backend operations. Datadog reporting
+is best effort; reporting failures produce warnings without overriding validation
+or deployment results.
 
-Question feedback screens offer **Report this question**; the menu includes
-**Send feedback** for general comments. Neither requires an account. See
-[Accounts, feedback, and monitoring](docs/SERVICES.md) for configuration and
-backend deployment.
+For Journey work, start with [Journey crafting](docs/JOURNEY_CRAFTING.md), or the
+[approved-spec workflow](docs/journey-authoring/IMPLEMENTING_A_SPEC.md) when a spec
+already exists. The [authoring kit](docs/JOURNEY_AUTHORING_KIT.md) exports current
+guidance and examples for design work.
 
-The hamburger menu offers **Atlas**, **Ocean**, **Dusk**, and **Paper** themes.
-Each theme applies to UI and globe, preserving the camera and session. Editorial
-emphasis, interaction accents, and primary actions use separate color roles.
-Themes and default-view preferences persist locally and synchronize between tabs.
-
-## Documentation
-
-Start with the [documentation index](docs/README.md).
-
-- [Architecture](docs/ARCHITECTURE.md): module responsibilities and globe state.
-- [Development](docs/DEVELOPMENT.md): commands, data preparation, and maintenance.
-- [Question catalog and authoring](docs/QUESTION_CATALOG.md): Journeys, rules, and content review.
-- [Journey engine and extension contracts](docs/JOURNEY_ENGINE.md): reusable mechanics, matching, and extension boundaries.
-- [Journey crafting](docs/JOURNEY_CRAFTING.md): Throughlines, difficulty, globe interaction, and meaningful reveals.
-- [Portable Journey authoring kit](docs/JOURNEY_AUTHORING_KIT.md): Export current context and examples for AI-assisted design.
-- [Implement a Journey from a spec](docs/journey-authoring/IMPLEMENTING_A_SPEC.md): Familiarize yourself with the current suite, preserve approved decisions, implement and verify.
-- [Geographic catalog policy](docs/CATALOG_POLICY.md) and [Explore data](docs/EXPLORE_DATA.md): identities, source conventions, and display limits.
-- [Save persistence](docs/SAVE_PERSISTENCE.md): migration, recovery, and conflicts.
-- [Hosting](docs/HOSTING.md): release acceptance, production deployment, domain, HTTP configuration, and rollback.
-- [Attribution](NOTICE.md): source notices, licenses, and transformations.
-
-## Product language
-
-**Ambit** is the product. A **Journey** is the daily five-question experience;
-a **round** is one question within it. **Explore** is freeform exploration.
-**Study** is practice; a **session** is one Study run. Keep the question prominent,
-explain exceptional rules only, and avoid copy that merely describes visible UI.
-Stable internal `wurl:` IDs remain for save/data compatibility; they are not an
-additional product mode. The npm package is named `ambit`.
-
-## Repository and licensing
+## Licensing
 
 No open-source license is granted for the application code. The package is marked
-`private` and `UNLICENSED`; repository visibility does not change those terms.
-Third-party dependencies, fonts, photographs, and geographic assets retain their
-own notices in [NOTICE.md](NOTICE.md).
-
-[CI](.github/workflows/ci.yml) runs on main pushes, pull requests, and manual
-requests using the pinned Node version. It installs locked dependencies, checks
-documentation formatting, runs tests, builds the app, and checks dependency
-advisories. Validation has read-only repository permissions. Successful main-branch
-builds can deploy their verified artifact to Amplify using short-lived AWS credentials
-scoped to Ambit's production app when the schedule-cutover flag is enabled;
-pull requests do not deploy. See [Schedule cutover](docs/SERVICES.md#schedule-cutover).
+`private` and `UNLICENSED`; public repository visibility does not change those
+terms. Dependencies, fonts, photographs, and geographic assets retain their own
+licenses and attribution in [NOTICE.md](NOTICE.md).
