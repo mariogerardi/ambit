@@ -79,7 +79,8 @@ for i,count,a in cells:
   color=[255,int(210-130*strength),65,int(50+190*strength)]
   heat[max(0,py-2):min(1200,py+3),max(0,px-2):min(1200,px+3)]=color
 Image.fromarray(heat).save(OUT/'population.png',optimize=True)
-for name in ['sahara.jpg','nile.jpg','lights.png']:shutil.copyfile(CACHE/name,OUT/name)
+# Raw imagery stays in CACHE for reproduction; prepare-sahara-display.py publishes
+# the cropped/masked assets used by the Journey.
 # Clear texture comparisons from one NASA ISS photograph, not upscaled map pixels.
 erg=Image.open(CACHE/'erg-oriental.jpg')
 for name,bounds in [('sand-texture.jpg',(0,.06,.29,.387)),('rock-texture.jpg',(.69,.12,1,.47))]:

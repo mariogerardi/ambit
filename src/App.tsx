@@ -11,7 +11,6 @@ import {
 } from "./app/MinigamesPanel";
 import { useMinigameTour } from "./minigames/useMinigameTour";
 import { useSharedNeighbors } from "./minigames/useSharedNeighbors";
-import { BorderMinigamePanel } from "./minigames/BorderMinigamePanel";
 import { startPlaceStudy } from "./study/engine";
 import type { StudyPlaceTarget } from "./study/placeReview";
 import { isStudyPinPrompt, studyPinTarget } from "./study/pins";
@@ -102,7 +101,17 @@ import { useMobileLayout } from "./app/useMobileLayout";
 const AdminPanel = lazy(() =>
   import("./app/AdminPanel").then((m) => ({ default: m.AdminPanel })),
 );
-import { ExplorePanel } from "./app/ExplorePanel";
+const BorderMinigamePanel = lazy(() =>
+  import("./minigames/BorderMinigamePanel").then((m) => ({
+    default: m.BorderMinigamePanel,
+  })),
+);
+const ExplorePanel = lazy(() =>
+  import("./app/ExplorePanel").then((m) => ({ default: m.ExplorePanel })),
+);
+const StudyPanel = lazy(() =>
+  import("./study/StudyPanel").then((m) => ({ default: m.StudyPanel })),
+);
 import type { ExploreSettings } from "./app/ExplorePanel";
 import {
   dailyJourney,
@@ -131,7 +140,6 @@ import type {
   StudyRecord,
 } from "./study/engine";
 import { useStudyPresentation } from "./study/useStudyPresentation";
-import { StudyPanel } from "./study/StudyPanel";
 import { studyIntent, studyLink } from "./study/StudyNavigation";
 import { startLearningReview } from "./study/engine";
 import type { LearningTarget } from "./study/learning";

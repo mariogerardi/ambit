@@ -80,9 +80,9 @@ The following modules own their own lifetimes and can be read independently:
   reframing retains its existing smooth scale change; reduced motion jumps directly.
 - [`HomePanel.tsx`](../src/app/HomePanel.tsx): today's Journey title, progress,
   Play/Resume/View result action and navigation; readiness is supplied by the shell.
-- [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Journeys/Feedback/Tools tabs, calendar
+- [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Journeys/Feedback tabs, calendar
   selection from the October 11 opening date, searchable Journey picker, explicit assignment, and compact reset
-  tools. Tabs retain the editor; unpublished selections survive navigation within
+  tools in Maintenance. Tabs retain the editor; unpublished selections survive navigation within
   the browser tab through session storage. Date/month switches confirm before
   discarding a draft. The shell supplies protected feedback and account reset;
   choosing a Journey alone never publishes or alters a player's attempt.
@@ -119,8 +119,12 @@ Completion effects cancel their flyover on exit or reduced-motion changes.
 
 ## Loading and transitions
 
-Startup requests the world layer and manifest in parallel. The renderer, mode
-panels, and Journey definitions use deferred imports. After Home's globe is ready,
+Startup requests the world layer and manifest in parallel. The renderer, Journey
+definitions, Explore and Study panels, minigame play panel, account dashboard,
+and Admin interfaces use deferred imports. Shared gameplay engines, the minigame
+menu/tour, and U.S. state geometry remain eager dependencies of the shell.
+Border Run imports only Three's triangulation and vector helpers, keeping the
+full renderer out of the entry bundle. After Home's globe is ready,
 idle preparation warms today's Journey and its question context, rather than all
 Journeys. Prepared contexts reuse the world border graph and are cached.
 

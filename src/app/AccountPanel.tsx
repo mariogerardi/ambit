@@ -1,13 +1,15 @@
-import { useEffect } from "react";
+import { lazy, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useToast } from "./Toast";
 import { useAccount } from "../services/accounts";
-import { AccountDashboard } from "./AccountDashboard";
 import type { DailyProgress } from "./dailyProgress";
 import type { StudySave } from "../study/engine";
 import { AccountTabs } from "./AccountTabs";
 import { accountTabLink } from "./accountNavigation";
 import type { AccountIntent, ComparisonTarget } from "./accountNavigation";
+const AccountDashboard = lazy(() =>
+  import("./AccountDashboard").then((m) => ({ default: m.AccountDashboard })),
+);
 export function AccountPanel({
   sync,
   daily,

@@ -30,7 +30,7 @@ The Nile reference is the actual bundled **Natural Earth 1:10m river centerline*
 
 ## Reproduction and calibration
 
-Repository script: `scripts/prepare-sahara-construction.py`. It consumes explicit cached inputs, changes only this Journey’s assets and scoring data, and writes source hashes and feasibility examples. See `docs/DEVELOPMENT.md` (Sahara data preparation) for input URLs and commands, and `docs/HOSTING.md` (Journey acceptance checks) for remaining human calibration. This Journey remains unlisted pending desktop/touch trials, particularly the brush and river tolerances. Automated geometric examples are not human usability tests.
+Repository scripts: `scripts/prepare-sahara-construction.py` and `scripts/prepare-sahara-display.py`. They consume explicit cached inputs, change only this Journey’s assets and scoring/display data, and write source hashes and feasibility examples. Raw Sahara, Nile, and nightlights imagery stays in the preparation cache; the public assets contain the cropped/masked imagery used by the Journey. See `docs/DEVELOPMENT.md` (Sahara data preparation) for input URLs and commands, and `docs/HOSTING.md` (Journey acceptance checks) for human calibration requirements, particularly the brush and river tolerances. This is a registered Journey. Automated geometric examples are not human usability tests.
 
 ## Masked imagery and interaction footprints
 

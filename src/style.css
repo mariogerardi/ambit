@@ -182,26 +182,15 @@ strong {
 @media (prefers-reduced-motion: no-preference) {
   .clue-locators:not([data-reduced="true"])
     .is-repeating.is-pulsing
-    > .completion-pulse,
-  .minigame-card:is(:hover, :focus-within, :active)
-    .motif-completion
     > .completion-pulse {
     animation: completion-pulse 1.6s ease-out infinite forwards;
-  }
-  .minigame-card:is(:hover, :focus-within, :active)
-    .motif-completion
-    > .completion-pulse {
-    animation-delay: 290ms;
   }
 }
 .clue-locators[data-reduced="true"] .is-pulsing > .completion-pulse {
   opacity: 0.45;
 }
 @media (prefers-reduced-motion: reduce) {
-  .clue-locators .is-pulsing > .completion-pulse,
-  .minigame-card:is(:hover, :focus-within, :active)
-    .motif-completion
-    > .completion-pulse {
+  .clue-locators .is-pulsing > .completion-pulse {
     opacity: 0.45;
   }
 }
