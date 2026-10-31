@@ -2,37 +2,11 @@
   margin-bottom: 12px;
   padding-block: 4px;
 }
-.minigame-carousel-arrows {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 40px;
-  align-items: center;
-  gap: 10px;
-}
-.experience .minigame-carousel-arrows button {
-  display: grid;
-  place-items: center;
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-}
-.minigame-carousel-arrows svg {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 .experience .minigames-carousel h1 {
   margin: 0 6px;
   text-align: center;
   font-size: clamp(25px, 2.5vw, 30px);
-  line-height: 40px;
+  line-height: 44px;
   transform: translateY(2px);
   letter-spacing: -0.7px;
 }
@@ -82,10 +56,10 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  min-height: 46px;
+  min-height: var(--action-min-height);
   margin: 0;
-  padding: 12px 16px;
-  font-size: 14px;
+  padding: var(--action-padding);
+  font-size: var(--action-font-size);
 }
 .experience .minigame-customize-toggle {
   display: block;
@@ -245,11 +219,11 @@
   gap: 6px;
   flex: 1 1 0;
   width: 0;
-  min-height: 46px;
+  min-height: var(--action-min-height);
   margin: 0;
-  padding: 10px 8px;
+  padding: var(--action-padding);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: var(--action-font-size);
 }
 .experience .minigame-session-actions > button:only-child {
   width: 100%;

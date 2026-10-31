@@ -1,6 +1,12 @@
 import type { Focus } from "../geography/types";
 import { normalWorldView } from "./defaultViews";
 import { geoInterpolate } from "d3-geo";
+import {
+  focusDuration,
+  motionDistance,
+  motionFrameDelta,
+  tourDuration,
+} from "./motion";
 export interface CameraPort {
   pointOfView(): Required<Focus>;
   pointOfView(focus: Focus, duration: number): unknown;
@@ -85,19 +91,10 @@ export class CameraTravel {
       return;
     }
     const local = Math.min(from.altitude, to.altitude) < 0.1;
-    const distance = Math.hypot(
-      to.lat - from.lat,
-      (lng - from.lng) * Math.cos(((from.lat + to.lat) * Math.PI) / 360),
-    );
+    const distance = motionDistance(from, to);
     const nearby = distance < 0.5;
     const wideDeparture = from.altitude < 0.1 && distance > 45;
-    const duration =
-      durationMs ??
-      (wideDeparture
-        ? 4200
-        : nearby
-          ? 1400
-          : 2600 + Math.min(600, distance * 6));
+    const duration = durationMs ?? focusDuration(distance, wideDeparture);
     const cruise = Math.max(
       from.altitude,
       to.altitude,
@@ -122,10 +119,7 @@ export class CameraTravel {
     const tick = (now: number) => {
       // A busy selection/render frame must not skip a quarter of the flight.
       // Advance by bounded frame time, including a small first-frame step.
-      elapsed += Math.min(
-        elapsed === 0 ? 16 : 32,
-        Math.max(0, now - previousTime),
-      );
+      elapsed += motionFrameDelta(now, previousTime, elapsed === 0);
       previousTime = now;
       to.altitude = fitAltitude();
       const t = Math.min(1, elapsed / duration);
@@ -220,7 +214,7 @@ export class CameraFlyover {
           previous = performance.now();
         const tick = (now: number) => {
           if (generation !== this.generation) return;
-          elapsed += Math.max(0, Math.min(32, now - previous));
+          elapsed += motionFrameDelta(now, previous, elapsed === 0);
           previous = now;
           if (elapsed >= 350) {
             this.frame = 0;
@@ -310,12 +304,7 @@ export class CameraFlyover {
     onStep?.(index);
     let fromVelocity = { lat: 0, lng: 0 },
       toVelocity = velocities[0];
-    const distance = () =>
-      Math.hypot(
-        to.lat - from.lat,
-        (to.lng - from.lng) * Math.cos(((from.lat + to.lat) * Math.PI) / 360),
-      );
-    let duration = Math.max(3000, Math.min(6500, distance() * 35));
+    let duration = tourDuration(motionDistance(from, to));
     let elapsed = 0,
       previousTime = performance.now();
     // Match position, velocity and acceleration at every destination. There is
@@ -340,11 +329,11 @@ export class CameraFlyover {
       onStep?.(index);
       to = destination(from, index);
       toVelocity = velocities[index];
-      duration = Math.max(6000, Math.min(10000, distance() * 70));
+      duration = tourDuration(motionDistance(from, to), false);
     };
     const tick = (now: number) => {
       if (generation !== this.generation) return;
-      elapsed += Math.max(0, Math.min(32, now - previousTime));
+      elapsed += motionFrameDelta(now, previousTime, elapsed === 0);
       previousTime = now;
       while (elapsed >= duration) {
         if (!loop && index === stops.length - 1) {

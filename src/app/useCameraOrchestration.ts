@@ -9,6 +9,7 @@ import {
   studyCameraTarget,
 } from "../globe/defaultViews";
 import { worldAltitude } from "../globe/camera";
+import { motionFrameDelta } from "../globe/motion";
 import { journeyStops } from "../game/journeyStops";
 import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { GameState } from "../game/state";
@@ -95,6 +96,8 @@ export function useCameraOrchestration({
     capitalFocus: studyCapitalFocus,
   } = study;
   const [motion, setMotion] = useState(mode === "home");
+  // Interaction can stop playback temporarily; an explicit pause survives navigation.
+  const rotationPaused = useRef(false);
   const [reviewTourPaused, setReviewTourPaused] = useState(false);
   const [reduced, setReduced] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -178,7 +181,7 @@ export function useCameraOrchestration({
       const worldZoom = altitude(mobile);
       if (view && !normalWorldView(view, worldZoom))
         globe.current?.focus({ ...view, altitude: worldZoom }, "world");
-      setMotion(true);
+      setMotion(!rotationPaused.current);
     }
   }, [
     ready,
@@ -217,7 +220,8 @@ export function useCameraOrchestration({
       elapsed = 0,
       last = performance.now();
     const tick = (now: number) => {
-      if (!document.hidden) elapsed += Math.max(0, Math.min(100, now - last));
+      if (!document.hidden)
+        elapsed += motionFrameDelta(now, last, elapsed === 0);
       last = now;
       globe.current?.orbitView(reviewTourFrame(previewViews, origin, elapsed));
       request = requestAnimationFrame(tick);
@@ -268,7 +272,7 @@ export function useCameraOrchestration({
     }
     if (old !== cameraKey) {
       if (old === undefined && mode === "home") {
-        setMotion(true);
+        setMotion(!rotationPaused.current);
         previous.current = cameraKey;
         return;
       }
@@ -301,7 +305,7 @@ export function useCameraOrchestration({
         const worldZoom = altitude();
         if (view && !normalWorldView(view, worldZoom))
           globe.current?.focus({ ...view, altitude: worldZoom }, "world");
-        setMotion(true);
+        setMotion(!rotationPaused.current);
       } else setMotion(false);
       previous.current = cameraKey;
       return;
@@ -442,7 +446,10 @@ export function useCameraOrchestration({
     globe.current?.cancelFidget();
     if (mode === "study" && studyPreview && previewViews?.length && !reduced)
       setReviewTourPaused((value) => !value);
-    else setMotion((value) => !value);
+    else {
+      rotationPaused.current = motion;
+      setMotion(!motion);
+    }
   };
   const fidget = () => globe.current?.fidget();
   const locateStudyAnswer = (targetId: string) => {
@@ -456,9 +463,13 @@ export function useCameraOrchestration({
       focusExplore(exploreRegion);
       return;
     }
+    if (mode === "study" && !studying && previewViews?.length) {
+      frame({ ...previewViews[0], altitude: REVIEW_TOUR_ALTITUDE });
+      return;
+    }
     frame(
       journeyFocus ??
-        (studying ? studyDestination() : undefined) ??
+        (studying ? studyDestination(true) : builderFocus) ??
         nextDefaultView(altitude()),
     );
   };

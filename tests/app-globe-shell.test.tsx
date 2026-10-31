@@ -148,11 +148,30 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
       ...country.focus,
       altitude: country.focus.altitude! * 0.72,
     });
-    await click("◎ Recenter");
+    await click("Recenter");
     expect(probe.focus.at(-1)).toEqual({
       ...country.focus,
       altitude: country.focus.altitude! * 0.72,
     });
+  });
+
+  it("offers a single desktop Recenter action during Study and Minigame play", async () => {
+    await mount();
+    await click("Study");
+    await click("Browse Study Packs");
+    await click("Start session");
+    expect(host.querySelectorAll('[aria-label="Recenter"]')).toHaveLength(1);
+    const mounts = probe.mounts;
+    await click("Recenter");
+    expect(probe.mounts).toBe(mounts);
+    await click("Home");
+    await click("Minigames");
+    await click("Start new game");
+    expect(host.querySelectorAll('[aria-label="Recenter"]')).toHaveLength(1);
+    const before = probe.focus.length;
+    await click("Recenter");
+    expect(probe.focus.length).toBeGreaterThan(before);
+    expect(probe.mounts).toBe(mounts);
   });
 
   it.each([
@@ -335,11 +354,11 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
       }));
       await mount();
       const tools = host.querySelector(".mobile-map-tools")!;
-      expect([...tools.children].map((child) => child.className)).toEqual([
-        "",
-        "globe-controls",
-        "",
-      ]);
+      expect(tools.children[0].getAttribute("aria-label")).toBe("Recenter");
+      expect(tools.children[1]).toBe(tools.querySelector(".globe-controls"));
+      expect(tools.children[2].getAttribute("aria-controls")).toBe(
+        "mobile-map",
+      );
       expect(document.querySelectorAll(".globe-controls")).toHaveLength(1);
       expect(host.querySelector(".mobile-gesture-hint")).not.toBeNull();
       // Programmatic camera changes must not dismiss the player's instruction.
@@ -398,8 +417,7 @@ describe("app globe shell (DOM only; no browser or WebGL)", () => {
     expect(host.querySelector(".account-earth")).not.toBeNull();
     expect(host.textContent).toContain("The 3D globe isn’t available");
     expect(
-      host.querySelector<HTMLButtonElement>(".daily-menu .primary-button")
-        ?.disabled,
+      host.querySelector<HTMLButtonElement>(".daily-menu-action")?.disabled,
     ).toBe(true);
     expect(host.querySelector('[role="alert"]')).toBeNull();
     await click("Study");

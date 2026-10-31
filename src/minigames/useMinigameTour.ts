@@ -10,6 +10,11 @@ import type { RefObject } from "react";
 import { geoDistance } from "d3-geo";
 import type { RegionFeature, Focus } from "../geography/types";
 import type { GlobeHandle } from "../globe/GlobeView";
+import {
+  motionDistance,
+  motionFrameDelta,
+  tourDuration,
+} from "../globe/motion";
 import type { BorderMinigame } from "./sharedNeighbors";
 import {
   demoWorld,
@@ -40,14 +45,14 @@ export function useMinigameTour({
   const [answer, setAnswer] = useState(false);
   const [frame, setFrame] = useState<TourFrame>();
   const motion = useRef<
-    { focus: Focus; velocity: Required<Focus>; at: number } | undefined
+    { focus: Focus; velocity: Required<Focus> } | undefined
   >(undefined);
   type Join = {
     from: Focus;
     velocity: Required<Focus>;
     to: Focus;
     endVelocity: Required<Focus>;
-    start: number;
+    elapsed: number;
     duration: number;
   };
   const plan = useRef<{
@@ -119,7 +124,7 @@ export function useMinigameTour({
     plan.current.needsJoin = true;
     motion.current = undefined;
     const tick = (now: number) => {
-      const deltaTime = Math.max(0, Math.min(100, now - last));
+      const deltaTime = motionFrameDelta(now, last, !motion.current);
       last = now;
       const currentPlan = plan.current;
       if (!currentPlan.examples.length) return;
@@ -151,16 +156,17 @@ export function useMinigameTour({
             lng: after.lng - target.lng,
             altitude: (after.altitude ?? 1.5) - (target.altitude ?? 1.5),
           },
-          start: motion.current?.at ?? now,
-          duration: Math.min(6500, Math.max(2800, Math.abs(delta) * 45)),
+          elapsed: 0,
+          duration: tourDuration(motionDistance(origin, target)),
         };
         currentPlan.needsJoin = false;
       }
       const join = currentPlan.join;
       let next = tourFrame(currentPlan.examples, currentPlan.elapsed);
       let focus: Focus;
-      if (join && now - join.start < join.duration) {
-        const time = now - join.start;
+      if (join && join.elapsed < join.duration) {
+        join.elapsed = Math.min(join.duration, join.elapsed + deltaTime);
+        const time = join.elapsed;
         focus = {
           lat: smoothJoin(
             join.from.lat,
@@ -195,21 +201,18 @@ export function useMinigameTour({
         };
       } else {
         currentPlan.join = undefined;
-        currentPlan.elapsed += join
-          ? Math.max(0, now - join.start - join.duration)
-          : deltaTime;
+        currentPlan.elapsed += deltaTime;
         next = tourFrame(currentPlan.examples, currentPlan.elapsed);
         next.focus.lng += currentPlan.offset;
         focus = next.focus;
       }
       const previous = motion.current;
-      const dt = previous ? Math.max(1, now - previous.at) : 1;
+      const dt = Math.max(1, deltaTime);
       const longitudeDelta = previous
         ? ((((focus.lng - previous.focus.lng + 180) % 360) + 360) % 360) - 180
         : 0;
       motion.current = {
         focus,
-        at: now,
         velocity: previous
           ? {
               lat: (focus.lat - previous.focus.lat) / dt,

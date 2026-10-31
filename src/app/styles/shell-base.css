@@ -196,6 +196,7 @@
   margin: 0 0 36px;
 }
 .daily-menu {
+  position: relative;
   padding: 18px 22px;
   border: 1px solid rgb(var(--ui-editorial-rgb) / 0.4);
   border-radius: 16px;
@@ -206,6 +207,7 @@
 .daily-menu-eyebrow {
   display: block;
   margin-bottom: 6px;
+  padding-right: 110px;
   color: var(--ui-muted, #b6c9b8);
   font-size: 10px;
 }
@@ -294,13 +296,6 @@
 }
 .daily-trail-stop[data-complete="true"] small {
   color: var(--ui-accent);
-}
-.daily-menu .primary-button {
-  width: 100%;
-  background: var(--ui-daily-action, #f0cc7a);
-}
-.daily-menu .primary-button:hover {
-  background: var(--ui-daily-action-hover, #ffdb90);
 }
 .menu-secondary {
   display: grid;

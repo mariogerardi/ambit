@@ -331,6 +331,7 @@ it("keeps typing available when WebGL is unavailable", () => {
   );
   expect(html).toContain("Your answer…");
   expect(html).toContain("Submit answer");
+  expect(html).not.toContain("Get a hint");
   expect(html).not.toContain("requires the 3D globe");
 });
 

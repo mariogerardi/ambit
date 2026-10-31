@@ -62,13 +62,17 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-async function render(title = "The Vaccine That Crossed the World") {
+async function render(
+  title = "The Vaccine That Crossed the World",
+  state: { ready?: boolean; attempt?: DailyAttempt; onPlay?(): void } = {},
+) {
   await act(async () =>
     root.render(
       <HomePanel
         journey={{ id: "test", title, description: "A Journey.", rounds: [] }}
-        ready
-        onPlay={() => {}}
+        ready={state.ready ?? true}
+        attempt={state.attempt}
+        onPlay={state.onPlay ?? (() => {})}
         onRetrySchedule={() => {}}
         onMinigames={() => {}}
         onExplore={() => {}}
@@ -84,6 +88,37 @@ function expectFits(heading: HTMLElement) {
     heading.firstElementChild!.getBoundingClientRect().width,
   ).toBeLessThanOrEqual(width);
 }
+
+it("keeps the card's start, resume and result actions accessible and blocks play until ready", async () => {
+  const onPlay = vi.fn();
+  const attempt: DailyAttempt = {
+    date: "2026-10-31",
+    journeyId: "test",
+    scheduleVersion: 1,
+    game: { ...initialGame, phase: "playing" },
+  };
+  for (const [saved, label] of [
+    [undefined, "Play"],
+    [attempt, "Resume"],
+    [
+      { ...attempt, game: { ...attempt.game, phase: "finished" } },
+      "View result",
+    ],
+  ] as const) {
+    const heading = await render("A Journey", { attempt: saved, onPlay });
+    const action = host.querySelector<HTMLButtonElement>(".daily-menu-action")!;
+    expect(action.getAttribute("aria-label")).toBe(label);
+    expect(action.getAttribute("aria-describedby")).toBe(heading.id);
+    action.click();
+  }
+  expect(onPlay).toHaveBeenCalledTimes(3);
+  await render("A Journey", { ready: false, onPlay });
+  const unavailable =
+    host.querySelector<HTMLButtonElement>(".daily-menu-action")!;
+  expect(unavailable.disabled).toBe(true);
+  unavailable.click();
+  expect(onPlay).toHaveBeenCalledTimes(3);
+});
 
 it("shrinks long titles to fit and restores their size when space returns", async () => {
   const heading = await render();
