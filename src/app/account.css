@@ -50,7 +50,6 @@
   padding-bottom: 12px;
   margin-bottom: 24px;
 }
-.account-tabs button,
 .account-row-actions button {
   color: var(--ui-muted);
   border: 1px solid transparent;
@@ -60,8 +59,6 @@
   font: inherit;
   cursor: pointer;
 }
-.account-tabs .selected,
-.account-tabs button:hover,
 .account-row-actions button:hover {
   color: var(--ui-text);
   background: rgb(var(--ui-line-rgb) / 0.1);
@@ -1160,17 +1157,6 @@
   padding: 0;
   margin: 0;
 }
-.account-tabs button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-align: left;
-}
-.account-tabs .action-icon {
-  width: 19px;
-  height: 19px;
-  flex-shrink: 0;
-}
 .account-sidebar .account-admin-link {
   margin-top: 18px;
   border-top-color: rgb(var(--ui-line-rgb) / 0.2);
@@ -1402,11 +1388,6 @@
   .account-settings-appearance,
   .account-dashboard .friend-journey-comparison {
     padding: 18px;
-  }
-  .account-sidebar .account-tabs button {
-    padding: 10px;
-    gap: 6px;
-    font-size: 13px;
   }
   .account-sidebar .account-tabs .action-icon {
     display: none;

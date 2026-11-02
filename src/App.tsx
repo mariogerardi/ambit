@@ -73,6 +73,7 @@ import { GlobeControls, GlobeRecenter } from "./app/GlobeControls";
 import { AmbitLogo } from "./app/AmbitLogo";
 import { applyTheme, readTheme, saveTheme, THEME_KEY } from "./theme/themes";
 import type { ThemeId } from "./theme/themes";
+import type { JourneyReviewSource } from "./app/journeyReview";
 import { ThemeContext } from "./theme/ThemedImage";
 const GameShell = lazy(() =>
   import("./game/GameShell").then((m) => ({ default: m.GameShell })),
@@ -85,7 +86,7 @@ const AdminJourneyReview = lazy(() =>
 import { JOURNEY_INDEX } from "./game/journeyRegistry";
 import { canSelect, responseCount } from "./game/questionPreparation";
 import { questionPrompt } from "./game/questionText";
-import { gameReducer, initialGame } from "./game/state";
+import { gameReducer, initialGame, startRound } from "./game/state";
 import type { Action, GameState } from "./game/state";
 import {
   DISPLAY_CAPITALS,
@@ -121,7 +122,10 @@ import {
   openDaily,
   withDailyGame,
 } from "./app/dailyProgress";
-import { useJourneySchedule } from "./services/journeySchedule";
+import {
+  useJourneySchedule,
+  unavailableScheduledJourney,
+} from "./services/journeySchedule";
 import { usePublishedPuzzles } from "./app/publishedPuzzles";
 import {
   COUNTRIES,
@@ -150,23 +154,30 @@ const GlobeView = lazy(() =>
 const emptyRoutes: [] = [];
 const emptyRegions: RegionFeature[] = [];
 const noAction = () => {};
-export function PlayerWorkspace() {
+export function PlayerWorkspace({
+  reviewSource,
+}: { reviewSource?: JourneyReviewSource } = {}) {
   const account = useAccount();
   return (
     <ToastProvider>
       {account.loading ? (
         <LoadingScreen />
       ) : (
-        <App key={account.user?.profile.sub ?? "guest"} />
+        <App
+          key={reviewSource?.journey.id ?? account.user?.profile.sub ?? "guest"}
+          reviewSource={reviewSource}
+        />
       )}
     </ToastProvider>
   );
 }
-export function App() {
+export function App({
+  reviewSource,
+}: { reviewSource?: JourneyReviewSource } = {}) {
   const account = useAccount();
   const { notify } = useToast();
   const subject = account.user?.profile.sub;
-  const schedule = useJourneySchedule();
+  const schedule = useJourneySchedule(!reviewSource);
   const playerProfile = usePlayerProfile(subject, account.accessToken);
   const [feedback, setFeedback] = useState<FeedbackRequest>();
   const closeFeedback = useCallback(() => setFeedback(undefined), []);
@@ -176,7 +187,7 @@ export function App() {
   const [globeExpanded, setGlobeExpanded] = useState(false);
   const [exploreContentHeight, setExploreContentHeight] = useState(220);
   const expanded = mobile.enabled && globeExpanded && !mobile.keyboard;
-  const published = usePublishedPuzzles();
+  const published = usePublishedPuzzles(!reviewSource);
   const allJourneys = useMemo(
     () => [...JOURNEY_INDEX, ...published.items.map((p) => p.journey)],
     [published.items],
@@ -197,11 +208,9 @@ export function App() {
     accessToken: account.accessToken,
     catalog: allJourneys,
     catalogReady: published.ready,
+    assignments: schedule.schedule?.assignments,
+    enabled: !reviewSource,
   });
-  const dailyReady =
-    dailyLoaded &&
-    schedule.ready &&
-    (cloudSave.hydrated || Object.keys(daily.attempts).length > 0);
   const [path, setPath] = useState(location.pathname + location.search);
   const pathname = path.split(/[?#]/)[0];
   const accountNavigation = useMemo(() => accountIntent(path), [path]);
@@ -219,12 +228,13 @@ export function App() {
     history.replaceState(null, "", canonical);
     setPath(canonical);
   }, [pathname, accountNavigation]);
-  const requestedMode = modeForPath(path);
+  const requestedMode = reviewSource ? "practice" : modeForPath(path);
   const restricted = requestedMode === "practice" && !account.admin;
   const mode = restricted ? "home" : requestedMode;
   const reviewing =
     mode === "practice" &&
-    new URLSearchParams(path.split("?")[1] ?? "").get("review") === "1";
+    (!!reviewSource ||
+      new URLSearchParams(path.split("?")[1] ?? "").get("review") === "1");
   useEffect(() => {
     if (restricted && !account.loading) {
       history.replaceState(null, "", "/");
@@ -234,17 +244,19 @@ export function App() {
   useEffect(() => {
     if (!account.loading) trackView(mode);
   }, [mode, account.loading]);
-  const [theme, setTheme] = useState(readTheme);
+  const [theme, setTheme] = useState(() => reviewSource?.theme ?? readTheme());
   useEffect(() => applyTheme(theme), [theme]);
   useEffect(() => {
+    if (reviewSource) return;
     const update = (event: StorageEvent) => {
       if (event.key === THEME_KEY || event.key === null) setTheme(readTheme());
     };
     addEventListener("storage", update);
     return () => removeEventListener("storage", update);
-  }, []);
+  }, [reviewSource]);
   const changeTheme = (value: ThemeId) => {
     setTheme(value);
+    if (reviewSource) return;
     if (saveTheme(value)) notify("Appearance saved on this device.");
     else
       notify("Appearance changed, but couldn’t be saved on this device.", {
@@ -361,6 +373,22 @@ export function App() {
       )
     : undefined;
   const activeAttempt = daily.attempts[playDate];
+  const dailyReady =
+    dailyLoaded && schedule.ready && (cloudSave.hydrated || !!activeAttempt);
+  const incompatibleJourney =
+    !activeAttempt &&
+    unavailableScheduledJourney(
+      playDate,
+      schedule.schedule?.records ?? {},
+      allJourneys,
+    );
+  const incompatibleToday =
+    !daily.attempts[today] &&
+    unavailableScheduledJourney(
+      today,
+      schedule.schedule?.records ?? {},
+      allJourneys,
+    );
   const activeJourneyId = archiveDate
     ? archiveEntry?.journey?.id
     : (activeAttempt?.journeyId ??
@@ -382,9 +410,10 @@ export function App() {
         ? `${path}:${studyBrowsingHistory ? "history" : studySetup || !study.session ? "setup" : `session:${study.session.id ?? study.session.seed}`}`
         : path;
   const journeyId =
-    mode === "daily"
+    reviewSource?.journey.id ??
+    (mode === "daily"
       ? activeJourneyId
-      : JOURNEY_INDEX.find((j) => j.path === pathname)?.id;
+      : JOURNEY_INDEX.find((j) => j.path === pathname)?.id);
   const {
     journey,
     loaded,
@@ -409,15 +438,72 @@ export function App() {
     regions,
     published: published.items,
     retry,
+    reviewJourney: reviewSource?.journey,
   });
+  const freshGame = useMemo(
+    () =>
+      mode === "practice" && journey.rounds[0]
+        ? startRound(journey.rounds[0])
+        : initialGame,
+    [mode, journey],
+  );
   const game =
     mode === "daily"
       ? (activeAttempt?.game ?? { ...initialGame, phase: "playing" as const })
-      : ((reviewing ? reviews : practice)[journey.id] ?? {
-          ...initialGame,
-          phase: "playing" as const,
-          ordered: [...(journey.rounds[0]?.orderInitial ?? [])],
-        });
+      : ((reviewing ? reviews : practice)[journey.id] ?? freshGame);
+  const reviewQuestionId =
+    reviewSource?.questionId ??
+    new URLSearchParams(path.split("?")[1]).get("question");
+  useEffect(() => {
+    if (
+      !reviewing ||
+      !context ||
+      !isJourney ||
+      (!reviewSource && !reviewQuestionId)
+    )
+      return;
+    const index = reviewQuestionId
+      ? journey.rounds.findIndex((q) => q.id === reviewQuestionId)
+      : 0;
+    if (index < 0) return;
+    let live = true;
+    void import("./app/journeyReview")
+      .then(({ reviewState }) =>
+        reviewState(
+          journey,
+          context,
+          index,
+          reviewSource?.stage ?? "play",
+          reviewSource?.seed,
+        ),
+      )
+      .then((next) => {
+        if (live) {
+          setReviews((previous) => ({ ...previous, [journey.id]: next }));
+          reviewSource?.onInspect?.(index, reviewSource.stage);
+        }
+      })
+      .catch((error) => {
+        if (live)
+          notify(
+            error instanceof Error
+              ? error.message
+              : "Couldn’t open this review state.",
+            { tone: "error" },
+          );
+      });
+    return () => {
+      live = false;
+    };
+  }, [
+    reviewing,
+    context,
+    isJourney,
+    journey,
+    reviewQuestionId,
+    reviewSource,
+    notify,
+  ]);
   const [constructionReviewIndex, setConstructionReviewIndex] = useState<
     number | undefined
   >(undefined);
@@ -902,7 +988,8 @@ export function App() {
       mode === "daily" &&
       dailyReady &&
       canOpenDate &&
-      (!archiveDate || cloudSave.hydrated) &&
+      !incompatibleJourney &&
+      cloudSave.hydrated &&
       !activeAttempt
     )
       setDaily((p) =>
@@ -921,6 +1008,7 @@ export function App() {
     playDate,
     archiveDate,
     canOpenDate,
+    incompatibleJourney,
     dailyReady,
     cloudSave.hydrated,
     allJourneys,
@@ -958,15 +1046,35 @@ export function App() {
         (reviewing ? setReviews : setPractice)((p) => ({
           ...p,
           [journey.id]: gameReducer(
-            p[journey.id] ?? { ...initialGame, phase: "playing" },
+            p[journey.id] ?? freshGame,
             action,
             journey,
             context,
           ),
         }));
     },
-    [context, mode, reviewing, journey, allJourneys, playDate, archiveDate],
+    [
+      context,
+      mode,
+      reviewing,
+      journey,
+      freshGame,
+      allJourneys,
+      playDate,
+      archiveDate,
+    ],
   );
+  useEffect(() => {
+    if (
+      context &&
+      mode === "daily" &&
+      activeAttempt &&
+      game.phase === "playing" &&
+      journey.rounds[game.roundIndex].orderInitial &&
+      !game.ordered.length
+    )
+      dispatch({ type: "initialize-round" });
+  }, [context, mode, activeAttempt, game, journey, dispatch]);
   const studyAction = useCallback(
     (action: StudyAction) => {
       const emptyFinish =
@@ -1066,7 +1174,17 @@ export function App() {
     ],
   );
   function playDaily(date: string) {
+    if (
+      !daily.attempts[date] &&
+      unavailableScheduledJourney(
+        date,
+        schedule.schedule?.records ?? {},
+        allJourneys,
+      )
+    )
+      return;
     if (!webgl || !dailyLoaded || !schedule.ready || !cloudSave.ready) return;
+    if (!daily.attempts[date] && !cloudSave.hydrated) return;
     if (
       date === today
         ? date !== localDateKey()
@@ -1106,6 +1224,14 @@ export function App() {
     });
   };
   const todayJourney =
+    (incompatibleToday
+      ? {
+          id: incompatibleToday,
+          title: "A new Journey is ready",
+          description: "Reload Ambit to open today’s Journey.",
+          rounds: [],
+        }
+      : undefined) ??
     allJourneys.find((j) => j.id === todayAttempt?.journeyId) ??
     dailyJourney(
       today,
@@ -1122,13 +1248,24 @@ export function App() {
           !!regions.length &&
           dailyLoaded &&
           cloudSave.ready &&
+          (!!todayAttempt || cloudSave.hydrated) &&
           schedule.ready &&
+          !incompatibleToday &&
           webgl
         }
-        scheduleError={schedule.ready ? undefined : schedule.error}
+        scheduleError={
+          incompatibleToday
+            ? "Reload Ambit to play today’s Journey."
+            : schedule.ready
+              ? undefined
+              : schedule.error
+        }
+        scheduleRetryLabel={incompatibleToday ? "Reload Ambit" : undefined}
         onPlay={() => playDaily(today)}
         onArchive={() => navigate("/archive")}
-        onRetrySchedule={() => void schedule.refresh()}
+        onRetrySchedule={() =>
+          incompatibleToday ? location.reload() : void schedule.refresh()
+        }
         onMinigames={() => navigate("/minigames")}
         onExplore={() => navigate("/explore")}
         onStudy={() => navigate("/study")}
@@ -1340,6 +1477,13 @@ export function App() {
         onResume={() => navigate(studyLink("session"))}
         onSetup={() => navigate(studyLink("custom"))}
       />
+    ) : mode === "daily" && incompatibleJourney ? (
+      <section className="info-view" role="status">
+        <p>Reload Ambit to open this day’s Journey.</p>
+        <button className="primary-button" onClick={() => location.reload()}>
+          Reload Ambit
+        </button>
+      </section>
     ) : archiveDate && !canOpenDate ? (
       <section className="info-view" role="status">
         <h1>Journey archive</h1>
@@ -1420,10 +1564,7 @@ export function App() {
                 date={adminDate(
                   new URLSearchParams(path.split("?")[1]).get("date"),
                 )}
-                initialQuestionId={
-                  new URLSearchParams(path.split("?")[1]).get("question") ??
-                  undefined
-                }
+                source={reviewSource}
                 context={context}
                 game={game}
                 onChange={(next) =>

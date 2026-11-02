@@ -1751,20 +1751,20 @@
 }
 .order-populated .order-bank,
 .order-populated .order-slots li[data-order-slot="-1"] {
-  border: 1px solid rgb(190 104 100 / 0.32);
-  border-radius: 9px;
-  background: rgb(190 104 100 / 0.065);
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.32);
+  border-radius: var(--control-radius);
+  background: rgb(var(--ui-raised-rgb) / 0.5);
   padding: 12px;
 }
 .order-populated .order-slots li[data-order-slot="-1"] .order-card:disabled {
-  border-color: rgb(190 104 100 / 0.45);
+  border-color: rgb(var(--ui-line-rgb) / 0.45);
 }
 .order-populated .order-bank .order-position {
   font-size: 12px;
 }
 
 .order-populated .order-card {
-  border-radius: 11px;
+  border-radius: var(--control-radius);
   border-color: rgb(var(--ui-line-rgb) / 0.24);
   font-weight: 500;
 }

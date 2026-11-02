@@ -22,7 +22,12 @@ import {
 } from "./guidance";
 import type { HelpUsage } from "./guidance";
 import { canSelect, responseCount, solutionIds } from "./questionPreparation";
-import type { Journey, QuestionContext, Response } from "./questionContracts";
+import type {
+  Journey,
+  Question,
+  QuestionContext,
+  Response,
+} from "./questionContracts";
 import { canSubmit, isCorrect } from "./questionEvaluation";
 import { cityIdForName } from "./answerTargets";
 import { submittedPoints, POINTS_VERSION } from "./points";
@@ -55,6 +60,7 @@ export interface GameState extends Response {
 }
 export type Action =
   | { type: "start" }
+  | { type: "initialize-round" }
   | { type: "construction"; value?: Construction }
   | { type: "show-construction-example" }
   | { type: "brush-size"; value: number }
@@ -83,20 +89,37 @@ export const initialGame: GameState = {
   ordered: [],
   answers: [],
 };
+/** One entry point for a fresh round. Restored responses never pass through it. */
+export function startRound(
+  question: Question,
+  index = 0,
+  random = Math.random,
+): GameState {
+  return {
+    ...initialGame,
+    phase: "playing",
+    roundIndex: index,
+    ordered: initialOrderCards(question, random),
+  };
+}
 export function gameReducer(
   state: GameState,
   action: Action,
   journey: Journey,
   context: QuestionContext,
 ): GameState {
-  if (action.type === "start")
-    return {
-      ...initialGame,
-      phase: "playing",
-      ordered: initialOrderCards(journey.rounds[0]),
-    };
+  if (action.type === "start") return startRound(journey.rounds[0]);
   if (action.type === "home") return { ...initialGame };
   const round = journey.rounds[state.roundIndex];
+  if (action.type === "initialize-round")
+    return state.phase === "playing" &&
+      round.orderInitial &&
+      !state.ordered.length
+      ? withAssistanceLocks(round, {
+          ...state,
+          ordered: initialOrderCards(round),
+        })
+      : state;
   if (action.type === "show-construction-example")
     return state.phase === "feedback" && round.constructionExample
       ? { ...state, showConstructionExample: !state.showConstructionExample }
@@ -172,21 +195,13 @@ export function gameReducer(
     return state.roundIndex === journey.rounds.length - 1
       ? { ...state, phase: "finished" }
       : {
-          ...state,
-          phase: "playing",
-          roundIndex: state.roundIndex + 1,
-          pin: undefined,
-          activePinSlot: undefined,
-          recall: undefined,
-          construction: undefined,
-          constructionResult: undefined,
+          ...startRound(
+            journey.rounds[state.roundIndex + 1],
+            state.roundIndex + 1,
+          ),
+          answers: state.answers,
+          help: state.help,
           constructionTool: "draw",
-          brushRadiusKm: undefined,
-          showConstructionExample: false,
-          selectedIds: [],
-          text: "",
-          ordered: initialOrderCards(journey.rounds[state.roundIndex + 1]),
-          inputError: undefined,
         };
   }
   if (state.phase !== "playing") return state;

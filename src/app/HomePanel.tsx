@@ -10,6 +10,7 @@ export function HomePanel({
   attempt,
   ready,
   scheduleError,
+  scheduleRetryLabel = "Retry schedule",
   onPlay,
   onArchive,
   onRetrySchedule,
@@ -21,6 +22,7 @@ export function HomePanel({
   attempt?: DailyAttempt;
   ready: boolean;
   scheduleError?: string;
+  scheduleRetryLabel?: string;
   onPlay(): void;
   onArchive?(): void;
   onRetrySchedule(): void;
@@ -157,7 +159,7 @@ export function HomePanel({
             data-dd-action-name="Home Retry Schedule"
             onClick={onRetrySchedule}
           >
-            Retry schedule
+            {scheduleRetryLabel}
           </button>
         </p>
       )}

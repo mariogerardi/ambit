@@ -4,6 +4,7 @@ import type { Journey, Question } from "./questionContracts";
 
 /** Enough to route, schedule and validate saves without loading clue geometry. */
 export interface JourneySummary {
+  dailyEligible?: boolean;
   addedAt?: string;
   saveRevision?: number;
   legacyRoundLabels?: Partial<Record<string, string>>;
@@ -35,7 +36,8 @@ export function loadJourney(id: string): Promise<Journey> {
         "id" in value &&
         value.id === id,
     );
-    if (!journey) throw Error("Couldn’t load this Journey. Please reload to try again.");
+    if (!journey)
+      throw Error("Couldn’t load this Journey. Please reload to try again.");
     validateJourneyContracts(journey);
     return journey;
   });

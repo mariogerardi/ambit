@@ -181,6 +181,11 @@ export function defineQuestion(question: AuthoredQuestion): Question {
 }
 export function validateJourneyContracts(journey: Journey): void {
   if (
+    journey.dailyEligible !== undefined &&
+    typeof journey.dailyEligible !== "boolean"
+  )
+    throw Error(`Invalid Daily eligibility: ${journey.id}`);
+  if (
     journey.completion?.initialConstructionRoundId &&
     (!journey.completion.constructionResults ||
       !journey.rounds.some(

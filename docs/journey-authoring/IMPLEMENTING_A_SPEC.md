@@ -56,6 +56,9 @@ Scale planning to novelty. For a familiar sequel, confirm the shared mechanic an
 identify content or scene differences; no separate feasibility exercise or full
 inventory of inherited UI is needed. For new interactions or bespoke data,
 identify the affected contracts, controls, grading, presentation and save behavior.
+Record the capability fit once in the spec's existing table: requirement, exact
+current recipe/source and revision, reuse/extension decision, and material risk.
+Group identical interactions; a familiar sequel still needs only one sentence.
 Resolve a risk that could invalidate the experience before implementing all five
 stops. Report material capability conflicts without silently replacing an
 approved task; continue independent work while the necessary decision is resolved.
@@ -76,18 +79,22 @@ where relevant, plus the final recap.
 
 ### Registration and compatibility
 
-Honor the registration authorization in the request or spec. Every registered
-Journey enters the automatic Daily pool; there is no unlisted catalog state.
+Honor the registration authorization in the request or spec. Registration makes
+an edition available to Admin review and explicit date assignment. Automatic Daily
+selection includes it by default; set `dailyEligible: false` to hold it outside
+that pool. This is not a privacy flag. Follow the staged catalog release procedure
+in [Hosting](../HOSTING.md#journey-catalog-activation) before activating new content.
 When authorized, register the Journey and route, update the catalog table and
 regenerate index metadata only when its inputs change. Preserve started editions,
 locked assignments and completed receipts, with explicit revision/recovery
 handling where needed. Account for the backend's bundled catalog when shipping.
 
 If registration is deferred, keep the new Journey out of `journeys.ts` and the
-generated index. The ID/slug checker and normal practice/review routes require
-indexed content; they cannot preview an unregistered module automatically. Use
-direct-module checks, including `auditJourney`, and an explicitly arranged isolated
-review when needed. Do not register temporarily just to make those tools work.
+generated index. Open the shared development workbench at
+`/review/journeys.html?module=<name>Journey.ts`, which loads the source through the
+production App with in-memory review state and disabled progress storage/sync.
+Run `npm run check:journey -- --module src/game/<name>Journey.ts` for its audit.
+Do not create a custom React fixture or register temporarily to make review work.
 If registration is unresolved, continue independent content work and flag that
 decision before changing the catalog. Implementation approval does not authorize
 deployment.

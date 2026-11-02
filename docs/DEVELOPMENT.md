@@ -84,16 +84,28 @@ blocked, and the fixture grants no server
 permissions. Review entry points stay
 outside the production bundle. See [Services](SERVICES.md) for release steps.
 
-For deferred, unregistered content, normal routes and the library cannot load an
-arbitrary module. `/review/made-in-china.html` is the existing direct-import,
-in-memory fixture; adapting an isolated fixture is an explicit development step,
-not temporary registration or server-side draft publication.
-`/review/beasts-on-banners.html` directly reviews Beasts on Banners with the shared
-globe, pin/choice controls, help, reveals and completion. Its state stays in memory;
-restarting or reloading clears the review. The registered Journey can also be
-opened in the full App review at
-`/review/journeys.html?journey=beasts-on-banners`, or through its Admin-only
-practice route `/journey/beasts-on-banners`.
+For registered or unregistered Journey source, use the shared workbench:
+`http://127.0.0.1:5173/review/journeys.html?module=imLikeABirdJourney.ts`.
+Choose another `*Journey.ts` source from its selector; no registration or custom
+React fixture is required. It runs the production App, globe adapter and camera
+orchestration with review state in memory. Player progress storage, account sync,
+legacy packs and schedule requests are disabled; non-read API requests are blocked.
+Old Bird, Made in China and Beasts on Banners review links redirect here.
+
+Use `question=<question-id>&state=<stage>&seed=17&theme=ocean` to reproduce a state.
+Stages are `play`, `hint`, `assist`, `correct`, `missed`, `completion`, and
+`completion-mixed`. The review buttons update the URL. The seed fixes shuffled
+inputs; samples use real reducer submissions and fail explicitly if unavailable.
+Capture current state downloads the actual response/receipts as JSON; restore
+accepts only the matching Journey ID, answer-contract revision and valid state.
+Captures never enter player saves. Reload a state URL for each viewport or theme;
+use reduced-motion emulation for animated compositions. These tools prepare
+review states, not screenshot or rendered-quality certification.
+
+Review representative play/help/correct/actual-miss/completion states for affected
+rounds, plus partial outcomes where supported. Use the narrow viewport, themes and
+motion settings relevant to the change. Automate state setup; run browser capture
+only when requested or needed to resolve a concrete input/rendering uncertainty.
 
 Vitest covers logic, local assets, and DOM integration with a
 mocked globe. It does not exercise browser/WebGL rendering or actual mobile input.
@@ -171,7 +183,9 @@ Date-selection parity uses the frozen catalogs and vectors in
 `tests/journey-schedule.test.ts` and `backend/test_journey_schedule.py`. Test the
 raw hash and fixed-pool choices there; do not tie expected provisional picks to
 the expanding production catalog. Catalog additions may change unassigned picks;
-locked assignments and started attempts must retain their editions. The catalog
+locked assignments and started attempts must retain their editions unless today's
+server assignment explicitly selects a different Journey. That reconciliation
+retains the displaced run for restoration rather than deleting its progress. The catalog
 invariant suite audits each Journey as a separate case so catalog growth does
 not put all geometry checks under one test's timeout.
 
@@ -342,6 +356,8 @@ does not modify content, call an AI or deploy anything.
 
 Run `npm run check:journey -- <id-or-slug>` to inspect one Journey's contracts,
 help and reveal scenes, cameras, sources and local media. `--recipe <answer-mode>`
-loads a complete control example; `--list` shows current Journeys.
+loads a complete control example; `--recipe populated-country-order` checks the
+prefilled/spare/hint-lock composition. `--module src/game/<name>Journey.ts` audits
+unregistered source; `--list` shows registered Journeys.
 See [Journey engine and authoring contracts](JOURNEY_ENGINE.md) for scene authoring,
 registered mechanics, recipes, JSON output and the limits of automated review.

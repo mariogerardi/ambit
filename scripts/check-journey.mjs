@@ -11,6 +11,9 @@ if (args.includes("--list")) {
 }
 const target = args.find((arg) => !arg.startsWith("--"));
 const recipeMode = args.includes("--recipe") ? target : undefined;
+const moduleTarget = args.includes("--module")
+  ? args[args.indexOf("--module") + 1]
+  : undefined;
 const all = args.includes("--all");
 const entry = index.find(
   (entry) =>
@@ -18,14 +21,18 @@ const entry = index.find(
     entry.path === target ||
     entry.path.split("/").at(-1) === target,
 );
-if (!entry && !recipeMode && !all) {
+if (
+  (!entry && !recipeMode && !all && !moduleTarget) ||
+  (moduleTarget &&
+    (!/^src\/game\/[^/]+Journey\.ts$/.test(moduleTarget) || all || recipeMode))
+) {
   console.error(
-    "Usage: npm run check:journey -- <journey-id-or-slug> [--json]\nUse --all for a catalog sweep, --list to list Journeys, or --recipe <answer-mode-or-composition> for a complete mechanic example.",
+    "Usage: npm run check:journey -- <journey-id-or-slug> [--json]\nUse --module src/game/<name>Journey.ts for an unregistered draft, --all for a catalog sweep, --list to list Journeys, or --recipe <answer-mode-or-composition> for a complete mechanic example.",
   );
   process.exit(1);
 }
 const server = await createServer({
-  server: { middlewareMode: true },
+  server: { middlewareMode: true, hmr: false },
   logLevel: "error",
 });
 try {
@@ -53,6 +60,16 @@ try {
         description: "Mechanic recipe",
         rounds: [question],
       };
+    } else if (moduleTarget) {
+      const module = await server.ssrLoadModule(`/${moduleTarget}`);
+      journey = Object.values(module).find(
+        (value) =>
+          value &&
+          typeof value === "object" &&
+          Array.isArray(value.rounds) &&
+          typeof value.id === "string",
+      );
+      if (!journey) throw Error(`Missing Journey export: ${moduleTarget}`);
     } else {
       const module = await server.ssrLoadModule(
         `/src/game/${selected.module.replace(/^\.\//, "")}`,

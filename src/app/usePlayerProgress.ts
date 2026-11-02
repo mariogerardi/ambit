@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JourneySummary } from "../game/journeyRegistry";
 import { reportFailure } from "../services/monitoring";
 import {
   DAILY_KEY,
   emptyDaily,
   localDateKey,
+  reconcileDailyAssignment,
   resetDailyAttempt,
   validDaily,
 } from "./dailyProgress";
 import { createDailySave, createStudySave, progressKey } from "./progressSaves";
 import { readSave } from "./storage";
 import { useProgressSync } from "./useProgressSync";
+import { emptyStudy } from "../study/engine";
 
 /** Account-scoped save lifetime follows PlayerWorkspace's subject-keyed remount. */
 export function usePlayerProgress({
@@ -18,25 +20,42 @@ export function usePlayerProgress({
   accessToken,
   catalog,
   catalogReady,
+  assignments,
+  enabled = true,
 }: {
   subject?: string;
   accessToken: () => Promise<string | undefined>;
   catalog: JourneySummary[];
   catalogReady: boolean;
+  assignments?: Record<string, string>;
+  enabled?: boolean;
 }) {
   const dailyStore = useRef<ReturnType<typeof createDailySave> | undefined>(
     undefined,
   );
   const [dailyLoaded, setDailyLoaded] = useState(false);
   const [dailyRead] = useState(() =>
-    readSave(progressKey(DAILY_KEY, subject), emptyDaily, validDaily),
+    enabled
+      ? readSave(progressKey(DAILY_KEY, subject), emptyDaily, validDaily)
+      : { value: emptyDaily, available: true },
   );
-  const [studyStore] = useState(() => createStudySave(subject));
-  const [daily, setDaily] = useState(dailyRead.value);
-  const [study, setStudy] = useState(() => studyStore.load());
+  const [studyStore] = useState(() =>
+    enabled ? createStudySave(subject) : undefined,
+  );
+  const [storedDaily, setDaily] = useState(dailyRead.value);
+  const today = localDateKey();
+  // Apply the server choice before rendering and after every incoming cloud
+  // merge, then persist the corrected selection through the existing registers.
+  const daily = useMemo(
+    () => reconcileDailyAssignment(storedDaily, today, assignments, catalog),
+    [storedDaily, today, assignments, catalog],
+  );
+  const [study, setStudy] = useState(() => studyStore?.load() ?? emptyStudy);
   const [dailySaveOk, setDailySaveOk] = useState(dailyRead.available);
-  const [studySaveOk, setStudySaveOk] = useState(studyStore.writable);
-  const [saveRecovered, setSaveRecovered] = useState(studyStore.recovered);
+  const [studySaveOk, setStudySaveOk] = useState(studyStore?.writable ?? true);
+  const [saveRecovered, setSaveRecovered] = useState(
+    studyStore?.recovered ?? false,
+  );
   const cloudSave = useProgressSync(
     subject,
     dailyLoaded ? dailyStore.current : undefined,
@@ -48,27 +67,29 @@ export function usePlayerProgress({
     if (!canSave) reportFailure("local save");
   }, [canSave]);
   useEffect(() => {
-    if (!catalogReady || dailyLoaded) return;
+    if (!enabled || !catalogReady || dailyLoaded) return;
     const store = createDailySave(catalog, subject);
     dailyStore.current = store;
     setDaily(store.load());
     setDailySaveOk(store.writable);
     if (store.recovered) setSaveRecovered(true);
     setDailyLoaded(true);
-  }, [catalogReady, dailyLoaded, catalog, subject]);
+  }, [enabled, catalogReady, dailyLoaded, catalog, subject]);
   useEffect(() => {
     if (!dailyLoaded || !dailyStore.current) return;
     const saved = dailyStore.current.save(daily);
     setDailySaveOk(saved.ok);
-    if (!dailyStore.current.equivalent(saved.value, daily))
+    if (!dailyStore.current.equivalent(saved.value, storedDaily))
       setDaily(saved.value);
-  }, [daily, dailyLoaded]);
+  }, [daily, storedDaily, dailyLoaded]);
   useEffect(() => {
+    if (!studyStore) return;
     const saved = studyStore.save(study);
     setStudySaveOk(saved.ok);
     if (!studyStore.equivalent(saved.value, study)) setStudy(saved.value);
   }, [study, studyStore]);
   useEffect(() => {
+    if (!enabled || !studyStore) return;
     const change = (event: Event) => {
       const key =
         event instanceof StorageEvent
@@ -105,9 +126,9 @@ export function usePlayerProgress({
       removeEventListener("storage", change);
       removeEventListener("ambit-progress-received", change);
     };
-  }, [studyStore]);
+  }, [enabled, studyStore]);
   const retrySaving = useCallback(() => {
-    setStudySaveOk(studyStore.save(study).ok);
+    if (studyStore) setStudySaveOk(studyStore.save(study).ok);
     if (dailyStore.current) setDailySaveOk(dailyStore.current.save(daily).ok);
     cloudSave.retry();
   }, [studyStore, study, daily, cloudSave.retry]);

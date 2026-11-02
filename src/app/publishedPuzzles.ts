@@ -89,12 +89,13 @@ export function readPublishedPuzzles(): Promise<PublishedPuzzle[]> {
     };
   });
 }
-export function usePublishedPuzzles() {
+export function usePublishedPuzzles(enabled = true) {
   const [state, setState] = useState<{
     ready: boolean;
     items: PublishedPuzzle[];
-  }>({ ready: false, items: [] });
+  }>({ ready: !enabled, items: [] });
   useEffect(() => {
+    if (!enabled) return;
     let live = true;
     void readPublishedPuzzles().then((items) => {
       if (live) setState({ ready: true, items });
@@ -102,6 +103,6 @@ export function usePublishedPuzzles() {
     return () => {
       live = false;
     };
-  }, []);
+  }, [enabled]);
   return state;
 }

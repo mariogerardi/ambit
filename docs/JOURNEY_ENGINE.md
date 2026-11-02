@@ -184,6 +184,17 @@ an answer as the spare. The lock survives assist, clear and stale draft recovery
 the stronger `assist.fixedSlots` contract can independently lock the first answer.
 The original answer sequence and help point ceilings are unchanged.
 
+`recipe:populated-country-order` is the complete prefilled/shuffled ordering
+composition: one spare, hint elimination, assist-fixed first position, compact
+feedback, staged country fills and separate flowing/reveal paths. Audit it with
+`npm run check:journey -- --recipe populated-country-order`. It is an executable
+example, not a second configuration API or an editorial template.
+
+Use the [shared draft workbench](DEVELOPMENT.md#run-and-check) for source not in
+the index. Review and normal play share fresh-round initialization; Daily fills
+uninitialized ordering inputs after lazy content loads, while restored nonempty
+drafts and completed receipts stay intact.
+
 ## Standards and supported capabilities
 
 [Crafting a Journey](JOURNEY_CRAFTING.md) owns current authoring standards. The

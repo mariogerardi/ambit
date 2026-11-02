@@ -18,6 +18,7 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 | `GPT_GUIDE.md`             | Single-file GPT knowledge upload: current instructions, implementation workflow, guide, mechanics, specification template and all compact Journey walkthroughs.                |
 | `AUTHORING_KIT.md`         | Game overview, editorial sections copied from the crafting guide, generated mechanic capabilities, semantic map colors and all current Journey references.                     |
 | `PROJECT_INSTRUCTIONS.md`  | Instructions to paste into a ChatGPT Project or other AI workspace.                                                                                                            |
+| `COMPOSITIONS.md`          | Executable interaction/presentation examples, including populated ordering with a hint-locked spare.                                                                           |
 | `IMPLEMENTING_A_SPEC.md`   | Coding-agent entry point: read the approved brief, inspect relevant Journeys, inherit shared conventions, implement and verify.                                                |
 | `JOURNEY_SPEC_TEMPLATE.md` | Record the approved design for implementation, including scenes, help, answer contracts, completion and sources.                                                               |
 | `JOURNEY_ARCHETYPES.md`    | Recurring authored structures, implementation boundaries and relevant examples across the catalog; no preferred subset.                                                        |

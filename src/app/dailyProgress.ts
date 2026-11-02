@@ -55,10 +55,9 @@ export function seededJourney<T extends JourneySummary>(
   catalog: T[],
   records: Record<string, string> = {},
 ): T {
-  const candidates = [...catalog].sort((a, b) =>
-    a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
-  );
-  if (!candidates.length) throw Error("No Journeys are available");
+  const candidates = catalog
+    .filter((journey) => journey.dailyEligible !== false)
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   const first = dateOrdinal(FIRST_DAILY_DATE);
   const target = dateOrdinal(date);
   const memo = new Map<string, string>();
@@ -80,6 +79,7 @@ export function seededJourney<T extends JourneySummary>(
       );
       continue;
     }
+    if (!candidates.length) throw Error("No eligible Journeys are available");
     const recent: string[] = [];
     for (
       let offset = 1;
@@ -93,7 +93,7 @@ export function seededJourney<T extends JourneySummary>(
       );
     if (cycle) {
       const position =
-        ((ordinal - first) % cycle.length + cycle.length) % cycle.length;
+        (((ordinal - first) % cycle.length) + cycle.length) % cycle.length;
       const selected = Array.from(
         { length: cycle.length },
         (_, offset) => cycle[(position + offset) % cycle.length],
@@ -491,6 +491,33 @@ export function upgradeDailyAttempt(
   };
 }
 
+/** Today's server choice wins; displaced runs and historical dates stay intact. */
+export function reconcileDailyAssignment(
+  progress: DailyProgress,
+  date: string,
+  assignments: Record<string, string> | undefined,
+  catalog: JourneySummary[],
+): DailyProgress {
+  const assignedId = assignments?.[date];
+  if (!assignedId) return progress;
+  const target =
+    catalog.find((journey) => journey.supersedes === assignedId) ??
+    catalog.find((journey) => journey.id === assignedId);
+  const current = progress.attempts[date];
+  if (current?.journeyId === (target?.id ?? assignedId)) return progress;
+  const restored =
+    target && progress.archivedAttempts?.[`${date}/${target.id}`];
+  if (!current && !restored) return progress;
+  const attempts = { ...progress.attempts };
+  const archivedAttempts = { ...progress.archivedAttempts };
+  if (current) archivedAttempts[`${date}/${current.journeyId}`] = current;
+  if (restored) {
+    attempts[date] = upgradeDailyAttempt(restored, catalog);
+    delete archivedAttempts[`${date}/${target.id}`];
+  } else delete attempts[date];
+  return { ...progress, attempts, archivedAttempts };
+}
+
 export function openDaily(
   progress: DailyProgress,
   date: string,
@@ -498,6 +525,18 @@ export function openDaily(
   catalog: JourneySummary[] = JOURNEY_INDEX,
   assignments?: Record<string, string>,
 ): DailyProgress {
+  if (
+    assignments?.[date] &&
+    (date === localDateKey() || !progress.attempts[date]) &&
+    !catalog.some(
+      (journey) =>
+        journey.id === assignments[date] ||
+        journey.supersedes === assignments[date],
+    )
+  )
+    throw Error("Journey unavailable");
+  if (date === localDateKey())
+    progress = reconcileDailyAssignment(progress, date, assignments, catalog);
   const saved = progress.attempts[date];
   const existing = saved && upgradeDailyAttempt(saved, catalog);
   const journeyId =

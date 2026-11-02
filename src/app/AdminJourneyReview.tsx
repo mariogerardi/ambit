@@ -1,17 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { Journey, QuestionContext } from "../game/questionContracts";
-import { gameReducer, initialGame } from "../game/state";
 import type { GameState } from "../game/state";
 import { adminJourneyLink } from "./accountNavigation";
-
-export function reviewRound(journey: Journey, index: number): GameState {
-  return {
-    ...initialGame,
-    phase: "playing",
-    roundIndex: index,
-    ordered: [...(journey.rounds[index].orderInitial ?? [])],
-  };
-}
+import {
+  captureReview,
+  restoreReview,
+  reviewRound,
+  reviewState,
+} from "./journeyReview";
+import type { JourneyReviewSource, ReviewStage } from "./journeyReview";
+export { reviewRound } from "./journeyReview";
 
 export function AdminJourneyReview({
   journey,
@@ -20,7 +18,7 @@ export function AdminJourneyReview({
   onChange,
   onNavigate,
   date,
-  initialQuestionId,
+  source,
 }: {
   journey: Journey;
   context: QuestionContext;
@@ -28,18 +26,11 @@ export function AdminJourneyReview({
   onChange(game: GameState): void;
   onNavigate(url: string): void;
   date?: string;
-  initialQuestionId?: string;
+  source?: JourneyReviewSource;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const request = useRef(0);
-  useEffect(() => {
-    if (!initialQuestionId) return;
-    const index = journey.rounds.findIndex(
-      (question) => question.id === initialQuestionId,
-    );
-    if (index >= 0) onChange(reviewRound(journey, index));
-  }, [journey.id, initialQuestionId]);
   useEffect(
     () => () => {
       request.current++;
@@ -50,53 +41,24 @@ export function AdminJourneyReview({
     request.current++;
     setBusy(false);
     setError("");
-    onChange(reviewRound(journey, index));
+    onChange(reviewRound(journey, index, source?.seed));
+    source?.onInspect?.(index, "play");
   };
-  const help = (assist: boolean) => {
-    let next = gameReducer(
-      reviewRound(journey, game.roundIndex),
-      { type: "request-hint" },
-      journey,
-      context,
-    );
-    if (assist)
-      next = gameReducer(next, { type: "request-assist" }, journey, context);
-    onChange(next);
-    setError("");
-  };
-  async function sample(kind: "correct" | "missed" | "completion") {
+  async function sample(kind: ReviewStage, index = game.roundIndex) {
     const id = ++request.current;
     setBusy(true);
     setError("");
     try {
-      const { submitSample } = await import("../game/journeyAudit");
+      const result = await reviewState(
+        journey,
+        context,
+        index,
+        kind,
+        source?.seed,
+      );
       if (id !== request.current) return;
-      if (kind === "completion") {
-        const answers: GameState["answers"] = [];
-        let result: GameState | undefined;
-        for (const [index, question] of journey.rounds.entries()) {
-          result = submitSample(journey, question, context, index, true);
-          if (!result)
-            throw Error(
-              "A sample completion isn’t available for this Journey. Play through the review instead.",
-            );
-          answers.push(...result.answers);
-        }
-        onChange({ ...result!, answers, phase: "finished" });
-      } else {
-        const result = submitSample(
-          journey,
-          journey.rounds[game.roundIndex],
-          context,
-          game.roundIndex,
-          kind === "correct",
-        );
-        if (!result)
-          throw Error(
-            "An example answer isn’t available for this state. Try your own answer in the review.",
-          );
-        onChange(result);
-      }
+      onChange(result);
+      source?.onInspect?.(index, kind);
     } catch (failure) {
       if (id === request.current)
         setError(
@@ -115,24 +77,30 @@ export function AdminJourneyReview({
         <span>Review progress isn’t saved.</span>
       </div>
       <div className="admin-library-actions">
-        <button
-          type="button"
-          className="quiet-button"
-          onClick={() =>
-            onNavigate(adminJourneyLink(journey.id, "journeys", date))
-          }
-        >
-          ← Journey library
-        </button>
-        <button
-          type="button"
-          className="quiet-button"
-          onClick={() =>
-            onNavigate(adminJourneyLink(journey.id, "schedule", date))
-          }
-        >
-          Schedule this Journey
-        </button>
+        {source ? (
+          source.navigation
+        ) : (
+          <>
+            <button
+              type="button"
+              className="quiet-button"
+              onClick={() =>
+                onNavigate(adminJourneyLink(journey.id, "journeys", date))
+              }
+            >
+              ← Journey library
+            </button>
+            <button
+              type="button"
+              className="quiet-button"
+              onClick={() =>
+                onNavigate(adminJourneyLink(journey.id, "schedule", date))
+              }
+            >
+              Schedule this Journey
+            </button>
+          </>
+        )}
       </div>
       <label className="field">
         <span>Review question</span>
@@ -170,7 +138,7 @@ export function AdminJourneyReview({
             type="button"
             className="quiet-button"
             disabled={busy}
-            onClick={() => help(false)}
+            onClick={() => void sample("hint")}
           >
             Show hint
           </button>
@@ -178,7 +146,7 @@ export function AdminJourneyReview({
             type="button"
             className="quiet-button"
             disabled={busy}
-            onClick={() => help(true)}
+            onClick={() => void sample("assist")}
           >
             Show assist
           </button>
@@ -206,6 +174,61 @@ export function AdminJourneyReview({
           >
             Show sample completion
           </button>
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={busy}
+            onClick={() => void sample("completion-mixed")}
+          >
+            Show mixed completion
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            onClick={() => {
+              const url = URL.createObjectURL(
+                new Blob([captureReview(journey, game)], {
+                  type: "application/json",
+                }),
+              );
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = `${journey.id}-review.json`;
+              link.click();
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }}
+          >
+            Capture current state
+          </button>
+          <label className="field">
+            Restore captured state
+            <input
+              type="file"
+              accept="application/json,.json"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const id = ++request.current;
+                setBusy(true);
+                try {
+                  const restored = restoreReview(journey, await file.text());
+                  if (id === request.current) {
+                    onChange(restored);
+                    setError("");
+                  }
+                } catch (failure) {
+                  if (id === request.current)
+                    setError(
+                      failure instanceof Error
+                        ? failure.message
+                        : "Couldn’t restore this capture.",
+                    );
+                } finally {
+                  if (id === request.current) setBusy(false);
+                }
+              }}
+            />
+          </label>
         </div>
       </details>
       {busy && <p role="status">Preparing example answers…</p>}

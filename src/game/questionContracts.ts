@@ -381,6 +381,8 @@ export interface Question {
   feedbackOverlays?: MapOverlay[];
 }
 export interface Journey {
+  /** False keeps this edition available for review/manual assignment, outside automatic Daily selection. */
+  dailyEligible?: boolean;
   /** Date this edition joined the catalog; drives Admin's newest-first view. */
   addedAt?: string;
   /** In-place answer-contract revision; no archived question definitions required. */

@@ -42,33 +42,6 @@
   border-radius: 0;
   background: none;
 }
-.experience .admin-workbench .admin-tabs [role="tab"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 48px;
-  padding: 10px 2px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--ui-muted);
-  font: 15px var(--font-ui);
-}
-.experience .admin-workbench .admin-tabs [aria-selected="true"] {
-  border-bottom-color: var(--ui-accent);
-  color: var(--ui-accent);
-}
-.experience .admin-workbench .admin-tabs [role="tab"]:hover {
-  color: var(--ui-text);
-  background: transparent;
-}
-.admin-tabs .action-icon {
-  width: 18px;
-  height: 18px;
-}
 :root .experience.page-layout .admin-workbench .journey-scheduler-card {
   margin: 0;
   padding: 0;
@@ -687,10 +660,6 @@
   .admin-workbench > .admin-tabs {
     flex-wrap: wrap;
     gap: 8px;
-  }
-  .experience .admin-workbench .admin-tabs [role="tab"] {
-    gap: 6px;
-    font-size: 13px;
   }
   .admin-workbench .admin-library-controls {
     flex-direction: column;

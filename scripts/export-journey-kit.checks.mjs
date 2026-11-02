@@ -240,6 +240,11 @@ test(
       assert.match(sliderNotes, /free Accuracy information/);
       assert.match(gptGuide, /"radiusKm":450/);
       assert.match(gptGuide, /"matchSlots"/);
+      assert.match(gptGuide, /recipe:populated-country-order/);
+      assert.match(
+        await readFile(path.join(directory, "COMPOSITIONS.md"), "utf8"),
+        /hintAsideId/,
+      );
       assert.match(gptGuide, /reviewed \d{4}-\d{2}-\d{2}/);
       const review = await readFile(
         path.join(directory, "SOURCE_REVIEW.md"),

@@ -107,6 +107,148 @@ when unavailable; exhausted authored help remains visibly disabled.
 Home's Daily Journey card is one full-card action with a top-right arrow; Resume
 and View result appear as compact state labels, and readiness gates the entire card.
 
+### Shared interface rules
+
+These standards were agreed on November 2, 2026. They describe the target
+interface; existing screens have not all been migrated or verified against them.
+Use a few shared styles by purpose: tabs, menu rows, cards and action buttons.
+Differences must be named exceptions rather than independent page-specific CSS.
+Theme palettes, font families and gameplay color meanings remain unchanged.
+
+#### Navigation and interaction states
+
+`src/app/styles/shared-controls.css` owns the existing `section-navigation`
+treatment. Preserve real links for page navigation and tab keyboard/focus
+behavior for tab panels.
+
+| Control family                                       | Default and selected appearance                                                                                                                     | Hover behavior                                                                                               |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Horizontal section tabs: Study, Minigames, Admin     | Muted labels; selected text/icon and underline use the accent color.                                                                                | Brighten unselected text/icon without adding a fill. Selected items retain their accent color and underline. |
+| Dropdown menu rows and Account sidebar items         | Selected items have accent text/icon, a slim left marker and a subtle neutral fill.                                                                 | Use a subtle neutral fill and brighter text. Selected items retain their selected color and marker.          |
+| Compact joined view switches, such as Upcoming/Month | Selected option has a neutral filled background and accent text; unselected options are muted.                                                      | Use the shared neutral hover treatment while retaining the selected appearance.                              |
+| Header menu triggers: profile and hamburger          | Use the neutral supporting-control treatment. While open, retain an accent border and accent text/icon. The profile trigger retains its pill shape. | Use a subtle neutral fill and brighter text/icon. Open triggers retain their accent treatment.               |
+
+Study links and Minigame tabs keep 13px labels and 44px minimum targets. Admin
+keeps its roomy 15px/48px variant; Account keeps 16px/44px sidebar items. On small
+screens, roomy/sidebar labels are 13px and their minimum targets are 44px. Short
+horizontal tab groups wrap onto another row when necessary, keeping every option
+visible. Other layout and orientation decisions remain feature-owned.
+
+Keyboard focus uses one consistent thin outer ring following the control's
+shape, with consistent spacing from its edge. It remains distinct from hover and
+selection. Enabled menu/button hover changes fade color and background over
+approximately 150ms, without movement or scaling; respect reduced motion.
+Keep these states in the shared owner rather than repeating them in feature CSS.
+
+Visible disabled controls keep comfortably readable muted labels and reduced
+border/fill emphasis, with no hover response. Avoid strongly fading the entire
+control. Explain unclear prerequisites nearby; do not rely on hovering over a
+disabled control. Unavailable question help remains omitted, while exhausted
+authored help remains visibly disabled.
+
+#### Actions, links and messages
+
+Normally give each task or panel one filled primary action, such as Submit or
+Save. Separate tasks can each have a primary action; answer choices are not a
+set of competing primary actions. Ordinary supporting actions such as Edit,
+Refresh and Cancel use neutral outlined buttons with a subtle neutral hover
+fill. Hint and destructive actions have the named exceptions below.
+
+Underline inline text links. Standalone Back links use an arrow and accent text
+without a permanent underline. Familiar utility actions such as Close, Settings
+and Refresh can be icon-only; primary and less familiar actions need visible
+labels. Icon-only controls need accessible names and a consistent tooltip on
+hover and keyboard focus. Essential instructions must also remain visible or
+available by tapping.
+
+While submitting, keep a button's width stable, show a spinner and specific
+wording such as “Saving…”, and prevent duplicate submission. Leave unrelated
+controls available. Destructive actions use warning color on the action itself
+and its final confirmation; surrounding controls remain neutral.
+
+Use the existing toast notifications for short success confirmations. Keep field
+errors and information the user still needs inline; do not introduce another
+notification system. A panel's initial content load uses a quiet placeholder.
+During refresh, retain loaded content and show a small busy indicator. The app's
+initial loading-globe presentation remains separate.
+
+#### Typography, shapes and cards
+
+Ordinary instructions and explanatory text use 14px body text on desktop and
+mobile. Supporting metadata such as credits and dates use 12px. Do not shrink
+instructions or explanations into metadata styling. Navigation labels, action
+labels and editorial Journey prompts retain their separate roles and sizes.
+Ordinary page headings share a 40px desktop / 28px mobile scale. Expressive Home
+copy, Journey prompts and dense Admin subheadings remain explicit exceptions.
+
+Use 8px corners for controls, 12px for cards/panels and 16px for dialogs/popups.
+Ordering cards are answer controls and therefore use 8px corners. Preserve
+purposeful circles and pills, and the unfilled/underlined shape of section tabs.
+`--control-radius` in `src/style.css` owns the existing control radius. Full-size
+answer actions retain `--action-min-height` (48px) and can grow for wrapped labels
+or help/points information. Compact controls and navigation keep 44px targets;
+existing mobile action sizing remains 44px.
+
+A card with one destination is clickable across its whole surface and has a
+consistent trailing arrow. A card with multiple actions stays static and uses
+explicit controls. Non-clickable panels do not brighten or change borders on
+hover; reserve that response for the clickable card, row or control. Preserve
+the shared raised neutral hover surface and accent border for navigation cards,
+including Home's existing treatment.
+
+Inside a panel, group information with spacing, headings and occasional dividers.
+Use another box only for a distinct task, interactive area or important status,
+rather than routinely nesting bordered panels.
+
+#### Forms and dialogs
+
+Ordinary form fields keep a visible label above the field. Placeholder text is
+for examples and hints, not a replacement label. First show error styling after
+the user leaves a field or attempts submission; once shown, update it as the
+user corrects the input. Mark the field border and put a short error message
+beside or below it. Form-level failures, such as a failed save, use a form-level
+message. These validation rules do not change quiz grading or disclose answers
+before submission.
+
+On small screens, keep short confirmations centered with comfortable screen
+margins. Long settings forms can use most of the screen height and scroll inside.
+
+#### Journey controls and named exceptions
+
+Journeys may vary their content composition to suit photography, ordering or
+other mechanics. Reuse shared answer controls, help, feedback and navigation
+styles through `GameShell`/`QuestionActions`; document additional exceptions.
+Image fitting follows the existing photo/flag contract, retaining credits and
+factual qualifications.
+
+An unsubmitted selected answer uses an accent border and light accent tint, with
+a check or selection mark where appropriate. Reserve grading colors for after
+submission. A hint-eliminated choice remains readable but muted, with a
+strikethrough and no hover response. It is not styled as a submitted mistake.
+An ordering spare uses neutral surface/line roles; a hint lock indicates
+availability without an error color.
+
+Hint buttons are an explicit exception to ordinary supporting buttons: they
+retain a light accent tint. Assistance stays neutral. Use these treatments
+consistently across Journeys. Graded feedback panels stay neutral, with outcome
+color on the result label, icon and relevant answer details rather than the
+whole panel. Existing correct, incorrect and revealed-answer color meanings
+remain unchanged.
+
+The agreed exceptions are Home's expressive composition (including Archive's
+stacked card shape), editorial Journey prompts and content compositions, dense
+Admin subheadings, hint buttons, purposeful circles/pills and the app's initial
+loading presentation. No additional page-specific exceptions were requested.
+Keep the already established navigation density variants above.
+
+Country fill and border fades belong to the Three.js presentation layer
+(`regionFades.ts` and `borderFades.ts`), independently of navigation CSS.
+Changing `regionTransitionKey` resets cached colors immediately, preventing old
+answers from appearing in a new puzzle. Continuous minigame previews keep one
+key across question, reveal and travel so their 160ms fades can run. Preserve
+these transitions when consolidating styles and check motion with reduced
+motion disabled; static screenshots cannot establish animation behavior.
+
 | Area                 | Theme-controlled appearance                                                           | Boundary                                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Page and text        | Background, primary/muted/faint text, editorial emphasis                              | Font families, sizes, weights, spacing, and heading italics are shared.                                                               |
@@ -302,7 +444,7 @@ once the theme is applied; they are different from unconditional fixed colors.
 | [placeLabels.ts](../src/globe/placeLabels.ts)                                                                                                                                                         | Odyssey uses pale neutral ink, Expedition violet/cyan ink, and Safari parchment/green ink; pins follow their selection colors. Discovery retains city/capital text `#f4f8ff`, river text `#b0e5ef`, mountain text `#ede1ca` and ocean text `#bddde1`. Numeric text and some casings/checkerboards remain fixed. Selected/outcome badge ink and semantic markers follow the palette. |
 | [physicalFeatures.ts](../src/globe/physicalFeatures.ts)                                                                                                                                               | Mountain light/dark faces `#c1b79a` / `#99896d`, relief lines and landform tints remain fixed or feature-authored. Rivers use semantic ink/casing.                                                                                                                                                                                                                                  |
 | [overlays.ts](../src/globe/overlays.ts), [pathAnnotations.ts](../src/globe/pathAnnotations.ts), [GlobeView.tsx](../src/globe/GlobeView.tsx)                                                           | State-bearing paths, paint, cells, and bands use play colors; unclassified paths/circles and fallback construction handles use the `guide` role. Path labels use white/dark casing. Odyssey arcs use slate/gold; other themes use pale green/gold. Raster/texture overlays retain authored colors.                                                                                  |
-| [game.css](../src/game/game.css)                                                                                                                                                                      | River-bank diagram stroke `#72b9d2`; order-bank red tint; selected copy and map-key glyphs now use semantic ink; several black/white inset and drop shadows. Most surrounding UI uses tokens.                                                                                                                                                                                       |
+| [game.css](../src/game/game.css)                                                                                                                                                                      | River-bank diagram stroke `#72b9d2`; selected copy and map-key glyphs now use semantic ink; several black/white inset and drop shadows. Most surrounding UI uses tokens.                                                                                                                                                                                                            |
 | [shell-base.css](../src/app/styles/shell-base.css)                                                                                                                                                    | Daily stage point outlines/fills `#9ed9df`.                                                                                                                                                                                                                                                                                                                                         |
 | [shared-neighbors.css](../src/app/styles/shared-neighbors.css)                                                                                                                                        | Motif checkerboards, boundaries and glow follow theme roles; popup shadow uses fixed black.                                                                                                                                                                                                                                                                                         |
 | [activity-preview.css](../src/app/styles/activity-preview.css)                                                                                                                                        | Image-area background follows the theme; SVG previews use generated themed variants.                                                                                                                                                                                                                                                                                                |

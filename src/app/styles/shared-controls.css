@@ -28,3 +28,74 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Shared appearance; links and tab buttons retain their native behavior. */
+.section-navigation > :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--control-min-height);
+  margin: 0;
+  padding: 8px 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui-muted);
+  font: var(--section-nav-font-size) / 1.4 var(--font-ui);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.section-navigation
+  > :is(a, button):is([aria-current="page"], [aria-selected="true"]) {
+  color: var(--ui-accent);
+  border-bottom-color: var(--ui-accent);
+}
+.section-navigation > :is(a, button):hover {
+  color: var(--ui-text);
+}
+.section-navigation > :is(a, button):focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+.section-navigation .action-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.section-navigation--roomy {
+  --section-nav-font-size: 15px;
+  --control-min-height: var(--action-min-height);
+}
+.section-navigation--sidebar {
+  --section-nav-font-size: 16px;
+}
+.section-navigation--sidebar > :is(a, button) {
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 13px;
+  border: 1px solid transparent;
+  border-radius: var(--control-radius);
+  text-align: left;
+}
+.section-navigation--sidebar
+  > :is(a, button):is([aria-current="page"], :hover) {
+  color: var(--ui-text);
+  border-color: rgb(var(--ui-line-rgb) / 0.2);
+  background: rgb(var(--ui-line-rgb) / 0.1);
+}
+@media (max-width: 600px) {
+  .section-navigation--roomy,
+  .section-navigation--sidebar {
+    --section-nav-font-size: 13px;
+  }
+  .section-navigation--roomy > :is(a, button) {
+    gap: 6px;
+  }
+  .section-navigation--sidebar > :is(a, button) {
+    padding: 10px;
+    gap: 6px;
+  }
+}

@@ -24,6 +24,9 @@ describe("catalog identity", () => {
       expect(entry.title).toBe(journey.title);
       expect(entry.path).toBe(journeyPath(journey.id));
       expect(entry.addedAt).toBe(journey.addedAt);
+      expect(entry.dailyEligible !== false).toBe(
+        journey.dailyEligible !== false,
+      );
       expect(entry.rounds.map((round) => round.id)).toEqual(
         journey.rounds.map((round) => round.id),
       );

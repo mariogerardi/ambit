@@ -403,7 +403,7 @@ export function AdminPanel({
       )}
       <div className="admin-workbench">
         <div
-          className="admin-tabs"
+          className="admin-tabs section-navigation section-navigation--roomy"
           role="tablist"
           aria-label="Admin sections"
           aria-orientation="horizontal"

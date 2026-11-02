@@ -25,6 +25,155 @@ import * as journeyRegistry from "../src/game/journeyRegistry";
 import { initialGame } from "../src/game/state";
 
 describe("app daily shell (DOM only; no browser or WebGL)", () => {
+  it("shows the authoritative assignment on Home and Daily while retaining a displaced attempt", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-02T17:00:00Z"));
+    const day = localDateKey();
+    const store = createDailySave(journeyRegistry.JOURNEY_INDEX);
+    const previous = openDaily(
+      store.load(),
+      day,
+      false,
+      journeyRegistry.JOURNEY_INDEX,
+      { [day]: CANADA_JOURNEY.id },
+    );
+    previous.attempts[day].game.text = "saved Canada draft";
+    store.save(previous);
+    scheduleState.records[day] = {
+      day,
+      journeyId: ANDES_JOURNEY.id,
+      source: "assigned",
+      revision: 2,
+    };
+    await mount();
+    expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
+      ANDES_JOURNEY.title,
+    );
+    expect(
+      store.load().archivedAttempts?.[`${day}/${CANADA_JOURNEY.id}`],
+    ).toEqual(previous.attempts[day]);
+    await click("Play");
+    expect(location.pathname).toBe("/daily");
+    expect(store.load().attempts[day].journeyId).toBe(ANDES_JOURNEY.id);
+    await click("Bogotá");
+    const submit = host.querySelector<HTMLButtonElement>(
+      '[data-dd-action-name="Answer Submit"]',
+    );
+    if (submit && !submit.disabled) await act(async () => submit.click());
+    expect(store.load().attempts[day].game.answers).toHaveLength(1);
+    expect(
+      store.load().archivedAttempts?.[`${day}/${CANADA_JOURNEY.id}`],
+    ).toEqual(previous.attempts[day]);
+  });
+
+  it("waits for cloud hydration and resumes the assigned cloud run instead of creating a replacement", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
+    vi.setSystemTime(new Date("2026-11-02T17:00:00Z"));
+    const day = localDateKey();
+    authProbe.subject = "owner";
+    const store = createDailySave(journeyRegistry.JOURNEY_INDEX, "owner");
+    store.save(
+      openDaily(
+        store.load(),
+        "2026-11-01",
+        false,
+        journeyRegistry.JOURNEY_INDEX,
+        { "2026-11-01": CANADA_JOURNEY.id },
+      ),
+    );
+    store.save(
+      openDaily(store.load(), day, false, journeyRegistry.JOURNEY_INDEX, {
+        [day]: CANADA_JOURNEY.id,
+      }),
+    );
+    const remote = createDailySave(journeyRegistry.JOURNEY_INDEX, "remote");
+    const cloud = openDaily(
+      remote.load(),
+      day,
+      false,
+      journeyRegistry.JOURNEY_INDEX,
+      { [day]: ANDES_JOURNEY.id },
+    );
+    cloud.attempts[day].game.text = "restored cloud draft";
+    remote.save(cloud);
+    const entries = remote.entries().map((entry) => ({
+      ...entry,
+      clock: entry.clock + 1000,
+      namespace: "daily",
+    }));
+    let restore!: (response: Response) => void;
+    const incoming = new Promise<Response>((resolve) => {
+      restore = resolve;
+    });
+    const fetcher = fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/account/saves"))
+          return init?.method === "POST"
+            ? new Response(JSON.stringify({ saved: true }))
+            : incoming;
+        if (url.includes("/account/profile"))
+          return new Response(JSON.stringify(null));
+        return fetcher(url, init);
+      }),
+    );
+    scheduleState.records[day] = {
+      day,
+      journeyId: ANDES_JOURNEY.id,
+      source: "assigned",
+      revision: 2,
+    };
+    history.replaceState(null, "", "/daily");
+    await mount();
+    expect(store.load().attempts[day]).toBeUndefined();
+    expect(host.querySelector(".question-card")).toBeNull();
+    await act(async () => vi.advanceTimersByTimeAsync(1201));
+    await act(async () => {
+      restore(new Response(JSON.stringify({ entries })));
+    });
+    await settleLoads();
+    expect(store.load().attempts[day]).toEqual(cloud.attempts[day]);
+    expect(store.load().attempts["2026-11-01"].journeyId).toBe(
+      CANADA_JOURNEY.id,
+    );
+    expect(
+      store.load().archivedAttempts?.[`${day}/${CANADA_JOURNEY.id}`],
+    ).toBeDefined();
+    expect(host.querySelector(".question-card")?.textContent).toContain(
+      ANDES_JOURNEY.rounds[0].prompt,
+    );
+    // A later device still selecting Canada must not replace the assigned run.
+    const staleDevice = createDailySave(
+      journeyRegistry.JOURNEY_INDEX,
+      "stale-device",
+    );
+    const stale = openDaily(
+      staleDevice.load(),
+      day,
+      false,
+      journeyRegistry.JOURNEY_INDEX,
+      { [day]: CANADA_JOURNEY.id },
+    );
+    stale.attempts[day].game.text = "late Canada draft";
+    staleDevice.save(stale);
+    await act(async () => {
+      store.mergeEntries(
+        staleDevice
+          .entries()
+          .map((entry) => ({ ...entry, clock: entry.clock + 2000 })),
+      );
+      dispatchEvent(
+        new CustomEvent("ambit-progress-received", { detail: store.prefix }),
+      );
+    });
+    await settleLoads();
+    expect(store.load().attempts[day]).toEqual(cloud.attempts[day]);
+    expect(
+      store.load().archivedAttempts?.[`${day}/${CANADA_JOURNEY.id}`].game.text,
+    ).toBe("late Canada draft");
+  });
+
   it("plays and resumes a historical Journey from Home without replacing today's attempt", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2026-11-19T16:00:00Z"));
@@ -233,6 +382,12 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     const save = createDailySave(journeyRegistry.JOURNEY_INDEX, "owner");
     const progress = openDaily(save.load(), day);
     save.save(progress);
+    scheduleState.records[day] = {
+      day,
+      journeyId: progress.attempts[day].journeyId,
+      source: "auto",
+      revision: 2,
+    };
     const fetcher = fetch;
     vi.stubGlobal(
       "fetch",
@@ -362,7 +517,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     expect(host.textContent).not.toContain("won’t be saved after this visit");
   });
 
-  it("publishes an assignment for new attempts without replacing a started Journey", async () => {
+  it("publishes today's assignment and retains the displaced Journey's answers", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
     vi.setSystemTime(new Date(2026, 9, 11, 12));
     scheduleState.assignments["2026-10-11"] = CANADA_JOURNEY.id;
@@ -392,12 +547,20 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     );
     expect(host.querySelector("canvas")).toBe(canvas);
     await click("Home");
-    await click("Resume");
-    expect(host.textContent).toContain("Well spotted.");
+    expect(host.querySelector(".daily-menu h2")?.textContent).toBe(
+      FOURTH_JOURNEY.title,
+    );
+    await click("Play");
+    expect(host.textContent).toContain("Which country faces Spain across it?");
     expect(
       JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts["2026-10-11"]
         .journeyId,
-    ).toBe(CANADA_JOURNEY.id);
+    ).toBe(FOURTH_JOURNEY.id);
+    expect(
+      JSON.parse(localStorage.getItem(DAILY_KEY)!).archivedAttempts[
+        `2026-10-11/${CANADA_JOURNEY.id}`
+      ].game.answers,
+    ).toHaveLength(1);
     await act(async () => {
       root.unmount();
       resetRoot();

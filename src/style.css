@@ -2,6 +2,9 @@
   --font-ui:
     "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-editorial: "Newsreader", Georgia, "Times New Roman", serif;
+  --control-radius: 8px;
+  --control-min-height: 44px;
+  --section-nav-font-size: 13px;
   --action-min-height: 48px;
   --action-font-size: 13px;
   --action-padding: 12px 14px;

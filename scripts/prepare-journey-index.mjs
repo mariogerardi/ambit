@@ -2,7 +2,9 @@ import { createServer } from "vite";
 import { readdir, writeFile } from "node:fs/promises";
 
 // Home copy, routing and progress metadata; clue geometry stays deferred.
-const server = await createServer({ server: { middlewareMode: true } });
+const server = await createServer({
+  server: { middlewareMode: true, hmr: false },
+});
 try {
   const { JOURNEYS, journeyPath } = await server.ssrLoadModule(
     "/src/game/journeys.ts",
@@ -30,6 +32,7 @@ try {
         throw Error(`Missing module: ${journey.id}`);
       return {
         id: journey.id,
+        ...(journey.dailyEligible === false ? { dailyEligible: false } : {}),
         addedAt: journey.addedAt,
         title: journey.title,
         ...(journey.supersedes ? { supersedes: journey.supersedes } : {}),

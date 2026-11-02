@@ -230,28 +230,6 @@
 .admin-panel > .muted {
   margin: 0 0 28px;
 }
-.admin-tabs {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  margin-bottom: 18px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.16);
-  border-radius: 9px;
-  background: rgb(var(--ui-line-rgb) / 0.04);
-}
-.experience .admin-tabs [role="tab"] {
-  min-height: 34px;
-  padding: 6px 12px;
-  border: 0;
-  border-radius: 6px;
-  color: var(--ui-muted);
-  font-size: 12px;
-  line-height: 1.4;
-}
-.experience .admin-tabs [aria-selected="true"] {
-  background: rgb(var(--ui-line-rgb) / 0.12);
-  color: var(--ui-accent);
-}
 .admin-tab-panel[hidden] {
   display: none;
 }

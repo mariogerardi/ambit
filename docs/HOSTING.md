@@ -68,6 +68,28 @@ For an authorized local release that should return immediately after upload, use
 This starts the Amplify job and prints its status link without polling or claiming
 deployment completion. Omitting `--no-wait` retains CI's completion checks.
 
+### Journey catalog activation
+
+Source discovery for the development workbench does not register content.
+Registration makes an edition reviewable and manually assignable. Set
+`dailyEligible: false` and regenerate the index to ship a catalog entry before
+allowing automatic Daily selection; omission/true preserves existing eligibility.
+No catalog visibility or eligibility flag grants Admin API access.
+
+Roll out eligibility-aware frontend and backend code before using the flag; older
+schedulers ignore it. For subsequent additions, deploy the held catalog/backend
+and matching frontend first. Verify the intended frontend release is available,
+then authorize a separate eligibility activation and ship its regenerated index
+to both consumers. Do not manually assign a held edition before its frontend is
+available. Backend packaging bundles the same generated index; frontend merging
+alone does not update Lambda. Deployment still requires explicit authorization.
+
+A current client that receives an unknown durable assignment requests a reload
+and does not create a substitute attempt. Older clients predating this guard may
+still fall back, so staged activation cannot guarantee compatibility with every
+old open tab. Preserve locked dates and started attempts even if their edition is
+later made ineligible. Refresh/reload does not reset those attempts.
+
 ## Hosting behavior
 
 - Deploy the built `dist/` artifact, not the source tree. `npm run preview` is a

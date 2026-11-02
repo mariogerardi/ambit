@@ -141,6 +141,15 @@ late edit from an old run cannot replace a fresh replay. Daily and Archive resul
 have no replay action, including for admins. Admins can explicitly clear today's
 attempt from the Tools tab; other players retain their completed result.
 
+Today's durable server schedule takes precedence over a conflicting saved
+Journey selection. Reconciliation retains the displaced run, including grades,
+help and drafts, and restores an existing run for the assigned Journey when
+available. This also applies after cloud merges; unselected edition run records
+remain recoverable even without an explicit archive record. A new signed-in run
+waits for initial cloud hydration so it cannot hide an existing cloud attempt.
+Past dates keep their saved editions. Catalog growth or eligibility changes alone
+do not replace started attempts.
+
 In-place Journey facelifts can declare a `saveRevision` and prior receipt names.
 Daily save decoding and opening preserve submitted grades, stamp their original
 receipt labels, clear obsolete unsubmitted drafts/help, and skip already graded

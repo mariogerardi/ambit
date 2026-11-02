@@ -133,7 +133,7 @@ export function MinigamesPanel({
   return (
     <section className="info-view minigames-carousel" aria-label="Minigames">
       <div
-        className="minigame-game-names"
+        className="minigame-game-names section-navigation"
         role="tablist"
         aria-label="Choose a minigame"
         onKeyDown={(event) => {
