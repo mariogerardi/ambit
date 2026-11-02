@@ -93,6 +93,20 @@ export function validateQuestionContract(q: Question): void {
       "clue candidates require noninteractive geography and deferred identity feedback",
     );
   const city = definition.mapSelection === "places";
+  if (q.guidance?.hintAsideId && q.mode !== "choice-order")
+    fail("a hint discard requires card ordering");
+  if (
+    q.map?.revealOrder &&
+    (q.mode !== "choice-order" ||
+      q.rule.type !== "country-ids" ||
+      !Number.isFinite(q.map.revealOrder.stepMs) ||
+      q.map.revealOrder.stepMs < 0 ||
+      !Number.isFinite(q.map.revealOrder.durationMs) ||
+      q.map.revealOrder.durationMs <= 0)
+  )
+    fail(
+      "ordered country reveals require nonnegative spacing and a positive duration",
+    );
   if (
     q.disclosure.bearingDestination !== undefined &&
     (q.mode !== "compass-bearing" ||

@@ -520,3 +520,18 @@ thumbnails; the interface may crop their displayed frame. Attribution and
 share-alike requirements apply to the photographs independently of application
 code. Province geometry is an unchanged subset of the bundled Natural Earth
 5.1.2 public-domain snapshot; city locations reuse the credited GeoNames data.
+
+## I'm Like a Bird photographs and migration illustrations
+
+The five bird portraits in `public/journeys/im-like-a-bird/` are unchanged
+Wikimedia Commons thumbnails, individually licensed under CC BY 3.0, CC BY-SA 3.0
+or CC BY-SA 4.0. The accompanying `SOURCES.md` identifies every creator, original
+file and license. `src/game/data/im-like-a-bird-media.v1.json` records attribution,
+license links, download URLs and checksums; reveal photographs display the
+applicable credit and license. These licenses apply independently of application
+code.
+
+The migration corridors and directional lines are original, research-informed
+illustrations through authored waypoints. They do not reproduce external GIS
+datasets, scientific map artwork or individual GPS tracks. Research references
+and modeling limitations are retained in the Journey's source notes.

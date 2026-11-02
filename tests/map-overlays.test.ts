@@ -18,6 +18,79 @@ import { MapOverlays, overlayPositions } from "../src/globe/overlays";
 import type { MapOverlay } from "../src/geography/types";
 
 describe("decorative map overlays", () => {
+  it("loops route arrows in place, respects reduced motion, and removes the animation on advance", () => {
+    const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+    const overlays = new MapOverlays();
+    const path: MapOverlay = {
+      id: "flow",
+      type: "path",
+      coordinates: [
+        [0, 0],
+        [5, 4],
+        [12, 5],
+      ],
+      opacity: 0,
+      flow: { durationMs: 24000, count: 4, opacity: 1, size: 1.8 },
+    };
+    const layer = {
+      id: "map",
+      kind: "map-overlays" as const,
+      overlays: [path],
+    };
+    const camera = new PerspectiveCamera(50, 1, 1, 1000);
+    camera.position.set(0, 0, 400);
+    camera.updateMatrixWorld();
+    try {
+      overlays.update(layer, 100);
+      const group = overlays.group.children[0] as Group;
+      const arrows = group.children.filter(
+        (c) => c.name === "path-flow-arrow",
+      ) as Mesh[];
+      expect(arrows).toHaveLength(4);
+      overlays.view(camera, 800, 800);
+      expect((group.children[0] as LineSegments2).material.opacity).toBe(0);
+      expect(group.children[0].visible).toBe(false);
+      expect((arrows[1].material as MeshBasicMaterial).opacity).toBe(1);
+      const positions = arrows[1].geometry.getAttribute("position");
+      const tip = new Vector3()
+        .fromBufferAttribute(positions, 0)
+        .applyMatrix4(group.matrixWorld)
+        .project(camera);
+      const side = new Vector3()
+        .fromBufferAttribute(positions, 1)
+        .applyMatrix4(group.matrixWorld)
+        .project(camera);
+      expect(
+        Math.hypot((tip.x - side.x) * 400, (tip.y - side.y) * 400),
+      ).toBeCloseTo(Math.hypot(7, 2.5) * 1.8, 2);
+      const first = arrows[1].userData.tip.clone();
+      expect(overlays.needsRefresh()).toBe(true);
+      clock.mockReturnValue(6000);
+      overlays.view(camera, 800, 800);
+      expect(arrows[1].userData.tip.distanceTo(first)).toBeGreaterThan(0.01);
+      clock.mockReturnValue(24000);
+      overlays.view(camera, 800, 800);
+      expect(arrows[1].userData.tip.distanceTo(first)).toBeLessThan(1e-9);
+      overlays.update({ ...layer, reduced: true }, 100);
+      expect(overlays.needsRefresh()).toBe(false);
+      expect(
+        overlays.group.children[0].children.some(
+          (c) => c.name === "path-flow-arrow",
+        ),
+      ).toBe(false);
+      expect(
+        overlays.group.children[0].children.some(
+          (c) => c.name === "path-arrowhead",
+        ),
+      ).toBe(true);
+      overlays.update({ ...layer, overlays: [] }, 100);
+      expect(overlays.group.children).toHaveLength(0);
+      expect(overlays.needsRefresh()).toBe(false);
+    } finally {
+      overlays.dispose();
+      clock.mockRestore();
+    }
+  });
   it("renders short dotted recap connectors and dashed answer connectors in the pin's tier color", () => {
     const overlays = new MapOverlays();
     const base = {
@@ -433,6 +506,18 @@ it("draws a revealed boundary progressively and stops requesting stationary fram
   expect(
     (staticGroup.children[0] as LineSegments2).geometry.instanceCount,
   ).toBe(total);
+  overlays.get(path, 100);
+  expect(overlays.needsRefresh()).toBe(true);
+  overlays.update(
+    { id: "map", kind: "map-overlays", overlays: [path], reduced: true },
+    100,
+  );
+  expect(
+    (overlays.group.children[0].children[0] as LineSegments2).geometry
+      .instanceCount,
+  ).toBe(total);
+  expect(overlays.needsRefresh()).toBe(false);
+  expect(path.reveal).toEqual({ durationMs: 1000, delayMs: 200 });
   overlays.dispose();
   clock.mockRestore();
 });

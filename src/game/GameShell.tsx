@@ -394,15 +394,38 @@ export function GameShell({
               {!constructed &&
                 !["slider", "compass-bearing"].includes(round.mode) && (
                   <>
-                    <p className="study-response study-correction journey-correct-answer">
-                      <span>{correctAnswer.label}: </span>
+                    <p
+                      className={
+                        round.feedbackReview === "compact"
+                          ? "submitted-answer"
+                          : "study-response study-correction journey-correct-answer"
+                      }
+                    >
+                      {round.feedbackReview === "compact" ? (
+                        <span className="sr-only">{correctAnswer.label}: </span>
+                      ) : (
+                        <span>{correctAnswer.label}: </span>
+                      )}
                       <strong>{correctAnswer.value}</strong>
                     </p>
-                    <AnswerReview
-                      question={round}
-                      context={context}
-                      game={game}
-                    />
+                    {round.feedbackReview === "compact" ? (
+                      !correct && (
+                        <details className="journey-answer-recap">
+                          <summary>Review your answer</summary>
+                          <AnswerReview
+                            question={round}
+                            context={context}
+                            game={game}
+                          />
+                        </details>
+                      )
+                    ) : (
+                      <AnswerReview
+                        question={round}
+                        context={context}
+                        game={game}
+                      />
+                    )}
                   </>
                 )}
               {feedbackText && (

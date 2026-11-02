@@ -187,6 +187,13 @@ export type MapOverlay =
       coordinates: number[][];
       /** Draw the path once on reveal; omitted for reduced motion. */
       reveal?: { durationMs: number; delayMs?: number };
+      /** Subtle repeating direction cues, replaced by a static tip for reduced motion. */
+      flow?: {
+        durationMs: number;
+        count?: number;
+        opacity?: number;
+        size?: number;
+      };
       /** Noninteractive direction and along-path annotation. */
       arrowhead?: boolean;
       label?: string;

@@ -463,7 +463,13 @@ export class PlaceLabels {
         ctx.lineWidth = 3.5;
         ctx.lineCap = "round";
         ctx.beginPath();
-        if (badge === "✓") {
+        if (/^\d+$/.test(badge)) {
+          ctx.font = '600 48px "Manrope", sans-serif';
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = ctx.strokeStyle;
+          ctx.fillText(badge, 32, 34);
+        } else if (badge === "✓") {
           ctx.moveTo(12, 32);
           ctx.lineTo(26, 46);
           ctx.lineTo(52, 17);

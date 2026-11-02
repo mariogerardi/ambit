@@ -17,6 +17,7 @@ For an approved specification, start with
 
 | Title                              | Practice route                                | Definition                                                                     |
 | ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
+| I’m Like a Bird                    | `/journey/im-like-a-bird`                     | [imLikeABirdJourney.ts](../src/game/imLikeABirdJourney.ts)                     |
 | Small Wonders                      | `/journey/small-wonders`                      | [smallWondersJourney.ts](../src/game/smallWondersJourney.ts)                   |
 | Made in China                      | `/journey/made-in-china`                      | [madeInChinaJourney.ts](../src/game/madeInChinaJourney.ts)                     |
 | Within Reach                       | `/journey/within-reach`                       | [withinReachJourney.ts](../src/game/withinReachJourney.ts)                     |
@@ -201,6 +202,10 @@ Assist photographs can also provide a `credit` with source and license links.
 use a compact two-column grid; players drag to swap or select two cards. With no
 spare, all cards stay in the grid. Older partial drafts retain a tray for their
 unplaced cards. The card-order recipe demonstrates this pattern.
+Without card photographs, the single spare occupies a final labelled row using
+the same swap interaction. Combine `orderInitial` with `shuffleChoices` to shuffle
+all choices into the occupied slots and spare when starting or advancing; the
+chosen arrangement is stored in the response and stays stable through edits/help.
 `assist.fixedSelections` can lock correct unordered picks, preserve existing picks,
 and keep the anchors selected after clearing. Focused tests retain coverage of
 this supported behavior. The current authoring standard commits single-country and merged-territory

@@ -35,8 +35,11 @@ export function withAssistanceLocks(
     ? { ...game, selectedIds: [...game.selectedIds, ...missing] }
     : game;
   const fixed = lockedOrderSlots(question, selected);
-  if (!fixed.length) return selected;
+  const aside = lockedOrderAside(question, selected);
+  if (!fixed.length && !aside) return selected;
   let ordered = orderedCards(question, selected);
+  if (aside && ordered.includes(aside))
+    ordered = swapOrderCard(question, ordered, aside, -1);
   if (question.orderInitial) {
     for (const slot of fixed)
       ordered = swapOrderCard(question, ordered, slot.id, slot.index);
@@ -63,6 +66,13 @@ export function lockedOrderSlots(
   return game.help?.[question.id] === "assisted"
     ? (question.guidance?.assist?.fixedSlots ?? [])
     : [];
+}
+
+export function lockedOrderAside(
+  question: Question,
+  game: Pick<GameState, "help">,
+) {
+  return game.help?.[question.id] ? question.guidance?.hintAsideId : undefined;
 }
 
 export function candidateAvailable(

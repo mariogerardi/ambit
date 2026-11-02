@@ -1716,6 +1716,10 @@
 .order-populated .order-slots li {
   grid-template-columns: 46px minmax(0, 1fr);
 }
+.order-populated .order-slots li[data-order-slot="-1"] {
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
 .order-photo-grid .order-slots {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1745,11 +1749,15 @@
   color: var(--ui-muted);
   margin: 10px 0;
 }
-.order-populated .order-bank {
-  border-style: solid;
-  border-color: rgb(190 104 100 / 0.32);
+.order-populated .order-bank,
+.order-populated .order-slots li[data-order-slot="-1"] {
+  border: 1px solid rgb(190 104 100 / 0.32);
+  border-radius: 9px;
   background: rgb(190 104 100 / 0.065);
   padding: 12px;
+}
+.order-populated .order-slots li[data-order-slot="-1"] .order-card:disabled {
+  border-color: rgb(190 104 100 / 0.45);
 }
 .order-populated .order-bank .order-position {
   font-size: 12px;

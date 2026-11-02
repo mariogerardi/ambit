@@ -1,0 +1,72 @@
+{
+  "common-crane": {
+    "src": "/journeys/im-like-a-bird/common-crane.jpg",
+    "alt": "Common crane in flight; gray wings, long neck and trailing legs.",
+    "caption": "Grus grus",
+    "credit": {
+      "name": "מינוזיג - MinoZig",
+      "url": "https://commons.wikimedia.org/wiki/File:Grus_grus_in_flight,_Israel.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/3/38/Grus_grus_in_flight%2C_Israel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Grus_grus_in_flight%2C_Israel.jpg/960px-Grus_grus_in_flight%2C_Israel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "sha256": "ed23c3f2fc9f74adbf7754a81bab8d71fe26576f782cd69c8b4ee839b70a6af1"
+  },
+  "ruby-throated-hummingbird": {
+    "src": "/journeys/im-like-a-bird/ruby-throated-hummingbird.jpg",
+    "alt": "Male ruby-throated hummingbird perched on a stake, with a red throat and green back.",
+    "caption": "Archilochus colubris",
+    "credit": {
+      "name": "Joe Schneid, Louisville, Kentucky",
+      "url": "https://commons.wikimedia.org/wiki/File:Archilochus_colubris_(Male).jpg",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Archilochus_colubris_%28Male%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Archilochus_colubris_%28Male%29.jpg/960px-Archilochus_colubris_%28Male%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "sha256": "7dba60a4a20ae4f9d59c90d2901c91de4cb9397a0e7fbc5f986b8e77d1d647cb"
+  },
+  "white-stork": {
+    "src": "/journeys/im-like-a-bird/white-stork.jpg",
+    "alt": "White stork in flight with black flight feathers, a long red bill and trailing red legs.",
+    "caption": "Ciconia ciconia",
+    "credit": {
+      "name": "Carlos Delgado",
+      "url": "https://commons.wikimedia.org/wiki/File:Ciconia_ciconia_-_01.jpg",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Ciconia_ciconia_-_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Ciconia_ciconia_-_01.jpg/960px-Ciconia_ciconia_-_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "sha256": "4c541b40c918d01c295f9f067d25e5cade2d570b9e02f95ee06e83dbd3cc7c71"
+  },
+  "amur-falcon": {
+    "src": "/journeys/im-like-a-bird/amur-falcon.jpg",
+    "alt": "Amur falcon perched, with a streaked pale head, barred back and orange feet.",
+    "caption": "Falco amurensis",
+    "credit": {
+      "name": "Afsarnayakkan",
+      "url": "https://commons.wikimedia.org/wiki/File:Amure_falcon_(Falco_amurensis)_(12244).jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Amure_falcon_%28Falco_amurensis%29_%2812244%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Amure_falcon_%28Falco_amurensis%29_%2812244%29.jpg/960px-Amure_falcon_%28Falco_amurensis%29_%2812244%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "sha256": "4f4fb621223da278c6c626825399eeced050ab9b40bd7f62da8eee7a81166fba"
+  },
+  "bar-headed-goose": {
+    "src": "/journeys/im-like-a-bird/bar-headed-goose.jpg",
+    "alt": "Bar-headed goose facing forward, showing dark markings on its pale head.",
+    "caption": "Anser indicus",
+    "credit": {
+      "name": "Horst J. Meuter",
+      "url": "https://commons.wikimedia.org/wiki/File:Streifengans_-_Indische_Gans_-_Anser_indicus_-_(1)_04.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/45/Streifengans_-_Indische_Gans_-_Anser_indicus_-_%281%29_04.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Streifengans_-_Indische_Gans_-_Anser_indicus_-_%281%29_04.jpg/960px-Streifengans_-_Indische_Gans_-_Anser_indicus_-_%281%29_04.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "sha256": "d4ae35fc78c99f16f6c45237b47be3ae801ebadd8b3ccaea724b318cd23370ee"
+  }
+}
