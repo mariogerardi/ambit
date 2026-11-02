@@ -57,13 +57,13 @@ function AnswerControls({
 }: AnswerFormProps) {
   const choices = useMemo(() => {
     const cards = [...(question.choices ?? [])];
-    if (question.shuffleChoices)
+    if (question.shuffleChoices && !question.orderInitial)
       for (let index = cards.length - 1; index > 0; index--) {
         const other = Math.floor(Math.random() * (index + 1));
         [cards[index], cards[other]] = [cards[other], cards[index]];
       }
     return cards;
-  }, [question.choices, question.shuffleChoices]);
+  }, [question.choices, question.shuffleChoices, question.orderInitial]);
   game = withAssistanceLocks(question, game);
   const locked = lockedSelectionIds(question, game);
   const items = answerItems(question, context, game);
@@ -107,7 +107,7 @@ function AnswerControls({
     return (
       <OrderAnswer
         key={question.id}
-        question={question}
+        question={question.shuffleChoices ? { ...question, choices } : question}
         context={context}
         game={game}
         dispatch={dispatch}

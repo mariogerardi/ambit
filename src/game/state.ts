@@ -7,7 +7,12 @@ import {
 import type { Construction } from "./constructionTypes";
 import { countryIdForName } from "./answerNames";
 import { mechanicFor, usesChoiceCards } from "./mechanics";
-import { orderedCards, swapOrderCard, isSlotAnswer } from "./ordering";
+import {
+  orderedCards,
+  swapOrderCard,
+  isSlotAnswer,
+  initialOrderCards,
+} from "./ordering";
 import { pointAnswerNoun, validPin } from "./answerTargets";
 import {
   candidateAvailable,
@@ -88,7 +93,7 @@ export function gameReducer(
     return {
       ...initialGame,
       phase: "playing",
-      ordered: [...(journey.rounds[0].orderInitial ?? [])],
+      ordered: initialOrderCards(journey.rounds[0]),
     };
   if (action.type === "home") return { ...initialGame };
   const round = journey.rounds[state.roundIndex];
@@ -180,9 +185,7 @@ export function gameReducer(
           showConstructionExample: false,
           selectedIds: [],
           text: "",
-          ordered: [
-            ...(journey.rounds[state.roundIndex + 1].orderInitial ?? []),
-          ],
+          ordered: initialOrderCards(journey.rounds[state.roundIndex + 1]),
           inputError: undefined,
         };
   }
@@ -192,7 +195,10 @@ export function gameReducer(
     return finish(state);
   if (action.type === "request-hint")
     return round.guidance && !state.help?.[round.id]
-      ? { ...state, help: { ...state.help, [round.id]: "hinted" } }
+      ? withAssistanceLocks(round, {
+          ...state,
+          help: { ...state.help, [round.id]: "hinted" },
+        })
       : state;
   if (action.type === "request-assist") {
     if (!round.guidance?.assist || state.help?.[round.id] !== "hinted")
@@ -319,12 +325,14 @@ export function gameReducer(
   }
   if (action.type === "order-card") {
     const fixed = lockedOrderSlots(round, state);
+    const aside = state.help?.[round.id] && round.guidance?.hintAsideId;
     if (
       !isSlotAnswer(round) ||
       !Number.isInteger(action.index) ||
       action.index < -1 ||
       action.index >= round.count ||
       !canSelect(round, context, action.id) ||
+      (aside && (action.id === aside || action.index === -1)) ||
       fixed.some((slot) => slot.id === action.id || slot.index === action.index)
     )
       return state;
@@ -337,7 +345,7 @@ export function gameReducer(
     return round.mode === "country-recall" ||
       (round.commitment === "immediate" && !mechanicFor(round).single)
       ? state
-      : {
+      : withAssistanceLocks(round, {
           ...state,
           pin: undefined,
           construction: undefined,
@@ -359,7 +367,7 @@ export function gameReducer(
                     )?.id ?? "",
                 )
               : [],
-        };
+        });
   if (action.type === "select" || action.type === "guess-country") {
     const mechanic = mechanicFor(round);
     if (mechanic.response !== "selected") return state;

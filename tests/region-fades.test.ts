@@ -67,3 +67,43 @@ it("starts a new Missing Borders question without fading from cached answer colo
   fades.dispose();
   clock.mockRestore();
 });
+
+it("staggers an ordered reveal, snaps for reduced motion, and clears delayed colors on advance", () => {
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  const fades = new RegionFades();
+  try {
+    const first = fades.get("a", "reveal", "#334455", "#78dfaa", 400, "q1", 0);
+    const second = fades.get(
+      "b",
+      "reveal",
+      "#334455",
+      "#78dfaa",
+      400,
+      "q1",
+      850,
+    );
+    clock.mockReturnValue(400);
+    fades.view();
+    expect(first.color).toEqual(new Color("#78dfaa"));
+    expect(second.color).toEqual(new Color("#334455"));
+    expect(fades.needsRefresh()).toBe(true);
+    clock.mockReturnValue(1050);
+    fades.view();
+    expect(second.color).toEqual(
+      new Color("#334455").lerp(new Color("#78dfaa"), 0.5),
+    );
+    fades.get("b", "reveal", "#334455", "#78dfaa", 0, "q1");
+    expect(second.color).toEqual(new Color("#78dfaa"));
+    fades.get("c", "reveal", "#334455", "#78dfaa", 400, "q1", 2550);
+    fades.transition("c", "#888888", 160, "q2");
+    clock.mockReturnValue(6000);
+    fades.view();
+    expect(fades.transition("c", "#888888", 160, "q2").color).toEqual(
+      new Color("#888888"),
+    );
+    expect(fades.needsRefresh()).toBe(false);
+  } finally {
+    fades.dispose();
+    clock.mockRestore();
+  }
+});

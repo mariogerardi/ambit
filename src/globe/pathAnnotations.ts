@@ -89,6 +89,52 @@ export function pathArrowhead(
   return arrow;
 }
 
+/** Reuse the shared screen-sized tips, spaced by distance rather than vertex count. */
+export function pathFlow(
+  coordinates: number[][],
+  color: string,
+  opacity: number,
+  count: number,
+) {
+  const distances = [0];
+  const segments = coordinates.slice(1).map((p, index) => {
+    const a = coordinates[index] as [number, number],
+      b = p as [number, number];
+    distances.push(distances[index] + geoDistance(a, b));
+    return geoInterpolate(a, b);
+  });
+  const total = distances.at(-1)!;
+  if (!total || !segments.length) return [];
+  const sample = (fraction: number) => {
+    const distance = fraction * total;
+    let low = 0,
+      high = segments.length - 1;
+    while (low < high) {
+      const middle = Math.floor((low + high) / 2);
+      if (distances[middle + 1] < distance) low = middle + 1;
+      else high = middle;
+    }
+    return point(
+      segments[low](
+        (distance - distances[low]) /
+          Math.max(1e-12, distances[low + 1] - distances[low]),
+      ),
+    );
+  };
+  return Array.from({ length: count }, (_, index) => {
+    const arrow = pathArrowhead(coordinates, color, opacity)!;
+    arrow.name = "path-flow-arrow";
+    arrow.userData.flowAt = (progress: number) => {
+      const t = (progress + index / count) % 1;
+      arrow.userData.tip.copy(sample(t));
+      arrow.userData.previous.copy(sample(Math.max(0, t - 0.005)));
+      (arrow.material as MeshBasicMaterial).opacity =
+        opacity * Math.min(1, t / 0.04, (1 - t) / 0.04);
+    };
+    return arrow;
+  });
+}
+
 function facesCamera(anchor: Vector3, group: Group, camera: PerspectiveCamera) {
   const center = group.getWorldPosition(new Vector3());
   const cameraPosition = camera.getWorldPosition(new Vector3());
@@ -102,6 +148,7 @@ export function viewPathArrowhead(
   camera: PerspectiveCamera,
   width: number,
   height: number,
+  size = 1,
 ) {
   group.updateWorldMatrix(true, true);
   const anchor = (arrow.userData.tip as Vector3)
@@ -128,8 +175,8 @@ export function viewPathArrowhead(
   const inverse = group.matrixWorld.clone().invert();
   const vertices = [
     [0, 0],
-    [-7 * x - 2.5 * y, -7 * y + 2.5 * x],
-    [-7 * x + 2.5 * y, -7 * y - 2.5 * x],
+    [(-7 * x - 2.5 * y) * size, (-7 * y + 2.5 * x) * size],
+    [(-7 * x + 2.5 * y) * size, (-7 * y - 2.5 * x) * size],
   ];
   const positions = arrow.geometry.getAttribute("position");
   vertices.forEach(([offsetX, offsetY], i) => {

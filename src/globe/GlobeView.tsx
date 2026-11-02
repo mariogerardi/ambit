@@ -976,14 +976,23 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         kind: "map-overlays" as const,
         overlays: props.overlays ?? [],
         palette: props.palette,
+        reduced: props.reduced,
       }),
       [],
     );
     overlayLayer.overlays = props.overlays ?? [];
     overlayLayer.palette = props.palette;
+    overlayLayer.reduced = props.reduced;
     useEffect(() => {
       mapOverlays.update(overlayLayer, globe.current?.getGlobeRadius() ?? 100);
-    }, [props.overlays, props.palette, ready, overlayLayer, mapOverlays]);
+    }, [
+      props.overlays,
+      props.palette,
+      props.reduced,
+      ready,
+      overlayLayer,
+      mapOverlays,
+    ]);
     const customData = useMemo(
       () => [
         ...renderRegions,
@@ -1048,6 +1057,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           capColor(obj),
           props.reduced ? 0 : reveal.durationMs,
           props.regionTransitionKey,
+          props.reduced ? 0 : reveal.ids.indexOf(r.id) * (reveal.stepMs ?? 0),
         );
       },
       [

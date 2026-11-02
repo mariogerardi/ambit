@@ -110,11 +110,17 @@ const validateCards: NonNullable<MechanicDefinition["validateContext"]> = (
 ) => {
   const ids = (question.choices ?? []).map((choice) => choice.id);
   const fixed = question.guidance?.assist?.fixedSlots ?? [];
+  const aside = question.guidance?.hintAsideId;
   if (
     ids.length < question.count ||
     expected.length !== question.count ||
     new Set(expected).size !== expected.length ||
     expected.some((id) => !ids.includes(id)) ||
+    (aside !== undefined &&
+      (!question.orderInitial ||
+        ids.length !== question.count + 1 ||
+        !ids.includes(aside) ||
+        expected.includes(aside))) ||
     new Set(fixed.map((slot) => slot.index)).size !== fixed.length ||
     fixed.some(
       (slot) =>

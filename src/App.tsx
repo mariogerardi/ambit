@@ -1611,14 +1611,14 @@ export function App() {
                     ? tour.world?.regionReveal
                     : minigamePlaying
                       ? activeMinigame.world?.regionReveal
-                      : undefined
+                      : world?.regionReveal
                 }
                 regionTransitionKey={
                   minigameLanding
                     ? tour.world?.regionTransitionKey
                     : minigamePlaying
                       ? activeMinigame.world?.regionTransitionKey
-                      : undefined
+                      : world?.regionTransitionKey
                 }
                 borderOmissions={
                   minigameLanding

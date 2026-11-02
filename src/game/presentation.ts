@@ -772,6 +772,12 @@ export function questionVisualStates(
           (item.state !== "disabled" || states[id] !== "hinted")
         )
           states[id] = item.state;
+  // An authored sequence reveal explains the solution; assignment errors remain
+  // in the response review, while an actually chosen spare retains its wrong color.
+  if (question.map?.revealOrder)
+    for (const id of expected)
+      if (context.targets.has(id))
+        states[id] = game.answers.at(-1)?.correct ? "correct" : "answer";
   for (const highlight of question.highlightParts ?? [])
     if (highlight.reveal) {
       const owner = states[highlight.countryId];
@@ -1011,6 +1017,10 @@ export function questionRegionMarkers(
   )
     return [];
   const states = questionVisualStates(question, context, game);
+  const sequence =
+    question.map?.revealOrder && game.phase !== "playing"
+      ? solutionIds(question, context)
+      : [];
   const visible = new Map(
     questionRegions(context.regions, question, game.phase)
       .filter(
@@ -1040,6 +1050,7 @@ export function questionRegionMarkers(
       return [];
     if (question.mode === "number") return [];
     const anchor = interiorAnchor(region);
+    const sequenceIndex = sequence.indexOf(id);
     return [
       {
         id: `response:${id}`,
@@ -1052,13 +1063,15 @@ export function questionRegionMarkers(
         visualState: state,
         labelHidden: true,
         markerRole: "annotation" as const,
-        markerSize: 30,
+        markerSize: sequenceIndex >= 0 ? 24 : 30,
         markerBadge:
-          state === "selected" || state === "correct"
-            ? "✓"
-            : state === "incorrect"
-              ? "×"
-              : "◎",
+          sequenceIndex >= 0
+            ? String(sequenceIndex + 1)
+            : state === "selected" || state === "correct"
+              ? "✓"
+              : state === "incorrect"
+                ? "×"
+                : "◎",
       },
     ];
   });

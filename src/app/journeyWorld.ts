@@ -1,4 +1,5 @@
 import type { ClueLocator } from "../globe/clueLocators";
+import type { RegionReveal } from "../globe/regionFades";
 import { constructionScene } from "../game/constructionScene";
 import { intersectionOverlays } from "../game/bearingIntersection";
 import { geoDistance } from "d3-geo";
@@ -633,6 +634,16 @@ export function journeyWorld(
             .filter((e) => e.result === "accepted")
             .map((e) => e.id)
         : game.selectedIds,
+    regionTransitionKey: `${journey.id}:${round.id}:${game.phase}`,
+    regionReveal:
+      game.phase === "feedback" && round.map?.revealOrder
+        ? ({
+            key: `${round.id}:${game.answers.length}`,
+            ids: solutionIds(round, context),
+            clueIds: [],
+            ...round.map.revealOrder,
+          } as RegionReveal)
+        : undefined,
     focus,
   };
 }

@@ -6,6 +6,7 @@ export interface RegionReveal {
   ids: string[];
   clueIds: string[];
   durationMs: number;
+  stepMs?: number;
 }
 type Fill = { color: Color; opacity: number };
 const fill = (value: string): Fill => {
@@ -49,6 +50,7 @@ export class RegionFades {
     to: Fill,
     duration: number,
     scope?: string,
+    delay = 0,
   ) {
     const entry: Entry = this.entries.get(id) ?? {
       key,
@@ -64,11 +66,11 @@ export class RegionFades {
       scope,
       from,
       to,
-      start: performance.now(),
+      start: performance.now() + delay,
       duration,
     });
     this.entries.set(id, entry);
-    this.sample(entry, entry.start);
+    this.sample(entry, performance.now());
     return entry.material;
   }
   /** Explicit route reveals may deliberately restart from their clue color. */
@@ -79,6 +81,7 @@ export class RegionFades {
     to: string,
     duration: number,
     scope?: string,
+    delay = 0,
   ) {
     const entry = this.entries.get(id),
       target = fill(to);
@@ -89,7 +92,11 @@ export class RegionFades {
       !entry.to.color.equals(target.color) ||
       entry.to.opacity !== target.opacity
     )
-      return this.begin(id, key, fill(from), target, duration, scope);
+      return this.begin(id, key, fill(from), target, duration, scope, delay);
+    if (duration === 0 && entry.pending) {
+      entry.duration = 0;
+      this.sample(entry, performance.now());
+    }
     return entry.material;
   }
   /** Ordinary state changes start from the current rendered color, including interrupted fades. */

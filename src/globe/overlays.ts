@@ -25,6 +25,7 @@ import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import type { PerspectiveCamera } from "three";
 import {
   pathArrowhead,
+  pathFlow,
   pathLabel,
   viewPathLabel,
   viewPathArrowhead,
@@ -41,6 +42,7 @@ export interface OverlayLayer {
   kind: "map-overlays";
   overlays: readonly MapOverlay[];
   palette?: ThemeId;
+  reduced?: boolean;
 }
 export const isOverlayLayer = (value: object): value is OverlayLayer =>
   "kind" in value && value.kind === "map-overlays";
@@ -266,6 +268,8 @@ export function makeMapOverlay(
   line.renderOrder = overlay.type === "path" && overlay.foreground ? 6 : 4;
   if (overlay.type === "path" && overlay.dashed) line.computeLineDistances();
   line.raycast = () => {};
+  // A zero-opacity wide line can still stipple with alpha-to-coverage on some GPUs.
+  line.visible = !(overlay.type === "path" && overlay.opacity === 0);
   group.add(line);
   if (overlay.type === "circle" && overlay.fadeInMs) {
     group.userData.fadeStarted = performance.now();
@@ -288,6 +292,17 @@ export function makeMapOverlay(
         overlay.opacity ?? 1,
       );
       if (arrow) group.add(arrow);
+    }
+    if (overlay.flow) {
+      const arrows = pathFlow(
+        overlay.coordinates,
+        color,
+        overlay.flow.opacity ?? overlay.opacity ?? 1,
+        Math.min(16, Math.max(1, Math.floor(overlay.flow.count ?? 4))),
+      );
+      group.add(...arrows);
+      group.userData.flowStarted = performance.now();
+      group.userData.flowing = arrows.length > 0;
     }
     if (overlay.label) {
       const label = pathLabel(overlay.coordinates, overlay.label, color);
@@ -435,14 +450,28 @@ export class MapOverlays {
       this.objects.delete(id);
     }
     for (const overlay of layer.overlays) {
-      const group = this.get(overlay, radius, layer.palette);
+      const effective =
+        layer.reduced &&
+        overlay.type === "path" &&
+        (overlay.reveal || overlay.flow)
+          ? {
+              ...overlay,
+              reveal: undefined,
+              flow: undefined,
+              arrowhead: overlay.arrowhead || !!overlay.flow,
+            }
+          : overlay;
+      const group = this.get(effective, radius, layer.palette);
       if (group.parent !== this.group) this.group.add(group);
     }
     this.group.visible = active.size > 0 || !!this.brush?.group.visible;
   }
   needsRefresh() {
     return [...this.objects.values()].some(
-      ({ group }) => group.userData.revealing || group.userData.fading,
+      ({ group }) =>
+        group.userData.revealing ||
+        group.userData.fading ||
+        group.userData.flowing,
     );
   }
   view(camera: PerspectiveCamera, width: number, height: number) {
@@ -515,6 +544,26 @@ export class MapOverlays {
           viewPathLabel(child, group, camera, width, height);
         else if (child instanceof Mesh && child.name === "path-arrowhead")
           viewPathArrowhead(child, group, camera, width, height);
+        else if (
+          child instanceof Mesh &&
+          child.name === "path-flow-arrow" &&
+          overlay.type === "path" &&
+          overlay.flow
+        ) {
+          child.userData.flowAt(
+            ((performance.now() - group.userData.flowStarted) /
+              Math.max(1000, overlay.flow.durationMs)) %
+              1,
+          );
+          viewPathArrowhead(
+            child,
+            group,
+            camera,
+            width,
+            height,
+            overlay.flow.size ?? 1,
+          );
+        }
     }
   }
   setPalette(palette: ThemeId) {
@@ -610,6 +659,7 @@ export class MapOverlays {
                       overlay.type,
                       overlay.coordinates,
                       overlay.reveal,
+                      overlay.flow,
                       overlay.foreground,
                       overlay.dashed,
                       overlay.accuracyBand,

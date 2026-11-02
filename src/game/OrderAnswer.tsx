@@ -5,7 +5,7 @@ import type { Action, GameState } from "./state";
 import type { Question, QuestionContext } from "./questionContracts";
 import { canSubmit } from "./questionEvaluation";
 import { orderedCards } from "./ordering";
-import { lockedOrderSlots } from "./guidance";
+import { lockedOrderSlots, lockedOrderAside } from "./guidance";
 import { QuestionActions } from "./QuestionActions";
 
 /** Drag on mouse/touch, or choose a card and then a slot with ordinary buttons. */
@@ -44,6 +44,7 @@ export function OrderAnswer({
   const matching = question.mode === "choice-match";
   const ordered = orderedCards(question, game);
   const fixed = lockedOrderSlots(question, game);
+  const asideLocked = lockedOrderAside(question, game);
   const spareCount = (question.choices?.length ?? 0) - question.count;
   const spareCopy = spareCount === 1 ? "one card" : `${spareCount} cards`;
   const name = (id: string) =>
@@ -70,6 +71,7 @@ export function OrderAnswer({
     ).values(),
   ];
   const photoGrid = populated && !matching && photos.length > 0;
+  const inlineSpare = populated && !matching && spareCount === 1 && !photoGrid;
   const hasUnplacedCards = question.choices?.some(
     (choice) => !ordered.includes(choice.id),
   );
@@ -153,7 +155,10 @@ export function OrderAnswer({
     ? {
         content: question.guidance,
         stage: game.help?.[question.id],
-        onHint: () => dispatch({ type: "request-hint" }),
+        onHint: () => {
+          setPicked(undefined);
+          dispatch({ type: "request-hint" });
+        },
         onAssist: () => {
           setPicked(undefined);
           dispatch({ type: "request-assist" });
@@ -237,6 +242,39 @@ export function OrderAnswer({
           </li>
         );
       })}
+      {inlineSpare &&
+        question.choices
+          ?.filter((choice) => !ordered.includes(choice.id))
+          .map((choice) => (
+            <li
+              key="aside"
+              data-order-slot={-1}
+              className={over === -1 ? "drop-target" : ""}
+            >
+              <span className="order-position">
+                {question.orderAsideLabel ?? "Leave out"}
+              </span>
+              <button
+                type="button"
+                className={`order-card${picked === choice.id ? " chosen" : ""}${dragging === choice.id ? " dragging" : ""}`}
+                aria-label={`${question.orderAsideLabel ?? "Leave out"}: ${name(choice.id)}${asideLocked ? ", locked by hint" : ""}`}
+                aria-pressed={!asideLocked && picked === choice.id}
+                disabled={!!asideLocked}
+                {...(!asideLocked ? pointer(choice.id) : {})}
+                onClick={() => {
+                  if (skipClick.current) {
+                    skipClick.current = false;
+                    return;
+                  }
+                  if (picked && picked !== choice.id) place(picked, -1);
+                  else choose(choice.id);
+                }}
+              >
+                {card(choice.id)}
+                <i aria-hidden="true">{asideLocked ? "✓" : "⠿"}</i>
+              </button>
+            </li>
+          ))}
     </ol>
   );
   const bank = (
@@ -259,9 +297,15 @@ export function OrderAnswer({
               type="button"
               data-dd-action-name="Answer Select Order Card"
               key={choice.id}
-              {...pointer(choice.id)}
+              {...(!asideLocked ? pointer(choice.id) : {})}
               className={`order-card${picked === choice.id ? " chosen" : ""}${dragging === choice.id ? " dragging" : ""}`}
-              aria-pressed={picked === choice.id}
+              aria-pressed={!asideLocked && picked === choice.id}
+              disabled={!!asideLocked}
+              aria-label={
+                asideLocked
+                  ? `${name(choice.id)}, left out and locked by hint`
+                  : undefined
+              }
               onClick={() => {
                 if (skipClick.current) {
                   skipClick.current = false;
@@ -305,7 +349,7 @@ export function OrderAnswer({
         ) : (
           <>
             {slots}
-            {hasUnplacedCards && bank}
+            {hasUnplacedCards && !inlineSpare && bank}
           </>
         )}
       </div>

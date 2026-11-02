@@ -159,6 +159,31 @@ required. New authors should use the grouped fields for state-specific geography
 all bundled Journeys have been migrated. Do not edit both an authored
 scene and its generated flat field independently.
 
+Country card ordering can set `map.revealOrder: { stepMs, durationMs }` to stagger
+solution fills in canonical order after submission. This uses the existing region
+fade clock; reduced motion resolves every fill immediately. Author a directional
+`path` overlay separately in the reveal scene when a sourced or explicitly
+illustrative movement warrants one. These reveals use smaller canonical sequence
+badges; after a miss, required countries show the solution color while the chosen
+spare retains its wrong-answer color. Submitted assignments remain in review.
+`feedbackReview: "compact"` keeps one answer line and puts missed assignments in
+a disclosure. Completion retains the full saved review.
+
+A path can set `flow: { durationMs, count, opacity, size }` for looping, distance-spaced
+direction tips. The shared render clock updates them without rebuilding geometry;
+reduced motion replaces them with a static endpoint arrow. Layers clear normally
+on advance/completion. `shuffleChoices` shuffles an unfilled card bank once per
+mount, or shuffles all cards into `orderInitial` slots on start/advance.
+`flow.size` scales the screen-sized tips; path `opacity: 0` suppresses the fixed
+centerline and any reduced-motion endpoint tip while independently visible flow
+tips retain their own opacity.
+
+For populated ordering with exactly one spare, `guidance.hintAsideId` moves that
+spare to the discard position and locks it at the hinted stage. Validation rejects
+an answer as the spare. The lock survives assist, clear and stale draft recovery;
+the stronger `assist.fixedSlots` contract can independently lock the first answer.
+The original answer sequence and help point ceilings are unchanged.
+
 ## Standards and supported capabilities
 
 [Crafting a Journey](JOURNEY_CRAFTING.md) owns current authoring standards. The

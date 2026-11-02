@@ -49,14 +49,14 @@ const places: PlaceFeature[] = [
     sourceId: "test",
   },
 ];
-function canvasFactory() {
+function canvasFactory(fillText = vi.fn()) {
   const createElement = vi.fn(() => ({
     width: 0,
     height: 0,
     getContext: () => ({
       measureText: (text: string) => ({ width: text.length * 14 }),
       strokeText() {},
-      fillText() {},
+      fillText,
       clearRect() {},
       beginPath() {},
       moveTo() {},
@@ -81,6 +81,34 @@ const camera = () => {
 };
 afterEach(() => vi.unstubAllGlobals());
 describe("cached readable place labels", () => {
+  it("draws numeric area annotations as plain numbers rather than target symbols", () => {
+    const fillText = vi.fn();
+    canvasFactory(fillText);
+    const labels = new PlaceLabels();
+    labels.update(
+      {
+        id: "sequence",
+        kind: "place-labels",
+        visible: true,
+        markers: true,
+        places: [
+          {
+            ...places[0],
+            name: "",
+            kind: "other",
+            labelHidden: true,
+            markerRole: "annotation",
+            markerBadge: "2",
+            visualState: "answer",
+          },
+        ],
+      },
+      100,
+    );
+    labels.view(camera(), 1200, 1200);
+    expect(fillText).toHaveBeenCalledWith("2", 32, 34);
+    labels.dispose();
+  });
   it("keeps an inspected small city visible and selectable at world zoom without making it a quiz answer target", () => {
     canvasFactory();
     const labels = new PlaceLabels();

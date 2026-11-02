@@ -306,6 +306,42 @@
     ]
   },
   {
+    "id": "im-like-a-bird-v1",
+    "addedAt": "2026-11-02",
+    "title": "I’m Like a Bird",
+    "saveRevision": 1,
+    "description": "Follow five extraordinary bird migrations across seas, continents and mountains.",
+    "path": "/journey/im-like-a-bird",
+    "module": "./imLikeABirdJourney.ts",
+    "rounds": [
+      {
+        "id": "im-like-a-bird-common-crane-v1",
+        "label": "The Autumn Flight",
+        "resolvedLabel": "Common crane"
+      },
+      {
+        "id": "im-like-a-bird-ruby-throated-hummingbird-v1",
+        "label": "Across the Gulf",
+        "resolvedLabel": "Ruby-throated hummingbird"
+      },
+      {
+        "id": "im-like-a-bird-white-stork-v1",
+        "label": "The Long Way Around",
+        "resolvedLabel": "White stork"
+      },
+      {
+        "id": "im-like-a-bird-amur-falcon-v1",
+        "label": "An Ocean Between",
+        "resolvedLabel": "Amur falcon"
+      },
+      {
+        "id": "im-like-a-bird-bar-headed-goose-v1",
+        "label": "Above the Clouds",
+        "resolvedLabel": "Bar-headed goose"
+      }
+    ]
+  },
+  {
     "id": "island-instincts-v1",
     "addedAt": "2026-10-10",
     "title": "Island Instincts",

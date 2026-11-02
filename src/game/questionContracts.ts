@@ -162,6 +162,8 @@ export interface Question {
   /** A semantic clue first; an optional, separately requested change to the task display. */
   guidance?: {
     hint: string;
+    /** A populated ordering hint can move its one spare aside and keep it there. */
+    hintAsideId?: string;
     /** Optional broad geographic clue, shown only once help is requested. */
     hintMap?: { regionIds: readonly string[]; focus?: Focus };
     assist?: {
@@ -240,6 +242,8 @@ export interface Question {
   correctFeedback?: string;
   /** Authored reaction for a miss; the reveal body supplies the explanation. */
   incorrectFeedback?: string;
+  /** Keep one answer line and disclose assignment details only on request. */
+  feedbackReview?: "compact";
   /** Full flags replace the clue image on reveal, with visible country labels. */
   feedbackFlags?: FlagDisplay[];
   /** Documentary image shown only after submission, with visible attribution. */
@@ -309,6 +313,8 @@ export interface Question {
     selectionFeedback?: "after-submit";
     /** City/physical answers can leave countries neutral on reveal. */
     feedbackRegions?: "neutral";
+    /** Reveal ordered country fills in canonical order, using the shared render clock. */
+    revealOrder?: { stepMs: number; durationMs: number };
   };
   /** Optional play-only orientation for small, explicitly supplied area clues. */
   clueLocators?: { regionId: string; label: string; pulseOnly?: boolean }[];
@@ -355,7 +361,7 @@ export interface Question {
     /** What this option depicts, independently of its grading ID. Never grants map input. */
     geographyIds?: string[];
   }[];
-  /** Shuffle choice-button positions once per mounted question; IDs still grade. */
+  /** Shuffle choices once per mounted question; IDs still grade. */
   shuffleChoices?: boolean;
   /** Directional captions for an ordering puzzle's slots. */
   orderLabels?: string[];
