@@ -192,10 +192,10 @@ it("plays a numeric country route, reveals numbered crossings, and saves a high 
   expect(probe.props!.clueLocators).toHaveLength(1);
   expect(probe.props!.clueLocators![0]).toMatchObject({
     pulseOnly: true,
-    repeat: true,
     appearance: "completion",
     anchor: { lat: crossings.at(-1)!.lat, lng: crossings.at(-1)!.lng },
   });
+  expect(probe.props!.clueLocators![0].repeat).not.toBe(true);
   await click("Next route");
   await click("Finish game");
   expect(host.querySelector(".minigame-overview")).not.toBeNull();

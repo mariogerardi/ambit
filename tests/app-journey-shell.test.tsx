@@ -7,6 +7,7 @@ import {
   member,
   mount,
   probe,
+  scheduleState,
 } from "./helpers/appShell";
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -21,6 +22,17 @@ import * as journeyRegistry from "../src/game/journeyRegistry";
 import { NORTH_AMERICA_JOURNEY as FIFTH_JOURNEY } from "../src/game/northAmericaJourney";
 import { initialGame } from "../src/game/state";
 
+// Resume fixtures must agree with the authoritative schedule for today.
+function scheduleJourney(day: string, journeyId: string) {
+  scheduleState.assignments[day] = journeyId;
+  scheduleState.records[day] = {
+    day,
+    journeyId,
+    source: "assigned",
+    revision: 1,
+  };
+}
+
 describe("app journey shell (DOM only; no browser or WebGL)", () => {
   it.each([CANADA_JOURNEY, ANDES_JOURNEY])(
     "renders usable third-question choices for $title",
@@ -28,6 +40,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
       vi.useFakeTimers({ toFake: ["Date"] });
       vi.setSystemTime(new Date(2026, 9, 5, 12));
       const date = "2026-10-05";
+      scheduleJourney(date, journey.id);
       localStorage.setItem(
         DAILY_KEY,
         JSON.stringify({
@@ -106,6 +119,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
         journeyRegistry.JOURNEY_INDEX,
       );
       const attempt = progress.attempts[date];
+      scheduleJourney(date, attempt.journeyId);
       save.save({
         ...progress,
         attempts: {
@@ -153,6 +167,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
         removeEventListener() {},
       }));
       const date = "2026-10-06";
+      scheduleJourney(date, SHARED_NAMES_JOURNEY.id);
       localStorage.setItem(
         DAILY_KEY,
         JSON.stringify({
@@ -248,6 +263,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
     vi.setSystemTime(new Date(2026, 9, 5, 12));
     const date = "2026-10-05";
+    scheduleJourney(date, FIFTH_JOURNEY.id);
     localStorage.setItem(
       DAILY_KEY,
       JSON.stringify({
@@ -452,6 +468,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date(2026, 9, 5, 12));
     const date = "2026-10-05";
+    scheduleJourney(date, FOURTH_JOURNEY.id);
     localStorage.setItem(
       DAILY_KEY,
       JSON.stringify({

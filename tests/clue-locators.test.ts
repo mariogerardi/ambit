@@ -174,7 +174,9 @@ it("adds and removes the completion ripple casing without duplicating it on upda
   expect(group.querySelectorAll(".completion-pulse-casing")).toHaveLength(1);
   expect(layer.element.dataset.reduced).toBe("true");
   layer.update([{ ...finish, appearance: undefined, repeat: false }]);
-  expect(group.querySelectorAll("circle")).toHaveLength(1);
+  expect(group.querySelectorAll(".clue-locator-anchor")).toHaveLength(1);
+  expect(group.querySelectorAll(".clue-locator-pulse")).toHaveLength(1);
+  expect(group.querySelector(".completion-pulse-casing")).toBeNull();
   expect(group.querySelector(".clue-locator-pulse")).not.toBeNull();
   expect(group.classList.contains("completion-pulse-group")).toBe(false);
   layer.dispose();

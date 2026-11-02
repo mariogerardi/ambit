@@ -552,11 +552,15 @@ export function auditJourney(
         )
           continue;
         const final = completed.places.find((p) => p.id === place.id);
+        // A construction stop reviews its original result; the overview is calm.
+        const retainedStates = journey.completion?.constructionResults
+          ? ["visited", "incorrect", place.visualState]
+          : ["visited", "incorrect"];
         if (
           !final ||
           (place.visualState === "incorrect"
             ? final.visualState !== "incorrect"
-            : !["visited", "incorrect"].includes(final.visualState ?? ""))
+            : !retainedStates.includes(final.visualState ?? ""))
         )
           report.errors.push(
             `[review-retention] Revealed point missing at completion: ${question.id} / ${place.id}`,
