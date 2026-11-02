@@ -1,4 +1,5 @@
 import type { PlaceFeature } from "../geography/types";
+import { GLOBE_SYMBOLS } from "../globe/symbols";
 
 /** Equal reference styling prevents a known capital's shape/size from disclosing its role. */
 export function cityReference(place: PlaceFeature): PlaceFeature {
@@ -6,7 +7,7 @@ export function cityReference(place: PlaceFeature): PlaceFeature {
     ...place,
     kind: "city",
     priority: 90,
-    markerSize: 24,
+    markerSize: GLOBE_SYMBOLS.reference,
     visualState: "hinted",
     labelFlexible: true,
     displayRole: "reference",
@@ -47,7 +48,9 @@ export function presentJourneyPlace(place: PlaceFeature): PlaceFeature {
         ? "reference"
         : undefined),
     ...(city ? { kind: "city" as const } : {}),
-    markerSize: city ? 24 : (place.markerSize ?? 24),
+    markerSize: city
+      ? GLOBE_SYMBOLS.reference
+      : (place.markerSize ?? GLOBE_SYMBOLS.reference),
     visualState: explanation ? "hinted" : (place.visualState ?? "hinted"),
     ...(explanation ? { markerBadge: undefined, answerTarget: false } : {}),
   };

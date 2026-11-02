@@ -100,6 +100,7 @@ export function startRound(
     phase: "playing",
     roundIndex: index,
     ordered: initialOrderCards(question, random),
+    showConstructionExample: false,
   };
 }
 export function gameReducer(

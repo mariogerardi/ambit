@@ -25,6 +25,7 @@ import { presentJourneyPlace, cityReference } from "./authoredPlaces";
 import { reviewedBearing } from "./compassBearing";
 import { mechanicFor } from "./mechanics";
 import { recalledIds, recallMistakes } from "./countryRecall";
+import { GLOBE_SYMBOLS } from "../globe/symbols";
 
 export function questionPlaces(
   question: Question,
@@ -91,6 +92,7 @@ function resolveQuestionPlaces(
       // Existing marker visibility is authored; mapping never introduces a hidden marker.
       return {
         ...place,
+        assisted: item.supplied,
         visualState:
           reveal ||
           question.mode === "choice-match" ||
@@ -177,7 +179,7 @@ function resolveQuestionPlaces(
           ...question.feedbackPlaces?.find((place) => place.id === target.id),
           kind: "pin",
           markerRole: "target",
-          markerSize: 30,
+          markerSize: GLOBE_SYMBOLS.target,
           visualState: "answer",
         });
     }
@@ -212,6 +214,11 @@ function resolveQuestionPlaces(
           {
             ...place,
             answerTarget: true,
+            assisted: items.some((item) => item.id === id && item.supplied),
+            markerBadge:
+              !reveal && selected && question.mode === "city-multiple"
+                ? "✓"
+                : place.markerBadge,
             priority: feedback?.priority ?? place.priority,
             // Anonymous city markers never carry hidden labels into the renderer.
             name: named ? displayName : "",
@@ -1063,7 +1070,13 @@ export function questionRegionMarkers(
         visualState: state,
         labelHidden: true,
         markerRole: "annotation" as const,
-        markerSize: sequenceIndex >= 0 ? 24 : 30,
+        markerSize:
+          sequenceIndex >= 0
+            ? GLOBE_SYMBOLS.sequence
+            : GLOBE_SYMBOLS.annotation,
+        assisted: answerItems(question, context, game).some(
+          (item) => item.supplied && item.geographyIds.includes(id),
+        ),
         markerBadge:
           sequenceIndex >= 0
             ? String(sequenceIndex + 1)

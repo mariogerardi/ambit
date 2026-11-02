@@ -15,6 +15,7 @@ import { playStateColor } from "./themes";
 import { playColors } from "../theme/playColors";
 import { MAP_ANNOTATION_ALTITUDE } from "./surface";
 import { areaSymbolSize } from "./areaSymbols";
+import { GLOBE_SYMBOLS } from "./symbols";
 export interface PlaceLabelLayer {
   id: string;
   kind: "place-labels";
@@ -89,9 +90,16 @@ export function placeStyle(
 }
 /** Authored clues stay legible; dense contextual city layers scale by population. */
 export function placeMarkerSize(place: PlaceFeature, contextual = false) {
+  if (place.editing) return GLOBE_SYMBOLS.activePin;
   if (place.markerSize !== undefined) return place.markerSize;
-  if (place.kind === "pin") return 36;
-  if (place.answerTarget) return place.visualState === "selected" ? 34 : 30;
+  if (place.visualState === "visited") return GLOBE_SYMBOLS.reference;
+  if (place.markerRole === "target") return GLOBE_SYMBOLS.target;
+  if (place.kind === "pin") return GLOBE_SYMBOLS.response;
+  if (place.answerTarget)
+    return place.visualState === "selected"
+      ? GLOBE_SYMBOLS.selected
+      : GLOBE_SYMBOLS.candidate;
+  if (place.displayRole) return GLOBE_SYMBOLS.reference;
   if (!contextual) return 30;
   return place.kind === "capital"
     ? 14
@@ -186,9 +194,38 @@ export const placeLabelStyle = (
           text: palette === "survey" ? "#c4c4c4" : "#b4cbd0",
           textHeight: 18,
         }
-      : base;
+      : (place.visualState === "visited" || place.displayRole) &&
+          !["selected", "correct", "answer", "incorrect"].includes(
+            place.visualState ?? "",
+          )
+        ? {
+            ...base,
+            font: "500 22px Manrope, sans-serif",
+            textHeight: 20,
+            text:
+              place.visualState === "visited"
+                ? playColors(palette).visited
+                : playColors(palette).hinted,
+          }
+        : base;
   return { ...style, textHeight: style.textHeight * (place.labelScale ?? 1) };
 };
+
+/** Role priority precedes editorial priority: context never crowds out a result. */
+export function placeLabelPriority(place: PlaceFeature) {
+  if (place.inspectionSelected) return 5;
+  if (place.labelTypography === "numeric") return 1;
+  if (
+    place.editing ||
+    place.kind === "pin" ||
+    ["selected", "correct", "answer", "incorrect"].includes(
+      place.visualState ?? "",
+    )
+  )
+    return 4;
+  if (place.answerTarget) return 3;
+  return place.displayRole ? 2 : 0;
+}
 
 /** Try nearby screen anchors before dropping an authored city's name. */
 export function placeLabelPlacement(
@@ -335,7 +372,8 @@ export class PlaceLabels {
       sprite.userData.labelName === place.name &&
       sprite.userData.labelKind === labelKind &&
       sprite.userData.labelTypography === place.labelTypography &&
-      sprite.userData.labelColor === style.text
+      sprite.userData.labelColor === style.text &&
+      sprite.userData.labelFont === style.font
     )
       return sprite;
     if (sprite) {
@@ -391,6 +429,7 @@ export class PlaceLabels {
     sprite.userData.labelKind = labelKind;
     sprite.userData.labelTypography = place.labelTypography;
     sprite.userData.labelColor = style.text;
+    sprite.userData.labelFont = style.font;
     sprite.raycast = () => {}; // Text never intercepts map answers.
     this.sprites.set(place.id, sprite);
     return sprite;
@@ -410,7 +449,7 @@ export class PlaceLabels {
           : place.visualState === "answer"
             ? "◎"
             : "");
-    const key = `${place.fadeInMs || place.dropInMs ? place.id : ""}:${style.shape}:${color}:${!!place.answerTarget}:${place.markerRole}:${badge}:${this.contextual}:${place.visualState}`;
+    const key = `${place.fadeInMs || place.dropInMs ? place.id : ""}:${style.shape}:${color}:${!!place.answerTarget}:${place.markerRole}:${badge}:${this.contextual}:${place.visualState}:${!!place.assisted}`;
     if (sprite && sprite.userData.markerStyle === key) return sprite;
     let material = this.markerMaterials.get(key);
     if (!material) {
@@ -570,6 +609,22 @@ export class PlaceLabels {
         ctx.textBaseline = "middle";
         ctx.fillText(badge, 32, style.shape === "pin" ? 24 : 32);
       }
+      if (place.assisted) {
+        // Small vector lock, preserving the response/slot symbol and its role color.
+        ctx.strokeStyle = playColors(this.palette)["on-selected"];
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(45, 43);
+        ctx.lineTo(58, 43);
+        ctx.lineTo(58, 56);
+        ctx.lineTo(45, 56);
+        ctx.closePath();
+        ctx.moveTo(48, 43);
+        ctx.lineTo(48, 39);
+        ctx.arc(51.5, 39, 3.5, Math.PI, 0);
+        ctx.lineTo(55, 43);
+        ctx.stroke();
+      }
       material = new SpriteMaterial({
         map: placeTexture(canvas),
         depthTest: false,
@@ -647,6 +702,7 @@ export class PlaceLabels {
     )
       return;
     const previousEntries = new Map(this.active.map((e) => [e.place.id, e]));
+    this.pendingLabels = true;
     const previousIds = new Set(previousEntries.keys());
     this.data = layer.places;
     this.radius = radius;
@@ -679,11 +735,10 @@ export class PlaceLabels {
         const previous = this.active.find(
           (entry) => entry.place.id === place.id,
         )?.marker;
-        marker.userData.dropStarted =
-          previous?.userData.dropStarted ?? performance.now();
+        marker.userData.dropStarted = previous?.userData.dropStarted;
       }
       if (marker && place.fadeInMs && !previousIds.has(place.id)) {
-        marker.userData.fadeStarted = performance.now();
+        marker.userData.fadeStarted = undefined;
         marker.material.opacity = 0;
       }
       const previous = previousEntries.get(place.id);
@@ -693,8 +748,8 @@ export class PlaceLabels {
           : undefined;
       const pulseStarted = pulse
         ? previous?.place.lat === place.lat && previous?.place.lng === place.lng
-          ? (previous.pulseStarted ?? performance.now())
-          : performance.now()
+          ? previous.pulseStarted
+          : undefined
         : undefined;
       return { place, position, label, marker, pulse, pulseStarted };
     });
@@ -769,6 +824,8 @@ export class PlaceLabels {
       )
       .sort(
         (a, b) =>
+          placeLabelPriority(b.entry.place) -
+            placeLabelPriority(a.entry.place) ||
           (b.entry.place.priority ?? 0) - (a.entry.place.priority ?? 0) ||
           (this.contextual && !mixedGeography
             ? (b.entry.place.priority ?? b.entry.place.population ?? 0) -
@@ -883,6 +940,8 @@ export class PlaceLabels {
                 place.markerSize,
               )
             : placeMarkerSize(place, this.contextual);
+        if (entry.pulse && entry.pulseStarted === undefined)
+          entry.pulseStarted = performance.now();
         if (entry.pulse && entry.pulseStarted !== undefined) {
           const t = Math.min(
             1,
@@ -897,6 +956,11 @@ export class PlaceLabels {
         }
         marker.scale.set(scale * size, scale * size, 1);
         marker.visible = size > 0;
+        // Start placement/fade only when the anchored symbol actually reaches view.
+        if (place.dropInMs && marker.userData.dropStarted === undefined)
+          marker.userData.dropStarted = performance.now();
+        if (place.fadeInMs && marker.userData.fadeStarted === undefined)
+          marker.userData.fadeStarted = performance.now();
         if (place.dropInMs && marker.userData.dropStarted !== undefined) {
           const t = Math.min(
             1,

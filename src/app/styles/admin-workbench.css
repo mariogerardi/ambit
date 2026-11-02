@@ -33,6 +33,7 @@
 }
 .admin-workbench > .admin-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   position: static;
   margin: 0;
@@ -73,25 +74,7 @@
   min-width: 0;
 }
 .admin-view-switch {
-  display: inline-flex;
-  gap: 4px;
   margin-bottom: 14px;
-  padding: 3px;
-  border-radius: 8px;
-  background: rgb(var(--ui-line-rgb) / 0.06);
-}
-.experience .admin-view-switch button {
-  min-height: 32px;
-  padding: 5px 12px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--ui-muted);
-  font: 14px var(--font-ui);
-}
-.experience .admin-view-switch button[aria-pressed="true"] {
-  background: rgb(var(--ui-raised-rgb));
-  color: var(--ui-text);
 }
 .admin-agenda,
 .admin-workbench .journey-month {

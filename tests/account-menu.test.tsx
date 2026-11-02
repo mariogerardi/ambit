@@ -87,3 +87,12 @@ it("takes guests straight to sign-in and closes account navigation on sign-out",
   expect(onNavigate).toHaveBeenLastCalledWith("/account");
   expect(host.querySelector("[aria-expanded]")).toBeNull();
 });
+
+it("marks Admin as the current account destination", async () => {
+  await mount({ admin: true, path: "/account?tab=admin&section=schedule" });
+  await click("Account");
+  const current = host.querySelector(
+    '[aria-label="Your account"] [aria-current="page"]',
+  );
+  expect(current?.textContent).toBe("Admin");
+});

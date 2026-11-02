@@ -12,9 +12,7 @@
 }
 .minigame-game-names {
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0 8px;
   margin: 0 0 14px;

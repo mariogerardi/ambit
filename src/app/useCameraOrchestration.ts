@@ -352,13 +352,24 @@ export function useCameraOrchestration({
     session?.phase,
     frame,
   ]);
-  const sceneViews =
+  const authoredSceneViews =
     phase === "playing"
       ? round?.introViews
       : phase === "feedback" &&
           (round?.mode !== "pin" || answers.at(-1)?.correct)
         ? round?.feedbackViews
         : undefined;
+  // Finish a teaching flyover with both bearing directions in view.
+  const sceneViews = useMemo(
+    () =>
+      phase === "feedback" &&
+      round?.mode === "compass-bearing" &&
+      authoredSceneViews?.length &&
+      journeyFocus
+        ? [...authoredSceneViews, journeyFocus]
+        : authoredSceneViews,
+    [authoredSceneViews, phase, round?.mode, journeyFocus],
+  );
   const sceneHelp = phase === "playing" ? help?.[round?.id] : undefined;
   useEffect(() => {
     if (

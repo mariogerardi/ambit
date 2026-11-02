@@ -24,6 +24,7 @@ import {
   isArchiveDate,
 } from "./app/archiveDates";
 import { LoadingScreen } from "./app/LoadingScreen";
+import { DelayedStatus } from "./app/DelayedStatus";
 import { JourneySocial } from "./app/JourneySocial";
 import {
   accountIntent,
@@ -1761,6 +1762,13 @@ export function App({
                       ? activeMinigame.world?.regionTransitionKey
                       : world?.regionTransitionKey
                 }
+                regionPhase={
+                  minigameLanding
+                    ? tour.world?.regionPhase
+                    : minigamePlaying
+                      ? activeMinigame.world?.regionPhase
+                      : world?.regionPhase
+                }
                 borderOmissions={
                   minigameLanding
                     ? tour.world?.borderOmissions
@@ -2045,8 +2053,8 @@ export function App({
         >
           <Suspense
             fallback={
-              <section className="info-view" role="status">
-                Loading…
+              <section className="info-view panel-loading" aria-busy="true">
+                <DelayedStatus>Loading…</DelayedStatus>
               </section>
             }
           >

@@ -1,5 +1,6 @@
 import type { ClueLocator } from "../globe/clueLocators";
 import type { RegionReveal } from "../globe/regionFades";
+import { comparisonFocus } from "../globe/camera";
 import { constructionScene } from "../game/constructionScene";
 import { intersectionOverlays } from "../game/bearingIntersection";
 import { geoDistance } from "d3-geo";
@@ -9,6 +10,7 @@ import { pinBands, pinReviewViews } from "../game/pinPresentation";
 import { withAssistanceLocks } from "../game/guidance";
 import type {
   MapOverlay,
+  PlaceFeature,
   RegionFeature,
   RouteFeature,
 } from "../geography/types";
@@ -176,7 +178,7 @@ export function journeyWorld(
           constructionQuestion,
           constructionResponse,
           game.phase !== "playing",
-          !!reviewingConstruction,
+          false,
           !!game.showConstructionExample,
         );
   const retainedConstructions =
@@ -233,6 +235,7 @@ export function journeyWorld(
     if (target)
       routes.push({
         id: `pin-distance:${round.id}`,
+        purpose: "comparison",
         from: game.pin,
         to: target,
         visualState: correct ? "correct" : "incorrect",
@@ -250,6 +253,7 @@ export function journeyWorld(
           (tier, index, tiers) => ({
             id: `pin-tolerance:${round.id}${pinRule.tiers ? `:${tier.radiusKm}` : ""}`,
             type: "circle" as const,
+            purpose: "accuracy" as const,
             center: pinTarget,
             radiusKm: tier.radiusKm,
             shade: !!pinRule.tiers,
@@ -279,6 +283,7 @@ export function journeyWorld(
           {
             id: `bearing-route:${q.id}`,
             type: "path" as const,
+            purpose: "route" as const,
             visualState:
               game.phase === "finished"
                 ? ("visited" as const)
@@ -306,6 +311,8 @@ export function journeyWorld(
       compassArcs.push({
         id: `bearing-guess:${round.id}`,
         type: "path",
+        purpose: "comparison",
+        dashed: true,
         arrowhead: true,
         label: "Your bearing",
         visualState: result.tier === null ? "incorrect" : "correct",
@@ -315,11 +322,101 @@ export function journeyWorld(
         ),
         opacity: 0.9,
       });
+      if (result.error > 0.01) {
+        const turn = ((result.target - result.chosen + 540) % 360) - 180;
+        const steps = Math.max(2, Math.ceil(result.error / 4));
+        compassArcs.push({
+          id: `bearing-error:${round.id}`,
+          type: "path",
+          purpose: "comparison",
+          dashed: "dotted",
+          visualState: result.tier === null ? "incorrect" : "correct",
+          coordinates: Array.from({ length: steps + 1 }, (_, i) => {
+            const p = pointAlongBearing(
+              result.origin,
+              result.chosen + (turn * i) / steps,
+              length * 0.35,
+            );
+            return [p.lng, p.lat];
+          }),
+        });
+      }
     }
   }
+  const bearingResult =
+    game.phase === "feedback" || game.phase === "failed"
+      ? reviewedBearing(round, game)
+      : undefined;
+  const bearingLabel: PlaceFeature[] =
+    round.rule.type === "bearing-angle" && bearingResult
+      ? [
+          {
+            ...pointAlongBearing(
+              bearingResult.origin,
+              bearingResult.chosen,
+              0.025,
+            ),
+            id: `bearing-error-label:${round.id}`,
+            name: `${Number(bearingResult.error.toFixed(1))}° off`,
+            kind: "other",
+            sourceId: "bearing-review",
+            markerRole: "annotation",
+            markerHidden: true,
+            labelFlexible: true,
+            labelTypography: "numeric",
+            priority: 450,
+            visualState: bearingResult.tier === null ? "incorrect" : "correct",
+          },
+        ]
+      : [];
+  const achievedBand = pinBands(round, game).find((band) => band.achieved);
+  const bandLabel: PlaceFeature[] =
+    game.phase === "feedback" && pinTarget && achievedBand
+      ? [
+          {
+            ...pointAlongBearing(
+              pinTarget,
+              115,
+              achievedBand.radiusKm / 6371.0088,
+            ),
+            id: `pin-band-label:${round.id}`,
+            name: `${achievedBand.label} · ${achievedBand.radiusKm} km`,
+            kind: "other",
+            sourceId: "pin-review",
+            markerRole: "annotation",
+            markerHidden: true,
+            labelFlexible: true,
+            labelTypography: "numeric",
+            priority: 400,
+          },
+        ]
+      : [];
   const selected = catalog.get(game.selectedIds.at(-1) ?? "");
   const preferredFocus =
     completion?.focus ??
+    (bearingResult
+      ? comparisonFocus(
+          [
+            bearingResult.origin,
+            bearingResult.destination,
+            pointAlongBearing(
+              bearingResult.origin,
+              bearingResult.chosen,
+              Math.min(
+                Math.PI / 15,
+                geoDistance(
+                  [bearingResult.origin.lng, bearingResult.origin.lat],
+                  [
+                    bearingResult.destination.lng,
+                    bearingResult.destination.lat,
+                  ],
+                ),
+              ),
+            ),
+          ],
+          round.feedbackFocus,
+        )
+      : undefined) ??
     (game.phase === "feedback" && round.feedbackFocus
       ? round.feedbackFocus
       : game.phase === "feedback" &&
@@ -547,6 +644,8 @@ export function journeyWorld(
             ]
           : [
               ...shapeScene.places,
+              ...bearingLabel,
+              ...bandLabel,
               ...questionPlaces(
                 round,
                 context,
@@ -634,7 +733,8 @@ export function journeyWorld(
             .filter((e) => e.result === "accepted")
             .map((e) => e.id)
         : game.selectedIds,
-    regionTransitionKey: `${journey.id}:${round.id}:${game.phase}`,
+    regionTransitionKey: `${journey.id}:${round.id}`,
+    regionPhase: game.phase as GameState["phase"] | undefined,
     regionReveal:
       game.phase === "feedback" && round.map?.revealOrder
         ? ({

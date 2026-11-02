@@ -212,7 +212,7 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     );
   });
 
-  it("blocks an unknown scheduled Journey without creating a substitute attempt, but lets a started edition resume", async () => {
+  it("blocks an unknown scheduled Journey and preserves a displaced started edition", async () => {
     clock();
     scheduleState.records[day] = {
       day,
@@ -228,17 +228,21 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     );
     const store = createDailySave(JOURNEY_INDEX);
     expect(store.load().attempts[day]).toBeUndefined();
-    store.save(
-      openDaily(emptyDaily, day, false, JOURNEY_INDEX, { [day]: bird.id }),
-    );
+    const previous = openDaily(emptyDaily, day, false, JOURNEY_INDEX, {
+      [day]: bird.id,
+    });
+    previous.attempts[day].game.text = "saved draft";
+    store.save(previous);
     await act(async () => root.unmount());
     resetRoot();
     await mount();
-    expect(host.textContent).not.toContain(
+    expect(host.textContent).toContain(
       "Reload Ambit to open this day’s Journey",
     );
-    expect(
-      host.querySelector(".question-card")?.getAttribute("data-question-id"),
-    ).toBe(bird.rounds[0].id);
+    expect(host.querySelector(".question-card")).toBeNull();
+    expect(store.load().attempts[day]).toBeUndefined();
+    expect(store.load().archivedAttempts?.[`${day}/${bird.id}`]).toEqual(
+      previous.attempts[day],
+    );
   });
 });

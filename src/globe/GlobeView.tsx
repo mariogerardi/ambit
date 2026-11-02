@@ -1,5 +1,9 @@
 import { BorderFades } from "./borderFades";
-import { RegionFades } from "./regionFades";
+import { RegionFades, RegionScene } from "./regionFades";
+import { geographicPointVisible } from "./visibility";
+import { interiorAnchor } from "../geography/interiorAnchor";
+import { GLOBE_MOTION } from "./motion";
+import { viewPathDashes } from "./pathAnnotations";
 import type { RegionReveal } from "./regionFades";
 import { bindFrameAnnotations } from "./frameAnnotations";
 import {
@@ -121,6 +125,7 @@ interface Props {
   borderOmissions?: Record<string, number[][][]>;
   regionReveal?: RegionReveal;
   regionTransitionKey?: string;
+  regionPhase?: string;
   showRegionalBorders?: boolean;
   regionInteraction?: boolean;
   regionNames?: "all" | "none" | "committed";
@@ -244,6 +249,11 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     const current = useRef(props);
     current.current = props;
     const regionFades = useMemo(() => new RegionFades(), []);
+    const [regionScene] = useState(() => new RegionScene());
+    const regionScope = useMemo(
+      () => regionScene.scope(props.regionTransitionKey, props.regionPhase),
+      [regionScene, props.regionTransitionKey, props.regionPhase],
+    );
     const borderFades = useMemo(() => new BorderFades(), []);
     useEffect(() => () => borderFades.dispose(), [borderFades]);
     useEffect(() => () => regionFades.dispose(), [regionFades]);
@@ -299,11 +309,6 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         camera.near = near;
         camera.updateProjectionMatrix();
       }
-      // Geographic context gets first claim on space; city names then avoid it.
-      physical.view(camera, rendererSize.x, rendererSize.y);
-      mapOverlays.view(camera, rendererSize.x, rendererSize.y);
-      regionFades.view();
-      borderFades.view();
       const panel = document
         .querySelector(".question-card")
         ?.getBoundingClientRect();
@@ -324,19 +329,54 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         rendererSize.x,
         rendererSize.y,
       );
+      const canReveal = (id: string) => {
+        const r = current.current.regions.find((region) => region.id === id);
+        return (
+          !r ||
+          geographicPointVisible(
+            interiorAnchor(r),
+            camera,
+            rendererSize.x,
+            rendererSize.y,
+            g.getGlobeRadius(),
+            panelBoxes,
+          )
+        );
+      };
+      regionFades.view(canReveal);
+      borderFades.view((line) =>
+        canReveal(
+          (line as unknown as { userData: { regionId: string } }).userData
+            .regionId,
+        ),
+      );
       const clueBoxes = clueLocators.view(
         camera,
         rendererSize.x,
         rendererSize.y,
         g.getGlobeRadius(),
-        [...physical.labelBoxes(), ...panelBoxes, ...flagBoxes],
+        [...panelBoxes, ...flagBoxes],
         !travel.current.active && !flyover.current.active,
         panelBoxes,
       );
       placeLabels.view(camera, rendererSize.x, rendererSize.y, [
-        ...physical.labelBoxes(),
+        ...panelBoxes,
         ...clueBoxes,
       ]);
+      // Essential authored/result names win space before contextual physical labels.
+      physical.view(camera, rendererSize.x, rendererSize.y, [
+        ...panelBoxes,
+        ...clueBoxes,
+        ...placeLabels.labelBoxes(),
+      ]);
+      mapOverlays.view(camera, rendererSize.x, rendererSize.y, [
+        ...panelBoxes,
+        ...placeLabels.labelBoxes(),
+        ...physical.labelBoxes(),
+      ]);
+      for (const line of outlines.current.values())
+        if (line.userData.comparison && line.parent)
+          viewPathDashes(line, line, camera, rendererSize.x, rendererSize.y);
       if (
         (placeLabels.needsRefresh() ||
           physical.needsRefresh() ||
@@ -783,12 +823,16 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           globe.current.controls().minDistance =
             globe.current.getGlobeRadius() * 1.005;
           fidget.current.cancel();
-          const ratio = Math.min(1, size.width / size.frameHeight);
+          const viewport = readViewport() ?? size;
           flyover.current.start(
             globe.current,
             stops.map((stop) => ({
               ...stop,
-              altitude: (stop.altitude ?? 0.65) / ratio,
+              altitude: focusAltitude(
+                stop.altitude ?? 0.65,
+                viewport,
+                !!current.current.compact,
+              ),
             })),
             current.current.reduced,
             loop,
@@ -906,7 +950,18 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       [],
     );
     // Keep the custom-layer binding stable while its cached content/preferences change.
-    labelLayer.places = props.places;
+    labelLayer.places = useMemo(
+      () =>
+        props.reduced
+          ? props.places.map((place) => ({
+              ...place,
+              dropInMs: undefined,
+              fadeInMs: undefined,
+              placementPulse: false,
+            }))
+          : props.places,
+      [props.places, props.reduced],
+    );
     labelLayer.visible = props.placeLabels !== false;
     labelLayer.markers = props.placeMarkers !== false;
     labelLayer.contextual = !!props.placeContextual;
@@ -1040,8 +1095,9 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           return regionFades.transition(
             r.id,
             capColor(obj),
-            props.reduced ? 0 : 160,
-            props.regionTransitionKey,
+            props.reduced ? 0 : GLOBE_MOTION.stateFadeMs,
+            regionScope,
+            ["correct", "answer", "incorrect"].includes(props.states[r.id]),
           );
         const from = themedRegionStyle(
           props.theme ?? "natural",
@@ -1056,13 +1112,14 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           from,
           capColor(obj),
           props.reduced ? 0 : reveal.durationMs,
-          props.regionTransitionKey,
+          regionScope,
           props.reduced ? 0 : reveal.ids.indexOf(r.id) * (reveal.stepMs ?? 0),
+          true,
         );
       },
       [
         props.regionReveal,
-        props.regionTransitionKey,
+        regionScope,
         props.theme,
         props.palette,
         props.reduced,
@@ -1117,6 +1174,14 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         // short. Its surface is non-interactive, but its outline remains useful.
         const visible = "from" in obj || regionBorderVisible(r, p);
         if ("from" in obj) {
+          line.userData.comparison = route(obj).purpose === "comparison";
+          if (line.material.dashed !== line.userData.comparison) {
+            line.material.dashed = line.userData.comparison;
+            line.material.needsUpdate = true;
+          }
+          line.material.dashSize = 4;
+          line.material.gapSize = 5;
+          if (line.userData.comparison) line.computeLineDistances();
           line.material.color.set(
             route(obj).accuracyBand
               ? pinBandColor(
@@ -1145,11 +1210,13 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           ).stroke,
         );
         line.material.color.set(color);
+        line.userData.regionId = r.id;
         borderFades.update(
           line,
           visible ? opacity : 0,
           p.reduced,
-          p.regionTransitionKey,
+          regionScene.scope(p.regionTransitionKey, p.regionPhase),
+          ["correct", "answer", "incorrect"].includes(p.states[r.id]),
         );
         const emphasis = outlineEmphasis(
           p.states[r.id],
@@ -1170,6 +1237,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         regionalSurfaces,
         mapOverlays,
         borderFades,
+        regionScene,
       ],
     );
     const makeOutline = useCallback(
@@ -1728,9 +1796,11 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           }
           arcAltitudeAutoScale={0.4}
           arcStroke={0.48}
-          arcDashLength={props.reduced ? 1 : 0.4}
-          arcDashGap={props.reduced ? 0 : 0.16}
-          arcDashAnimateTime={props.reduced ? 0 : 2100}
+          arcDashLength={(obj) =>
+            route(obj).purpose === "comparison" ? 0.4 : 1
+          }
+          arcDashGap={(obj) => (route(obj).purpose === "comparison" ? 0.16 : 0)}
+          arcDashAnimateTime={0}
           arcsTransitionDuration={props.reduced ? 0 : 700}
         />
         <div

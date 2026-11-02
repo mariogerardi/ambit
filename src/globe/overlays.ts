@@ -36,6 +36,8 @@ import type { MapOverlay } from "../geography/types";
 import type { ThemeId } from "../theme/themes";
 import { pinBandColor, playColors } from "../theme/playColors";
 import { EARTH_KM } from "../game/spatial";
+import { geographicPointVisible } from "./visibility";
+import type { LabelBox } from "./placeLabels";
 
 export interface OverlayLayer {
   id: string;
@@ -46,6 +48,38 @@ export interface OverlayLayer {
 }
 export const isOverlayLayer = (value: object): value is OverlayLayer =>
   "kind" in value && value.kind === "map-overlays";
+
+function overlayDashes(overlay: MapOverlay) {
+  return overlay.type === "path"
+    ? (overlay.dashed ??
+        (overlay.purpose === "comparison" || overlay.purpose === "example"))
+    : overlay.type === "circle" && !!overlay.example;
+}
+
+/** Circle meaning controls emphasis; its radius always remains geographic. */
+export function circleStyle(overlay: Extract<MapOverlay, { type: "circle" }>) {
+  const purpose =
+    overlay.purpose ??
+    (overlay.accuracyBand
+      ? "accuracy"
+      : overlay.visualState
+        ? "construction"
+        : "explanation");
+  return {
+    purpose,
+    width: overlay.active ? 3 : purpose === "construction" ? 2.2 : 1.6,
+    opacity:
+      purpose === "accuracy"
+        ? overlay.active
+          ? 1
+          : 0.48
+        : purpose === "search"
+          ? 0.65
+          : 0.8,
+    fillOpacity:
+      purpose === "construction" ? 0.1 : overlay.active ? 0.1 : 0.025,
+  };
+}
 
 const radians = Math.PI / 180;
 function surfacePoint(lng: number, lat: number, radius = 1.005) {
@@ -250,35 +284,41 @@ export function makeMapOverlay(
             ? playColors(palette)[overlay.visualState]
             : playColors(palette).guide,
       linewidth:
-        (overlay.type === "path" && overlay.visualState === "corridor") ||
-        (overlay.type === "circle" && overlay.active)
-          ? 3
-          : 1.8,
+        overlay.type === "circle"
+          ? circleStyle(overlay).width
+          : overlay.type === "path" && overlay.visualState === "corridor"
+            ? 3
+            : 1.8,
       transparent: true,
       depthWrite: false,
       depthTest: true,
       alphaToCoverage: true,
-      opacity: overlay.type === "path" ? (overlay.opacity ?? 1) : 1,
-      dashed: overlay.type === "path" && !!overlay.dashed,
+      opacity:
+        overlay.type === "path"
+          ? (overlay.opacity ?? 1)
+          : overlay.type === "circle"
+            ? circleStyle(overlay).opacity
+            : 1,
+      dashed: !!overlayDashes(overlay),
       dashSize:
         overlay.type === "path" && overlay.dashed === "dotted" ? 1.5 : 4,
       gapSize: overlay.type === "path" && overlay.dashed === "dotted" ? 4.5 : 5,
     }),
   );
   line.renderOrder = overlay.type === "path" && overlay.foreground ? 6 : 4;
-  if (overlay.type === "path" && overlay.dashed) line.computeLineDistances();
+  if (overlayDashes(overlay)) line.computeLineDistances();
   line.raycast = () => {};
   // A zero-opacity wide line can still stipple with alpha-to-coverage on some GPUs.
   line.visible = !(overlay.type === "path" && overlay.opacity === 0);
   group.add(line);
   if (overlay.type === "circle" && overlay.fadeInMs) {
-    group.userData.fadeStarted = performance.now();
+    group.userData.waiting = true;
     group.userData.fading = true;
     line.material.opacity = 0;
   }
   if (overlay.type === "path" && overlay.reveal) {
     line.geometry.instanceCount = 0;
-    group.userData.revealStarted = performance.now();
+    group.userData.waiting = true;
     group.userData.revealing = true;
   }
   if (overlay.type === "path") {
@@ -337,7 +377,7 @@ export function makeMapOverlay(
                 : playColors(palette).guide,
           ),
         },
-        bandOpacity: { value: overlay.active ? 0.13 : 0.045 },
+        bandOpacity: { value: circleStyle(overlay).fillOpacity },
       },
       vertexShader:
         "varying vec3 surface; void main() { surface = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
@@ -450,7 +490,7 @@ export class MapOverlays {
       this.objects.delete(id);
     }
     for (const overlay of layer.overlays) {
-      const effective =
+      let effective =
         layer.reduced &&
         overlay.type === "path" &&
         (overlay.reveal || overlay.flow)
@@ -461,6 +501,8 @@ export class MapOverlays {
               arrowhead: overlay.arrowhead || !!overlay.flow,
             }
           : overlay;
+      if (layer.reduced && effective.type === "circle" && effective.fadeInMs)
+        effective = { ...effective, fadeInMs: undefined };
       const group = this.get(effective, radius, layer.palette);
       if (group.parent !== this.group) this.group.add(group);
     }
@@ -469,20 +511,54 @@ export class MapOverlays {
   needsRefresh() {
     return [...this.objects.values()].some(
       ({ group }) =>
-        group.userData.revealing ||
-        group.userData.fading ||
+        (group.userData.waiting && !group.userData.visibilityChecked) ||
+        (!group.userData.waiting &&
+          (group.userData.revealing || group.userData.fading)) ||
         group.userData.flowing,
     );
   }
-  view(camera: PerspectiveCamera, width: number, height: number) {
+  view(
+    camera: PerspectiveCamera,
+    width: number,
+    height: number,
+    reserved: readonly LabelBox[] = [],
+  ) {
     for (const { group, overlay } of this.objects.values()) {
-      if (overlay.type === "path" && overlay.dashed)
+      if (group.userData.waiting) {
+        group.userData.visibilityChecked = true;
+        const anchor =
+          overlay.type === "circle"
+            ? overlay.center
+            : overlay.type === "path"
+              ? {
+                  lng: overlay.coordinates.at(-1)![0],
+                  lat: overlay.coordinates.at(-1)![1],
+                }
+              : undefined;
+        if (
+          anchor &&
+          geographicPointVisible(
+            anchor,
+            camera,
+            width,
+            height,
+            group.scale.x,
+            reserved,
+          )
+        ) {
+          group.userData.waiting = false;
+          group.userData.fadeStarted = group.userData.revealStarted =
+            performance.now();
+        }
+      }
+      if (overlayDashes(overlay))
         for (const child of group.children)
           if (child instanceof LineSegments2)
             viewPathDashes(child, group, camera, width, height);
       if (
         overlay.type === "circle" &&
         overlay.fadeInMs &&
+        !group.userData.waiting &&
         group.userData.fading
       ) {
         const t = Math.min(
@@ -491,12 +567,14 @@ export class MapOverlays {
         );
         for (const child of group.children)
           if (child instanceof LineSegments2)
-            child.material.opacity = t * t * (3 - 2 * t);
+            child.material.opacity =
+              circleStyle(overlay).opacity * t * t * (3 - 2 * t);
         group.userData.fading = t < 1;
       }
       if (
         overlay.type === "path" &&
         overlay.reveal &&
+        !group.userData.waiting &&
         group.userData.revealing
       ) {
         const elapsed =
@@ -541,7 +619,7 @@ export class MapOverlays {
       }
       for (const child of group.children)
         if (child instanceof Sprite)
-          viewPathLabel(child, group, camera, width, height);
+          viewPathLabel(child, group, camera, width, height, reserved);
         else if (child instanceof Mesh && child.name === "path-arrowhead")
           viewPathArrowhead(child, group, camera, width, height);
         else if (
@@ -657,6 +735,7 @@ export class MapOverlays {
                 : overlay.type === "path"
                   ? [
                       overlay.type,
+                      overlay.purpose,
                       overlay.coordinates,
                       overlay.reveal,
                       overlay.flow,
@@ -671,6 +750,8 @@ export class MapOverlays {
                   : overlay.type === "circle"
                     ? [
                         overlay.type,
+                        overlay.purpose,
+                        overlay.example,
                         overlay.center,
                         overlay.radiusKm,
                         overlay.shade,

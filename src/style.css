@@ -4,6 +4,8 @@
   --font-editorial: "Newsreader", Georgia, "Times New Roman", serif;
   --control-radius: 8px;
   --control-min-height: 44px;
+  --control-motion-duration: 150ms;
+  --control-hover-background: rgb(var(--ui-line-rgb) / 0.1);
   --section-nav-font-size: 13px;
   --action-min-height: 48px;
   --action-font-size: 13px;
@@ -51,9 +53,11 @@ button:disabled {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
 summary:focus-visible {
   outline: 2px solid var(--mint);
-  outline-offset: 4px;
+  outline-offset: 2px;
 }
 button {
   border: 0;
@@ -134,7 +138,7 @@ strong {
   transform-origin: center;
 }
 .is-pulsing > .clue-locator-pulse {
-  animation: clue-locator-pulse 1.6s ease-out 2 both;
+  animation: clue-locator-pulse 1.6s ease-out 1 both;
 }
 @keyframes clue-locator-pulse {
   from {

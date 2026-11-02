@@ -3,8 +3,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap;
   margin: 0 0 24px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);

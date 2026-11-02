@@ -447,6 +447,16 @@ historical truth, screen-space legibility or every form of answer leakage.
 
 ## Answer roles and presentation
 
+The agreed cross-mode [globe appearance standards](THEMES.md#shared-globe-standards)
+cover symbols, labels, overlays, motion and camera framing by role and mechanic.
+Shared renderer defaults implement the role hierarchy; the disclosure and grading
+responsibilities below continue to define valid scenes. Display metadata stays
+separate from canonical geometry: circles may declare `purpose` (`accuracy`,
+`construction`, `search`, `explanation`, `preview`) and `example`; paths may declare
+`purpose` (`route`, `comparison`, `construction`, `example`, `guide`). Comparisons
+and examples use dashed lines by default. Point `editing` and `assisted` flags
+control emphasis and a lock indicator without changing answer identity or grading.
+
 `answerPresentation.ts` resolves response identities, slot assignments, assistance
 provenance, and outcome states independently of their colors. A choice may declare
 `geographyIds` to link its stable grading ID to one or more region/place depictions.

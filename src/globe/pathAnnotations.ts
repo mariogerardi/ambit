@@ -10,13 +10,13 @@ import {
   SRGBColorSpace,
   Vector3,
 } from "three";
-import type { PerspectiveCamera, Group } from "three";
+import type { PerspectiveCamera, Group, Object3D } from "three";
 import type { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 
 /** Measure dash spacing in CSS pixels, matching UI trails regardless of globe zoom. */
 export function viewPathDashes(
   line: LineSegments2,
-  group: Group,
+  group: Object3D,
   camera: PerspectiveCamera,
   width: number,
   height: number,
@@ -254,6 +254,12 @@ export function viewPathLabel(
   camera: PerspectiveCamera,
   width: number,
   height: number,
+  reserved: readonly {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  }[] = [],
 ) {
   group.updateWorldMatrix(true, true);
   const anchor = label.getWorldPosition(new Vector3());
@@ -274,6 +280,19 @@ export function viewPathLabel(
     Math.abs(projected.x) < 0.98 &&
     Math.abs(projected.y) < 0.98 &&
     span > 35;
+  const x = ((projected.x + 1) * width) / 2,
+    y = ((1 - projected.y) * height) / 2;
+  const halfWidth = 7 * label.userData.aspect;
+  if (
+    reserved.some(
+      (box) =>
+        x + halfWidth > box.left &&
+        x - halfWidth < box.right &&
+        y + 16 > box.top &&
+        y - 16 < box.bottom,
+    )
+  )
+    label.visible = false;
   if (!label.visible) return;
   const next = project(
     label.position.clone().addScaledVector(label.userData.tangent, 0.01),

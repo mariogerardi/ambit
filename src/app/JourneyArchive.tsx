@@ -3,6 +3,7 @@ import type { DailyProgress } from "./dailyProgress";
 import type { JourneySummary } from "../game/journeyRegistry";
 import type { useJourneySchedule } from "../services/journeySchedule";
 import { journeyPoints } from "../game/points";
+import { DelayedStatus } from "./DelayedStatus";
 import {
   ARCHIVE_START_DATE,
   archiveDay,
@@ -135,96 +136,100 @@ export function JourneyArchive({
           </button>
         </p>
       )}
-      {!loaded && !schedule.error && (
-        <p role="status">Loading this month’s Journeys…</p>
-      )}
-      <table
-        className="archive-calendar"
-        aria-label={monthLabel}
-        aria-busy={!loaded && !schedule.error}
-      >
-        <thead>
-          <tr>
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-              <th key={d} scope="col">
-                {d}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: cells.length / 7 }, (_, row) => (
-            <tr key={row}>
-              {cells.slice(row * 7, row * 7 + 7).map((date, column) => {
-                const entry =
-                  date && loaded
-                    ? archiveDay(
-                        date,
-                        today,
-                        progress,
-                        catalog,
-                        schedule.schedule?.records ?? {},
-                      )
-                    : undefined;
-                const points =
-                  entry?.attempt && entry.status === "completed"
-                    ? journeyPoints(entry.attempt.game)
-                    : undefined;
-                const status =
-                  entry?.status === "completed"
-                    ? `Completed · ${points}/15 points`
-                    : entry?.status === "in-progress"
-                      ? "In progress"
-                      : entry?.status === "unplayed"
-                        ? "Not played"
-                        : date && date > today
-                          ? "Not yet released"
-                          : "Unavailable";
-                return (
-                  <td key={column}>
-                    {date && (
-                      <button
-                        disabled={!loaded || !isArchiveDate(date, today)}
-                        aria-pressed={selected === date}
-                        aria-label={`${archiveDateLabel(date)}${entry?.journey ? `: ${entry.journey.title}` : ""} · ${status}`}
-                        onClick={() => setSelected(date)}
-                        data-status={entry?.status}
-                      >
-                        <span className="archive-day-number">
-                          {points !== undefined && (
-                            <svg
-                              className="archive-completed-icon"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="m5 12 4 4L19 6" />
-                            </svg>
-                          )}
-                          {Number(date.slice(-2))}
-                        </span>
-                        <small>
-                          {points !== undefined
-                            ? `${points}/15`
-                            : entry?.status === "in-progress"
-                              ? "Resume"
-                              : entry?.status === "unplayed"
-                                ? "Play"
-                                : "—"}
-                        </small>
-                      </button>
-                    )}
-                  </td>
-                );
-              })}
+      <div className="archive-calendar-frame">
+        {!loaded && !schedule.error && (
+          <div className="archive-loading">
+            <DelayedStatus>Loading this month’s Journeys…</DelayedStatus>
+          </div>
+        )}
+        <table
+          className="archive-calendar"
+          aria-label={monthLabel}
+          aria-busy={!loaded && !schedule.error}
+        >
+          <thead>
+            <tr>
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                <th key={d} scope="col">
+                  {d}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {Array.from({ length: cells.length / 7 }, (_, row) => (
+              <tr key={row}>
+                {cells.slice(row * 7, row * 7 + 7).map((date, column) => {
+                  const entry =
+                    date && loaded
+                      ? archiveDay(
+                          date,
+                          today,
+                          progress,
+                          catalog,
+                          schedule.schedule?.records ?? {},
+                        )
+                      : undefined;
+                  const points =
+                    entry?.attempt && entry.status === "completed"
+                      ? journeyPoints(entry.attempt.game)
+                      : undefined;
+                  const status =
+                    entry?.status === "completed"
+                      ? `Completed · ${points}/15 points`
+                      : entry?.status === "in-progress"
+                        ? "In progress"
+                        : entry?.status === "unplayed"
+                          ? "Not played"
+                          : date && date > today
+                            ? "Not yet released"
+                            : "Unavailable";
+                  return (
+                    <td key={column}>
+                      {date && (
+                        <button
+                          disabled={!loaded || !isArchiveDate(date, today)}
+                          aria-pressed={selected === date}
+                          aria-label={`${archiveDateLabel(date)}${entry?.journey ? `: ${entry.journey.title}` : ""} · ${status}`}
+                          onClick={() => setSelected(date)}
+                          data-status={entry?.status}
+                        >
+                          <span className="archive-day-number">
+                            {points !== undefined && (
+                              <svg
+                                className="archive-completed-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                              >
+                                <path d="m5 12 4 4L19 6" />
+                              </svg>
+                            )}
+                            {Number(date.slice(-2))}
+                          </span>
+                          <small>
+                            {points !== undefined
+                              ? `${points}/15`
+                              : entry?.status === "in-progress"
+                                ? "Resume"
+                                : entry?.status === "unplayed"
+                                  ? "Play"
+                                  : "—"}
+                          </small>
+                        </button>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {loaded && selectedDay && (
         <article className="archive-selected-day" aria-live="polite">
           <span className="overline">{archiveDateLabel(selected)}</span>

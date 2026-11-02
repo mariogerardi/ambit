@@ -1,6 +1,46 @@
 import type { Focus } from "../geography/types";
 import { normalWorldView } from "./defaultViews";
-import { geoInterpolate } from "d3-geo";
+import { geoInterpolate, geoDistance } from "d3-geo";
+
+/** Fit comparison evidence together; ordinary authored framing survives when it fits. */
+export function comparisonFocus(
+  points: readonly Pick<Focus, "lat" | "lng">[],
+  preferred?: Focus,
+): Focus {
+  const vectors = points.map((p) => {
+    const lat = (p.lat * Math.PI) / 180,
+      lng = (p.lng * Math.PI) / 180;
+    return [
+      Math.cos(lat) * Math.cos(lng),
+      Math.cos(lat) * Math.sin(lng),
+      Math.sin(lat),
+    ];
+  });
+  const sum = vectors.reduce((a, p) => a.map((n, i) => n + p[i]), [0, 0, 0]);
+  const center = {
+    lat: (Math.atan2(sum[2], Math.hypot(sum[0], sum[1])) * 180) / Math.PI,
+    lng: (Math.atan2(sum[1], sum[0]) * 180) / Math.PI,
+  };
+  const extent = (focus: Pick<Focus, "lat" | "lng">) =>
+    Math.max(
+      ...points.map((p) => geoDistance([focus.lng, focus.lat], [p.lng, p.lat])),
+    );
+  const altitudeFor = (radius: number) =>
+    Math.min(
+      5.5,
+      Math.max(
+        0.12,
+        1 / Math.cos(Math.min(Math.PI * 0.49, radius + Math.PI / 36)) - 1,
+        Math.cos(radius) + Math.sin(radius) / Math.tan(Math.PI / 12) - 1,
+      ),
+    );
+  if (
+    preferred &&
+    altitudeFor(extent(preferred)) <= (preferred.altitude ?? 0.8)
+  )
+    return preferred;
+  return { ...center, altitude: altitudeFor(extent(center)) };
+}
 import {
   focusDuration,
   motionDistance,

@@ -115,6 +115,11 @@ Use a few shared styles by purpose: tabs, menu rows, cards and action buttons.
 Differences must be named exceptions rather than independent page-specific CSS.
 Theme palettes, font families and gameplay color meanings remain unchanged.
 
+Implementation progress: section tabs, dropdown/sidebar rows, header triggers
+and Admin's Upcoming/Month switch now share their agreed interaction treatments,
+and the common focus-ring baseline is aligned. The remaining typography, action,
+form, tooltip, card and Journey-feedback migrations are still pending.
+
 #### Navigation and interaction states
 
 `src/app/styles/shared-controls.css` owns the existing `section-navigation`
@@ -240,6 +245,113 @@ stacked card shape), editorial Journey prompts and content compositions, dense
 Admin subheadings, hint buttons, purposeful circles/pills and the app's initial
 loading presentation. No additional page-specific exceptions were requested.
 Keep the already established navigation density variants above.
+
+### Shared globe standards
+
+The following globe standards were agreed on November 2, 2026. Like the
+interface standards above, these are a target, not a claim that every rendered
+state already conforms. Shared geographic roles apply across Journeys, Study
+and live minigames, independently of answer input. The engine's
+[answer-role and disclosure contracts](JOURNEY_ENGINE.md#answer-roles-and-presentation)
+remain authoritative for what may be shown. Styling must not change eligibility,
+grading, canonical geometry or withheld identities.
+
+#### Geographic layers and symbols
+
+- During questions, unrelated land remains recognizable but clearly quieter than
+  clues, candidates and answers. Home and Explore retain ordinary political-map
+  colors, using the shared symbols, labels and selection styles where relevant.
+- Country borders have a shared thin baseline. Use restrained extra weight and
+  role color for references, hovered candidates, selections and results. Preserve
+  existing rules that keep noninteractive references and committed colors steady.
+- References, submitted pins, revealed point targets and numbered locations use a
+  small shared family of role-specific symbols and sizes. Scale for legibility
+  rather than giving each Journey a separate symbol language.
+- Circles have shared styles by meaning: accuracy bands, editable answers, search
+  areas and explanatory geography. Share basic stroke/label conventions without
+  implying that all circles represent the same thing. Decorative preview rings
+  are explicitly separate from grading distances.
+- Meaningful routes, player traces and response-to-target comparisons differ by
+  a shared combination of pattern and color, such as solid routes versus dashed
+  comparisons. Do not invent routes or center-to-center links to decorate an
+  answer. Existing geographic and comparison paths retain their real meaning.
+- Thematic layers such as population and terrain can use distinct data palettes
+  with clear legends and shared contrast/opacity conventions. Player responses
+  and results remain distinguishable above those layers; data colors do not
+  acquire grading meanings merely because they resemble an outcome color.
+
+#### Labels, motion and camera
+
+- Where disclosure permits labels, use a shared hierarchy: clear answer labels,
+  quieter reference labels and smaller distance/measurement labels. Keep
+  typography consistent for each role. Essential task/result labels take priority
+  when space is tight; reduce or hide lower-priority context first and adjust
+  framing when necessary. Anonymous geography must remain anonymous until its
+  disclosure contract permits naming.
+- Ordinary globe fades use shared short defaults around 150–200ms. Pin placement
+  animations use shared defaults around 300–400ms. Camera travel and deliberately
+  sequenced teaching reveals are separate motion roles, not reasons to stretch
+  ordinary fades independently in each Journey.
+- Normally pulse once after an attention event, then leave a stable marker.
+  Repeated pulses need a specific guidance purpose. Respect reduced motion and
+  retain equivalent final information and existing manual review controls.
+- Frame the geography and markers that must be visible, adapting to screen size.
+  Preserve authored framing needed for the question. After manual rotation/zoom,
+  take over at a new question, explicit hint/assistance requiring reframing, or a
+  reveal that needs it; otherwise respect the player's view.
+- Ensure the answer is on screen before its main reveal animation. Gentle camera
+  movement may continue; finishing all movement before showing any information
+  is not required. Use the existing answer/guess views when one view cannot show
+  a distant pin comparison legibly.
+
+#### Mechanic-specific presentation
+
+| Mechanic family                                                | Shared presentation target                                                                                                                                                                                                                                                             |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single/multiple country or city picks                          | Preserve candidate/reference roles and disclosure. For unordered multiple picks, use selected color plus a discreet check/selection symbol where legible; numbers imply order or a named slot.                                                                                         |
+| Merged anonymous territory picks                               | Reuse area-selection styles while preserving the mechanic's anonymous merged geography before submission and canonical reveal afterward.                                                                                                                                               |
+| Distance pins                                                  | Retain the actual response and target. Draw real accuracy bands lightly, emphasize the achieved band and label its meaning. Decorative preview radii never redefine grading.                                                                                                           |
+| Territory-inside pins                                          | Make the territory result primary and keep the submitted pin. Do not invent a correct target coordinate at the country's center.                                                                                                                                                       |
+| Brush, circle, trace, polygon and cut constructions            | Keep the submitted geometry primary. Use clear outlines and translucent fills with shared defaults by construction role; painting must remain visibly painted. Distinguish authored examples by pattern/color and provide a toggle when simultaneous display would obscure comparison. |
+| Independently labeled pins                                     | Give the active pin a shared editing emphasis and clear slot label. Keep placed pins visible but quieter and preserve their labels. Grade and retain each slot independently.                                                                                                          |
+| Compass bearings                                               | Preserve destination concealment during play. Feedback shows submitted/target directions with distinct shared line treatments and a compact angular-error annotation.                                                                                                                  |
+| Geographic card ordering/matching and ordered typed answers    | Connect revealed geography to the list with shared number badges or slot labels where legible, preserve sequence and reduce competing context labels. Abstract cards must not manufacture geographic answer roles.                                                                     |
+| Text, typed-region lists, recall, choices, numbers and sliders | Use the same geographic role rules as other controls. A non-map input does not by itself create map selections, disclose anonymous names or grade illustrative geography. Apply point/area styles according to the actual answer identity.                                             |
+| Visibly assisted/locked responses                              | Retain the appropriate selected/answer role and add a small lock or assistance indicator where disclosure allows it. Do not imply grading before submission or introduce a separate assistance palette.                                                                                |
+| Completion overview and stop review                            | Use a calm overview, emphasizing the relevant geography and result when reviewing a stop. Retain required discoveries and keep mistakes identifiable throughout. Deliberately authored completion maps remain documented exceptions.                                                   |
+
+This covers every registered control family, including supported controls without
+current catalog use. `land-path` remains internal/recipe-only; its presence in
+an inventory is not approval to introduce it into a published Journey. Compare
+applicable initial-play, pending-response, hint, assistance, correct-reveal,
+missed-reveal, completion-overview and completion-stop states. Shared layers also
+need screen-size and theme checks; neither source inventory nor mocked scene
+checks establish rendered legibility or actual animation timing.
+
+#### Scope and exceptions
+
+Live minigames and Study reuse these role styles. Flyover previews reuse the real
+symbols, role colors, borders and labels, while allowing different preview pacing
+and explicitly decorative elements. Preserve production behavior when building
+review tools rather than creating a separate renderer for the examples.
+
+Document departures from shared roles, symbol styles or motion defaults.
+Coordinates, real geographic sizes and ordinary framing needed to show a subject
+are content choices, not style exceptions. Required disclosure exceptions still
+follow the engine's existing validation. These appearance standards do not add
+new supported keys to `visualExceptions` by themselves.
+
+Shared implementation now supplies role-based marker sizes and label priority,
+circle and line treatments, one-shot attention pulses, and visibility-gated
+reveal motion. Normal feedback retains the question's fade scope; starting a new
+question or rewinding to play resets it. Compass feedback includes angular error
+and comparison framing; distance-pin feedback fits the response and target where
+one view can show both. Submitted constructions remain primary in stop review.
+Authored symbol overrides and real geographic sizes remain supported.
+
+Focused scene/renderer tests cover these contracts. Native Chrome checks cover
+representative compass, pin, ordering and construction scenes, including a narrow
+viewport. This is not visual certification of every question, theme or device.
 
 Country fill and border fades belong to the Three.js presentation layer
 (`regionFades.ts` and `borderFades.ts`), independently of navigation CSS.

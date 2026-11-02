@@ -31,7 +31,7 @@ export function AccountTabs({
   if (admin && !guest) sections.push("admin");
   return (
     <nav
-      className="account-tabs section-navigation section-navigation--sidebar"
+      className="account-tabs section-navigation section-navigation--sidebar navigation-rows"
       aria-label="Account sections"
     >
       {sections.map((section) => (

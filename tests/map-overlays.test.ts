@@ -494,6 +494,10 @@ it("draws a revealed boundary progressively and stops requesting stationary fram
   const camera = new PerspectiveCamera(50, 1, 1, 1000);
   expect(line.geometry.instanceCount).toBe(0);
   expect(overlays.needsRefresh()).toBe(true);
+  camera.position.set(0, 0, 300);
+  camera.updateMatrixWorld();
+  overlays.view(camera, 800, 800);
+  expect(overlays.needsRefresh()).toBe(true);
   clock.mockReturnValue(700);
   overlays.view(camera, 800, 800);
   expect(line.geometry.instanceCount).toBe(Math.ceil(total / 2));
@@ -561,6 +565,8 @@ it("fades a newly introduced accuracy ring without restarting existing rings", (
   const circle: MapOverlay = {
     id: "bullseye",
     type: "circle",
+    purpose: "accuracy",
+    active: true,
     center: { lat: 0, lng: 0 },
     radiusKm: 1,
     fadeInMs: 240,
@@ -572,11 +578,16 @@ it("fades a newly introduced accuracy ring without restarting existing rings", (
   const camera = new PerspectiveCamera(50, 1, 1, 1000);
   expect(line.material.opacity).toBe(0);
   expect(overlays.needsRefresh()).toBe(true);
+  camera.position.set(0, 0, 300);
+  camera.updateMatrixWorld();
+  overlays.view(camera, 800, 800);
+  expect(overlays.needsRefresh()).toBe(true);
   clock.mockReturnValue(120);
   overlays.view(camera, 800, 800);
   expect(line.material.opacity).toBeCloseTo(0.5);
   overlays.get({ ...circle, id: "close", radiusKm: 1040 }, 100);
   expect(overlays.get({ ...circle }, 100)).toBe(group);
+  overlays.view(camera, 800, 800);
   expect(line.material.opacity).toBeCloseTo(0.5);
   clock.mockReturnValue(400);
   overlays.view(camera, 800, 800);

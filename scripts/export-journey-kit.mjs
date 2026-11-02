@@ -19,6 +19,7 @@ const DOCS = [
   "docs/JOURNEY_CRAFTING.md",
   "docs/QUESTION_CATALOG.md",
   "docs/JOURNEY_ENGINE.md",
+  "docs/THEMES.md",
   "docs/ARCHITECTURE.md",
   "docs/CATALOG_POLICY.md",
   "docs/journey-authoring/PROJECT_INSTRUCTIONS.md",

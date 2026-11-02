@@ -540,7 +540,7 @@ export function AdminPanel({
               <div className="journey-scheduler">
                 <div className="admin-schedule-browser">
                   <div
-                    className="admin-view-switch"
+                    className="admin-view-switch view-switch"
                     role="group"
                     aria-label="Schedule view"
                   >

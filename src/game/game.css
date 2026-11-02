@@ -782,13 +782,6 @@
     animation: none;
   }
 }
-.experience button:focus-visible,
-.experience a:focus-visible,
-.experience input:focus-visible,
-.experience summary:focus-visible {
-  outline: 2px solid var(--ui-accent, #e6d093);
-  outline-offset: 4px;
-}
 @media (min-width: 1600px) {
   .experience-header {
     padding: 36px 64px;

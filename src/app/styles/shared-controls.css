@@ -53,12 +53,13 @@
   color: var(--ui-accent);
   border-bottom-color: var(--ui-accent);
 }
-.section-navigation > :is(a, button):hover {
+.section-navigation
+  > :is(a, button):not(
+    :disabled,
+    [aria-current="page"],
+    [aria-selected="true"]
+  ):hover {
   color: var(--ui-text);
-}
-.section-navigation > :is(a, button):focus-visible {
-  outline: 2px solid var(--ui-focus);
-  outline-offset: 2px;
 }
 .section-navigation .action-icon {
   width: 18px;
@@ -80,11 +81,103 @@
   border-radius: var(--control-radius);
   text-align: left;
 }
-.section-navigation--sidebar
-  > :is(a, button):is([aria-current="page"], :hover) {
+
+/* Sidebar and dropdown rows share states; their parent owns layout and density. */
+.experience .navigation-rows :is(a, button) {
+  border: 1px solid transparent;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--ui-muted);
+  box-shadow: none;
+}
+.experience .navigation-rows .action-icon {
+  color: inherit;
+}
+.experience
+  .navigation-rows
+  :is(a, button):not(:disabled, [aria-current="page"]):hover {
+  background: var(--control-hover-background);
   color: var(--ui-text);
-  border-color: rgb(var(--ui-line-rgb) / 0.2);
-  background: rgb(var(--ui-line-rgb) / 0.1);
+}
+.experience .navigation-rows :is(a, button)[aria-current="page"] {
+  background: var(--control-hover-background);
+  color: var(--ui-accent);
+  box-shadow: inset 2px 0 var(--ui-accent);
+}
+
+.experience-header .menu-trigger {
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  background: transparent;
+  color: var(--ui-muted);
+}
+.experience-header
+  .menu-trigger:not(
+    :disabled,
+    [aria-expanded="true"],
+    [aria-current="page"]
+  ):hover {
+  background: var(--control-hover-background);
+  color: var(--ui-text);
+}
+.experience-header
+  .menu-trigger:is([aria-expanded="true"], [aria-current="page"]) {
+  border-color: var(--ui-accent);
+  background: var(--control-hover-background);
+  color: var(--ui-accent);
+}
+
+.view-switch {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--control-radius);
+  background: rgb(var(--ui-line-rgb) / 0.06);
+}
+.experience .view-switch > button {
+  min-height: var(--control-min-height);
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--ui-muted);
+  font: 14px var(--font-ui);
+}
+.experience .view-switch > button:not(:disabled, [aria-pressed="true"]):hover {
+  background: var(--control-hover-background);
+  color: var(--ui-text);
+}
+.experience .view-switch > button[aria-pressed="true"] {
+  background: rgb(var(--ui-raised-rgb));
+  color: var(--ui-accent);
+}
+
+.section-navigation > :is(a, button),
+.navigation-rows :is(a, button),
+.menu-trigger,
+.view-switch > button {
+  transition:
+    color var(--control-motion-duration) ease,
+    background-color var(--control-motion-duration) ease,
+    border-color var(--control-motion-duration) ease;
+}
+.experience .section-navigation > button:disabled,
+.experience .navigation-rows button:disabled,
+.experience-header .menu-trigger:disabled,
+.experience .view-switch > button:disabled {
+  opacity: 1;
+  color: var(--ui-muted);
+  border-color: rgb(var(--ui-line-rgb) / 0.1);
+  background: rgb(var(--ui-line-rgb) / 0.04);
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-navigation > :is(a, button),
+  .navigation-rows :is(a, button),
+  .menu-trigger,
+  .view-switch > button {
+    transition: none;
+  }
 }
 @media (max-width: 600px) {
   .section-navigation--roomy,
@@ -98,4 +191,9 @@
     padding: 10px;
     gap: 6px;
   }
+}
+.panel-loading {
+  min-height: min(320px, 50dvh);
+  display: grid;
+  place-items: center;
 }
