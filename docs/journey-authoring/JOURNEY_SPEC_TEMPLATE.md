@@ -10,6 +10,9 @@ implementation guide. The implementing agent resolves routine IDs, types, styles
 files and shared UI conventions from the current repository. Leave irrelevant
 fields blank; an approved spec need not fill every template cell. Use
 `IMPLEMENTING_A_SPEC.md` for the coding handoff.
+AI authors the copy. Inherit `JOURNEY_DEFAULTS.md`; document exceptions, not a
+repeated inventory of standard behavior. The completed handoff goes to the user,
+Ambit's sole human maintainer.
 
 **Decision status:** Approved player-facing tasks, clues, assistance, reveals,
 scoring exceptions and explicit exclusions are **locked**. Distinguish **verified**

@@ -16,6 +16,7 @@ import {
   reviewState,
 } from "../src/app/journeyReview";
 import { journeyPoints } from "../src/game/points";
+import { compileQuestionScenes } from "../src/game/scenes";
 import type { RegionFeature } from "../src/geography/types";
 const regions = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -24,6 +25,53 @@ const recipes = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES];
 const capabilities = authoringCapabilities(JOURNEYS, recipes, regions);
 
 describe("live authoring evidence", () => {
+  it("inherits the network return policy while preserving explicit endpoint choices", () => {
+    const recipe = recipes.find((q) => q.id === "recipe:multilingual-network")!;
+    expect(recipe.scenes?.reveal?.returnToSelection).toBeUndefined();
+    expect(recipe.feedbackReturnToSelection).toBe(true);
+    const inherited = { ...recipe, feedbackReturnToSelection: undefined };
+    for (const [endpoint, expected] of [
+      [{ returnToSelection: false }, false],
+      [{ orbit: true }, undefined],
+    ] as const) {
+      const question = compileQuestionScenes({
+        ...inherited,
+        scenes: {
+          ...recipe.scenes,
+          reveal: { ...recipe.scenes?.reveal, ...endpoint },
+        },
+      });
+      expect(question.feedbackReturnToSelection).toBe(expected);
+      expect(question.rule).toEqual(recipe.rule);
+    }
+  });
+  it("distinguishes experience policies and actual Journey completion within the same mode and rule", () => {
+    const recipe = recipes.find((q) => q.id === "recipe:multilingual-network")!;
+    const sandbox = recipeJourney(recipe);
+    const [entry] = authoringCapabilities(
+      [
+        {
+          ...sandbox,
+          id: "different-endpoints",
+          rounds: [{ ...recipe, feedbackReturnToSelection: false }],
+          completion: { ...sandbox.completion!, orbit: true },
+        },
+      ],
+      [recipe],
+      regions,
+    );
+    expect(entry.experience.answer).toContain("accepted alternatives");
+    expect(entry.experience.disclosure).toContain("hover names false");
+    expect(entry.experience.playCamera).toContain("shared random continental");
+    expect(entry.experience.revealCamera).toContain("actual selection");
+    expect(entry.examples[0].policyDifferences).toEqual([
+      "revealCamera",
+      "completion",
+    ]);
+    expect(entry.examples[0].experience.completion).toContain(
+      "then world rotation",
+    );
+  });
   it("covers the actual registry with auditable recipes and keeps internal modes distinct", () => {
     expect(new Set(recipes.map((q) => q.id)).size).toBe(recipes.length);
     for (const [mode, mechanic] of Object.entries(MECHANICS)) {

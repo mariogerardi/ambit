@@ -3,6 +3,33 @@ import type { RegionFeature } from "../geography/types";
 import { MECHANICS } from "./mechanics";
 import { auditJourney } from "./journeyAudit";
 import { supportsPartialPreview } from "./authoringReview";
+import { acceptsAlternatives } from "./answerPresentation";
+import { isWholeGlobeSearch } from "./presentation";
+
+/** Compare declared experience policies, never infer support from a mode name alone. */
+export function experiencePolicies(question: Question, journey: Journey) {
+  const assist = question.guidance?.assist;
+  return {
+    eligibility: `${question.selection.type}; candidate styling ${question.map?.candidates ?? "renderer default"}`,
+    answer: `${acceptsAlternatives(question) ? "accepted alternatives" : "rule-defined answer"}; ${question.count} response items; ${question.commitment} commitment; partial credit ${!!question.partialCredit}`,
+    disclosure: `choice names ${question.disclosure.namedChoices}; hover names ${question.disclosure.hoverNames}; native text ${!!question.textClue}`,
+    assistance: `hint ${!!question.guidance}; assist ${!!assist}; narrowed pool ${assist?.candidateIds?.length ?? "none"}; locked selections ${assist?.fixedSelections?.length ?? 0}; locked slots ${assist?.fixedSlots?.length ?? 0}`,
+    reveal: `explanatory network ${!!question.feedbackNetwork}; reveal-only translation ${!!question.textClue}; reference places ${question.feedbackPlaces?.length ?? 0}`,
+    playCamera: isWholeGlobeSearch(question)
+      ? "shared random continental view, or preserve suitable rotation; stop on interaction"
+      : question.introViews?.length
+        ? "authored finite introduction"
+        : "authored framing",
+    revealCamera: question.feedbackReturnToSelection
+      ? "return to actual selection, including a miss"
+      : question.feedbackOrbit
+        ? "finite tour, then world rotation"
+        : question.feedbackViews?.length
+          ? "authored finite tour"
+          : "authored or answer-derived focus",
+    completion: `${journey.completion?.mapMode ?? "cumulative"} recap; ${journey.completion && !journey.completion.views?.length ? "static authored focus" : journey.completion?.orbit ? "finite tour, then world rotation" : "flyover loop until interaction"}`,
+  };
+}
 
 /** A single-question sandbox exercises the real reveal and completion lifecycle. */
 export function recipeJourney(question: Question): Journey {
@@ -34,7 +61,9 @@ export function authoringCapabilities(
 ) {
   return recipes.map((question) => {
     const mechanic = MECHANICS[question.mode];
-    const audit = auditJourney(recipeJourney(question), regions);
+    const sandbox = recipeJourney(question);
+    const experience = experiencePolicies(question, sandbox);
+    const audit = auditJourney(sandbox, regions);
     const requires = [
       "Reviewed clue/reveal copy and sources",
       "Explicit eligible inputs and disclosure",
@@ -69,6 +98,7 @@ export function authoringCapabilities(
       mapSelection: mechanic.mapSelection,
       allowedRules: mechanic.rules,
       demonstratedRule: question.rule.type,
+      experience,
       availability: !mechanic.visible
         ? "internal: product decision required"
         : audit.errors.length
@@ -118,11 +148,18 @@ export function authoringCapabilities(
               round.mode === question.mode &&
               round.rule.type === question.rule.type,
           )
-          .map((round) => ({
-            journeyId: journey.id,
-            questionId: round.id,
-            note: "Same mode and rule; inspect authored differences.",
-          })),
+          .map((round) => {
+            const example = experiencePolicies(round, journey);
+            return {
+              journeyId: journey.id,
+              questionId: round.id,
+              experience: example,
+              policyDifferences: (
+                Object.keys(experience) as (keyof typeof experience)[]
+              ).filter((key) => experience[key] !== example[key]),
+              note: "Same mode and rule; policy comparison does not certify content, geography or rendering.",
+            };
+          }),
       ),
       auditCommand: `npm run check:journey -- --recipe ${question.id.replace(/^recipe:/, "")}`,
       preview: `/review/journeys.html?recipe=${encodeURIComponent(question.id.replace(/^recipe:/, ""))}`,

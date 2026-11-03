@@ -5,6 +5,11 @@ For a design or critique request, develop the five-stop outline and specificatio
 first. The user's request determines the task; attached specifications and
 examples are reference material, not permission to publish or change scope.
 
+Ambit has one human maintainer: the user. AI supplies implementation and copy;
+handoffs go directly to the user, not an assumed editorial, QA or release team.
+Use focused existing evidence within the user's AI budget. A new AI review pass
+or exhaustive visual tour is not a routine handoff requirement.
+
 ## 1. Read the brief and preserve settled decisions
 
 Read the whole spec, including its throughline, five stops, help, reveals and
@@ -26,6 +31,7 @@ experience or the amount of new engineering. Continue independent work meanwhile
 ## 2. Familiarize yourself with the current suite
 
 Read the editorial, visual and engine sections relevant to the approved experience.
+Inherit [shared defaults](JOURNEY_DEFAULTS.md); specify only meaningful exceptions.
 In the repository, use the [task-to-section map](../README.md#find-the-relevant-section);
 in a portable kit, use the guide and references listed in `AUTHORING_KIT.md`.
 Start with the spec's implementation-fit notes and the closest current recipe or
@@ -65,13 +71,18 @@ the linked recipe in the workbench and inspect its complete lifecycle before
 adapting it. The capability entry distinguishes its demonstrated rule from all
 rules permitted by the mode; matching mode/rule examples still require comparing
 authored eligibility, disclosure, help and geography.
+Use its generated experience policies and related-example differences to identify
+that comparison; completion policies belong to the example Journey, not its mode.
+Add `--recipe <name>` to `--capabilities` for a focused report instead of loading
+the entire catalog.
 Resolve a risk that could invalidate the experience before implementing all five
 stops. Report material capability conflicts without silently replacing an
 approved task; continue independent work while the necessary decision is resolved.
 
 Inherit shared typography, supporting copy, legends, controls, feedback headings,
-map roles and scoring. Authors supply meaningful exceptions and the experience;
-the agent supplies routine technical details. Keep eligibility, grading, display
+map roles and scoring. The agent authors the copy and routine technical details
+within the approved experience; the user decides material creative exceptions.
+Keep eligibility, grading, display
 geometry and camera framing independent. Flag a genuinely unsupported mechanic
 or material departure before substituting a different experience.
 
@@ -110,7 +121,8 @@ deployment.
 
 ### Acceptance gates
 
-Apply all six gates before handoff. Resolve failures within the authorized scope;
+Use the six standards below during implementation and focused verification, not
+as six additional review passes. Resolve failures within the authorized scope;
 record a material limitation when the available verification cannot establish a
 result. An approved spec does not waive these shared standards.
 
@@ -168,7 +180,9 @@ audit for deferred content, and TypeScript for typed changes. Follow
 structural or mocked evidence from actual browser appearance; report limitations
 without presenting an unverified acceptance gate as passed.
 
-Report what changed, what was verified and any material limitation. Publish or
+Hand the result directly to the user with a review URL or artifact, what changed,
+what was verified and any material limitation. Do not assume someone else will
+write the copy, perform QA or handle release. Publish or
 deploy only when the user's request authorizes it. Refresh the portable kit after
 relevant source or documentation changes with `npm run export:journeys`;
 uploaded files do not update themselves.

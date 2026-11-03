@@ -141,6 +141,21 @@ test(
       assert.ok(pin.evidence.stages.includes("reveal:partial"));
       assert.deepEqual(pin.evidence.errors, []);
       assert.ok(pin.preview.includes("recipe=pin"));
+      assert.ok(pin.experience.playCamera);
+      const network = capabilities.find(
+        (item) => item.id === "recipe:multilingual-network",
+      );
+      assert.match(network.experience.revealCamera, /actual selection/);
+      assert.ok(
+        (
+          await readFile(path.join(directory, "AUTHORING_KIT.md"), "utf8")
+        ).includes("# Shared Journey defaults"),
+      );
+      assert.ok(
+        (
+          await readFile(path.join(directory, "JOURNEY_DEFAULTS.md"), "utf8")
+        ).includes("Camera rules by stage"),
+      );
       assert.ok(
         (
           await readFile(path.join(directory, "CAPABILITIES.md"), "utf8")

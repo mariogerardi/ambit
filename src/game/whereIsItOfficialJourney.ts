@@ -79,7 +79,6 @@ const tour = (
   reveal: {
     focus: overview,
     views,
-    returnToSelection: true,
     contextIds: [],
     network: {
       regionIds: OFFICIAL_LANGUAGE_NETWORKS[language],

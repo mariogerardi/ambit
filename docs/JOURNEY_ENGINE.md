@@ -275,6 +275,10 @@ existing camera path. Input cancels the handoff; reduced motion stays static.
 the finite tour, including after a miss. It also supplies the reduced-motion and
 recenter destination. These two reveal endpoint policies are mutually exclusive. Existing
 tours retain their defaults when these options are absent.
+Grouped single-country scenes with an explanatory network inherit
+`returnToSelection: true` unless explicitly disabled or overview rotation is
+requested. See [shared defaults](journey-authoring/JOURNEY_DEFAULTS.md) for the
+stage-by-stage camera policy and other inherited conventions.
 Neutral full-world searches (`members` or `world`) without geographic context,
 markers, overlays or authored intro views start at a random continental overview
 and rotate until interaction. A suitable world view already rotating is preserved.

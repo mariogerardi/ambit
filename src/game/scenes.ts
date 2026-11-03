@@ -94,6 +94,14 @@ export function compileQuestionScenes(
   assign("feedbackOrbit", reveal?.orbit);
   assign("feedbackReturnToSelection", reveal?.returnToSelection);
   assign("feedbackNetwork", reveal?.network);
+  // A single-country network tour returns to the player's choice unless overridden.
+  if (
+    compiled.mode === "map-single" &&
+    compiled.feedbackNetwork &&
+    compiled.feedbackReturnToSelection === undefined &&
+    !compiled.feedbackOrbit
+  )
+    compiled.feedbackReturnToSelection = true;
   assign("feedbackHintIds", reveal?.contextIds);
   assign("feedbackContextIds", reveal?.answerIds);
   assign("feedbackPlaces", reveal?.places);

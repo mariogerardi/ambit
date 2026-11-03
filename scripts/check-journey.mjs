@@ -52,18 +52,24 @@ try {
     const { JOURNEYS } = await server.ssrLoadModule("/src/game/journeys.ts");
     const { MECHANIC_RECIPES, PRESENTATION_RECIPES } =
       await server.ssrLoadModule("/src/game/recipes.ts");
-    const catalog = authoringCapabilities(
-      JOURNEYS,
-      [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES],
-      regions,
+    const recipes = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES].filter(
+      (question) => !recipeMode || question.id === `recipe:${recipeMode}`,
     );
+    if (!recipes.length) throw Error(`Unknown recipe: ${recipeMode}`);
+    const catalog = authoringCapabilities(JOURNEYS, recipes, regions);
     console.log(
       args.includes("--json")
         ? JSON.stringify(catalog, null, 2)
         : catalog
             .map(
               (item) =>
-                `${item.id} — ${item.availability}\n  ${item.control} / ${item.demonstratedRule}; stages: ${item.evidence.stages.join(", ")}\n  Requires: ${item.requires.join("; ")}\n  Preview: ${item.preview}\n  ${item.auditCommand}\n  Limits: ${item.limits.join(" ")}\n  Checks: ${item.evidence.checks.join(", ")}${item.evidence.errors.length ? `\n  Errors: ${item.evidence.errors.join("; ")}` : ""}`,
+                `${item.id} — ${item.availability}\n  ${item.control} / ${item.demonstratedRule}; stages: ${item.evidence.stages.join(", ")}\n  ${Object.entries(
+                  item.experience,
+                )
+                  .map(([stage, policy]) => `${stage}: ${policy}`)
+                  .join(
+                    "\n  ",
+                  )}\n  Related examples: ${item.examples.map((example) => `${example.questionId} (policy differences: ${example.policyDifferences.join(", ") || "none"})`).join("; ") || "none"}\n  Requires: ${item.requires.join("; ")}\n  Preview: ${item.preview}\n  ${item.auditCommand}\n  Limits: ${item.limits.join(" ")}\n  Checks: ${item.evidence.checks.join(", ")}${item.evidence.errors.length ? `\n  Errors: ${item.evidence.errors.join("; ")}` : ""}`,
             )
             .join("\n\n"),
     );

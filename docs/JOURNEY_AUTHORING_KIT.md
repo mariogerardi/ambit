@@ -71,10 +71,17 @@ its demonstrated rule and states, content/data requirements, limitations, matchi
 published examples, audit command, preview URL and focused checks. Availability
 is scoped to the demonstrated composition; internal modes require a product
 decision and failed audits are marked as needing repair.
+Entries also describe effective eligibility, answer/commitment policy, disclosure,
+help, reveal and camera behavior. Related examples include their Journey's actual
+completion policy and the policy differences from the recipe; a shared mode/rule
+does not imply a matching experience. `JOURNEY_DEFAULTS.md` is exported separately
+and included in the main brief and combined GPT guide. It records inherited
+behavior so the user need not specify it again.
 
 In the repository, run `npm run check:journey -- --capabilities` or open the
 workbench’s **Mechanic recipe** selector. Recipes support the normal play → help →
-reveal → completion lifecycle. Two-country partial credit and lower distance-pin
+reveal → completion lifecycle. Add `--recipe <name>` to the capability command to
+inspect only that composition. Two-country partial credit and lower distance-pin
 tiers also have real submitted partial previews; other quality outcomes can be
 reviewed with captured answers. **Clue and reveal** and audit JSON compare the
 starting clue with the post-answer insight and include nonblocking editorial

@@ -22,6 +22,8 @@ standards; examples do not override the crafting guide.
 
 For player-facing wording, follow [Player-facing copy](COPY_STYLE.md), alongside
 the task-specific guide above.
+Journey work inherits [shared defaults](journey-authoring/JOURNEY_DEFAULTS.md);
+specifications need only describe meaningful exceptions to established behavior.
 
 ## Current guides
 
