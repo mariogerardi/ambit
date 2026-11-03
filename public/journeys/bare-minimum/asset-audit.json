@@ -1,0 +1,19 @@
+{
+  "worldSHA256": "d75294788428c0f6a454000f86809f9852ecb62d1c57407101af2e7a37bf3fcb",
+  "coastSHA256": "c10e509534074644d6b07932de46bffd4cf8fa0d084bccc754c7f7a635675f64",
+  "outputsSHA256": {
+    "clue-02.svg": "0aa3c8ac5445c3a31e39fd5db5d44159a2474f9ebc42daf0eb62302b924bc4d0",
+    "clue-03.svg": "9f13eb95c7a32125332d883cecb16aa2e8f92ffd9eee8bdf8769c5ce4a2fc6be",
+    "clue-04.svg": "4aa47a6f3fc52a5e1a07b83d39cb00a2984448f88a1e88fe5cfd6b12bb3e60cd",
+    "field-01.svg": "c90707fdfd2dbb1c3638f20cee8a176507e3417778aa86625594f555bcb1f056",
+    "field-02.svg": "ceb23501ac81927d709b17cc6b879400814e0f9e7884c6e8a3ac61ee5af6e431",
+    "field-03.svg": "c4bfc87726cece86cca6556d4847941e25df3da199f5b567c86c4e0e60048323",
+    "field-04.svg": "c4bfc87726cece86cca6556d4847941e25df3da199f5b567c86c4e0e60048323",
+    "field-05.svg": "b1adc07b28bdf8f827ac41d24170e9fd1f67762ba2e0e0bb6cb496d8a4e6be87",
+    "field-06.svg": "c90707fdfd2dbb1c3638f20cee8a176507e3417778aa86625594f555bcb1f056",
+    "field-07.svg": "8404fbd698b2390123ef182359845cba0ed2e9f390c7ef5ee76bee975052f64f",
+    "striped-02.svg": "a7cd34ebbbd1dbbd4b1c1c51a45ad8490fdcbb39f4da93dc19cecae089f0d158"
+  },
+  "coastSource": "Natural Earth 5.1.2, public domain; union of MYS, IDN and BRN, Borneo component only",
+  "colorStatus": "Illustrative historic colors; no claim of standardized historic digital colors"
+}
