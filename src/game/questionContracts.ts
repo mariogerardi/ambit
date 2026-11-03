@@ -240,6 +240,8 @@ export interface Question {
   partialCredit?: "one-of-two";
   failure: "feedback" | "end-game";
   focus: Focus;
+  /** Fit the full bounded region-selection pool; resolved after geography loads. */
+  playFraming?: "selection";
   /** Finite orientation sequence; reduced motion uses focus directly. */
   introViews?: Focus[];
   /** Optional camera reveal for questions linking geographically distant places. */
@@ -661,7 +663,8 @@ export type AuthoredQuestion = Omit<
     | {
         focus?: never;
         scenes: QuestionScenes & {
-          play: PlayScene & { focus: Question["focus"] };
+          play: PlayScene &
+            ({ focus: Question["focus"] } | { framing: "selection" });
         };
       }
   );

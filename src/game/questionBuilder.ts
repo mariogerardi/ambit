@@ -87,6 +87,12 @@ export function validateQuestionContract(q: Question): void {
   if (q.feedbackOrbit && (q.feedbackFocus?.altitude ?? 0) < 1.65)
     fail("a rotating reveal requires a whole-globe final focus");
   const definition = mechanicFor(q);
+  if (
+    q.playFraming === "selection" &&
+    (definition.mapSelection !== "regions" ||
+      !["ids", "neighbors"].includes(q.selection.type))
+  )
+    fail("selection framing requires a bounded selectable region pool");
   const allowed = definition?.rules;
   if (!allowed?.includes(q.rule.type))
     fail("answer mode and grading rule disagree");

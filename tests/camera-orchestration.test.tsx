@@ -564,6 +564,67 @@ it("frames a late-loaded puzzle focus even when the phase and route key have not
   expect(port.focus).not.toHaveBeenCalled();
 });
 
+it("reframes automatic selection cameras when an assist narrows the field", async () => {
+  const { MISSING_BORDERS_TWO_JOURNEY: definition } = await import(
+    "../src/game/missingBordersTwoJourney"
+  );
+  const { journeyWorld } = await import("../src/app/journeyWorld");
+  const context = createQuestionContext(regions, [], definition);
+  const question = definition.rounds[3];
+  const game = { ...initialGame, phase: "playing" as const, roundIndex: 3 };
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      context,
+      phase: "playing",
+      roundIndex: 3,
+      focus: journeyWorld(regions, definition, game, context).focus,
+    },
+  });
+  vi.mocked(port.focus).mockClear();
+  const assisted = { ...game, help: { [question.id]: "assisted" as const } };
+  const focus = journeyWorld(regions, definition, assisted, context).focus;
+  await render({ journey: { ...options.journey, help: assisted.help, focus } });
+  expect(port.focus).toHaveBeenLastCalledWith(focus);
+});
+
+it("ends an automatic-framing introduction at the computed candidate view", async () => {
+  const { MISSING_BORDERS_TWO_JOURNEY: source } = await import(
+    "../src/game/missingBordersTwoJourney"
+  );
+  const { journeyWorld } = await import("../src/app/journeyWorld");
+  const intro = { lat: 0, lng: 0, altitude: 2.2 };
+  const definition = {
+    ...source,
+    rounds: source.rounds.map((round, index) =>
+      index === 3 ? { ...round, introViews: [intro] } : round,
+    ),
+  };
+  const context = createQuestionContext(regions, [], definition);
+  const focus = journeyWorld(
+    regions,
+    definition,
+    { ...initialGame, phase: "playing", roundIndex: 3 },
+    context,
+  ).focus;
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      context,
+      phase: "playing",
+      roundIndex: 3,
+      focus,
+    },
+  });
+  expect(port.flyover).toHaveBeenLastCalledWith([intro, focus], false);
+});
+
 it.each(["wurl:MLI", "wurl:CAN"])(
   "returns a round tour to the chosen country %s, including a miss",
   async (id) => {

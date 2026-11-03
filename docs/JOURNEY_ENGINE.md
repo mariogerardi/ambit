@@ -99,9 +99,25 @@ an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
 contract, not scene geometry.
 
+For bounded selectable countries/territories, use
+`scenes.play: { framing: "selection" }` instead of guessing a focus. This compiles
+to `playFraming: "selection"` and resolves after geography loads. The camera fits
+the spherical bounds of every eligible outline, including merged regions,
+offshore parts and dateline crossings; grading solutions never influence it.
+Assists fit their surviving candidate pool unless an explicit help focus takes
+precedence. Region geometry is cached per question/context/stage rather than
+recomputed while answering. Extremely broad sets use a whole-globe overview;
+opposite sides of Earth cannot be shown simultaneously. This policy supports
+`ids` and `neighbors` region selection, not city, pin or whole-world searches.
+An authored play focus is optional with this policy; the compiled neutral focus
+is only a fallback before geography is available. Existing authored framing stays
+in effect when the policy is absent. The merged-region recipe and Missing Borders
+II demonstrate it. Canonical geometry and answer rules remain unchanged.
+
 `scenes.play.views` and `scenes.reveal.views` optionally author a finite camera
 sequence, compiled as `introViews` / `feedbackViews`. End the sequence at the
-scene's `focus`: reduced motion uses that focus directly. Playback runs once,
+scene's `focus`; automatically framed play tours append the computed endpoint.
+Reduced motion uses the effective focus directly. Playback runs once,
 does not restart on response edits, and yields to globe input. Help ends an intro
 at its effective search focus; missed pins retain the shared answer/guess review
 instead of starting a reveal tour. Completion flyovers retain their looping behavior. Close views (altitude below

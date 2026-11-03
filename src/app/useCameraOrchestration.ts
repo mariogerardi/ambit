@@ -87,7 +87,8 @@ export function useCameraOrchestration({
     isJourney &&
     round &&
     phase === "playing" &&
-    ((help?.[round.id] === "assisted" && !!round.guidance?.assist?.focus) ||
+    ((help?.[round.id] === "assisted" &&
+      (!!round.guidance?.assist?.focus || round.playFraming === "selection")) ||
       (help?.[round.id] === "hinted" && !!round.guidance?.hintMap?.focus))
       ? help?.[round.id]
       : undefined;
@@ -402,11 +403,13 @@ export function useCameraOrchestration({
           (round?.mode !== "pin" || answers.at(-1)?.correct)
         ? round?.feedbackViews
         : undefined;
-  // Finish a teaching flyover with both bearing directions in view.
+  // End authored introductions/reveals at their effective framing destination.
   const sceneViews = useMemo(
     () =>
-      phase === "feedback" &&
-      (round?.mode === "compass-bearing" || round?.feedbackReturnToSelection) &&
+      ((phase === "feedback" &&
+        (round?.mode === "compass-bearing" ||
+          round?.feedbackReturnToSelection)) ||
+        (phase === "playing" && round?.playFraming === "selection")) &&
       authoredSceneViews?.length &&
       journeyFocus
         ? [...authoredSceneViews, journeyFocus]
@@ -416,6 +419,7 @@ export function useCameraOrchestration({
       phase,
       round?.mode,
       round?.feedbackReturnToSelection,
+      round?.playFraming,
       journeyFocus,
     ],
   );

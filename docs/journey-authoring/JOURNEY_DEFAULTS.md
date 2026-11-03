@@ -18,6 +18,13 @@ alone do not override the current standards. Code establishes actual behavior.
 
 ## Camera rules by stage
 
+- **Bounded country/territory search:** prefer
+  `scenes.play: { framing: "selection" }` to derive the view from all eligible
+  outlines. No hand-entered focus is needed. Assistance fits the surviving pool;
+  explicit help framing takes precedence. Full outlines and dateline crossings
+  count; sets too broad for one hemisphere use a world overview. Use authored
+  framing for a deliberate reference/clue composition. Existing questions adopt
+  the policy explicitly rather than having authored views silently replaced.
 - **Question entry:** a neutral whole-world country search without authored map
   clues or intro views starts at a random continental view and rotates. Preserve
   an already suitable rotating world view. Interaction stops rotation; explicit

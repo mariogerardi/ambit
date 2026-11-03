@@ -129,7 +129,7 @@ export const MECHANIC_RECIPES: Question[] = [
     },
     scenes: {
       play: {
-        focus: { lat: 38, lng: 3, altitude: 0.65 },
+        framing: "selection",
         map: {
           borders: true,
           hoverFeedback: false,

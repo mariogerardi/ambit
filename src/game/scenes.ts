@@ -8,6 +8,8 @@ import type { Question } from "./questionContracts";
 
 export interface PlayScene {
   focus?: Focus;
+  /** Fit all eligible region outlines; an authored focus is optional. */
+  framing?: "selection";
   /** One pass through broad orientation views, ending at the playable focus. */
   views?: Focus[];
   contextIds?: string[];
@@ -51,7 +53,12 @@ export function compileQuestionScenes(
   question: Omit<Question, "focus"> & { focus?: Focus },
 ): Question {
   const { play, assist, reveal } = question.scenes ?? {};
-  const focus = play?.focus ?? question.focus;
+  const focus =
+    play?.focus ??
+    question.focus ??
+    (play?.framing === "selection"
+      ? { lat: 0, lng: 0, altitude: 2.2 }
+      : undefined);
   if (!focus)
     throw Error(`Question requires a playable focus: ${question.id}.`);
   if (!question.scenes) return question as Question;
@@ -62,6 +69,7 @@ export function compileQuestionScenes(
   ) => {
     if (value !== undefined) compiled[key] = value;
   };
+  assign("playFraming", play?.framing);
   assign("contextIds", play?.contextIds);
   assign("introViews", play?.views);
   assign("candidateRegionIds", play?.candidateRegionIds);

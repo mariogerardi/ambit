@@ -15,11 +15,14 @@ export function experiencePolicies(question: Question, journey: Journey) {
     disclosure: `choice names ${question.disclosure.namedChoices}; hover names ${question.disclosure.hoverNames}; native text ${!!question.textClue}`,
     assistance: `hint ${!!question.guidance}; assist ${!!assist}; narrowed pool ${assist?.candidateIds?.length ?? "none"}; locked selections ${assist?.fixedSelections?.length ?? 0}; locked slots ${assist?.fixedSlots?.length ?? 0}`,
     reveal: `explanatory network ${!!question.feedbackNetwork}; reveal-only translation ${!!question.textClue}; reference places ${question.feedbackPlaces?.length ?? 0}`,
-    playCamera: isWholeGlobeSearch(question)
-      ? "shared random continental view, or preserve suitable rotation; stop on interaction"
-      : question.introViews?.length
-        ? "authored finite introduction"
-        : "authored framing",
+    playCamera:
+      question.playFraming === "selection"
+        ? "fit all selectable region outlines; assist fits survivors"
+        : isWholeGlobeSearch(question)
+          ? "shared random continental view, or preserve suitable rotation; stop on interaction"
+          : question.introViews?.length
+            ? "authored finite introduction"
+            : "authored framing",
     revealCamera: question.feedbackReturnToSelection
       ? "return to actual selection, including a miss"
       : question.feedbackOrbit
@@ -67,7 +70,9 @@ export function authoringCapabilities(
     const requires = [
       "Reviewed clue/reveal copy and sources",
       "Explicit eligible inputs and disclosure",
-      "Camera framing for the declared reference/candidate area",
+      question.playFraming === "selection"
+        ? "A bounded eligible region pool; camera framing is derived"
+        : "Camera framing for the declared reference/candidate area",
     ];
     if (mechanic.mapSelection === "places" || mechanic.response === "pin")
       requires.push("Canonical place records or reviewed coordinates");
@@ -116,6 +121,7 @@ export function authoringCapabilities(
         explanatoryNetwork: !!question.feedbackNetwork,
         overviewRotation: !!question.feedbackOrbit,
         returnToSelection: !!question.feedbackReturnToSelection,
+        selectionFraming: question.playFraming === "selection",
       },
       requires,
       limits: [

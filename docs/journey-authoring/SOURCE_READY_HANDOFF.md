@@ -38,6 +38,10 @@ scenes. Ordinary presentation follows `JOURNEY_DEFAULTS.md`. Imports and fields
 must exist in the inspected source; do not invent a mode, helper or option to
 make the draft look complete. Do not add React components, CSS or engine changes
 inside the content module.
+For a bounded selectable-country search, prefer
+`scenes.play: { framing: "selection" }` over hand-entered camera coordinates.
+The engine derives its frame from the eligible outlines, including merged regions
+and assist survivors. Keep explicitly authored reveal/recap framing when useful.
 
 ## Populate the existing fields
 

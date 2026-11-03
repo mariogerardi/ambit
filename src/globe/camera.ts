@@ -6,6 +6,7 @@ import { geoInterpolate, geoDistance } from "d3-geo";
 export function comparisonFocus(
   points: readonly Pick<Focus, "lat" | "lng">[],
   preferred?: Focus,
+  fieldOfView = 30,
 ): Focus {
   const vectors = points.map((p) => {
     const lat = (p.lat * Math.PI) / 180,
@@ -31,7 +32,9 @@ export function comparisonFocus(
       Math.max(
         0.12,
         1 / Math.cos(Math.min(Math.PI * 0.49, radius + Math.PI / 36)) - 1,
-        Math.cos(radius) + Math.sin(radius) / Math.tan(Math.PI / 12) - 1,
+        Math.cos(radius) +
+          Math.sin(radius) / Math.tan((fieldOfView * Math.PI) / 360) -
+          1,
       ),
     );
   if (
