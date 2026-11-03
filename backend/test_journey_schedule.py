@@ -61,7 +61,7 @@ class JourneyScheduleTests(unittest.TestCase):
         self.assertTrue(all(choices[index] != choices[index + 1] for index in range(len(choices) - 1)))
         self.assertEqual(choices, [schedule.choose(date.fromordinal(day).isoformat(), {}, dict(reversed(list(pool.items())))) for day in days])
 
-    def test_automatic_schedule_covers_every_registered_journey_within_90_days(self):
+    def test_automatic_schedule_covers_every_eligible_journey_within_90_days(self):
         memo = {}
         choices = [
             schedule.choose(
@@ -71,7 +71,7 @@ class JourneyScheduleTests(unittest.TestCase):
             )
             for offset in range(90)
         ]
-        self.assertEqual(set(choices), set(schedule.CATALOG))
+        self.assertEqual(set(choices), {key for key, item in schedule.CATALOG.items() if item.get("dailyEligible") is not False})
 
     def test_eligibility_excludes_only_automatic_picks_and_preserves_explicit_dates(self):
         pool = {"eligible": {"id": "eligible"}, "held": {"id": "held", "dailyEligible": False}}
