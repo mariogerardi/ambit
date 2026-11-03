@@ -30,6 +30,7 @@ experience or the amount of new engineering. Continue independent work meanwhile
 
 ## 2. Familiarize yourself with the current suite
 
+For the preceding ChatGPT design workflow, use the [authoring entry point](README.md).
 Read the editorial, visual and engine sections relevant to the approved experience.
 Inherit [shared defaults](JOURNEY_DEFAULTS.md); specify only meaningful exceptions.
 In the repository, use the [task-to-section map](../README.md#find-the-relevant-section);
@@ -183,6 +184,7 @@ without presenting an unverified acceptance gate as passed.
 Hand the result directly to the user with a review URL or artifact, what changed,
 what was verified and any material limitation. Do not assume someone else will
 write the copy, perform QA or handle release. Publish or
-deploy only when the user's request authorizes it. Refresh the portable kit after
-relevant source or documentation changes with `npm run export:journeys`;
-uploaded files do not update themselves.
+deploy only when the user's request authorizes it. Repository-first authoring does
+not require an export. When an uploaded/offline kit is being used or a refresh is
+requested, update it with `npm run export:journeys`; uploaded files do not update
+themselves.

@@ -9,16 +9,16 @@ standards; examples do not override the crafting guide.
 
 ## Find the relevant section
 
-| Task                                   | Start here                                                                                                                        | Then inspect                                                                                                                                                  |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Implement an approved Journey spec     | [Implementation workflow](journey-authoring/IMPLEMENTING_A_SPEC.md)                                                               | Approved brief, relevant crafting sections, catalog's **Bundled Journeys** table, and matching examples/recipes.                                              |
-| Design a new Journey                   | [Crafting](JOURNEY_CRAFTING.md), sections 1–2                                                                                     | Sections relevant to the proposed controls, help, reveal and completion; record decisions in the [spec template](journey-authoring/JOURNEY_SPEC_TEMPLATE.md). |
-| Edit question copy or help             | [Crafting](JOURNEY_CRAFTING.md), sections 3 and 7–9                                                                               | The affected Journey; `questionText.ts` and `QuestionSupport.tsx` if changing shared copy.                                                                    |
-| Change clues, scenes or camera framing | [Engine: Explicit scenes](JOURNEY_ENGINE.md#explicit-scenes); crafting sections 5–6                                               | `presentation.ts`, `scenes.ts`, and the relevant presentation/camera owner in [Architecture](ARCHITECTURE.md#module-map).                                     |
-| Change grading or add a mechanic       | [Engine: Responsibilities](JOURNEY_ENGINE.md#responsibilities) and [Extending the engine](JOURNEY_ENGINE.md#extending-the-engine) | `questionContracts.ts`, preparation/evaluation owner, `mechanics.ts` and the matching `recipes.ts` example.                                                   |
-| Register or retire a Journey           | [Catalog: Add or change a Journey](QUESTION_CATALOG.md#add-or-change-a-journey)                                                   | `journeys.ts`, generated index, retired IDs and save recovery.                                                                                                |
-| Change themes or shared visual styling | [Themes and visual styling](THEMES.md)                                                                                            | `src/theme/themes.ts`, `playColors.ts`, shared CSS, and theme/preference/loading tests.                                                                       |
-| Change saves, accounts or backend APIs | [Architecture: Module map](ARCHITECTURE.md#module-map)                                                                            | Relevant sections of [Save persistence](SAVE_PERSISTENCE.md) or [Services](SERVICES.md), then the owning module and focused tests.                            |
+| Task                                   | Start here                                                                                                                        | Then inspect                                                                                                                         |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Implement an approved Journey spec     | [Implementation workflow](journey-authoring/IMPLEMENTING_A_SPEC.md)                                                               | Approved brief, relevant crafting sections, catalog's **Bundled Journeys** table, and matching examples/recipes.                     |
+| Design a new Journey                   | [Authoring entry point](journey-authoring/README.md), then crafting sections 1–3                                                  | Relevant defaults, structures and live recipes; record decisions in the [spec template](journey-authoring/JOURNEY_SPEC_TEMPLATE.md). |
+| Edit question copy or help             | [Crafting](JOURNEY_CRAFTING.md), sections 3 and 7–9                                                                               | The affected Journey; `questionText.ts` and `QuestionSupport.tsx` if changing shared copy.                                           |
+| Change clues, scenes or camera framing | [Engine: Explicit scenes](JOURNEY_ENGINE.md#explicit-scenes); crafting sections 5–6                                               | `presentation.ts`, `scenes.ts`, and the relevant presentation/camera owner in [Architecture](ARCHITECTURE.md#module-map).            |
+| Change grading or add a mechanic       | [Engine: Responsibilities](JOURNEY_ENGINE.md#responsibilities) and [Extending the engine](JOURNEY_ENGINE.md#extending-the-engine) | `questionContracts.ts`, preparation/evaluation owner, `mechanics.ts` and the matching `recipes.ts` example.                          |
+| Register or retire a Journey           | [Catalog: Add or change a Journey](QUESTION_CATALOG.md#add-or-change-a-journey)                                                   | `journeys.ts`, generated index, retired IDs and save recovery.                                                                       |
+| Change themes or shared visual styling | [Themes and visual styling](THEMES.md)                                                                                            | `src/theme/themes.ts`, `playColors.ts`, shared CSS, and theme/preference/loading tests.                                              |
+| Change saves, accounts or backend APIs | [Architecture: Module map](ARCHITECTURE.md#module-map)                                                                            | Relevant sections of [Save persistence](SAVE_PERSISTENCE.md) or [Services](SERVICES.md), then the owning module and focused tests.   |
 
 For player-facing wording, follow [Player-facing copy](COPY_STYLE.md), alongside
 the task-specific guide above.
@@ -51,9 +51,9 @@ requirement. Keep this index focused on maintained guides.
 
 ## Source notices and generated records
 
-For AI-assisted Journey design, use the [portable authoring kit](JOURNEY_AUTHORING_KIT.md).
-It exports current guides, mechanics and complete examples without loading the
-whole repository into a design conversation.
+For AI-assisted Journey design, use the [GitHub-first authoring entry point](journey-authoring/README.md).
+Read relevant repository files directly. The [portable kit](JOURNEY_AUTHORING_KIT.md)
+is an optional fallback for offline or uploaded context, not a prerequisite.
 
 The [layer manifest](../public/geography/manifest.json), `sources/*.metadata.json`,
 checksum files, and ID mappings document the shipped inputs and outputs.

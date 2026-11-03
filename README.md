@@ -110,10 +110,10 @@ rollback, and [Services](docs/SERVICES.md) for backend operations. Datadog repor
 is best effort; reporting failures produce warnings without overriding validation
 or deployment results.
 
-For Journey work, start with [Journey crafting](docs/JOURNEY_CRAFTING.md), or the
-[approved-spec workflow](docs/journey-authoring/IMPLEMENTING_A_SPEC.md) when a spec
-already exists. The [authoring kit](docs/JOURNEY_AUTHORING_KIT.md) exports current
-guidance and examples for design work.
+For Journey work, start with the [Journey authoring entry point](docs/journey-authoring/README.md).
+It describes GitHub-first design with ChatGPT and the approved-spec handoff to
+Codex. Use relevant repository docs and examples directly; the
+[portable kit](docs/JOURNEY_AUTHORING_KIT.md) is an optional offline/upload fallback.
 
 ## Licensing
 

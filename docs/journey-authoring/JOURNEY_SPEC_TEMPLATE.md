@@ -2,7 +2,7 @@
 
 **Status:** draft / approved for implementation\
 **Journey:** title; ID and source file if known\
-**Authoring basis:** live repository revision, or exported-kit revision/date and known limitations\
+**Authoring basis:** repository/ref/commit actually read (or available branch/date), or optional kit snapshot; material access limitations\
 **Registration:** defer / authorize (see Catalog impact)
 
 Specify the **approved player experience**. Do not replicate the engine's

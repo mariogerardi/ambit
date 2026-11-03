@@ -1,6 +1,11 @@
 # Portable Journey authoring kit
 
-Use the exporter to give ChatGPT or another AI current Journey context without
+For normal authoring with GitHub access, use the
+[repository-first entry point](journey-authoring/README.md) and read relevant source
+files directly. No export or upload is required. Use this kit only when repository
+access is unavailable or a frozen local snapshot is useful.
+
+The exporter gives ChatGPT or another AI a Journey-context snapshot without
 asking it to explore the whole repository. It makes ordinary Markdown files using
 local code and docs; it does not call an AI, download data, change Journey content,
 start a browser or deploy anything.
@@ -27,11 +32,11 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 | `references/*.md`          | Full crafting guide, engine, architecture, question catalog and geographic policy. Consult as needed rather than loading all at once.                                          |
 | `manifest.json`            | Repository revision, local-change indicator, highlighted IDs, and SHA-256 hashes/sizes of inputs and outputs.                                                                  |
 
-For a GPT in another thread, upload `GPT_GUIDE.md`. It includes the context and
+For an upload-based conversation, use `GPT_GUIDE.md`. It includes the context and
 walkthroughs in one file; the smaller files remain available for selective loading.
 Paste `PROJECT_INSTRUCTIONS.md` into the GPT's instructions when available.
 
-Create one conversation per Journey. Start with the authoring kit, add relevant
+When using the kit, create one conversation per Journey. Start with the kit, add relevant
 examples, and keep settled decisions in the specification rather than relying on
 conversation history. Give the approved specification to a coding agent with
 access to the current repository and
