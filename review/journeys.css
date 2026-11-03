@@ -1,0 +1,36 @@
+.journey-workbench {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  gap: 10px;
+}
+.journey-workbench form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+.journey-workbench label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.journey-workbench :is(select, input) {
+  width: 100%;
+  max-width: 100%;
+}
+.journey-workbench :is(p, ul) {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+.journey-workbench li {
+  overflow-wrap: anywhere;
+}
+.journey-workbench .workbench-advanced input {
+  max-width: 120px;
+}
+.journey-workbench details > .admin-review-states {
+  margin-top: 10px;
+}

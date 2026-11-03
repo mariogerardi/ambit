@@ -1,7 +1,9 @@
 // Development-only entry point. Module discovery never enters the production App.
 import { createRoot } from "react-dom/client";
+import { JourneyWorkbench } from "./JourneyWorkbench";
 import { PlayerWorkspace } from "../src/App";
-import { AccountContext, type AccountAccess } from "../src/services/accounts";
+import { AccountProvider } from "../src/services/accounts";
+import { serviceConfig } from "../src/services/config";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 import { validateJourneyContracts } from "../src/game/questionBuilder";
 import type { Journey } from "../src/game/questionContracts";
@@ -13,24 +15,27 @@ import "../src/game/game.css";
 import "../src/app/app.css";
 import "../src/app/mobile.css";
 import "../src/theme/themes.css";
+import "./journeys.css";
 
-const account: AccountAccess = {
-  user: null,
-  admin: true,
-  loading: false,
-  busy: false,
-  error: "",
-  async signIn() {},
-  async signOut() {},
-  async accessToken() {
-    return undefined;
-  },
-};
-const readOnlyFetch = window.fetch.bind(window);
+// Keep the original fetch across Vite hot updates; the review guard remains global.
+const readOnlyFetch: typeof fetch =
+  import.meta.hot?.data.fetch ?? window.fetch.bind(window);
+if (import.meta.hot) import.meta.hot.data.fetch = readOnlyFetch;
 window.fetch = (input, options) => {
   const method =
     options?.method ?? (input instanceof Request ? input.method : "GET");
-  if (!["GET", "HEAD"].includes(method.toUpperCase()))
+  const url = new URL(
+    input instanceof Request ? input.url : String(input),
+    location.href,
+  );
+  const authOrigins = [
+    serviceConfig.auth.authority,
+    serviceConfig.auth.loginUrl,
+  ].map((value) => new URL(value).origin);
+  if (
+    !["GET", "HEAD"].includes(method.toUpperCase()) &&
+    !authOrigins.includes(url.origin)
+  )
     return Promise.reject(
       new Error("API writes are disabled in Journey review."),
     );
@@ -80,7 +85,7 @@ async function open() {
   if (!isTheme(theme)) throw Error("Unknown theme.");
   applyTheme(theme);
   root.render(
-    <AccountContext.Provider value={account}>
+    <AccountProvider>
       <PlayerWorkspace
         reviewSource={{
           journey,
@@ -89,36 +94,19 @@ async function open() {
           stage: stage as ReviewStage,
           questionId: params.get("question") ?? undefined,
           navigation: (
-            <form action="/review/journeys.html">
-              <label>
-                Journey source{" "}
-                <select name="module" defaultValue={filename}>
-                  {Object.keys(modules)
-                    .sort()
-                    .map((path) => {
-                      const name = path.split("/").at(-1)!;
-                      return (
-                        <option key={name} value={name}>
-                          {name}
-                        </option>
-                      );
-                    })}
-                </select>
-              </label>{" "}
-              <label>
-                Seed{" "}
-                <input
-                  name="seed"
-                  type="number"
-                  defaultValue={seed}
-                  style={{ width: "6em" }}
-                />
-              </label>{" "}
-              <button type="submit" className="quiet-button">
-                Open source
-              </button>
-            </form>
+            <JourneyWorkbench
+              journey={journey}
+              filename={filename!}
+              modules={Object.keys(modules)
+                .map((path) => path.split("/").at(-1)!)
+                .sort()}
+              seed={seed}
+              request={readOnlyFetch}
+            />
           ),
+          onExit(path) {
+            location.assign(path);
+          },
           onInspect(index, state) {
             const url = new URL(location.href);
             url.searchParams.set("module", filename!);
@@ -129,7 +117,7 @@ async function open() {
           },
         }}
       />
-    </AccountContext.Provider>,
+    </AccountProvider>,
   );
 }
 void open().catch((failure) =>

@@ -773,7 +773,7 @@ describe("cached readable place labels", () => {
     expect(
       ((first.scale.y / first.position.distanceTo(c.position)) * 700) /
         (2 * Math.tan((c.fov * Math.PI) / 360)),
-    ).toBeCloseTo(26);
+    ).toBeCloseTo(28);
     c.position.z = -300;
     c.lookAt(0, 0, 0);
     c.updateMatrixWorld();

@@ -23,6 +23,8 @@ export interface JourneyReviewSource {
   questionId?: string;
   navigation?: ReactNode;
   onInspect?(index: number, stage: ReviewStage): void;
+  /** Leave this isolated source workspace with a full document navigation. */
+  onExit?(path: string): void;
 }
 export function reviewRandom(seed: number) {
   let value = seed >>> 0;

@@ -213,33 +213,9 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
         expect(probe.focus.at(-1)).toMatchObject(
           SHARED_NAMES_JOURNEY.completion!.focus,
         );
-        const controls = host.querySelector(
-          '[aria-label="Completion map views"]',
-        )!;
-        expect(controls.textContent).toContain("Map overview");
         expect(
-          controls.querySelector<HTMLButtonElement>("button:nth-of-type(2)")
-            ?.disabled,
-        ).toBe(true);
-        const views = SHARED_NAMES_JOURNEY.completion!.views!;
-        for (const [index, view] of views.entries()) {
-          await click("Next view");
-          expect(probe.focus.at(-1)).toMatchObject(view);
-          expect(controls.textContent).toContain(
-            `Map view ${index + 1} of ${views.length}`,
-          );
-        }
-        expect(
-          controls.querySelector<HTMLButtonElement>("button:last-of-type")
-            ?.disabled,
-        ).toBe(true);
-        await click("Previous view");
-        expect(probe.focus.at(-1)).toMatchObject(views.at(-2)!);
-        await click("Overview");
-        expect(probe.focus.at(-1)).toMatchObject(
-          SHARED_NAMES_JOURNEY.completion!.focus,
-        );
-        expect(probe.tours).toHaveLength(0);
+          host.querySelector('[aria-label="Completion map views"]'),
+        ).toBeNull();
         await click("Study");
         expect(location.pathname).toBe("/study");
         expect(
@@ -251,6 +227,8 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
         ).toBeNull();
         expect(probe.tours).toHaveLength(1);
         expect(probe.tours[0]).toEqual(SHARED_NAMES_JOURNEY.completion!.views);
+        expect(host.textContent).not.toContain("Stop flyover");
+        expect(host.textContent).not.toContain("Review your answer");
         const before = probe.tourCancellations;
         await click("Home");
         expect(probe.tourCancellations).toBeGreaterThan(before);

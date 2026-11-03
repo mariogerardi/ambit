@@ -484,7 +484,6 @@ export const MADE_IN_CHINA_JOURNEY: Journey = {
   ],
   completion: {
     mapMode: "authored",
-    answerReviews: true,
     focus: { lat: 33, lng: 110, altitude: 0.95 },
     regionIds: [],
     views: [
@@ -494,7 +493,6 @@ export const MADE_IN_CHINA_JOURNEY: Journey = {
       { lat: 31.2, lng: 121.5, altitude: 0.3 },
       { lat: 22.7, lng: 114.05, altitude: 0.11 },
     ],
-    loopViews: false,
     places: [
       { ...xian, name: "Xi’an · wheat and noodles" },
       { ...jingdezhen, name: "Jingdezhen · porcelain workshops" },

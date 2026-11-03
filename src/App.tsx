@@ -230,7 +230,8 @@ export function App({
     setPath(canonical);
   }, [pathname, accountNavigation]);
   const requestedMode = reviewSource ? "practice" : modeForPath(path);
-  const restricted = requestedMode === "practice" && !account.admin;
+  const restricted =
+    requestedMode === "practice" && !account.admin && !reviewSource;
   const mode = restricted ? "home" : requestedMode;
   const reviewing =
     mode === "practice" &&
@@ -947,6 +948,11 @@ export function App({
     setStudyReview(undefined);
   }, [mode]);
   function navigate(url: string) {
+    if (reviewSource) {
+      if (reviewSource.onExit) reviewSource.onExit(url);
+      else location.assign(url);
+      return;
+    }
     if (url === path) return;
     setExploreSearch("");
     prepareNavigation(url);
@@ -1540,44 +1546,9 @@ export function App({
     ) : context ? (
       <GameShell
         constructionReviewIndex={constructionReviewIndex}
-        onConstructionReview={(index) => {
-          setConstructionReviewIndex(index);
-          if (index === undefined) {
-            if (journey.completion) {
-              frame(journey.completion.focus);
-              if (!reduced && journey.completion.views?.length) {
-                if (journey.completion.loopViews === false)
-                  globe.current?.flyover(journey.completion.views, false);
-                else globe.current?.flyover(journey.completion.views);
-              }
-            }
-          } else {
-            const question = journey.rounds[index];
-            if (question) frame(question.feedbackFocus ?? question.focus);
-          }
-        }}
         canReplay={mode === "practice"}
         contextNavigation={
-          reviewing ? (
-            <Suspense fallback={<p role="status">Opening review controls…</p>}>
-              <AdminJourneyReview
-                journey={journey}
-                date={adminDate(
-                  new URLSearchParams(path.split("?")[1]).get("date"),
-                )}
-                source={reviewSource}
-                context={context}
-                game={game}
-                onChange={(next) =>
-                  setReviews((previous) => ({
-                    ...previous,
-                    [journey.id]: next,
-                  }))
-                }
-                onNavigate={navigate}
-              />
-            </Suspense>
-          ) : archiveDate ? (
+          archiveDate ? (
             <div className="journey-archive-context">
               <button
                 className="quiet-button"
@@ -1681,7 +1652,7 @@ export function App({
   );
   const content = (
     <main
-      className={`experience ${minigameLanding ? "minigame-touring" : ""} mode-${mode} phase-${phase} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
+      className={`experience ${reviewing ? "journey-reviewing" : ""} ${minigameLanding ? "minigame-touring" : ""} mode-${mode} phase-${phase} ${expanded ? "globe-expanded" : ""} ${panelOnly ? "panel-only" : ""} ${pageLayout ? "page-layout" : ""}`}
       style={
         mobile.enabled
           ? ({
@@ -1958,23 +1929,33 @@ export function App({
           <AmbitLogo />
         </button>
         <div className="experience-header-right">
-          <AccountMenu
-            signedIn={!!account.user}
-            player={playerProfile}
-            admin={account.admin}
-            path={path}
-            onNavigate={navigate}
-          />
+          {reviewSource && !account.user ? (
+            <span className="review-local-badge">Local workbench</span>
+          ) : (
+            <AccountMenu
+              signedIn={!!account.user}
+              player={playerProfile}
+              admin={account.admin}
+              path={path}
+              onNavigate={navigate}
+            />
+          )}
           <AppMenu
-            onJourney={() => playDaily(today)}
-            journeyReady={
-              !!regions.length &&
-              dailyLoaded &&
-              cloudSave.ready &&
-              schedule.ready
+            onJourney={() =>
+              reviewSource ? navigate("/daily") : playDaily(today)
             }
-            onFeedback={() =>
-              setFeedback({ kind: "experience", context: { view: mode } })
+            journeyReady={
+              !!reviewSource ||
+              (!!regions.length &&
+                dailyLoaded &&
+                cloudSave.ready &&
+                schedule.ready)
+            }
+            onFeedback={
+              reviewSource
+                ? undefined
+                : () =>
+                    setFeedback({ kind: "experience", context: { view: mode } })
             }
             path={path}
             onCredits={() => setCreditsOpen(true)}
@@ -2062,6 +2043,31 @@ export function App({
           </Suspense>
         </PanelBoundary>
       </ModePanels>
+      {reviewing && context && (
+        <aside
+          className="journey-review-panel"
+          aria-label="Journey review workbench"
+        >
+          <Suspense fallback={<p role="status">Opening review controls…</p>}>
+            <AdminJourneyReview
+              journey={journey}
+              date={adminDate(
+                new URLSearchParams(path.split("?")[1]).get("date"),
+              )}
+              source={reviewSource}
+              context={context}
+              game={game}
+              onChange={(next) =>
+                setReviews((previous) => ({
+                  ...previous,
+                  [journey.id]: next,
+                }))
+              }
+              onNavigate={navigate}
+            />
+          </Suspense>
+        </aside>
+      )}
       {!mobile.enabled &&
         !panelOnly &&
         (motionControls ||

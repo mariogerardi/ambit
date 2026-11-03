@@ -111,6 +111,11 @@ export function AdminJourneys({
         <header>
           <h2>Journeys</h2>
           <p className="muted">Review the questions, then choose a day.</p>
+          {import.meta.env.DEV && (
+            <a className="tertiary-action" href="/review/journeys.html">
+              Open Journey workbench →
+            </a>
+          )}
         </header>
       )}
       <div className="admin-library-controls">

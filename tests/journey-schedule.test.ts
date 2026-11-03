@@ -159,7 +159,7 @@ describe("shared Journey dates", () => {
   });
 });
 
-it("includes every registered Journey in automatic picks while retaining started attempts", () => {
+it("includes every eligible Journey in automatic picks while retaining started attempts", () => {
   const picked = new Set(
     Array.from(
       { length: 90 },
@@ -170,7 +170,8 @@ it("includes every registered Journey in automatic picks while retaining started
         ).id,
     ),
   );
-  for (const { id } of JOURNEY_INDEX) expect(picked.has(id), id).toBe(true);
+  for (const { id, dailyEligible } of JOURNEY_INDEX)
+    expect(picked.has(id), id).toBe(dailyEligible !== false);
   const date = "2026-10-18";
   const old = openDaily(emptyDaily, date, false, JOURNEY_INDEX, {
     [date]: "try-not-to-click-russia-v1",

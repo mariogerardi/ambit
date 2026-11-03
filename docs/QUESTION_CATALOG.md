@@ -47,6 +47,8 @@ For an approved specification, start with
 | Across the Divide                  | `/journey/across-the-divide`                  | [acrossDivideJourney.ts](../src/game/acrossDivideJourney.ts)                   |
 | Far From Everything                | `/journey/far-from-everything`                | [farFromEverythingJourney.ts](../src/game/farFromEverythingJourney.ts)         |
 | The Reggaetón Route                | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
+| Power to the People                | `/journey/power-to-the-people`                | [powerToThePeopleJourney.ts](../src/game/powerToThePeopleJourney.ts)           |
+| Bare Minimum                       | `/journey/bare-minimum`                       | [bareMinimumJourney.ts](../src/game/bareMinimumJourney.ts)                     |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.
@@ -58,9 +60,9 @@ titles and routes come from `journeyIndex.json`. Results use Home/Study as prima
 with replay available only on practice routes. Daily and Archive results retain the
 saved run for all players, including admins; Admin Tools provides the separate
 explicit current-day reset. A results flyover follows answer stops in round order and
-loops; player interaction or reduced motion interrupts it. With reduced motion,
-completion offers Overview, Previous view and Next view controls to inspect every
-authored destination without automatic travel.
+loops until the player moves the map. Reduced motion
+keeps the authored overview static. Completion has no overview/round-view link
+strip or expandable answer-review controls.
 
 The Russia-neighbor Journey asks for pins in Finland, North Korea, Mongolia,
 Georgia, and Estonia. Broad playable cameras are deliberately centered outside

@@ -1,5 +1,4 @@
 import { ConstructionReview, IslandScoring } from "./ConstructionAnswer";
-import { CompletionMapViews } from "./CompletionMapViews";
 import { constructionRule, reviewedConstruction } from "./construction";
 import { QuestionSources } from "./QuestionSources";
 import { QuestionHelp } from "../app/QuestionHelp";
@@ -46,7 +45,7 @@ import {
 } from "./copy";
 function FlagComparison({
   flags,
-  label = "Revealed national flags",
+  label = "Flag comparison",
 }: {
   flags: FlagDisplay[];
   label?: string;
@@ -58,7 +57,7 @@ function FlagComparison({
       aria-label={label}
     >
       {flags.map((flag) => (
-        <figure key={flag.src}>
+        <figure key={`${flag.src}:${flag.label}`}>
           <div className="flag-media">
             {flag.detail && (
               <img
@@ -136,12 +135,9 @@ export function GameShell({
   social,
   contextNavigation,
   constructionReviewIndex,
-  onConstructionReview,
-  reduced = false,
 }: {
   reduced?: boolean;
   constructionReviewIndex?: number;
-  onConstructionReview?(index?: number): void;
   social?: ReactNode;
   contextNavigation?: ReactNode;
   onReport?(questionId: string): void;
@@ -408,18 +404,7 @@ export function GameShell({
                       )}
                       <strong>{correctAnswer.value}</strong>
                     </p>
-                    {round.feedbackReview === "compact" ? (
-                      !correct && (
-                        <details className="journey-answer-recap">
-                          <summary>Review your answer</summary>
-                          <AnswerReview
-                            question={round}
-                            context={context}
-                            game={game}
-                          />
-                        </details>
-                      )
-                    ) : (
+                    {round.feedbackReview !== "compact" && (
                       <AnswerReview
                         question={round}
                         context={context}
@@ -640,90 +625,6 @@ export function GameShell({
           )}
           {game.phase === "failed" && <p>{feedbackText}</p>}
 
-          {game.phase === "finished" &&
-            reduced &&
-            webgl &&
-            constructionReviewIndex === undefined &&
-            !!journey.completion?.views?.length && (
-              <CompletionMapViews
-                key={journey.id}
-                overview={journey.completion.focus}
-                views={journey.completion.views}
-                frame={frame}
-              />
-            )}
-          {journey.completion?.constructionResults &&
-            game.phase === "finished" && (
-              <>
-                <div
-                  className="construction-recap-controls"
-                  aria-label="Review your constructions"
-                >
-                  <button
-                    type="button"
-                    className="quiet-button"
-                    aria-pressed={constructionReviewIndex === undefined}
-                    onClick={() => onConstructionReview?.()}
-                  >
-                    Overview
-                  </button>
-                  {journey.rounds.map((q, i) => (
-                    <button
-                      type="button"
-                      className="quiet-button"
-                      aria-pressed={constructionReviewIndex === i}
-                      key={q.id}
-                      onClick={() => onConstructionReview?.(i)}
-                    >
-                      {q.progressLabel ?? q.label}
-                    </button>
-                  ))}
-                </div>
-                {constructionReviewIndex !== undefined && (
-                  <ConstructionReview
-                    question={
-                      journey.rounds[
-                        constructionReviewIndex ?? journey.rounds.length - 1
-                      ]
-                    }
-                    response={{
-                      ...game,
-                      ...game.answers.find(
-                        (a) =>
-                          a.roundId ===
-                          journey.rounds[
-                            constructionReviewIndex ?? journey.rounds.length - 1
-                          ].id,
-                      ),
-                    }}
-                  />
-                )}
-                {constructionReviewIndex !== undefined &&
-                  journey.rounds[constructionReviewIndex].mode ===
-                    "country-recall" && (
-                    <AnswerReview
-                      question={journey.rounds[constructionReviewIndex]}
-                      context={context}
-                      game={{
-                        ...game,
-                        ...game.answers.find(
-                          (a) =>
-                            a.roundId ===
-                            journey.rounds[constructionReviewIndex].id,
-                        ),
-                        phase: "feedback",
-                        roundIndex: constructionReviewIndex,
-                      }}
-                    />
-                  )}
-                {constructionReviewIndex !== undefined && (
-                  <IslandScoring
-                    questions={[journey.rounds[constructionReviewIndex]]}
-                    help={game.help}
-                  />
-                )}
-              </>
-            )}
           <ol className="journey-receipt">
             {journey.rounds.map((question, i) => {
               const answer = game.answers.find(
@@ -742,15 +643,6 @@ export function GameShell({
                 currentAnswer && pinDistance(question, currentAnswer);
               const recapTier =
                 currentAnswer && pinDistanceTier(question, currentAnswer);
-              const reviewedGame = currentAnswer
-                ? {
-                    ...game,
-                    ...currentAnswer,
-                    phase: "feedback" as const,
-                    roundIndex: i,
-                    answers: [currentAnswer],
-                  }
-                : undefined;
               return (
                 <li
                   key={question.id}
@@ -813,34 +705,6 @@ export function GameShell({
                           </a>
                         </small>
                       )}
-                    {journey.completion?.answerReviews && reviewedGame && (
-                      <details className="journey-answer-recap">
-                        <summary>Review your answer</summary>
-                        <p>
-                          {
-                            correctAnswerSummary(
-                              question,
-                              context,
-                              reviewedGame,
-                            ).value
-                          }
-                        </p>
-                        {recapDistance !== undefined && (
-                          <p>
-                            Your pin was{" "}
-                            {recapDistance < 1
-                              ? "less than 1"
-                              : Math.round(recapDistance).toLocaleString()}{" "}
-                            km away.
-                          </p>
-                        )}
-                        <AnswerReview
-                          question={question}
-                          context={context}
-                          game={reviewedGame}
-                        />
-                      </details>
-                    )}
                   </div>
                   <span className="journey-round-result">
                     {help && (

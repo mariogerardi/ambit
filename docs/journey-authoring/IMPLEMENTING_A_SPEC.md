@@ -95,6 +95,9 @@ generated index. Open the shared development workbench at
 production App with in-memory review state and disabled progress storage/sync.
 Run `npm run check:journey -- --module src/game/<name>Journey.ts` for its audit.
 Do not create a custom React fixture or register temporarily to make review work.
+When registration is authorized, the local workbench offers **Register Journey**
+with an audited preview of repository edits. New entries are held out of automatic
+Daily selection; assignment and release remain separate actions.
 If registration is unresolved, continue independent content work and flag that
 decision before changing the catalog. Implementation approval does not authorize
 deployment.

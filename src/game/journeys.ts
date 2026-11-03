@@ -28,6 +28,8 @@ import { FOURTH_JOURNEY } from "./fourthJourney";
 import { ACROSS_DIVIDE_JOURNEY } from "./acrossDivideJourney";
 import { FAR_FROM_EVERYTHING_JOURNEY } from "./farFromEverythingJourney";
 import { REGGAETON_JOURNEY } from "./reggaetonJourney";
+import { POWER_TO_THE_PEOPLE_JOURNEY } from "./powerToThePeopleJourney";
+import { BARE_MINIMUM_JOURNEY } from "./bareMinimumJourney";
 export const JOURNEYS = [
   IM_LIKE_A_BIRD_JOURNEY,
   BEASTS_ON_BANNERS_JOURNEY,
@@ -59,6 +61,8 @@ export const JOURNEYS = [
   SHARED_NAMES_JOURNEY,
   MISSING_BORDERS_JOURNEY,
   MISSING_BORDERS_TWO_JOURNEY,
+  POWER_TO_THE_PEOPLE_JOURNEY,
+  BARE_MINIMUM_JOURNEY,
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
@@ -93,6 +97,8 @@ export function journeyPath(id: string) {
     [NINTH_JOURNEY.id]: "/journey/shared-neighbors",
     [SHARED_NEIGHBORS_TWO_JOURNEY.id]: "/journey/shared-neighbors-two",
     [FOURTH_JOURNEY.id]: "/journey/mediterranean",
+    [POWER_TO_THE_PEOPLE_JOURNEY.id]: "/journey/power-to-the-people",
+    [BARE_MINIMUM_JOURNEY.id]: "/journey/bare-minimum",
   };
   return paths[id] ?? "/";
 }

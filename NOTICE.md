@@ -535,3 +535,38 @@ The migration corridors and directional lines are original, research-informed
 illustrations through authored waypoints. They do not reproduce external GIS
 datasets, scientific map artwork or individual GPS tracks. Research references
 and modeling limitations are retained in the Journey's source notes.
+
+## Power to the People election-region reconstruction
+
+The Journey-local Ukraine reconstruction uses **© OpenStreetMap contributors** /
+Wambacher via **geoBoundaries gbOpen**, pinned commit **9469f09**, boundary ID
+`UKR-ADM1-14850775`, representing **2017**. Underlying boundary data and the
+[derived administrative database](public/journeys/power-to-the-people/historical-regions.geojson)
+are distributed under **ODbL 1.0**:
+https://opendatacommons.org/licenses/odbl/1-0/.
+Source: https://www.geoboundaries.org/api/current/gbOpen/UKR/ADM1/.
+
+The 27 units are matched individually to the Ukrainian Central Election
+Commission's **December 26, 2004** repeat-runoff results:
+https://cvk.gov.ua/pls/vp2004/wp301e2e3e.html.
+Later geographic polygons reconstruct those administrative units; this is not
+a surveyed 2004 boundary archive. Natural Earth land (public domain) clips
+coastal waters. Crimea, Sevastopol, Kyiv City and Kyiv Oblast remain distinct.
+The matching display raster, alpha masks and grading grid derive from these same
+polygons. Source checksums, crosswalk, licenses and reproduction notes are in
+`public/journeys/power-to-the-people/SOURCES.md` and `data-audit.json`.
+
+## Bare Minimum historical flag illustrations
+
+`public/journeys/bare-minimum/` contains original flat SVG recreations of simple
+historical flag fields. Period/status captions distinguish the Bruneian Sultan’s
+royal banner, a qualified Afghan black-banner reconstruction and documented
+national flags. These are illustrative historical colors, without a claim of
+standardized historic digital values. The 1906–1959 Brunei stripe geometry and
+current French, Bruneian and Libyan flags reuse the existing public-domain flag
+sources documented above. No third-party photograph or infographic is bundled.
+
+The Journey-local Borneo perimeter derives from the bundled Natural Earth 5.1.2
+country polygons (public domain); city locations reuse GeoNames (CC BY 4.0).
+Historical evidence, asset checksums and reproduction notes are recorded in
+`public/journeys/bare-minimum/SOURCES.md` and `asset-audit.json`.

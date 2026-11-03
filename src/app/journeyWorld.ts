@@ -574,16 +574,44 @@ export function journeyWorld(
             )
         : states!),
       ...islandStates,
+      ...(completion?.contextIds
+        ? Object.fromEntries(
+            completion.contextIds.map((id) => [
+              id,
+              visited?.[id] === "incorrect"
+                ? ("incorrect" as const)
+                : ("hinted" as const),
+            ]),
+          )
+        : {}),
     },
     places: reviewingConstruction
       ? [
           ...(constructionQuestion.places ?? []).filter(
             (p) =>
+              !constructionQuestion.mode.startsWith("city-") &&
               p.displayRole === "reference" &&
               !shapeScene.places.some((existing) => existing.id === p.id),
           ),
           ...shapeScene.places,
-          ...(constructionQuestion.feedbackPlaces ?? [])
+          ...(constructionQuestion.mode.startsWith("city-")
+            ? questionPlaces(
+                constructionQuestion,
+                context,
+                "feedback",
+                constructionResponse.text,
+                !!game.answers.find(
+                  (a) => a.roundId === constructionQuestion.id,
+                )?.correct,
+                {
+                  ...game,
+                  ...constructionResponse,
+                  phase: "feedback",
+                  roundIndex: reviewIndex,
+                },
+              )
+            : (constructionQuestion.feedbackPlaces ?? [])
+          )
             .filter(
               (p) =>
                 !shapeScene.places.some((existing) => existing.id === p.id),

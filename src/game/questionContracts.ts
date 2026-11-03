@@ -402,10 +402,10 @@ export interface Journey {
     mapMode?: "cumulative" | "authored";
     /** Explicit country recap uses the same visited style as ordinary Journeys. */
     regionIds?: string[];
-    /** Required by the authoring audit; also available as manual reduced-motion views. */
+    /** Given geography stays contextual in recap; actual submitted country mistakes take precedence. */
+    contextIds?: string[];
+    /** Required by the authoring audit; reduced motion uses the authored focus. */
     views?: Focus[];
-    /** Default true; false ends the completion tour at its last authored view. */
-    loopViews?: boolean;
     physicalFeatures: PhysicalFeature[];
     overlays?: MapOverlay[];
     mapCaption?: string;
@@ -415,14 +415,12 @@ export interface Journey {
     caption?: string;
     /** Reviewed flag/motif comparison, shown only after the Journey ends. */
     flags?: FlagDisplay[];
-    /** Offer a traditional overview plus manual review of one saved construction at a time. */
+    /** Use the authored construction overview for the completion map. */
     constructionResults?: boolean;
-    /** Start the completed map on this saved response; Overview remains available. */
+    /** Start the completed map on this saved response; for an authored focused recap. */
     initialConstructionRoundId?: string;
     /** Resolved photo-and-distance recap for pin Journeys. */
     photoResults?: boolean;
-    /** Expand saved responses in the completion receipt without changing the map. */
-    answerReviews?: boolean;
   };
   mapAttribution?: { label: string; url: string };
   /** Keep previously visited display geography during subsequent camera travel. */

@@ -40,7 +40,8 @@ export function placeStyle(
       marker: kind === "pin" ? playColors(palette).selected : "#d7dfc9",
       text: kind === "river" || kind === "ocean" ? "#c5dfd0" : "#f0eddf",
       font: "500 26px Manrope, sans-serif",
-      textHeight: kind === "capital" ? 26 : 24,
+      textHeight:
+        kind === "capital" ? 28 : ["city", "town"].includes(kind) ? 26 : 24,
     };
   if (palette === "dusk")
     return {
@@ -48,7 +49,8 @@ export function placeStyle(
       marker: kind === "pin" ? playColors(palette).selected : "#e0d3f4",
       text: kind === "river" || kind === "ocean" ? "#b6f2f4" : "#f2edf9",
       font: "500 26px Manrope, sans-serif",
-      textHeight: kind === "capital" ? 26 : 24,
+      textHeight:
+        kind === "capital" ? 28 : ["city", "town"].includes(kind) ? 26 : 24,
     };
   if (["river", "mountain", "landform", "ocean"].includes(kind))
     return {
@@ -78,14 +80,14 @@ export function placeStyle(
         marker: survey ? "#e4e4e4" : "#e4e8df",
         text: survey ? "#ececec" : "#f4f8ff",
         font: "500 26px Manrope, sans-serif",
-        textHeight: 26,
+        textHeight: 28,
       }
     : {
         shape: "circle",
         marker: survey ? "#d4d4d4" : "#101010",
         text: survey ? "#ececec" : "#f4f8ff",
         font: "500 26px Manrope, sans-serif",
-        textHeight: 24,
+        textHeight: ["city", "town"].includes(kind) ? 26 : 24,
       };
 }
 /** Authored clues stay legible; dense contextual city layers scale by population. */
@@ -200,8 +202,16 @@ export const placeLabelStyle = (
           )
         ? {
             ...base,
-            font: "500 22px Manrope, sans-serif",
-            textHeight: 20,
+            font:
+              ["city", "capital", "town"].includes(place.kind) ||
+              place.answerTarget
+                ? "500 26px Manrope, sans-serif"
+                : "500 22px Manrope, sans-serif",
+            textHeight:
+              ["city", "capital", "town"].includes(place.kind) ||
+              place.answerTarget
+                ? 24
+                : 20,
             text:
               place.visualState === "visited"
                 ? playColors(palette).visited

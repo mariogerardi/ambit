@@ -169,3 +169,115 @@
     width: 100%;
   }
 }
+
+/* Review tools are secondary to the actual question being inspected. */
+.admin-review-toolbar {
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+.admin-review-heading {
+  gap: 2px;
+}
+.admin-review-toolbar .field {
+  gap: 6px;
+  margin: 0;
+}
+.admin-review-control-panel {
+  display: grid;
+  gap: 14px;
+  padding-top: 12px;
+}
+.admin-review-control-panel > .admin-library-actions {
+  margin: 0;
+}
+.admin-review-toolbar .admin-library-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.admin-review-toolbar .admin-library-actions:has(.journey-workbench) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-review-toolbar :is(button, input, select) {
+  box-sizing: border-box;
+  min-height: 44px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
+  border-radius: 8px;
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  padding: 9px 11px;
+  font: 13px var(--font-ui);
+}
+.admin-review-toolbar button {
+  width: 100%;
+  white-space: normal;
+  line-height: 1.35;
+}
+.admin-review-toolbar button:hover {
+  border-color: var(--ui-accent);
+  background: var(--control-hover-background);
+}
+.admin-review-toolbar button:focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+.admin-review-toolbar summary {
+  display: list-item;
+  padding: 7px 0;
+  min-height: 24px;
+  color: var(--ui-accent);
+  font-size: 13px;
+}
+.admin-review-group {
+  min-width: 0;
+  padding: 12px;
+  margin: 0;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.22);
+  border-radius: 8px;
+}
+.admin-review-group legend {
+  padding: 0 5px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.admin-review-captures input {
+  width: 100%;
+  min-width: 0;
+}
+.review-local-badge {
+  font: 12px var(--font-ui);
+  color: var(--ui-muted);
+}
+
+.journey-review-panel {
+  position: absolute;
+  right: 24px;
+  bottom: 96px;
+  z-index: 8;
+  width: 340px;
+  max-height: calc(100dvh - 190px);
+  overflow: auto;
+  pointer-events: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px #0004;
+}
+.journey-review-panel .admin-review-toolbar {
+  margin: 0;
+  background: var(--ui-surface);
+}
+@media (max-width: 700px) {
+  .journey-review-panel {
+    right: 12px;
+    bottom: 12px;
+    width: min(320px, calc(100% - 24px));
+    max-height: 35dvh;
+  }
+  .journey-reviewing .journey-map-notes {
+    margin-bottom: 210px;
+  }
+}
+
+.journey-reviewing .globe-controls {
+  bottom: 48px;
+}

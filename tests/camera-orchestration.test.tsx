@@ -440,7 +440,7 @@ it("starts completion only when saves are ready, cancels animated playback for r
   expect(result.motion).toBe(true);
 });
 
-it("ends an authored finite completion tour at its last view", async () => {
+it("loops authored completion views, including previously finite tours", async () => {
   const definition = {
     ...ANDES_JOURNEY,
     completion: { ...ANDES_JOURNEY.completion!, loopViews: false },
@@ -456,7 +456,6 @@ it("ends an authored finite completion tour at its last view", async () => {
   });
   expect(port.flyover).toHaveBeenCalledExactlyOnceWith(
     definition.completion.views,
-    false,
   );
 });
 

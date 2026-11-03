@@ -31,7 +31,7 @@
   color: var(--ui-text, #fff);
   text-shadow: none;
 }
-.experience .app-menu-content button {
+.experience .app-menu-content :is(a, button) {
   display: flex;
   align-items: center;
   width: 100%;
@@ -90,7 +90,7 @@
   padding-top: 10px;
   border-top: 1px solid rgb(var(--ui-line-rgb) / 0.15);
 }
-.experience .app-menu-secondary button {
+.experience .app-menu-secondary :is(a, button) {
   font-size: 12px;
   color: var(--ui-muted);
 }

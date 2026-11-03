@@ -45,12 +45,6 @@
 .globe-canvas[data-construction-input="erase"] {
   touch-action: none;
 }
-.construction-recap-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-block: 16px;
-}
 .construction-comparison-images {
   display: grid;
   grid-template-columns: 1fr 1fr;

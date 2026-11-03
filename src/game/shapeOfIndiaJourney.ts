@@ -558,7 +558,6 @@ export const SHAPE_OF_INDIA_JOURNEY: Journey = {
       visualState: "visited",
     })),
     constructionResults: true,
-    loopViews: false,
     mapCaption: "The Shape of India · five ways to read one country",
     caption:
       "You began with an outline and ended with people. In between, the same country became a mountain arc, a desert, a plain, a ring of neighbors and a triangle of cities. One map can tell very different stories depending on the shape you look for.",

@@ -195,7 +195,7 @@ it("discloses accuracy without spoilers and gives the density scale before help"
   expect(accuracy).not.toContain("Bangladesh");
 });
 
-it("retains partial recall points and typed mistakes in the completed receipt", () => {
+it("retains partial recall points and saved mistakes without completion review controls", () => {
   const q = journey.rounds.find((q) => q.mode === "country-recall")!;
   let game: GameState = {
     ...initialGame,
@@ -222,9 +222,14 @@ it("retains partial recall points and typed mistakes in the completed receipt", 
   );
   expect(html).toContain('aria-label="1 of 15 points"');
   expect(html).toContain("Six land neighbors");
-  expect(html).toContain("Sri Lanka");
+  expect(game.recall?.entries).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ input: "Sri Lanka", result: "wrong" }),
+    ]),
+  );
+  expect(html).not.toContain("Review your answer");
   expect(html).not.toContain("Still to find:");
-  expect(html).toContain("Incorrect guesses:");
+  expect(html).not.toContain("Incorrect guesses:");
   expect(recalledIds(game.recall)).toContain("wurl:CHN");
   expect(INDIA_DATA.zones).toHaveLength(3);
 });
