@@ -247,6 +247,33 @@ visible at the assisted stage; it stays withheld earlier. Card-order reveal
 markers use submitted slot badges, independently of canonical dates and grading.
 Completion receipts show results without expandable answer reviews. The map retains authored destinations and actual mistakes.
 
+## Native text and explanatory networks
+
+A question can supply `textClue: {text, lang, dir?, reveal: {language,
+translation}}`. The shared `TextClue` renders native Unicode as selectable text;
+language name and translation nodes appear only after commitment. Use a valid
+language tag and RTL where appropriate, without translating the clue early.
+
+`selection: {type: "world"}` includes all supported ADM0 map units, whereas
+`members` retains the existing UN-member roster. Combine world selection with
+neutral candidates for an untinted global search. For `match: "any"`, an assist
+may narrow the displayed valid alternatives while retaining enough qualifying
+answers and a plausible invalid option; it never changes the canonical solution.
+
+`scenes.reveal.network: {regionIds, label}` is explanatory geography. All listed
+countries appear in context color at once; a chosen valid/invalid country keeps
+its real grade. Alternative-answer recaps retain the submitted valid choice, or
+one illustrative solution after a miss, rather than promote the whole network.
+The network's IDs and legend are checked independently of answer eligibility.
+
+`scenes.reveal.orbit: true` finishes the finite reveal at its authored whole-globe
+focus, appending that focus to the views if needed, then resumes the shared
+Home/Explore rotation. These teaching tours use a brief duration scale of the
+existing camera path. Input cancels the handoff; reduced motion stays static.
+`completion.orbit` similarly makes its recap tour finite before rotation. Existing
+tours retain their defaults when these options are absent.
+See `recipe:multilingual-network` for an executable scoped demonstration.
+
 ## Bearing Intersection composition
 
 `PRESENTATION_RECIPES` in `recipes.ts` includes `recipe:bearing-intersection`.

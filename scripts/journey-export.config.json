@@ -38,6 +38,7 @@
     "src/game/authoredPlaces.ts",
     "src/game/OrderAnswer.tsx",
     "src/game/QuestionSupport.tsx",
+    "src/game/TextClue.tsx",
     "src/app/AdminJourneyReview.tsx",
     "src/app/journeyReview.ts",
     "src/game/ordering.ts",

@@ -1,3 +1,4 @@
+import { TextClue } from "./TextClue";
 import { ConstructionReview, IslandScoring } from "./ConstructionAnswer";
 import { constructionRule, reviewedConstruction } from "./construction";
 import { QuestionSources } from "./QuestionSources";
@@ -317,6 +318,12 @@ export function GameShell({
               {questionPrompt(round, context)}
             </span>
           </h1>
+          {round.textClue && (
+            <TextClue
+              clue={round.textClue}
+              revealed={game.phase === "feedback"}
+            />
+          )}
           {round.image?.presentation !== "photo" && clueImage}
           {game.phase === "playing" ? (
             <>

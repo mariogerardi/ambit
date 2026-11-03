@@ -254,6 +254,12 @@ export function feedbackLegend(
             ? "Incorrect match"
             : "Incorrect pick",
     });
+  if (
+    game.phase === "feedback" &&
+    question.feedbackNetwork &&
+    question.feedbackNetwork.regionIds.some((id) => states[id] === "hinted")
+  )
+    entries.push({ key: "hint", label: question.feedbackNetwork.label });
   // Context and ordinary background are not results. Legends explain only
   // distinctions that help read a response, never every color on the globe.
   if (

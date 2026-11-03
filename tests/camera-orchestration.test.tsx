@@ -563,3 +563,71 @@ it("frames a late-loaded puzzle focus even when the phase and route key have not
   await render({ journey: { ...options.journey, focus: { ...focus } } });
   expect(port.focus).not.toHaveBeenCalled();
 });
+
+it("finishes a network tour in shared overview rotation and cancels the handoff on interaction", async () => {
+  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+    "../src/game/whereIsItOfficialJourney"
+  );
+  const round = definition.rounds[0];
+  await render({
+    mode: "practice",
+    transitionKey: "/review?state=correct",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      phase: "feedback",
+      roundIndex: 0,
+      focus: round.feedbackFocus,
+    },
+  });
+  const call = vi.mocked(port.flyover).mock.calls.at(-1)!;
+  expect(call[0]).toBe(round.feedbackViews);
+  expect(call[1]).toBe(false);
+  expect(result.motion).toBe(false);
+  await act(async () => call[2]!.onComplete!());
+  expect(result.motion).toBe(true);
+  await render({
+    transitionKey: "/review?state=missed",
+    journey: {
+      ...options.journey,
+      phase: "feedback",
+      roundIndex: 1,
+      focus: definition.rounds[1].feedbackFocus,
+    },
+  });
+  const interrupted = vi.mocked(port.flyover).mock.calls.at(-1)![2]!
+    .onComplete!;
+  await act(async () => result.stop());
+  await act(async () => interrupted());
+  expect(result.motion).toBe(false);
+  await render({ journey: { ...options.journey, phase: "finished" } });
+  const completion = vi.mocked(port.flyover).mock.calls.at(-1)!;
+  expect(completion[1]).toBe(false);
+  await act(async () => completion[2]!.onComplete!());
+  expect(result.motion).toBe(true);
+});
+it("uses the final network overview without rotation under reduced motion", async () => {
+  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+    "../src/game/whereIsItOfficialJourney"
+  );
+  Object.defineProperty(media, "matches", { configurable: true, value: true });
+  await act(async () => mediaChange!());
+  await render({
+    mode: "practice",
+    transitionKey: "/review?reduced",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      phase: "feedback",
+      roundIndex: 0,
+      focus: definition.rounds[0].feedbackFocus,
+    },
+  });
+  expect(port.flyover).not.toHaveBeenCalled();
+  expect(result.motion).toBe(false);
+  expect(port.focus).toHaveBeenLastCalledWith(
+    definition.rounds[0].feedbackFocus,
+  );
+});

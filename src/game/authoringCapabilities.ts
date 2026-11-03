@@ -46,6 +46,14 @@ export function authoringCapabilities(
       requires.push(
         "Canonical grading geometry/grid, independently of display geometry",
       );
+    if (question.textClue)
+      requires.push(
+        "Attested native-script text, language/direction metadata and a reveal-only translation",
+      );
+    if (question.feedbackNetwork)
+      requires.push(
+        "A sourced explanatory region set, independent of submitted-answer grading",
+      );
     if (
       question.image ||
       question.feedbackImage ||
@@ -74,6 +82,9 @@ export function authoringCapabilities(
         namedChoices: question.disclosure.namedChoices,
         hoverNames: question.disclosure.hoverNames,
         commitment: question.commitment,
+        nativeText: !!question.textClue,
+        explanatoryNetwork: !!question.feedbackNetwork,
+        overviewRotation: !!question.feedbackOrbit,
       },
       requires,
       limits: [

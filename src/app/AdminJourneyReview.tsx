@@ -175,6 +175,9 @@ export function AdminJourneyReview({
         <div className="admin-review-copy-pair">
           <section aria-label="Before answering">
             <strong>Before answering</strong>
+            {editorial.before.expression && (
+              <p>{editorial.before.expression}</p>
+            )}
             {editorial.before.leadIn && <p>{editorial.before.leadIn}</p>}
             <p>{editorial.before.prompt}</p>
             {editorial.before.instruction && (

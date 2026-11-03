@@ -108,11 +108,13 @@ export function useCameraOrchestration({
   );
   const previous = useRef<string | undefined>(undefined);
   const pendingExploreFocus = useRef<string | undefined>(undefined);
+  const pendingOrbit = useRef<(() => void) | undefined>(undefined);
   const frame = useCallback(
     (focus: Focus) => globe.current?.focus(focus),
     [globe],
   );
   const stop = useCallback(() => {
+    pendingOrbit.current = undefined;
     setMotion(false);
     setReviewTourPaused(true);
   }, []);
@@ -352,6 +354,19 @@ export function useCameraOrchestration({
     session?.phase,
     frame,
   ]);
+  const tourThenOrbit = (views: Focus[]) => {
+    const resume = () => {
+      if (pendingOrbit.current !== resume) return;
+      pendingOrbit.current = undefined;
+      setMotion(!rotationPaused.current);
+    };
+    globe.current?.flyover(views, false, {
+      onComplete: resume,
+      durationScale: 0.45,
+    });
+    // Starting a globe tour cancels the prior interaction/motion intent synchronously.
+    pendingOrbit.current = resume;
+  };
   const authoredSceneViews =
     phase === "playing"
       ? round?.introViews
@@ -381,8 +396,13 @@ export function useCameraOrchestration({
       return;
     stop();
     if (reduced || sceneHelp) frame(journeyFocus ?? sceneViews.at(-1)!);
+    else if (phase === "feedback" && round?.feedbackOrbit)
+      tourThenOrbit(sceneViews);
     else globe.current?.flyover(sceneViews, false);
-    return () => globe.current?.cancelFlyover();
+    return () => {
+      pendingOrbit.current = undefined;
+      globe.current?.cancelFlyover();
+    };
     // Response edits leave the player's orbit alone. The transition/help stage
     // owns playback; reduced motion uses the current effective scene focus.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -411,9 +431,13 @@ export function useCameraOrchestration({
     clearHover();
     if (phase === "finished" && journey.completion) {
       if (!reduced && journey.completion.views?.length) {
-        globe.current?.flyover(journey.completion.views);
+        if (journey.completion.orbit) tourThenOrbit(journey.completion.views);
+        else globe.current?.flyover(journey.completion.views);
       } else frame(journey.completion.focus);
-      return () => globe.current?.cancelFlyover();
+      return () => {
+        pendingOrbit.current = undefined;
+        globe.current?.cancelFlyover();
+      };
     }
     const stops = journeyStops(journey, context, answers);
     if (reduced && stops[0]) frame(stops[0]);

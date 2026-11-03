@@ -197,6 +197,10 @@ backend files go after `python3 scripts/run-python-tests.py`.
 
 For changes that cross these areas, also select checks at the affected boundaries:
 
+- Native text/network presentation or overview handoff: run
+  `tests/where-is-it-official-journey.test.tsx`, `tests/camera.test.ts`,
+  `tests/camera-orchestration.test.tsx`, `tests/question-contracts.test.ts` and
+  `tests/journey-review-lifecycle.test.tsx` as relevant.
 - Authoring capability evidence, recipe lifecycle or editorial warnings: run
   `tests/authoring-capabilities.test.ts`, `tests/journey-authoring.test.tsx` and
   `tests/journey-workbench.test.tsx`; exporter changes also use

@@ -73,11 +73,18 @@ export function reviewQuestionCopy(
   }
   return {
     before: {
+      expression: question.textClue?.text,
       leadIn: question.leadIn ?? "",
       prompt,
       instruction: question.instruction,
     },
-    after: { heading, answer, explanation: reveal },
+    after: {
+      heading,
+      answer,
+      explanation: reveal,
+      language: question.textClue?.reveal.language,
+      translation: question.textClue?.reveal.translation,
+    },
     warnings,
   };
 }

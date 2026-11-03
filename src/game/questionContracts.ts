@@ -159,6 +159,13 @@ export interface Question {
   prompt: string;
   /** Brief, spoiler-safe context connecting this stop to the Journey. */
   leadIn?: string;
+  /** Native-script clue; language name and translation are reveal-only. */
+  textClue?: {
+    text: string;
+    lang: string;
+    dir?: "ltr" | "rtl" | "auto";
+    reveal: { language: string; translation: string };
+  };
   /** A semantic clue first; an optional, separately requested change to the task display. */
   guidance?: {
     hint: string;
@@ -216,6 +223,8 @@ export interface Question {
   selection:
     | { type: "neighbors"; of: string }
     | { type: "members"; excludeIds?: string[] }
+    /** All supported ADM0 map units, including units outside the UN-member roster. */
+    | { type: "world"; excludeIds?: string[] }
     | { type: "ids"; ids: string[] }
     | { type: "none" };
   disclosure: {
@@ -237,6 +246,10 @@ export interface Question {
   feedbackFocus?: Focus;
   /** Finite reveal sequence; distant missed pins retain their comparison view. */
   feedbackViews?: Focus[];
+  /** Resume the shared overview rotation after a finite reveal tour. */
+  feedbackOrbit?: boolean;
+  /** Explanatory geography, distinct from selected/graded answers. */
+  feedbackNetwork?: { regionIds: string[]; label: string };
   explanation: string;
   /** Optional praise matching the knowledge/skill, rather than the input widget. */
   correctFeedback?: string;
@@ -406,6 +419,8 @@ export interface Journey {
     contextIds?: string[];
     /** Required by the authoring audit; reduced motion uses the authored focus. */
     views?: Focus[];
+    /** One finite recap followed by shared whole-globe rotation. */
+    orbit?: boolean;
     physicalFeatures: PhysicalFeature[];
     overlays?: MapOverlay[];
     mapCaption?: string;
@@ -466,6 +481,7 @@ export type QuestionPresentation = Partial<
     | "selection"
     | "commitment"
     | "partialCredit"
+    | "textClue"
     | "choices"
     | "inputLabel"
     | "orderLabels"

@@ -2025,3 +2025,33 @@
   color: var(--ui-muted);
   font-size: 14px;
 }
+
+.journey-text-clue {
+  margin: 22px 0;
+}
+.journey-text-clue blockquote {
+  margin: 0;
+  color: var(--ui-text);
+  font:
+    500 clamp(24px, 2.3vw, 34px) / 1.65 var(--font-ui),
+    Arial,
+    sans-serif;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  user-select: text;
+  text-align: start;
+}
+.journey-text-clue figcaption {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+.journey-text-clue figcaption strong {
+  color: var(--ui-text);
+  font-size: 18px;
+}
+.journey-text-clue figcaption span {
+  color: var(--ui-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}

@@ -100,7 +100,11 @@ export interface GlobeHandle {
   focus(focus: Focus, fitToViewport?: boolean | "world"): void;
   orbitView(focus?: Focus): Focus | undefined;
   cancelFocus(): void;
-  flyover(stops: Focus[], loop?: boolean): void;
+  flyover(
+    stops: Focus[],
+    loop?: boolean,
+    options?: { onComplete?: () => void; durationScale?: number },
+  ): void;
   cancelFlyover(): void;
   pulseIslands(): void;
   fidget(): void;
@@ -814,7 +818,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             fitAltitude,
           );
         },
-        flyover(stops, loop = true) {
+        flyover(stops, loop = true, options) {
           clearInspection();
           if (!globe.current) return;
           stop();
@@ -837,6 +841,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
             current.current.reduced,
             loop,
             (index) => current.current.onFlyoverStep?.(index),
+            options?.onComplete,
+            options?.durationScale,
           );
         },
         pulseIslands() {

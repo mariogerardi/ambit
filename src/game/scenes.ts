@@ -28,6 +28,8 @@ export interface AssistScene {
 }
 export interface RevealScene {
   focus?: Focus;
+  orbit?: boolean;
+  network?: { regionIds: string[]; label: string };
   /** One pass through the revealed geography; interrupted by globe input. */
   views?: Focus[];
   /** Known geography retains context color; answered regions are separate. */
@@ -75,7 +77,21 @@ export function compileQuestionScenes(
       ...play.map,
     };
   assign("feedbackFocus", reveal?.focus);
-  assign("feedbackViews", reveal?.views);
+  const revealViews = reveal?.views;
+  const lastView = revealViews?.at(-1);
+  assign(
+    "feedbackViews",
+    reveal?.orbit &&
+      reveal.focus &&
+      (!lastView ||
+        lastView.lat !== reveal.focus.lat ||
+        lastView.lng !== reveal.focus.lng ||
+        lastView.altitude !== reveal.focus.altitude)
+      ? [...(revealViews ?? []), reveal.focus]
+      : revealViews,
+  );
+  assign("feedbackOrbit", reveal?.orbit);
+  assign("feedbackNetwork", reveal?.network);
   assign("feedbackHintIds", reveal?.contextIds);
   assign("feedbackContextIds", reveal?.answerIds);
   assign("feedbackPlaces", reveal?.places);

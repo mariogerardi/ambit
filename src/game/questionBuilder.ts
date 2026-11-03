@@ -40,6 +40,7 @@ export function definePresentation<T extends QuestionPresentation>(
     "constructionExampleFootprint",
     "constructionInitial",
     "partialCredit",
+    "textClue",
   ];
   if (forbidden.some((key) => key in presentation))
     throw Error(
@@ -56,6 +57,28 @@ export function validateQuestionContract(q: Question): void {
   const fail = (message: string): never => {
     throw Error(`Invalid question contract (${q.id}): ${message}`);
   };
+  if (
+    q.textClue &&
+    (!q.textClue.text.trim() ||
+      !/^[a-z]{2,3}(?:-[A-Za-z0-9]+)*$/.test(q.textClue.lang) ||
+      !q.textClue.reveal.language.trim() ||
+      !q.textClue.reveal.translation.trim() ||
+      (q.textClue.dir !== undefined &&
+        !["ltr", "rtl", "auto"].includes(q.textClue.dir)))
+  )
+    fail(
+      "text clues require native text, a language tag and a reveal-only language/translation",
+    );
+  if (
+    q.feedbackNetwork &&
+    (!q.feedbackNetwork.regionIds.length ||
+      !q.feedbackNetwork.label.trim() ||
+      new Set(q.feedbackNetwork.regionIds).size !==
+        q.feedbackNetwork.regionIds.length)
+  )
+    fail("explanatory networks require distinct regions and a legend label");
+  if (q.feedbackOrbit && (q.feedbackFocus?.altitude ?? 0) < 1.65)
+    fail("a rotating reveal requires a whole-globe final focus");
   const definition = mechanicFor(q);
   const allowed = definition?.rules;
   if (!allowed?.includes(q.rule.type))

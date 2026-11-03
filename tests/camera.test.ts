@@ -396,9 +396,13 @@ describe("camera travel", () => {
     expect(position).toEqual(stopped);
   });
 
-  it.each([1, 2])(
-    "finishes a finite %s-stop scene at its last view without looping and allows interruption",
-    (count) => {
+  it.each([
+    [1, 1],
+    [2, 1],
+    [2, 0.45],
+  ])(
+    "finishes a finite %s-stop scene at pace %s without looping and allows interruption",
+    (count, pace) => {
       let now = 0,
         nextId = 0;
       const callbacks = new Map<number, FrameRequestCallback>();
@@ -433,19 +437,23 @@ describe("camera travel", () => {
         }
       };
       const tour = new CameraFlyover();
-      tour.start(port, stops, false, false);
-      advance(25000);
+      const completed = vi.fn();
+      tour.start(port, stops, false, false, undefined, completed, pace);
+      advance(25000 * pace);
+      expect(completed).toHaveBeenCalledOnce();
       expect(position).toEqual(stops.at(-1));
       expect(tour.active).toBe(false);
       expect(callbacks.size).toBe(0);
       advance(20000);
       expect(position).toEqual(stops.at(-1));
-      tour.start(port, stops, false, false);
+      completed.mockClear();
+      tour.start(port, stops, false, false, undefined, completed, pace);
       advance(100);
       tour.cancel();
       const interrupted = { ...position };
-      advance(25000);
+      advance(25000 * pace);
       expect(position).toEqual(interrupted);
+      expect(completed).not.toHaveBeenCalled();
       expect(callbacks.size).toBe(0);
     },
   );
