@@ -124,16 +124,14 @@
 .archive-calendar td button {
   display: grid;
   place-items: center;
-  align-content: center;
-  gap: 1px;
   width: 100%;
-  min-height: 44px;
+  min-height: 32px;
   padding: 3px 2px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
   border-radius: 9px;
   background: rgb(var(--ui-surface-rgb) / 0.8);
   color: var(--ui-text);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
@@ -149,7 +147,7 @@
   outline: 2px solid var(--ui-accent);
   outline-offset: 1px;
 }
-.archive-calendar td button[data-status="completed"] :is(span, small) {
+.archive-calendar td button[data-status="completed"] span {
   color: var(--ui-accent);
 }
 .archive-calendar td button:disabled {
@@ -160,12 +158,6 @@
   display: flex;
   align-items: center;
   gap: 3px;
-}
-.experience .archive-calendar td small {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.2;
-  color: var(--ui-muted);
 }
 .archive-completed-icon {
   width: 13px;
@@ -205,6 +197,11 @@
   margin-bottom: 18px;
   color: var(--ui-muted);
   font-size: 11px;
+}
+@media (pointer: coarse) {
+  .archive-calendar td button {
+    min-height: 44px;
+  }
 }
 @media (max-width: 700px) {
   .archive-completed-icon {
