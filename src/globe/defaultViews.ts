@@ -43,3 +43,8 @@ export function studyCameraTarget(
     };
   return normalWorldView(view, altitude) ? undefined : nextDefault(altitude);
 }
+
+/** Answer-independent, fresh continental orientation for a new global search. */
+export function randomWorldView(altitude: number): Focus {
+  return createDefaultViewCycle()(altitude);
+}

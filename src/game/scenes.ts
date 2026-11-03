@@ -8,6 +8,8 @@ import type { Question } from "./questionContracts";
 
 export interface PlayScene {
   focus?: Focus;
+  /** Fit all eligible region outlines; an authored focus is optional. */
+  framing?: "selection";
   /** One pass through broad orientation views, ending at the playable focus. */
   views?: Focus[];
   contextIds?: string[];
@@ -28,6 +30,9 @@ export interface AssistScene {
 }
 export interface RevealScene {
   focus?: Focus;
+  orbit?: boolean;
+  returnToSelection?: boolean;
+  network?: { regionIds: string[]; label: string };
   /** One pass through the revealed geography; interrupted by globe input. */
   views?: Focus[];
   /** Known geography retains context color; answered regions are separate. */
@@ -48,7 +53,12 @@ export function compileQuestionScenes(
   question: Omit<Question, "focus"> & { focus?: Focus },
 ): Question {
   const { play, assist, reveal } = question.scenes ?? {};
-  const focus = play?.focus ?? question.focus;
+  const focus =
+    play?.focus ??
+    question.focus ??
+    (play?.framing === "selection"
+      ? { lat: 0, lng: 0, altitude: 2.2 }
+      : undefined);
   if (!focus)
     throw Error(`Question requires a playable focus: ${question.id}.`);
   if (!question.scenes) return question as Question;
@@ -59,6 +69,7 @@ export function compileQuestionScenes(
   ) => {
     if (value !== undefined) compiled[key] = value;
   };
+  assign("playFraming", play?.framing);
   assign("contextIds", play?.contextIds);
   assign("introViews", play?.views);
   assign("candidateRegionIds", play?.candidateRegionIds);
@@ -75,7 +86,30 @@ export function compileQuestionScenes(
       ...play.map,
     };
   assign("feedbackFocus", reveal?.focus);
-  assign("feedbackViews", reveal?.views);
+  const revealViews = reveal?.views;
+  const lastView = revealViews?.at(-1);
+  assign(
+    "feedbackViews",
+    reveal?.orbit &&
+      reveal.focus &&
+      (!lastView ||
+        lastView.lat !== reveal.focus.lat ||
+        lastView.lng !== reveal.focus.lng ||
+        lastView.altitude !== reveal.focus.altitude)
+      ? [...(revealViews ?? []), reveal.focus]
+      : revealViews,
+  );
+  assign("feedbackOrbit", reveal?.orbit);
+  assign("feedbackReturnToSelection", reveal?.returnToSelection);
+  assign("feedbackNetwork", reveal?.network);
+  // A single-country network tour returns to the player's choice unless overridden.
+  if (
+    compiled.mode === "map-single" &&
+    compiled.feedbackNetwork &&
+    compiled.feedbackReturnToSelection === undefined &&
+    !compiled.feedbackOrbit
+  )
+    compiled.feedbackReturnToSelection = true;
   assign("feedbackHintIds", reveal?.contextIds);
   assign("feedbackContextIds", reveal?.answerIds);
   assign("feedbackPlaces", reveal?.places);

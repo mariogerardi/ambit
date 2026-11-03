@@ -48,27 +48,42 @@ const params = new URLSearchParams(location.search);
 const registered = JOURNEY_INDEX.find(
   (j) => j.path === `/journey/${params.get("journey") ?? "down-the-danube"}`,
 );
+const recipeId = params.get("recipe") ?? undefined;
 const filename =
   params.get("module") ?? registered?.module.replace(/^\.\//, "");
 const modulePath = `../src/game/${filename?.replace(/\.ts$/, "")}.ts`;
 const root = createRoot(document.getElementById("root")!);
 async function open() {
-  const loader = modules[modulePath];
-  if (!loader)
-    throw Error("Choose a Journey source file from src/game/*Journey.ts.");
-  const exports = await loader();
-  const journey = Object.values(exports).find(
-    (value): value is Journey =>
-      !!value &&
-      typeof value === "object" &&
-      "rounds" in value &&
-      Array.isArray(value.rounds) &&
-      "id" in value &&
-      typeof value.id === "string" &&
-      (!params.get("id") || value.id === params.get("id")),
+  const { MECHANIC_RECIPES, PRESENTATION_RECIPES } = await import(
+    "../src/game/recipes"
   );
-  if (!journey)
-    throw Error("The module does not export the requested Journey.");
+  const recipes = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES];
+  let journey: Journey | undefined;
+  if (recipeId) {
+    const question = recipes.find(
+      (question) => question.id === `recipe:${recipeId}`,
+    );
+    if (!question) throw Error("Unknown mechanic recipe.");
+    const { recipeJourney } = await import("../src/game/authoringCapabilities");
+    journey = recipeJourney(question);
+  } else {
+    const loader = modules[modulePath];
+    if (!loader)
+      throw Error("Choose a Journey source file from src/game/*Journey.ts.");
+    const exports = await loader();
+    journey = Object.values(exports).find(
+      (value): value is Journey =>
+        !!value &&
+        typeof value === "object" &&
+        "rounds" in value &&
+        Array.isArray(value.rounds) &&
+        "id" in value &&
+        typeof value.id === "string" &&
+        (!params.get("id") || value.id === params.get("id")),
+    );
+    if (!journey)
+      throw Error("The module does not export the requested Journey.");
+  }
   validateJourneyContracts(journey);
   if (
     params.get("question") &&
@@ -97,6 +112,8 @@ async function open() {
             <JourneyWorkbench
               journey={journey}
               filename={filename!}
+              recipes={recipes.map(({ id, title }) => ({ id, title }))}
+              recipeId={recipeId}
               modules={Object.keys(modules)
                 .map((path) => path.split("/").at(-1)!)
                 .sort()}
@@ -109,7 +126,8 @@ async function open() {
           },
           onInspect(index, state) {
             const url = new URL(location.href);
-            url.searchParams.set("module", filename!);
+            if (recipeId) url.searchParams.delete("module");
+            else url.searchParams.set("module", filename!);
             url.searchParams.set("question", journey!.rounds[index].id);
             url.searchParams.set("state", state);
             url.searchParams.set("seed", String(seed));

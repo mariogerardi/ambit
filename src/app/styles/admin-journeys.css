@@ -134,7 +134,7 @@
   gap: 14px;
   border: 1px solid rgb(var(--ui-accent-rgb) / 0.4);
   border-radius: 12px;
-  background: rgb(var(--ui-surface-rgb) / 0.85);
+  background: rgb(var(--ui-surface-rgb));
 }
 .admin-review-heading {
   display: grid;
@@ -204,7 +204,7 @@
   min-height: 44px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
   border-radius: 8px;
-  background: var(--ui-surface);
+  background: rgb(var(--ui-surface-rgb));
   color: var(--ui-text);
   padding: 9px 11px;
   font: 13px var(--font-ui);
@@ -261,10 +261,11 @@
   pointer-events: auto;
   border-radius: 12px;
   box-shadow: 0 8px 32px #0004;
+  background: rgb(var(--ui-surface-rgb));
 }
 .journey-review-panel .admin-review-toolbar {
   margin: 0;
-  background: var(--ui-surface);
+  background: rgb(var(--ui-surface-rgb));
 }
 @media (max-width: 700px) {
   .journey-review-panel {
@@ -280,4 +281,28 @@
 
 .journey-reviewing .globe-controls {
   bottom: 48px;
+}
+
+/* Keep account and navigation menus above the independent review panel on all viewports. */
+.experience.journey-reviewing .experience-header {
+  z-index: 9;
+}
+
+.admin-review-copy-pair {
+  display: grid;
+  gap: 12px;
+}
+.admin-review-copy-pair section {
+  padding: 10px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
+  border-radius: 8px;
+}
+.admin-review-copy-pair p {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+.admin-review-editorial li {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 8px;
 }

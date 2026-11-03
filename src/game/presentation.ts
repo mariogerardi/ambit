@@ -565,13 +565,33 @@ export function questionRegions(
   return result;
 }
 
+/** Neutral full-world searches can begin in motion; authored geographic clues keep their framing. */
+export function isWholeGlobeSearch(question: Question) {
+  return (
+    mechanicFor(question).mapSelection === "regions" &&
+    ["members", "world"].includes(question.selection.type) &&
+    question.map?.candidates === "neutral" &&
+    ![
+      question.contextIds,
+      question.candidateRegionIds,
+      question.places,
+      question.overlays,
+      question.physicalFeatures,
+      question.clueLocators,
+      question.highlightParts,
+      question.importedRegions,
+      question.introViews,
+    ].some((items) => items?.length)
+  );
+}
+
 export function questionVisualStates(
   question: Question,
   context: QuestionContext,
   game: GameState,
 ) {
   const wholeWorld =
-    question.selection.type === "members" &&
+    ["members", "world"].includes(question.selection.type) &&
     mechanicFor(question).mapSelection === "regions";
   const states: Record<string, VisualState> = Object.fromEntries(
     [...context.regions, ...(question.importedRegions ?? [])].map((r) => [
@@ -580,7 +600,7 @@ export function questionVisualStates(
       (question.map?.background === "open-search" ||
         (wholeWorld &&
           question.map?.candidates === "neutral" &&
-          context.members.has(r.id)))
+          (question.selection.type === "world" || context.members.has(r.id))))
         ? "surface"
         : question.map?.neutralRegions
           ? "default"
@@ -779,6 +799,10 @@ export function questionVisualStates(
           (item.state !== "disabled" || states[id] !== "hinted")
         )
           states[id] = item.state;
+  // A network explains the distribution without claiming every member was selected.
+  for (const id of question.feedbackNetwork?.regionIds ?? [])
+    if (context.targets.has(id) && !game.selectedIds.includes(id))
+      states[id] = "hinted";
   // An authored sequence reveal explains the solution; assignment errors remain
   // in the response review, while an actually chosen spare retains its wrong color.
   if (question.map?.revealOrder)
@@ -833,6 +857,9 @@ export function journeyVisitedStates(
               : solutionIds(question, context).slice(0, question.count),
           )
         : undefined;
+    if (example && !answer.correct && question.feedbackNetwork)
+      for (const id of example)
+        if (context.targets.has(id)) states[id] = "visited";
     for (const [id, state] of Object.entries(
       questionVisualStates(question, context, review),
     ))

@@ -1,3 +1,4 @@
+import { isWholeGlobeSearch } from "../game/presentation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isStudyPinPrompt, studyPinTarget } from "../study/pins";
 import type { RefObject } from "react";
@@ -6,6 +7,7 @@ import type { GlobeHandle } from "../globe/GlobeView";
 import {
   createDefaultViewCycle,
   normalWorldView,
+  randomWorldView,
   studyCameraTarget,
 } from "../globe/defaultViews";
 import { worldAltitude } from "../globe/camera";
@@ -78,11 +80,15 @@ export function useCameraOrchestration({
     dailyReady,
   } = journeyCamera;
   const round = journey.rounds[roundIndex];
+  const wholeGlobeSearch =
+    isJourney && phase === "playing" && !!round && isWholeGlobeSearch(round);
+  const wholeGlobeHelp = wholeGlobeSearch ? help?.[round.id] : undefined;
   const helpFraming =
     isJourney &&
     round &&
     phase === "playing" &&
-    ((help?.[round.id] === "assisted" && !!round.guidance?.assist?.focus) ||
+    ((help?.[round.id] === "assisted" &&
+      (!!round.guidance?.assist?.focus || round.playFraming === "selection")) ||
       (help?.[round.id] === "hinted" && !!round.guidance?.hintMap?.focus))
       ? help?.[round.id]
       : undefined;
@@ -108,11 +114,14 @@ export function useCameraOrchestration({
   );
   const previous = useRef<string | undefined>(undefined);
   const pendingExploreFocus = useRef<string | undefined>(undefined);
+  const worldSearchVisit = useRef<string | undefined>(undefined);
+  const pendingOrbit = useRef<(() => void) | undefined>(undefined);
   const frame = useCallback(
     (focus: Focus) => globe.current?.focus(focus),
     [globe],
   );
   const stop = useCallback(() => {
+    pendingOrbit.current = undefined;
     setMotion(false);
     setReviewTourPaused(true);
   }, []);
@@ -267,9 +276,28 @@ export function useCameraOrchestration({
     }
     const old = previous.current;
     if (isJourney && (phase === "finished" || phase === "failed")) {
+      worldSearchVisit.current = undefined;
       previous.current = cameraKey;
       return;
     }
+    if (wholeGlobeSearch && !helpFraming) {
+      const visit = `${cameraKey}:${journey.id}:${round.id}`;
+      if (worldSearchVisit.current !== visit) {
+        worldSearchVisit.current = visit;
+        clearHover();
+        const view = globe.current?.view();
+        const worldZoom = altitude();
+        if (!(motion && normalWorldView(view, worldZoom))) {
+          globe.current?.cancelFocus();
+          frame(randomWorldView(worldZoom));
+        }
+        setMotion(!reduced && !wholeGlobeHelp && !rotationPaused.current);
+      }
+      if (wholeGlobeHelp || reduced) stop();
+      previous.current = cameraKey;
+      return;
+    }
+    worldSearchVisit.current = undefined;
     if (old !== cameraKey) {
       if (old === undefined && mode === "home") {
         setMotion(!rotationPaused.current);
@@ -341,6 +369,9 @@ export function useCameraOrchestration({
     mode === "minigames" ? journeyFocus?.lng : undefined,
     mode === "minigames" ? journeyFocus?.altitude : undefined,
     helpFraming,
+    wholeGlobeSearch,
+    wholeGlobeHelp,
+    reduced,
     namedRegions.length,
     phase,
     roundIndex,
@@ -352,6 +383,19 @@ export function useCameraOrchestration({
     session?.phase,
     frame,
   ]);
+  const tourThenOrbit = (views: Focus[]) => {
+    const resume = () => {
+      if (pendingOrbit.current !== resume) return;
+      pendingOrbit.current = undefined;
+      setMotion(!rotationPaused.current);
+    };
+    globe.current?.flyover(views, false, {
+      onComplete: resume,
+      durationScale: 0.45,
+    });
+    // Starting a globe tour cancels the prior interaction/motion intent synchronously.
+    pendingOrbit.current = resume;
+  };
   const authoredSceneViews =
     phase === "playing"
       ? round?.introViews
@@ -359,16 +403,25 @@ export function useCameraOrchestration({
           (round?.mode !== "pin" || answers.at(-1)?.correct)
         ? round?.feedbackViews
         : undefined;
-  // Finish a teaching flyover with both bearing directions in view.
+  // End authored introductions/reveals at their effective framing destination.
   const sceneViews = useMemo(
     () =>
-      phase === "feedback" &&
-      round?.mode === "compass-bearing" &&
+      ((phase === "feedback" &&
+        (round?.mode === "compass-bearing" ||
+          round?.feedbackReturnToSelection)) ||
+        (phase === "playing" && round?.playFraming === "selection")) &&
       authoredSceneViews?.length &&
       journeyFocus
         ? [...authoredSceneViews, journeyFocus]
         : authoredSceneViews,
-    [authoredSceneViews, phase, round?.mode, journeyFocus],
+    [
+      authoredSceneViews,
+      phase,
+      round?.mode,
+      round?.feedbackReturnToSelection,
+      round?.playFraming,
+      journeyFocus,
+    ],
   );
   const sceneHelp = phase === "playing" ? help?.[round?.id] : undefined;
   useEffect(() => {
@@ -381,8 +434,15 @@ export function useCameraOrchestration({
       return;
     stop();
     if (reduced || sceneHelp) frame(journeyFocus ?? sceneViews.at(-1)!);
+    else if (phase === "feedback" && round?.feedbackOrbit)
+      tourThenOrbit(sceneViews);
+    else if (round?.feedbackReturnToSelection)
+      globe.current?.flyover(sceneViews, false, { durationScale: 0.45 });
     else globe.current?.flyover(sceneViews, false);
-    return () => globe.current?.cancelFlyover();
+    return () => {
+      pendingOrbit.current = undefined;
+      globe.current?.cancelFlyover();
+    };
     // Response edits leave the player's orbit alone. The transition/help stage
     // owns playback; reduced motion uses the current effective scene focus.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -411,9 +471,13 @@ export function useCameraOrchestration({
     clearHover();
     if (phase === "finished" && journey.completion) {
       if (!reduced && journey.completion.views?.length) {
-        globe.current?.flyover(journey.completion.views);
+        if (journey.completion.orbit) tourThenOrbit(journey.completion.views);
+        else globe.current?.flyover(journey.completion.views);
       } else frame(journey.completion.focus);
-      return () => globe.current?.cancelFlyover();
+      return () => {
+        pendingOrbit.current = undefined;
+        globe.current?.cancelFlyover();
+      };
     }
     const stops = journeyStops(journey, context, answers);
     if (reduced && stops[0]) frame(stops[0]);

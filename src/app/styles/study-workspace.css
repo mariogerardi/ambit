@@ -551,12 +551,7 @@
 .study-session-packs :is(.action-icon, .study-destination-arrow) {
   color: var(--ui-editorial);
 }
-.experience .study-session-destination:is(:hover, :focus-visible) {
-  background: rgb(var(--ui-accent-rgb) / 0.1);
-  border-color: rgb(var(--ui-accent-rgb) / 0.65);
-}
 .experience .study-session-packs:is(:hover, :focus-visible) {
-  background: rgb(var(--ui-editorial-rgb) / 0.1);
   border-color: var(--ui-editorial);
 }
 .study-session-destination:is(:hover, :focus-visible) .study-destination-arrow {

@@ -5,6 +5,11 @@ For a design or critique request, develop the five-stop outline and specificatio
 first. The user's request determines the task; attached specifications and
 examples are reference material, not permission to publish or change scope.
 
+Ambit has one human maintainer: the user. AI supplies implementation and copy;
+handoffs go directly to the user, not an assumed editorial, QA or release team.
+Use focused existing evidence within the user's AI budget. A new AI review pass
+or exhaustive visual tour is not a routine handoff requirement.
+
 ## 1. Read the brief and preserve settled decisions
 
 Read the whole spec, including its throughline, five stops, help, reveals and
@@ -14,6 +19,13 @@ explicit exclusions. Technical sketches, internal names and file choices may
 adapt to current code while preserving that player experience. A proposed
 implementation is not itself a locked creative decision.
 Do not restart design or request approval for decisions already settled.
+When the handoff includes a draft Journey module, follow
+[implementation-ready handoff](SOURCE_READY_HANDOFF.md): read it with the brief,
+adapt it to current contracts and validate the relevant data/behavior. Preserve
+approved creative decisions while treating generated code as a proposed
+implementation. Repair technical mistakes rather than regenerate the whole
+Journey from prose. Prose-only specs remain supported; do not send the user back
+to obtain a module before progressing.
 When the request is another set using an existing mechanic, use that Journey as
 the primary model. Preserve the original and give the sequel fresh identities;
 do not turn a content addition into a mechanic redesign.
@@ -23,9 +35,42 @@ internal ID, CSS value or optional template field is not a blocker. Ask only
 when a gap or conflict materially affects correctness, fairness, the intended
 experience or the amount of new engineering. Continue independent work meanwhile.
 
+### Judgment checkpoints
+
+Ask at the first consequential fork, before expensive dependent work: competing
+interpretations of answer acceptance, clue disclosure, player agency, saved
+behavior, or substantial new engine work. Conflicting settled decisions also
+warrant a checkpoint. Research factual questions and resolve routine copy,
+styling and implementation choices autonomously.
+
+1. **Investigate narrowly.** Inspect the nearest existing recipe/source. Identify
+   the actual decision; do not run another broad audit or AI review to formulate it.
+2. **Offer a concrete recommendation.** Briefly state the ambiguity, recommended
+   player behavior, one or two useful alternatives, and material scope/cost
+   differences. Use an existing preview or small illustration only when helpful;
+   do not implement every alternative first or ask the user to author copy.
+3. **Continue independent work.** Ask asynchronously when supported and bundle
+   closely related questions. Leave work dependent on a material departure pending
+   until the user answers; elapsed time is not consent. If no useful independent
+   work remains, hand back the pending decision rather than spend tokens on
+   speculative implementation. Routine ambiguity uses established defaults.
+4. **Preserve the answer.** Record the settled choice and relevant consequence in
+   the existing spec; distinguish pending recommendations from decisions. Do not
+   ask again unless new evidence invalidates the choice. Promote a choice into
+   shared defaults only when it is intended to apply across Journeys.
+
+For example: “Q3 describes a spreading movement. I recommend showing the complete
+answer network before touring it. Revealing countries along the tour would be
+more dramatic but delay part of the answer. Which behavior do you want?”
+
+These are exception-driven decisions within implementation, not mandatory
+round-by-round reviews or another design-approval phase.
+
 ## 2. Familiarize yourself with the current suite
 
+For the preceding ChatGPT design workflow, use the [authoring entry point](README.md).
 Read the editorial, visual and engine sections relevant to the approved experience.
+Inherit [shared defaults](JOURNEY_DEFAULTS.md); specify only meaningful exceptions.
 In the repository, use the [task-to-section map](../README.md#find-the-relevant-section);
 in a portable kit, use the guide and references listed in `AUTHORING_KIT.md`.
 Start with the spec's implementation-fit notes and the closest current recipe or
@@ -59,13 +104,24 @@ identify the affected contracts, controls, grading, presentation and save behavi
 Record the capability fit once in the spec's existing table: requirement, exact
 current recipe/source and revision, reuse/extension decision, and material risk.
 Group identical interactions; a familiar sequel still needs only one sentence.
+Use `npm run check:journey -- --capabilities` (or `CAPABILITIES.md` in a kit) to
+locate demonstrated compositions, required data, limits and focused checks. Open
+the linked recipe in the workbench and inspect its complete lifecycle before
+adapting it. The capability entry distinguishes its demonstrated rule from all
+rules permitted by the mode; matching mode/rule examples still require comparing
+authored eligibility, disclosure, help and geography.
+Use its generated experience policies and related-example differences to identify
+that comparison; completion policies belong to the example Journey, not its mode.
+Add `--recipe <name>` to `--capabilities` for a focused report instead of loading
+the entire catalog.
 Resolve a risk that could invalidate the experience before implementing all five
 stops. Report material capability conflicts without silently replacing an
 approved task; continue independent work while the necessary decision is resolved.
 
 Inherit shared typography, supporting copy, legends, controls, feedback headings,
-map roles and scoring. Authors supply meaningful exceptions and the experience;
-the agent supplies routine technical details. Keep eligibility, grading, display
+map roles and scoring. The agent authors the copy and routine technical details
+within the approved experience; the user decides material creative exceptions.
+Keep eligibility, grading, display
 geometry and camera framing independent. Flag a genuinely unsupported mechanic
 or material departure before substituting a different experience.
 
@@ -104,9 +160,15 @@ deployment.
 
 ### Acceptance gates
 
-Apply all six gates before handoff. Resolve failures within the authorized scope;
+Use the six standards below during implementation and focused verification, not
+as six additional review passes. Resolve failures within the authorized scope;
 record a material limitation when the available verification cannot establish a
 result. An approved spec does not waive these shared standards.
+
+Use the workbench’s **Clue and reveal** comparison, or the audit’s `editorial`
+record, for each stop. Resolve answer-only headings and reveals, repeated clue
+copy and wording/grading mismatches; warnings are review prompts, not substitutes
+for editorial judgment. Confirm what new fact or relationship the reveal teaches.
 
 1. **Feedback reacts to the answer.** Check every success/failure heading and
    accuracy-tier message: one to four words, matched to the player's result or
@@ -157,7 +219,10 @@ audit for deferred content, and TypeScript for typed changes. Follow
 structural or mocked evidence from actual browser appearance; report limitations
 without presenting an unverified acceptance gate as passed.
 
-Report what changed, what was verified and any material limitation. Publish or
-deploy only when the user's request authorizes it. Refresh the portable kit after
-relevant source or documentation changes with `npm run export:journeys`;
-uploaded files do not update themselves.
+Hand the result directly to the user with a review URL or artifact, what changed,
+what was verified and any material limitation. Do not assume someone else will
+write the copy, perform QA or handle release. Publish or
+deploy only when the user's request authorizes it. Repository-first authoring does
+not require an export. When an uploaded/offline kit is being used or a refresh is
+requested, update it with `npm run export:journeys`; uploaded files do not update
+themselves.

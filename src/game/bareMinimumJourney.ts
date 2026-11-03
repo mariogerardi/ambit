@@ -116,7 +116,7 @@ export const BARE_MINIMUM_JOURNEY: Journey = {
       allowTyping: false,
       rule: { type: "country-ids", ids: ["wurl:FRA"] },
       correctFeedback: "Well recognized.",
-      incorrectFeedback: "It was France.",
+      incorrectFeedback: "Not quite.",
       leadIn:
         "Some of these flags look like someone forgot to finish them. After a revolution made its tricolor famous, a European country restored its monarchy—and replaced the three colors with a plain white flag.",
       prompt: "Which country was it?",
@@ -189,7 +189,7 @@ export const BARE_MINIMUM_JOURNEY: Journey = {
         "Before it added stripes and a crest, one Southeast Asian sultan's banner was simply yellow. Brunei is a tiny sultanate on Borneo, an island shared with Malaysia and Indonesia.",
       prompt: "Place a pin at Brunei’s capital on Borneo’s coast.",
       explanation:
-        "Bandar Seri Begawan is the capital, in Brunei’s larger western pocket on Borneo’s northern coast. Its ruler's plain-yellow royal banner predated the country's first official state flag, introduced in 1906 with black and white diagonal stripes. A red crest arrived in 1959. The flag did eventually get a few more details.",
+        "Bandar Seri Begawan is the capital, in Brunei’s larger western pocket on Borneo’s northern coast. The sultan’s plain-yellow royal banner predated the country's first official state flag, introduced in 1906 with black and white diagonal stripes. A red crest arrived in 1959. The flag did eventually get a few more details.",
       guidance: {
         hint: "Look along the northern side of Borneo rather than the coasts farther south.",
         assist: {
@@ -347,12 +347,12 @@ export const BARE_MINIMUM_JOURNEY: Journey = {
       allowTyping: false,
       rule: { type: "place-ids", ids: [kabul.id] },
       correctFeedback: "Well located.",
-      incorrectFeedback: "It was Kabul.",
+      incorrectFeedback: "Not quite.",
       leadIn:
         "Black was the royal flag color under Emir Abdur Rahman Khan in the late 1800s. A century later, a new movement carried white banners: the Taliban advanced from southern Afghanistan and captured the capital in September 1996, making it the seat of their government.",
       prompt: "Which marked city did they capture?",
       explanation:
-        "Kabul. Taliban forces took the city in September 1996, using an initially plain white banner; later versions bore a religious inscription. Earlier, black had become a defining color of Afghan royal and state flags under Emir Abdur Rahman Khan. Political change repeatedly reshaped Afghanistan's flag designs—though the details and status of nineteenth-century examples vary across sources.",
+        "Kabul. The two banners belonged to very different political orders: black was a royal and state flag color under the emirate, while the Taliban’s initially white banner later gained a religious inscription. Even a single-color flag could change its meaning as the government behind it changed.",
       guidance: {
         hint: "Look in the eastern half of Afghanistan. The capital lies in a mountain valley, not on the country's far western edge.",
         assist: {
@@ -411,12 +411,12 @@ export const BARE_MINIMUM_JOURNEY: Journey = {
       allowTyping: false,
       rule: { type: "country-ids", ids: ["wurl:LBY"] },
       correctFeedback: "Well recognized.",
-      incorrectFeedback: "It was Libya.",
+      incorrectFeedback: "Not quite.",
       leadIn:
-        "For more than three decades, a single color was enough. In 1977, a North African country adopted a national flag with no stripes, symbols, or writing—just green. It kept that design for more than three decades, until the upheaval of 2011.",
+        "In 1977, a North African country adopted a national flag with no stripes, symbols, or writing—just green. It kept that design for more than three decades, until the upheaval of 2011.",
       prompt: "Which country was it?",
       explanation:
-        "Libya. From 1977 to 2011, its national flag was an uninterrupted field of green. Adopted under Muammar Gaddafi's government, it was replaced during the 2011 uprising by the red-black-green flag associated with Libya's earlier independence era. No emblem, no stripes: this really was the whole design.",
+        "Libya’s 2011 uprising brought back the red-black-green flag of its earlier independence era, including the crescent and star. An older design replaced the plain-green flag adopted under Muammar Gaddafi in 1977, linking the country’s new political chapter to its earlier national symbols.",
       guidance: {
         hint: "Look to the Mediterranean side of North Africa rather than farther into the Sahara.",
         assist: {

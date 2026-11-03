@@ -563,3 +563,237 @@ it("frames a late-loaded puzzle focus even when the phase and route key have not
   await render({ journey: { ...options.journey, focus: { ...focus } } });
   expect(port.focus).not.toHaveBeenCalled();
 });
+
+it("reframes automatic selection cameras when an assist narrows the field", async () => {
+  const { MISSING_BORDERS_TWO_JOURNEY: definition } = await import(
+    "../src/game/missingBordersTwoJourney"
+  );
+  const { journeyWorld } = await import("../src/app/journeyWorld");
+  const context = createQuestionContext(regions, [], definition);
+  const question = definition.rounds[3];
+  const game = { ...initialGame, phase: "playing" as const, roundIndex: 3 };
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      context,
+      phase: "playing",
+      roundIndex: 3,
+      focus: journeyWorld(regions, definition, game, context).focus,
+    },
+  });
+  vi.mocked(port.focus).mockClear();
+  const assisted = { ...game, help: { [question.id]: "assisted" as const } };
+  const focus = journeyWorld(regions, definition, assisted, context).focus;
+  await render({ journey: { ...options.journey, help: assisted.help, focus } });
+  expect(port.focus).toHaveBeenLastCalledWith(focus);
+});
+
+it("ends an automatic-framing introduction at the computed candidate view", async () => {
+  const { MISSING_BORDERS_TWO_JOURNEY: source } = await import(
+    "../src/game/missingBordersTwoJourney"
+  );
+  const { journeyWorld } = await import("../src/app/journeyWorld");
+  const intro = { lat: 0, lng: 0, altitude: 2.2 };
+  const definition = {
+    ...source,
+    rounds: source.rounds.map((round, index) =>
+      index === 3 ? { ...round, introViews: [intro] } : round,
+    ),
+  };
+  const context = createQuestionContext(regions, [], definition);
+  const focus = journeyWorld(
+    regions,
+    definition,
+    { ...initialGame, phase: "playing", roundIndex: 3 },
+    context,
+  ).focus;
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      context,
+      phase: "playing",
+      roundIndex: 3,
+      focus,
+    },
+  });
+  expect(port.flyover).toHaveBeenLastCalledWith([intro, focus], false);
+});
+
+it.each(["wurl:MLI", "wurl:CAN"])(
+  "returns a round tour to the chosen country %s, including a miss",
+  async (id) => {
+    const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+      "../src/game/whereIsItOfficialJourney"
+    );
+    const { gameReducer } = await import("../src/game/state");
+    const { journeyWorld } = await import("../src/app/journeyWorld");
+    const context = createQuestionContext(regions, [], definition);
+    const game = gameReducer(
+      { ...initialGame, phase: "playing" },
+      { type: "select", id },
+      definition,
+      context,
+    );
+    const focus = journeyWorld(regions, definition, game, context).focus;
+    await render({
+      mode: "practice",
+      journey: {
+        ...options.journey,
+        active: true,
+        definition,
+        context,
+        phase: "feedback",
+        roundIndex: 0,
+        answers: game.answers,
+        focus,
+      },
+    });
+    const call = vi.mocked(port.flyover).mock.calls.at(-1)!;
+    expect(call[0]).toEqual([...definition.rounds[0].feedbackViews!, focus]);
+    expect(call[0].at(-1)).toMatchObject(
+      regions.find((r) => r.id === id)!.focus,
+    );
+    expect(call[1]).toBe(false);
+    expect(call[2]?.onComplete).toBeUndefined();
+    expect(result.motion).toBe(false);
+  },
+);
+it("reserves overview rotation for completion and cancels its handoff on interaction", async () => {
+  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+    "../src/game/whereIsItOfficialJourney"
+  );
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      phase: "finished",
+      roundIndex: 4,
+    },
+  });
+  const interrupted = vi.mocked(port.flyover).mock.calls.at(-1)![2]!
+    .onComplete!;
+  await act(async () => result.stop());
+  await act(async () => interrupted());
+  expect(result.motion).toBe(false);
+  await render({
+    journey: { ...options.journey, phase: "playing", roundIndex: 0 },
+  });
+  await render({
+    journey: { ...options.journey, phase: "finished", roundIndex: 4 },
+  });
+  const completed = vi.mocked(port.flyover).mock.calls.at(-1)!;
+  expect(completed[1]).toBe(false);
+  await act(async () => completed[2]!.onComplete!());
+  expect(result.motion).toBe(true);
+});
+it("uses the chosen country without a tour or spin under reduced motion", async () => {
+  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+    "../src/game/whereIsItOfficialJourney"
+  );
+  const { gameReducer } = await import("../src/game/state");
+  const { journeyWorld } = await import("../src/app/journeyWorld");
+  const context = createQuestionContext(regions, [], definition);
+  const game = gameReducer(
+    { ...initialGame, phase: "playing" },
+    { type: "select", id: "wurl:EGY" },
+    definition,
+    context,
+  );
+  const focus = journeyWorld(regions, definition, game, context).focus;
+  Object.defineProperty(media, "matches", { configurable: true, value: true });
+  await act(async () => mediaChange!());
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      context,
+      phase: "feedback",
+      roundIndex: 0,
+      answers: game.answers,
+      focus,
+    },
+  });
+  expect(port.flyover).not.toHaveBeenCalled();
+  expect(port.focus).toHaveBeenLastCalledWith(focus);
+  expect(result.motion).toBe(false);
+});
+it("preserves a suitable world view already rotating when a global question loads", async () => {
+  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+    "../src/game/whereIsItOfficialJourney"
+  );
+  await render();
+  expect(result.motion).toBe(true);
+  vi.mocked(port.focus).mockClear();
+  await render({
+    mode: "practice",
+    transitionKey: "/global",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      phase: "playing",
+      roundIndex: 0,
+    },
+  });
+  expect(port.focus).not.toHaveBeenCalled();
+  expect(result.motion).toBe(true);
+  await act(async () => result.stop());
+  await render({ journey: { ...options.journey } });
+  expect(result.motion).toBe(false);
+  expect(port.focus).not.toHaveBeenCalled();
+});
+it("starts an unrotating global question on an answer-independent random continent and restarts only on a new question", async () => {
+  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+    "../src/game/whereIsItOfficialJourney"
+  );
+  const { DEFAULT_VIEWS } = await import("../src/globe/defaultViews");
+  const random = vi.spyOn(Math, "random").mockReturnValue(0);
+  try {
+    await render({
+      mode: "practice",
+      journey: {
+        ...options.journey,
+        active: true,
+        definition,
+        phase: "playing",
+        roundIndex: 0,
+      },
+    });
+    expect(port.focus).toHaveBeenLastCalledWith({
+      ...DEFAULT_VIEWS[0],
+      altitude: worldAltitude(width, height),
+    });
+    expect(result.motion).toBe(true);
+    await act(async () => result.stop());
+    random.mockReturnValue(0.99);
+    await render({ journey: { ...options.journey, phase: "feedback" } });
+    vi.mocked(port.focus).mockClear();
+    await render({
+      journey: { ...options.journey, phase: "playing", roundIndex: 1 },
+    });
+    expect(port.focus).toHaveBeenLastCalledWith({
+      ...DEFAULT_VIEWS.at(-1),
+      altitude: worldAltitude(width, height),
+    });
+    expect(result.motion).toBe(true);
+    await render({
+      journey: {
+        ...options.journey,
+        help: { [definition.rounds[1].id]: "hinted" },
+      },
+    });
+    expect(result.motion).toBe(false);
+  } finally {
+    random.mockRestore();
+  }
+});

@@ -124,3 +124,81 @@ it("shows audit errors and never offers a commit after a failed preview", async 
   expect(host.textContent).not.toContain("Register in local catalog");
   expect(request).toHaveBeenCalledTimes(1);
 });
+
+it("switches Journey immediately from the visible selector and submits the current seed", async () => {
+  const submit = vi
+    .spyOn(HTMLFormElement.prototype, "requestSubmit")
+    .mockImplementation(() => {});
+  try {
+    await act(async () =>
+      root.render(
+        <JourneyWorkbench
+          journey={journey}
+          filename="powerToThePeopleJourney.ts"
+          modules={["powerToThePeopleJourney.ts", "bareMinimumJourney.ts"]}
+          seed={17}
+          request={vi.fn()}
+        />,
+      ),
+    );
+    const select = host.querySelector<HTMLSelectElement>(
+      'select[name="module"]',
+    )!;
+    expect(select.closest("details")).toBeNull();
+    await act(async () => {
+      select.value = "bareMinimumJourney.ts";
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(submit).toHaveBeenCalledOnce();
+    expect([...new FormData(select.form!).entries()]).toEqual([
+      ["module", "bareMinimumJourney.ts"],
+      ["seed", "17"],
+    ]);
+  } finally {
+    submit.mockRestore();
+  }
+});
+
+it("opens a recipe sandbox without offering catalog registration", async () => {
+  const submit = vi
+    .spyOn(HTMLFormElement.prototype, "requestSubmit")
+    .mockImplementation(() => {});
+  try {
+    await act(async () =>
+      root.render(
+        <JourneyWorkbench
+          journey={{ ...journey, title: "Capital pin" }}
+          filename="powerToThePeopleJourney.ts"
+          modules={["powerToThePeopleJourney.ts"]}
+          recipes={[
+            { id: "recipe:pin", title: "Capital pin" },
+            { id: "recipe:map-multiple", title: "Country pair" },
+          ]}
+          recipeId="pin"
+          seed={17}
+          request={vi.fn()}
+        />,
+      ),
+    );
+    expect(host.textContent).not.toContain("Catalog registration");
+    expect(
+      host.querySelector('option[value="powerToThePeopleJourney.ts"]')
+        ?.textContent,
+    ).toBe("Power to the People");
+    const select = host.querySelector<HTMLSelectElement>(
+      'select[name="recipe"]',
+    )!;
+    expect(select.value).toBe("pin");
+    await act(async () => {
+      select.value = "map-multiple";
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(submit).toHaveBeenCalledOnce();
+    expect([...new FormData(select.form!).entries()]).toEqual([
+      ["recipe", "map-multiple"],
+      ["seed", "17"],
+    ]);
+  } finally {
+    submit.mockRestore();
+  }
+});

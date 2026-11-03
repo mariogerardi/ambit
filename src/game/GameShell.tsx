@@ -1,3 +1,4 @@
+import { TextClue } from "./TextClue";
 import { ConstructionReview, IslandScoring } from "./ConstructionAnswer";
 import { constructionRule, reviewedConstruction } from "./construction";
 import { QuestionSources } from "./QuestionSources";
@@ -134,9 +135,11 @@ export function GameShell({
   canReplay = false,
   social,
   contextNavigation,
+  reviewing = false,
   constructionReviewIndex,
 }: {
   reduced?: boolean;
+  reviewing?: boolean;
   constructionReviewIndex?: number;
   social?: ReactNode;
   contextNavigation?: ReactNode;
@@ -315,6 +318,12 @@ export function GameShell({
               {questionPrompt(round, context)}
             </span>
           </h1>
+          {round.textClue && (
+            <TextClue
+              clue={round.textClue}
+              revealed={game.phase === "feedback"}
+            />
+          )}
           {round.image?.presentation !== "photo" && clueImage}
           {game.phase === "playing" ? (
             <>
@@ -785,7 +794,7 @@ export function GameShell({
         {inGame && game.phase === "playing" && (
           <>
             <span className="hover-place" aria-live="polite">
-              {visibleHover ?? "Drag to rotate"}
+              {visibleHover ?? (reviewing ? undefined : "Drag to rotate")}
             </span>
           </>
         )}

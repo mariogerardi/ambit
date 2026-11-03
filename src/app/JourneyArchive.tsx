@@ -211,15 +211,6 @@ export function JourneyArchive({
                             )}
                             {Number(date.slice(-2))}
                           </span>
-                          <small>
-                            {points !== undefined
-                              ? `${points}/15`
-                              : entry?.status === "in-progress"
-                                ? "Resume"
-                                : entry?.status === "unplayed"
-                                  ? "Play"
-                                  : "—"}
-                          </small>
                         </button>
                       )}
                     </td>

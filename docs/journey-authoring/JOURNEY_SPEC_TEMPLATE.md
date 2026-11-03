@@ -2,14 +2,28 @@
 
 **Status:** draft / approved for implementation\
 **Journey:** title; ID and source file if known\
-**Authoring basis:** live repository revision, or exported-kit revision/date and known limitations\
+**Authoring basis:** repository/ref/commit actually read (or available branch/date), or optional kit snapshot; material access limitations\
 **Registration:** defer / authorize (see Catalog impact)
+
+**Implementation draft:** companion `<name>Journey.ts` / labeled TypeScript fence / partial or unavailable (state material reason)
+
+After settling the design, follow `SOURCE_READY_HANDOFF.md`: deliver a short brief
+and a draft module using the current repository contracts. The module contains
+the complete ordinary copy, grading, help, scenes, evidence and completion.
+Use this template as a concise decision record: keep the outline, consequential
+qualifications, relevant references, gaps and release scope. Do not repeat the
+module's fields and strings in prose. The detailed sections below are prompts for
+missing or exceptional information, not a requirement to duplicate the module.
+With a prose-only handoff, retain enough detail to implement the approved design.
 
 Specify the **approved player experience**. Do not replicate the engine's
 implementation guide. The implementing agent resolves routine IDs, types, styles,
 files and shared UI conventions from the current repository. Leave irrelevant
 fields blank; an approved spec need not fill every template cell. Use
 `IMPLEMENTING_A_SPEC.md` for the coding handoff.
+AI authors the copy. Inherit `JOURNEY_DEFAULTS.md`; document exceptions, not a
+repeated inventory of standard behavior. The completed handoff goes to the user,
+Ambit's sole human maintainer.
 
 **Decision status:** Approved player-facing tasks, clues, assistance, reveals,
 scoring exceptions and explicit exclusions are **locked**. Distinguish **verified**
@@ -51,6 +65,10 @@ a lightweight feasibility check, **not** a reason to replace a locked gameplay i
 If a genuinely new interaction could invalidate a major assumption, resolve that
 specific feasibility risk before implementing the entire Journey. Skip separate
 feasibility work for routine reuse.
+
+If implementation needs the user's judgment, record the resulting choice and its
+consequence here or in the affected round. Keep pending recommendations distinct
+from settled decisions; no separate decision log or routine approval table is needed.
 
 ## Round specification — repeat for each stop
 

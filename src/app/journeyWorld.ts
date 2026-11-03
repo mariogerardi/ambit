@@ -1,6 +1,7 @@
 import type { ClueLocator } from "../globe/clueLocators";
 import type { RegionReveal } from "../globe/regionFades";
 import { comparisonFocus } from "../globe/camera";
+import { selectionFocus } from "../game/selectionFraming";
 import { constructionScene } from "../game/constructionScene";
 import { intersectionOverlays } from "../game/bearingIntersection";
 import { geoDistance } from "d3-geo";
@@ -394,6 +395,12 @@ export function journeyWorld(
   const selected = catalog.get(game.selectedIds.at(-1) ?? "");
   const preferredFocus =
     completion?.focus ??
+    (game.phase === "feedback" && round.feedbackReturnToSelection && selected
+      ? {
+          ...selected.focus,
+          altitude: Math.max(0.12, selected.focus.altitude ?? 0.7),
+        }
+      : undefined) ??
     (bearingResult
       ? comparisonFocus(
           [
@@ -428,7 +435,11 @@ export function journeyWorld(
           ? { ...selected.focus, altitude: 1.3 }
           : game.phase === "finished"
             ? journey.rounds.at(-1)!.focus
-            : (assist?.focus ?? hintFocus ?? round.focus));
+            : (assist?.focus ??
+              hintFocus ??
+              (round.playFraming === "selection"
+                ? selectionFocus(round, context, !!assist)
+                : round.focus)));
   const focus =
     pinReviewViews(
       round,

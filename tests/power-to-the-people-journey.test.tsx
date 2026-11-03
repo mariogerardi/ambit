@@ -86,6 +86,21 @@ describe("Power to the People draft", () => {
       path: "/journey/power-to-the-people",
     });
   });
+  it("separates outcome feedback, the answer, and the additional explanation in Nepal's reveal", () => {
+    const node = shell(pick(4, "wurl:NPL"));
+    expect(node.querySelector(".feedback-label")?.textContent).toMatch(
+      /Well identified/,
+    );
+    expect(
+      node.querySelector(".journey-correct-answer strong")?.textContent,
+    ).toContain("Nepal");
+    expect(node.querySelector(".journey-explanation")?.textContent).toMatch(
+      /informal poll.*appointed/s,
+    );
+    expect(node.querySelector(".journey-explanation")?.textContent).not.toMatch(
+      /March 2026/,
+    );
+  });
   it("labels six regional capitals equally and retains a useful four-capital assist", () => {
     const game = start(0),
       world = view(game);
@@ -387,6 +402,7 @@ describe("Power to the People draft", () => {
     expect(restored.answers).toEqual(completed.answers);
     const overview = view(restored);
     expect(overview.states).toMatchObject({
+      "wurl:UKR": "visited",
       "wurl:DZA": "incorrect",
       "wurl:IND": "incorrect",
     });

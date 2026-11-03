@@ -64,6 +64,9 @@ export function createQuestionContext(
       context.targets.set(target.id, target);
       context.names.set(target.id, target.name);
     }
+    for (const id of round.feedbackNetwork?.regionIds ?? [])
+      if (!context.targets.has(id))
+        throw Error(`Unknown explanatory network region: ${round.id} / ${id}`);
     for (const id of round.candidateRegionIds ?? [])
       if (!context.targets.has(id))
         throw Error(`Unknown candidate geography (${round.id}): ${id}`);
@@ -150,7 +153,11 @@ export function createQuestionContext(
       if (
         new Set(survivors).size !== survivors.length ||
         survivors.some((id) => !eligible.includes(id)) ||
-        expected.some((id) => !survivors.includes(id)) ||
+        ("match" in round.rule && round.rule.match === "any"
+          ? expected.filter((id) => survivors.includes(id)).length <
+              responseCount(round, context) ||
+            survivors.every((id) => expected.includes(id))
+          : expected.some((id) => !survivors.includes(id))) ||
         survivors.length <= responseCount(round, context)
       )
         throw Error(
@@ -354,9 +361,12 @@ export function selectableIds(
       ? selection.ids
       : selection.type === "neighbors"
         ? [...(context.graph.get(selection.of) ?? [])]
-        : [...context.members].filter(
-            (id) => !selection.excludeIds?.includes(id),
-          );
+        : (selection.type === "world"
+            ? context.regions
+                .filter((region) => region.level === "ADM0")
+                .map((region) => region.id)
+            : [...context.members]
+          ).filter((id) => !selection.excludeIds?.includes(id));
   return mechanicFor(question).mapSelection === "regions"
     ? ids.filter((id) => !question.contextIds?.includes(id))
     : ids;

@@ -99,9 +99,25 @@ an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
 contract, not scene geometry.
 
+For bounded selectable countries/territories, use
+`scenes.play: { framing: "selection" }` instead of guessing a focus. This compiles
+to `playFraming: "selection"` and resolves after geography loads. The camera fits
+the spherical bounds of every eligible outline, including merged regions,
+offshore parts and dateline crossings; grading solutions never influence it.
+Assists fit their surviving candidate pool unless an explicit help focus takes
+precedence. Region geometry is cached per question/context/stage rather than
+recomputed while answering. Extremely broad sets use a whole-globe overview;
+opposite sides of Earth cannot be shown simultaneously. This policy supports
+`ids` and `neighbors` region selection, not city, pin or whole-world searches.
+An authored play focus is optional with this policy; the compiled neutral focus
+is only a fallback before geography is available. Existing authored framing stays
+in effect when the policy is absent. The merged-region recipe and Missing Borders
+II demonstrate it. Canonical geometry and answer rules remain unchanged.
+
 `scenes.play.views` and `scenes.reveal.views` optionally author a finite camera
 sequence, compiled as `introViews` / `feedbackViews`. End the sequence at the
-scene's `focus`: reduced motion uses that focus directly. Playback runs once,
+scene's `focus`; automatically framed play tours append the computed endpoint.
+Reduced motion uses the effective focus directly. Playback runs once,
 does not restart on response edits, and yields to globe input. Help ends an intro
 at its effective search focus; missed pins retain the shared answer/guess review
 instead of starting a reveal tour. Completion flyovers retain their looping behavior. Close views (altitude below
@@ -246,6 +262,48 @@ emphasized. Imported reveal geography requested by `assist.regionIds` becomes
 visible at the assisted stage; it stays withheld earlier. Card-order reveal
 markers use submitted slot badges, independently of canonical dates and grading.
 Completion receipts show results without expandable answer reviews. The map retains authored destinations and actual mistakes.
+
+## Native text and explanatory networks
+
+A question can supply `textClue: {text, lang, dir?, reveal: {language,
+translation}}`. The shared `TextClue` renders native Unicode as selectable text;
+language name and translation nodes appear only after commitment. Use a valid
+language tag and RTL where appropriate, without translating the clue early.
+
+`selection: {type: "world"}` includes all supported ADM0 map units, whereas
+`members` retains the existing UN-member roster. Combine world selection with
+neutral candidates for an untinted global search. For `match: "any"`, an assist
+may narrow the displayed valid alternatives while retaining enough qualifying
+answers and a plausible invalid option; it never changes the canonical solution.
+
+`scenes.reveal.network: {regionIds, label}` is explanatory geography. All listed
+countries appear in context color at once; a chosen valid/invalid country keeps
+its real grade. Alternative-answer recaps retain the submitted valid choice, or
+one illustrative solution after a miss, rather than promote the whole network.
+The network's IDs and legend are checked independently of answer eligibility.
+
+`scenes.reveal.orbit: true` finishes the finite reveal at its authored whole-globe
+focus, appending that focus to the views if needed, then resumes the shared
+Home/Explore rotation. These teaching tours use a brief duration scale of the
+existing camera path. Input cancels the handoff; reduced motion stays static.
+`completion.orbit` similarly makes its recap tour finite before rotation. For a single-country task,
+`scenes.reveal.returnToSelection` instead appends the submitted country's focus to
+the finite tour, including after a miss. It also supplies the reduced-motion and
+recenter destination. These two reveal endpoint policies are mutually exclusive. Existing
+tours retain their defaults when these options are absent.
+Grouped single-country scenes with an explanatory network inherit
+`returnToSelection: true` unless explicitly disabled or overview rotation is
+requested. See [shared defaults](journey-authoring/JOURNEY_DEFAULTS.md) for the
+stage-by-stage camera policy and other inherited conventions.
+Neutral full-world searches (`members` or `world`) without geographic context,
+markers, overlays or authored intro views start at a random continental overview
+and rotate until interaction. A suitable world view already rotating is preserved.
+Hints stop this introductory motion; authored help framing remains in control.
+Reduced motion uses a static view. This shared policy does not override map clues.
+
+Native clue translations use italics and contain the translation alone. The
+shared typography keeps Latin/Cyrillic text compact while retaining larger Arabic.
+See `recipe:multilingual-network` for an executable scoped demonstration.
 
 ## Bearing Intersection composition
 

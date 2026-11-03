@@ -272,6 +272,11 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
         )!
         .click(),
     );
+    expect(
+      host
+        .querySelector('button[aria-label^="October 11, 2026"]')
+        ?.textContent?.trim(),
+    ).toBe("11");
     await click("Resume Journey");
     expect(host.querySelector(".round-feedback")?.textContent).toContain(
       "Bogotá",
@@ -341,12 +346,16 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     expect(
       completedDay.querySelector(".archive-completed-icon"),
     ).not.toBeNull();
+    expect(completedDay.textContent?.trim()).toBe("11");
     await act(async () =>
       host
         .querySelector<HTMLButtonElement>(
           'button[aria-label^="October 11, 2026"]',
         )!
         .click(),
+    );
+    expect(host.querySelector(".archive-selected-day")?.textContent).toContain(
+      "15/15 points",
     );
     await click("View result");
     expect(host.querySelector(".journey-score")?.textContent).toContain(

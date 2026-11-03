@@ -15,6 +15,7 @@ const moduleTarget = args.includes("--module")
   ? args[args.indexOf("--module") + 1]
   : undefined;
 const all = args.includes("--all");
+const capabilities = args.includes("--capabilities");
 const entry = index.find(
   (entry) =>
     entry.id === target ||
@@ -22,12 +23,12 @@ const entry = index.find(
     entry.path.split("/").at(-1) === target,
 );
 if (
-  (!entry && !recipeMode && !all && !moduleTarget) ||
+  (!entry && !recipeMode && !all && !moduleTarget && !capabilities) ||
   (moduleTarget &&
     (!/^src\/game\/[^/]+Journey\.ts$/.test(moduleTarget) || all || recipeMode))
 ) {
   console.error(
-    "Usage: npm run check:journey -- <journey-id-or-slug> [--json]\nUse --module src/game/<name>Journey.ts for an unregistered draft, --all for a catalog sweep, --list to list Journeys, or --recipe <answer-mode-or-composition> for a complete mechanic example.",
+    "Usage: npm run check:journey -- <journey-id-or-slug> [--json]\nUse --module src/game/<name>Journey.ts for an unregistered draft, --all for a catalog sweep, --list to list Journeys, or --recipe <answer-mode-or-composition> for a complete mechanic example. Use --capabilities [--json] for live reuse evidence and recipe preview links.",
   );
   process.exit(1);
 }
@@ -44,8 +45,37 @@ try {
   );
   const publicRoot = path.resolve("public");
   const reports = [];
+  const { recipeJourney, authoringCapabilities } = await server.ssrLoadModule(
+    "/src/game/authoringCapabilities.ts",
+  );
+  if (capabilities) {
+    const { JOURNEYS } = await server.ssrLoadModule("/src/game/journeys.ts");
+    const { MECHANIC_RECIPES, PRESENTATION_RECIPES } =
+      await server.ssrLoadModule("/src/game/recipes.ts");
+    const recipes = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES].filter(
+      (question) => !recipeMode || question.id === `recipe:${recipeMode}`,
+    );
+    if (!recipes.length) throw Error(`Unknown recipe: ${recipeMode}`);
+    const catalog = authoringCapabilities(JOURNEYS, recipes, regions);
+    console.log(
+      args.includes("--json")
+        ? JSON.stringify(catalog, null, 2)
+        : catalog
+            .map(
+              (item) =>
+                `${item.id} — ${item.availability}\n  ${item.control} / ${item.demonstratedRule}; stages: ${item.evidence.stages.join(", ")}\n  ${Object.entries(
+                  item.experience,
+                )
+                  .map(([stage, policy]) => `${stage}: ${policy}`)
+                  .join(
+                    "\n  ",
+                  )}\n  Related examples: ${item.examples.map((example) => `${example.questionId} (policy differences: ${example.policyDifferences.join(", ") || "none"})`).join("; ") || "none"}\n  Requires: ${item.requires.join("; ")}\n  Preview: ${item.preview}\n  ${item.auditCommand}\n  Limits: ${item.limits.join(" ")}\n  Checks: ${item.evidence.checks.join(", ")}${item.evidence.errors.length ? `\n  Errors: ${item.evidence.errors.join("; ")}` : ""}`,
+            )
+            .join("\n\n"),
+    );
+  }
   // No rendering, downloads, preparation or deployment. Every registered Journey is checked.
-  for (const selected of all ? index : [entry]) {
+  for (const selected of capabilities ? [] : all ? index : [entry]) {
     let journey;
     if (recipeMode) {
       const { MECHANIC_RECIPES, PRESENTATION_RECIPES } =
@@ -54,12 +84,7 @@ try {
         (question) => question.id === `recipe:${recipeMode}`,
       );
       if (!question) throw Error(`Unknown recipe: ${recipeMode}`);
-      journey = {
-        id: question.id,
-        title: question.title,
-        description: "Mechanic recipe",
-        rounds: [question],
-      };
+      journey = recipeJourney(question);
     } else if (moduleTarget) {
       const module = await server.ssrLoadModule(`/${moduleTarget}`);
       journey = Object.values(module).find(
@@ -95,6 +120,12 @@ try {
         console.log(
           `  ${question.id} — ${question.mode} (${question.control})`,
         );
+        console.log(
+          `    Clue: ${[question.editorial.before.leadIn, question.editorial.before.prompt].filter(Boolean).join(" ")}`,
+        );
+        console.log(
+          `    Reveal: ${question.editorial.after.heading} ${question.editorial.after.answer} — ${question.editorial.after.explanation}`,
+        );
         for (const state of question.states)
           console.log(
             `    ${state.stage}: ${state.context.length} context regions, ${state.places.length} places, borders ${state.borders ? "on" : "off"}`,
@@ -113,7 +144,7 @@ try {
     }
     if (report.errors.length) process.exitCode = 1;
   }
-  if (args.includes("--json"))
+  if (args.includes("--json") && !capabilities)
     console.log(JSON.stringify(all ? reports : reports[0], null, 2));
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);

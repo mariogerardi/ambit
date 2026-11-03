@@ -134,6 +134,34 @@ test(
         await readFile(path.join(ROOT, "src/game/journeyIndex.json"), "utf8"),
       );
       assert.equal(report.journeys, index.length);
+      const capabilities = JSON.parse(
+        await readFile(path.join(directory, "CAPABILITIES.json"), "utf8"),
+      );
+      const pin = capabilities.find((item) => item.id === "recipe:pin");
+      assert.ok(pin.evidence.stages.includes("reveal:partial"));
+      assert.deepEqual(pin.evidence.errors, []);
+      assert.ok(pin.preview.includes("recipe=pin"));
+      assert.ok(pin.experience.playCamera);
+      const network = capabilities.find(
+        (item) => item.id === "recipe:multilingual-network",
+      );
+      assert.match(network.experience.revealCamera, /actual selection/);
+      assert.ok(
+        (
+          await readFile(path.join(directory, "AUTHORING_KIT.md"), "utf8")
+        ).includes("# Shared Journey defaults"),
+      );
+      assert.ok(
+        (
+          await readFile(path.join(directory, "JOURNEY_DEFAULTS.md"), "utf8")
+        ).includes("Camera rules by stage"),
+      );
+      assert.ok(
+        (
+          await readFile(path.join(directory, "CAPABILITIES.md"), "utf8")
+        ).includes("Limits:"),
+      );
+
       assert.equal(manifest.journeys.length, index.length);
       assert.deepEqual(manifest.highlightedJourneyIds, []);
       await assert.rejects(
@@ -208,6 +236,15 @@ test(
         workflow,
       );
       assert.ok(kit.includes(workflow));
+      const handoff = await readFile(
+        path.join(ROOT, "docs/journey-authoring/SOURCE_READY_HANDOFF.md"),
+        "utf8",
+      );
+      assert.equal(
+        await readFile(path.join(directory, "SOURCE_READY_HANDOFF.md"), "utf8"),
+        handoff,
+      );
+      assert.ok(kit.includes(handoff));
       const archetypes = await readFile(
         path.join(ROOT, "docs/journey-authoring/JOURNEY_ARCHETYPES.md"),
         "utf8",
@@ -226,6 +263,7 @@ test(
         "AUTHORING_KIT.md",
         "JOURNEY_ARCHETYPES.md",
         "JOURNEY_SPEC_TEMPLATE.md",
+        "SOURCE_READY_HANDOFF.md",
       ])
         assert.ok(
           gptGuide.includes(await readFile(path.join(directory, file), "utf8")),

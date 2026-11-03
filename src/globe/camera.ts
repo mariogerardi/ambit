@@ -6,6 +6,7 @@ import { geoInterpolate, geoDistance } from "d3-geo";
 export function comparisonFocus(
   points: readonly Pick<Focus, "lat" | "lng">[],
   preferred?: Focus,
+  fieldOfView = 30,
 ): Focus {
   const vectors = points.map((p) => {
     const lat = (p.lat * Math.PI) / 180,
@@ -31,7 +32,9 @@ export function comparisonFocus(
       Math.max(
         0.12,
         1 / Math.cos(Math.min(Math.PI * 0.49, radius + Math.PI / 36)) - 1,
-        Math.cos(radius) + Math.sin(radius) / Math.tan(Math.PI / 12) - 1,
+        Math.cos(radius) +
+          Math.sin(radius) / Math.tan((fieldOfView * Math.PI) / 360) -
+          1,
       ),
     );
   if (
@@ -224,10 +227,15 @@ export class CameraFlyover {
     reduced: boolean,
     loop = true,
     onStep?: (index: number) => void,
+    onComplete?: () => void,
+    durationScale = 1,
   ) {
     this.cancel();
     if (reduced || !stops.length) return;
     const generation = this.generation;
+    const pace = Number.isFinite(durationScale)
+      ? Math.max(0.25, Math.min(2, durationScale))
+      : 1;
     const destinations = stops.map((stop) => ({
       ...stop,
       altitude: Math.max(
@@ -247,7 +255,7 @@ export class CameraFlyover {
             if (generation === this.generation) done();
           },
           undefined,
-          duration,
+          duration * pace,
         );
       const hover = (done: () => void) => {
         let elapsed = 0,
@@ -277,7 +285,10 @@ export class CameraFlyover {
           hover(() =>
             move(close, 3500, () =>
               hover(() => {
-                if (!loop && index === destinations.length - 1) return;
+                if (!loop && index === destinations.length - 1) {
+                  onComplete?.();
+                  return;
+                }
                 move(overview, 3500, () =>
                   visit((index + 1) % destinations.length),
                 );
@@ -344,7 +355,7 @@ export class CameraFlyover {
     onStep?.(index);
     let fromVelocity = { lat: 0, lng: 0 },
       toVelocity = velocities[0];
-    let duration = tourDuration(motionDistance(from, to));
+    let duration = tourDuration(motionDistance(from, to)) * pace;
     let elapsed = 0,
       previousTime = performance.now();
     // Match position, velocity and acceleration at every destination. There is
@@ -369,7 +380,7 @@ export class CameraFlyover {
       onStep?.(index);
       to = destination(from, index);
       toVelocity = velocities[index];
-      duration = tourDuration(motionDistance(from, to), false);
+      duration = tourDuration(motionDistance(from, to), false) * pace;
     };
     const tick = (now: number) => {
       if (generation !== this.generation) return;
@@ -379,6 +390,7 @@ export class CameraFlyover {
         if (!loop && index === stops.length - 1) {
           port.pointOfView(to, 0);
           this.frame = 0;
+          onComplete?.();
           return;
         }
         elapsed -= duration;

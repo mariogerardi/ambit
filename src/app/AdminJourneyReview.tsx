@@ -1,4 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  reviewQuestionCopy,
+  supportsPartialPreview,
+} from "../game/authoringReview";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { GameState } from "../game/state";
 import { adminJourneyLink } from "./accountNavigation";
@@ -28,6 +32,11 @@ export function AdminJourneyReview({
   date?: string;
   source?: JourneyReviewSource;
 }) {
+  const question = journey.rounds[game.roundIndex];
+  const editorial = useMemo(
+    () => reviewQuestionCopy(question, context),
+    [question, context],
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const request = useRef(0);
@@ -76,6 +85,7 @@ export function AdminJourneyReview({
         <strong>Journey review</strong>
         <span>Review progress isn’t saved.</span>
       </div>
+      {source?.navigation}
       <label className="field">
         <span>Review question</span>
         <select
@@ -89,13 +99,112 @@ export function AdminJourneyReview({
           ))}
         </select>
       </label>
+      <fieldset className="admin-review-group">
+        <legend>Preview question state</legend>
+        <div className="admin-review-states">
+          <button
+            type="button"
+            className="quiet-button"
+            onClick={() => reset(game.roundIndex)}
+          >
+            Show question
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={busy || !question.guidance}
+            onClick={() => void sample("hint")}
+          >
+            Show hint
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={busy || !question.guidance?.assist}
+            onClick={() => void sample("assist")}
+          >
+            Show assist
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={busy}
+            onClick={() => void sample("correct")}
+          >
+            Show correct reveal
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={busy}
+            onClick={() => void sample("missed")}
+          >
+            Show missed reveal
+          </button>
+          {supportsPartialPreview(question) && (
+            <button
+              type="button"
+              className="quiet-button"
+              disabled={busy}
+              onClick={() => void sample("partial")}
+            >
+              Show partial / lower tier
+            </button>
+          )}
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={busy}
+            onClick={() => void sample("completion")}
+          >
+            Show sample completion
+          </button>
+          <button
+            type="button"
+            className="quiet-button"
+            disabled={busy}
+            onClick={() => void sample("completion-mixed")}
+          >
+            Show mixed completion
+          </button>
+        </div>
+      </fieldset>
+      <details className="admin-review-editorial">
+        <summary>Clue and reveal</summary>
+        <p>What does the player learn after identifying the answer?</p>
+        <div className="admin-review-copy-pair">
+          <section aria-label="Before answering">
+            <strong>Before answering</strong>
+            {editorial.before.expression && (
+              <p>{editorial.before.expression}</p>
+            )}
+            {editorial.before.leadIn && <p>{editorial.before.leadIn}</p>}
+            <p>{editorial.before.prompt}</p>
+            {editorial.before.instruction && (
+              <p>{editorial.before.instruction}</p>
+            )}
+          </section>
+          <section aria-label="After answering">
+            <strong>After answering</strong>
+            <p>
+              {editorial.after.heading} · {editorial.after.answer}
+            </p>
+            <p>{editorial.after.explanation}</p>
+          </section>
+        </div>
+        {editorial.warnings.length > 0 && (
+          <ul aria-label="Editorial notes">
+            {editorial.warnings.map((warning) => (
+              <li key={warning}>{warning}</li>
+            ))}
+          </ul>
+        )}
+      </details>
       <details className="admin-review-tools">
         <summary>Review controls</summary>
         <div className="admin-review-control-panel">
           <div className="admin-library-actions">
-            {source ? (
-              source.navigation
-            ) : (
+            {!source && (
               <>
                 <button
                   type="button"
@@ -134,59 +243,6 @@ export function AdminJourneyReview({
               Restart Journey
             </button>
           </div>
-          <fieldset className="admin-review-group">
-            <legend>Preview an answer</legend>
-            <div className="admin-review-states">
-              <button
-                type="button"
-                className="quiet-button"
-                disabled={busy}
-                onClick={() => void sample("hint")}
-              >
-                Show hint
-              </button>
-              <button
-                type="button"
-                className="quiet-button"
-                disabled={busy}
-                onClick={() => void sample("assist")}
-              >
-                Show assist
-              </button>
-              <button
-                type="button"
-                className="quiet-button"
-                disabled={busy}
-                onClick={() => void sample("correct")}
-              >
-                Show correct reveal
-              </button>
-              <button
-                type="button"
-                className="quiet-button"
-                disabled={busy}
-                onClick={() => void sample("missed")}
-              >
-                Show missed reveal
-              </button>
-              <button
-                type="button"
-                className="quiet-button"
-                disabled={busy}
-                onClick={() => void sample("completion")}
-              >
-                Show sample completion
-              </button>
-              <button
-                type="button"
-                className="quiet-button"
-                disabled={busy}
-                onClick={() => void sample("completion-mixed")}
-              >
-                Show mixed completion
-              </button>
-            </div>
-          </fieldset>
           <details className="admin-review-captures">
             <summary>Capture and restore</summary>
             <div className="admin-review-states">

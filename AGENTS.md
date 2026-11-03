@@ -2,6 +2,25 @@
 
 These instructions apply to every coding agent working in this repository.
 
+## Working relationship
+
+- Ambit currently has one human contributor and maintainer: the user. Do not
+  assume an engineering team, editor, QA department or release operator exists.
+- The user delegates implementation and player-facing copy to AI. Resolve routine
+  writing and technical choices; do not turn a handoff into a copywriting assignment.
+- Handoffs go directly to the user: provide the concrete result or review link,
+  focused checks performed, and material remaining decisions or limitations.
+  Do not arrange another reviewer or contact anyone unless explicitly requested.
+- Respect the user's limited AI allowance. Use relevant existing evidence and
+  focused checks; do not add separate AI review rounds, exhaustive inspections or
+  repeated polish passes by default. Complete authorized work before handing it back.
+- Seek judgment at consequential forks, not routine implementation choices.
+  Present a concrete recommendation, useful alternatives and their consequences;
+  continue independent work, and record the answer in the existing spec. Wait
+  before materially departing from the approved experience or scope; silence is
+  not approval. Journey work follows the judgment checkpoints in
+  `docs/journey-authoring/IMPLEMENTING_A_SPEC.md`.
+
 ## Work efficiently
 
 - Make the smallest complete change that satisfies the request. Avoid unrelated
@@ -99,6 +118,14 @@ These instructions apply to every coding agent working in this repository.
   forward and reserve recap for completion.
 - For an approved spec, start with `docs/journey-authoring/IMPLEMENTING_A_SPEC.md`.
   Reuse the approved outline, inspect relevant current Journeys and preserve settled decisions.
+  If a draft Journey module accompanies the brief, adapt and validate it instead
+  of regenerating it from prose; follow `SOURCE_READY_HANDOFF.md` in that directory.
+- For ChatGPT design and the spec handoff, use `docs/journey-authoring/README.md`.
+  Repository reading is the normal path; exports are optional offline snapshots.
+  Record the inspected revision and do not assume GitHub sees local-only work.
+- Inherit `docs/journey-authoring/JOURNEY_DEFAULTS.md`; specs describe meaningful
+  exceptions. Use live capability experience policies to compare compositions,
+  rather than treating a matching mechanic name as proof of complete support.
 - Before extending a Journey mechanic, read `docs/JOURNEY_ENGINE.md`, inspect
   `src/game/mechanics.ts` and the corresponding `src/game/recipes.ts` example.
   Prefer grouped scene authoring; use `npm run check:journey -- <id-or-slug>` for

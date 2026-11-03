@@ -1,6 +1,11 @@
 # Portable Journey authoring kit
 
-Use the exporter to give ChatGPT or another AI current Journey context without
+For normal authoring with GitHub access, use the
+[repository-first entry point](journey-authoring/README.md) and read relevant source
+files directly. No export or upload is required. Use this kit only when repository
+access is unavailable or a frozen local snapshot is useful.
+
+The exporter gives ChatGPT or another AI a Journey-context snapshot without
 asking it to explore the whole repository. It makes ordinary Markdown files using
 local code and docs; it does not call an AI, download data, change Journey content,
 start a browser or deploy anything.
@@ -20,6 +25,7 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 | `PROJECT_INSTRUCTIONS.md`  | Instructions to paste into a ChatGPT Project or other AI workspace.                                                                                                            |
 | `COMPOSITIONS.md`          | Executable interaction/presentation examples, including populated ordering with a hint-locked spare.                                                                           |
 | `IMPLEMENTING_A_SPEC.md`   | Coding-agent entry point: read the approved brief, inspect relevant Journeys, inherit shared conventions, implement and verify.                                                |
+| `SOURCE_READY_HANDOFF.md`  | ChatGPT authors a short brief and draft module in existing TypeScript contracts; Codex adapts and validates them.                                                              |
 | `JOURNEY_SPEC_TEMPLATE.md` | Record the approved design for implementation, including scenes, help, answer contracts, completion and sources.                                                               |
 | `JOURNEY_ARCHETYPES.md`    | Recurring authored structures, implementation boundaries and relevant examples across the catalog; no preferred subset.                                                        |
 | `FEATURED_EXAMPLES.md`     | Optional collection of examples explicitly requested with `--highlight`; absent from a default export.                                                                         |
@@ -27,11 +33,11 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 | `references/*.md`          | Full crafting guide, engine, architecture, question catalog and geographic policy. Consult as needed rather than loading all at once.                                          |
 | `manifest.json`            | Repository revision, local-change indicator, highlighted IDs, and SHA-256 hashes/sizes of inputs and outputs.                                                                  |
 
-For a GPT in another thread, upload `GPT_GUIDE.md`. It includes the context and
+For an upload-based conversation, use `GPT_GUIDE.md`. It includes the context and
 walkthroughs in one file; the smaller files remain available for selective loading.
 Paste `PROJECT_INSTRUCTIONS.md` into the GPT's instructions when available.
 
-Create one conversation per Journey. Start with the authoring kit, add relevant
+When using the kit, create one conversation per Journey. Start with the kit, add relevant
 examples, and keep settled decisions in the specification rather than relying on
 conversation history. Give the approved specification to a coding agent with
 access to the current repository and
@@ -62,6 +68,30 @@ catalog-wide preference:
 ```sh
 npm run export:journeys -- --highlight along-the-andes --highlight down-the-danube
 ```
+
+## Reuse evidence and complete previews
+
+The export includes `CAPABILITIES.md` and `CAPABILITIES.json`, generated from
+current registry contracts, recipes and reducer/scene audits. Each entry records
+its demonstrated rule and states, content/data requirements, limitations, matching
+published examples, audit command, preview URL and focused checks. Availability
+is scoped to the demonstrated composition; internal modes require a product
+decision and failed audits are marked as needing repair.
+Entries also describe effective eligibility, answer/commitment policy, disclosure,
+help, reveal and camera behavior. Related examples include their Journey's actual
+completion policy and the policy differences from the recipe; a shared mode/rule
+does not imply a matching experience. `JOURNEY_DEFAULTS.md` is exported separately
+and included in the main brief and combined GPT guide. It records inherited
+behavior so the user need not specify it again.
+
+In the repository, run `npm run check:journey -- --capabilities` or open the
+workbench’s **Mechanic recipe** selector. Recipes support the normal play → help →
+reveal → completion lifecycle. Add `--recipe <name>` to the capability command to
+inspect only that composition. Two-country partial credit and lower distance-pin
+tiers also have real submitted partial previews; other quality outcomes can be
+reviewed with captured answers. **Clue and reveal** and audit JSON compare the
+starting clue with the post-answer insight and include nonblocking editorial
+warnings. These simulations do not establish factual or rendered quality.
 
 ## Fresh architecture review
 

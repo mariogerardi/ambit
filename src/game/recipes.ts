@@ -129,7 +129,7 @@ export const MECHANIC_RECIPES: Question[] = [
     },
     scenes: {
       play: {
-        focus: { lat: 38, lng: 3, altitude: 0.65 },
+        framing: "selection",
         map: {
           borders: true,
           hoverFeedback: false,
@@ -294,6 +294,7 @@ export const MECHANIC_RECIPES: Question[] = [
       type: "country-ids",
       ids: ["wurl:CAN", "wurl:MEX"],
     },
+    partialCredit: "one-of-two",
     guidance: {
       hint: "They lie on opposite sides of the United States.",
       assist: {
@@ -752,6 +753,48 @@ export const MECHANIC_RECIPES: Question[] = [
 
 /** Independent presentation composition: pin response, not the compass angle control. */
 export const PRESENTATION_RECIPES: Question[] = [
+  defineQuestion({
+    ...base,
+    id: "recipe:multilingual-network",
+    title: "Native text with an explanatory alternative-answer network",
+    mode: "map-single",
+    count: 1,
+    selection: { type: "world" },
+    commitment: "immediate",
+    rule: { type: "country-ids", ids: ["wurl:FRA", "wurl:CAN"], match: "any" },
+    prompt: "Select France or Canada for this scoped demonstration.",
+    explanation:
+      "The blue network explains a relationship; only the chosen country receives a grade. Replace this scoped demonstration with a complete, sourced acceptance set.",
+    qualification:
+      "This deliberately limits the fixture to two named countries; it is not an exhaustive French official-language list.",
+    textClue: {
+      text: "Bonjour tout le monde.",
+      lang: "fr",
+      reveal: { language: "French", translation: "Hello everyone." },
+    },
+    map: { ...base.map, muteOthers: false, candidates: "neutral" },
+    guidance: {
+      hint: "This demonstration spans the North Atlantic.",
+      assist: {
+        text: "Four candidates remain; two qualify.",
+        candidateIds: ["wurl:FRA", "wurl:CAN", "wurl:GBR", "wurl:DEU"],
+      },
+    },
+    scenes: {
+      play: { focus: { lat: 20, lng: -30, altitude: 2.2 }, contextIds: [] },
+      reveal: {
+        focus: { lat: 35, lng: -30, altitude: 2.2 },
+        views: [
+          { lat: 47, lng: 2, altitude: 0.8 },
+          { lat: 55, lng: -100, altitude: 1 },
+        ],
+        network: {
+          regionIds: ["wurl:FRA", "wurl:CAN"],
+          label: "Explanatory network",
+        },
+      },
+    },
+  }),
   defineQuestion({
     ...base,
     id: "recipe:populated-country-order",
