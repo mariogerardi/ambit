@@ -2033,13 +2033,18 @@
   margin: 0;
   color: var(--ui-text);
   font:
-    500 clamp(24px, 2.3vw, 34px) / 1.65 var(--font-ui),
+    500 clamp(20px, 1.5vw, 24px) / 1.55 var(--font-ui),
     Arial,
     sans-serif;
   overflow-wrap: anywhere;
   white-space: normal;
   user-select: text;
   text-align: start;
+}
+/* Preserve the larger Arabic script while keeping longer Latin/Cyrillic clues compact. */
+.journey-text-clue blockquote[lang|="ar"] {
+  font-size: clamp(24px, 2.3vw, 34px);
+  line-height: 1.65;
 }
 .journey-text-clue figcaption {
   display: grid;
@@ -2050,7 +2055,7 @@
   color: var(--ui-text);
   font-size: 18px;
 }
-.journey-text-clue figcaption span {
+.journey-text-clue figcaption em {
   color: var(--ui-muted);
   font-size: 14px;
   line-height: 1.5;

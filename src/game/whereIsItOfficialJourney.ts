@@ -55,8 +55,7 @@ export const OFFICIAL_LANGUAGE_NETWORKS = {
 const base = definePresentation({
   label: "Official languages",
   topic: "Language and geography",
-  instruction:
-    "National official use counts, including the related language varieties explained on reveal.",
+  instruction: "National official status counts.",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -79,8 +78,8 @@ const tour = (
   play: { focus: world, contextIds: [], places: [], overlays: [] },
   reveal: {
     focus: overview,
-    views: [...views, overview],
-    orbit: true,
+    views,
+    returnToSelection: true,
     contextIds: [],
     network: {
       regionIds: OFFICIAL_LANGUAGE_NETWORKS[language],
@@ -133,7 +132,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       },
       leadIn:
         "One expression can belong to a language used far beyond one country’s borders.",
-      prompt: "Find a country where the language of this saying is official.",
+      prompt: "Find a country where this language is official:",
       explanation:
         "Arabic connects North Africa and Southwest Asia with countries farther south, including Chad, Djibouti, Comoros and Somalia. Mali’s official languages include Hassaniya Arabic, a different variety from the Standard Arabic used in this proverb.",
       guidance: {
@@ -193,7 +192,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
         },
       },
       leadIn: "Familiar-looking letters can open onto a much larger geography.",
-      prompt: "Find a country where this language is official.",
+      prompt: "Find a country where this language is official:",
       explanation:
         "Portuguese has official status in nine countries across four continents: Portugal, Brazil, six African countries and Timor-Leste. Maritime empire and colonization carried the language across oceans; independent states later made their own choices about its place in national life.",
       guidance: {
@@ -250,7 +249,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       },
       leadIn:
         "An alphabet can cross languages and borders; official status is another clue.",
-      prompt: "Find a country where this language is official.",
+      prompt: "Find a country where this language is official:",
       explanation:
         "Russian has national legal standing beyond Russia. Belarus recognizes it alongside Belarusian, and Kyrgyzstan gives it official-language status. Kazakhstan names Kazakh as its official language and expressly provides for Russian’s official use in state and local institutions.",
       guidance: {
@@ -307,12 +306,12 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
         reveal: {
           language: "Malay",
           translation:
-            "As bamboo depends on the riverbank, so the riverbank depends on bamboo—a saying about mutual support.",
+            "As bamboo depends on the riverbank, so the riverbank depends on bamboo.",
         },
       },
       leadIn:
         "The alphabet may look familiar, but these words offer a new puzzle.",
-      prompt: "Find a country where this language is official.",
+      prompt: "Find a country where this language is official:",
       explanation:
         "Malay links Malaysia, Brunei and Singapore across the South China Sea. Indonesia’s official national standard, Bahasa Indonesia, developed from Malay and is accepted here too. Singapore recognizes Malay alongside English, Mandarin and Tamil: one small country belongs to several official-language networks.",
       guidance: {
@@ -377,7 +376,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       },
       leadIn:
         "This final expression belongs to a language whose story long predates today’s borders.",
-      prompt: "Find a country where this language is official.",
+      prompt: "Find a country where this language is official:",
       explanation:
         "Guaraní joins two neighboring countries through different national arrangements. Paraguay recognizes it alongside Spanish; Bolivia includes it among its constitutionally official Indigenous languages. An enduring spoken tradition is reflected in both a bilingual national framework and a much larger multilingual one.",
       guidance: {

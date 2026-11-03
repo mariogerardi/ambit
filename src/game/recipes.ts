@@ -788,7 +788,7 @@ export const PRESENTATION_RECIPES: Question[] = [
           { lat: 47, lng: 2, altitude: 0.8 },
           { lat: 55, lng: -100, altitude: 1 },
         ],
-        orbit: true,
+        returnToSelection: true,
         network: {
           regionIds: ["wurl:FRA", "wurl:CAN"],
           label: "Explanatory network",

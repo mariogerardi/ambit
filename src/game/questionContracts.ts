@@ -248,6 +248,8 @@ export interface Question {
   feedbackViews?: Focus[];
   /** Resume the shared overview rotation after a finite reveal tour. */
   feedbackOrbit?: boolean;
+  /** Finish a finite country reveal at the submitted country, including a miss. */
+  feedbackReturnToSelection?: boolean;
   /** Explanatory geography, distinct from selected/graded answers. */
   feedbackNetwork?: { regionIds: string[]; label: string };
   explanation: string;

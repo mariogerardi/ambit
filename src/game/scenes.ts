@@ -29,6 +29,7 @@ export interface AssistScene {
 export interface RevealScene {
   focus?: Focus;
   orbit?: boolean;
+  returnToSelection?: boolean;
   network?: { regionIds: string[]; label: string };
   /** One pass through the revealed geography; interrupted by globe input. */
   views?: Focus[];
@@ -91,6 +92,7 @@ export function compileQuestionScenes(
       : revealViews,
   );
   assign("feedbackOrbit", reveal?.orbit);
+  assign("feedbackReturnToSelection", reveal?.returnToSelection);
   assign("feedbackNetwork", reveal?.network);
   assign("feedbackHintIds", reveal?.contextIds);
   assign("feedbackContextIds", reveal?.answerIds);

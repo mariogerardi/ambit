@@ -77,6 +77,13 @@ export function validateQuestionContract(q: Question): void {
         q.feedbackNetwork.regionIds.length)
   )
     fail("explanatory networks require distinct regions and a legend label");
+  if (
+    q.feedbackReturnToSelection &&
+    (q.mode !== "map-single" || q.feedbackOrbit)
+  )
+    fail(
+      "returning to a selection requires a single country answer and cannot also start overview rotation",
+    );
   if (q.feedbackOrbit && (q.feedbackFocus?.altitude ?? 0) < 1.65)
     fail("a rotating reveal requires a whole-globe final focus");
   const definition = mechanicFor(q);

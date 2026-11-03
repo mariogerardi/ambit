@@ -32,7 +32,9 @@ Wrong selections earn zero and show the full explanatory reveal.
 
 - `textClue` provides selectable Unicode text, a language tag, direction, and
   reveal-only language name/English translation. Arabic's clue is RTL; captions
-  are LTR. Shared typography wraps naturally with system script fallback.
+  are LTR. Translations are italic and contain only the translated expression.
+  Longer Latin/Cyrillic clues use a smaller shared size; Arabic retains its larger size.
+  Shared typography wraps naturally with system script fallback.
 - `selection: {type: "world"}` uses all supported ADM0 geography rather than the
   UN-member roster. Neutral whole-world selection has borders without a gold
   candidate pool, target framing, country-name disclosure or answer tint.
@@ -50,11 +52,14 @@ qualifications live in [Sources](../../public/journeys/where-is-it-official/SOUR
 ## Motion and completion
 
 Reveal all network countries before starting a short finite tour of one or two
-regional views. Finish at a whole-globe overview, then use the same rotation as
-Home/Explore. `scenes.reveal.orbit` appends the authored final focus when needed.
-This uses the existing flyover path with a brief duration scale and a completion
-handoff, not another animation system. Input interrupts both stages; reduced
-motion shows the final static overview.
+regional views. Every round ends back at the actual submitted country, including
+an incorrect selection, and stays there. `scenes.reveal.returnToSelection` provides
+this reusable endpoint policy; reduced motion directly frames the chosen country.
+
+Whole-world neutral questions begin over a random continent and rotate until
+interaction. If the current view already has a suitable world zoom and is
+rotating normally, preserve it. Geographic clues and authored intro tours retain
+their explicit framing; reduced motion stays static.
 
 Completion makes one curated tour in round order and ends in overview rotation.
 Accepted actual alternatives become reviewed discoveries; actual mistakes stay

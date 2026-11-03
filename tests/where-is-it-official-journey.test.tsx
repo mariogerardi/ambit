@@ -97,8 +97,8 @@ describe("Where Is It Official?", () => {
     const recipe = PRESENTATION_RECIPES.find(
       (q) => q.id === "recipe:multilingual-network",
     )!;
-    expect(recipe.feedbackViews?.at(-1)).toEqual(recipe.feedbackFocus);
-    expect(recipe.feedbackOrbit).toBe(true);
+    expect(recipe.feedbackReturnToSelection).toBe(true);
+    expect(recipe.feedbackOrbit).not.toBe(true);
   });
   it("accepts every qualifying country independently, including Mali, Palestine and Indonesia", () => {
     for (const [index, q] of journey.rounds.entries()) {
@@ -110,6 +110,10 @@ describe("Where Is It Official?", () => {
         expect(journeyPoints(game), id).toBe(3);
         const map = view(game);
         expect(map.states[id]).toBe("correct");
+        expect(map.focus).toMatchObject({
+          lat: context.targets.get(id)!.focus.lat,
+          lng: context.targets.get(id)!.focus.lng,
+        });
         expect(
           q.rule.ids
             .filter((other) => other !== id)
@@ -141,6 +145,8 @@ describe("Where Is It Official?", () => {
           ?.getAttribute("lang"),
       ).toBe(q.textClue!.lang);
       expect(node.querySelector(".journey-text-clue figcaption")).toBeNull();
+      expect(q.prompt).toBe("Find a country where this language is official:");
+      expect(q.textClue!.reveal.translation).not.toContain("—a saying");
       expect(node.textContent).not.toContain(q.textClue!.reveal.language);
       expect(node.textContent).not.toContain(q.textClue!.reveal.translation);
     }
@@ -195,9 +201,12 @@ describe("Where Is It Official?", () => {
       expect(journeyPoints(game)).toBe(0);
       const map = view(game);
       expect(map.states["wurl:CAN"]).toBe("incorrect");
+      expect(map.focus).toMatchObject(
+        regions.find((region) => region.id === "wurl:CAN")!.focus,
+      );
       expect(q.rule.ids.every((id) => map.states[id] === "hinted")).toBe(true);
       const node = shell(game);
-      expect(node.querySelector("figcaption")?.textContent).toContain(
+      expect(node.querySelector("figcaption em")?.textContent).toContain(
         q.textClue!.reveal.translation,
       );
       expect(node.querySelector(".feedback-map-key")?.textContent).toContain(

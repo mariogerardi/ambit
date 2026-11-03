@@ -565,6 +565,26 @@ export function questionRegions(
   return result;
 }
 
+/** Neutral full-world searches can begin in motion; authored geographic clues keep their framing. */
+export function isWholeGlobeSearch(question: Question) {
+  return (
+    mechanicFor(question).mapSelection === "regions" &&
+    ["members", "world"].includes(question.selection.type) &&
+    question.map?.candidates === "neutral" &&
+    ![
+      question.contextIds,
+      question.candidateRegionIds,
+      question.places,
+      question.overlays,
+      question.physicalFeatures,
+      question.clueLocators,
+      question.highlightParts,
+      question.importedRegions,
+      question.introViews,
+    ].some((items) => items?.length)
+  );
+}
+
 export function questionVisualStates(
   question: Question,
   context: QuestionContext,

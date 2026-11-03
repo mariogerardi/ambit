@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_VIEWS,
   createDefaultViewCycle,
   studyCameraTarget,
+  randomWorldView,
 } from "../src/globe/defaultViews";
 describe("Study camera policy", () => {
   it("keeps normal world positions untouched between recall prompts", () => {
@@ -39,4 +40,18 @@ describe("Study camera policy", () => {
     );
     expect(destination).toEqual({ lat: 45, lng: 25, altitude: 1.7 });
   });
+});
+
+it("picks a fresh continent for a new world search without reference to its answers", () => {
+  const random = vi.spyOn(Math, "random").mockReturnValue(0);
+  try {
+    expect(randomWorldView(2)).toEqual({ ...DEFAULT_VIEWS[0], altitude: 2 });
+    random.mockReturnValue(0.99);
+    expect(randomWorldView(2)).toEqual({
+      ...DEFAULT_VIEWS.at(-1),
+      altitude: 2,
+    });
+  } finally {
+    random.mockRestore();
+  }
 });

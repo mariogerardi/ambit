@@ -16,7 +16,7 @@ export function TextClue({
       {revealed && (
         <figcaption lang="en" dir="ltr">
           <strong>{clue.reveal.language}</strong>
-          <span>{clue.reveal.translation}</span>
+          <em>{clue.reveal.translation}</em>
         </figcaption>
       )}
     </figure>

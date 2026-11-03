@@ -270,8 +270,19 @@ The network's IDs and legend are checked independently of answer eligibility.
 focus, appending that focus to the views if needed, then resumes the shared
 Home/Explore rotation. These teaching tours use a brief duration scale of the
 existing camera path. Input cancels the handoff; reduced motion stays static.
-`completion.orbit` similarly makes its recap tour finite before rotation. Existing
+`completion.orbit` similarly makes its recap tour finite before rotation. For a single-country task,
+`scenes.reveal.returnToSelection` instead appends the submitted country's focus to
+the finite tour, including after a miss. It also supplies the reduced-motion and
+recenter destination. These two reveal endpoint policies are mutually exclusive. Existing
 tours retain their defaults when these options are absent.
+Neutral full-world searches (`members` or `world`) without geographic context,
+markers, overlays or authored intro views start at a random continental overview
+and rotate until interaction. A suitable world view already rotating is preserved.
+Hints stop this introductory motion; authored help framing remains in control.
+Reduced motion uses a static view. This shared policy does not override map clues.
+
+Native clue translations use italics and contain the translation alone. The
+shared typography keeps Latin/Cyrillic text compact while retaining larger Arabic.
 See `recipe:multilingual-network` for an executable scoped demonstration.
 
 ## Bearing Intersection composition

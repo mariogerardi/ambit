@@ -85,6 +85,7 @@ export function authoringCapabilities(
         nativeText: !!question.textClue,
         explanatoryNetwork: !!question.feedbackNetwork,
         overviewRotation: !!question.feedbackOrbit,
+        returnToSelection: !!question.feedbackReturnToSelection,
       },
       requires,
       limits: [

@@ -394,6 +394,12 @@ export function journeyWorld(
   const selected = catalog.get(game.selectedIds.at(-1) ?? "");
   const preferredFocus =
     completion?.focus ??
+    (game.phase === "feedback" && round.feedbackReturnToSelection && selected
+      ? {
+          ...selected.focus,
+          altitude: Math.max(0.12, selected.focus.altitude ?? 0.7),
+        }
+      : undefined) ??
     (bearingResult
       ? comparisonFocus(
           [
