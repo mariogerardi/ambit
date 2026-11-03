@@ -236,6 +236,15 @@ test(
         workflow,
       );
       assert.ok(kit.includes(workflow));
+      const handoff = await readFile(
+        path.join(ROOT, "docs/journey-authoring/SOURCE_READY_HANDOFF.md"),
+        "utf8",
+      );
+      assert.equal(
+        await readFile(path.join(directory, "SOURCE_READY_HANDOFF.md"), "utf8"),
+        handoff,
+      );
+      assert.ok(kit.includes(handoff));
       const archetypes = await readFile(
         path.join(ROOT, "docs/journey-authoring/JOURNEY_ARCHETYPES.md"),
         "utf8",
@@ -254,6 +263,7 @@ test(
         "AUTHORING_KIT.md",
         "JOURNEY_ARCHETYPES.md",
         "JOURNEY_SPEC_TEMPLATE.md",
+        "SOURCE_READY_HANDOFF.md",
       ])
         assert.ok(
           gptGuide.includes(await readFile(path.join(directory, file), "utf8")),

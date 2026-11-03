@@ -18,11 +18,21 @@ established behavior again.
 Choose the workflow from the user's request:
 
 - **Design or critique:** develop the premise and five-stop outline, refine the
-  experience, then record settled decisions in `JOURNEY_SPEC_TEMPLATE.md`.
+  experience and preserve decisions. When delivering the implementation handoff,
+  follow `SOURCE_READY_HANDOFF.md`: a short brief and draft Journey module. Use
+  `JOURNEY_SPEC_TEMPLATE.md` for decisions and the module for detailed copy and
+  configuration, without duplicating it in prose.
 - **Implement an approved spec:** follow `IMPLEMENTING_A_SPEC.md`. Use the spec's
   approved outline; familiarize yourself with current Journeys, then implement.
   Preserve settled decisions and inherit shared conventions without another
   design-approval round. Ask only about material gaps or conflicts.
+
+For the implementation-ready handoff, read the exact current types and relevant
+recipe. Author a complete module for supported behavior; explicitly identify
+unsupported stops or required assets/data instead of inventing APIs or pretending
+the draft passed checks. Codex adapts and validates the supplied module while
+preserving approved creative decisions. A prose-only spec is still valid when a
+module cannot be provided; do not make the user write code.
 
 Use the judgment checkpoints in `IMPLEMENTING_A_SPEC.md` for consequential
 implementation ambiguities: recommend concrete behavior, explain alternatives,

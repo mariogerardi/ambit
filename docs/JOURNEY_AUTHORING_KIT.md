@@ -25,6 +25,7 @@ The output is `artifacts/journey-authoring-kit/`, which is ignored by Git.
 | `PROJECT_INSTRUCTIONS.md`  | Instructions to paste into a ChatGPT Project or other AI workspace.                                                                                                            |
 | `COMPOSITIONS.md`          | Executable interaction/presentation examples, including populated ordering with a hint-locked spare.                                                                           |
 | `IMPLEMENTING_A_SPEC.md`   | Coding-agent entry point: read the approved brief, inspect relevant Journeys, inherit shared conventions, implement and verify.                                                |
+| `SOURCE_READY_HANDOFF.md`  | ChatGPT authors a short brief and draft module in existing TypeScript contracts; Codex adapts and validates them.                                                              |
 | `JOURNEY_SPEC_TEMPLATE.md` | Record the approved design for implementation, including scenes, help, answer contracts, completion and sources.                                                               |
 | `JOURNEY_ARCHETYPES.md`    | Recurring authored structures, implementation boundaries and relevant examples across the catalog; no preferred subset.                                                        |
 | `FEATURED_EXAMPLES.md`     | Optional collection of examples explicitly requested with `--highlight`; absent from a default export.                                                                         |

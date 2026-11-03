@@ -11,8 +11,9 @@ Give ChatGPT the repository and this path. A reusable starting prompt is:
 
 > Read `docs/journey-authoring/README.md` in `mariogerardi/ambit` on `main`
 > through GitHub. Follow its design workflow for this Journey idea: [idea].
-> Read only relevant references and examples. Author the copy and produce a
-> spec I can bring to Codex. Inherit shared defaults and flag only material
+> Read only relevant references and examples. Once the design is settled, produce
+> a short brief and draft Journey TypeScript module for Codex using
+> `SOURCE_READY_HANDOFF.md`. Inherit shared defaults and flag only material
 > open decisions or engine additions. Record the repository revision used.
 
 Replace `main` with a published branch or commit when using work that has not
@@ -45,11 +46,12 @@ switch silently to another branch or claim local checks from repository reading.
    [Engine](../JOURNEY_ENGINE.md) explains the boundaries; `src/game/mechanics.ts` and the
    recipe establish implemented support. A supported control does not prove every
    proposed combination works. Inherit defaults; specify only relevant exceptions.
-5. Deliver one self-contained Markdown spec based on the
-   [spec template](JOURNEY_SPEC_TEMPLATE.md). Retain settled decisions, acceptance
-   rules, final copy, source URLs and material implementation differences. Include
-   inspected paths/recipe IDs and revision when known. Ask the user to settle
-   creative choices, not write routine copy or fill technical fields.
+5. After settling the design, follow the [implementation-ready handoff](SOURCE_READY_HANDOFF.md):
+   deliver a short brief based on the [spec template](JOURNEY_SPEC_TEMPLATE.md)
+   and a draft `<name>Journey.ts` module. Put final copy and concrete contracts in
+   the module; keep decisions, qualifications and material gaps in the brief.
+   Include inspected paths/recipe IDs and revision when known. Ask the user to
+   settle creative choices, not write routine copy or fill technical fields.
 
 With repository-reading access only, do not ask the user to run setup or export
 commands just to design a Journey. Generated `CAPABILITIES.*`, `GPT_GUIDE.md` and
@@ -61,13 +63,15 @@ geometry/data validation belongs to implementation when needed.
 
 ## Handoff to the user, then Codex
 
-The spec is the handoff artifact; the user can paste or attach it in Codex. A
-downloadable file is convenient, not a reason to export the repository. Include:
+The brief and draft module are the handoff artifacts; the user can paste or attach
+them in Codex. A labeled TypeScript fence within the brief also works. Downloadable
+files are convenient, not a reason to export the repository. Include:
 
 - **Status and basis:** draft or approved, repository/ref/revision actually read,
   and any material access or evidence limitation.
-- **Settled experience:** five stops, authored copy, answer acceptance, help,
-  reveals, completion and deliberate departures from shared defaults.
+- **Settled experience:** five-stop outline, material acceptance decisions and
+  deliberate departures from shared defaults. Detailed copy, help, rules, scenes
+  and completion live in the module without a duplicate prose inventory.
 - **Implementation fit:** relevant source/recipe references, authored data/assets,
   and genuinely new engineering or unresolved decisions. Group repeated mechanics.
 - **Release scope:** registration authorized or deferred; publishing, pushing and
@@ -75,7 +79,9 @@ downloadable file is convenient, not a reason to export the repository. Include:
 
 Codex follows [Implementing a spec](IMPLEMENTING_A_SPEC.md) and repository
 [AGENTS.md](../../AGENTS.md), checks the actual working revision and preserves
-approved creative decisions. Recheck only relevant capability differences if the
+approved creative decisions. Adapt and validate the supplied module rather than
+regenerating it from prose. A prose-only spec remains usable when no module is
+available; do not ask the user to produce one. Recheck relevant capability differences if the
 repository has changed; do not restart the design. Complete implementation and
 focused checks, then hand the result and review link directly to the user.
 Consequential ambiguities use the implementation workflow's
@@ -86,16 +92,17 @@ forms of evidence; report only what was actually established.
 
 ## Which document owns what?
 
-| Source                                        | Responsibility                                                         |
-| --------------------------------------------- | ---------------------------------------------------------------------- |
-| This page                                     | GitHub-first reading order and ChatGPT → user → Codex handoff.         |
-| `PROJECT_INSTRUCTIONS.md`                     | Shared AI working instructions for repository and optional export use. |
-| `JOURNEY_CRAFTING.md`                         | Editorial and player-experience standards.                             |
-| `JOURNEY_DEFAULTS.md`                         | Inherited shared behavior and meaningful exception boundaries.         |
-| `JOURNEY_ARCHETYPES.md`, catalog              | Finding relevant structures and current Journeys.                      |
-| `JOURNEY_ENGINE.md`, current code/recipes     | Supported contracts, compositions and implementation boundaries.       |
-| `JOURNEY_SPEC_TEMPLATE.md`, the approved spec | Recording and preserving the chosen design.                            |
-| `IMPLEMENTING_A_SPEC.md`, `AGENTS.md`         | Local implementation, focused verification and handoff.                |
+| Source                                        | Responsibility                                                                    |
+| --------------------------------------------- | --------------------------------------------------------------------------------- |
+| This page                                     | GitHub-first reading order and ChatGPT → user → Codex handoff.                    |
+| `PROJECT_INSTRUCTIONS.md`                     | Shared AI working instructions for repository and optional export use.            |
+| `JOURNEY_CRAFTING.md`                         | Editorial and player-experience standards.                                        |
+| `JOURNEY_DEFAULTS.md`                         | Inherited shared behavior and meaningful exception boundaries.                    |
+| `JOURNEY_ARCHETYPES.md`, catalog              | Finding relevant structures and current Journeys.                                 |
+| `JOURNEY_ENGINE.md`, current code/recipes     | Supported contracts, compositions and implementation boundaries.                  |
+| `JOURNEY_SPEC_TEMPLATE.md`, the approved spec | Recording and preserving the chosen design.                                       |
+| `SOURCE_READY_HANDOFF.md`                     | Exact content responsibilities for the brief/module handoff and Codex validation. |
+| `IMPLEMENTING_A_SPEC.md`, `AGENTS.md`         | Local implementation, focused verification and handoff.                           |
 
 Do not treat historical review notes or individual examples as newer standards.
 Code establishes implemented behavior when a summary disagrees; flag material

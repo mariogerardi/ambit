@@ -19,6 +19,13 @@ explicit exclusions. Technical sketches, internal names and file choices may
 adapt to current code while preserving that player experience. A proposed
 implementation is not itself a locked creative decision.
 Do not restart design or request approval for decisions already settled.
+When the handoff includes a draft Journey module, follow
+[implementation-ready handoff](SOURCE_READY_HANDOFF.md): read it with the brief,
+adapt it to current contracts and validate the relevant data/behavior. Preserve
+approved creative decisions while treating generated code as a proposed
+implementation. Repair technical mistakes rather than regenerate the whole
+Journey from prose. Prose-only specs remain supported; do not send the user back
+to obtain a module before progressing.
 When the request is another set using an existing mechanic, use that Journey as
 the primary model. Preserve the original and give the sequel fresh identities;
 do not turn a content addition into a mechanic redesign.

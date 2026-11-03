@@ -5,6 +5,17 @@
 **Authoring basis:** repository/ref/commit actually read (or available branch/date), or optional kit snapshot; material access limitations\
 **Registration:** defer / authorize (see Catalog impact)
 
+**Implementation draft:** companion `<name>Journey.ts` / labeled TypeScript fence / partial or unavailable (state material reason)
+
+After settling the design, follow `SOURCE_READY_HANDOFF.md`: deliver a short brief
+and a draft module using the current repository contracts. The module contains
+the complete ordinary copy, grading, help, scenes, evidence and completion.
+Use this template as a concise decision record: keep the outline, consequential
+qualifications, relevant references, gaps and release scope. Do not repeat the
+module's fields and strings in prose. The detailed sections below are prompts for
+missing or exceptional information, not a requirement to duplicate the module.
+With a prose-only handoff, retain enough detail to implement the approved design.
+
 Specify the **approved player experience**. Do not replicate the engine's
 implementation guide. The implementing agent resolves routine IDs, types, styles,
 files and shared UI conventions from the current repository. Leave irrelevant

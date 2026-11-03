@@ -118,6 +118,8 @@ These instructions apply to every coding agent working in this repository.
   forward and reserve recap for completion.
 - For an approved spec, start with `docs/journey-authoring/IMPLEMENTING_A_SPEC.md`.
   Reuse the approved outline, inspect relevant current Journeys and preserve settled decisions.
+  If a draft Journey module accompanies the brief, adapt and validate it instead
+  of regenerating it from prose; follow `SOURCE_READY_HANDOFF.md` in that directory.
 - For ChatGPT design and the spec handoff, use `docs/journey-authoring/README.md`.
   Repository reading is the normal path; exports are optional offline snapshots.
   Record the inspected revision and do not assume GitHub sees local-only work.
