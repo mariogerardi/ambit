@@ -65,6 +65,48 @@
     ]
   },
   {
+    "id": "bare-minimum-v1",
+    "dailyEligible": false,
+    "addedAt": "2026-11-02",
+    "title": "Bare Minimum",
+    "saveRevision": 1,
+    "description": "No stripes. No stars. No complicated symbols. Meet the flags that did the absolute minimum—and the histories that didn’t.",
+    "path": "/journey/bare-minimum",
+    "module": "./bareMinimumJourney.ts",
+    "rounds": [
+      {
+        "id": "bare-01-white-flag",
+        "label": "Historical flags",
+        "progressLabel": "The White Flag",
+        "resolvedLabel": "France · Bourbon Restoration"
+      },
+      {
+        "id": "bare-02-yellow-banner",
+        "label": "Historical flags",
+        "progressLabel": "Yellow, Apparently",
+        "resolvedLabel": "Brunei · Sultan’s yellow banner"
+      },
+      {
+        "id": "bare-03-redundant",
+        "label": "Historical flags",
+        "progressLabel": "Redundant",
+        "resolvedLabel": "Hungary + Oman · Two red flags"
+      },
+      {
+        "id": "bare-04-extremes",
+        "label": "Historical flags",
+        "progressLabel": "A Study in Extremes",
+        "resolvedLabel": "Kabul · Afghanistan, 1996"
+      },
+      {
+        "id": "bare-05-final-form",
+        "label": "Historical flags",
+        "progressLabel": "The Final Form",
+        "resolvedLabel": "Libya · 1977–2011"
+      }
+    ]
+  },
+  {
     "id": "beasts-on-banners-v1",
     "addedAt": "2026-10-29",
     "title": "Beasts on Banners",
@@ -649,6 +691,48 @@
         "id": "unexpected-south-africa-capitals",
         "label": "Three capitals",
         "progressLabel": "South Africa"
+      }
+    ]
+  },
+  {
+    "id": "power-to-the-people-v1",
+    "dailyEligible": false,
+    "addedAt": "2026-11-02",
+    "title": "Power to the People",
+    "saveRevision": 1,
+    "description": "Five political turning points, from crowds in the streets to ballots and online deliberations.",
+    "path": "/journey/power-to-the-people",
+    "module": "./powerToThePeopleJourney.ts",
+    "rounds": [
+      {
+        "id": "power-people-01-people-power",
+        "label": "Political turning points",
+        "progressLabel": "People Power",
+        "resolvedLabel": "Manila · EDSA, 1986"
+      },
+      {
+        "id": "power-people-02-new-flag",
+        "label": "Political turning points",
+        "progressLabel": "A New Flag",
+        "resolvedLabel": "South Africa · 1994"
+      },
+      {
+        "id": "power-people-03-election-regions",
+        "label": "Political turning points",
+        "progressLabel": "A Country at the Polls",
+        "resolvedLabel": "Ukraine · December 2004 repeat runoff"
+      },
+      {
+        "id": "power-people-04-spark-spreads",
+        "label": "Political turning points",
+        "progressLabel": "The Spark Spreads",
+        "resolvedLabel": "Tunisia, Egypt and Libya · 2010–11"
+      },
+      {
+        "id": "power-people-05-digital-turn",
+        "label": "Political turning points",
+        "progressLabel": "The Digital Turn",
+        "resolvedLabel": "Nepal · 2025 youth uprising"
       }
     ]
   },

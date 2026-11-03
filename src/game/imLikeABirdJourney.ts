@@ -498,12 +498,10 @@ export const IM_LIKE_A_BIRD_JOURNEY: Journey = {
       ),
     ],
     views: migrations.map((m) => m.focus),
-    loopViews: false,
     physicalFeatures: corridors.flat(),
     overlays: migrations.map((m) => direction(m, false)),
     places: [],
     borders: true,
-    answerReviews: true,
     mapCaption: "Five migrations shaped by land, water and seasons",
     caption:
       "Seasons set these birds in motion, but land, water, winds and mountain passes shape their journeys. Some cross open seas; others follow land to find rising air. Political borders help us describe these movements. They do not determine where the birds fly.",

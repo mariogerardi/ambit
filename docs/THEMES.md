@@ -596,3 +596,8 @@ country adjacency colors, semantic state distinctions, selected/clue/hover
 outlines, river visibility, storage recovery, and theme switching without globe
 replacement. These checks do not prove composited/translucent contrast,
 color-vision accessibility, GPU appearance, or final browser layout.
+
+City and capital map labels use a moderate shared text size in all themes. Authored city
+references retain equal typography regardless of capital status; numeric map
+annotations and physical-feature labels keep their existing scale. The values
+and screen-space layout live in `src/globe/placeLabels.ts`.

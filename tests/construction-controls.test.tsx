@@ -90,7 +90,7 @@ it("discloses all quality bands before answering for each independent mode", () 
   }
 });
 
-it("shows manual completion controls and removes the brush coordinate disclosure", async () => {
+it("keeps completion receipts free of answer disclosures and view links", async () => {
   const { GameShell } = await import("../src/game/GameShell");
   const { DRAWING_SAHARA_JOURNEY: journey } = await import(
     "../src/game/drawingSaharaJourney"
@@ -138,15 +138,16 @@ it("shows manual completion controls and removes the brush coordinate disclosure
     constructionReviewIndex: 1,
   };
   const markup = renderToStaticMarkup(<GameShell {...props} />);
-  expect(markup).toContain('aria-label="Review your constructions"');
-  expect(markup).toContain("Capitals enclosed");
+  expect(markup).not.toContain('aria-label="Review your constructions"');
+  expect(markup).not.toContain("Review your answer");
+  expect(markup).not.toContain("Capitals enclosed");
   expect(markup).not.toContain("scoring cells");
   expect(markup).not.toContain("Your submitted shape is kept");
   const overview = renderToStaticMarkup(
     <GameShell {...props} constructionReviewIndex={undefined} />,
   );
-  expect(overview).toContain("Overview");
-  expect(overview).not.toContain("Your construction result");
+  expect(overview).not.toContain("construction-recap-controls");
+  expect(overview).not.toContain(">Overview<");
   const playing = renderToStaticMarkup(
     <GameShell
       {...props}
@@ -284,7 +285,7 @@ it("keeps the island target in play and explains scoring with each question resu
   expect(scoring.querySelectorAll('[role="img"]')).toHaveLength(3);
   expect(scoring.textContent).not.toContain("or fewer");
   const finished: GameState = {
-    ...game,
+    ...answered,
     phase: "finished",
     roundIndex: 4,
     help: { [journey.rounds[0].id]: "assisted" },
@@ -298,13 +299,10 @@ it("keeps the island target in play and explains scoring with each question resu
   );
   expect(
     host.querySelectorAll('[aria-label="Island scoring"] tbody tr'),
-  ).toHaveLength(1);
+  ).toHaveLength(0);
   expect(
     host.querySelector('[aria-label="Your construction result"]'),
   ).toBeNull();
-  expect(
-    host.querySelector('[aria-label="Island scoring"]')?.textContent,
-  ).toContain("Assist cap: 1 point");
   await act(async () => root.unmount());
   host.remove();
 });

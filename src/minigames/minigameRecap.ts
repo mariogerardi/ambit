@@ -60,7 +60,6 @@ export function minigameCompletion(
   return {
     focus: views[0] ?? { lat: 20, lng: 0, altitude: 2.5 },
     views: views.length ? views : undefined,
-    loopViews: true,
     mapMode: "authored",
     regionIds: [
       ...new Set(visits.filter((v) => v.correct).flatMap((v) => v.ids)),

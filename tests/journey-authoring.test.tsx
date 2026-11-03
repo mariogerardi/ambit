@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {
+  authProbe,
   click,
   host,
   mount,
@@ -152,6 +153,47 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     expect(JSON.stringify(store.load())).toBe(before);
   });
 
+  it("keeps guest review explicitly local and preserves real signed-in account presentation", async () => {
+    authProbe.admin = false;
+    await mount({ reviewSource: { journey: bird, seed: 1, stage: "play" } });
+    expect(host.textContent).toContain("Local workbench");
+    expect(host.textContent).not.toContain("Sign in");
+    expect(host.querySelector('[aria-label="Journey review"]')).not.toBeNull();
+    authProbe.subject = "review-player";
+    await mount({ reviewSource: { journey: bird, seed: 1, stage: "play" } });
+    expect(host.querySelector('[aria-label="Account"]')).not.toBeNull();
+    expect(host.textContent).not.toContain("Local workbench");
+  });
+  it("exits isolated draft review through real document navigation without changing the review URL", async () => {
+    const onExit = vi.fn();
+    history.replaceState(
+      null,
+      "",
+      "/review/journeys.html?module=imLikeABirdJourney.ts",
+    );
+    await mount({
+      reviewSource: { journey: bird, seed: 1, stage: "play", onExit },
+    });
+    await click("ambit home");
+    expect(onExit).toHaveBeenCalledWith("/");
+    expect(location.pathname).toBe("/review/journeys.html");
+    await click("Open menu");
+    await click("Home");
+    expect(onExit).toHaveBeenCalledTimes(2);
+  });
+  it("keeps review tools separate from the question and omits completion review navigation", async () => {
+    await mount({
+      reviewSource: { journey: sahara, seed: 1, stage: "completion-mixed" },
+    });
+    expect(host.querySelector(".construction-recap-controls")).toBeNull();
+    expect(host.querySelector(".journey-receipt details")).toBeNull();
+    expect(host.textContent).not.toContain("Review your answer");
+    expect(host.textContent).not.toContain("Stop flyover");
+    const panel = host.querySelector(".journey-review-panel");
+    expect(panel).not.toBeNull();
+    expect(panel?.closest(".question-card, .finish-story")).toBeNull();
+    expect(panel?.textContent).toContain("Journey review");
+  });
   it("keeps construction inputs on the same production globe adapter in draft review", async () => {
     const draft = { ...sahara, id: "unregistered-construction" };
     await mount({ reviewSource: { journey: draft, seed: 1, stage: "play" } });

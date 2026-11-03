@@ -411,9 +411,7 @@ export function useCameraOrchestration({
     clearHover();
     if (phase === "finished" && journey.completion) {
       if (!reduced && journey.completion.views?.length) {
-        if (journey.completion.loopViews === false)
-          globe.current?.flyover(journey.completion.views, false);
-        else globe.current?.flyover(journey.completion.views);
+        globe.current?.flyover(journey.completion.views);
       } else frame(journey.completion.focus);
       return () => globe.current?.cancelFlyover();
     }

@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { journeyWorkbenchPlugin } from "./review/registrationServer";
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync } from "node:fs";
 
@@ -19,6 +20,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    journeyWorkbenchPlugin(),
     {
       name: "ambit-defer-entry-css",
       apply: "build",

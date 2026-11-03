@@ -142,7 +142,7 @@ coastline replacement. These footprints apply to play, reveal and completion;
 canonical geometry and answer eligibility remain unchanged. Replace the full
 footprint rather than adding an overlapping imported island.
 
-Completion can author `overlays`, `borders`, `mapCaption` and `mapAttribution` separately from
+Completion can author `contextIds` for supplied reference countries (actual country mistakes retain priority), `overlays`, `borders`, `mapCaption` and `mapAttribution` separately from
 the last round. A `texture` overlay is a transparent equirectangular image covering
 the globe (−180° at the left edge, north at the top); `opacity` controls its strength.
 It never participates in picking or grading. A `path` overlay supports a sourced
@@ -238,18 +238,14 @@ the correct path and submitted heading remain reveal-only. This presentation
 option does not change angular grading, help ceilings, or saved bearing evidence.
 
 An authored completion overview retains actual wrong country selections and
-point guesses alongside its declared geography. Construction overviews with
-separate saved-response review keep their existing focused overview; the mistakes
-remain available in that review.
+point guesses alongside its declared geography. Construction overviews keep their authored geographic focus. Reveal screens display the saved construction and its frozen scoring metrics.
 
 Authored overviews without a separate construction review also retain imported
 province geometry, with only the declared completion regions and saved mistakes
 emphasized. Imported reveal geography requested by `assist.regionIds` becomes
 visible at the assisted stage; it stays withheld earlier. Card-order reveal
 markers use submitted slot badges, independently of canonical dates and grading.
-`completion.answerReviews: true` adds expandable saved-response reviews to the
-completion receipt, including slot assignments, mistaken selections and pin
-distance. These reviews preserve the overview and do not start a new attempt.
+Completion receipts show results without expandable answer reviews. The map retains authored destinations and actual mistakes.
 
 ## Bearing Intersection composition
 
@@ -789,13 +785,7 @@ shown. Three authored quality bands award 3/2/1 points before help ceilings.
 `constructionResult` freezes source revision, tier, feedback and metrics at
 submission. Preserve it with the submitted geometry through saves and sync;
 never silently recompute historical rewards. An optional `constructionExample`
-is reveal-only and player-toggled. `completion.constructionResults` offers a traditional overview flyover and manual
-review of one saved construction at a time; camera movement does not change the
-selected construction. `initialConstructionRoundId` can begin with a particular
-saved response, and `loopViews: false` makes a completion tour finish at its final
-authored view. The Shape of India uses an authored overview of India and the
-Golden Triangle cities, retaining access to all five responses through manual
-review. Generic cumulative completion also retains constructed submissions.
+is reveal-only and player-toggled. `completion.constructionResults` uses an authored overview flyover. `initialConstructionRoundId` can begin with a particular saved response. Completion flyovers loop until map interaction; reduced motion uses the static authored focus. The Shape of India uses an authored overview of India and the Golden Triangle cities. Generic cumulative completion also retains constructed submissions.
 
 `raster-patch` overlays are georeferenced local images. `foreground: true` places
 explanatory shading above base imagery; pins and labels remain above the shading.

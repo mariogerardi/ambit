@@ -131,6 +131,9 @@ export function AccountMenu({
                 <ActionIcon name="admin" />
                 <span>Admin</span>
               </button>
+              {import.meta.env.DEV && (
+                <a href="/review/journeys.html">Journey workbench</a>
+              )}
             </div>
           )}
         </nav>

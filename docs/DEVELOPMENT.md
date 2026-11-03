@@ -74,9 +74,11 @@ For review without deploying account services, open
 dashboard with an in-memory client and sample accounts; requests never reach AWS.
 The preview supports profile edits, friend acceptance and Journey comparisons. `/review/login.html` previews the supported
 Cognito branding assets; it submits no credentials. For Journey map review, open `/review/journeys.html`. It renders the real App and
-WebGL globe with an in-memory Admin permission for local practice, no signed-in
-user, and no access token. It starts Down the Danube in isolated review; use its
-**Journey library** button and **Review Journey** for other registered Journeys. Review routes use
+WebGL globe in isolated local review, preserving the real account session for the
+current origin. Without an account it identifies itself as a local workbench;
+it grants no server permissions. It starts Down the Danube in isolated review;
+use **Review controls → Journey** to choose another source. The Admin library’s
+**Review Journey** action opens registered content. Review routes use
 `/journey/<slug>?review=1` and separate in-memory state, with question selection,
 help, evaluated sample reveals and completion. Normal practice omits the query
 flag; both are separate from saved Daily attempts. Non-read API requests are
@@ -84,12 +86,19 @@ blocked, and the fixture grants no server
 permissions. Review entry points stay
 outside the production bundle. See [Services](SERVICES.md) for release steps.
 
-For registered or unregistered Journey source, use the shared workbench:
+During local development, open **Journey workbench** from the signed-in account
+menu under **Admin**, or from the Admin Journey library. For registered or unregistered Journey source, use
+the shared workbench:
 `http://127.0.0.1:5173/review/journeys.html?module=imLikeABirdJourney.ts`.
+The compact review panel keeps the question selector visible; expand **Review
+controls** for source selection, registration, grouped answer previews and capture
+tools. Navigation leaves the review document, restoring the normal app and its
+account session. Use the same origin as the signed-in app (`localhost` and
+`127.0.0.1` have separate browser storage).
 Choose another `*Journey.ts` source from its selector; no registration or custom
 React fixture is required. It runs the production App, globe adapter and camera
 orchestration with review state in memory. Player progress storage, account sync,
-legacy packs and schedule requests are disabled; non-read API requests are blocked.
+legacy packs and schedule requests are disabled; non-read application API requests are blocked; account token renewal remains available.
 Old Bird, Made in China and Beasts on Banners review links redirect here.
 
 Use `question=<question-id>&state=<stage>&seed=17&theme=ocean` to reproduce a state.
@@ -98,7 +107,20 @@ Stages are `play`, `hint`, `assist`, `correct`, `missed`, `completion`, and
 inputs; samples use real reducer submissions and fail explicitly if unavailable.
 Capture current state downloads the actual response/receipts as JSON; restore
 accepts only the matching Journey ID, answer-contract revision and valid state.
-Captures never enter player saves. Reload a state URL for each viewport or theme;
+Captures never enter player saves.
+
+For an unregistered source, expand **Register Journey**, choose its route and
+select **Preview registration**. The workbench audits the Journey and lists the
+local source, route catalog, generated metadata and catalog documentation edits.
+**Register in local catalog** applies those edits with `dailyEligible: false`.
+A stale preview is rejected; preview again after editing the source. Registration
+does not assign a date, commit, merge or deploy. Follow the staged catalog/backend
+release procedure in [Hosting](HOSTING.md#journey-catalog-activation) before
+activating it. These controls and their same-origin loopback write endpoint exist
+only on the Vite development server, not in the hosted production app. Player
+progress, account sync and schedule writes remain disabled in review.
+
+Reload a state URL for each viewport or theme;
 use reduced-motion emulation for animated compositions. These tools prepare
 review states, not screenshot or rendered-quality certification.
 

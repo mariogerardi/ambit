@@ -76,32 +76,6 @@ export function AdminJourneyReview({
         <strong>Journey review</strong>
         <span>Review progress isn’t saved.</span>
       </div>
-      <div className="admin-library-actions">
-        {source ? (
-          source.navigation
-        ) : (
-          <>
-            <button
-              type="button"
-              className="quiet-button"
-              onClick={() =>
-                onNavigate(adminJourneyLink(journey.id, "journeys", date))
-              }
-            >
-              ← Journey library
-            </button>
-            <button
-              type="button"
-              className="quiet-button"
-              onClick={() =>
-                onNavigate(adminJourneyLink(journey.id, "schedule", date))
-              }
-            >
-              Schedule this Journey
-            </button>
-          </>
-        )}
-      </div>
       <label className="field">
         <span>Review question</span>
         <select
@@ -115,120 +89,159 @@ export function AdminJourneyReview({
           ))}
         </select>
       </label>
-      <div className="admin-library-actions">
-        <button
-          type="button"
-          className="quiet-button"
-          onClick={() => reset(game.roundIndex)}
-        >
-          Restart question
-        </button>
-        <button type="button" className="quiet-button" onClick={() => reset(0)}>
-          Restart Journey
-        </button>
-      </div>
-      <details>
-        <summary>Inspect help and sample reveals</summary>
-        <p className="muted">
-          Sample reveals use example answers. You can also answer normally to
-          inspect a particular mistake.
-        </p>
-        <div className="admin-review-states">
-          <button
-            type="button"
-            className="quiet-button"
-            disabled={busy}
-            onClick={() => void sample("hint")}
-          >
-            Show hint
-          </button>
-          <button
-            type="button"
-            className="quiet-button"
-            disabled={busy}
-            onClick={() => void sample("assist")}
-          >
-            Show assist
-          </button>
-          <button
-            type="button"
-            className="quiet-button"
-            disabled={busy}
-            onClick={() => void sample("correct")}
-          >
-            Show correct reveal
-          </button>
-          <button
-            type="button"
-            className="quiet-button"
-            disabled={busy}
-            onClick={() => void sample("missed")}
-          >
-            Show missed reveal
-          </button>
-          <button
-            type="button"
-            className="quiet-button"
-            disabled={busy}
-            onClick={() => void sample("completion")}
-          >
-            Show sample completion
-          </button>
-          <button
-            type="button"
-            className="quiet-button"
-            disabled={busy}
-            onClick={() => void sample("completion-mixed")}
-          >
-            Show mixed completion
-          </button>
-          <button
-            type="button"
-            className="quiet-button"
-            onClick={() => {
-              const url = URL.createObjectURL(
-                new Blob([captureReview(journey, game)], {
-                  type: "application/json",
-                }),
-              );
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = `${journey.id}-review.json`;
-              link.click();
-              setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }}
-          >
-            Capture current state
-          </button>
-          <label className="field">
-            Restore captured state
-            <input
-              type="file"
-              accept="application/json,.json"
-              onChange={async (event) => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-                const id = ++request.current;
-                setBusy(true);
-                try {
-                  const restored = restoreReview(journey, await file.text());
-                  if (id === request.current) {
-                    onChange(restored);
-                    setError("");
+      <details className="admin-review-tools">
+        <summary>Review controls</summary>
+        <div className="admin-review-control-panel">
+          <div className="admin-library-actions">
+            {source ? (
+              source.navigation
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="quiet-button"
+                  onClick={() =>
+                    onNavigate(adminJourneyLink(journey.id, "journeys", date))
                   }
-                } catch (failure) {
-                  if (id === request.current)
-                    setError(
-                      failure instanceof Error
-                        ? failure.message
-                        : "Couldn’t restore this capture.",
-                    );
-                } finally {
-                  if (id === request.current) setBusy(false);
-                }
-              }}
-            />
-          </label>
+                >
+                  ← Journey library
+                </button>
+                <button
+                  type="button"
+                  className="quiet-button"
+                  onClick={() =>
+                    onNavigate(adminJourneyLink(journey.id, "schedule", date))
+                  }
+                >
+                  Schedule this Journey
+                </button>
+              </>
+            )}
+          </div>
+          <div className="admin-library-actions">
+            <button
+              type="button"
+              className="quiet-button"
+              onClick={() => reset(game.roundIndex)}
+            >
+              Restart question
+            </button>
+            <button
+              type="button"
+              className="quiet-button"
+              onClick={() => reset(0)}
+            >
+              Restart Journey
+            </button>
+          </div>
+          <fieldset className="admin-review-group">
+            <legend>Preview an answer</legend>
+            <div className="admin-review-states">
+              <button
+                type="button"
+                className="quiet-button"
+                disabled={busy}
+                onClick={() => void sample("hint")}
+              >
+                Show hint
+              </button>
+              <button
+                type="button"
+                className="quiet-button"
+                disabled={busy}
+                onClick={() => void sample("assist")}
+              >
+                Show assist
+              </button>
+              <button
+                type="button"
+                className="quiet-button"
+                disabled={busy}
+                onClick={() => void sample("correct")}
+              >
+                Show correct reveal
+              </button>
+              <button
+                type="button"
+                className="quiet-button"
+                disabled={busy}
+                onClick={() => void sample("missed")}
+              >
+                Show missed reveal
+              </button>
+              <button
+                type="button"
+                className="quiet-button"
+                disabled={busy}
+                onClick={() => void sample("completion")}
+              >
+                Show sample completion
+              </button>
+              <button
+                type="button"
+                className="quiet-button"
+                disabled={busy}
+                onClick={() => void sample("completion-mixed")}
+              >
+                Show mixed completion
+              </button>
+            </div>
+          </fieldset>
+          <details className="admin-review-captures">
+            <summary>Capture and restore</summary>
+            <div className="admin-review-states">
+              <button
+                type="button"
+                className="quiet-button"
+                onClick={() => {
+                  const url = URL.createObjectURL(
+                    new Blob([captureReview(journey, game)], {
+                      type: "application/json",
+                    }),
+                  );
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `${journey.id}-review.json`;
+                  link.click();
+                  setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }}
+              >
+                Capture current state
+              </button>
+              <label className="field">
+                Restore captured state
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    const id = ++request.current;
+                    setBusy(true);
+                    try {
+                      const restored = restoreReview(
+                        journey,
+                        await file.text(),
+                      );
+                      if (id === request.current) {
+                        onChange(restored);
+                        setError("");
+                      }
+                    } catch (failure) {
+                      if (id === request.current)
+                        setError(
+                          failure instanceof Error
+                            ? failure.message
+                            : "Couldn’t restore this capture.",
+                        );
+                    } finally {
+                      if (id === request.current) setBusy(false);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </details>
         </div>
       </details>
       {busy && <p role="status">Preparing example answers…</p>}
