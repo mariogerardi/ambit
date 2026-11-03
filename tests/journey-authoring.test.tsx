@@ -26,7 +26,8 @@ import {
   reviewState,
 } from "../src/app/journeyReview";
 import { gameReducer, initialGame, startRound } from "../src/game/state";
-import { PRESENTATION_RECIPES } from "../src/game/recipes";
+import { recipeJourney } from "../src/game/authoringCapabilities";
+import { MECHANIC_RECIPES, PRESENTATION_RECIPES } from "../src/game/recipes";
 import { auditJourney } from "../src/game/journeyAudit";
 import { journeyWorld } from "../src/app/journeyWorld";
 
@@ -129,6 +130,21 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     });
     expect(JOURNEY_INDEX.some((j) => j.id === draft.id)).toBe(false);
     expect(host.textContent).toContain("Draft source");
+    expect(host.textContent).not.toContain("Drag to rotate");
+    for (const text of [
+      "Show question",
+      "Show hint",
+      "Show assist",
+      "Show correct reveal",
+      "Show missed reveal",
+    ]) {
+      const button = [...host.querySelectorAll("button")].find(
+        (b) => b.textContent?.trim() === text,
+      )!;
+      expect(button).toBeDefined();
+      expect(button.closest("details")).toBeNull();
+    }
+
     expect(host.textContent).not.toContain("Schedule this Journey");
     await click("Show assist");
     expect(
@@ -229,6 +245,30 @@ describe("Journey authoring and entry parity (DOM only)", () => {
         }),
       ),
     ).toThrow("does not match");
+  });
+
+  it("previews lower tiers and paired copy through the production review shell", async () => {
+    const question = MECHANIC_RECIPES.find((q) => q.id === "recipe:pin")!;
+    await mount({
+      reviewSource: {
+        journey: recipeJourney(question),
+        seed: 17,
+        stage: "play",
+      },
+    });
+    await click("Show partial / lower tier");
+    expect(host.querySelector(".round-feedback")?.textContent).toContain(
+      "Very close.",
+    );
+    const comparison = host.querySelector(".admin-review-editorial")!;
+    expect(
+      comparison.querySelector('[aria-label="Before answering"]')?.textContent,
+    ).toContain(question.prompt);
+    expect(
+      comparison.querySelector('[aria-label="After answering"]')?.textContent,
+    ).toContain(question.explanation);
+    await click("Show sample completion");
+    expect(host.querySelector(".finish-story")).not.toBeNull();
   });
 
   it("makes populated ordering a reusable audited composition, including help and reveal cleanup", () => {

@@ -1545,6 +1545,7 @@ export function App({
       </section>
     ) : context ? (
       <GameShell
+        reviewing={reviewing}
         constructionReviewIndex={constructionReviewIndex}
         canReplay={mode === "practice"}
         contextNavigation={
@@ -2082,7 +2083,7 @@ export function App({
           )))}
       {mobile.enabled && (
         <>
-          {!globeInteracted && (
+          {!globeInteracted && !reviewing && (
             <p className="mobile-gesture-hint">
               Drag to rotate · pinch to zoom
             </p>

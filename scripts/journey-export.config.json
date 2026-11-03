@@ -51,6 +51,8 @@
     "src/geography/places.ts",
     "src/geography/relief.ts",
     "src/game/journeyAudit.ts",
+    "src/game/authoringReview.ts",
+    "src/game/authoringCapabilities.ts",
     "src/game/journeyStops.ts",
     "src/game/journeyVisualRules.ts",
     "src/app/journeyWorld.ts",

@@ -294,6 +294,7 @@ export const MECHANIC_RECIPES: Question[] = [
       type: "country-ids",
       ids: ["wurl:CAN", "wurl:MEX"],
     },
+    partialCredit: "one-of-two",
     guidance: {
       hint: "They lie on opposite sides of the United States.",
       assist: {

@@ -11,6 +11,7 @@ export const REVIEW_STAGES = [
   "assist",
   "correct",
   "missed",
+  "partial",
   "completion",
   "completion-mixed",
 ] as const;
@@ -62,7 +63,22 @@ export async function reviewState(
       ? gameReducer(game, { type: "request-assist" }, journey, context)
       : game;
   }
-  const { submitSample } = await import("../game/journeyAudit");
+  const { submitSample, submitPartialSample } = await import(
+    "../game/journeyAudit"
+  );
+  if (stage === "partial") {
+    const partial = submitPartialSample(
+      journey,
+      journey.rounds[index],
+      context,
+      index,
+    );
+    if (!partial)
+      throw Error(
+        "No partial or lower-tier sample is available for this question. Use an actual answer capture.",
+      );
+    return partial;
+  }
   if (stage === "completion" || stage === "completion-mixed") {
     const answers: GameState["answers"] = [];
     for (const [i, question] of journey.rounds.entries()) {

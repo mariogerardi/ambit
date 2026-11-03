@@ -134,6 +134,19 @@ test(
         await readFile(path.join(ROOT, "src/game/journeyIndex.json"), "utf8"),
       );
       assert.equal(report.journeys, index.length);
+      const capabilities = JSON.parse(
+        await readFile(path.join(directory, "CAPABILITIES.json"), "utf8"),
+      );
+      const pin = capabilities.find((item) => item.id === "recipe:pin");
+      assert.ok(pin.evidence.stages.includes("reveal:partial"));
+      assert.deepEqual(pin.evidence.errors, []);
+      assert.ok(pin.preview.includes("recipe=pin"));
+      assert.ok(
+        (
+          await readFile(path.join(directory, "CAPABILITIES.md"), "utf8")
+        ).includes("Limits:"),
+      );
+
       assert.equal(manifest.journeys.length, index.length);
       assert.deepEqual(manifest.highlightedJourneyIds, []);
       await assert.rejects(

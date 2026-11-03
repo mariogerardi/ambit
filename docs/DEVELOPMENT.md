@@ -77,7 +77,7 @@ Cognito branding assets; it submits no credentials. For Journey map review, open
 WebGL globe in isolated local review, preserving the real account session for the
 current origin. Without an account it identifies itself as a local workbench;
 it grants no server permissions. It starts Down the Danube in isolated review;
-use **Review controls → Journey** to choose another source. The Admin library’s
+use the always-visible **Journey** selector to choose another source. The Admin library’s
 **Review Journey** action opens registered content. Review routes use
 `/journey/<slug>?review=1` and separate in-memory state, with question selection,
 help, evaluated sample reveals and completion. Normal practice omits the query
@@ -90,9 +90,7 @@ During local development, open **Journey workbench** from the signed-in account
 menu under **Admin**, or from the Admin Journey library. For registered or unregistered Journey source, use
 the shared workbench:
 `http://127.0.0.1:5173/review/journeys.html?module=imLikeABirdJourney.ts`.
-The compact review panel keeps the question selector visible; expand **Review
-controls** for source selection, registration, grouped answer previews and capture
-tools. Navigation leaves the review document, restoring the normal app and its
+The opaque review panel keeps Journey selection, question selection and question-state preview buttons directly accessible. Changing the Journey selector opens that source immediately; **Seed and source** contains an explicit **Apply seed** action. Expand **Catalog registration** for registration, or **Review controls** for restart and capture tools. Navigation leaves the review document, restoring the normal app and its
 account session. Use the same origin as the signed-in app (`localhost` and
 `127.0.0.1` have separate browser storage).
 Choose another `*Journey.ts` source from its selector; no registration or custom
@@ -103,13 +101,27 @@ Old Bird, Made in China and Beasts on Banners review links redirect here.
 
 Use `question=<question-id>&state=<stage>&seed=17&theme=ocean` to reproduce a state.
 Stages are `play`, `hint`, `assist`, `correct`, `missed`, `completion`, and
-`completion-mixed`. The review buttons update the URL. The seed fixes shuffled
+`completion-mixed`, plus `partial` for two-country partial credit and lower distance-pin tiers. The review buttons update the URL. The seed fixes shuffled
 inputs; samples use real reducer submissions and fail explicitly if unavailable.
 Capture current state downloads the actual response/receipts as JSON; restore
 accepts only the matching Journey ID, answer-contract revision and valid state.
 Captures never enter player saves.
 
-For an unregistered source, expand **Register Journey**, choose its route and
+The **Mechanic recipe** selector opens a one-question sandbox through the same
+App/globe adapter, with normal help, evaluated reveals and completion. Recipe
+sandboxes cannot be registered in the catalog. **Clue and reveal** compares the
+player’s starting information with the answer and explanation. Its editorial
+notes flag answer-only feedback, near-duplicate clues/reveals, long headings and
+ambiguous capital-pin wording; they are suggestions, not grading failures.
+
+Run `npm run check:journey -- --capabilities` (add `--json` for structured output)
+for current reuse evidence, required data, limitations, matching examples, recipe
+preview URLs and focused checks. `--recipe pin` and other recipe audits include
+paired copy and demonstrated lifecycle states. Internal modes remain explicitly
+identified as requiring a product decision. Scene/reducer evidence does not
+certify facts, camera fit, typography or GPU rendering.
+
+For an unregistered source, expand **Catalog registration**, choose its route and
 select **Preview registration**. The workbench audits the Journey and lists the
 local source, route catalog, generated metadata and catalog documentation edits.
 **Register in local catalog** applies those edits with `dailyEligible: false`.
@@ -185,6 +197,10 @@ backend files go after `python3 scripts/run-python-tests.py`.
 
 For changes that cross these areas, also select checks at the affected boundaries:
 
+- Authoring capability evidence, recipe lifecycle or editorial warnings: run
+  `tests/authoring-capabilities.test.ts`, `tests/journey-authoring.test.tsx` and
+  `tests/journey-workbench.test.tsx`; exporter changes also use
+  `npm run test:journey-export`.
 - Journey registration or eligibility: run `tests/catalog-invariants.test.ts`,
   `tests/journey-schedule.test.ts`, and `backend/test_journey_schedule.py` to
   cover catalog and frontend/backend scheduling behavior. For metadata-only

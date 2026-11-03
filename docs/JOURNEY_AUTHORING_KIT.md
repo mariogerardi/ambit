@@ -63,6 +63,23 @@ catalog-wide preference:
 npm run export:journeys -- --highlight along-the-andes --highlight down-the-danube
 ```
 
+## Reuse evidence and complete previews
+
+The export includes `CAPABILITIES.md` and `CAPABILITIES.json`, generated from
+current registry contracts, recipes and reducer/scene audits. Each entry records
+its demonstrated rule and states, content/data requirements, limitations, matching
+published examples, audit command, preview URL and focused checks. Availability
+is scoped to the demonstrated composition; internal modes require a product
+decision and failed audits are marked as needing repair.
+
+In the repository, run `npm run check:journey -- --capabilities` or open the
+workbench’s **Mechanic recipe** selector. Recipes support the normal play → help →
+reveal → completion lifecycle. Two-country partial credit and lower distance-pin
+tiers also have real submitted partial previews; other quality outcomes can be
+reviewed with captured answers. **Clue and reveal** and audit JSON compare the
+starting clue with the post-answer insight and include nonblocking editorial
+warnings. These simulations do not establish factual or rendered quality.
+
 ## Fresh architecture review
 
 ```sh

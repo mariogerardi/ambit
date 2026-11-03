@@ -9,13 +9,19 @@ export function JourneyWorkbench({
   modules,
   seed,
   request,
+  recipes = [],
+  recipeId,
 }: {
   journey: Journey;
   filename: string;
   modules: string[];
   seed: number;
   request: typeof fetch;
+  recipes?: { id: string; title: string }[];
+  recipeId?: string;
 }) {
+  const [reviewSeed, setReviewSeed] = useState(String(seed));
+  const activeForm = recipeId ? "workbench-recipe" : "workbench-source";
   const registered = JOURNEY_INDEX.some((j) => j.id === journey.id);
   const [route, setRoute] = useState(
     `/journey/${journey.id.replace(/-v\d+$/, "")}`,
@@ -67,10 +73,20 @@ export function JourneyWorkbench({
       <form id="workbench-source" action="/review/journeys.html">
         <label>
           Journey{" "}
-          <select name="module" defaultValue={filename} disabled={busy}>
+          <select
+            name="module"
+            defaultValue={recipeId ? "" : filename}
+            disabled={busy}
+            onChange={(event) => event.currentTarget.form?.requestSubmit()}
+          >
+            {recipeId && (
+              <option value="" disabled>
+                Choose a Journey
+              </option>
+            )}
             {modules.map((name) => (
               <option key={name} value={name}>
-                {name === filename
+                {name === filename && !recipeId
                   ? journey.title
                   : (JOURNEY_INDEX.find((entry) => entry.module === `./${name}`)
                       ?.title ??
@@ -82,94 +98,133 @@ export function JourneyWorkbench({
             ))}
           </select>
         </label>
-        <button type="submit" className="quiet-button" disabled={busy}>
-          Open Journey
-        </button>
+        <input type="hidden" name="seed" value={reviewSeed} />
       </form>
+      {recipes.length > 0 && (
+        <form id="workbench-recipe" action="/review/journeys.html">
+          <label>
+            Mechanic recipe
+            <select
+              name="recipe"
+              defaultValue={recipeId ?? ""}
+              onChange={(event) => event.currentTarget.form?.requestSubmit()}
+            >
+              <option value="" disabled>
+                Choose a mechanic or composition
+              </option>
+              {recipes.map((recipe) => (
+                <option
+                  key={recipe.id}
+                  value={recipe.id.replace(/^recipe:/, "")}
+                >
+                  {recipe.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          <input type="hidden" name="seed" value={reviewSeed} />
+        </form>
+      )}
       <details className="workbench-advanced">
         <summary>Seed and source</summary>
         <label>
           Seed{" "}
           <input
-            name="seed"
             type="number"
-            defaultValue={seed}
-            form="workbench-source"
+            step="1"
+            value={reviewSeed}
+            onChange={(event) => setReviewSeed(event.target.value)}
+            form={activeForm}
             disabled={busy}
           />
         </label>
-        <p className="muted">{filename}</p>
-      </details>
-      {registered || saved ? (
-        <p role="status">
-          Registered in the local catalog.{" "}
-          {saved && "Held out of automatic Daily selection. "}Date assignment
-          and deployment are separate.
+        <p className="muted">
+          {recipeId ? `src/game/recipes.ts · recipe:${recipeId}` : filename}
         </p>
-      ) : (
-        <details>
-          <summary>Register Journey</summary>
-          <p>
-            Add this draft to the local Journey library for review and date
-            assignment. It will be held out of automatic Daily selection.
-          </p>
-          <label className="field">
-            Journey route{" "}
-            <input
-              value={route}
-              disabled={busy}
-              onChange={(event) => {
-                setRoute(event.target.value);
-                setPreview(undefined);
-              }}
-            />
-          </label>
-          {preview ? (
+        <button
+          type="submit"
+          form={activeForm}
+          className="quiet-button"
+          disabled={busy}
+        >
+          Apply seed
+        </button>
+      </details>
+      {!recipeId && (
+        <details className="workbench-catalog">
+          <summary>Catalog registration</summary>
+          {registered || saved ? (
+            <p role="status">
+              Registered in the local catalog.{" "}
+              {saved && "Held out of automatic Daily selection. "}Date
+              assignment and deployment are separate.
+            </p>
+          ) : (
             <>
               <p>
-                <strong>{preview.title}</strong> · {preview.id}
-                <br />
-                {preview.route}
+                Add this draft to the local Journey library for review and date
+                assignment. It will be held out of automatic Daily selection.
               </p>
-              <p>
-                The Journey audit passed. No date is assigned by registration.
-              </p>
-              <details>
-                <summary>Files to update</summary>
-                <ul>
-                  {preview.files.map((file) => (
-                    <li key={file}>{file}</li>
-                  ))}
-                </ul>
-              </details>
-
-              <div className="admin-review-states">
-                <button
-                  type="button"
+              <label className="field">
+                Journey route{" "}
+                <input
+                  value={route}
                   disabled={busy}
-                  onClick={() => void registration(true)}
-                >
-                  {busy ? "Registering…" : "Register in local catalog"}
-                </button>
+                  onChange={(event) => {
+                    setRoute(event.target.value);
+                    setPreview(undefined);
+                  }}
+                />
+              </label>
+              {preview ? (
+                <>
+                  <p>
+                    <strong>{preview.title}</strong> · {preview.id}
+                    <br />
+                    {preview.route}
+                  </p>
+                  <p>
+                    The Journey audit passed. No date is assigned by
+                    registration.
+                  </p>
+                  <details>
+                    <summary>Files to update</summary>
+                    <ul>
+                      {preview.files.map((file) => (
+                        <li key={file}>{file}</li>
+                      ))}
+                    </ul>
+                  </details>
+
+                  <div className="admin-review-states">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void registration(true)}
+                    >
+                      {busy ? "Registering…" : "Register in local catalog"}
+                    </button>
+                    <button
+                      type="button"
+                      className="quiet-button"
+                      disabled={busy}
+                      onClick={() => setPreview(undefined)}
+                    >
+                      Back
+                    </button>
+                  </div>
+                </>
+              ) : (
                 <button
                   type="button"
                   className="quiet-button"
                   disabled={busy}
-                  onClick={() => setPreview(undefined)}
+                  onClick={() => void registration(false)}
                 >
-                  Back
+                  {busy ? "Checking draft…" : "Preview registration"}
                 </button>
-              </div>
+              )}
             </>
-          ) : (
-            <button
-              type="button"
-              className="quiet-button"
-              disabled={busy}
-              onClick={() => void registration(false)}
-            >
-              {busy ? "Checking draft…" : "Preview registration"}
-            </button>
           )}
         </details>
       )}

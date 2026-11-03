@@ -134,9 +134,11 @@ export function GameShell({
   canReplay = false,
   social,
   contextNavigation,
+  reviewing = false,
   constructionReviewIndex,
 }: {
   reduced?: boolean;
+  reviewing?: boolean;
   constructionReviewIndex?: number;
   social?: ReactNode;
   contextNavigation?: ReactNode;
@@ -785,7 +787,7 @@ export function GameShell({
         {inGame && game.phase === "playing" && (
           <>
             <span className="hover-place" aria-live="polite">
-              {visibleHover ?? "Drag to rotate"}
+              {visibleHover ?? (reviewing ? undefined : "Drag to rotate")}
             </span>
           </>
         )}

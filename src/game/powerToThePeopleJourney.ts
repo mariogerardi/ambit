@@ -204,7 +204,7 @@ export const POWER_TO_THE_PEOPLE_JOURNEY: Journey = {
       allowTyping: false,
       rule: { type: "flag-country", countryId: "wurl:ZAF" },
       correctFeedback: "Well recognized.",
-      incorrectFeedback: "Look farther south.",
+      incorrectFeedback: "Not quite.",
       leadIn:
         "In April 1994, citizens of all races voted on equal terms in a landmark national election. A new flag marked the country’s change of era.",
       prompt: "Which country adopted this flag?",
@@ -419,13 +419,13 @@ export const POWER_TO_THE_PEOPLE_JOURNEY: Journey = {
       commitment: "immediate",
       allowTyping: false,
       rule: { type: "country-ids", ids: ["wurl:NPL"] },
-      correctFeedback: "Nepal.",
-      incorrectFeedback: "It was Nepal.",
+      correctFeedback: "Well identified.",
+      incorrectFeedback: "Not quite.",
       leadIn:
         "In September 2025, youth-led protests over corruption and social-media restrictions brought down a South Asian government. Demonstrators used an online discussion and poll to help choose a proposed interim leader.",
       prompt: "Which country was this?",
       explanation:
-        "In Nepal, protesters used Discord to debate possible interim leaders and hold an informal poll. Former chief justice Sushila Karki emerged as a favorite, and President Ramchandra Paudel appointed her interim prime minister on September 12, 2025. Parliamentary elections followed in March 2026, and Balendra Shah became prime minister later that month.",
+        "Discord helped a decentralized protest movement put forward a candidate for government. Participants backed former chief justice Sushila Karki in an informal poll; President Ramchandra Paudel then appointed her interim prime minister on September 12, 2025. Online organizing and the formal appointment process played distinct parts in the transition.",
       guidance: {
         hint: "Look toward the Himalayas, where smaller countries lie along the northern edge of the Indian subcontinent.",
         assist: {
@@ -465,7 +465,7 @@ export const POWER_TO_THE_PEOPLE_JOURNEY: Journey = {
       label: "Journey sources and geographic data",
       url: assets + "SOURCES.md",
     },
-    regionIds: countries("ZAF", "EGY", "LBY", "NPL"),
+    regionIds: countries("ZAF", "UKR", "EGY", "LBY", "NPL"),
     views: [
       { lat: 14.61, lng: 121.02, altitude: 0.32 },
       southernAfrica,

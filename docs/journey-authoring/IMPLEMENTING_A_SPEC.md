@@ -59,6 +59,12 @@ identify the affected contracts, controls, grading, presentation and save behavi
 Record the capability fit once in the spec's existing table: requirement, exact
 current recipe/source and revision, reuse/extension decision, and material risk.
 Group identical interactions; a familiar sequel still needs only one sentence.
+Use `npm run check:journey -- --capabilities` (or `CAPABILITIES.md` in a kit) to
+locate demonstrated compositions, required data, limits and focused checks. Open
+the linked recipe in the workbench and inspect its complete lifecycle before
+adapting it. The capability entry distinguishes its demonstrated rule from all
+rules permitted by the mode; matching mode/rule examples still require comparing
+authored eligibility, disclosure, help and geography.
 Resolve a risk that could invalidate the experience before implementing all five
 stops. Report material capability conflicts without silently replacing an
 approved task; continue independent work while the necessary decision is resolved.
@@ -107,6 +113,11 @@ deployment.
 Apply all six gates before handoff. Resolve failures within the authorized scope;
 record a material limitation when the available verification cannot establish a
 result. An approved spec does not waive these shared standards.
+
+Use the workbench’s **Clue and reveal** comparison, or the audit’s `editorial`
+record, for each stop. Resolve answer-only headings and reveals, repeated clue
+copy and wording/grading mismatches; warnings are review prompts, not substitutes
+for editorial judgment. Confirm what new fact or relationship the reveal teaches.
 
 1. **Feedback reacts to the answer.** Check every success/failure heading and
    accuracy-tier message: one to four words, matched to the player's result or

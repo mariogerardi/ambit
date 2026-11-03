@@ -1,3 +1,4 @@
+import { reviewQuestionCopy, supportsPartialPreview } from "./authoringReview";
 import { constructionAuditSample } from "./constructionAudit";
 import {
   SHARED_VISUAL_RULES,
@@ -30,7 +31,11 @@ import { answerPlace, responsePlaceForName } from "./answerTargets";
 import { canSubmit, isCorrect } from "./questionEvaluation";
 import { interiorAnchor } from "../geography/interiorAnchor";
 import { acceptsAlternatives, responseIds } from "./answerPresentation";
-import { initialBearing, normalizeBearing } from "./geodesic";
+import {
+  initialBearing,
+  normalizeBearing,
+  pointAlongBearing,
+} from "./geodesic";
 
 function invalidCamera(focus: Focus) {
   return (
@@ -195,6 +200,40 @@ export function submitSample(
     : undefined;
 }
 
+/** Partial answers and lower pin tiers still go through normal reducer submissions. */
+export function submitPartialSample(
+  journey: Journey,
+  question: Question,
+  context: QuestionContext,
+  index: number,
+) {
+  if (question.partialCredit === "one-of-two") {
+    const sample = submitSample(journey, question, context, index, false);
+    return sample?.answers.at(-1)?.partialCredit ? sample : undefined;
+  }
+  const rule = question.rule;
+  if (rule.type !== "pin-distance" || !rule.tiers || rule.tiers.length < 2)
+    return undefined;
+  const target = answerPlace(question, rule.targetId);
+  if (!target) return undefined;
+  const km = (rule.tiers[0].radiusKm + rule.tiers[1].radiusKm) / 2;
+  let game = startRound(question, index, () => 0);
+  game = gameReducer(
+    game,
+    { type: "drop-pin", ...pointAlongBearing(target, 90, km / 6371.0088) },
+    journey,
+    context,
+  );
+  game = gameReducer(game, { type: "submit" }, journey, context);
+  const points = game.answers.at(-1)?.points;
+  return game.phase === "feedback" &&
+    points !== undefined &&
+    points > 0 &&
+    points < 3
+    ? game
+    : undefined;
+}
+
 export interface JourneyAudit {
   id: string;
   errors: string[];
@@ -207,6 +246,7 @@ export interface JourneyAudit {
     mode: string;
     control: string;
     answers: string[];
+    editorial: ReturnType<typeof reviewQuestionCopy>;
     states: {
       stage: string;
       focus: unknown;
@@ -313,6 +353,10 @@ export function auditJourney(
     const exceptions = auditVisualExceptions(question);
     report.errors.push(...exceptions.errors);
     report.exceptions.push(...exceptions.accepted);
+    const editorial = reviewQuestionCopy(question, context);
+    report.warnings.push(
+      ...editorial.warnings.map((warning) => `${question.id}: ${warning}`),
+    );
     const definition = mechanicFor(question);
     const answers = solutionIds(question, context);
     const playing = startRound(question, index, () => 0);
@@ -408,6 +452,13 @@ export function auditJourney(
         ],
       ];
     });
+    const partial = supportsPartialPreview(question)
+      ? submitPartialSample(journey, question, context, index)
+      : undefined;
+    if (supportsPartialPreview(question) && !partial)
+      report.warnings.push(
+        `No partial/lower-tier sample available: ${question.id}`,
+      );
     const stages = [
       ["play", playing],
       ...(question.guidance
@@ -430,6 +481,7 @@ export function auditJourney(
           ]
         : []),
       ...samples,
+      ...(partial ? [["reveal:partial", partial]] : []),
     ] as [string, GameState][];
     const states = stages.map(([stage, game]) => {
       const world = journeyWorld(regions, journey, game, context!);
@@ -478,6 +530,7 @@ export function auditJourney(
       };
     });
     report.questions.push({
+      editorial,
       id: question.id,
       mode: question.mode,
       control: definition.control,
