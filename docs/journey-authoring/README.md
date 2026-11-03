@@ -78,6 +78,9 @@ Codex follows [Implementing a spec](IMPLEMENTING_A_SPEC.md) and repository
 approved creative decisions. Recheck only relevant capability differences if the
 repository has changed; do not restart the design. Complete implementation and
 focused checks, then hand the result and review link directly to the user.
+Consequential ambiguities use the implementation workflow's
+[judgment checkpoints](IMPLEMENTING_A_SPEC.md#judgment-checkpoints); routine
+writing and technical decisions remain delegated to AI.
 Reading source, running mocked tests and verifying real rendering are distinct
 forms of evidence; report only what was actually established.
 

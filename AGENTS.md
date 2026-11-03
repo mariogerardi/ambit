@@ -14,6 +14,12 @@ These instructions apply to every coding agent working in this repository.
 - Respect the user's limited AI allowance. Use relevant existing evidence and
   focused checks; do not add separate AI review rounds, exhaustive inspections or
   repeated polish passes by default. Complete authorized work before handing it back.
+- Seek judgment at consequential forks, not routine implementation choices.
+  Present a concrete recommendation, useful alternatives and their consequences;
+  continue independent work, and record the answer in the existing spec. Wait
+  before materially departing from the approved experience or scope; silence is
+  not approval. Journey work follows the judgment checkpoints in
+  `docs/journey-authoring/IMPLEMENTING_A_SPEC.md`.
 
 ## Work efficiently
 

@@ -24,6 +24,11 @@ Choose the workflow from the user's request:
   Preserve settled decisions and inherit shared conventions without another
   design-approval round. Ask only about material gaps or conflicts.
 
+Use the judgment checkpoints in `IMPLEMENTING_A_SPEC.md` for consequential
+implementation ambiguities: recommend concrete behavior, explain alternatives,
+continue independent work and preserve the user's answer in the existing spec.
+Do not add mandatory per-round approvals or delegate routine copy back to the user.
+
 Record the repository/ref/revision actually inspected, or the uploaded kit's
 snapshot basis. GitHub reading does not include unpushed local work or establish
 that commands ran. If access is limited to reading, inspect recipes directly and

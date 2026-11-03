@@ -28,6 +28,37 @@ internal ID, CSS value or optional template field is not a blocker. Ask only
 when a gap or conflict materially affects correctness, fairness, the intended
 experience or the amount of new engineering. Continue independent work meanwhile.
 
+### Judgment checkpoints
+
+Ask at the first consequential fork, before expensive dependent work: competing
+interpretations of answer acceptance, clue disclosure, player agency, saved
+behavior, or substantial new engine work. Conflicting settled decisions also
+warrant a checkpoint. Research factual questions and resolve routine copy,
+styling and implementation choices autonomously.
+
+1. **Investigate narrowly.** Inspect the nearest existing recipe/source. Identify
+   the actual decision; do not run another broad audit or AI review to formulate it.
+2. **Offer a concrete recommendation.** Briefly state the ambiguity, recommended
+   player behavior, one or two useful alternatives, and material scope/cost
+   differences. Use an existing preview or small illustration only when helpful;
+   do not implement every alternative first or ask the user to author copy.
+3. **Continue independent work.** Ask asynchronously when supported and bundle
+   closely related questions. Leave work dependent on a material departure pending
+   until the user answers; elapsed time is not consent. If no useful independent
+   work remains, hand back the pending decision rather than spend tokens on
+   speculative implementation. Routine ambiguity uses established defaults.
+4. **Preserve the answer.** Record the settled choice and relevant consequence in
+   the existing spec; distinguish pending recommendations from decisions. Do not
+   ask again unless new evidence invalidates the choice. Promote a choice into
+   shared defaults only when it is intended to apply across Journeys.
+
+For example: “Q3 describes a spreading movement. I recommend showing the complete
+answer network before touring it. Revealing countries along the tour would be
+more dramatic but delay part of the answer. Which behavior do you want?”
+
+These are exception-driven decisions within implementation, not mandatory
+round-by-round reviews or another design-approval phase.
+
 ## 2. Familiarize yourself with the current suite
 
 For the preceding ChatGPT design workflow, use the [authoring entry point](README.md).

@@ -55,6 +55,10 @@ If a genuinely new interaction could invalidate a major assumption, resolve that
 specific feasibility risk before implementing the entire Journey. Skip separate
 feasibility work for routine reuse.
 
+If implementation needs the user's judgment, record the resulting choice and its
+consequence here or in the affected round. Keep pending recommendations distinct
+from settled decisions; no separate decision log or routine approval table is needed.
+
 ## Round specification — repeat for each stop
 
 Be concise with existing mechanics. Expand new or unusual scoring, geography and
