@@ -191,7 +191,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
           translation: "Sometimes a small change makes all the difference.",
         },
       },
-      leadIn: "Familiar-looking letters can open onto a much larger geography.",
+      leadIn: "This language has official status on four continents.",
       prompt: "Find a country where this language is official:",
       explanation:
         "Portuguese has official status in nine countries across four continents: Portugal, Brazil, six African countries and Timor-Leste. Maritime empire and colonization carried the language across oceans; independent states later made their own choices about its place in national life.",
@@ -248,7 +248,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
         },
       },
       leadIn:
-        "An alphabet can cross languages and borders; official status is another clue.",
+        "This sentence uses Cyrillic, an alphabet shared by several languages.",
       prompt: "Find a country where this language is official:",
       explanation:
         "Russian has national legal standing beyond Russia. Belarus recognizes it alongside Belarusian, and Kyrgyzstan gives it official-language status. Kazakhstan names Kazakh as its official language and expressly provides for Russian’s official use in state and local institutions.",
@@ -310,10 +310,10 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
         },
       },
       leadIn:
-        "The alphabet may look familiar, but these words offer a new puzzle.",
+        "Closely related forms of this language have different national names.",
       prompt: "Find a country where this language is official:",
       explanation:
-        "Malay links Malaysia, Brunei and Singapore across the South China Sea. Indonesia’s official national standard, Bahasa Indonesia, developed from Malay and is accepted here too. Singapore recognizes Malay alongside English, Mandarin and Tamil: one small country belongs to several official-language networks.",
+        "Malay links Malaysia, Brunei and Singapore across the South China Sea. Indonesia is also part of this network: its official language, Bahasa Indonesia, developed from Malay as a distinct national standard. Singapore recognizes Malay alongside English, Mandarin and Tamil: one small country belongs to several official-language networks.",
       guidance: {
         hint: "Think of maritime Southeast Asia and closely related languages with different national names.",
         assist: {

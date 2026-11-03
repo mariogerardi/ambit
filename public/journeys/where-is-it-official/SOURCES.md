@@ -84,9 +84,9 @@ on reveal. Indonesia's official designation remains Bahasa Indonesia.
 
 All five clues are selectable Unicode text, not images. Arabic uses an RTL text
 block with an explicit language tag; captions remain English/LTR. Translation and
-language-name nodes are inserted only after commitment. Fonts use the shared UI
-stack with system script fallback; glyph coverage and small-screen shaping still
-benefit from player/native-speaker review.
+language-name nodes are inserted only after commitment. Clues use the shared UI
+stack with system script fallback; translations use the bundled editorial italic.
+Glyph coverage and small-screen shaping still benefit from player/native-speaker review.
 
 Whole-network coloring is explanatory blue. The actual submitted country retains
 green/rose judgment. Recap promotes the accepted selection, or one explicit

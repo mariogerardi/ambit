@@ -2056,6 +2056,9 @@
   font-size: 18px;
 }
 .journey-text-clue figcaption em {
+  /* Manrope has no italic face; use the bundled editorial italic. */
+  font-family: var(--font-editorial);
+  font-style: italic;
   color: var(--ui-muted);
   font-size: 14px;
   line-height: 1.5;
