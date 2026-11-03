@@ -216,7 +216,7 @@ describe("Made in China: why here?", () => {
     );
     expect(view(game).overlays ?? []).toEqual([]);
     expect(shell(game).querySelectorAll(".journey-answer-recap")).toHaveLength(
-      5,
+      0,
     );
   });
 

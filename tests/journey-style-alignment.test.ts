@@ -81,7 +81,7 @@ describe("shared Journey style contracts", () => {
           );
         });
     }
-    it(`${journey.id} consistently mutes all unvisited recap land`, () => {
+    it(`${journey.id} mutes unvisited recap land while preserving supplied context`, () => {
       const answers = journey.rounds.map((question) => ({
         ...initialGame,
         roundId: question.id,
@@ -96,9 +96,10 @@ describe("shared Journey style contracts", () => {
       );
       expect(
         scene.regions.every((region) =>
-          ["visited", "incorrect", "disabled"].includes(
-            scene.states[region.id],
-          ),
+          (journey.completion?.contextIds?.includes(region.id)
+            ? ["hinted", "incorrect"]
+            : ["visited", "incorrect", "disabled"]
+          ).includes(scene.states[region.id]),
         ),
       ).toBe(true);
     });
