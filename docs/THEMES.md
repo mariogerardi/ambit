@@ -106,6 +106,11 @@ Archive retains its stacked shape and editorial accent. Question help is omitted
 when unavailable; exhausted authored help remains visibly disabled.
 Home's Daily Journey card is one full-card action with a top-right arrow; Resume
 and View result appear as compact state labels, and readiness gates the entire card.
+Home destination cards and Study destination cards (including Review) share an
+opaque surface and neutral raised hover/focus fill in `themes.css`. Archive's
+decorative stack lights its front, near and far borders in sequence; reduced
+motion applies the highlight immediately. Archive uses compact 44px date targets
+and tight month spacing to leave room for the selected Journey below the calendar.
 
 ### Shared interface rules
 

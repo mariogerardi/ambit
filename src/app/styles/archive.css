@@ -65,26 +65,26 @@
   font-size: 13px;
   white-space: nowrap;
 }
-@media (min-width: 701px) and (max-width: 1000px) {
-  .journey-archive .explore-heading h1.editorial-heading {
-    font-size: 32px;
-  }
+.journey-archive .explore-heading h1.editorial-heading {
+  font-size: 32px;
 }
 .archive-month-navigation {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 24px 0 12px;
-  padding-top: 16px;
+  margin: 8px 0 4px;
+  padding-top: 8px;
   border-top: 1px solid rgb(var(--ui-line-rgb) / 0.18);
 }
 .archive-month-navigation h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
 }
 .archive-month-navigation > button {
-  padding: 10px 14px;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
   color: var(--ui-accent);
 }
 .archive-month-navigation > button:disabled {
@@ -93,7 +93,7 @@
 .archive-calendar {
   width: 100%;
   table-layout: fixed;
-  border-spacing: 4px;
+  border-spacing: 2px;
 }
 .archive-calendar-frame {
   position: relative;
@@ -112,9 +112,9 @@
   font-size: 14px;
 }
 .archive-calendar th {
-  padding: 6px 0;
+  padding: 2px 0;
   color: var(--ui-muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
 }
 .archive-calendar td {
@@ -125,14 +125,16 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 5px;
+  gap: 1px;
   width: 100%;
-  min-height: 68px;
+  min-height: 44px;
+  padding: 3px 2px;
   border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
   border-radius: 9px;
   background: rgb(var(--ui-surface-rgb) / 0.8);
   color: var(--ui-text);
-  font-size: 18px;
+  font-size: 16px;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 .archive-calendar td button[data-status="completed"] {
@@ -161,8 +163,8 @@
 }
 .experience .archive-calendar td small {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.2;
   color: var(--ui-muted);
 }
 .archive-completed-icon {
@@ -171,20 +173,23 @@
   flex-shrink: 0;
 }
 .archive-selected-day {
-  margin-top: 22px;
-  padding-top: 22px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid rgb(var(--ui-line-rgb) / 0.18);
 }
 .archive-selected-day h2 {
-  margin: 12px 0;
+  margin: 6px 0;
+  font-size: 22px;
 }
 .archive-selected-day .primary-button {
   width: 100%;
+  margin-top: 8px;
 }
 .archive-selected-day p {
   color: var(--ui-muted);
-  font-size: 14px;
-  line-height: 1.65;
+  margin: 8px 0;
+  font-size: 13px;
+  line-height: 1.5;
 }
 .archive-streak-note {
   color: var(--ui-muted);
@@ -202,15 +207,6 @@
   font-size: 11px;
 }
 @media (max-width: 700px) {
-  .archive-calendar {
-    border-spacing: 2px;
-  }
-  .archive-calendar td button {
-    min-height: 58px;
-  }
-  .experience .archive-calendar td small {
-    font-size: 11px;
-  }
   .archive-completed-icon {
     width: 11px;
     height: 11px;

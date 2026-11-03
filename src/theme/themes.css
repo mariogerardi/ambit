@@ -95,6 +95,7 @@
     .study-history-list li,
     .minigames-landing .study-paths > .minigame-card,
     .home-menu .menu-secondary button,
+    .study-session-destination,
     .study-path
   ) {
   background: rgb(var(--ui-surface-rgb));
@@ -107,10 +108,18 @@
   border-color: rgb(var(--ui-accent-rgb) / 0.4);
 }
 :root .home-menu .menu-secondary button:is(:hover, :focus-visible),
+:root
+  .study-session-choices
+  .study-session-destination:is(:hover, :focus-visible),
 :root .study-history-list li:hover {
   background: rgb(var(--ui-raised-rgb));
 }
-:root .home-menu .menu-secondary button:is(:hover, :focus-visible) {
+:root .home-menu .menu-secondary button:is(:hover, :focus-visible),
+:root
+  .study-session-destination:not(.study-session-packs):is(
+    :hover,
+    :focus-visible
+  ) {
   border-color: var(--ui-accent);
 }
 :root :is(.primary-button, .order-card, .point-orb-earned) {
