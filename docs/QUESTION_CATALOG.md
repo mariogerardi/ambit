@@ -50,7 +50,7 @@ For an approved specification, start with
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.
-Unassigned future dates show a provisional, seeded choice from all registered
+Unassigned future dates show a provisional, seeded choice from Daily-eligible
 Journeys; a date becomes permanent when it is locked or assigned. The previous
 rotation is preserved only for cutover history in
 [`legacy-journey-rotation.json`](../scripts/legacy-journey-rotation.json). Current IDs,
@@ -334,9 +334,12 @@ assignments resolve to the current edition. The original ID is retired: save
 recovery drops its old attempts while preserving progress on retained Journeys.
 The index generator includes only current definitions.
 
-Registering a bundled Journey includes it in automatic selection. Adding or
-removing a Journey can change provisional dates; locked and assigned dates remain
-fixed. There is no separate listed/unlisted designation.
+Registering a bundled Journey enables Admin review and explicit date assignment.
+Automatic selection includes it by default; `dailyEligible: false` excludes it
+from automatic picks while retaining those capabilities. This flag is not private
+access control. Adding, removing or changing eligibility can change provisional
+dates; locked/assigned dates and started attempts remain fixed. See the staged
+[activation procedure](HOSTING.md#journey-catalog-activation).
 Retained attempts remain pinned to their stored Journey. Removed editions are
 absent from Admin and practice routes. Their IDs are recorded
 only for save recovery: discard their attempts and overrides, while preserving

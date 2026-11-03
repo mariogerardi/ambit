@@ -33,6 +33,7 @@
 }
 .admin-workbench > .admin-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   position: static;
   margin: 0;
@@ -41,33 +42,6 @@
   border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
   border-radius: 0;
   background: none;
-}
-.experience .admin-workbench .admin-tabs [role="tab"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 48px;
-  padding: 10px 2px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--ui-muted);
-  font: 15px var(--font-ui);
-}
-.experience .admin-workbench .admin-tabs [aria-selected="true"] {
-  border-bottom-color: var(--ui-accent);
-  color: var(--ui-accent);
-}
-.experience .admin-workbench .admin-tabs [role="tab"]:hover {
-  color: var(--ui-text);
-  background: transparent;
-}
-.admin-tabs .action-icon {
-  width: 18px;
-  height: 18px;
 }
 :root .experience.page-layout .admin-workbench .journey-scheduler-card {
   margin: 0;
@@ -100,25 +74,7 @@
   min-width: 0;
 }
 .admin-view-switch {
-  display: inline-flex;
-  gap: 4px;
   margin-bottom: 14px;
-  padding: 3px;
-  border-radius: 8px;
-  background: rgb(var(--ui-line-rgb) / 0.06);
-}
-.experience .admin-view-switch button {
-  min-height: 32px;
-  padding: 5px 12px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--ui-muted);
-  font: 14px var(--font-ui);
-}
-.experience .admin-view-switch button[aria-pressed="true"] {
-  background: rgb(var(--ui-raised-rgb));
-  color: var(--ui-text);
 }
 .admin-agenda,
 .admin-workbench .journey-month {
@@ -687,10 +643,6 @@
   .admin-workbench > .admin-tabs {
     flex-wrap: wrap;
     gap: 8px;
-  }
-  .experience .admin-workbench .admin-tabs [role="tab"] {
-    gap: 6px;
-    font-size: 13px;
   }
   .admin-workbench .admin-library-controls {
     flex-direction: column;

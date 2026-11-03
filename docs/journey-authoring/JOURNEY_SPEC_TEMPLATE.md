@@ -39,7 +39,9 @@ routine detail. Do not reopen locked creative decisions without a material reaso
 
 Map each distinct interaction to the closest known recipe. For a familiar sequel,
 a one-sentence statement that all five reuse the existing mechanic is sufficient.
-A portable-kit claim is **to verify** until checked against current code. This is
+Cite the current recipe/source and inspected revision for each distinct behavior,
+and label the decision reuse or extend. A portable-kit claim is **to verify** until
+checked against current code. This is
 a lightweight feasibility check, **not** a reason to replace a locked gameplay idea.
 
 | Stop(s) | Existing recipe or proposed interaction | New data/assets | Engine addition | Verified / kit / to verify |
@@ -144,9 +146,11 @@ Journey-specific geographic payoff rather than a fixed result heading.
 ### Catalog impact
 
 - **Identity:** Stable Journey ID, added date and route when known.
-- **Registration decision:** **Defer / Authorize.** Registered Journeys enter the
-  automatic Daily pool; the current engine has **no unlisted status**. If deferred,
-  arrange isolated review instead of claiming registration will remain hidden.
+- **Registration decision:** **Defer / Authorize.** Unregistered source can use
+  the development workbench without catalog changes. Registration permits Admin
+  review and explicit date assignment; `dailyEligible: false` excludes automatic
+  Daily selection, without making the content private. Activation requires the
+  staged frontend/backend catalog release in `HOSTING.md`.
   Approval to implement does not itself authorize deployment.
 - **Existing dates and saves:** Identify superseded/removed IDs and affected
   assignments. Preserve locked dates, started attempts and completed receipts;

@@ -12,32 +12,14 @@
 }
 .minigame-game-names {
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0 8px;
   margin: 0 0 14px;
   width: 100%;
 }
-.experience .minigame-game-names button {
+.minigame-game-names button {
   flex: 1 0 auto;
-  min-height: 36px;
-  padding: 6px 2px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
-  color: var(--ui-muted);
-  font: 11px var(--font-ui);
-  white-space: nowrap;
-}
-.experience .minigame-game-names button[aria-selected="true"] {
-  color: var(--ui-accent);
-  border-bottom-color: var(--ui-accent);
-}
-.experience .minigame-game-names button:hover {
-  color: var(--ui-text);
 }
 .minigame-premise {
   margin: 0 0 16px;

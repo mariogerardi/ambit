@@ -754,6 +754,84 @@ export const MECHANIC_RECIPES: Question[] = [
 export const PRESENTATION_RECIPES: Question[] = [
   defineQuestion({
     ...base,
+    id: "recipe:populated-country-order",
+    title: "Populated ordering with an eliminated spare",
+    prompt:
+      "Arrange Canada, the United States and Mexico from north to south. Leave one country out.",
+    explanation:
+      "The hint removes Brazil; the assist locks Canada. Replace this demonstration with the Journey’s geographic reasoning.",
+    mode: "choice-order",
+    count: 3,
+    selection: { type: "none" },
+    commitment: "submit",
+    rule: {
+      type: "country-ids",
+      ids: ["wurl:CAN", "wurl:USA", "wurl:MEX"],
+      ordered: true,
+    },
+    choices: [
+      { id: "wurl:CAN", label: "Canada" },
+      { id: "wurl:USA", label: "United States" },
+      { id: "wurl:MEX", label: "Mexico" },
+      { id: "wurl:BRA", label: "Brazil" },
+    ],
+    orderInitial: ["wurl:USA", "wurl:BRA", "wurl:CAN"],
+    shuffleChoices: true,
+    orderLabels: ["North", "Middle", "South"],
+    orderAsideLabel: "Leave out",
+    feedbackReview: "compact",
+    disclosure: { ...base.disclosure, namedChoices: true },
+    guidance: {
+      hint: "Brazil is left out. Order the remaining countries.",
+      hintAsideId: "wurl:BRA",
+      assist: {
+        text: "Canada is locked in the north.",
+        fixedSlots: [{ index: 0, id: "wurl:CAN" }],
+      },
+    },
+    map: {
+      ...base.map,
+      selectionFeedback: "after-submit",
+      revealOrder: { stepMs: 850, durationMs: 400 },
+    },
+    scenes: {
+      play: {
+        focus: { lat: 35, lng: -100, altitude: 1.4 },
+        overlays: [
+          {
+            id: "recipe:flow",
+            type: "path",
+            coordinates: [
+              [-100, 55],
+              [-100, 40],
+              [-100, 24],
+            ],
+            opacity: 0,
+            flow: { durationMs: 18000, count: 4 },
+          },
+        ],
+      },
+      reveal: {
+        overlays: [
+          {
+            id: "recipe:reveal",
+            type: "path",
+            coordinates: [
+              [-100, 55],
+              [-100, 40],
+              [-100, 24],
+            ],
+            arrowhead: true,
+            reveal: { durationMs: 2000 },
+          },
+        ],
+      },
+    },
+    qualification:
+      "The line illustrates geographic direction, not a traveled route.",
+  }),
+  defineQuestion({
+    ...base,
     id: "recipe:bearing-intersection",
     title: "bearing-intersection example",
     prompt: "Lanzhou and Datong report two bearings. Where do they meet?",

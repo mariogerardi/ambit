@@ -46,6 +46,7 @@ export function useJourneyContent({
   regions,
   published,
   retry,
+  reviewJourney,
 }: {
   mode: AppMode;
   journeyId?: string;
@@ -54,6 +55,7 @@ export function useJourneyContent({
   regions: RegionFeature[];
   published: PublishedPuzzle[];
   retry: number;
+  reviewJourney?: Journey;
 }) {
   const [loaded, setLoaded] = useState<{
     journey: Journey;
@@ -69,19 +71,26 @@ export function useJourneyContent({
     let live = true;
     setJourneyError("");
     const local = published.find((pack) => pack.id === journeyId)?.journey;
-    const content = local ? Promise.resolve(local) : loadJourney(journeyId);
+    const content =
+      reviewJourney?.id === journeyId
+        ? Promise.resolve(reviewJourney)
+        : local
+          ? Promise.resolve(local)
+          : loadJourney(journeyId);
     void Promise.all([content, import("../game/runtime")])
       .then(([journey, runtime]) => {
         if (live) setLoaded({ journey, runtime });
       })
       .catch(() => {
         if (live)
-          setJourneyError("Couldn’t load this Journey. Please reload to try again.");
+          setJourneyError(
+            "Couldn’t load this Journey. Please reload to try again.",
+          );
       });
     return () => {
       live = false;
     };
-  }, [wantsJourney, journeyId, mode, published, retry]);
+  }, [wantsJourney, journeyId, mode, published, retry, reviewJourney]);
   // A replaced world invalidates every derived answer context and shared graph.
   const contexts = useMemo<ContextCache>(
     () => ({ journeys: new WeakMap() }),

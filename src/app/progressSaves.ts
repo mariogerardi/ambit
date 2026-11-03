@@ -298,6 +298,20 @@ export function dailySaveCodec(
         if (attempt) save.attempts[date] = attempt;
         else delete save.attempts[date];
       }
+      // Cloud devices can disagree about the selected edition. Retain every
+      // other edition's run so schedule reconciliation can resume it, even if
+      // that device never wrote a separate archive register.
+      for (const [field, value] of Object.entries(fields)) {
+        if (!field.startsWith("run.") || !value) continue;
+        const attempt = value as DailyAttempt;
+        if (save.attempts[attempt.date]?.journeyId === attempt.journeyId)
+          continue;
+        const key = `${attempt.date}/${attempt.journeyId}`;
+        const previous = save.archivedAttempts?.[key];
+        (save.archivedAttempts ??= {})[key] = previous
+          ? preferAttempt(previous, attempt)
+          : upgradeDailyAttempt(attempt, catalog);
+      }
       for (const [date, attempt] of Object.entries(save.attempts))
         if (!catalog.some((journey) => journey.id === attempt.journeyId)) {
           (save.archivedAttempts ??= {})[`${date}/${attempt.journeyId}`] =

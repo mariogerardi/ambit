@@ -20,6 +20,7 @@ import {
   segmentDistance,
 } from "./construction";
 import { sphericalGeometry } from "../geography/sphericalGeometry.mjs";
+import { GLOBE_SYMBOLS } from "../globe/symbols";
 
 const brushDisplays = new WeakMap<object, ConstructionGrid>();
 function brushDisplayGrid(q: Question, fallback: ConstructionGrid) {
@@ -78,7 +79,7 @@ export function constructionScene(
   if (rule.type === "labeled-region-pin-set" && c?.kind === "pins") {
     for (const slot of rule.slots) {
       const point = c.pins[slot.id];
-      if (!point || (!reveal && response.activePinSlot === slot.id)) continue;
+      if (!point) continue;
       const inside = result?.containedIds?.includes(slot.id);
       places.push({
         ...point,
@@ -87,6 +88,9 @@ export function constructionScene(
         kind: "pin",
         sourceId: "player",
         answerTarget: false,
+        editing: !reveal && response.activePinSlot === slot.id,
+        markerSize: GLOBE_SYMBOLS.response,
+        priority: !reveal && response.activePinSlot === slot.id ? 1000 : 500,
         visualState: reveal
           ? inside
             ? completion
@@ -184,6 +188,7 @@ export function constructionScene(
     overlays.push({
       id: `construction:${q.id}:circle`,
       type: "circle",
+      purpose: "construction",
       center: c.center,
       radiusKm: rule.radiusKm,
       shade: true,
@@ -194,6 +199,7 @@ export function constructionScene(
     overlays.push({
       id: `construction:${q.id}:outline`,
       type: "path",
+      purpose: "construction",
       foreground: true,
       coordinates: coords(
         c.kind === "polygon" && c.points.length >= 3
@@ -384,7 +390,7 @@ export function constructionScene(
         kind: "pin",
         sourceId: "player",
         visualState: "selected",
-        markerSize: 18,
+        markerSize: GLOBE_SYMBOLS.handle,
         labelHidden: true,
         answerTarget: false,
         ...(c.kind !== "circle" && c.kind !== "trace"
@@ -401,6 +407,8 @@ export function constructionScene(
     overlays.push({
       id: `construction:${q.id}:example`,
       type: "circle",
+      purpose: "explanation",
+      example: true,
       center: example.center,
       radiusKm: rule.radiusKm,
       visualState: "answer",
@@ -452,6 +460,7 @@ export function constructionScene(
       ),
       visualState: "answer",
       dashed: true,
+      purpose: "example",
       label: "Our solution",
     });
   const clipped = overlays.flatMap((o) => {

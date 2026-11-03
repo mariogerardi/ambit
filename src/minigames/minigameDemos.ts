@@ -24,6 +24,7 @@ import {
 } from "./extraGames";
 import type { PinpointPair, RoutePair } from "./extraGames";
 import { defaultMinigameSettings } from "./minigameSettings";
+import { GLOBE_MOTION } from "../globe/motion";
 
 export type DemoPhase = "question" | "action" | "reveal" | "travel";
 export interface MinigameExample {
@@ -336,6 +337,11 @@ export function demoWorld(
   });
   view.selectDisabled = true;
   view.regionInteraction = false;
+  // A preview is one continuous scene: fade through feedback and travel rather
+  // than inheriting the live Journey's phase-specific answer-color reset.
+  view.regionTransitionKey = `preview:${example.kind}`;
+  // Continuous previews fade back into travel rather than starting a new attempt.
+  view.regionPhase = undefined;
   if (phase === "question" || phase === "action") {
     for (const id of Object.keys(view.states)) {
       if (example.kind === "border-run" && view.states[id] === "disabled")
@@ -364,22 +370,25 @@ export function demoWorld(
     if (phase === "reveal") {
       const target = (example.pair as PinpointPair).place!;
       const country = example.context.targets.get(target.parentId!);
+      const maximumRadiusKm =
+        example.title === "Addis Ababa" ? 300 : DEMO_PINPOINT_RADIUS_KM;
       const radiusKm = country
         ? Math.min(
-            DEMO_PINPOINT_RADIUS_KM,
+            maximumRadiusKm,
             regionalPinpointBands(country).at(-1)!.radiusKm,
           )
-        : DEMO_PINPOINT_RADIUS_KM;
+        : maximumRadiusKm;
       view.overlays = [
         ...(view.overlays ?? []).filter((o) => o.type !== "circle"),
         ...Array.from({ length: reduced ? 3 : rings }, (_, index) => ({
           id: `demo:pinpoint-tier:${index}`,
           type: "circle" as const,
+          purpose: "preview" as const,
           center: target,
           radiusKm: (radiusKm * (index + 1)) / 3,
           shade: false,
           accuracyBand: { index, count: 3 },
-          fadeInMs: reduced ? undefined : 240,
+          fadeInMs: reduced ? undefined : GLOBE_MOTION.overlayFadeMs,
         })),
       ];
     }
@@ -387,7 +396,7 @@ export function demoWorld(
   if (!reduced)
     view.places = view.places.map((place) =>
       place.kind === "pin" && place.markerRole !== "target"
-        ? { ...place, dropInMs: 340 }
+        ? { ...place, dropInMs: GLOBE_MOTION.pinDropMs }
         : place,
     );
   if (phase === "travel") {
@@ -401,15 +410,12 @@ export function demoWorld(
     view.regionNames = "none";
   }
   if (example.kind === "missing-borders") {
-    // Preview travel blends between normal and question colors. Live play keeps
-    // its per-question reset to prevent answer-color carryover on Next map.
-    view.regionTransitionKey = "preview:missing-borders";
     if (phase === "reveal")
       view.regionReveal = {
         key: `demo:${example.id}:${cycle}`,
         ids: example.pair.countries,
         clueIds: [],
-        durationMs: 160,
+        durationMs: GLOBE_MOTION.stateFadeMs,
       };
     view.regions = missingDemoMap(
       regions,

@@ -6,8 +6,9 @@
   margin-block: 12px;
 }
 .construction-toolbar button {
+  min-height: var(--control-min-height);
   border: 1px solid var(--ui-muted);
-  border-radius: 8px;
+  border-radius: var(--control-radius);
   padding: 8px 12px;
   background: transparent;
   color: inherit;
@@ -92,7 +93,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
+  min-width: var(--control-min-height);
+  min-height: var(--control-min-height);
   padding: 6px;
 }
 .construction-brush-size {

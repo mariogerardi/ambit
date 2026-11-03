@@ -22,11 +22,28 @@ type Entry = {
   start: number;
   duration: number;
   pending: boolean;
+  waiting: boolean;
+  delay: number;
 };
+
+/** A rewind/replay clears prior answers; entering feedback within a question does not. */
+export class RegionScene {
+  private key?: string;
+  private phase?: string;
+  private epoch = 0;
+  scope(key?: string, phase?: string) {
+    if (key !== this.key || (phase === "playing" && this.phase !== phase))
+      this.epoch++;
+    this.key = key;
+    this.phase = phase;
+    return key === undefined ? undefined : `${key}:${this.epoch}`;
+  }
+}
 
 /** Country fills blend on the render clock, without rebuilding geography or React state. */
 export class RegionFades {
   private entries = new Map<string, Entry>();
+  private visibilityCheckPending = false;
   private sample(entry: Entry, now: number) {
     const t =
       entry.duration <= 0
@@ -51,6 +68,7 @@ export class RegionFades {
     duration: number,
     scope?: string,
     delay = 0,
+    waitForVisibility = false,
   ) {
     const entry: Entry = this.entries.get(id) ?? {
       key,
@@ -60,16 +78,24 @@ export class RegionFades {
       start: 0,
       duration,
       pending: false,
+      waiting: false,
+      delay: 0,
     };
     Object.assign(entry, {
       key,
       scope,
       from,
       to,
-      start: performance.now() + delay,
+      start:
+        waitForVisibility && duration > 0
+          ? Infinity
+          : performance.now() + delay,
       duration,
+      waiting: waitForVisibility && duration > 0,
+      delay,
     });
     this.entries.set(id, entry);
+    if (entry.waiting) this.visibilityCheckPending = true;
     this.sample(entry, performance.now());
     return entry.material;
   }
@@ -82,6 +108,7 @@ export class RegionFades {
     duration: number,
     scope?: string,
     delay = 0,
+    waitForVisibility = false,
   ) {
     const entry = this.entries.get(id),
       target = fill(to);
@@ -92,15 +119,31 @@ export class RegionFades {
       !entry.to.color.equals(target.color) ||
       entry.to.opacity !== target.opacity
     )
-      return this.begin(id, key, fill(from), target, duration, scope, delay);
+      return this.begin(
+        id,
+        key,
+        fill(from),
+        target,
+        duration,
+        scope,
+        delay,
+        waitForVisibility,
+      );
     if (duration === 0 && entry.pending) {
       entry.duration = 0;
+      entry.waiting = false;
       this.sample(entry, performance.now());
     }
     return entry.material;
   }
   /** Ordinary state changes start from the current rendered color, including interrupted fades. */
-  transition(id: string, to: string, duration: number, scope?: string) {
+  transition(
+    id: string,
+    to: string,
+    duration: number,
+    scope?: string,
+    waitForVisibility = false,
+  ) {
     const entry = this.entries.get(id),
       target = fill(to);
     // A new puzzle must not briefly disclose the previous puzzle's answer colors.
@@ -112,6 +155,7 @@ export class RegionFades {
     ) {
       if (duration === 0 && entry.pending) {
         entry.duration = 0;
+        entry.waiting = false;
         this.sample(entry, performance.now());
       }
       return entry.material;
@@ -124,15 +168,26 @@ export class RegionFades {
       target,
       duration,
       scope,
+      0,
+      waitForVisibility,
     );
   }
-  view() {
+  view(visible: (id: string) => boolean = () => true) {
+    this.visibilityCheckPending = false;
     const now = performance.now();
-    for (const entry of this.entries.values())
+    for (const [id, entry] of this.entries) {
+      if (entry.waiting && visible(id)) {
+        entry.waiting = false;
+        entry.start = now + entry.delay;
+      }
       if (entry.pending) this.sample(entry, now);
+    }
   }
   needsRefresh() {
-    return [...this.entries.values()].some((e) => e.pending);
+    return (
+      this.visibilityCheckPending ||
+      [...this.entries.values()].some((e) => e.pending && !e.waiting)
+    );
   }
   dispose() {
     for (const e of this.entries.values()) e.material.dispose();

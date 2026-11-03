@@ -103,7 +103,9 @@ describe("not the obvious city", () => {
       labelHidden: true,
     });
     expect(
-      after.places.filter((p) => p.sourceId !== "player").map((p) => p.name),
+      after.places
+        .filter((p) => p.sourceId !== "player" && p.markerRole !== "annotation")
+        .map((p) => p.name),
     ).toEqual(["Canberra", "Sydney", "Melbourne"]);
     expect(new Set(after.places.map((p) => p.id)).size).toBe(
       after.places.length,

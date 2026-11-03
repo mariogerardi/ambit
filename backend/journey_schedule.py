@@ -50,9 +50,7 @@ def choose(day, records, catalog=CATALOG, memo=None):
         memo = {}
     if day in memo:
         return memo[day]
-    candidates = sorted(catalog)
-    if not candidates:
-        raise ValueError("No Journeys are available")
+    candidates = sorted(key for key, item in catalog.items() if item.get("dailyEligible") is not False)
     cycle = (
         sorted(candidates, key=lambda item: (hash_date(item), item))
         if len(candidates) > NO_REPEAT_DAYS
@@ -72,6 +70,8 @@ def choose(day, records, catalog=CATALOG, memo=None):
                 else:
                     print(json.dumps({"event": "journey_schedule_unavailable", "day": key}))
             if key not in memo:
+                if not candidates:
+                    raise ValueError("No eligible Journeys are available")
                 recent = [memo[(current - timedelta(days=offset)).isoformat()]
                           for offset in range(1, min(NO_REPEAT_DAYS, (current - FIRST_DAY).days) + 1)]
                 if cycle:

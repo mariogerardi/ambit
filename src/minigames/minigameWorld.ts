@@ -9,6 +9,7 @@ import { journeyWorld } from "../app/journeyWorld";
 import { pointAlongBearing } from "../game/geodesic";
 import { borderRunCrossings } from "./borderRunPath";
 import { PINPOINT_BANDS } from "./extraGames";
+import { GLOBE_SYMBOLS } from "../globe/symbols";
 import type { RoutePair, PinpointPair } from "./extraGames";
 import type { BorderMinigame, NeighborPair } from "./sharedNeighbors";
 
@@ -86,7 +87,6 @@ export function minigameWorld({
         id: `border-run:${route.id}:finish`,
         label: "",
         pulseOnly: true,
-        repeat: true,
         appearance: "completion",
         region: route.components.at(-1)!.region,
         anchor: { lng, lat },
@@ -122,6 +122,7 @@ export function minigameWorld({
       ...connectors.map((r) => ({
         id: r.id,
         type: "path" as const,
+        purpose: "comparison" as const,
         coordinates: [
           [r.from.lng, r.from.lat],
           [r.to.lng, r.to.lat],
@@ -138,13 +139,16 @@ export function minigameWorld({
         ? {
             ...place,
             priority: 1000,
-            markerSize: 34,
+            markerSize: GLOBE_SYMBOLS.target,
             labelHidden: false,
             labelFlexible: true,
           }
         : place,
     );
 
+    const achievedRadius = view.overlays?.find(
+      (o) => o.type === "circle" && o.active,
+    );
     const visibleBands = (
       regionalPinpoint && (pair as PinpointPair).searchArea
         ? regionalPinpointBands(
@@ -152,7 +156,12 @@ export function minigameWorld({
               (pair as PinpointPair).searchArea!,
           )
         : PINPOINT_BANDS
-    ).filter((b) => [1000, 500, 100].includes(b.points));
+    ).filter(
+      (b) =>
+        [1000, 500, 100].includes(b.points) ||
+        (achievedRadius?.type === "circle" &&
+          b.radiusKm === achievedRadius.radiusKm),
+    );
     view.overlays = view.overlays
       ?.filter(
         (o) =>
@@ -164,7 +173,6 @@ export function minigameWorld({
           ? {
               ...o,
               shade: false,
-              active: false,
               accuracyBand: {
                 index: visibleBands.findIndex((b) => b.radiusKm === o.radiusKm),
                 count: visibleBands.length,
@@ -172,6 +180,9 @@ export function minigameWorld({
             }
           : o,
       );
+    view.places = view.places.filter(
+      (p) => !p.id.startsWith("pin-band-label:"),
+    );
     view.places.push(
       ...visibleBands.map((b) => {
         const { lng, lat } = pointAlongBearing(
@@ -188,7 +199,6 @@ export function minigameWorld({
           sourceId: "pinpoint-score-band",
           markerHidden: true,
           labelTypography: "numeric" as const,
-          labelScale: 1.35,
           labelFlexible: false,
           visualState: "hinted" as const,
           priority: 90,

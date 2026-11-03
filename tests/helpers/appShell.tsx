@@ -233,9 +233,9 @@ export async function settleLoads() {
       );
   });
 }
-export async function mount() {
+export async function mount(props: Parameters<typeof App>[0] = {}) {
   await act(async () => {
-    root.render(<App />);
+    root.render(<App {...props} />);
   });
   await settleLoads();
 }

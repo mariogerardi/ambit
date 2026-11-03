@@ -54,6 +54,9 @@ export interface PlaceFeature {
   annotationRadius?: number;
   /** Read-only response badge; never changes picking eligibility or grading. */
   markerBadge?: string;
+  /** Assistance provenance and active editing are display-only, never grading inputs. */
+  assisted?: boolean;
+  editing?: boolean;
   /** Fade a newly introduced authored marker on the render clock. */
   fadeInMs?: number;
   /** Drop a newly introduced pin into its anchored position. */
@@ -103,6 +106,7 @@ export interface PlaceFeature {
   sourceId: string;
 }
 export interface RouteFeature {
+  purpose?: "route" | "comparison";
   accuracyBand?: { index: number; count: number };
   id: string;
   from: { lat: number; lng: number };
@@ -157,6 +161,15 @@ export type MapOverlay =
   | {
       id: string;
       type: "circle";
+      /** Meaning, independently of the geographic radius or grading contract. */
+      purpose?:
+        | "accuracy"
+        | "construction"
+        | "search"
+        | "explanation"
+        | "preview";
+      /** Comparison example, distinct from the player's editable circle. */
+      example?: boolean;
       center: { lat: number; lng: number };
       radiusKm: number;
       shade?: boolean;
@@ -172,6 +185,7 @@ export type MapOverlay =
   | {
       id: string;
       type: "path";
+      purpose?: "route" | "comparison" | "construction" | "example" | "guide";
       /** Draw above translucent construction fills. */
       foreground?: boolean;
       /** Local decorative shore paths share the map shell. */

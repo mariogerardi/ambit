@@ -184,6 +184,17 @@ an answer as the spare. The lock survives assist, clear and stale draft recovery
 the stronger `assist.fixedSlots` contract can independently lock the first answer.
 The original answer sequence and help point ceilings are unchanged.
 
+`recipe:populated-country-order` is the complete prefilled/shuffled ordering
+composition: one spare, hint elimination, assist-fixed first position, compact
+feedback, staged country fills and separate flowing/reveal paths. Audit it with
+`npm run check:journey -- --recipe populated-country-order`. It is an executable
+example, not a second configuration API or an editorial template.
+
+Use the [shared draft workbench](DEVELOPMENT.md#run-and-check) for source not in
+the index. Review and normal play share fresh-round initialization; Daily fills
+uninitialized ordering inputs after lazy content loads, while restored nonempty
+drafts and completed receipts stay intact.
+
 ## Standards and supported capabilities
 
 [Crafting a Journey](JOURNEY_CRAFTING.md) owns current authoring standards. The
@@ -435,6 +446,16 @@ Review geography, copy and sources with judgment; automated checks cannot establ
 historical truth, screen-space legibility or every form of answer leakage.
 
 ## Answer roles and presentation
+
+The agreed cross-mode [globe appearance standards](THEMES.md#shared-globe-standards)
+cover symbols, labels, overlays, motion and camera framing by role and mechanic.
+Shared renderer defaults implement the role hierarchy; the disclosure and grading
+responsibilities below continue to define valid scenes. Display metadata stays
+separate from canonical geometry: circles may declare `purpose` (`accuracy`,
+`construction`, `search`, `explanation`, `preview`) and `example`; paths may declare
+`purpose` (`route`, `comparison`, `construction`, `example`, `guide`). Comparisons
+and examples use dashed lines by default. Point `editing` and `assisted` flags
+control emphasis and a lock indicator without changing answer identity or grading.
 
 `answerPresentation.ts` resolves response identities, slot assignments, assistance
 provenance, and outcome states independently of their colors. A choice may declare

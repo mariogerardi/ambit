@@ -28,3 +28,9 @@ export function tourDuration(distance: number, entry = true) {
     ? Math.max(3000, Math.min(6500, distance * 35))
     : Math.max(6000, Math.min(10000, distance * 70));
 }
+/** Shared render-clock timings; authored teaching sequences remain explicit. */
+export const GLOBE_MOTION = {
+  stateFadeMs: 160,
+  pinDropMs: 340,
+  overlayFadeMs: 240,
+} as const;

@@ -403,7 +403,7 @@ export function AdminPanel({
       )}
       <div className="admin-workbench">
         <div
-          className="admin-tabs"
+          className="admin-tabs section-navigation section-navigation--roomy"
           role="tablist"
           aria-label="Admin sections"
           aria-orientation="horizontal"
@@ -540,7 +540,7 @@ export function AdminPanel({
               <div className="journey-scheduler">
                 <div className="admin-schedule-browser">
                   <div
-                    className="admin-view-switch"
+                    className="admin-view-switch view-switch"
                     role="group"
                     aria-label="Schedule view"
                   >

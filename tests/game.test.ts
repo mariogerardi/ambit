@@ -364,6 +364,7 @@ describe("committed answers and failure policies", () => {
     expect(reduce(game, { type: "start" })).toEqual({
       ...initialGame,
       phase: "playing",
+      showConstructionExample: false,
     });
     expect(reduce(game, { type: "home" })).toEqual(initialGame);
   });

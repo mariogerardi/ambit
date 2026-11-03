@@ -8,16 +8,8 @@
   width: 44px;
   height: 44px;
   padding: 10px;
-  color: var(--ui-text, #fff);
-  background: rgb(var(--ui-surface-rgb) / 0.6);
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.145);
-  border-radius: 12px;
+  border-radius: var(--control-radius);
   text-shadow: none;
-}
-.experience-header .app-menu-toggle:is(:hover, [aria-expanded="true"]) {
-  color: var(--ui-accent);
-  background: rgb(var(--ui-surface-rgb) / 1);
-  border-color: rgb(var(--ui-accent-rgb) / 0.3);
 }
 .app-menu-toggle svg {
   width: 22px;
@@ -46,17 +38,8 @@
   min-height: 44px;
   padding: 10px 12px;
   font-size: 14px;
-  color: var(--ui-text, #fff);
-  border-radius: 9px;
   cursor: pointer;
   text-align: left;
-}
-.experience .app-menu-content button:is(:hover, [aria-current]) {
-  background: rgb(var(--ui-accent-rgb) / 0.1);
-}
-.experience .app-menu-content button[aria-current] {
-  color: var(--ui-accent);
-  box-shadow: inset 2px 0 var(--ui-accent);
 }
 .app-menu-primary {
   display: grid;
@@ -82,9 +65,6 @@
 .experience .app-menu-content .app-menu-subitem {
   font-size: 13px;
   color: var(--ui-muted);
-}
-.experience .app-menu-content .app-menu-subitem[aria-current] {
-  color: var(--ui-accent);
 }
 .app-menu-primary .app-menu-subitem .action-icon {
   width: 16px;
@@ -123,15 +103,8 @@
   gap: 8px;
   min-height: 44px;
   padding: 8px 12px;
-  color: var(--ui-accent);
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
   border-radius: 24px;
-  background: rgb(var(--ui-surface-rgb) / 0.7);
   font-size: 12px;
-}
-.experience-header .profile-toggle:is(:hover, [aria-current]) {
-  background: rgb(var(--ui-surface-rgb) / 1);
-  border-color: rgb(var(--ui-accent-rgb) / 0.3);
 }
 .experience-header .profile-toggle .profile-avatar {
   width: 26px;
@@ -237,10 +210,6 @@
 .account-menu {
   position: relative;
   pointer-events: auto;
-}
-.experience-header .profile-toggle[aria-expanded="true"] {
-  border-color: rgb(var(--ui-accent-rgb) / 0.5);
-  background: rgb(var(--ui-surface-rgb));
 }
 .profile-toggle .account-menu-chevron {
   width: 12px;

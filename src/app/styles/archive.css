@@ -95,6 +95,22 @@
   table-layout: fixed;
   border-spacing: 4px;
 }
+.archive-calendar-frame {
+  position: relative;
+}
+.archive-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.archive-loading [role="status"] {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgb(var(--ui-surface-rgb));
+  font-size: 14px;
+}
 .archive-calendar th {
   padding: 6px 0;
   color: var(--ui-muted);

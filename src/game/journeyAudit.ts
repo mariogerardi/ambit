@@ -20,7 +20,7 @@ import {
 } from "./questionPreparation";
 import { COUNTRY_FACTS } from "./countryFacts";
 import { mechanicFor } from "./mechanics";
-import { initialGame, gameReducer } from "./state";
+import { initialGame, gameReducer, startRound } from "./state";
 import type { GameState } from "./state";
 import { journeyWorld } from "../app/journeyWorld";
 import { withAssistanceLocks } from "./guidance";
@@ -165,7 +165,7 @@ export function submitSample(
     isCorrect(question, context, response) !== correct
   )
     return undefined;
-  let game: GameState = { ...initialGame, phase: "playing", roundIndex: index };
+  let game: GameState = startRound(question, index, () => 0);
   const dispatch = (action: Parameters<typeof gameReducer>[1]) => {
     game = gameReducer(game, action, journey, context);
   };
@@ -315,11 +315,7 @@ export function auditJourney(
     report.exceptions.push(...exceptions.accepted);
     const definition = mechanicFor(question);
     const answers = solutionIds(question, context);
-    const playing: GameState = {
-      ...initialGame,
-      phase: "playing",
-      roundIndex: index,
-    };
+    const playing = startRound(question, index, () => 0);
     // Anonymous geography must not become a name lookup through editable inputs.
     // Named matching markers are already disclosed and intentionally retain slot feedback.
     if (
@@ -416,7 +412,10 @@ export function auditJourney(
       ["play", playing],
       ...(question.guidance
         ? [
-            ["hint", { ...playing, help: { [question.id]: "hinted" } }],
+            [
+              "hint",
+              gameReducer(playing, { type: "request-hint" }, journey, context!),
+            ],
             ...(question.guidance.assist
               ? [
                   [
@@ -553,11 +552,15 @@ export function auditJourney(
         )
           continue;
         const final = completed.places.find((p) => p.id === place.id);
+        // A construction stop reviews its original result; the overview is calm.
+        const retainedStates = journey.completion?.constructionResults
+          ? ["visited", "incorrect", place.visualState]
+          : ["visited", "incorrect"];
         if (
           !final ||
           (place.visualState === "incorrect"
             ? final.visualState !== "incorrect"
-            : !["visited", "incorrect"].includes(final.visualState ?? ""))
+            : !retainedStates.includes(final.visualState ?? ""))
         )
           report.errors.push(
             `[review-retention] Revealed point missing at completion: ${question.id} / ${place.id}`,

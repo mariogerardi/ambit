@@ -179,3 +179,22 @@ it("includes every registered Journey in automatic picks while retaining started
     old.attempts[date],
   );
 });
+
+it("keeps reviewable editions outside automatic picks while honoring explicit and started assignments", () => {
+  const live = { ...JOURNEY_INDEX[0], id: "eligible" };
+  const held = { ...JOURNEY_INDEX[0], id: "review-only", dailyEligible: false };
+  const pool = [held, live];
+  const day = FIRST_DAILY_DATE;
+  expect(seededJourney(day, pool).id).toBe(live.id);
+  expect(seededJourney(day, [...pool].reverse()).id).toBe(live.id);
+  expect(dailyJourney(day, undefined, pool, { [day]: held.id }).id).toBe(
+    held.id,
+  );
+  expect(seededJourney(day, pool, { [day]: held.id }).id).toBe(held.id);
+  expect(seededJourney(day, [held], { [day]: held.id }).id).toBe(held.id);
+  expect(() => seededJourney(day, [held])).toThrow("No eligible Journeys");
+  const started = openDaily(emptyDaily, day, false, pool, { [day]: held.id });
+  expect(openDaily(started, day, false, pool, {}).attempts[day]).toEqual(
+    started.attempts[day],
+  );
+});

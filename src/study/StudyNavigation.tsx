@@ -65,7 +65,10 @@ export function StudyNavigation() {
       ? "history"
       : context.view;
   return (
-    <nav className="study-navigation" aria-label="Study sections">
+    <nav
+      className="study-navigation section-navigation"
+      aria-label="Study sections"
+    >
       {(
         [
           ["history", "Your Sessions"],

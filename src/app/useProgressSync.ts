@@ -5,7 +5,7 @@ import type { SyncStatus, SyncStore } from "../services/progressSync";
 export function useProgressSync(
   subject: string | undefined,
   daily: SyncStore | undefined,
-  study: SyncStore,
+  study: SyncStore | undefined,
   accessToken: () => Promise<string | undefined>,
 ) {
   const token = useRef(accessToken);
@@ -17,7 +17,7 @@ export function useProgressSync(
     message: "Preparing to sync your progress…",
   });
   useEffect(() => {
-    if (!subject || !daily) return;
+    if (!subject || !daily || !study) return;
     const client = new ProgressSync(
       { daily, study },
       () => token.current(),

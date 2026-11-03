@@ -171,7 +171,10 @@ describe("Bearing Intersection geometry and contracts", () => {
     ).toThrow();
   });
   it("works as a self-contained question and as a separate authoring recipe", () => {
-    for (const question of [...journey.rounds, ...PRESENTATION_RECIPES]) {
+    for (const question of [
+      ...journey.rounds,
+      ...PRESENTATION_RECIPES.filter((q) => q.bearingIntersection),
+    ]) {
       const single = { ...journey, rounds: [question] };
       const ctx = createQuestionContext(regions, [], single);
       const game = gameReducer(

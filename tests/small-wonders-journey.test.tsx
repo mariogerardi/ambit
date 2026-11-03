@@ -290,6 +290,7 @@ describe("Small Wonders", () => {
     expect(world(wrong).overlays?.map((o) => o.id)).toEqual([
       `bearing-route:${q.id}`,
       `bearing-guess:${q.id}`,
+      `bearing-error:${q.id}`,
     ]);
     expect(
       world(wrong).places.find((p) => p.id === destination.id)?.visualState,

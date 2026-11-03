@@ -6,12 +6,12 @@ export const isSlotAnswer = (question: Pick<Question, "mode">) =>
   mechanicFor(question).control === "cards";
 
 /** Store the shuffled occupied slots in the response; the single spare is inferred. */
-export function initialOrderCards(question: Question) {
+export function initialOrderCards(question: Question, random = Math.random) {
   if (!question.orderInitial) return [];
   if (!question.shuffleChoices) return [...question.orderInitial];
   const ids = question.choices!.map((choice) => choice.id);
   for (let index = ids.length - 1; index > 0; index--) {
-    const other = Math.floor(Math.random() * (index + 1));
+    const other = Math.floor(random() * (index + 1));
     [ids[index], ids[other]] = [ids[other], ids[index]];
   }
   return ids.slice(0, question.count);

@@ -73,6 +73,22 @@ class JourneyScheduleTests(unittest.TestCase):
         ]
         self.assertEqual(set(choices), set(schedule.CATALOG))
 
+    def test_eligibility_excludes_only_automatic_picks_and_preserves_explicit_dates(self):
+        pool = {"eligible": {"id": "eligible"}, "held": {"id": "held", "dailyEligible": False}}
+        day = "2026-10-05"
+        self.assertEqual(schedule.choose(day, {}, pool), "eligible")
+        self.assertEqual(schedule.choose(day, {}, dict(reversed(list(pool.items())))), "eligible")
+        for source in ("assigned", "auto"):
+            records = {day: {"journeyId": "held", "source": source, "lockedAt": "locked"}}
+            self.assertEqual(schedule.choose(day, records, pool), "held")
+            self.assertEqual(schedule.choose(day, records, {"held": pool["held"]}), "held")
+        with self.assertRaisesRegex(ValueError, "No eligible Journeys"):
+            schedule.choose(day, {}, {"held": pool["held"]})
+        with patch.dict(schedule.CATALOG, {self.journey: {**schedule.CATALOG[self.journey], "dailyEligible": False}}):
+            result = schedule.handle(self.event(), True)
+            self.assertEqual(result["statusCode"], 200)
+            self.assertEqual(json.loads(result["body"])["records"]["2026-10-20"]["journeyId"], self.journey)
+
     def test_expanding_catalog_preserves_locked_and_assigned_choices(self):
         original = {"one": {"id": "one"}}
         expanded = {**original, "two": {"id": "two"}, "three": {"id": "three"}}

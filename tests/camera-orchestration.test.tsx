@@ -7,6 +7,7 @@ import { useCameraOrchestration } from "../src/app/useCameraOrchestration";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
 import { DANUBE_JOURNEY } from "../src/game/danubeJourney";
 import { REGGAETON_JOURNEY } from "../src/game/reggaetonJourney";
+import { SMALL_WONDERS_JOURNEY } from "../src/game/smallWondersJourney";
 import { createQuestionContext } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
 import { reviewTourFrame, REVIEW_TOUR_ALTITUDE } from "../src/study/reviewTour";
@@ -304,6 +305,29 @@ it("plays authored intros once, leaves answer edits alone, and ends the intro on
     journey: { ...options.journey, active: false },
   });
   expect(port.cancelFlyover).toHaveBeenCalledTimes(3);
+});
+
+it("ends a compass teaching flyover at the effective comparison frame", async () => {
+  const journey = SMALL_WONDERS_JOURNEY;
+  const index = journey.rounds.findIndex((q) => q.mode === "compass-bearing");
+  const round = journey.rounds[index];
+  const focus = { lat: 42, lng: -20, altitude: 1.4 };
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition: journey,
+      context: createQuestionContext(regions, [], journey),
+      roundIndex: index,
+      phase: "feedback",
+      focus,
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledWith(
+    [...round.feedbackViews!, focus],
+    false,
+  );
 });
 
 it("uses reveal views only after commitment and preserves a missed pin's comparison framing", async () => {

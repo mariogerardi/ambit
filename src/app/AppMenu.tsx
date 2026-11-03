@@ -52,7 +52,7 @@ export function AppMenu({
     <div className="app-menu" ref={shell}>
       <button
         ref={trigger}
-        className="app-menu-toggle"
+        className="app-menu-toggle menu-trigger"
         data-dd-action-name="Menu Toggle"
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
@@ -77,7 +77,7 @@ export function AppMenu({
       {open && (
         <nav
           id="app-navigation"
-          className="app-menu-content"
+          className="app-menu-content navigation-rows"
           aria-label="App navigation"
         >
           <span className="app-menu-heading">Ambit</span>

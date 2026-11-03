@@ -56,7 +56,7 @@ export function AccountMenu({
     <div className="account-menu" ref={shell}>
       <button
         ref={trigger}
-        className="profile-toggle"
+        className="profile-toggle menu-trigger"
         data-dd-action-name="Menu Account"
         aria-label="Account"
         aria-current={active ? "page" : undefined}
@@ -105,7 +105,7 @@ export function AccountMenu({
       {open && signedIn && (
         <nav
           id="account-navigation"
-          className="app-menu-content account-menu-content"
+          className="app-menu-content account-menu-content navigation-rows"
           aria-label="Your account"
         >
           <span className="app-menu-heading">Your space</span>
@@ -124,7 +124,10 @@ export function AccountMenu({
           )}
           {admin && (
             <div className="account-menu-admin">
-              <button onClick={() => go("admin")}>
+              <button
+                aria-current={active === "admin" ? "page" : undefined}
+                onClick={() => go("admin")}
+              >
                 <ActionIcon name="admin" />
                 <span>Admin</span>
               </button>

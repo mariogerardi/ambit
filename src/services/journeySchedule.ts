@@ -3,6 +3,7 @@ import { dateOrdinal, localDateKey } from "../app/dailyProgress";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { reportFailure } from "./monitoring";
 import { serviceConfig } from "./config";
+import type { JourneySummary } from "../game/journeyRegistry";
 
 export interface DayRecord {
   day: string;
@@ -17,6 +18,13 @@ export interface JourneySchedule {
   records: Record<string, DayRecord>;
   /** Effective stored choices; missing dates use the provisional seeded pick. */
   assignments: Record<string, string>;
+}
+/** A durable assignment must never be replaced by a different local Daily. */
+export function unavailableScheduledJourney(date: string, records: Record<string, DayRecord>, catalog: JourneySummary[]) {
+  const record = records[date];
+  return record?.source !== "provisional" && record?.journeyId &&
+    !catalog.some((journey) => journey.id === record.journeyId || journey.supersedes === record.journeyId)
+    ? record.journeyId : undefined;
 }
 const dateAt = (ordinal: number) =>
   new Date(ordinal * 86400000).toISOString().slice(0, 10);
@@ -68,7 +76,7 @@ async function request(token?: string, body?: unknown, month?: string, admin = f
   if (!validJourneySchedule(schedule)) throw Error("Couldn’t read the Journey schedule. Please try again.");
   return schedule;
 }
-export function useJourneySchedule() {
+export function useJourneySchedule(enabled = true) {
   const [schedule, setSchedule] = useState<JourneySchedule>();
   const [error, setError] = useState("");
   const [loadedMonths, setLoadedMonths] = useState<string[]>([]);
@@ -117,6 +125,7 @@ export function useJourneySchedule() {
     }
   }, []);
   useEffect(() => {
+    if (!enabled) return;
     void refresh();
     const wake = () => { if (document.visibilityState !== "hidden") void refresh(); };
     const timer = setInterval(wake, 60000);
@@ -132,7 +141,7 @@ export function useJourneySchedule() {
       removeEventListener("online", wake);
       document.removeEventListener("visibilitychange", wake);
     };
-  }, [refresh]);
+  }, [enabled, refresh]);
   const save = async (date: string, journeyId: string | undefined, token: string, rewriteHistory = false) => {
     if (!schedule || writing.current) return false;
     writing.current = true;

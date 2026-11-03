@@ -1,5 +1,10 @@
 import { readFileSync } from "node:fs";
-import { expect, it } from "vitest";
+import { Color } from "three";
+import { expect, it, vi } from "vitest";
+import { BorderFades } from "../src/globe/borderFades";
+import { RegionFades } from "../src/globe/regionFades";
+import { outlineColor, regionBorderVisible } from "../src/globe/outlines";
+import { themedRegionStyle } from "../src/globe/themes";
 import type { RegionFeature } from "../src/geography/types";
 import {
   DEMO_HOLD_MS,
@@ -147,6 +152,83 @@ it("clears markers and merged geography while restoring default borders between 
   );
 });
 
+it("blends the Shared Neighbors answer and borders after the pin drop and back into travel", () => {
+  const example = library["shared-neighbors"][0];
+  const answer = example.context.targets.get(example.pair.answer)!;
+  const views = (["action", "reveal", "travel"] as const).map((phase) =>
+    demoWorld(regions, example, phase, 0, false, 0),
+  );
+  const clock = vi.spyOn(performance, "now");
+  try {
+    for (let i = 1; i < views.length; i++) {
+      const fills = new RegionFades();
+      const borders = new BorderFades();
+      const line = { visible: false, material: { opacity: 0 } };
+      const styles = views.slice(i - 1, i + 1).map((view) => {
+        const style = themedRegionStyle(
+          "play",
+          answer.id,
+          view.states[answer.id],
+        );
+        return {
+          fill: style.fill,
+          opacity: regionBorderVisible(answer, view)
+            ? outlineColor(style.stroke).opacity
+            : 0,
+        };
+      });
+      try {
+        clock.mockReturnValue(0);
+        const material = fills.transition(
+          answer.id,
+          styles[0].fill,
+          160,
+          views[i - 1].regionTransitionKey,
+        );
+        borders.update(
+          line,
+          styles[0].opacity,
+          false,
+          views[i - 1].regionTransitionKey,
+        );
+        fills.transition(
+          answer.id,
+          styles[1].fill,
+          160,
+          views[i].regionTransitionKey,
+        );
+        borders.update(
+          line,
+          styles[1].opacity,
+          false,
+          views[i].regionTransitionKey,
+        );
+        expect(material.color).toEqual(new Color(styles[0].fill));
+        expect(line.material.opacity).toBe(styles[0].opacity);
+        clock.mockReturnValue(80);
+        fills.view();
+        borders.view();
+        expect(material.color).toEqual(
+          new Color(styles[0].fill).lerp(new Color(styles[1].fill), 0.5),
+        );
+        expect(line.material.opacity).toBeCloseTo(
+          (styles[0].opacity + styles[1].opacity) / 2,
+        );
+        clock.mockReturnValue(160);
+        fills.view();
+        borders.view();
+        expect(material.color).toEqual(new Color(styles[1].fill));
+        expect(line.material.opacity).toBe(styles[1].opacity);
+      } finally {
+        fills.dispose();
+        borders.dispose();
+      }
+    }
+  } finally {
+    clock.mockRestore();
+  }
+});
+
 it("joins fast and slow motion continuously, including zoom and the final wrap", () => {
   for (const source of Object.values(library)) {
     const examples = [...source].sort((a, b) => b.focus.lng - a.focus.lng);
@@ -221,6 +303,14 @@ it("drops the same pin through feedback and introduces Pinpoint rings from the b
     return view.overlays!.filter((o) => o.type === "circle").at(-1)!.radiusKm;
   });
   expect(new Set(outerRadii).size).toBeGreaterThan(1);
+  const addis = library.pinpoint.find(
+    (example) => example.title === "Addis Ababa",
+  )!;
+  const addisReveal = demoWorld(regions, addis, "reveal", 1, false, 0);
+  expect(
+    addisReveal.overlays!.filter((overlay) => overlay.type === "circle").at(-1)!
+      .radiusKm,
+  ).toBe(300);
   expect(radii[1]).toBeGreaterThan(radii[0]);
   expect(radii[2]).toBeGreaterThan(radii[1]);
   expect(tourFrame(library["border-run"], DEMO_REVEAL_MS + 160).step).toBe(1);

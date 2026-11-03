@@ -196,6 +196,13 @@ export class ClueLocators {
         pulse.classList.add("clue-locator-pulse");
         text.textContent = clue.pulseOnly ? "" : clue.label;
         group.append(pulse);
+        if (clue.pulseOnly) {
+          const anchor = svg("circle");
+          anchor.classList.add("clue-locator-anchor");
+          anchor.setAttribute("r", "2.5");
+          anchor.setAttribute("fill", "currentColor");
+          group.append(anchor);
+        }
         if (!clue.pulseOnly) group.append(line, text);
         this.element.append(group);
         entry = {
@@ -223,7 +230,7 @@ export class ClueLocators {
         clue.appearance === "completion",
       );
       const pulse = entry.group.querySelector(
-        "circle:not(.completion-pulse-casing)",
+        "circle:not(.completion-pulse-casing):not(.clue-locator-anchor)",
       )!;
       if (clue.appearance === "completion") {
         pulse.classList.replace("clue-locator-pulse", "completion-pulse");
