@@ -232,15 +232,15 @@ describe("product copy follows the answer and visible reveal", () => {
       ),
     ).not.toContain("Other correct answers");
   });
-  it("shows other correct answers only for a multiple-answer reveal", () => {
+  it("shows required answers and an incorrect pick for a multiple-answer reveal", () => {
     const { question, context, game } = play(ELEVENTH_JOURNEY, 4, [
-      { type: "order-card", id: "place:964137", index: 0 },
-      { type: "order-card", id: "place:3369157", index: 1 },
-      { type: "order-card", id: "place:993800", index: 2 },
+      { type: "select", id: "place:964137" },
+      { type: "select", id: "place:3369157" },
+      { type: "select", id: "place:993800" },
       { type: "submit" },
     ]);
     expect(feedbackLegend(question, context, game).map((e) => e.label)).toEqual(
-      ["Correct assignment", "Required answers", "Incorrect match"],
+      ["Correct", "Required answers", "Incorrect pick"],
     );
   });
   it("explains a pin target and highlighted clues without claiming multiple correct answers", () => {

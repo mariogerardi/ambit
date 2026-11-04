@@ -105,7 +105,9 @@ describe("Journey engine authoring boundaries", () => {
         }),
       ).toBe(true);
       expect(
-        auditJourney({ ...recipes, rounds: [question] }, world).errors,
+        auditJourney({ ...recipes, rounds: [question] }, world, undefined, {
+          allowDeprecated: !!mechanicFor(question).deprecated,
+        }).errors,
       ).toEqual([]);
     }
     const ordered = MECHANIC_RECIPES.find(
@@ -140,6 +142,7 @@ describe("Journey engine authoring boundaries", () => {
         .sort(),
     );
     expect(ANSWER_TYPES["land-path"]).toBeUndefined();
+    expect(ANSWER_TYPES["choice-match"]).toBeUndefined();
   });
   it("compiles scene overrides without mutating presets or changing legacy records", () => {
     const legacy = { ...ELEVENTH_JOURNEY.rounds[0], scenes: undefined };

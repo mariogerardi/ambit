@@ -174,24 +174,34 @@ describe("Journey visual grammar", () => {
         .every((p) => p.markerHidden),
     ).toBe(true);
   });
-  it("retains matching slot identity after grading", () => {
-    const { q, context, scene, start } = question(
-      "unexpected-south-africa-capitals",
-    );
-    const ordered = solutionIds(q, context);
-    const pending = scene({ ...start, ordered }).places;
+  it("marks selected and unselected target cities after grading", () => {
+    const { q, scene, start } = question("unexpected-south-africa-capitals");
+    const selectedIds = ["place:964137", "place:3369157", "place:993800"];
     const feedback = scene({
       ...start,
       phase: "feedback",
-      ordered,
-      answers: [{ ...initialGame, roundId: q.id, correct: true, ordered }],
+      selectedIds,
+      answers: [
+        {
+          ...initialGame,
+          roundId: q.id,
+          correct: false,
+          selectedIds,
+        },
+      ],
     }).places;
-    for (const id of ordered) {
-      expect(feedback.find((p) => p.id === id)?.markerBadge).toBe(
-        pending.find((p) => p.id === id)?.markerBadge,
-      );
-      expect(feedback.find((p) => p.id === id)?.visualState).toBe("correct");
-    }
+    expect(feedback.find((p) => p.id === "place:964137")?.visualState).toBe(
+      "correct",
+    );
+    expect(feedback.find((p) => p.id === "place:3369157")?.visualState).toBe(
+      "correct",
+    );
+    expect(feedback.find((p) => p.id === "place:993800")?.visualState).toBe(
+      "incorrect",
+    );
+    expect(feedback.find((p) => p.id === "place:1018725")?.visualState).toBe(
+      "answer",
+    );
   });
   it("shares one status symbol across a clue fragment and its owner", () => {
     const { reduce, scene } = question("island-owner-bioko");

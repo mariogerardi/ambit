@@ -99,7 +99,6 @@ user-facing type names live in [`questionTypes.ts`](../src/game/questionTypes.ts
 | `choice-single`        | Single choice               |
 | `choice-multiple`      | Multiple choices            |
 | `choice-order`         | Order cards with spares     |
-| `choice-match`         | Match cards to roles        |
 
 `land-path` remains an internal supported mode/evaluator, with an executable
 `recipe:land-path` example and no playable catalog question. Inspect it with
@@ -177,15 +176,11 @@ narrows to four targets. Completion restores all eleven solution countries,
 uses five views without route lines in the existing flyover. Actual WebGL/mobile fidelity remains distinct from automated
 geometry and DOM checks.
 
-`choice-match` pairs distinct `choices` cards with labelled `matchSlots` roles.
-A `slot-matches` rule declares `{ slotId, choiceId }` pairs by stable identity;
-array order in the rule is irrelevant. Each role receives one unique card, with
-optional spare cards. Responses use the existing `ordered` slots, and
-`assist.fixedSlots` can lock a correct pairing. `orderAsideLabel` can name the card
-tray (for example, Countries). Dragging and button placement share
-`OrderAnswer` with ordering; matching has its own two-column layout, instructions,
-answer summary, grading contract, and per-role map feedback. It works without WebGL.
-Do not encode city/role matching as ordered `country-ids`.
+Card matching (`choice-match` / `slot-matches`) is deprecated and must not be
+used in new Journeys. The compatibility implementation remains for saved content
+and regression tests. Use `city-multiple` for city sets or `choice-multiple` for
+other sets; ordering remains a separate supported mechanic. Normal Journey audits
+reject deprecated modes, and authoring menus do not offer them.
 
 `shuffleChoices: true` randomizes ordinary choice-button positions once while a
 question is mounted. Hint/assist rerenders preserve those positions; grading uses
@@ -195,7 +190,7 @@ IDs. Do not infer answers from visual card order.
 `country-ids` or `choice-ids` rule marked `ordered: true`. Use `choice-ids` for
 landmarks or other cards whose identities are independent of countries. It supports spare/distractor cards,
 mouse/touch dragging, button placement, and authored `assist.fixedSlots` locks.
-Ordering `choices` and matching `matchSlots` can carry an `image` using the
+Ordering `choices` and legacy matching `matchSlots` can carry an `image` using the
 documentary feedback-image contract (source, alt text, caption and credit).
 The shared card control displays the photo and attribution while keeping its
 caption for the reveal, so dates or associations in that caption do not leak.
@@ -231,16 +226,16 @@ and `pinPresentation.ts` for labels and feedback.
 
 A rule describes correctness independently of its answer control:
 
-| Family                 | Rule IDs                                                                                                                | Authority/limits                                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `slot-matches`, `country-ids`, `region-ids`, `place-ids`, `merged-region` | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
-| Compass direction      | `bearing-angle`                                                                                                         | Reviewed endpoints, initial spherical azimuth and circular angular error.                               |
-| Pin placement          | `pin-inside`, `pin-distance`                                                                                            | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
-| Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                                              | Sourced fact context or the explicit common-English-name UN roster.                                     |
-| Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                                         | Bundled capital/flag records; capital-order checks the specified route.                                 |
-| Geographic reasoning   | `shortest-borders`, `great-circle-order`                                                                                | Shared-edge canonical topology and spherical route intersections, not roads or travel permissions.      |
-| Reviewed relationships | `territory-owner`, `feature-count`, `language-family`, `official-languages`, `physical-feature`                         | Curated sets/profiles, not universal relationships inferred from display metadata.                      |
-| Spatial predicates     | `capital-coordinate`, `capital-circle`, `country-circle`                                                                | Pinned coordinates, geodesic disks, and full country geometry. `country-circle` has no bundled example. |
+| Family                 | Rule IDs                                                                                                | Authority/limits                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Authored answers       | `manual-text`, `manual-number`, `choice-ids`, `country-ids`, `region-ids`, `place-ids`, `merged-region` | Reviewed explicit answers, aliases, and membership sets; `manual-number` is supported.                  |
+| Compass direction      | `bearing-angle`                                                                                         | Reviewed endpoints, initial spherical azimuth and circular angular error.                               |
+| Pin placement          | `pin-inside`, `pin-distance`                                                                            | Canonical local region containment or authored place/radius, with units and tolerance reviewed.         |
+| Country facts/names    | `country-fact`, `text-fact`, `name-length`                                                              | Sourced fact context or the explicit common-English-name UN roster.                                     |
+| Capitals/flags         | `capital-name`, `capital-order`, `flag-country`                                                         | Bundled capital/flag records; capital-order checks the specified route.                                 |
+| Geographic reasoning   | `shortest-borders`, `great-circle-order`                                                                | Shared-edge canonical topology and spherical route intersections, not roads or travel permissions.      |
+| Reviewed relationships | `territory-owner`, `feature-count`, `language-family`, `official-languages`, `physical-feature`         | Curated sets/profiles, not universal relationships inferred from display metadata.                      |
+| Spatial predicates     | `capital-coordinate`, `capital-circle`, `country-circle`                                                | Pinned coordinates, geodesic disks, and full country geometry. `country-circle` has no bundled example. |
 
 Support for a declared knowledge rule does not imply
 complete factual coverage or that every mode/rule combination is valid.

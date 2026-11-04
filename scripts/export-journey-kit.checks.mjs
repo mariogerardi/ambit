@@ -141,6 +141,11 @@ test(
       assert.ok(pin.evidence.stages.includes("reveal:partial"));
       assert.deepEqual(pin.evidence.errors, []);
       assert.ok(pin.preview.includes("recipe=pin"));
+      const matching = capabilities.find(
+        (item) => item.id === "recipe:choice-match",
+      );
+      assert.match(matching.availability, /deprecated: do not use/);
+      assert.equal(matching.deprecation.replacement, "city-multiple");
       assert.ok(pin.experience.playCamera);
       const network = capabilities.find(
         (item) => item.id === "recipe:multilingual-network",
@@ -277,7 +282,8 @@ test(
       const sliderNotes = kit.match(/### slider[^]*?(?=\n###|\n##)/)[0];
       assert.match(sliderNotes, /free Accuracy information/);
       assert.match(gptGuide, /"radiusKm":450/);
-      assert.match(gptGuide, /"matchSlots"/);
+      assert.doesNotMatch(gptGuide, /"matchSlots"/);
+      assert.match(gptGuide, /deprecated: do not use for new Journeys/);
       assert.match(gptGuide, /recipe:populated-country-order/);
       assert.match(
         await readFile(path.join(directory, "COMPOSITIONS.md"), "utf8"),

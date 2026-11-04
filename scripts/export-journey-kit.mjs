@@ -75,7 +75,7 @@ const MODE_NOTES = {
   "choice-order":
     "Arrange country cards in an authored geographic order. Two to six cards; the prefilled impostor variant has exactly one extra card. Assists can lock fewer than all slots. No partial credit.",
   "choice-match":
-    "Place two to six distinct cards into named role slots, with optional spare cards. Each role has one unique card; no many-to-one matching or partial credit. Assists can lock fewer than all slots.",
+    "Deprecated: do not use for new Journeys. Compatibility support only. Use city-multiple for city sets or choice-multiple for other sets; choice-order remains supported.",
   "land-path":
     "Internal/test-supported land-path control with an executable recipe, absent from the current published catalog. Introducing it as a product format requires an explicit design decision.",
 };
@@ -868,7 +868,7 @@ export async function exportJourneyKit(options) {
     const mechanics = Object.entries(MECHANICS)
       .map(
         ([mode, mechanic]) =>
-          `### ${mode} — ${mechanic.label}\n\n${MODE_NOTES[mode]}\n\nControl: \`${mechanic.control}\`; response: \`${mechanic.response}\`; map selection: \`${mechanic.mapSelection}\`; availability: ${mechanic.visible ? "author-facing" : "internal"}; current questions: ${counts[mode]}.\n\nAllowed grading rules: ${mechanic.rules.map((rule) => `\`${rule}\``).join(", ")}.\n\nImplementation recipe: \`npm run check:journey -- --recipe ${mode}\`.`,
+          `### ${mode} — ${mechanic.label}\n\n${MODE_NOTES[mode]}\n\nControl: \`${mechanic.control}\`; response: \`${mechanic.response}\`; map selection: \`${mechanic.mapSelection}\`; availability: ${mechanic.deprecated ? "deprecated: do not use for new Journeys" : mechanic.visible ? "author-facing" : "internal"}; current questions: ${counts[mode]}.\n\nAllowed grading rules: ${mechanic.rules.map((rule) => `\`${rule}\``).join(", ")}.\n\nImplementation recipe: \`npm run check:journey -- --recipe ${mode}\`.`,
       )
       .join("\n\n");
     const fullCrafting = docs.get("docs/JOURNEY_CRAFTING.md");

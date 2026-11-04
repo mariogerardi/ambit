@@ -495,6 +495,11 @@ stops share the same country.
 
 ## 10. Reuse supported mechanics and keep contracts explicit
 
+Card matching (`choice-match` / `slot-matches`) is deprecated for new Journeys.
+Use multi-city or multiple-choice selection for sets, and ordering for genuine
+sequences. Matching's compatibility code and regression recipe are not authoring
+examples; the ordinary Journey audit rejects this mode.
+
 **Do not use an unrelated completed question as a template.** A whole-question
 spread can silently inherit commitment, eligibility, disclosure, or clue content.
 Reuse reviewed data and deliberate presentation defaults instead.

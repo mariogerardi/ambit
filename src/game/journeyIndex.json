@@ -663,34 +663,40 @@
     "id": "not-the-obvious-city-v1",
     "addedAt": "2026-10-10",
     "title": "Not the Obvious City",
-    "description": "Fame, compromise, relocation and divided government: discover the decisions behind five unexpected capitals.",
+    "saveRevision": 2,
+    "description": "Why do capitals end up where they do? Explore independence, compromise, relocation and shared government through five capital choices.",
     "path": "/journey/not-the-obvious-city",
     "module": "./eleventhJourney.ts",
     "rounds": [
       {
         "id": "unexpected-turkey-capital",
         "label": "Famous city",
-        "progressLabel": "Türkiye"
+        "progressLabel": "Türkiye",
+        "resolvedLabel": "Ankara"
       },
       {
         "id": "unexpected-canberra-pin",
         "label": "Planned capital",
-        "progressLabel": "Australia"
+        "progressLabel": "Australia",
+        "resolvedLabel": "Canberra"
       },
       {
         "id": "unexpected-abuja",
         "label": "Capital move",
-        "progressLabel": "Nigeria"
+        "progressLabel": "Nigeria",
+        "resolvedLabel": "Abuja"
       },
       {
         "id": "unexpected-brasilia-marker",
         "label": "New capital",
-        "progressLabel": "Brazil"
+        "progressLabel": "Brazil",
+        "resolvedLabel": "Brasília"
       },
       {
         "id": "unexpected-south-africa-capitals",
-        "label": "Three capitals",
-        "progressLabel": "South Africa"
+        "label": "Shared government",
+        "progressLabel": "South Africa",
+        "resolvedLabel": "Pretoria, Cape Town & Bloemfontein"
       }
     ]
   },

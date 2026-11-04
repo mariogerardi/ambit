@@ -77,28 +77,32 @@ describe("Journey answer roles across controls", () => {
     );
     expect(scene.states["wurl:TUR"]).toBe("visited");
   });
-  it("preserves wrong assignments even when those cities also belong to the discovered solution", () => {
-    const matching = round(
+  it("distinguishes an incorrect city pick from correct answers in a multi-select reveal", () => {
+    const southAfrica = round(
       "not-the-obvious-city-v1",
       "unexpected-south-africa-capitals",
     );
-    const missed = matching.reduce(
-      matching.start,
-      { type: "order-card", id: "place:3369157", index: 0 },
-      { type: "order-card", id: "place:964137", index: 1 },
-      { type: "order-card", id: "place:1018725", index: 2 },
+    const missed = southAfrica.reduce(
+      southAfrica.start,
+      { type: "select", id: "place:3369157" },
+      { type: "select", id: "place:964137" },
+      { type: "select", id: "place:993800" },
       { type: "submit" },
     );
-    const scene = matching.view({ ...missed, phase: "finished" });
+    const scene = southAfrica.view(missed);
     expect(missed.answers[0].correct).toBe(false);
-    for (const id of ["place:3369157", "place:964137"])
-      expect(scene.places.find((p) => p.id === id)?.visualState).toBe(
-        "incorrect",
-      );
+    expect(scene.places.find((p) => p.id === "place:993800")?.visualState).toBe(
+      "incorrect",
+    );
+    expect(
+      scene.places.find((p) => p.id === "place:3369157")?.visualState,
+    ).toBe("correct");
+    expect(scene.places.find((p) => p.id === "place:964137")?.visualState).toBe(
+      "correct",
+    );
     expect(
       scene.places.find((p) => p.id === "place:1018725")?.visualState,
-    ).toBe("visited");
-    expect(scene.states["wurl:ZAF"]).toBe("visited");
+    ).toBe("answer");
   });
   it("retains an incorrect coordinate pin separately from the revealed destination", () => {
     const pin = round("down-the-danube-v1", "danube-vienna-pin-v1");
@@ -120,7 +124,7 @@ describe("Journey answer roles across controls", () => {
   });
   it.each([
     ["down-the-danube-v1", "danube-vienna-pin-v1", 50],
-    ["not-the-obvious-city-v1", "unexpected-canberra-pin", 150],
+    ["not-the-obvious-city-v1", "unexpected-canberra-pin", 200],
   ] as const)(
     "gives %s distance-pin feedback three bands without changing acceptance",
     (journeyId, id, radiusKm) => {
@@ -298,8 +302,8 @@ describe("Journey answer roles across controls", () => {
     expect(html).toBe("");
   });
 
-  it("keeps incorrect matching assignments separate from membership and identifies supplied slots", () => {
-    const { question, context, start, reduce } = round(
+  it("keeps assisted city candidates distinct from selected answers", () => {
+    const { question, context, start, reduce, view } = round(
       "not-the-obvious-city-v1",
       "unexpected-south-africa-capitals",
     );
@@ -312,20 +316,26 @@ describe("Journey answer roles across controls", () => {
       answerItems(question, context, helped).find(
         (item) => item.id === "place:3369157",
       ),
-    ).toMatchObject({ supplied: true, selected: true, slot: 1 });
+    ).toMatchObject({ supplied: false, selected: false, eliminated: false });
+    expect(
+      answerItems(question, context, helped).find(
+        (item) => item.id === "place:1007311",
+      )?.eliminated,
+    ).toBe(true);
     const game = reduce(
       helped,
-      { type: "order-card", id: "place:1018725", index: 0 },
-      { type: "order-card", id: "place:964137", index: 2 },
+      { type: "select", id: "place:1018725" },
+      { type: "select", id: "place:964137" },
+      { type: "select", id: "place:993800" },
       { type: "submit" },
     );
-    const html = renderToStaticMarkup(
-      <AnswerReview question={question} context={context} game={game} />,
-    );
-    expect(html).toContain("National administration");
-    expect(html).toContain("Correct: ");
-    expect(html).toContain("Incorrect assignment");
     expect(game.answers[0].correct).toBe(false);
+    expect(
+      view(game).places.find((p) => p.id === "place:993800")?.visualState,
+    ).toBe("incorrect");
+    expect(
+      view(game).places.find((p) => p.id === "place:3369157")?.visualState,
+    ).toBe("answer");
   });
 
   it.each([0, 225, 375, 600])(

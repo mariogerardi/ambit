@@ -351,56 +351,18 @@ with separately attributed schematic overland corridors. Paths can declare
 base `opacity` at `near` to the overview strength at `far`, updating material
 opacity in place. `visualState: "corridor"` supplies ungraded copper/gold context.
 
-## Matching example
+## Deprecated card matching
 
-Matching shares card movement with ordering but has a distinct rule and named roles.
-The relevant fields in a complete question are:
+`choice-match` and its `slot-matches` rule are deprecated. Do not author new
+Journeys with them. Use `city-multiple` for sets of cities or `choice-multiple`
+for other sets; `choice-order` remains available for genuine ordering tasks.
 
-```ts
-mode: "choice-match",
-selection: { type: "none" },
-commitment: "submit",
-count: 3,
-choices: [
-  { id: "city:pretoria", label: "Pretoria" },
-  { id: "city:cape-town", label: "Cape Town" },
-  { id: "city:bloemfontein", label: "Bloemfontein" },
-  { id: "city:johannesburg", label: "Johannesburg" },
-],
-matchSlots: [
-  { id: "executive", label: "National administration" },
-  { id: "legislative", label: "Parliament" },
-  { id: "judicial", label: "Supreme Court of Appeal" },
-],
-rule: {
-  type: "slot-matches",
-  matches: [
-    { slotId: "executive", choiceId: "city:pretoria" },
-    { slotId: "legislative", choiceId: "city:cape-town" },
-    { slotId: "judicial", choiceId: "city:bloemfontein" },
-  ],
-},
-```
-
-This excerpt uses illustrative card IDs; real map references use bundled place IDs.
-Matching itself can use any reviewed card identities. Role labels appear inside
-empty slots. Placed cards retain a compact role caption. Both columns have equal
-width; narrow screens stack them.
-
-Rules are keyed by role ID. `Response.ordered` stores cards in displayed slot
-order; expected cards are derived from role identities. Rule array order therefore
-does not change the pairings. Each role needs one unique card; spare cards stay
-unused. Current contracts allow two to six cards, with no many-to-one matching or
-partial credit. A correct matching response earns one answer.
-
-`assist.fixedSlots` uses displayed slot indices. Update it when changing role
-order; context validation rejects a wrong lock. Lock fewer than all roles so a
-real decision remains. South Africa locks Cape Town while retaining three cards
-for two roles. Clearing and restoring drafts preserve the lock.
-
-The Supreme Court of Appeal wording makes Johannesburg a fair distractor despite
-its Constitutional Court. Keep that nuance in the reveal, not extra map-label copy.
-See the current South Africa question for reviewed primary sources.
+Matching's schema, renderer and grading remain only for compatibility. Its recipe
+is a regression fixture, not an authoring example. It is absent from answer-type
+menus and workbench choices, and normal Journey audits reject it. Compatibility
+maintenance may explicitly call `auditJourney` with `{ allowDeprecated: true }` as
+its fourth argument; registration and normal authoring must never bypass the guard.
+Generated capability reports label the mode deprecated and identify its replacement.
 
 ## Composite territory example
 
@@ -448,7 +410,6 @@ defines the answer.
 
 ```sh
 npm run check:journey -- not-the-obvious-city
-npm run check:journey -- --recipe choice-match
 npm run check:journey -- --all
 npm run check:journey -- --list
 npm run --silent check:journey -- not-the-obvious-city --json
