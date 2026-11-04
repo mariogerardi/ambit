@@ -35,10 +35,16 @@ export function partialSelectionCredit(
   if (
     question.partialCredit !== "one-of-two" ||
     rule.type !== "country-ids" ||
-    selection.type !== "ids" ||
     response.selectedIds.length !== 2 ||
     new Set(response.selectedIds).size !== 2 ||
-    !response.selectedIds.every((id) => selection.ids.includes(id))
+    !response.selectedIds.every((id) =>
+      selection.type === "ids"
+        ? selection.ids.includes(id)
+        : selection.type === "world" &&
+          /^wurl:[A-Z]{3}$/.test(id) &&
+          !selection.excludeIds?.includes(id) &&
+          !question.contextIds?.includes(id),
+    )
   )
     return;
   const found = response.selectedIds.filter((id) => rule.ids.includes(id));

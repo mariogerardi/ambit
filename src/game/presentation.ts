@@ -215,10 +215,14 @@ function resolveQuestionPlaces(
             ...place,
             answerTarget: true,
             assisted: items.some((item) => item.id === id && item.supplied),
+            // Explicit undefined clears a clue badge so the renderer shows the result glyph.
+            // Without an override, retain the author's existing badge behavior.
             markerBadge:
-              !reveal && selected && question.mode === "city-multiple"
-                ? "✓"
-                : place.markerBadge,
+              feedback && Object.hasOwn(feedback, "markerBadge")
+                ? feedback.markerBadge
+                : !reveal && selected && question.mode === "city-multiple"
+                  ? "✓"
+                  : place.markerBadge,
             priority: feedback?.priority ?? place.priority,
             // Anonymous city markers never carry hidden labels into the renderer.
             name: named ? displayName : "",

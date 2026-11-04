@@ -527,7 +527,7 @@ describe("Along the Andes authored map and finale", () => {
       { type: "submit" },
     );
     const places = journeyWorld(regions, journey, answer, context).places;
-    expect(places.map((place) => placeMarkerSize(place))).toEqual([24, 24]);
+    expect(places.map((place) => placeMarkerSize(place))).toEqual([30, 30]);
     expect(places.every((place) => place.kind === "city")).toBe(true);
     expect(placeMarkerSize(ANSWER_PLACES.get(places[0].id)!, true)).toBe(14);
   });
