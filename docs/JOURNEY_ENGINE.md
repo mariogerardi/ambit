@@ -627,8 +627,9 @@ framing.
 An unordered two-country `map-multiple` question may opt into
 `partialCredit: "one-of-two"`. A submitted pair with exactly one independently
 found correct country earns one point; a country filled in by an assist earns
-no partial credit. Both answers still earn the normal three points before help
-ceilings, and only both count as a fully correct question. A frozen
+no partial credit. World selection and explicit ID pools both support this credit;
+excluded countries remain ineligible. Both answers still earn the normal three
+points before help ceilings, and only both count as a fully correct question. A frozen
 `Answer.partialCredit.matchedId` accompanies the one-point receipt through save
 validation and account totals. Existing answers retain their recorded rewards.
 `answerPoints` preserves historical answers without these fields as full prior
