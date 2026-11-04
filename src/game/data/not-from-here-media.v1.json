@@ -1,0 +1,82 @@
+{
+  "kiwi": {
+    "src": "/journeys/not-from-here/kiwi.v1.jpg",
+    "alt": "Whole brown kiwifruit and halves showing green flesh and black seeds.",
+    "caption": "Whole and cut green kiwifruit.",
+    "credit": {
+      "name": "Luc Viatour",
+      "url": "https://commons.wikimedia.org/wiki/File:Kiwi_%28Actinidia_chinensis%29_1_Luc_Viatour.jpg",
+      "license": "CC BY-SA 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5/"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Kiwi_%28Actinidia_chinensis%29_1_Luc_Viatour.jpg",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Kiwi_%28Actinidia_chinensis%29_1_Luc_Viatour.jpg/1280px-Kiwi_%28Actinidia_chinensis%29_1_Luc_Viatour.jpg",
+    "sha256": "f6889289a9b45bd3c755b816a8997bcdb70e9e2ec817908ab82801ed8e78ef93",
+    "bytes": 247839,
+    "reviewedOn": "2026-11-03"
+  },
+  "potato": {
+    "src": "/journeys/not-from-here/potato.v1.jpg",
+    "alt": "Potatoes with red, yellow and purple skins fill the frame.",
+    "caption": "A selection of potato varieties.",
+    "credit": {
+      "name": "Scott Bauer / USDA ARS",
+      "url": "https://commons.wikimedia.org/wiki/File:Patates.jpg",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Patates.jpg",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Patates.jpg/1280px-Patates.jpg",
+    "sha256": "2567bab43b9c5b0faec42d98a1aea7bebcf3af9300d21734e264ed276b793729",
+    "bytes": 343956,
+    "reviewedOn": "2026-11-03"
+  },
+  "coffee": {
+    "src": "/journeys/not-from-here/coffee.v1.jpg",
+    "alt": "A close view of glossy brown roasted coffee beans.",
+    "caption": "Roasted coffee beans.",
+    "credit": {
+      "name": "MarkSweep",
+      "url": "https://commons.wikimedia.org/wiki/File:Roasted_coffee_beans.jpg",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Roasted_coffee_beans.jpg",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Roasted_coffee_beans.jpg/1280px-Roasted_coffee_beans.jpg",
+    "sha256": "b2405f9f12fddf06869bfcb36575b12e1303a0eb75f30eac37d80d86c4c308ca",
+    "bytes": 313242,
+    "reviewedOn": "2026-11-03"
+  },
+  "vanilla": {
+    "src": "/journeys/not-from-here/vanilla.v1.jpg",
+    "alt": "Six long, dark vanilla pods arranged on a white background.",
+    "caption": "Cured vanilla pods.",
+    "credit": {
+      "name": "B.navez; rotation by Andrzej 22",
+      "url": "https://commons.wikimedia.org/wiki/File:Vanilla_6beans_%28rot._90_deg.%29.JPG",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/06/Vanilla_6beans_%28rot._90_deg.%29.JPG",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Vanilla_6beans_%28rot._90_deg.%29.JPG/1280px-Vanilla_6beans_%28rot._90_deg.%29.JPG",
+    "sha256": "279759efec60adab4c8cb479311e0fcfd55ed65da60d9979e07cd1fc428e2990",
+    "bytes": 119413,
+    "reviewedOn": "2026-11-03"
+  },
+  "rubber": {
+    "src": "/journeys/not-from-here/rubber.v1.jpg",
+    "alt": "White latex runs down a tapped tree trunk into a collecting cup.",
+    "caption": "Latex collected from a rubber tree in a modern photograph.",
+    "credit": {
+      "name": "Vis M",
+      "url": "https://commons.wikimedia.org/wiki/File:Latex_collection_02.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    },
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Latex_collection_02.jpg",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Latex_collection_02.jpg/1280px-Latex_collection_02.jpg",
+    "sha256": "e903cceea00f507aad821f63ef038f4ca3a7ec5a1f81884e61062990b8e91ca7",
+    "bytes": 311917,
+    "reviewedOn": "2026-11-03"
+  }
+}

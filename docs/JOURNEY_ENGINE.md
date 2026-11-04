@@ -99,6 +99,11 @@ an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
 contract, not scene geometry.
 
+For city selections, a revealed place may explicitly override `markerBadge`.
+Set it to `undefined` to replace an anonymous clue badge with the shared result
+symbol; omitting the property retains the play badge. Candidate letters can
+remain in the revealed name while the marker communicates correctness.
+
 For bounded selectable countries/territories, use
 `scenes.play: { framing: "selection" }` instead of guessing a focus. This compiles
 to `playFraming: "selection"` and resolves after geography loads. The camera fits
@@ -627,8 +632,9 @@ framing.
 An unordered two-country `map-multiple` question may opt into
 `partialCredit: "one-of-two"`. A submitted pair with exactly one independently
 found correct country earns one point; a country filled in by an assist earns
-no partial credit. Both answers still earn the normal three points before help
-ceilings, and only both count as a fully correct question. A frozen
+no partial credit. World selection and explicit ID pools both support this credit;
+excluded countries remain ineligible. Both answers still earn the normal three
+points before help ceilings, and only both count as a fully correct question. A frozen
 `Answer.partialCredit.matchedId` accompanies the one-point receipt through save
 validation and account totals. Existing answers retain their recorded rewards.
 `answerPoints` preserves historical answers without these fields as full prior

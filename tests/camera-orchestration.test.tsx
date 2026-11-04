@@ -307,6 +307,48 @@ it("plays authored intros once, leaves answer edits alone, and ends the intro on
   expect(port.cancelFlyover).toHaveBeenCalledTimes(3);
 });
 
+it("preserves Not From Here’s continental opening and frames both country assists", async () => {
+  const { NOT_FROM_HERE_JOURNEY: definition } = await import(
+    "../src/game/notFromHereJourney"
+  );
+  const { journeyWorld } = await import("../src/app/journeyWorld");
+  const ctx = createQuestionContext(regions, [], definition);
+  for (const roundIndex of [0, 1]) {
+    const round = definition.rounds[roundIndex];
+    const playing = { ...initialGame, phase: "playing" as const, roundIndex };
+    const focus = journeyWorld(regions, definition, playing, ctx).focus;
+    vi.mocked(port.flyover).mockClear();
+    await render({
+      mode: "practice",
+      transitionKey: `not-from-here:${roundIndex}:playing`,
+      journey: {
+        ...options.journey,
+        active: true,
+        definition,
+        context: ctx,
+        phase: "playing",
+        roundIndex,
+        focus,
+        help: {},
+      },
+    });
+    if (roundIndex === 1) {
+      expect(port.flyover).toHaveBeenCalledExactlyOnceWith([focus], false);
+      expect(result.motion).toBe(false);
+    }
+    const help = { [round.id]: "assisted" as const };
+    const assisted = journeyWorld(
+      regions,
+      definition,
+      { ...playing, help },
+      ctx,
+    ).focus;
+    await render({ journey: { ...options.journey, focus: assisted, help } });
+    expect(port.focus).toHaveBeenLastCalledWith(assisted);
+    expect(result.motion).toBe(false);
+  }
+});
+
 it("ends a compass teaching flyover at the effective comparison frame", async () => {
   const journey = SMALL_WONDERS_JOURNEY;
   const index = journey.rounds.findIndex((q) => q.mode === "compass-bearing");
