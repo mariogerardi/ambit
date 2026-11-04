@@ -202,27 +202,27 @@ describe("Journey point rewards", () => {
     const target = answerPlace(q, q.rule.targetId)!;
     for (const [distance, earned] of [
       [0, 3],
-      [50, 3],
-      [50.01, 2],
-      [100, 2],
-      [100.01, 1],
-      [150, 1],
-      [151, 0],
+      [100, 3],
+      [100.01, 2],
+      [150, 2],
+      [150.01, 1],
+      [200, 1],
+      [200.01, 0],
     ]) {
       const [lng, lat] = geoCircle()
         .center([target.lng, target.lat])
         .radius(((distance / 6371.0088) * 180) / Math.PI)().coordinates[0][0];
       const response = { ...initialGame, pin: { lat, lng } };
       expect(
-        submittedPoints(q, response, distance <= 150),
+        submittedPoints(q, response, distance <= q.rule.radiusKm),
         String(distance),
       ).toBe(earned);
-      expect(submittedPoints(q, response, distance <= 150, "hinted")).toBe(
-        Math.min(earned, 2),
-      );
-      expect(submittedPoints(q, response, distance <= 150, "assisted")).toBe(
-        Math.min(earned, 1),
-      );
+      expect(
+        submittedPoints(q, response, distance <= q.rule.radiusKm, "hinted"),
+      ).toBe(Math.min(earned, 2));
+      expect(
+        submittedPoints(q, response, distance <= q.rule.radiusKm, "assisted"),
+      ).toBe(Math.min(earned, 1));
     }
   });
   it("preserves legacy saves and rejects invalid point snapshots", () => {

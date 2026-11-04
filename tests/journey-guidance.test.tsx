@@ -304,7 +304,7 @@ describe("authored Journey hint and assist stages", () => {
         ),
       ).toHaveLength(1);
     }
-    expect(q.rule).toMatchObject({ radiusKm: 150 });
+    expect(q.rule).toMatchObject({ radiusKm: 200 });
   });
 
   it("keeps correctness and completion intact, annotates help and validates persisted usage", () => {
