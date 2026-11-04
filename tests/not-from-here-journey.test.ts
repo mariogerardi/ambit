@@ -14,6 +14,7 @@ import { validGame } from "../src/app/dailyProgress";
 import { journeyPoints, submittedPoints } from "../src/game/points";
 import { answerPlace } from "../src/game/answerTargets";
 import { initialBearing, pointAlongBearing } from "../src/game/geodesic";
+import { isWholeGlobeSearch, questionPlaces } from "../src/game/presentation";
 import type { RegionFeature } from "../src/geography/types";
 
 const regions: RegionFeature[] = JSON.parse(
@@ -38,6 +39,35 @@ const submit: Action = { type: "submit" };
 const help: Action[] = [{ type: "request-hint" }, { type: "request-assist" }];
 
 describe("Not From Here handoff integration", () => {
+  it("keeps the continental opening and lake disclosure separate from open-world eligibility", () => {
+    expect(isWholeGlobeSearch(round("kiwifruit"))).toBe(true);
+    expect(isWholeGlobeSearch(round("potatoes"))).toBe(false);
+    for (const subject of ["kiwifruit", "potatoes"]) {
+      const q = round(subject);
+      expect(q.selection.type).toBe("world");
+      const assisted = view(step(play(subject), ...help));
+      expect(assisted.focus).toEqual(q.guidance?.assist?.focus);
+      for (const game of [
+        play(subject),
+        step(play(subject), help[0]),
+        step(play(subject), ...help),
+      ])
+        expect(view(game).physicalFeatures).toEqual([]);
+    }
+    const missed = step(play("kiwifruit"), select("wurl:JPN"));
+    expect(view(missed).states).toMatchObject({
+      "wurl:CHN": "answer",
+      "wurl:NZL": "hinted",
+      "wurl:JPN": "incorrect",
+    });
+    const volcano = view(play("vanilla"));
+    expect(new Set(Object.values(volcano.states))).toEqual(
+      new Set(["surface"]),
+    );
+    expect(volcano.places).toEqual([]);
+    expect(volcano.overlays).toEqual([]);
+  });
+
   it("keeps country answers undisclosed until help and grades/saves open-world partial pairs", () => {
     for (const subject of ["kiwifruit", "potatoes"]) {
       const world = view(play(subject));
@@ -71,7 +101,9 @@ describe("Not From Here handoff integration", () => {
           ["wurl:PER", "wurl:BOL"].includes(id) ? "correct" : "incorrect",
         );
       expect(
-        world.places.find((p) => p.name === "Lake Titicaca"),
+        world.physicalFeatures.find(
+          (p) => p.name === "Lake Titicaca" && !!p.geometry,
+        ),
       ).toBeDefined();
     }
     const partial = step(
@@ -119,11 +151,19 @@ describe("Not From Here handoff integration", () => {
     for (const id of ["place:105343", "place:415189", "place:78751"]) {
       const game = step(start, select(id), submit);
       const world = view(game);
-      expect(world.places.map((p) => p.name)).toEqual([
-        "Jeddah",
-        "Mocha",
-        "Aden",
+      const ports = world.places.filter((p) => p.answerTarget);
+      expect(ports.map((p) => p.name)).toEqual([
+        "A · Jeddah",
+        "B · Mocha",
+        "C · Aden",
       ]);
+      expect(ports.every((p) => p.markerBadge === undefined)).toBe(true);
+      expect(world.places.some((p) => p.name === "Ethiopian highlands")).toBe(
+        true,
+      );
+      expect(
+        world.places.some((p) => p.name.startsWith("Yemeni highlands")),
+      ).toBe(true);
       expect(world.places.find((p) => p.id === id)?.visualState).toBe(
         id === "place:78751" ? "correct" : "incorrect",
       );
@@ -132,6 +172,27 @@ describe("Not From Here handoff integration", () => {
       ).toBe(id === "place:78751" ? "correct" : "answer");
       expect(view(step(game, { type: "next" })).places).toEqual([]);
     }
+    // An omitted override must preserve the existing behavior for other authors.
+    const q = round("coffee");
+    const game = step(start, select("place:78751"), submit);
+    const inherited = questionPlaces(
+      {
+        ...q,
+        feedbackPlaces: q.feedbackPlaces?.map((p) => {
+          const named = { ...p };
+          delete named.markerBadge;
+          return named;
+        }),
+      },
+      context,
+      "feedback",
+      "",
+      true,
+      game,
+    );
+    expect(
+      inherited.filter((p) => p.answerTarget).map((p) => p.markerBadge),
+    ).toEqual(["A", "B", "C"]);
   });
 
   it("hides Réunion through assistance and awards each inclusive distance band, including sea pins", () => {
@@ -200,7 +261,7 @@ describe("Not From Here handoff integration", () => {
       "incorrect",
     );
     expect(
-      recap.places.some((p) => p.id === "not-from-here:recap:vanilla-reunion"),
+      recap.places.some((p) => p.id === "not-from-here:reunion-center"),
     ).toBe(true);
     expect(
       recap.places.some(
@@ -222,5 +283,54 @@ describe("Not From Here handoff integration", () => {
         view(game).overlays?.some((o) => o.id.startsWith("bearing-route:")),
       ).toBe(true);
     }
+  });
+
+  it("consolidates canonical discoveries, keeps France muted and gives every recap subject a visible stop", () => {
+    const answers = [
+      step(play("kiwifruit"), select("wurl:CHN")),
+      step(play("potatoes"), select("wurl:PER"), select("wurl:BOL"), submit),
+      step(play("coffee"), select("place:78751"), submit),
+      step(
+        play("vanilla"),
+        { type: "drop-pin", lat: -21.1, lng: 55.6 },
+        submit,
+      ),
+      step(play("rubber"), { type: "text", value: "32" }, submit),
+    ].flatMap((g) => g.answers);
+    const recap = view({ ...play("rubber"), phase: "finished", answers });
+    expect(recap.states["wurl:FRA"]).toBe("disabled");
+    for (const id of [
+      "place:78751",
+      "not-from-here:reunion-center",
+      "place:2643743",
+    ])
+      expect(recap.places.filter((p) => p.id === id)).toHaveLength(1);
+    for (const place of recap.places) {
+      expect(
+        journey.completion!.views!.some(
+          (focus) =>
+            geoDistance([focus.lng, focus.lat], [place.lng, place.lat]) <
+            Math.PI / 18,
+        ),
+        place.name,
+      ).toBe(true);
+      expect(
+        recap.places.some(
+          (other) =>
+            other.id !== place.id &&
+            geoDistance([other.lng, other.lat], [place.lng, place.lat]) *
+              6371.0088 <
+              20,
+        ),
+        `Overlapping annotation: ${place.name}`,
+      ).toBe(false);
+    }
+    expect(
+      recap.places.find((p) => p.id === "not-from-here:reunion-center"),
+    ).toMatchObject({ markerHidden: true, visualState: "visited" });
+    expect(recap.overlays?.some((o) => o.id.startsWith("bearing-route:"))).toBe(
+      true,
+    );
+    expect(journey.completion!.mapCaption).toContain("great-circle comparison");
   });
 });

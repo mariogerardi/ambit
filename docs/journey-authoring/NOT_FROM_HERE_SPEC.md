@@ -1,9 +1,13 @@
 # Not From Here — source-ready Journey brief
 
-**Decision status:** Five-stop player experience **approved** in the current design conversation. TypeScript module **proposed**, not technically validated.  
-**Journey:** `Not From Here` · `not-from-here-v1` · `src/game/notFromHereJourney.ts`  
-**Companion:** [`src/game/notFromHereJourney.ts`](../../src/game/notFromHereJourney.ts) (complete five-round draft; authoritative for final player copy, help, grading and scene configuration).  
-**Authoring basis:** Public `mariogerardi/ambit`, `main` at **`ef8cc99404fd44f299306f038bffbac063666afd`**, inspected 2026-11-03 through the GitHub connector. The working checkout may differ; unpushed work is unavailable.  
+**Decision status:** Five-stop player experience **approved** in the current design conversation. TypeScript module integrated and checked locally; the presentation revision below records the latest authorized changes.
+
+**Journey:** `Not From Here` · `not-from-here-v1` · `src/game/notFromHereJourney.ts`
+
+**Companion:** [`src/game/notFromHereJourney.ts`](../../src/game/notFromHereJourney.ts) (implemented five-round draft; authoritative for current player copy, help, grading and scenes).
+
+**Authoring basis:** Public `mariogerardi/ambit`, `main` at **`ef8cc99404fd44f299306f038bffbac063666afd`**, inspected 2026-11-03 through the GitHub connector. The working checkout may differ; unpushed work is unavailable.
+
 **Registration:** **DEFER**. New Journey is `dailyEligible:false`. Do not register, schedule, push, publish or deploy on the strength of this handoff.
 
 ## Premise and rhythm
@@ -83,7 +87,7 @@ Workbench: `/review/journeys.html?module=notFromHereJourney.ts`
 
 Keep this an unregistered draft. Do **not** add it to the catalog, assign a Daily date, push or deploy without a new explicit instruction.
 
-## Local integration record — 2026-11-03
+## Initial integration record — 2026-11-03 (`cc228f2`)
 
 Inspected and adapted against `origin/main` at
 `ef8cc99404fd44f299306f038bffbac063666afd`, exactly matching the handoff basis.
@@ -133,9 +137,59 @@ Neither wording required changing gameplay or asking for a new design decision.
 
 **Workflow result:** The source-ready module removed the need to author five
 questions, help stages, reveals and completion from prose. Work consisted of
-integration, targeted corrections and focused validation. 490 of the supplied module’s 524 lines (93.5%) remain exactly unchanged,
+integration, targeted corrections and focused validation. At that commit, 490 of the supplied module’s 524 lines (93.5%) remained exactly unchanged,
 including the effect of repository formatting; comparative token/cost savings are not measurable
 without a prose-only baseline, and this environment exposes no billing/token
 usage report for the task. No registration, scheduling, push or deployment.
 
 Review locally at `/review/journeys.html?module=notFromHereJourney.ts`.
+
+## Authorized presentation revision — 2026-11-03
+
+The user approved correcting the presentation audit findings while preserving all
+five questions, mechanics, canonical answers, scoring and withheld play-state
+geography. These decisions supersede the initial camera, badge and recap details
+above; registration and release remain deferred.
+
+- **Cameras:** Q2 declares a single continental introduction, using the existing
+  scene-view contract to retain its South America opening with unrestricted world
+  eligibility. Q1 and Q2 assist views fit every candidate outline in their
+  respective survivor sets, independently of the grading answers. No shared
+  camera changes or answer-targeted play views.
+- **Reveals:** China is a graded solution and New Zealand is explanatory context.
+  Coffee keeps A/B/C anonymous in play, moves the letters into revealed port names,
+  and uses standard result symbols on the markers. Named Ethiopian and Yemeni
+  highlands supply reveal-only context. Q2 reuses the existing reviewed Natural
+  Earth Titicaca shoreline from `andes-context.v1.json` only after commitment and
+  in completion. No geography preparation or new assets.
+- **Vanilla:** The regional search explicitly uses the neutral open-search
+  background, with the required visual-exception reason. The hidden target and
+  all distance bands are unchanged. Removing the optional France display parent
+  prevents an island pin from highlighting mainland France; the copy retains its
+  French identity.
+- **Completion:** The cumulative recap retains real mistakes, uses the canonical
+  Mocha/Réunion/London identities instead of nearby duplicate annotations, and
+  keeps containing reference countries blue. Réunion is a purple island label;
+  actual mistaken pins remain red. The opening/static view and tour now include
+  New Zealand directly, and each other annotated subject has a nearby camera
+  stop. Rubber’s arc is explicitly described as a great-circle comparison.
+- **Copy:** Simplified source qualifications and repeated voyage disclaimers,
+  normalized punctuation and selection prompts, and removed ineffective custom
+  miss strings. Ordinary misses deliberately use the shared “Not quite.” reaction;
+  partial-credit, distance and compass feedback remain result-specific.
+
+The only shared engine change in this revision honors an explicit reveal-place
+`markerBadge` override for city selections. Explicit `undefined` clears the clue
+badge for standard result symbols; an omitted property preserves existing
+behavior. This is documented in `JOURNEY_ENGINE.md`; grading, saves and shared
+feedback controls were not changed.
+
+Validation: TypeScript passed; direct-module Journey audit returned five questions
+with zero errors or warnings; six focused Journey tests, two camera cases and one
+existing Made in China marker case passed. Regression checks cover hidden play
+geography, reveal-only lake geometry, camera transitions and assist framing,
+solution/context/mistake roles, explicit versus omitted badge overrides, canonical
+recap consolidation and unaltered scoring/save behavior. Static comparison also
+confirms the five grading contracts and all answer coordinates are unchanged.
+These checks do not establish actual WebGL label placement or narrow-screen
+legibility; those presentation details remain visually unverified.

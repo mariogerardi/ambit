@@ -99,6 +99,11 @@ an assist focus frames the surviving candidates without changing eligibility.
 Grading changes, survivor sets and locked answers belong to the answer/help
 contract, not scene geometry.
 
+For city selections, a revealed place may explicitly override `markerBadge`.
+Set it to `undefined` to replace an anonymous clue badge with the shared result
+symbol; omitting the property retains the play badge. Candidate letters can
+remain in the revealed name while the marker communicates correctness.
+
 For bounded selectable countries/territories, use
 `scenes.play: { framing: "selection" }` instead of guessing a focus. This compiles
 to `playFraming: "selection"` and resolves after geography loads. The camera fits
