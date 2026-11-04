@@ -48,6 +48,8 @@ export interface MechanicDefinition<
   single: boolean;
   editableCommitment: boolean;
   visible: boolean;
+  /** Compatibility support only; new Journey authoring must use the replacement. */
+  deprecated?: { replacement: AnswerMode; reason: string };
   /** Tiered mechanics evaluate acceptance, rewards and evidence together. */
   outcome?: OutcomeEvaluator;
   canSubmit(
@@ -616,7 +618,16 @@ export const MECHANICS = {
     "ordered",
     "none",
     false,
-    { ...cards, validate: validateMatching },
+    {
+      ...cards,
+      validate: validateMatching,
+      visible: false,
+      deprecated: {
+        replacement: "city-multiple",
+        reason:
+          "Card matching is retained for compatibility only. Use city-multiple for city sets or choice-multiple for other sets.",
+      },
+    },
   ),
   "land-path": defineMechanic(
     ["shortest-borders"],

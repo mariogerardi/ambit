@@ -57,6 +57,7 @@ async function open() {
   const { MECHANIC_RECIPES, PRESENTATION_RECIPES } = await import(
     "../src/game/recipes"
   );
+  const { mechanicFor } = await import("../src/game/mechanics");
   const recipes = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES];
   let journey: Journey | undefined;
   if (recipeId) {
@@ -112,7 +113,9 @@ async function open() {
             <JourneyWorkbench
               journey={journey}
               filename={filename!}
-              recipes={recipes.map(({ id, title }) => ({ id, title }))}
+              recipes={recipes
+                .filter((question) => !mechanicFor(question).deprecated)
+                .map(({ id, title }) => ({ id, title }))}
               recipeId={recipeId}
               modules={Object.keys(modules)
                 .map((path) => path.split("/").at(-1)!)

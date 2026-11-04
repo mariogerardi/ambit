@@ -6,10 +6,14 @@ import { capitalSource } from "./quizData";
 import type { PlaceFeature } from "../geography/types";
 
 const place = (id: string) => ANSWER_PLACES.get(id)!;
-const source = (name: string, url: string): FactSource => ({
+const source = (
+  name: string,
+  url: string,
+  reviewedOn = "2026-10-11",
+): FactSource => ({
   name,
   url,
-  reviewedOn: "2026-10-11",
+  reviewedOn,
 });
 export const BRAZIL_CITY_TARGETS = [
   "3469058",
@@ -24,6 +28,7 @@ export const SOUTH_AFRICA_CITY_TARGETS = [
   "3369157",
   "1018725",
   "993800",
+  "1007311",
 ].map((id) => `place:${id}`);
 export const SOUTH_AFRICA_CAPITAL_TARGETS = SOUTH_AFRICA_CITY_TARGETS.slice(
   0,
@@ -59,9 +64,10 @@ const base = definePresentation({
 export const ELEVENTH_JOURNEY: Journey = {
   id: "not-the-obvious-city-v1",
   addedAt: "2026-10-10",
+  saveRevision: 2,
   title: "Not the Obvious City",
   description:
-    "Fame, compromise, relocation and divided government: discover the decisions behind five unexpected capitals.",
+    "Why do capitals end up where they do? Explore independence, compromise, relocation and shared government through five capital choices.",
   rounds: [
     defineQuestion({
       count: 1,
@@ -71,7 +77,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       ...base,
       id: "unexpected-turkey-capital",
       leadIn:
-        "Begin in Türkiye, where the most familiar city can lead you astray.",
+        "Istanbul’s imperial landmarks make it an easy guess, but Türkiye’s modern government is based inland.",
       progressLabel: "Türkiye",
       resolvedLabel: "Ankara",
       label: "Famous city",
@@ -88,10 +94,11 @@ export const ELEVENTH_JOURNEY: Journey = {
       mode: "text",
       rule: { type: "capital-name", countryId: "wurl:TUR" },
       explanation:
-        "Ankara became Türkiye’s capital in 1923. Istanbul remained the famous city on the Bosporus, but fame and national government had different addresses.",
+        "Türkiye’s national assembly met in Ankara during the independence struggle. The city became the capital in October 1923, linking the new republic to its inland political centre. Istanbul retained its imperial landmarks and commercial importance.",
       source: source(
-        "Türkiye Ministry of Culture and Tourism · 1923 chronology",
-        "https://www.ktb.gov.tr/EN-103934/1923.html",
+        "Türkiye Ministry of Culture and Tourism · first National Assembly",
+        "https://www.ktb.gov.tr/EN-103958/ankara---independence-war-museum-1stturkish-grand-national-assembly-building.html",
+        "2026-11-03",
       ),
       sources: [capitalSource],
       scenes: {
@@ -132,12 +139,12 @@ export const ELEVENTH_JOURNEY: Journey = {
       title: "Find Canberra.",
       label: "Planned capital",
       leadIn:
-        "Cross to Australia, where Sydney and Melbourne competed to host the capital.",
-      prompt: "Place a pin in Canberra, the city chosen instead.",
+        "Sydney and Melbourne competed to host Australia’s federal capital. A new inland city was chosen between them.",
+      prompt: "Place a pin in Canberra.",
       guidance: {
         hint: "The capital is inland in southeastern Australia, between Sydney and Melbourne.",
         assist: {
-          text: "Sydney and Melbourne are now marked. Look inland between them; Canberra itself is still unmarked. Land within 150 km of its center.",
+          text: "Sydney and Melbourne are marked. Look inland between them.",
         },
       },
       instruction: "",
@@ -154,12 +161,13 @@ export const ELEVENTH_JOURNEY: Journey = {
       },
       sources: [
         source(
-          "National Capital Authority · Federation and the national capital",
-          "https://www.nca.gov.au/education/canberras-history/federation-and-national-capital",
+          "National Capital Authority · siting and naming Canberra",
+          "https://www.nca.gov.au/education/canberras-history/siting-and-naming-canberra",
+          "2026-11-03",
         ),
       ],
       explanation:
-        "A purpose-built capital resolved the rivalry between Sydney and Melbourne. Its site also had to sit at least 100 miles from Sydney; the compromise did not require an exact midpoint.",
+        "Canberra was planned as a new federal capital in New South Wales. The Constitution required a site at least 100 miles from Sydney, while Parliament met in Melbourne until its new home was ready. The compromise created a distinct seat of government between the rival cities.",
       scenes: {
         play: {
           focus: { lat: -34, lng: 147, altitude: 0.55 },
@@ -216,41 +224,42 @@ export const ELEVENTH_JOURNEY: Journey = {
       label: "Capital move",
       title: "Why move inland?",
       leadIn:
-        "Continue to Nigeria, where government moved from Lagos to Abuja in 1991.",
-      prompt: "Which advantage helped make Abuja the preferred site?",
+        "Nigeria moved its capital from crowded, coastal Lagos to Abuja in 1991.",
+      prompt:
+        "Looking at both cities, which geographical advantage did Abuja offer?",
       choices: [
         {
           id: "abuja:rivalry",
-          label: "A midpoint that settled a rivalry between major cities",
+          label: "A midpoint between two competing cities",
         },
         {
           id: "abuja:access",
-          label: "A central site accessible from across the country",
+          label: "A central location with room to develop",
         },
         {
           id: "abuja:infrastructure",
-          label:
-            "An established commercial hub with infrastructure already in place",
+          label: "An established coastal business and transport hub",
         },
         {
           id: "abuja:oil",
-          label: "A location closer to the country’s southern oil fields",
+          label: "A location beside the Niger Delta’s oil fields",
         },
       ],
       rule: { type: "choice-ids", ids: ["abuja:access"] },
       correctFeedback: "Well done.",
       guidance: {
-        hint: "Compare the two locations. What changes for people traveling to the seat of government?",
+        hint: "Compare coastal Lagos with inland Abuja. Which location could serve people arriving from across Nigeria?",
         assist: {
-          text: "Two explanations remain: access from across the country, or a compromise between rival cities. Compare what each explanation claims.",
+          text: "Two explanations remain. Decide whether the move served the whole country or settled a contest between two cities.",
           candidateIds: ["abuja:access", "abuja:rivalry"],
         },
       },
       explanation:
-        "The site-selection committee sought a central location with room to develop and easier access from every part of Nigeria. Abuja answered that national need; Lagos’s limited space and infrastructure pressures had made its dual federal and state role difficult.",
+        "Lagos served as both a state capital and the federal capital, putting pressure on limited land and infrastructure. The site-selection panel sought a spacious, central location accessible from across Nigeria. Abuja gave the federal government room to build a new capital inland.",
       source: source(
         "Federal Capital Development Authority · history of Abuja",
         "https://fcda.gov.ng/the-history-of-abuja/",
+        "2026-11-03",
       ),
       sources: [
         source(
@@ -289,12 +298,13 @@ export const ELEVENTH_JOURNEY: Journey = {
       resolvedLabel: "Brasília",
       title: "Find Brasília.",
       label: "New capital",
-      leadIn: "Cross the Atlantic to Brazil for another purpose-built capital.",
+      leadIn:
+        "Brazil’s coastal cities had long drawn people and power. In 1960, the federal government moved inland.",
       prompt: "Which marker is Brasília, the capital since 1960?",
       guidance: {
-        hint: "Look near the middle of Brazil, away from the Atlantic coast.",
+        hint: "Look on the central plateau, south of the Amazon and west of the southeastern coastal cities.",
         assist: {
-          text: "Three markers remain. Compare their distance from the Atlantic coast: the capital was built to draw government into the interior.",
+          text: "Three markers remain. Compare how far inland each sits from Brazil’s southeastern coast.",
           candidateIds: ["place:3469058", "place:3448439", "place:3470127"],
         },
       },
@@ -304,15 +314,16 @@ export const ELEVENTH_JOURNEY: Journey = {
       selection: { type: "ids", ids: BRAZIL_CITY_TARGETS },
       commitment: "submit",
       explanation:
-        "Brasília became Brazil’s capital in 1960, when the seat of government moved from coastal Rio de Janeiro to a planned city in the interior.",
+        "Rio de Janeiro had been the capital since 1763. In 1960, the seat of government moved to Brasília, planned on the central plateau. Moving political power inland put a longstanding ambition to develop Brazil’s interior onto the map.",
       source: source(
         "Presidency of Brazil · Law 3,273, capital transfer date",
         "https://www.planalto.gov.br/ccivil_03/leis/l3273.htm",
       ),
       sources: [
         source(
-          "IPHAN · Brasília, a purpose-built capital",
-          "https://www.gov.br/iphan/pt-br/superintendencias/distrito-federal/patrimonio-mundial",
+          "Brazilian Senate · the creation of Brasília",
+          "https://www.senado.gov.br/noticias/especiais/brasilia50anos/not02.asp",
+          "2026-11-03",
         ),
       ],
       scenes: {
@@ -341,61 +352,45 @@ export const ELEVENTH_JOURNEY: Journey = {
     }),
     defineQuestion({
       ...base,
-      commitment: "submit",
-      selection: { type: "none" },
       id: "unexpected-south-africa-capitals",
       leadIn:
-        "Finish in South Africa, where government has more than one home.",
+        "Finish in South Africa, where national government has homes in several cities.",
       progressLabel: "South Africa",
       resolvedLabel: "Pretoria, Cape Town & Bloemfontein",
-      title: "Three cities, three roles.",
-      label: "Three capitals",
-      prompt:
-        "Match the three traditional capital roles to their cities. One city will be left over.",
-      mode: "choice-match",
+      title: "More than one capital.",
+      label: "Shared government",
+      prompt: "Select South Africa’s three traditional capital cities.",
+      mode: "city-multiple",
       count: 3,
-      matchSlots: [
-        {
-          id: "executive",
-          label: "National administration",
-        },
-        { id: "legislative", label: "Parliament" },
-        {
-          id: "judicial",
-          label: "Supreme Court of Appeal",
-        },
-      ],
-      choices: [
-        { id: "place:993800", label: "Johannesburg" },
-        { id: "place:3369157", label: "Cape Town" },
-        { id: "place:964137", label: "Pretoria" },
-        { id: "place:1018725", label: "Bloemfontein" },
-      ],
-      rule: {
-        type: "slot-matches",
-        matches: [
-          { slotId: "executive", choiceId: "place:964137" },
-          { slotId: "legislative", choiceId: "place:3369157" },
-          { slotId: "judicial", choiceId: "place:1018725" },
-        ],
+      commitment: "submit",
+      selection: { type: "ids", ids: SOUTH_AFRICA_CITY_TARGETS },
+      rule: { type: "place-ids", ids: SOUTH_AFRICA_CAPITAL_TARGETS },
+      disclosure: {
+        ...base.disclosure,
+        namedChoices: true,
+        hoverNames: true,
+        committedNames: true,
       },
       guidance: {
-        hint: "Parliament sits in the southwestern coastal city. The other two capital roles are inland.",
+        hint: "One capital is coastal; the other two are inland.",
         assist: {
-          text: "Cape Town is locked into Parliament. Match the remaining two roles; one city still stays unused.",
-          fixedSlots: [{ index: 1, id: "place:3369157" }],
+          text: "Four cities remain. Parliament meets in the city on the southwestern coast; find the other two capitals inland.",
+          candidateIds: SOUTH_AFRICA_CITY_TARGETS.filter(
+            (id) => id !== "place:1007311",
+          ),
         },
       },
       explanation:
-        "Pretoria houses South Africa’s national administration, Cape Town its Parliament, and Bloemfontein its Supreme Court of Appeal. Johannesburg houses the Constitutional Court, adding another layer to a country whose government cannot be located with one capital marker.",
+        "Pretoria houses the national administration, Cape Town Parliament, and Bloemfontein the Supreme Court of Appeal. Johannesburg hosts the Constitutional Court. South Africa’s traditional three-capital arrangement shares government functions across the country rather than concentrating them in one city.",
       source: source(
-        "South African Government · three national capitals",
-        "https://www.gov.za/about-sa/south-africas-provinces",
+        "South African Government · national capitals and Constitutional Court",
+        "https://www.gov.za/about-sa/south-africa-glance-1",
+        "2026-11-03",
       ),
       sources: [
         source(
-          "South African Government · Constitutional Court location",
-          "https://www.gov.za/nr/about-government/contact-directory/judicial-institution/constitutional-court",
+          "South African Government · provinces and capital functions",
+          "https://www.gov.za/about-sa/south-africas-provinces",
         ),
       ],
       scenes: {
@@ -406,18 +401,7 @@ export const ELEVENTH_JOURNEY: Journey = {
         },
         reveal: {
           contextIds: ["wurl:ZAF"],
-          places: [
-            { ...referenceCity("place:964137"), name: "Pretoria" },
-            { ...referenceCity("place:3369157"), name: "Cape Town" },
-            {
-              ...referenceCity("place:1018725"),
-              name: "Bloemfontein",
-            },
-            {
-              ...referenceCity("place:993800"),
-              name: "Johannesburg",
-            },
-          ],
+          places: SOUTH_AFRICA_CITY_TARGETS.map(referenceCity),
         },
       },
     }),
@@ -465,6 +449,6 @@ export const ELEVENTH_JOURNEY: Journey = {
       })),
     ],
     caption:
-      "A capital can mark a new republic, settle a rivalry, improve national access or draw government inland. South Africa ends the story by sharing capital roles across three cities. The most familiar city is only the beginning of the question.",
+      "These capitals reflect different political choices: an inland centre for a new republic, a compromise between rivals, room for government to grow, and a move toward the interior. South Africa completes the picture with government functions shared among three traditional capitals.",
   },
 };

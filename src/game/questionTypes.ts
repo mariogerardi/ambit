@@ -26,7 +26,7 @@ export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
   "merged-region": "One composite territory from canonical countries",
   "region-ids": "Authored region set",
   "choice-ids": "Reviewed choice set",
-  "slot-matches": "Reviewed card-to-role matches",
+  "slot-matches": "Deprecated: compatibility-only card matches",
   "capital-name": "Recall a country’s capital",
   "country-fact": "Find a country from a fact",
   "text-fact": "Recall a country fact",

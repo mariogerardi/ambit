@@ -50,6 +50,11 @@ without the tools and evidence to establish it.
 
 - Follow the current crafting guide as the authoring standard. Engine
   support includes legacy/internal configurations; it does not override the standard.
+  Card matching (`choice-match` / `slot-matches`) is deprecated: never use it in
+  a new Journey. Use `city-multiple` or `choice-multiple` for sets. Ordering remains
+  supported; compatibility recipes are not permission to revive matching.
+  Do not disguise role matching as ordering. If pair assignment is essential to
+  an approved idea, ask the user to settle a replacement task.
   Identify proposed departures and anything requiring new engineering explicitly.
   Historical reviews record earlier work and are not current instructions.
 - Begin with the premise and a compact five-stop outline. Explain the intended

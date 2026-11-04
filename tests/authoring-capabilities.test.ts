@@ -25,6 +25,21 @@ const recipes = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES];
 const capabilities = authoringCapabilities(JOURNEYS, recipes, regions);
 
 describe("live authoring evidence", () => {
+  it("rejects deprecated matching for new Journeys while keeping compatibility evidence", () => {
+    const matching = recipes.find((q) => q.id === "recipe:choice-match")!;
+    const entry = capabilities.find((item) => item.id === matching.id)!;
+    expect(entry.availability).toBe("deprecated: do not use for new Journeys");
+    expect(entry.deprecation?.replacement).toBe("city-multiple");
+    expect(
+      auditJourney(recipeJourney(matching), regions).errors.join(" "),
+    ).toContain("Deprecated mechanic choice-match");
+    expect(entry.evidence.errors).toEqual([]);
+    expect(
+      JOURNEYS.flatMap((journey) => journey.rounds).some(
+        (q) => q.mode === "choice-match",
+      ),
+    ).toBe(false);
+  });
   it("inherits the network return policy while preserving explicit endpoint choices", () => {
     const recipe = recipes.find((q) => q.id === "recipe:multilingual-network")!;
     expect(recipe.scenes?.reveal?.returnToSelection).toBeUndefined();
@@ -83,7 +98,9 @@ describe("live authoring evidence", () => {
         expect(entry.evidence.stages).toContain("play");
         expect(entry.evidence.stages).toContain("reveal:correct");
         expect(entry.preview).toContain("?recipe=");
-        if (!mechanic.visible)
+        if (mechanic.deprecated)
+          expect(entry.availability).toMatch(/deprecated: do not use/);
+        else if (!mechanic.visible)
           expect(entry.availability).toMatch(/product decision/);
       }
     }

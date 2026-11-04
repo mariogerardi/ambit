@@ -288,6 +288,7 @@ export function auditJourney(
   journey: Journey,
   regions: RegionFeature[],
   assetExists?: (path: string) => boolean,
+  options: { allowDeprecated?: boolean } = {},
 ): JourneyAudit {
   const report: JourneyAudit = {
     id: journey.id,
@@ -342,6 +343,11 @@ export function auditJourney(
     return report;
   }
   for (const [index, question] of journey.rounds.entries()) {
+    const deprecated = mechanicFor(question).deprecated;
+    if (deprecated && !options.allowDeprecated)
+      report.errors.push(
+        `Deprecated mechanic ${question.mode}: ${question.id}. ${deprecated.reason}`,
+      );
     for (const source of [question.source, ...(question.sources ?? [])]) {
       if (
         !source?.name?.trim() ||

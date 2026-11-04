@@ -66,7 +66,9 @@ export function authoringCapabilities(
     const mechanic = MECHANICS[question.mode];
     const sandbox = recipeJourney(question);
     const experience = experiencePolicies(question, sandbox);
-    const audit = auditJourney(sandbox, regions);
+    const audit = auditJourney(sandbox, regions, undefined, {
+      allowDeprecated: !!mechanic.deprecated,
+    });
     const requires = [
       "Reviewed clue/reveal copy and sources",
       "Explicit eligible inputs and disclosure",
@@ -104,11 +106,14 @@ export function authoringCapabilities(
       allowedRules: mechanic.rules,
       demonstratedRule: question.rule.type,
       experience,
-      availability: !mechanic.visible
-        ? "internal: product decision required"
-        : audit.errors.length
-          ? "needs repair"
-          : "reusable with authored content",
+      deprecation: mechanic.deprecated,
+      availability: mechanic.deprecated
+        ? "deprecated: do not use for new Journeys"
+        : !mechanic.visible
+          ? "internal: product decision required"
+          : audit.errors.length
+            ? "needs repair"
+            : "reusable with authored content",
       features: {
         hint: !!question.guidance,
         assist: !!question.guidance?.assist,
@@ -125,6 +130,7 @@ export function authoringCapabilities(
       },
       requires,
       limits: [
+        ...(mechanic.deprecated ? [mechanic.deprecated.reason] : []),
         "Evidence applies to this composition, not every combination allowed by the mode.",
         "Custom history/data and geographic scope need separate review.",
         "Reducer/scene checks do not certify factual accuracy, camera fit, label layout or WebGL rendering.",

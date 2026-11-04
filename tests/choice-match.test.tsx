@@ -3,7 +3,8 @@ import { readFileSync } from "node:fs";
 import { act, useReducer } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
-import { ELEVENTH_JOURNEY as journey } from "../src/game/eleventhJourney";
+import { ELEVENTH_JOURNEY as polishedJourney } from "../src/game/eleventhJourney";
+import { MECHANIC_RECIPES } from "../src/game/recipes";
 import { AnswerForm } from "../src/game/AnswerForm";
 import {
   canSubmit,
@@ -22,6 +23,12 @@ import type { RegionFeature } from "../src/geography/types";
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
+// Retain regression coverage for compatibility support, independently of new content.
+const legacy = MECHANIC_RECIPES.find((q) => q.id === "recipe:choice-match")!;
+const journey = {
+  ...polishedJourney,
+  rounds: [...polishedJourney.rounds.slice(0, 4), legacy],
+};
 const context = createQuestionContext(world, [], journey);
 const question = journey.rounds[4];
 const at = (): GameState => ({

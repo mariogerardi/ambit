@@ -623,11 +623,11 @@ export const MECHANIC_RECIPES: Question[] = [
   defineQuestion({
     ...base,
     id: "recipe:choice-match",
-    title: "choice-match example",
+    title: "Deprecated matching compatibility fixture",
     prompt:
       "Match South Africa’s traditional capital roles to cities. Leave one city aside.",
     explanation:
-      "This example demonstrates the answer contract; author a specific explanation for your Journey.",
+      "Legacy matching is retained for compatibility only. Use city-multiple or choice-multiple for new Journeys.",
     mode: "choice-match",
     count: 3,
     selection: {

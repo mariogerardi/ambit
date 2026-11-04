@@ -38,6 +38,11 @@ scenes. Ordinary presentation follows `JOURNEY_DEFAULTS.md`. Imports and fields
 must exist in the inspected source; do not invent a mode, helper or option to
 make the draft look complete. Do not add React components, CSS or engine changes
 inside the content module.
+Check the chosen mechanic's deprecation metadata. Never generate `choice-match`
+or `slot-matches`: these are compatibility-only. Use supported city/set selection
+instead. A compatibility recipe is not an available mechanic for new authoring.
+If an approved task requires role pairing, flag that conflict for the user's
+judgment rather than silently converting it into ordering or a different task.
 For a bounded selectable-country search, prefer
 `scenes.play: { framing: "selection" }` over hand-entered camera coordinates.
 The engine derives its frame from the eligible outlines, including merged regions

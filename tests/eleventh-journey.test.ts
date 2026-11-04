@@ -5,6 +5,7 @@ import {
   ELEVENTH_JOURNEY,
   BRAZIL_CITY_TARGETS,
   SOUTH_AFRICA_CAPITAL_TARGETS,
+  SOUTH_AFRICA_CITY_TARGETS,
   TURKEY_ASSIST_CITIES,
 } from "../src/game/eleventhJourney";
 import { JOURNEYS, journeyPath } from "../src/game/journeys";
@@ -13,6 +14,8 @@ import { placeLabelStyle, placeMarkerSize } from "../src/globe/placeLabels";
 import { ANSWER_PLACES } from "../src/game/answerTargets";
 import { gameReducer, initialGame } from "../src/game/state";
 import type { Action, GameState } from "../src/game/state";
+import { upgradeDailyAttempt } from "../src/app/dailyProgress";
+import { journeyPoints } from "../src/game/points";
 import { journeyWorld } from "../src/app/journeyWorld";
 const world = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -37,12 +40,14 @@ describe("not the obvious city", () => {
       "pin",
       "choice-single",
       "city-single",
-      "choice-match",
+      "city-multiple",
     ]);
     expect(journey.rounds[2].choices).toHaveLength(4);
     for (const q of journey.rounds.filter((q) => q.mode.startsWith("city-"))) {
       expect(q.allowTyping).not.toBe(true);
-      expect(q.selection.type === "ids" && q.selection.ids.length).toBe(6);
+      expect(q.selection.type === "ids" && q.selection.ids.length).toBe(
+        q.mode === "city-multiple" ? 5 : 6,
+      );
     }
   });
   it("highlights Turkey without disclosing its two cities until submission, then zooms in", () => {
@@ -211,42 +216,127 @@ describe("not the obvious city", () => {
       wrong.places.find((p) => p.id === "place:3451190")?.visualState,
     ).toBe("incorrect");
   });
-  it("keeps four South African candidates equal, then reveals matched roles", () => {
+  it("offers five named cities with equal markers and accepts exactly the three traditional capitals", () => {
     const before = journeyWorld(world, journey, at(4), context);
+    expect(before.places.map((p) => p.id)).toEqual(SOUTH_AFRICA_CITY_TARGETS);
     expect(before.places.map((p) => p.name)).toEqual([
       "Pretoria",
       "Cape Town",
       "Bloemfontein",
       "Johannesburg",
+      "Durban",
     ]);
     expect(
       before.places.every(
-        (p) => p.kind === "city" && p.visualState === "selectable",
+        (p) =>
+          p.kind === "city" && p.visualState === "selectable" && !p.labelHidden,
       ),
     ).toBe(true);
-    expect(before.regionInteraction).toBe(false);
-    const after = journeyWorld(
-      world,
-      journey,
-      reduce(
-        at(4),
-        ...SOUTH_AFRICA_CAPITAL_TARGETS.map(
-          (id, index): Action => ({ type: "order-card", id, index }),
-        ),
-        { type: "submit" },
-      ),
-      context,
+    expect(new Set(before.places.map((p) => placeMarkerSize(p))).size).toBe(1);
+    for (let a = 0; a < 3; a++)
+      for (let b = a + 1; b < 4; b++)
+        for (let c = b + 1; c < 5; c++) {
+          const ids = [a, b, c].map(
+            (index) => SOUTH_AFRICA_CITY_TARGETS[index],
+          );
+          const game = reduce(
+            at(4),
+            ...ids.map((id): Action => ({ type: "select", id })),
+            { type: "submit" },
+          );
+          const correct = ids.every((id) =>
+            SOUTH_AFRICA_CAPITAL_TARGETS.includes(id),
+          );
+          expect(game.answers.at(-1)?.correct).toBe(correct);
+          expect(journeyPoints(game)).toBe(correct ? 3 : 0);
+        }
+    const assisted = reduce(
+      at(4),
+      { type: "request-hint" },
+      { type: "request-assist" },
     );
-    expect(after.places.slice(0, 3).map((p) => p.name)).toEqual([
+    const narrowed = journeyWorld(world, journey, assisted, context);
+    expect(narrowed.places.map((p) => p.name)).toEqual([
       "Pretoria",
       "Cape Town",
       "Bloemfontein",
+      "Johannesburg",
     ]);
+    const ignored = reduce(assisted, { type: "select", id: "place:1007311" });
+    expect(ignored.selectedIds).toEqual([]);
+    const correct = reduce(
+      at(4),
+      ...SOUTH_AFRICA_CAPITAL_TARGETS.map(
+        (id): Action => ({ type: "select", id }),
+      ),
+      { type: "submit" },
+    );
+    const after = journeyWorld(world, journey, correct, context);
     expect(
       after.places.slice(0, 3).every((p) => p.visualState === "correct"),
     ).toBe(true);
-    expect(after.places[3].name).toBe("Johannesburg");
-    expect(after.places[3].visualState).toBe("hinted");
+    expect(after.places.slice(3).every((p) => p.visualState === "hinted")).toBe(
+      true,
+    );
+  });
+  it("clears obsolete matching drafts while preserving submitted grades and receipt labels", () => {
+    const answers = journey.rounds
+      .slice(0, 4)
+      .map((q) => ({
+        ...initialGame,
+        roundId: q.id,
+        correct: true,
+        points: 3,
+        pointsVersion: 1 as const,
+      }));
+    const attempt = {
+      date: "2026-11-03",
+      journeyId: journey.id,
+      scheduleVersion: 1,
+      contentRevision: 1,
+      game: {
+        ...at(4),
+        answers,
+        ordered: SOUTH_AFRICA_CAPITAL_TARGETS,
+        help: { [journey.rounds[4].id]: "assisted" as const },
+      },
+    };
+    const upgraded = upgradeDailyAttempt(attempt, [journey]);
+    expect(upgraded.contentRevision).toBe(2);
+    expect(upgraded.game.ordered).toEqual([]);
+    expect(upgraded.game.help).toBeUndefined();
+    expect(upgraded.game.answers.map((a) => a.correct)).toEqual([
+      true,
+      true,
+      true,
+      true,
+    ]);
+    const completed = upgradeDailyAttempt(
+      {
+        ...attempt,
+        game: {
+          ...attempt.game,
+          phase: "finished",
+          answers: [
+            ...answers,
+            {
+              ...initialGame,
+              roundId: journey.rounds[4].id,
+              correct: false,
+              points: 0,
+              pointsVersion: 1,
+            },
+          ],
+        },
+      },
+      [journey],
+    );
+    expect(completed.game.answers.at(-1)).toMatchObject({
+      correct: false,
+      points: 0,
+      receiptLabel: "Pretoria, Cape Town & Bloemfontein",
+    });
+    expect(journeyPoints(completed.game)).toBe(12);
   });
   it("completes the five-round pack through the game engine", () => {
     let s = reduce(
@@ -277,7 +367,7 @@ describe("not the obvious city", () => {
     s = reduce(
       s,
       ...SOUTH_AFRICA_CAPITAL_TARGETS.map(
-        (id, index): Action => ({ type: "order-card", id, index }),
+        (id): Action => ({ type: "select", id }),
       ),
       { type: "submit" },
       { type: "next" },
