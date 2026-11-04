@@ -48,9 +48,7 @@ export function presentJourneyPlace(place: PlaceFeature): PlaceFeature {
         ? "reference"
         : undefined),
     ...(city ? { kind: "city" as const } : {}),
-    markerSize: city
-      ? GLOBE_SYMBOLS.reference
-      : (place.markerSize ?? GLOBE_SYMBOLS.reference),
+    markerSize: place.markerSize ?? GLOBE_SYMBOLS.reference,
     visualState: explanation ? "hinted" : (place.visualState ?? "hinted"),
     ...(explanation ? { markerBadge: undefined, answerTarget: false } : {}),
   };

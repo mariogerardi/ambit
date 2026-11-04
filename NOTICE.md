@@ -521,6 +521,16 @@ share-alike requirements apply to the photographs independently of application
 code. Province geometry is an unchanged subset of the bundled Natural Earth
 5.1.2 public-domain snapshot; city locations reuse the credited GeoNames data.
 
+## Not From Here photographs
+
+The five product photographs in `public/journeys/not-from-here/` are Wikimedia
+Commons thumbnails. Each source, photographer and license is listed in the
+accompanying `SOURCES.md`; download URLs and checksums are recorded in
+`src/game/data/not-from-here-media.v1.json`. The reveal displays captions,
+photographer credits and license links. Individual public-domain or Creative
+Commons terms apply independently of the application code. The thumbnails are
+unchanged from Commons; the vanilla source credits its existing rotation.
+
 ## I'm Like a Bird photographs and migration illustrations
 
 The five bird portraits in `public/journeys/im-like-a-bird/` are unchanged

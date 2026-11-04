@@ -15,6 +15,8 @@ import { journeyPoints, submittedPoints } from "../src/game/points";
 import { answerPlace } from "../src/game/answerTargets";
 import { initialBearing, pointAlongBearing } from "../src/game/geodesic";
 import { isWholeGlobeSearch, questionPlaces } from "../src/game/presentation";
+import { GLOBE_SYMBOLS } from "../src/globe/symbols";
+import { placeLabelStyle } from "../src/globe/placeLabels";
 import type { RegionFeature } from "../src/geography/types";
 
 const regions: RegionFeature[] = JSON.parse(
@@ -66,6 +68,11 @@ describe("Not From Here handoff integration", () => {
     );
     expect(volcano.places).toEqual([]);
     expect(volcano.overlays).toEqual([]);
+    expect(volcano.focus.altitude).toBeGreaterThanOrEqual(1.65);
+    expect(round("vanilla").leadIn).not.toMatch(
+      /Madagascar|Mauritius|Indian Ocean/,
+    );
+    expect(round("coffee").leadIn).not.toMatch(/southern|Red Sea/);
   });
 
   it("keeps country answers undisclosed until help and grades/saves open-world partial pairs", () => {
@@ -141,26 +148,25 @@ describe("Not From Here handoff integration", () => {
       expect(ports.every((p) => !p.name && !p.hoverName && p.labelHidden)).toBe(
         true,
       );
-      expect(new Set(ports.map((p) => p.markerSize)).size).toBe(1);
-      expect(ports.map((p) => p.markerBadge)).toEqual(
-        game.help?.[round("coffee").id] === "assisted"
-          ? ["B", "C"]
-          : ["A", "B", "C"],
+      expect(new Set(ports.map((p) => p.markerSize))).toEqual(
+        new Set([GLOBE_SYMBOLS.candidate]),
       );
+      expect(ports.every((p) => p.markerBadge === undefined)).toBe(true);
     }
     for (const id of ["place:105343", "place:415189", "place:78751"]) {
       const game = step(start, select(id), submit);
       const world = view(game);
       const ports = world.places.filter((p) => p.answerTarget);
-      expect(ports.map((p) => p.name)).toEqual([
-        "A · Jeddah",
-        "B · Mocha",
-        "C · Aden",
-      ]);
+      expect(ports.map((p) => p.name)).toEqual(["Jeddah", "Mocha", "Aden"]);
       expect(ports.every((p) => p.markerBadge === undefined)).toBe(true);
       expect(world.places.some((p) => p.name === "Ethiopian highlands")).toBe(
         true,
       );
+      expect(
+        placeLabelStyle(
+          world.places.find((p) => p.name === "Ethiopian highlands")!,
+        ).textHeight,
+      ).toBeGreaterThanOrEqual(26);
       expect(
         world.places.some((p) => p.name.startsWith("Yemeni highlands")),
       ).toBe(true);
@@ -174,10 +180,24 @@ describe("Not From Here handoff integration", () => {
     }
     // An omitted override must preserve the existing behavior for other authors.
     const q = round("coffee");
+    const lettered = q.places?.map((p, i) => ({ ...p, markerBadge: "ABC"[i] }));
     const game = step(start, select("place:78751"), submit);
+    expect(
+      questionPlaces(
+        { ...q, places: lettered },
+        context,
+        "feedback",
+        "",
+        true,
+        game,
+      )
+        .filter((p) => p.answerTarget)
+        .every((p) => p.markerBadge === undefined),
+    ).toBe(true);
     const inherited = questionPlaces(
       {
         ...q,
+        places: lettered,
         feedbackPlaces: q.feedbackPlaces?.map((p) => {
           const named = { ...p };
           delete named.markerBadge;

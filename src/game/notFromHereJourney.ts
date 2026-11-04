@@ -7,9 +7,23 @@
  */
 import { areaLabel, cityReference } from "./authoredPlaces";
 import { definePresentation, defineQuestion } from "./questionBuilder";
-import type { FactSource, Journey } from "./questionContracts";
+import type { FactSource, Journey, Question } from "./questionContracts";
 import type { Focus, PhysicalFeature, PlaceFeature } from "../geography/types";
 import andesGeography from "./data/andes-context.v1.json";
+import media from "./data/not-from-here-media.v1.json";
+import { GLOBE_SYMBOLS } from "../globe/symbols";
+
+// Product photographs use the existing Small Wonders photo/reveal composition.
+const photo = (key: keyof typeof media) => {
+  const { src, alt, caption, credit } = media[key];
+  const image: NonNullable<Question["image"]> = {
+    src,
+    alt,
+    feedbackAlt: alt,
+    presentation: "photo",
+  };
+  return { image, feedbackImage: { src, alt, caption, credit } };
+};
 
 const source = (name: string, url: string): FactSource => ({
   name,
@@ -67,18 +81,15 @@ const aden = cityReference({
   lng: 45.03852,
   sourceId: "geonames:415189",
 });
-const portCandidates: PlaceFeature[] = [jeddah, mocha, aden].map(
-  (place, index) => ({
-    ...place,
-    markerBadge: "ABC"[index],
-    labelHidden: true,
-    hoverName: "",
-  }),
-);
-// Keep candidate identity in the revealed name; the marker carries its result.
+const portCandidates: PlaceFeature[] = [jeddah, mocha, aden].map((place) => ({
+  ...place,
+  markerSize: GLOBE_SYMBOLS.candidate,
+  labelHidden: true,
+  hoverName: "",
+}));
+// Names and result symbols appear only after commitment.
 const namedPorts: PlaceFeature[] = portCandidates.map((place) => ({
   ...place,
-  name: `${place.markerBadge} · ${place.name}`,
   markerBadge: undefined,
   labelHidden: false,
   hoverName: place.name,
@@ -115,6 +126,7 @@ const mauritiusReference = areaLabel({
   lng: 57.58333,
   sourceId: "geonames:934292",
   visualState: "hinted",
+  labelScale: 1.3,
 });
 // Reuse the reviewed Andes water geometry, exclusively after commitment.
 const titicacaRevealed: PhysicalFeature = {
@@ -130,15 +142,17 @@ const coffeeHighlands = [
     lng: 39,
     sourceId: "not-from-here:regional-coffee-annotation",
     visualState: "hinted",
+    labelScale: 1.3,
   }),
   areaLabel({
     id: "not-from-here:yemeni-highlands",
-    name: "Yemeni highlands · coffee cultivation",
+    name: "Yemeni highlands",
     kind: "landform",
     lat: 15.6,
     lng: 44.2,
     sourceId: "not-from-here:regional-coffee-annotation",
     visualState: "hinted",
+    labelScale: 1.3,
   }),
 ];
 const santarem = cityReference({
@@ -181,6 +195,7 @@ const recapArea = (
     lng,
     sourceId: "not-from-here:recap-annotation",
     visualState: "hinted",
+    labelScale: 1.3,
   });
 
 const base = definePresentation({
@@ -220,6 +235,7 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       title: "The False Passport",
       progressLabel: "Kiwifruit",
       resolvedLabel: "Kiwifruit · China to New Zealand",
+      ...photo("kiwi"),
       leadIn:
         "New Zealand made the kiwifruit famous, but its first seeds arrived from overseas in 1904.",
       prompt: "Select the country those seeds came from.",
@@ -273,6 +289,7 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       title: "Before Ireland",
       progressLabel: "Potatoes",
       resolvedLabel: "Potatoes · Peru and Bolivia",
+      ...photo("potato"),
       leadIn:
         "Long before potatoes became an Irish staple, they were domesticated in the Andes near Lake Titicaca.",
       prompt: "Select the two present-day countries that share the lake.",
@@ -329,8 +346,9 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       title: "The Port of Mocha",
       progressLabel: "Coffee",
       resolvedLabel: "Coffee · Mocha, Yemen",
+      ...photo("coffee"),
       leadIn:
-        "Coffee crossed from northeastern Africa to Arabia. One port near the southern end of the Red Sea gave its name to a lasting part of coffee vocabulary.",
+        "Coffee crossed from northeastern Africa to Arabia. One of these ports gave its name to a familiar coffee drink.",
       prompt: "Select that port.",
       mode: "city-single",
       count: 1,
@@ -385,8 +403,9 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       title: "An Island Breakthrough",
       progressLabel: "Vanilla",
       resolvedLabel: "Vanilla · Réunion",
+      ...photo("vanilla"),
       leadIn:
-        "Vanilla was cultivated in Mexico long before a breakthrough on Réunion, a French island east of Madagascar and southwest of Mauritius.",
+        "Vanilla was cultivated in Mexico long before a young innovator on Réunion found a way to pollinate its flowers by hand.",
       prompt: "Place a pin as close to Réunion as you can.",
       mode: "pin",
       count: 1,
@@ -407,7 +426,7 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
         ],
       },
       guidance: {
-        hint: "Réunion is a compact volcanic island in the southwestern Indian Ocean, much smaller than Madagascar.",
+        hint: "Réunion is a small volcanic island in the southwestern Indian Ocean, east of Madagascar.",
         assist: {
           text: "Mauritius is now marked for reference. Search southwest of it for the separate island of Réunion.",
           places: [mauritiusReference],
@@ -435,7 +454,7 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       ],
       scenes: {
         play: {
-          focus: { lat: -19.2, lng: 51.5, altitude: 0.78 },
+          focus: { lat: 10, lng: 75, altitude: 2.2 },
           contextIds: [],
           places: [reunionTarget],
           overlays: [],
@@ -454,6 +473,7 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       title: "A Seed’s Long Journey",
       progressLabel: "Rubber",
       resolvedLabel: "Rubber · Santarém to Kew",
+      ...photo("rubber"),
       leadIn:
         "In 1876, thousands of Brazilian rubber-tree seeds left Santarém, an Amazon River port, bound for Britain and Kew Gardens.",
       prompt:
@@ -570,6 +590,7 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       {
         ...areaLabel(reunionRevealed),
         name: "Vanilla · Réunion",
+        labelScale: 1.3,
         visualState: "visited",
         displayRole: undefined,
         answerTarget: false,

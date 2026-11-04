@@ -20,7 +20,7 @@ Five familiar products became closely associated with places far from their orig
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **1 · Kiwifruit** | Select **China** on globe (`map-single`, immediate). Establish the familiar-name/original-home mismatch.                                            | Player knows New Zealand made kiwi famous; 1904 seed arrival. Ordinary world map; **China and New Zealand not highlighted**.                           | East Asian habitat hint; assist offers China, Japan and South Korea as equivalent visual candidates.                                | China → New Zealand, Mary Isabel Fraser, _Chinese gooseberry_, 1959 rebranding.                                                     |
 | **2 · Potatoes**  | Select **Peru and Bolivia** (`map-multiple`, submit); identify the two countries around Lake Titicaca.                                              | Andes and lake named in text; **no lake marker, footprint, country outlines singled out, or target-centered camera**. South America presented broadly. | High-altitude/landlocked-neighbor clue; assisted field Peru, Bolivia, Chile, Ecuador.                                               | Lake Titicaca named **only on reveal**; origin and agricultural diversity explained.                                                |
-| **3 · Coffee**    | Pick **Mocha**, Yemen, from three identically styled **anonymous port markers** (`city-single`, submit). Read the southern Red Sea coast.           | Candidate ports are Jeddah, Mocha and Aden, but only badges **A/B/C** are initially visible. No country or port names disclosed by hover.              | Coastline distinction; assist leaves Mocha and Aden as viable-looking southern alternatives.                                        | Real names of the three ports, and the Ethiopian highlands ↔ Yemen trade relationship.                                             |
+| **3 · Coffee**    | Pick **Mocha**, Yemen, from three identically styled **anonymous port markers** (`city-single`, submit). Read the southern Red Sea coast.           | Candidate ports are Jeddah, Mocha and Aden, but initially appear as anonymous, unlettered markers. No country or port names disclosed by hover.        | Coastline distinction; assist leaves Mocha and Aden as viable-looking southern alternatives.                                        | Real names of the three ports, and the Ethiopian highlands ↔ Yemen trade relationship.                                             |
 | **4 · Vanilla**   | Drop a distance pin **near Réunion** (`pin`, submit). Find a small island relative to Madagascar and Mauritius.                                     | Island name and relative location in prompt; **no target pin, label or hint footprint**, even though Réunion is visible in the globe geography.        | Volcanic-island hint; assist labels **Mauritius**, not Réunion.                                                                     | Réunion marker, 1841 hand-pollination work of Edmond Albius, and eventual production beyond Mesoamerica.                            |
 | **5 · Rubber**    | Set **initial compass bearing from Santarém, Brazil, toward London** (`compass-bearing`, submit). Reason about the shortest great-circle direction. | Two neutral city endpoints. **No correct path or sector pre-revealed**. Historical shipment and Kew connection provided.                               | Distinguish great-circle bearing from eastward flat-map intuition; assist shows 0–90° sector, still leaving a genuine angle choice. | Northeast initial bearing (~32°); 1876 seed transfer and Kew → Sri Lanka link. Reveal line is **not** the historical ship's course. |
 
@@ -193,3 +193,56 @@ recap consolidation and unaltered scoring/save behavior. Static comparison also
 confirms the five grading contracts and all answer coordinates are unchanged.
 These checks do not establish actual WebGL label placement or narrow-screen
 legibility; those presentation details remain visually unverified.
+
+## Product images, readable labels and harder clues — 2026-11-03
+
+After committing the preceding presentation revision as `c900e17`, the user
+approved larger map labels/badges, photographs, a less guided vanilla question,
+and removal of the coffee clue that immediately eliminated the northern port.
+These changes supersede the original Q3/Q4 play-copy and Q4 framing decisions;
+all five mechanics, canonical targets, scoring bands and help ceilings remain.
+
+- Reference-area text uses `labelScale: 1.3` (26 px, comparable to city names),
+  including the coffee highlands and recap labels. The Yemeni label is shortened
+  to “Yemeni highlands.” Anonymous ports use the existing 30 px candidate-marker
+  size. Journey presentation preserves explicit authored marker sizes. Unspecified
+  reference sizes retain their existing treatment.
+- Q3 introduces a historic coffee port without narrowing it by Red Sea position.
+  Coastal distinctions are reserved for the existing hint and assist. The same
+  three anonymous ports, accepted Mocha identity and grading remain.
+- Q4 introduces the pollination breakthrough without Madagascar/Mauritius
+  directions. Its broad opening centers the Indian Ocean at globe scale rather
+  than Madagascar. The Madagascar relationship now appears in the hint; assist
+  retains the Mauritius reference and southwest relationship. Réunion stays
+  unmarked in play, and the 25/50/90 km bands are unchanged.
+- All five rounds use the existing Small Wonders photo/reveal composition with
+  genuine product photographs: kiwifruit, potato varieties, roasted beans, vanilla
+  pods and latex collection. The images and play alt text contain no location
+  clues. Reveal captions identify the subject and credit the actual photographer,
+  without implying that a modern photograph depicts the historical event.
+  Commons source pages, licenses, download URLs and SHA-256 checksums are stored
+  in `src/game/data/not-from-here-media.v1.json`, with redistribution notices in
+  `public/journeys/not-from-here/SOURCES.md` and `NOTICE.md`.
+
+The five source images were visually inspected for content and spoilers. TypeScript
+and the direct-module Journey audit passed (five local media assets checked); six
+Journey cases, two focused marker cases and the existing Made in China city-marker
+case passed. All five JPEGs match their recorded SHA-256 checksums (1,336,367 bytes
+total). A narrow Chrome/WebGL check confirmed coffee’s larger labels and letters,
+its photograph/reveal credit, and vanilla’s broad opening with an unmarked target.
+No mobile/theme walkthrough, registration or release was performed.
+
+## Release instruction — 2026-11-03
+
+The user requested plain port markers with no letters, then authorized committing,
+pushing and deploying the pending changes. Q3 now has equally styled anonymous
+dots during play/help and plain port names with standard result symbols after
+commitment. The larger-letter font change was dropped; shared typography for other
+Journeys is unchanged. Answers, scoring, photo attribution and hidden play-state
+geography are preserved.
+
+Release authorization does not change the existing registration decision. The
+Journey stays outside `journeys.ts` and the generated index, with
+`dailyEligible: false`. This release ships shared presentation fixes and public
+assets without catalog activation; there are no backend or migration dependencies.
+Production release follows the required passing PR/main CI gates.
