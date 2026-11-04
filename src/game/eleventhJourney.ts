@@ -152,11 +152,11 @@ export const ELEVENTH_JOURNEY: Journey = {
       rule: {
         type: "pin-distance",
         targetId: "place:2172517",
-        radiusKm: 150,
+        radiusKm: 200,
         tiers: [
-          { radiusKm: 50, feedback: "Bullseye!" },
-          { radiusKm: 100, feedback: "Very close." },
-          { radiusKm: 150, feedback: "In range." },
+          { radiusKm: 100, feedback: "Bullseye!" },
+          { radiusKm: 150, feedback: "Very close." },
+          { radiusKm: 200, feedback: "In range." },
         ],
       },
       sources: [
@@ -223,10 +223,8 @@ export const ELEVENTH_JOURNEY: Journey = {
       resolvedLabel: "Abuja",
       label: "Capital move",
       title: "Why move inland?",
-      leadIn:
-        "Nigeria moved its capital from crowded, coastal Lagos to Abuja in 1991.",
-      prompt:
-        "Looking at both cities, which geographical advantage did Abuja offer?",
+      leadIn: "Nigeria moved its capital from Lagos to Abuja in 1991.",
+      prompt: "Which advantage helped make Abuja the choice?",
       choices: [
         {
           id: "abuja:rivalry",
@@ -298,8 +296,7 @@ export const ELEVENTH_JOURNEY: Journey = {
       resolvedLabel: "Brasília",
       title: "Find Brasília.",
       label: "New capital",
-      leadIn:
-        "Brazil’s coastal cities had long drawn people and power. In 1960, the federal government moved inland.",
+      leadIn: "In 1960, Brazil gave its federal government a new home.",
       prompt: "Which marker is Brasília, the capital since 1960?",
       guidance: {
         hint: "Look on the central plateau, south of the Amazon and west of the southeastern coastal cities.",

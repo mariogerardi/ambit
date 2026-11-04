@@ -72,7 +72,7 @@ describe("not the obvious city", () => {
     ]);
     expect(after.focus.altitude).toBeLessThan(before.focus.altitude!);
   });
-  it("grades Canberra with the 150km tolerance and reveals Sydney and Melbourne only afterward", () => {
+  it("grades Canberra with the 200km tolerance and reveals Sydney and Melbourne only afterward", () => {
     const q = journey.rounds[1],
       target = ANSWER_PLACES.get("place:2172517")!;
     const response = { selectedIds: [], ordered: [], text: "", pin: target };
@@ -80,7 +80,7 @@ describe("not the obvious city", () => {
     expect(
       isCorrect(q, context, {
         ...response,
-        pin: { lat: target.lat + 1, lng: target.lng },
+        pin: { lat: target.lat + 1.7, lng: target.lng },
       }),
     ).toBe(true);
     expect(
@@ -398,7 +398,7 @@ describe("not the obvious city", () => {
     expect(journey.rounds[1].prompt).toContain("Canberra");
     expect(journey.rounds[1].rule).toMatchObject({
       type: "pin-distance",
-      radiusKm: 150,
+      radiusKm: 200,
     });
     expect(journey.rounds[1].instruction).not.toContain("km");
     for (let roundIndex = 0; roundIndex < journey.rounds.length; roundIndex++) {
