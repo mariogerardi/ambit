@@ -34,7 +34,15 @@ the necessary contracts, deliver the usable brief and disclose that limitation
 instead of inventing code or making the user author it.
 
 Reuse `defineQuestion`, `definePresentation` for shared presentation, and grouped
-scenes. Ordinary presentation follows `JOURNEY_DEFAULTS.md`. Imports and fields
+scenes. Reuse the closest Journey's interaction structure; resolve appearance
+from `JOURNEY_DEFAULTS.md` and shared presentation helpers. Example-specific
+badges, sizes, colors, captions and camera exceptions are not defaults. Omit
+optional overrides unless the approved experience requires them. For anonymous
+city selection, start with `recipe:anonymous-city-selection` in `recipes.ts`,
+not another Journey's optional letter badges. Identify interaction and
+presentation sources separately in the brief's existing implementation-fit table,
+grouping repeated compositions and recording only meaningful departures.
+Imports and fields
 must exist in the inspected source; do not invent a mode, helper or option to
 make the draft look complete. Do not add React components, CSS or engine changes
 inside the content module.
@@ -83,7 +91,9 @@ easier task, guess grading geometry or invent an API to fill that gap.
 
 - Read the brief and supplied module together. Approved creative decisions govern;
   generated TypeScript is a proposed implementation. Use judgment checkpoints
-  for material conflicts; repair ordinary technical errors autonomously.
+  for material conflicts; repair ordinary technical and copy errors autonomously.
+  Compare presentation with the shared defaults even when the module compiles;
+  do not preserve an incidental styling choice just because it appears in code.
 - Inspect relevant imports/contracts and identified gaps. Adapt the supplied
   module to current source instead of regenerating it from the prose or surveying
   the catalog again. Recheck changed dependencies when the source basis differs.

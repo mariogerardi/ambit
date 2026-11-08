@@ -129,6 +129,12 @@ or material departure before substituting a different experience.
 
 Implement the approved spec with the existing authoring builders and grouped
 scenes. Preserve save continuity and follow the catalog policy.
+Compare the supplied module's appearance with `JOURNEY_DEFAULTS.md`, even when it
+compiles. Preserve the intended task, clue timing, acceptance and difficulty;
+repair ordinary copy and presentation mismatches rather than treating incidental
+code or example-specific styling as a creative requirement. Explicitly approved
+wording/visual exceptions remain settled. Use a judgment checkpoint before a
+material change to the reasoning, difficulty or search scope.
 Review the combined rendered copy and effective scenes for answer leakage,
 redundancy and stale objects. Check correct, actual wrong and partial responses
 where relevant, plus the final recap.
@@ -218,6 +224,12 @@ audit for deferred content, and TypeScript for typed changes. Follow
 [AGENTS.md](../../AGENTS.md) for local/CI and browser-check boundaries. Distinguish
 structural or mocked evidence from actual browser appearance; report limitations
 without presenting an unverified acceptance gate as passed.
+
+Summarize meaningful adaptations under copy, presentation, behavior and assets,
+omitting empty categories. Include unexpected shared-engine work and remaining
+limitations. Source-line retention or compilation alone does not establish a
+successful integration. Keep this in the normal handoff, not another audit report
+or AI review pass; reuse existing regression coverage for fixed shared behavior.
 
 Hand the result directly to the user with a review URL or artifact, what changed,
 what was verified and any material limitation. Do not assume someone else will

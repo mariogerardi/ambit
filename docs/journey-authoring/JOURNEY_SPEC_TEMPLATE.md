@@ -26,7 +26,10 @@ repeated inventory of standard behavior. The completed handoff goes to the user,
 Ambit's sole human maintainer.
 
 **Decision status:** Approved player-facing tasks, clues, assistance, reveals,
-scoring exceptions and explicit exclusions are **locked**. Distinguish **verified**
+scoring exceptions and explicit exclusions are **locked**. Preserve the intended
+reasoning and clue timing; ordinary wording and proposed styling can adapt to
+shared standards. Explicitly approved wording or visual exceptions remain locked.
+Distinguish **verified**
 engine behavior (checked against current source), **proposed** technical designs,
 **to verify** claims based on an older kit or uncertain implementation, and
 **open** material decisions. Label uncertainties where they matter, not every
@@ -53,14 +56,16 @@ routine detail. Do not reopen locked creative decisions without a material reaso
 
 Map each distinct interaction to the closest known recipe. For a familiar sequel,
 a one-sentence statement that all five reuse the existing mechanic is sufficient.
-Cite the current recipe/source and inspected revision for each distinct behavior,
-and label the decision reuse or extend. A portable-kit claim is **to verify** until
+Cite the current interaction recipe/source and inspected revision, and separately
+identify the presentation source and meaningful departures. Use shared visual
+defaults before example-specific treatments. Label the decision reuse or extend.
+A portable-kit claim is **to verify** until
 checked against current code. This is
 a lightweight feasibility check, **not** a reason to replace a locked gameplay idea.
 
-| Stop(s) | Existing recipe or proposed interaction | New data/assets | Engine addition | Verified / kit / to verify |
-| ------- | --------------------------------------- | --------------- | --------------- | -------------------------- |
-|         |                                         |                 |                 |                            |
+| Stop(s) | Interaction source / revision; reuse or extend | Presentation source / shared defaults | Departures, new data/assets or engine work | Verified / proposed / to verify |
+| ------- | ---------------------------------------------- | ------------------------------------- | ------------------------------------------ | ------------------------------- |
+|         |                                                |                                       |                                            |                                 |
 
 If a genuinely new interaction could invalidate a major assumption, resolve that
 specific feasibility risk before implementing the entire Journey. Skip separate

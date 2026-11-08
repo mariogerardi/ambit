@@ -46,6 +46,10 @@ export function recipeJourney(question: Question): Journey {
     dailyEligible: false,
     completion: {
       mapMode: "cumulative",
+      // City answers grade locations; their containing regions remain context.
+      ...(question.mode.startsWith("city-")
+        ? { contextIds: question.contextIds }
+        : {}),
       focus,
       views: question.feedbackViews?.length ? question.feedbackViews : [focus],
       physicalFeatures: [],

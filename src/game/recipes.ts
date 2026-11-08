@@ -4,6 +4,7 @@ import { ANSWER_PLACES } from "./answerTargets";
 import { capitalSource } from "./quizData";
 import { mapSource } from "./countryFacts";
 import { cityReference } from "./authoredPlaces";
+import { GLOBE_SYMBOLS } from "../globe/symbols";
 import type { Question } from "./questionContracts";
 const reference = (id: string) => cityReference(ANSWER_PLACES.get(id)!);
 const base = definePresentation({
@@ -751,8 +752,50 @@ export const MECHANIC_RECIPES: Question[] = [
   }),
 ];
 
-/** Independent presentation composition: pin response, not the compass angle control. */
+/** Complete presentation compositions; optional Journey treatments are not defaults. */
 export const PRESENTATION_RECIPES: Question[] = [
+  defineQuestion({
+    ...base,
+    id: "recipe:anonymous-city-selection",
+    title: "Anonymous cities with plain markers and named results",
+    prompt: "Select the marker for Canberra.",
+    explanation:
+      "Canberra is Australia's inland federal capital. Sydney and Melbourne are coastal cities; their locations provide reference points for finding Canberra.",
+    mode: "city-single",
+    count: 1,
+    selection: {
+      type: "ids",
+      ids: ["place:2172517", "place:2147714", "place:2158177"],
+    },
+    commitment: "submit",
+    allowTyping: false,
+    rule: { type: "place-ids", ids: ["place:2172517"] },
+    guidance: {
+      hint: "The capital is in southeastern Australia.",
+      assist: {
+        text: "Two markers remain. Look for the inland city.",
+        candidateIds: ["place:2172517", "place:2147714"],
+      },
+    },
+    scenes: {
+      play: {
+        focus: { lat: -34, lng: 147, altitude: 0.55 },
+        contextIds: ["wurl:AUS"],
+        // Shared circle shape/size for every candidate, including the capital.
+        // Disclosure hides names through pending selection; no letter badges.
+        places: ["place:2172517", "place:2147714", "place:2158177"].map(
+          (id) => ({ ...reference(id), markerSize: GLOBE_SYMBOLS.candidate }),
+        ),
+      },
+      reveal: {
+        focus: { lat: -34, lng: 147, altitude: 0.55 },
+        contextIds: ["wurl:AUS"],
+        // City selection discloses names and applies shared result symbols.
+        // The recipeJourney sandbox retains canonical discoveries and misses
+        // through cumulative completion; do not add duplicate recap anchors.
+      },
+    },
+  }),
   defineQuestion({
     ...base,
     id: "recipe:multilingual-network",

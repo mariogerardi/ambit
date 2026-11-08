@@ -17,6 +17,9 @@ import {
 } from "../src/app/journeyReview";
 import { journeyPoints } from "../src/game/points";
 import { compileQuestionScenes } from "../src/game/scenes";
+import { gameReducer } from "../src/game/state";
+import { journeyWorld } from "../src/app/journeyWorld";
+import { GLOBE_SYMBOLS } from "../src/globe/symbols";
 import type { RegionFeature } from "../src/geography/types";
 const regions = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -25,6 +28,71 @@ const recipes = [...MECHANIC_RECIPES, ...PRESENTATION_RECIPES];
 const capabilities = authoringCapabilities(JOURNEYS, recipes, regions);
 
 describe("live authoring evidence", () => {
+  it("keeps plain city candidates anonymous until commitment and retains canonical results in completion", async () => {
+    const question = recipes.find(
+      (q) => q.id === "recipe:anonymous-city-selection",
+    )!;
+    const journey = recipeJourney(question);
+    const context = createQuestionContext(regions, [], journey);
+    const view = (game: Awaited<ReturnType<typeof reviewState>>) =>
+      journeyWorld(regions, journey, game, context);
+    const play = await reviewState(journey, context, 0, "play", 17);
+    const pending = gameReducer(
+      play,
+      { type: "select", id: "place:2147714" },
+      journey,
+      context,
+    );
+    for (const game of [
+      play,
+      pending,
+      await reviewState(journey, context, 0, "hint", 17),
+      await reviewState(journey, context, 0, "assist", 17),
+    ]) {
+      const places = view(game).places;
+      expect(places.length).toBeGreaterThanOrEqual(2);
+      expect(
+        places.every((p) => !p.name && !p.hoverName && p.labelHidden),
+      ).toBe(true);
+      expect(places.every((p) => p.markerBadge === undefined)).toBe(true);
+      expect(new Set(places.map((p) => p.kind))).toEqual(new Set(["city"]));
+      expect(new Set(places.map((p) => p.markerSize))).toEqual(
+        new Set([GLOBE_SYMBOLS.candidate]),
+      );
+    }
+    expect(
+      view(await reviewState(journey, context, 0, "assist", 17)).places.map(
+        (p) => p.id,
+      ),
+    ).toEqual(["place:2172517", "place:2147714"]);
+    const missed = gameReducer(pending, { type: "submit" }, journey, context);
+    const correct = await reviewState(journey, context, 0, "correct", 17);
+    for (const game of [correct, missed]) {
+      const places = view(game).places;
+      expect(places.map((p) => p.name)).toEqual([
+        "Canberra",
+        "Sydney",
+        "Melbourne",
+      ]);
+      expect(
+        places.every((p) => !p.labelHidden && p.markerBadge === undefined),
+      ).toBe(true);
+      const finished = gameReducer(game, { type: "next" }, journey, context);
+      expect(finished.phase).toBe("finished");
+      const recap = view(finished);
+      expect(new Set(recap.places.map((p) => p.id)).size).toBe(
+        recap.places.length,
+      );
+      expect(
+        recap.places.find((p) => p.id === "place:2172517")?.visualState,
+      ).toBe("visited");
+      if (!game.answers[0].correct)
+        expect(
+          recap.places.find((p) => p.id === "place:2147714")?.visualState,
+        ).toBe("incorrect");
+      expect(recap.states["wurl:AUS"]).toBe("hinted");
+    }
+  });
   it("rejects deprecated matching for new Journeys while keeping compatibility evidence", () => {
     const matching = recipes.find((q) => q.id === "recipe:choice-match")!;
     const entry = capabilities.find((item) => item.id === matching.id)!;
