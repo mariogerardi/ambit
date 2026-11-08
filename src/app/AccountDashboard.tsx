@@ -298,35 +298,24 @@ export function AccountDashboard({
           />
         </aside>
         <div className="account-workspace-main">
-          <header className="account-heading">
+          <header className="account-heading" hidden={tab === "admin"}>
             <div>
               <h1 className="editorial-heading">
                 {ACCOUNT_SECTIONS[tab].label}
               </h1>
-              {tab !== "admin" && (
-                <p className="account-section-description">
+              <p className="account-section-description">
+                {
                   {
-                    {
-                      dashboard:
-                        "Pick up your next stop. See how far you’ve come.",
-                      profile: "How you appear to other players.",
-                      friends: "A shared Journey. A little friendly curiosity.",
-                      appearance: "Make Ambit feel like home.",
-                      admin:
-                        "Review Journeys, manage the schedule, and follow up on feedback.",
-                    }[tab]
-                  }
-                </p>
-              )}
+                    dashboard:
+                      "Pick up your next stop. See how far you’ve come.",
+                    profile: "How you appear to other players.",
+                    friends: "A shared Journey. A little friendly curiosity.",
+                    appearance: "Make Ambit feel like home.",
+                    admin: "",
+                  }[tab]
+                }
+              </p>
             </div>
-            {tab === "admin" && (
-              <button
-                className="quiet-button tertiary-action"
-                onClick={() => selectTab("dashboard")}
-              >
-                ← Your progress
-              </button>
-            )}
           </header>
           <div hidden={tab === "admin"}>
             {loading && tab !== "friends" && (

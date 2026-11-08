@@ -287,7 +287,6 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     history.replaceState(null, "", "/account?tab=dashboard");
     await mount();
     const layer = host.querySelector(".mode-incoming");
-    const heading = host.querySelector(".account-heading");
     const tabs = host.querySelector(".account-tabs");
     async function section(label: string) {
       await act(async () =>
@@ -299,7 +298,11 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       );
       await settleLoads();
       expect(host.querySelector(".mode-incoming")).toBe(layer);
-      expect(host.querySelector(".account-heading")).toBe(heading);
+      if (label === "Admin")
+        expect(
+          host.querySelector<HTMLElement>(".account-heading")?.hidden,
+        ).toBe(true);
+      else expect(host.querySelector(".account-heading")).not.toBeNull();
       expect(host.querySelector(".account-tabs")).toBe(tabs);
       expect(host.querySelector(".mode-outgoing")).toBeNull();
     }
@@ -309,7 +312,13 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     expect(location.search).toBe("?tab=friends");
     await section("Admin");
     expect(location.search).toBe("?tab=admin");
-    expect(host.querySelector(".admin-panel > h1")).toBeNull();
+    expect(host.querySelector<HTMLElement>(".account-heading")?.hidden).toBe(
+      true,
+    );
+    expect(host.querySelector(".admin-top-navigation")).not.toBeNull();
+    expect(
+      host.querySelector("#admin-tab-schedule")?.getAttribute("aria-current"),
+    ).toBe("page");
     const editor = host.querySelector(".journey-date-editor");
     await click("Choose a Journey");
     await act(async () =>
@@ -344,7 +353,7 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     await section("Admin");
     expect(host.querySelector(".journey-date-editor")).toBe(editor);
     expect(
-      host.querySelector(".scheduled-journey-preview.is-draft h4")?.textContent,
+      host.querySelector(".schedule-proposed h4")?.textContent,
     ).toBe("Down the Danube");
     expect(probe.mounts).toBe(1);
   });
@@ -358,13 +367,13 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       await mount();
       if (admin) {
         expect(
-          host.querySelector<HTMLDetailsElement>(".admin-maintenance")?.open,
+          host.querySelector<HTMLDialogElement>(".admin-utility-dialog")?.open,
         ).toBe(true);
         expect(
           host
             .querySelector("#admin-tab-schedule")
-            ?.getAttribute("aria-selected"),
-        ).toBe("true");
+            ?.getAttribute("aria-current"),
+        ).toBe("page");
       } else {
         expect(host.textContent).toContain("Admin access required.");
         expect(host.querySelector(".admin-panel")).toBeNull();

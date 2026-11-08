@@ -338,6 +338,11 @@ from automatic picks while retaining those capabilities. This flag is not privat
 access control. Adding, removing or changing eligibility can change provisional
 dates; locked/assigned dates and started attempts remain fixed. See the staged
 [activation procedure](HOSTING.md#journey-catalog-activation).
+The Admin Journey library reflects the frontend catalog, identifies each
+Journey's automatic-rotation eligibility, and distinguishes selecting a date
+from publishing its schedule draft. Manual assignment requires matching
+frontend and backend catalogs; the library cannot confirm deployment state.
+Use the activation procedure to verify release readiness.
 Retained attempts remain pinned to their stored Journey. Removed editions are
 absent from Admin and practice routes. Their IDs are recorded
 only for save recovery: discard their attempts and overrides, while preserving

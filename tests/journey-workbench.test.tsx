@@ -27,6 +27,13 @@ async function click(text: string) {
   expect(button).toBeDefined();
   await act(async () => button.click());
 }
+async function openDisclosure(text: string) {
+  const summary = [...host.querySelectorAll("summary")].find(
+    (item) => item.textContent?.trim() === text,
+  )!;
+  expect(summary).toBeDefined();
+  await act(async () => summary.click());
+}
 it("keeps workbench access in the signed-in Admin menu", async () => {
   await act(async () =>
     root.render(
@@ -76,6 +83,8 @@ it("previews an unregistered source without writing and commits only from its re
   );
   expect(request).not.toHaveBeenCalled();
   expect(host.textContent).toContain("held out of automatic Daily selection");
+  await openDisclosure("Advanced development tools");
+  await openDisclosure("Catalog registration");
   await click("Preview registration");
   expect(request).toHaveBeenCalledWith(
     expect.stringContaining("?module=powerToThePeopleJourney.ts"),
@@ -117,6 +126,8 @@ it("shows audit errors and never offers a commit after a failed preview", async 
       />,
     ),
   );
+  await openDisclosure("Advanced development tools");
+  await openDisclosure("Catalog registration");
   await click("Preview registration");
   expect(host.querySelector('[role="alert"]')?.textContent).toContain(
     "missing target",
@@ -215,6 +226,7 @@ it("opens a recipe sandbox without offering catalog registration", async () => {
       host.querySelector('option[value="powerToThePeopleJourney.ts"]')
         ?.textContent,
     ).toBe("Power to the People");
+    await openDisclosure("Advanced development tools");
     const select = host.querySelector<HTMLSelectElement>(
       'select[name="recipe"]',
     )!;

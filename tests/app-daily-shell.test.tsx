@@ -416,10 +416,14 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     await mount();
     // Let the initial account hydration run, without waiting for any real service.
     await act(async () => new Promise((resolve) => setTimeout(resolve, 30)));
-    await act(async () =>
-      host.querySelector<HTMLElement>(".admin-maintenance > summary")!.click(),
-    );
-    await click("Clear my Journey attempt");
+    await click("Utilities");
+    await vi.waitFor(() => {
+      expect(
+        host.querySelector<HTMLButtonElement>(".admin-utility-dialog > button")
+          ?.disabled,
+      ).toBe(false);
+    });
+    await click("Clear today’s attempt");
     expect(document.querySelector("dialog[open]")).not.toBeNull();
     await click("Reset my attempt");
     expect(host.textContent).toContain("Attempt cleared.");
@@ -639,7 +643,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     await click("Admin");
     await click("Mon, Oct 12");
     await click("Choose a Journey");
-    await click("Use automatic rotation");
+    await click("Restore automatic rotation");
     await click("Restore automatic selection");
     expect(scheduleState.assignments).toEqual({});
     expect(host.textContent).toContain(

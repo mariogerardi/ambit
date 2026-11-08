@@ -303,33 +303,11 @@
   display: block;
   margin-top: 4px;
 }
-.scheduled-journey-preview {
-  padding: 16px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-  border-radius: 12px;
-  background: rgb(var(--ui-line-rgb) / 0.05);
-}
-.scheduled-journey-preview.is-draft {
-  border-color: rgb(var(--ui-accent-rgb) / 0.55);
-}
 .schedule-preview-label {
   color: var(--ui-accent);
   font: 10px var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
-.scheduled-journey-preview h4 {
-  margin: 10px 0 8px;
-  font: 23px/1.15 var(--font-editorial);
-}
-.scheduled-journey-preview p {
-  margin: 0 0 12px;
-  color: var(--ui-muted);
-  font: 12px/1.6 var(--font-ui);
-}
-.scheduled-journey-preview a {
-  font-size: 12px;
-  color: var(--ui-accent);
 }
 .schedule-current {
   margin: 0;

@@ -62,6 +62,9 @@ export default defineConfig({
       },
     },
   ],
+  optimizeDeps: {
+    entries: ["index.html", "review/*.html"],
+  },
   build: { sourcemap: "hidden" },
   server: { host: "127.0.0.1", strictPort: true },
   preview: { host: "127.0.0.1", strictPort: true },

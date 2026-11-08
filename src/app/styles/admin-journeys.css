@@ -1,17 +1,3 @@
-.admin-journey-library header h2 {
-  margin: 0 0 8px;
-}
-.admin-library-controls {
-  display: flex;
-  align-items: end;
-  gap: 16px;
-  margin: 24px 0;
-}
-.admin-library-controls .field:first-child {
-  flex: 1;
-}
-.admin-library-controls .field,
-.admin-schedule-candidate .field,
 .admin-review-toolbar .field {
   display: grid;
   gap: 8px;
@@ -19,9 +5,6 @@
   color: var(--ui-muted);
   font-size: 13px;
 }
-.admin-library-controls input,
-.admin-library-controls select,
-.admin-schedule-candidate input,
 .admin-review-toolbar select {
   width: 100%;
   box-sizing: border-box;
@@ -33,73 +16,9 @@
   color: var(--ui-text);
   font: 14px var(--font-ui);
 }
-.admin-library-controls input:focus-visible,
-.admin-library-controls select:focus-visible,
-.admin-schedule-candidate input:focus-visible,
 .admin-review-toolbar select:focus-visible {
   outline: 2px solid var(--ui-focus);
   outline-offset: 2px;
-}
-.admin-library-columns {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
-  gap: 24px;
-  align-items: start;
-}
-.admin-library-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 560px;
-  overflow-y: auto;
-  display: grid;
-  gap: 8px;
-}
-.experience .admin-library-list button {
-  display: grid;
-  gap: 6px;
-  width: 100%;
-  padding: 14px;
-  text-align: left;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-  border-radius: 10px;
-  background: rgb(var(--ui-line-rgb) / 0.04);
-  color: var(--ui-text);
-}
-.experience .admin-library-list button[aria-current] {
-  border-color: var(--ui-accent);
-  background: rgb(var(--ui-accent-rgb) / 0.08);
-}
-.admin-library-list span {
-  color: var(--ui-muted);
-  font-size: 13px;
-  line-height: 1.5;
-}
-.admin-journey-outline {
-  min-width: 0;
-  padding: 20px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-  border-radius: 12px;
-  background: rgb(var(--ui-surface-rgb) / 0.8);
-}
-.admin-journey-outline h3 {
-  margin-top: 0;
-  font: 24px var(--font-editorial);
-}
-.admin-journey-outline ol {
-  padding-inline-start: 24px;
-}
-.admin-journey-outline li {
-  padding-inline-start: 4px;
-  margin: 24px 0;
-}
-.admin-journey-outline h4 {
-  margin: 0 0 8px;
-}
-.admin-journey-outline li p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
 }
 .admin-library-actions {
   display: flex;
@@ -117,15 +36,6 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-}
-.admin-schedule-candidate {
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid var(--ui-accent);
-  border-radius: 12px;
-}
-.admin-schedule-candidate .field {
-  max-width: 260px;
 }
 .admin-review-toolbar {
   padding: 16px;
@@ -154,30 +64,51 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
-@media (max-width: 800px) {
-  .admin-library-columns {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .admin-library-list {
-    max-height: 300px;
-  }
-  .admin-library-controls {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .admin-library-controls .field {
-    width: 100%;
-  }
-}
-
 /* Review tools are secondary to the actual question being inspected. */
 .admin-review-toolbar {
-  gap: 12px;
-  padding: 14px;
-  margin-bottom: 18px;
+  gap: 10px;
+  padding: 12px;
+  margin: 0;
+}
+.admin-review-toolbar[data-mode="playtest"] {
+  gap: 8px;
+  padding: 10px;
 }
 .admin-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.admin-review-heading > div {
+  min-width: 0;
+  display: grid;
   gap: 2px;
+}
+.admin-review-heading strong {
+  font-size: 13px;
+}
+.admin-review-heading span {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+.admin-review-toolbar .admin-review-mode-toggle {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 36px;
+  padding: 7px 10px;
+  color: var(--ui-accent);
+  white-space: nowrap;
+}
+.admin-review-toolbar[data-mode="playtest"] .workbench-advanced {
+  display: none;
+}
+.admin-review-selectors {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
 }
 .admin-review-toolbar .field {
   gap: 6px;
@@ -222,10 +153,10 @@
   outline: 2px solid var(--ui-focus);
   outline-offset: 2px;
 }
-.admin-review-toolbar summary {
+.admin-review-toolbar details > summary {
   display: list-item;
-  padding: 7px 0;
-  min-height: 24px;
+  padding: 6px 0;
+  min-height: 32px;
   color: var(--ui-accent);
   font-size: 13px;
 }
@@ -255,27 +186,86 @@
   right: 24px;
   bottom: 96px;
   z-index: 8;
-  width: 340px;
-  max-height: calc(100dvh - 190px);
+  width: min(380px, calc(100vw - 48px));
+  max-height: calc(100dvh - 150px);
   overflow: auto;
   pointer-events: auto;
   border-radius: 12px;
   box-shadow: 0 8px 32px #0004;
   background: rgb(var(--ui-surface-rgb));
 }
+.journey-review-panel:has(.admin-review-toolbar[data-mode="playtest"]) {
+  width: min(310px, calc(100vw - 32px));
+  max-height: none;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
 .journey-review-panel .admin-review-toolbar {
   margin: 0;
   background: rgb(var(--ui-surface-rgb));
+}
+.experience.journey-reviewing:has(
+    .admin-review-toolbar[data-mode="inspect"]
+  )
+  .game-scene {
+  right: min(390px, 32vw);
+  transition: right 180ms ease;
+}
+.journey-reviewing:has(.admin-review-toolbar[data-mode="inspect"])
+  .journey-review-panel {
+  top: 160px;
+  right: 0;
+  bottom: 0;
+  width: min(390px, 32vw);
+  max-height: none;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-left: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+  border-radius: 12px 0 0;
+  box-shadow: -12px 0 36px rgb(var(--ui-shadow-rgb) / 0.22);
+}
+.journey-reviewing:has(.admin-review-toolbar[data-mode="inspect"])
+  .journey-review-panel
+  .admin-review-toolbar {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 @media (max-width: 700px) {
   .journey-review-panel {
     right: 12px;
     bottom: 12px;
-    width: min(320px, calc(100% - 24px));
-    max-height: 35dvh;
+    width: min(360px, calc(100vw - 24px));
+    max-height: 58dvh;
   }
-  .journey-reviewing .journey-map-notes {
-    margin-bottom: 210px;
+  .journey-review-panel:has(.admin-review-toolbar[data-mode="playtest"]) {
+    width: min(300px, calc(100vw - 24px));
+  }
+  .experience.journey-reviewing:has(
+      .admin-review-toolbar[data-mode="inspect"]
+    )
+    .game-scene {
+    inset: 0 0 52dvh;
+    transition: bottom 180ms ease;
+  }
+  .journey-reviewing:has(.admin-review-toolbar[data-mode="inspect"])
+    .journey-review-panel {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 52dvh;
+    max-height: 52dvh;
+    border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
+    border-left: 0;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -12px 36px rgb(var(--ui-shadow-rgb) / 0.25);
+  }
+  .admin-review-selectors {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

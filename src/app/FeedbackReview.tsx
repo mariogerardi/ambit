@@ -6,6 +6,24 @@ import { useToast } from "./Toast";
 import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { journeyReviewLink } from "./accountNavigation";
 
+const statusActions: Record<
+  FeedbackItem["status"],
+  { status: FeedbackItem["status"]; label: string }[]
+> = {
+  new: [
+    { status: "reviewed", label: "Mark reviewed" },
+    { status: "resolved", label: "Resolve" },
+  ],
+  reviewed: [
+    { status: "resolved", label: "Resolve" },
+    { status: "new", label: "Mark new" },
+  ],
+  resolved: [
+    { status: "new", label: "Reopen as new" },
+    { status: "reviewed", label: "Reopen as reviewed" },
+  ],
+};
+
 export function FeedbackReview({
   onNavigate,
 }: {
@@ -113,39 +131,47 @@ export function FeedbackReview({
   return (
     <section
       className="feedback-review"
-      aria-label="Player feedback"
+      aria-label="Feedback"
       data-dd-privacy="mask"
     >
       <header className="feedback-review-heading">
-        <h2>Player feedback</h2>
+        <div className="admin-section-heading-copy">
+          <h2>Feedback</h2>
+          <p>Review reports and jump straight to the Journey question.</p>
+        </div>
         <button
+          type="button"
           className="quiet-button tertiary-action"
           disabled={busy}
           onClick={() => void load()}
         >
-          Refresh feedback
+          Refresh
         </button>
       </header>
-      {items.length > 0 && (
-        <div className="admin-feedback-filters" aria-label="Filter feedback">
-          {(["all", "new", "reviewed", "resolved"] as const).map((status) => (
-            <button
-              type="button"
-              key={status}
-              className="quiet-button"
-              aria-pressed={filter === status}
-              onClick={() => setFilter(status)}
-            >
-              {status[0].toUpperCase() + status.slice(1)}{" "}
-              <span>
-                {status === "all"
-                  ? items.length
-                  : items.filter((item) => item.status === status).length}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      <div
+        className="admin-feedback-filters"
+        role="group"
+        aria-label="Filter feedback"
+      >
+        {(["all", "new", "reviewed", "resolved"] as const).map((status) => (
+          <button
+            type="button"
+            key={status}
+            className="quiet-button"
+            aria-pressed={filter === status}
+            onClick={() => setFilter(status)}
+          >
+            {status === "all"
+              ? "All"
+              : status[0].toUpperCase() + status.slice(1)}
+            <span>
+              {status === "all"
+                ? items.length
+                : items.filter((item) => item.status === status).length}
+            </span>
+          </button>
+        ))}
+      </div>
       {cursor && items.length > 0 && (
         <p className="admin-feedback-count-note">
           Counts reflect loaded reports.
@@ -155,22 +181,25 @@ export function FeedbackReview({
       {error && <p role="alert">{error}</p>}
       {loaded && !items.length && (
         <div className="admin-empty">
-          <h3>All quiet here.</h3>
-          <p>
-            No player feedback yet. New reports will appear here with a link to
-            the relevant Journey.
-          </p>
+          <h3>No reports yet.</h3>
+          <p>Player reports and available Journey details will appear here.</p>
         </div>
       )}
       <ul>
         {items
           .filter((item) => filter === "all" || item.status === filter)
           .sort(
-            (a, b) => Number(b.status === "new") - Number(a.status === "new"),
+            (a, b) =>
+              Number(b.status === "new") - Number(a.status === "new") ||
+              Number(b.createdAt.split("#")[0]) -
+                Number(a.createdAt.split("#")[0]),
           )
           .map((item) => {
             const journey = JOURNEY_INDEX.find(
               (journey) => journey.id === item.context.journeyId,
+            );
+            const question = journey?.rounds.find(
+              (round) => round.id === item.context.questionId,
             );
             const review =
               journey &&
@@ -179,23 +208,48 @@ export function FeedbackReview({
                 undefined,
                 item.context.questionId,
               );
+            const createdAtSeconds = Number(item.createdAt.split("#")[0]);
+            const timestamp = new Date(createdAtSeconds * 1000);
+            const createdAt = Number.isFinite(timestamp.getTime())
+              ? timestamp
+              : undefined;
             return (
-              <li key={item.id}>
-                <strong>
-                  {item.kind === "question" ? "Question" : "Experience"} ·{" "}
-                  {item.category}
-                </strong>
-                <small>
-                  {new Date(
-                    Number(item.createdAt.split("#")[0]) * 1000,
-                  ).toLocaleString()}
-                </small>
-                {item.message && (
-                  <p className="feedback-message">{item.message}</p>
-                )}
-                {journey && (
+              <li key={item.id} className="admin-feedback-item">
+                <header className="admin-feedback-item-heading">
+                  <div className="admin-feedback-meta">
+                    <span className="admin-feedback-kind">
+                      {item.kind === "question" ? "Question" : "Experience"}
+                    </span>
+                    <strong>{item.category}</strong>
+                    <span className={`admin-feedback-status is-${item.status}`}>
+                      {item.status}
+                    </span>
+                  </div>
+                  {createdAt && (
+                    <time dateTime={createdAt.toISOString()}>
+                      {createdAt.toLocaleString()}
+                    </time>
+                  )}
+                </header>
+                <p className="feedback-message">
+                  {item.message || "No written message was included."}
+                </p>
+                {(journey || item.context.questionId) && (
                   <div className="admin-feedback-journey">
-                    <strong>{journey.title}</strong>
+                    <div>
+                      {journey && <strong>{journey.title}</strong>}
+                      {question && (
+                        <span>{question.progressLabel ?? question.label}</span>
+                      )}
+                      {!question && item.context.questionId && (
+                        <span>
+                          Question reference: {item.context.questionId}
+                        </span>
+                      )}
+                      {!journey && item.context.questionId && (
+                        <span>Reported question is not in this catalog.</span>
+                      )}
+                    </div>
                     {review && (
                       <a
                         href={review}
@@ -214,7 +268,7 @@ export function FeedbackReview({
                   </div>
                 )}
                 <details className="admin-feedback-context">
-                  <summary>Report context</summary>
+                  <summary>Technical context</summary>
                   <dl>
                     {Object.entries(item.context).map(([key, value]) => (
                       <div key={key}>
@@ -224,23 +278,27 @@ export function FeedbackReview({
                     ))}
                   </dl>
                 </details>
-                <label className="field">
-                  Status
-                  <select
-                    value={item.status}
-                    disabled={busy}
-                    onChange={(event) =>
-                      void update(
-                        item.id,
-                        event.target.value as FeedbackItem["status"],
-                      )
-                    }
-                  >
-                    <option value="new">New</option>
-                    <option value="reviewed">Reviewed</option>
-                    <option value="resolved">Resolved</option>
-                  </select>
-                </label>
+                <div
+                  className="admin-feedback-actions"
+                  role="group"
+                  aria-label={`Update status for ${item.category} feedback`}
+                >
+                  {statusActions[item.status].map((action) => (
+                    <button
+                      key={action.status}
+                      type="button"
+                      className={
+                        action.status === "resolved"
+                          ? "primary-button is-resolve"
+                          : "quiet-button"
+                      }
+                      disabled={busy}
+                      onClick={() => void update(item.id, action.status)}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
               </li>
             );
           })}

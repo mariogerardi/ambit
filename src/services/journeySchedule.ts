@@ -19,6 +19,16 @@ export interface JourneySchedule {
   /** Effective stored choices; missing dates use the provisional seeded pick. */
   assignments: Record<string, string>;
 }
+export function journeyScheduleConnectionMessage(
+  apiUrl: string,
+  development: boolean,
+) {
+  if (!development)
+    return "Couldn’t connect to the Journey schedule. Check your internet connection and retry.";
+  if (apiUrl === "http://127.0.0.1:3001")
+    return "No local schedule service is running at 127.0.0.1:3001. Configure the staging API as described in docs/SERVICES.md, then restart Vite.";
+  return "Couldn’t connect to the configured staging API. Check that it is available and that VITE_API_URL in .env.development.local is correct.";
+}
 /** A durable assignment must never be replaced by a different local Daily. */
 export function unavailableScheduledJourney(date: string, records: Record<string, DayRecord>, catalog: JourneySummary[]) {
   const record = records[date];
@@ -59,10 +69,24 @@ function merge(previous: JourneySchedule | undefined, incoming: Pick<JourneySche
     .map(([day, record]) => [day, record.journeyId as string]));
   return { today: incoming.today, records, assignments };
 }
+async function fetchSchedule(url: string, options: RequestInit) {
+  try {
+    return await fetch(url, options);
+  } catch (failure) {
+    if (failure instanceof TypeError)
+      throw Error(
+        journeyScheduleConnectionMessage(
+          serviceConfig.apiUrl,
+          import.meta.env.DEV,
+        ),
+      );
+    throw failure;
+  }
+}
 async function request(token?: string, body?: unknown, month?: string, admin = false): Promise<Pick<JourneySchedule, "today" | "records">> {
   const range = month ? rangeFor(month) : rangeFor();
   const query = body || admin ? "" : `?${new URLSearchParams(range)}`;
-  const response = await fetch(`${serviceConfig.apiUrl}${body || admin ? "/admin/journeys/schedule" : "/journeys/schedule"}${query}`, {
+  const response = await fetchSchedule(`${serviceConfig.apiUrl}${body || admin ? "/admin/journeys/schedule" : "/journeys/schedule"}${query}`, {
     method: body ? "PATCH" : "GET",
     signal: AbortSignal.timeout(15000),
     headers: body ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` } : admin ? { Authorization: `Bearer ${token}` } : {},
