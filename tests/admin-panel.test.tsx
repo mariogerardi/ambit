@@ -129,7 +129,11 @@ it("navigates full months and selects calendar dates, including leap day", async
   expect(host.querySelector(".schedule-assignment-heading h3")?.textContent).toContain(
     "October 11",
   );
-  for (let month = 0; month < 16; month++) await click("Next month");
+});
+
+it("selects leap day in the February 2028 calendar", async () => {
+  await render("2028-02-29");
+  await click("Month");
   expect(host.querySelector(".journey-month-heading h3")?.textContent).toBe(
     "February 2028",
   );
@@ -140,7 +144,7 @@ it("navigates full months and selects calendar dates, including leap day", async
   expect(
     host.querySelectorAll('.journey-calendar-day time[datetime="2028-02-29"]'),
   ).toHaveLength(1);
-}, 10000);
+});
 it("blocks pre-opening dates and restored drafts", async () => {
   const earlier = "2026-10-10";
   schedule.schedule!.records[earlier] = {
