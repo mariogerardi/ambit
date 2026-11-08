@@ -81,6 +81,21 @@ export function constructionAuditSample(
         )
           return candidate;
       }
+  } else if (r.type === "population-brush-target") {
+    const cell =
+      r.grid.cells.find(([, count]) => count === 0) ?? r.grid.cells[0];
+    if (!correct && cell)
+      c = {
+        version: 1,
+        kind: "brush",
+        strokes: [
+          {
+            points: [gridPoint(r.grid, cell[0])],
+            radiusKm: r.brushRadiusKm,
+            erase: false,
+          },
+        ],
+      };
   } else if (r.type === "raster-overlap") {
     if (!correct) {
       const cell = r.grid.cells.find(([, value]) => value === 0);

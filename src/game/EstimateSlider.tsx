@@ -1,5 +1,5 @@
 import type { NumericRange } from "./numericEstimate";
-import { formatEstimate } from "./numericEstimate";
+import { formatEstimate, formatEstimateLimit } from "./numericEstimate";
 
 export function EstimateSlider({
   rule,
@@ -54,8 +54,8 @@ export function EstimateSlider({
         }}
       />
       <div className="estimate-slider-limits" aria-hidden="true">
-        <span>{formatEstimate(rule.min, rule.unit)}</span>
-        <span>{formatEstimate(rule.max, rule.unit)}</span>
+        <span>{formatEstimateLimit(rule.min, rule.unit)}</span>
+        <span>{formatEstimateLimit(rule.max, rule.unit)}</span>
       </div>
       <p id="estimate-slider-help" className="sr-only">
         Use the arrow keys to adjust your estimate in steps of{" "}

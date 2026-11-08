@@ -390,6 +390,8 @@ export function solutionIds(
         rule.matches.find((match) => match.slotId === slot.id)?.choiceId ?? "",
     );
   if (rule.type === "bearing-angle") return [rule.destination.id];
+  if (rule.type === "region-population-sum")
+    return Object.keys(rule.populations);
   if (rule.type === "pin-distance") return [rule.targetId];
   if (rule.type === "pin-inside" || rule.type === "place-ids") return rule.ids;
   const cached = context.solutions.get(question);

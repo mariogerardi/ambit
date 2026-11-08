@@ -35,6 +35,21 @@ export function isCorrect(
   if (outcome) return outcome.correct;
   const rule = question.rule,
     expected = solutionIds(question, context);
+  if (rule.type === "region-population-sum") {
+    const ids = response.selectedIds;
+    if (
+      ids.length !== question.count ||
+      new Set(ids).size !== ids.length ||
+      ids.some(
+        (id) =>
+          !Object.hasOwn(rule.populations, id) ||
+          !canSelect(question, context, id),
+      )
+    )
+      return false;
+    const total = ids.reduce((sum, id) => sum + rule.populations[id], 0);
+    return total * rule.denominator > rule.totalPopulation * rule.numerator;
+  }
   const controlGrade = mechanicFor(question).grade;
   if (controlGrade)
     return controlGrade(question, context, response, expected, {

@@ -131,18 +131,24 @@ export function validateQuestionContract(q: Question): void {
   const city = definition.mapSelection === "places";
   if (q.guidance?.hintAsideId && q.mode !== "choice-order")
     fail("a hint discard requires card ordering");
-  if (
-    q.map?.revealOrder &&
-    (q.mode !== "choice-order" ||
-      q.rule.type !== "country-ids" ||
+  if (q.map?.revealOrder) {
+    const countryOrder =
+      q.mode === "choice-order" && q.rule.type === "country-ids";
+    const regionMap =
+      q.mode === "map-single" &&
+      q.rule.type === "region-ids" &&
+      q.rule.match === "any";
+    if (
+      (!countryOrder && !regionMap) ||
       !Number.isFinite(q.map.revealOrder.stepMs) ||
       q.map.revealOrder.stepMs < 0 ||
       !Number.isFinite(q.map.revealOrder.durationMs) ||
-      q.map.revealOrder.durationMs <= 0)
-  )
-    fail(
-      "ordered country reveals require nonnegative spacing and a positive duration",
-    );
+      q.map.revealOrder.durationMs <= 0
+    )
+      fail(
+        "ordered reveals require a supported answer mode, nonnegative spacing and a positive duration",
+      );
+  }
   if (
     q.disclosure.bearingDestination !== undefined &&
     (q.mode !== "compass-bearing" ||

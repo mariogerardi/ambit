@@ -348,6 +348,42 @@
     ]
   },
   {
+    "id": "how-america-adds-up-v1",
+    "dailyEligible": false,
+    "addedAt": "2026-11-04",
+    "title": "How America Adds Up",
+    "description": "From crowded island shores to wide empty basins, trace where 340 million Americans actually live—and discover the single point where the whole country balances.",
+    "path": "/journey/how-america-adds-up",
+    "module": "./howAmericaAddsUpJourney.ts",
+    "rounds": [
+      {
+        "id": "america-population-01-whole-country",
+        "label": "National count",
+        "progressLabel": "The Whole Country"
+      },
+      {
+        "id": "america-population-02-island-state",
+        "label": "Island living",
+        "progressLabel": "Island living"
+      },
+      {
+        "id": "america-population-03-sparse",
+        "label": "Sparse ground",
+        "progressLabel": "Room to Breathe"
+      },
+      {
+        "id": "america-population-04-fifty-million",
+        "label": "Concentration",
+        "progressLabel": "Fifty Million"
+      },
+      {
+        "id": "america-population-05-mean-center",
+        "label": "Balance point",
+        "progressLabel": "Center of population"
+      }
+    ]
+  },
+  {
     "id": "im-like-a-bird-v1",
     "addedAt": "2026-11-02",
     "title": "I’m Like a Bird",

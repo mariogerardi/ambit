@@ -33,6 +33,11 @@ export function estimateTier(question: Question, response: Response) {
 export const formatEstimate = (value: number, unit: string) =>
   `${value.toLocaleString("en-US", { maximumFractionDigits: 10 })} ${unit}`;
 
+export const formatEstimateLimit = (value: number, unit: string) =>
+  unit === "million people"
+    ? `${value.toLocaleString("en-US")}M`
+    : formatEstimate(value, unit);
+
 export function estimateBands(question: Question, response: Response) {
   if (question.rule.type !== "numeric-range") return [];
   const tiers = question.rule.tiers ?? [];

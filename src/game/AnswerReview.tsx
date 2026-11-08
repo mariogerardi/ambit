@@ -33,6 +33,12 @@ export function AnswerReview({
   ].includes(q.mode);
   const picked = responseIds(q, context, game);
   const reviewItems = answerItems(q, context, game);
+  if (q.rule.type === "region-population-sum")
+    return (
+      <p className="submitted-answer">
+        Selected states: <strong>{picked.map(name).join(", ")}</strong>
+      </p>
+    );
   if (q.mode === "country-recall") {
     const entries = game.recall?.entries ?? [];
     const wrong = entries.filter((e) => e.result === "wrong");

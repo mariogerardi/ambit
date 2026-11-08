@@ -120,6 +120,27 @@ export function constructionScene(
         opacity,
       });
   };
+  if (c?.kind === "brush" && rule.type === "population-brush-target") {
+    const mask = q.constructionArea?.mask;
+    if (mask)
+      overlays.push({
+        id: `construction:${q.id}:paint`,
+        type: "paint",
+        bounds: mask.bounds,
+        mask,
+        strokes: c.strokes,
+        coverage: "paint",
+        visualState: completion ? "visited" : "selected",
+        opacity: 0.72,
+      });
+    else
+      cells(
+        "paint",
+        rule.grid,
+        [...paintedCells(rule.grid, c)],
+        completion ? "visited" : "selected",
+      );
+  }
   if (c?.kind === "brush" && rule.type === "raster-overlap") {
     const mask = q.constructionArea?.mask;
     if (mask && (!reveal || rule.targetMask)) {
@@ -412,6 +433,21 @@ export function constructionScene(
       center: example.center,
       radiusKm: rule.radiusKm,
       visualState: "answer",
+    });
+  if (
+    example?.kind === "brush" &&
+    rule.type === "population-brush-target" &&
+    q.constructionArea?.mask
+  )
+    overlays.push({
+      id: `construction:${q.id}:example`,
+      type: "paint",
+      bounds: q.constructionArea.mask.bounds,
+      mask: q.constructionArea.mask,
+      strokes: example.strokes,
+      coverage: "paint",
+      visualState: "answer",
+      opacity: 0.72,
     });
   if (
     example?.kind === "polygon" &&

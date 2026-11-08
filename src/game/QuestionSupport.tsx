@@ -145,20 +145,22 @@ export function QuestionAccuracy({ question }: { question: Question }) {
                 {3 - i} {i === 2 ? "point" : "points"}:{" "}
                 {rule.type === "raster-overlap" && "f1" in tier
                   ? `overlap score at least ${tier.f1 * 100}%, with at least ${tier.precision * 100}% of scored paint on ${rule.targetLabel ?? "mapped dunes"}.`
-                  : rule.type === "labeled-region-pin-set" && "count" in tier
-                    ? `locate at least ${tier.count} correctly labeled ${tier.count === 1 ? "landscape" : "landscapes"}.`
-                    : rule.type === "island-coverage-max" && "count" in tier
-                      ? `enclose at least ${tier.count} entire islands, including every shore.`
-                      : rule.type === "point-coverage-max" && "count" in tier
-                        ? `enclose at least ${tier.count} of the ${rule.hideCandidatesUntilReveal ? "named" : "marked"} ${rule.pointLabel ?? "capitals"}.`
-                        : rule.type === "line-following" && "coverage" in tier
-                          ? `follow at least ${tier.coverage * 100}% of the river within ${tier.referenceKm} km, with ${tier.coverage * 100}% of your stroke within ${tier.strokeKm} km of it.`
-                          : rule.type === "population-coverage-area-budget" &&
-                              "population" in tier
-                            ? `capture at least ${tier.population}% of modeled residents in at most ${tier.area}% of country land.`
-                            : "error" in tier
-                              ? `each side contains ${50 - tier.error}% to ${50 + tier.error}% of modeled residents.`
-                              : ""}
+                  : rule.type === "population-brush-target" && "error" in tier
+                    ? `within ${tier.error.toLocaleString("en-US")} modeled residents of the target.`
+                    : rule.type === "labeled-region-pin-set" && "count" in tier
+                      ? `locate at least ${tier.count} correctly labeled ${tier.count === 1 ? "landscape" : "landscapes"}.`
+                      : rule.type === "island-coverage-max" && "count" in tier
+                        ? `enclose at least ${tier.count} entire islands, including every shore.`
+                        : rule.type === "point-coverage-max" && "count" in tier
+                          ? `enclose at least ${tier.count} of the ${rule.hideCandidatesUntilReveal ? "named" : "marked"} ${rule.pointLabel ?? "capitals"}.`
+                          : rule.type === "line-following" && "coverage" in tier
+                            ? `follow at least ${tier.coverage * 100}% of the river within ${tier.referenceKm} km, with ${tier.coverage * 100}% of your stroke within ${tier.strokeKm} km of it.`
+                            : rule.type === "population-coverage-area-budget" &&
+                                "population" in tier
+                              ? `capture at least ${tier.population}% of modeled residents in at most ${tier.area}% of country land.`
+                              : "error" in tier
+                                ? `each side contains ${50 - tier.error}% to ${50 + tier.error}% of modeled residents.`
+                                : ""}
               </li>
             ))}
           </ul>

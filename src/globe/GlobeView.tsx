@@ -276,7 +276,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
     useEffect(() => {
       const input = props.constructionInput;
       const rule = input && constructionRule(input.question);
-      if (rule?.type === "raster-overlap")
+      if (
+        rule?.type === "raster-overlap" ||
+        rule?.type === "population-brush-target"
+      )
         mapOverlays.previewBrush(
           brushHover.current,
           brushSize(rule, input?.brushRadiusKm),
@@ -1564,7 +1567,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         );
       const rule = constructionRule(input.question);
       brushHover.current =
-        rule?.type === "raster-overlap" &&
+        (rule?.type === "raster-overlap" ||
+          rule?.type === "population-brush-target") &&
         input.tool !== "move" &&
         event.pointerType === "mouse" &&
         !constructionPanning.current &&
@@ -1574,7 +1578,8 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           : undefined;
       mapOverlays.previewBrush(
         brushHover.current,
-        rule?.type === "raster-overlap"
+        rule?.type === "raster-overlap" ||
+          rule?.type === "population-brush-target"
           ? brushSize(rule, input.brushRadiusKm)
           : undefined,
         g.getGlobeRadius(),
