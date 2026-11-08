@@ -60,6 +60,7 @@ import {
 import { useAccount } from "./services/accounts";
 import { usePlayerProfile } from "./services/playerProfile";
 import { AccountMenu } from "./app/AccountMenu";
+import { AdminTopNavigation } from "./app/AdminTopNavigation";
 import { appRelease } from "./services/config";
 import { trackAction, trackView, reportFailure } from "./services/monitoring";
 import type { FeedbackRequest } from "./services/feedback";
@@ -1355,11 +1356,6 @@ export function App({
                   }
                   date={today}
                   schedule={schedule}
-                  attempt={daily.attempts[today]}
-                  resetReady={
-                    !!subject && dailyLoaded && cloudSave.hydrated && canSave
-                  }
-                  onResetAttempt={() => account.admin && resetAttempt(today)}
                   feedback={<FeedbackReview onNavigate={navigate} />}
                 />
               </Suspense>
@@ -1920,7 +1916,9 @@ export function App({
         )}
       </div>
       {minigameLanding && webgl && <MinigameTourCaption tour={tour} />}
-      <header className="experience-header">
+      <header
+        className={`experience-header${mode === "account" && account.admin && accountNavigation.tab === "admin" ? " has-admin-navigation" : ""}`}
+      >
         <button
           className="experience-logo"
           data-dd-action-name="Menu Home Logo"
@@ -1929,6 +1927,25 @@ export function App({
         >
           <AmbitLogo />
         </button>
+        {mode === "account" &&
+          account.admin &&
+          accountNavigation.tab === "admin" && (
+            <AdminTopNavigation
+              active={
+                accountNavigation.section ?? "schedule"
+              }
+              date={accountNavigation.date}
+              today={today}
+              onNavigate={navigate}
+              attempt={daily.attempts[today]}
+              resetReady={
+                !!subject && dailyLoaded && cloudSave.hydrated && canSave
+              }
+              onResetAttempt={() =>
+                account.admin && resetAttempt(today)
+              }
+            />
+          )}
         <div className="experience-header-right">
           {reviewSource && !account.user ? (
             <span className="review-local-badge">Local workbench</span>

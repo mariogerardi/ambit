@@ -4,12 +4,14 @@ export function AdminConfirmation({
   title,
   message,
   confirmLabel,
+  destructive = false,
   onConfirm,
   onCancel,
 }: {
   title: string;
   message: string;
   confirmLabel: string;
+  destructive?: boolean;
   onConfirm(): void;
   onCancel(): void;
 }) {
@@ -54,13 +56,21 @@ export function AdminConfirmation({
       <div className="admin-confirmation-actions">
         <button
           type="button"
-          className="quiet-button"
+          className={destructive ? "primary-button" : "quiet-button"}
           ref={cancel}
           onClick={onCancel}
         >
           Keep working
         </button>
-        <button type="button" className="primary-button" onClick={onConfirm}>
+        <button
+          type="button"
+          className={
+            destructive
+              ? "quiet-button admin-confirmation-destructive"
+              : "primary-button"
+          }
+          onClick={onConfirm}
+        >
           {confirmLabel}
         </button>
       </div>

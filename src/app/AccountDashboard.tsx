@@ -298,12 +298,12 @@ export function AccountDashboard({
           />
         </aside>
         <div className="account-workspace-main">
-          <header className="account-heading">
-            <div>
-              <h1 className="editorial-heading">
-                {ACCOUNT_SECTIONS[tab].label}
-              </h1>
-              {tab !== "admin" && (
+          {tab !== "admin" && (
+            <header className="account-heading">
+              <div>
+                <h1 className="editorial-heading">
+                  {ACCOUNT_SECTIONS[tab].label}
+                </h1>
                 <p className="account-section-description">
                   {
                     {
@@ -312,22 +312,13 @@ export function AccountDashboard({
                       profile: "How you appear to other players.",
                       friends: "A shared Journey. A little friendly curiosity.",
                       appearance: "Make Ambit feel like home.",
-                      admin:
-                        "Review Journeys, manage the schedule, and follow up on feedback.",
+                      admin: "",
                     }[tab]
                   }
                 </p>
-              )}
-            </div>
-            {tab === "admin" && (
-              <button
-                className="quiet-button tertiary-action"
-                onClick={() => selectTab("dashboard")}
-              >
-                ← Your progress
-              </button>
-            )}
-          </header>
+              </div>
+            </header>
+          )}
           <div hidden={tab === "admin"}>
             {loading && tab !== "friends" && (
               <p role="status">Opening your account…</p>

@@ -290,8 +290,10 @@ edition when one exists. Production has no demo function or schedule, and the
 Lambda's IAM write permissions are limited to demo partition keys. The manual
 script remains available for initial provisioning or an immediate refresh.
 
-Development uses `http://127.0.0.1:3001` until a staging API is configured. The
-staging stack has its own Cognito user pool, API, tables, login domain and logs;
+Development uses `http://127.0.0.1:3001` until a staging API is configured. No
+schedule service runs at that local URL by default; configure staging before
+using Daily schedules or Admin assignment locally. The staging stack has its own
+Cognito user pool, API, tables, login domain and logs;
 production tokens and data are not reused. Its API allows only localhost and
 127.0.0.1 on port 5173. Production API CORS and write-origin checks allow only
 `https://playambit.com`.

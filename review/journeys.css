@@ -2,7 +2,7 @@
   min-width: 0;
   width: 100%;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 .journey-workbench form {
   display: grid;
@@ -30,6 +30,33 @@
 }
 .journey-workbench .workbench-advanced input {
   max-width: 120px;
+}
+.journey-workbench .workbench-advanced {
+  display: grid;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.18);
+}
+.journey-workbench .workbench-advanced > summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--ui-accent);
+  font-size: 12px;
+}
+.journey-workbench .workbench-advanced[open] {
+  padding-bottom: 4px;
+}
+.journey-workbench .workbench-catalog {
+  padding-top: 8px;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+}
+.journey-workbench .workbench-catalog > summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 .journey-workbench details > .admin-review-states {
   margin-top: 10px;

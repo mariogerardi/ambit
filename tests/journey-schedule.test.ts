@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { validJourneySchedule } from "../src/services/journeySchedule";
+import {
+  journeyScheduleConnectionMessage,
+  validJourneySchedule,
+} from "../src/services/journeySchedule";
 import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 import {
   dailyJourney,
@@ -17,6 +20,17 @@ import vectors from "./fixtures/journey-schedule-vectors.json";
 
 describe("shared Journey dates", () => {
   const day = "2026-10-05";
+  it("explains how to restore a missing local schedule connection", () => {
+    expect(
+      journeyScheduleConnectionMessage("http://127.0.0.1:3001", true),
+    ).toContain("Configure the staging API");
+    expect(
+      journeyScheduleConnectionMessage("https://staging.example.com", true),
+    ).toContain("VITE_API_URL");
+    expect(
+      journeyScheduleConnectionMessage("https://playambit.com/api", false),
+    ).toContain("internet connection");
+  });
   const edition = JOURNEY_INDEX.find(
     (journey) => journey.id === "across-the-divide-v1",
   )!;
