@@ -299,7 +299,9 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       await settleLoads();
       expect(host.querySelector(".mode-incoming")).toBe(layer);
       if (label === "Admin")
-        expect(host.querySelector(".account-heading")).toBeNull();
+        expect(
+          host.querySelector<HTMLElement>(".account-heading")?.hidden,
+        ).toBe(true);
       else expect(host.querySelector(".account-heading")).not.toBeNull();
       expect(host.querySelector(".account-tabs")).toBe(tabs);
       expect(host.querySelector(".mode-outgoing")).toBeNull();
@@ -310,7 +312,9 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     expect(location.search).toBe("?tab=friends");
     await section("Admin");
     expect(location.search).toBe("?tab=admin");
-    expect(host.querySelector(".account-heading")).toBeNull();
+    expect(host.querySelector<HTMLElement>(".account-heading")?.hidden).toBe(
+      true,
+    );
     expect(host.querySelector(".admin-top-navigation")).not.toBeNull();
     expect(
       host.querySelector("#admin-tab-schedule")?.getAttribute("aria-current"),
