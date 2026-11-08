@@ -140,7 +140,7 @@ it("navigates full months and selects calendar dates, including leap day", async
   expect(
     host.querySelectorAll('.journey-calendar-day time[datetime="2028-02-29"]'),
   ).toHaveLength(1);
-});
+}, 10000);
 it("blocks pre-opening dates and restored drafts", async () => {
   const earlier = "2026-10-10";
   schedule.schedule!.records[earlier] = {

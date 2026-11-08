@@ -37,6 +37,25 @@ const clock = () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date(`${day}T16:00:00Z`));
 };
+async function changeReviewState(value: string) {
+  const select = host.querySelectorAll<HTMLSelectElement>(
+    ".admin-review-selectors select",
+  )[1];
+  expect(select).toBeDefined();
+  await act(async () => {
+    select.value = value;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await settleLoads();
+}
+async function openReviewDisclosure(label: string) {
+  const summary = [...host.querySelectorAll("summary")].find(
+    (element) => element.textContent?.trim() === label,
+  );
+  expect(summary).toBeDefined();
+  await act(async () => summary!.click());
+  await settleLoads();
+}
 
 describe("Journey authoring and entry parity (DOM only)", () => {
   it("initializes fresh Daily inputs once and keeps a resumed ordering draft", async () => {
@@ -95,12 +114,14 @@ describe("Journey authoring and entry parity (DOM only)", () => {
         (e) => e.textContent,
       );
     const before = cards();
-    await click("Restart question");
-    expect(cards()).toEqual(before);
-    expect(reviewRound(bird, 0).ordered).toEqual(
-      startRound(bird.rounds[0], 0, () => 0).ordered,
-    );
-    await click("Show hint");
+      await click("Inspect");
+      await openReviewDisclosure("Advanced review tools");
+      await click("Restart question");
+      expect(cards()).toEqual(before);
+      expect(reviewRound(bird, 0).ordered).toEqual(
+        startRound(bird.rounds[0], 0, () => 0).ordered,
+      );
+      await changeReviewState("hint");
     expect(
       host.querySelector('[aria-label="Leave out: Italy, locked by hint"]'),
     ).not.toBeNull();
@@ -131,28 +152,16 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     expect(JOURNEY_INDEX.some((j) => j.id === draft.id)).toBe(false);
     expect(host.textContent).toContain("Draft source");
     expect(host.textContent).not.toContain("Drag to rotate");
-    for (const text of [
-      "Show question",
-      "Show hint",
-      "Show assist",
-      "Show correct reveal",
-      "Show missed reveal",
-    ]) {
-      const button = [...host.querySelectorAll("button")].find(
-        (b) => b.textContent?.trim() === text,
-      )!;
-      expect(button).toBeDefined();
-      expect(button.closest("details")).toBeNull();
-    }
-
+    await click("Inspect");
+    expect(host.querySelector(".admin-review-selectors")).not.toBeNull();
     expect(host.textContent).not.toContain("Schedule this Journey");
-    await click("Show assist");
+    await changeReviewState("assist");
     expect(
       host.querySelector('[aria-label="First: Sweden, locked by assist"]'),
     ).not.toBeNull();
-    await click("Show missed reveal");
+    await changeReviewState("missed");
     expect(host.querySelector(".round-feedback")).not.toBeNull();
-    await click("Show mixed completion");
+    await changeReviewState("completion-mixed");
     expect(host.querySelector(".finish-story")).not.toBeNull();
     expect(probe.mounts).toBe(1);
     expect(inspect).toHaveBeenLastCalledWith(0, "completion-mixed");
@@ -205,10 +214,12 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     expect(host.querySelector(".journey-receipt details")).toBeNull();
     expect(host.textContent).not.toContain("Review your answer");
     expect(host.textContent).not.toContain("Stop flyover");
+    await click("Inspect");
     const panel = host.querySelector(".journey-review-panel");
     expect(panel).not.toBeNull();
     expect(panel?.closest(".question-card, .finish-story")).toBeNull();
-    expect(panel?.textContent).toContain("Journey review");
+    expect(panel?.textContent).toContain("Inspect");
+    expect(panel?.textContent).toContain("Journey completion · Mixed completion");
   });
   it("keeps construction inputs on the same production globe adapter in draft review", async () => {
     const draft = { ...sahara, id: "unregistered-construction" };
@@ -256,7 +267,8 @@ describe("Journey authoring and entry parity (DOM only)", () => {
         stage: "play",
       },
     });
-    await click("Show partial / lower tier");
+    await click("Inspect");
+    await changeReviewState("partial");
     expect(host.querySelector(".round-feedback")?.textContent).toContain(
       "Very close.",
     );
@@ -267,7 +279,7 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     expect(
       comparison.querySelector('[aria-label="After answering"]')?.textContent,
     ).toContain(question.explanation);
-    await click("Show sample completion");
+    await changeReviewState("completion");
     expect(host.querySelector(".finish-story")).not.toBeNull();
   });
 

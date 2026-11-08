@@ -298,27 +298,25 @@ export function AccountDashboard({
           />
         </aside>
         <div className="account-workspace-main">
-          {tab !== "admin" && (
-            <header className="account-heading">
-              <div>
-                <h1 className="editorial-heading">
-                  {ACCOUNT_SECTIONS[tab].label}
-                </h1>
-                <p className="account-section-description">
+          <header className="account-heading" hidden={tab === "admin"}>
+            <div>
+              <h1 className="editorial-heading">
+                {ACCOUNT_SECTIONS[tab].label}
+              </h1>
+              <p className="account-section-description">
+                {
                   {
-                    {
-                      dashboard:
-                        "Pick up your next stop. See how far you’ve come.",
-                      profile: "How you appear to other players.",
-                      friends: "A shared Journey. A little friendly curiosity.",
-                      appearance: "Make Ambit feel like home.",
-                      admin: "",
-                    }[tab]
-                  }
-                </p>
-              </div>
-            </header>
-          )}
+                    dashboard:
+                      "Pick up your next stop. See how far you’ve come.",
+                    profile: "How you appear to other players.",
+                    friends: "A shared Journey. A little friendly curiosity.",
+                    appearance: "Make Ambit feel like home.",
+                    admin: "",
+                  }[tab]
+                }
+              </p>
+            </div>
+          </header>
           <div hidden={tab === "admin"}>
             {loading && tab !== "friends" && (
               <p role="status">Opening your account…</p>
