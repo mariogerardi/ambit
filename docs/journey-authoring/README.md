@@ -14,7 +14,10 @@ Give ChatGPT the repository and this path. A reusable starting prompt is:
 > Read only relevant references and examples. Once the design is settled, produce
 > a short brief and draft Journey TypeScript module for Codex using
 > `SOURCE_READY_HANDOFF.md`. Inherit shared defaults and flag only material
-> open decisions or engine additions. Record the repository revision used.
+> open decisions or engine additions. Reuse interaction and presentation
+> deliberately: shared visual defaults take precedence over optional treatments
+> in example Journeys. Check the complete puzzles for accidental giveaways before
+> delivery. Record the repository revision used.
 
 Replace `main` with a published branch or commit when using work that has not
 merged. Confirm the requested files/ref can actually be read. A search result,
@@ -38,6 +41,9 @@ switch silently to another branch or claim local checks from repository reading.
    relevant Journey. Inspect its `src/game/*Journey.ts` definition and matching
    example in `src/game/recipes.ts` (construction examples may live in
    `src/game/constructionRecipes.ts`). Read one or two useful examples, not the whole suite.
+   Choose presentation from [shared visual defaults](JOURNEY_DEFAULTS.md#choose-presentation-by-role).
+   Anonymous city selection has a complete `recipe:anonymous-city-selection`
+   composition; letters used by another Journey are an optional variation.
 3. Establish the premise and compact five-stop outline. AI supplies playable
    clues, player-facing copy, plausible alternatives, help and meaningful reveals.
    Research new factual claims and media provenance; mark material uncertainties.
@@ -50,7 +56,8 @@ switch silently to another branch or claim local checks from repository reading.
    deliver a short brief based on the [spec template](JOURNEY_SPEC_TEMPLATE.md)
    and a draft `<name>Journey.ts` module. Put final copy and concrete contracts in
    the module; keep decisions, qualifications and material gaps in the brief.
-   Include inspected paths/recipe IDs and revision when known. Ask the user to
+   Include interaction and presentation source paths/recipe IDs, material departures
+   and revision when known in the existing fit table. Ask the user to
    settle creative choices, not write routine copy or fill technical fields.
 
 With repository-reading access only, do not ask the user to run setup or export

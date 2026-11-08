@@ -151,6 +151,8 @@ const mountains = [
 ];
 const coastalCities = [nanjing, shanghai, ningbo];
 const factoryCities = [dongguan, shenzhen, huizhou];
+// Optional lettered treatment for this Journey, not the anonymous-selection default.
+// New plain-marker compositions live in recipe:anonymous-city-selection.
 const anonymousFactories = factoryCities.map((p, i) => ({
   ...p,
   name: p.name,

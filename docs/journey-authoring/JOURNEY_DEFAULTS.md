@@ -16,6 +16,30 @@ alone do not override the current standards. Code establishes actual behavior.
 | Geographic roles       | Keep input eligibility, clue disclosure, canonical grading and display geography independent. Explanatory network countries do not all become player discoveries.                          | `presentation.ts`, `answerPresentation.ts`, `journeyWorld.ts`. Use semantic roles, not custom colors. |
 | Completion             | Cumulative discoveries and actual mistakes, with the shared result UI. An authored map can intentionally replace the cumulative scene.                                                     | `journeyWorld.ts`, `completion.mapMode`. Authored recap geography is content.                         |
 
+## Choose presentation by role
+
+Reuse a Journey's interaction structure; inherit appearance from this guide and
+the shared helpers/tokens. A published Journey may deliberately use optional
+badges, sizes or camera exceptions. Its presence is not a recommendation to copy
+those treatments. Omit optional overrides unless the approved experience needs
+them; use `authoredPlaces.ts` and `globe/symbols.ts` for shared point styles.
+
+| Object                         | Default presentation                                                                                                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Anonymous selectable locations | Equal plain candidate markers; no names, hover names or letter badges before commitment. Use `cityReference` for equal city shapes and `GLOBE_SYMBOLS.candidate` for candidate size. |
+| Named selectable locations     | The same shared markers, with names disclosed by the question's disclosure policy. Capital status must not give away a candidate's role.                                             |
+| Explanatory geographic areas   | Existing footprints or `areaLabel` anchors without invented city dots; explanatory context does not receive the player's grade.                                                      |
+| Revealed locations             | Disclosed names and shared result symbols; preserve the actual wrong selection alongside the solution.                                                                               |
+| Completion                     | Reuse canonical place identities, retain discoveries and actual mistakes, and distinguish explanatory context. Avoid nearby duplicate annotations for the same place.                |
+
+Letter/number badges are an exception when the task needs to refer to lettered
+objects or show an ordering. Ordinary anonymous selection does not need them.
+For an executable plain-marker lifecycle, use `recipe:anonymous-city-selection`
+in `src/game/recipes.ts`; its sandbox includes correct/missed reveals and cumulative
+completion. Made in China's A/B/C markers are an optional Journey-specific
+treatment, not the anonymous-selection default. Existing content is not restyled
+automatically by these authoring conventions.
+
 ## Camera rules by stage
 
 - **Bounded country/territory search:** prefer

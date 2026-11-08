@@ -67,6 +67,15 @@ without the tools and evidence to establish it.
 - Design prompt, candidates, camera, hint and assist together. Plausible
   distractors must preserve the deciding distinction. Do not give the answer away
   with camera centering, map styling, labels, a secondary clue or help.
+- Before delivering the module, read each complete puzzle against its intended
+  reasoning skill: opening, visible geography, candidate names/markers and the
+  shared supporting text. Check what each clue eliminates and whether that is
+  intentional. Remove accidental giveaways; reserve additional orientation for
+  help when that preserves the intended difficulty. Check that hint and assist
+  add useful information while leaving a real decision. Read reactions,
+  explanations and qualifications as player-facing copy: remove redundant answer
+  prefixes, technical grading prose and repeated disclaimers. Perform this within
+  authoring, not as an extra AI review, user copywriting task or separate report.
 - Hints add semantic understanding. Assists change the available support and
   preserve a real decision. Neither changes grading; avoid first-letter or
   letter-count giveaways and help that repeats the prompt.
@@ -78,6 +87,10 @@ without the tools and evidence to establish it.
   Areas use footprints and fitting bare symbols; actual locations use point markers;
   area names use labels without city dots. Candidate promotion never grants input.
   Use the shared semantic roles, not custom colors or per-question marker repairs.
+- Resolve appearance from JOURNEY_DEFAULTS.md and shared helpers before copying
+  an example's optional treatment. Anonymous candidates use plain equal markers;
+  letter badges need a task-specific reason. Record interaction reuse,
+  presentation reuse and meaningful departures in the existing fit table.
 - Single-country and merged-territory taps commit immediately. Pins and multi-answer
   selections confirm. Use one supporting paragraph: only a missing interaction
   cue or genuine exception, plus the shared commitment notice. Leave `instruction`
