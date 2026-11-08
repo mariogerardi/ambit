@@ -93,7 +93,8 @@ export function ConstructionAnswer({
             <span aria-hidden="true">◎</span> Recenter view
           </button>
         </div>
-      ) : rule.type === "raster-overlap" ? (
+      ) : rule.type === "raster-overlap" ||
+        rule.type === "population-brush-target" ? (
         <div
           className="construction-toolbar construction-brush-row"
           role="group"
@@ -229,24 +230,31 @@ export function ConstructionReview({
     constructionRule(question)?.type === "island-coverage-max"
   )
     return null;
+  const populationTarget =
+    constructionRule(question)?.type === "population-brush-target";
+  const metrics = populationTarget
+    ? result.metrics.slice(0, 1)
+    : result.metrics;
   return (
     <section
       className="construction-review"
       aria-label="Your construction result"
     >
       <dl>
-        {result.metrics.map((m) => (
+        {metrics.map((m) => (
           <div key={m.label}>
             <dt>
               {m.label
                 .replace("Modeled residents enclosed", "Population enclosed")
+                .replace("Modeled residents painted", "Population covered")
                 .replace("modeled residents", "people")}
             </dt>
             <dd>
-              {m.value.toLocaleString("en-US", {
-                maximumFractionDigits: m.unit.startsWith("of") ? 0 : 1,
-              })}
-              {m.unit === "%" ? "%" : ` ${m.unit}`}
+              {populationTarget && m.unit === "people"
+                ? `${(m.value / 1_000_000).toFixed(1)} million people`
+                : `${m.value.toLocaleString("en-US", {
+                    maximumFractionDigits: m.unit.startsWith("of") ? 0 : 1,
+                  })}${m.unit === "%" ? "%" : ` ${m.unit}`}`}
             </dd>
           </div>
         ))}

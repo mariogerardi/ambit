@@ -82,6 +82,20 @@ export function correctAnswerSummary(
   game: GameState,
 ) {
   const rule = question.rule;
+  if (rule.type === "region-population-sum") {
+    const selected = game.answers.at(-1)?.selectedIds ?? game.selectedIds;
+    const total = selected.reduce(
+      (sum, id) => sum + (rule.populations[id] ?? 0),
+      0,
+    );
+    const percentage = (100 * total) / rule.totalPopulation;
+    const delta =
+      total - (rule.totalPopulation * rule.numerator) / rule.denominator;
+    return {
+      label: "Your total",
+      value: `${total.toLocaleString("en-US")} people · ${percentage.toFixed(2)}% · ${Math.abs(delta).toLocaleString("en-US")} ${delta >= 0 ? "above" : "below"} half`,
+    };
+  }
   const expected = solutionIds(question, context);
   const name = (id: string) =>
     question.choices?.find((choice) => choice.id === id)?.label ??
@@ -100,6 +114,7 @@ export function correctAnswerSummary(
     ];
   } else if (
     rule.type === "raster-overlap" ||
+    rule.type === "population-brush-target" ||
     rule.type === "line-following" ||
     rule.type === "labeled-region-pin-set"
   )

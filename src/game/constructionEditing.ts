@@ -30,7 +30,10 @@ export function editConstruction(
   };
   if (rule.type === "point-coverage-max" || rule.type === "island-coverage-max")
     return { version: 1, kind: "circle", center: p };
-  if (rule.type === "raster-overlap") {
+  if (
+    rule.type === "raster-overlap" ||
+    rule.type === "population-brush-target"
+  ) {
     const c =
       current?.kind === "brush"
         ? current

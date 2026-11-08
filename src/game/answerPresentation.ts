@@ -59,6 +59,28 @@ export function answerItems(
   const expected = solutionIds(q, context);
   const picked = responseIds(q, context, game);
   const reveal = game.phase === "feedback" || game.phase === "failed";
+  if (q.rule.type === "region-population-sum") {
+    const survivors =
+      game.help?.[q.id] === "assisted"
+        ? q.guidance?.assist?.candidateIds
+        : undefined;
+    return selectableIds(q, context).map((id) => ({
+      id,
+      geographyIds: [id],
+      selected: picked.includes(id),
+      eliminated: !!survivors && !survivors.includes(id),
+      supplied: false,
+      state: reveal
+        ? picked.includes(id)
+          ? game.answers.at(-1)?.correct
+            ? "correct"
+            : "selected"
+          : "disabled"
+        : picked.includes(id)
+          ? "selected"
+          : "selectable",
+    }));
+  }
   if (q.mode === "country-recall")
     return [...new Set([...expected, ...picked])].map((id) => ({
       id,

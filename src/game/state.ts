@@ -292,7 +292,10 @@ export function gameReducer(
   }
   if (action.type === "brush-size") {
     const r = constructionRule(round);
-    if (r?.type !== "raster-overlap" || !Number.isFinite(action.value))
+    if (
+      (r?.type !== "raster-overlap" && r?.type !== "population-brush-target") ||
+      !Number.isFinite(action.value)
+    )
       return state;
     const range = brushSizeRange(r);
     return action.value >= range.min && action.value <= range.max

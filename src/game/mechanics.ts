@@ -266,7 +266,7 @@ export const MECHANICS = {
     { validate: validateConstructionQuestion, outcome: constructionOutcome },
   ),
   "geo-brush": defineMechanic(
-    ["raster-overlap"],
+    ["raster-overlap", "population-brush-target"],
     "Paint a geographic area",
     "construction",
     "construction",
@@ -467,12 +467,37 @@ export const MECHANICS = {
     true,
   ),
   "map-multiple": defineMechanic(
-    countryRules,
+    [...countryRules, "region-population-sum"],
     "Multiple country picks",
     "map",
     "selected",
     "regions",
     false,
+    {
+      validate: (q, fail) => {
+        if (q.rule.type !== "region-population-sum") return;
+        const r = q.rule,
+          entries = Object.entries(r.populations);
+        if (
+          q.selection.type !== "ids" ||
+          entries.length < q.count ||
+          entries.some(
+            ([id, value]) => !id || !Number.isSafeInteger(value) || value < 0,
+          ) ||
+          !Number.isSafeInteger(r.totalPopulation) ||
+          r.totalPopulation <= 0 ||
+          !Number.isSafeInteger(r.numerator) ||
+          r.numerator <= 0 ||
+          !Number.isSafeInteger(r.denominator) ||
+          r.denominator <= r.numerator ||
+          q.selection.ids.length !== entries.length ||
+          q.selection.ids.some((id) => !(id in r.populations))
+        )
+          fail(
+            "population sum requires matching selectable regions and valid integer totals",
+          );
+      },
+    },
   ),
   number: defineMechanic(
     ["manual-number", "feature-count", "shortest-borders", "capital-circle"],

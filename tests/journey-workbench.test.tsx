@@ -159,6 +159,36 @@ it("switches Journey immediately from the visible selector and submits the curre
   }
 });
 
+it("sorts Journey sources by their displayed titles", async () => {
+  await act(async () =>
+    root.render(
+      <JourneyWorkbench
+        journey={template}
+        filename="powerToThePeopleJourney.ts"
+        modules={[
+          "powerToThePeopleJourney.ts",
+          "howAmericaAddsUpJourney.ts",
+          "northAmericaJourney.ts",
+          "fifteenthJourney.ts",
+          "bareMinimumJourney.ts",
+        ]}
+        seed={1}
+        request={vi.fn()}
+      />,
+    ),
+  );
+  const options = [
+    ...host.querySelectorAll<HTMLSelectElement>('select[name="module"] option'),
+  ];
+  expect(options.map((option) => option.textContent)).toEqual([
+    "A Continent in Pieces",
+    "Bare Minimum",
+    "How America Adds Up",
+    "On Russia’s Doorstep",
+    "Power to the People",
+  ]);
+});
+
 it("opens a recipe sandbox without offering catalog registration", async () => {
   const submit = vi
     .spyOn(HTMLFormElement.prototype, "requestSubmit")

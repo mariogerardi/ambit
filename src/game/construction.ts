@@ -18,6 +18,7 @@ export const constructionRule = (
 ): ConstructionRule | undefined =>
   [
     "raster-overlap",
+    "population-brush-target",
     "point-coverage-max",
     "island-coverage-max",
     "line-following",
@@ -32,6 +33,7 @@ export const constructionKind = (
 ): Construction["kind"] =>
   ({
     "raster-overlap": "brush",
+    "population-brush-target": "brush",
     "point-coverage-max": "circle",
     "island-coverage-max": "circle",
     "line-following": "trace",
@@ -355,7 +357,10 @@ export function snapToBoundary(p: GeoPoint, boundary: GeoPoint[]) {
   return { ...best };
 }
 export function brushSizeRange(
-  rule: Extract<ConstructionRule, { type: "raster-overlap" }>,
+  rule: Extract<
+    ConstructionRule,
+    { type: "raster-overlap" | "population-brush-target" }
+  >,
 ) {
   return {
     min: Math.max(10, Math.round(rule.brushRadiusKm / 40) * 10),
@@ -364,7 +369,10 @@ export function brushSizeRange(
   };
 }
 export function brushSize(
-  rule: Extract<ConstructionRule, { type: "raster-overlap" }>,
+  rule: Extract<
+    ConstructionRule,
+    { type: "raster-overlap" | "population-brush-target" }
+  >,
   value?: number,
 ) {
   const range = brushSizeRange(rule);
@@ -385,7 +393,8 @@ export function constructionReady(q: Question, response: Response) {
     );
   if (c.kind === "brush")
     return (
-      rule.type === "raster-overlap" &&
+      (rule.type === "raster-overlap" ||
+        rule.type === "population-brush-target") &&
       c.strokes.every((s) => s.radiusKm <= brushSizeRange(rule).max) &&
       c.strokes.some((s) => !s.erase)
     );
@@ -443,6 +452,19 @@ export function evaluateConstruction(
         value: containedIds.length,
         unit: `of ${rule.slots.length}`,
       },
+    ];
+  } else if (rule.type === "population-brush-target" && c.kind === "brush") {
+    const painted = paintedCells(rule.grid, c);
+    const population = rule.grid.cells.reduce(
+      (total, [index, count]) => total + (painted.has(index) ? count : 0),
+      0,
+    );
+    const error = Math.abs(population - rule.targetPopulation);
+    tier = rule.tiers.findIndex((band) => error <= band.error + 1e-7);
+    metrics = [
+      { label: "Modeled residents painted", value: population, unit: "people" },
+      { label: "Difference from target", value: error, unit: "people" },
+      { label: "Target", value: rule.targetPopulation, unit: "people" },
     ];
   } else if (rule.type === "raster-overlap" && c.kind === "brush") {
     const cells = paintedCells(rule.grid, c);
@@ -708,6 +730,21 @@ export function validateConstructionQuestion(
   }
   if (r.type === "raster-overlap" && r.grid.cells.some(([, v]) => v > 1))
     fail("dune fractions must be between zero and one");
+  if (
+    r.type === "population-brush-target" &&
+    (!Number.isFinite(r.targetPopulation) ||
+      r.targetPopulation <= 0 ||
+      !Number.isFinite(r.brushRadiusKm) ||
+      r.brushRadiusKm < 1 ||
+      r.brushRadiusKm > 500 ||
+      r.tiers.some(
+        (band, i) =>
+          !Number.isFinite(band.error) ||
+          band.error < 0 ||
+          (i > 0 && band.error <= r.tiers[i - 1].error),
+      ))
+  )
+    fail("invalid population brush target or accuracy bands");
   if ("grid" in r && r.grid.cells.reduce((n, [, v]) => n + v, 0) <= 0)
     fail("construction grid has no target mass");
   if (

@@ -49,6 +49,7 @@ For an approved specification, start with
 | The Reggaetón Route                | `/journey/the-sound-of-somewhere-reggaeton`   | [reggaetonJourney.ts](../src/game/reggaetonJourney.ts)                         |
 | Power to the People                | `/journey/power-to-the-people`                | [powerToThePeopleJourney.ts](../src/game/powerToThePeopleJourney.ts)           |
 | Bare Minimum                       | `/journey/bare-minimum`                       | [bareMinimumJourney.ts](../src/game/bareMinimumJourney.ts)                     |
+| How America Adds Up                | `/journey/how-america-adds-up`                | [howAmericaAddsUpJourney.ts](../src/game/howAmericaAddsUpJourney.ts)           |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.

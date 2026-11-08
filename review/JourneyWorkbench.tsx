@@ -30,6 +30,20 @@ export function JourneyWorkbench({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const sources = modules
+    .map((name) => ({
+      name,
+      title:
+        name === filename && !recipeId
+          ? journey.title
+          : (JOURNEY_INDEX.find((entry) => entry.module === `./${name}`)
+              ?.title ??
+            name
+              .replace(/Journey\.ts$/, "")
+              .replace(/([a-z])([A-Z])/g, "$1 $2")
+              .replace(/^./, (letter) => letter.toUpperCase())),
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title));
   async function registration(commit: boolean) {
     setBusy(true);
     setError("");
@@ -84,16 +98,9 @@ export function JourneyWorkbench({
                 Choose a Journey
               </option>
             )}
-            {modules.map((name) => (
+            {sources.map(({ name, title }) => (
               <option key={name} value={name}>
-                {name === filename && !recipeId
-                  ? journey.title
-                  : (JOURNEY_INDEX.find((entry) => entry.module === `./${name}`)
-                      ?.title ??
-                    name
-                      .replace(/Journey\.ts$/, "")
-                      .replace(/([a-z])([A-Z])/g, "$1 $2")
-                      .replace(/^./, (letter) => letter.toUpperCase()))}
+                {title}
               </option>
             ))}
           </select>

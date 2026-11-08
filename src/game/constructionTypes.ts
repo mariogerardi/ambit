@@ -84,6 +84,13 @@ export type ConstructionRule =
       tiers: (ConstructionBand & { f1: number; precision: number })[];
     }
   | {
+      type: "population-brush-target";
+      grid: ConstructionGrid;
+      targetPopulation: number;
+      brushRadiusKm: number;
+      tiers: (ConstructionBand & { error: number })[];
+    }
+  | {
       type: "point-coverage-max";
       radiusKm: number;
       candidates: PlaceFeature[];

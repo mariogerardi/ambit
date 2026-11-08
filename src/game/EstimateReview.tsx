@@ -5,6 +5,7 @@ import {
   estimateError,
   estimateValue,
   formatEstimate,
+  formatEstimateLimit,
 } from "./numericEstimate";
 
 /** A committed estimate stays on its original scale; this is display-only. */
@@ -78,8 +79,8 @@ export function EstimateReview({
         />
       </div>
       <div className="estimate-slider-limits" aria-hidden="true">
-        <span>{formatEstimate(rule.min, rule.unit)}</span>
-        <span>{formatEstimate(rule.max, rule.unit)}</span>
+        <span>{formatEstimateLimit(rule.min, rule.unit)}</span>
+        <span>{formatEstimateLimit(rule.max, rule.unit)}</span>
       </div>
       <p className="estimate-review-key">
         <span>
@@ -88,28 +89,31 @@ export function EstimateReview({
         </span>
         <span>
           <i className="estimate-review-target-key" aria-hidden="true" />
-          Answer: {formatEstimate(rule.value, rule.unit)}
+          {rule.answerLabel ?? "Answer"}:{" "}
+          {formatEstimate(rule.value, rule.unit)}
         </span>
       </p>
-      <ol className="pin-accuracy-bands" aria-label="Estimate accuracy bands">
-        {bands.map((band) => (
-          <li
-            key={band.tolerance}
-            data-achieved={band.achieved || undefined}
-            style={
-              {
-                "--band-color": `var(--play-${bandRole(band.index)})`,
-              } as CSSProperties
-            }
-          >
-            <span aria-hidden="true">{band.achieved ? "✓" : "◎"}</span>
-            <span>
-              <span className="sr-only">{band.label}: </span>
-              <strong>±{formatEstimate(band.tolerance, rule.unit)}</strong>
-            </span>
-          </li>
-        ))}
-      </ol>
+      {rule.showAccuracyBands !== false && (
+        <ol className="pin-accuracy-bands" aria-label="Estimate accuracy bands">
+          {bands.map((band) => (
+            <li
+              key={band.tolerance}
+              data-achieved={band.achieved || undefined}
+              style={
+                {
+                  "--band-color": `var(--play-${bandRole(band.index)})`,
+                } as CSSProperties
+              }
+            >
+              <span aria-hidden="true">{band.achieved ? "✓" : "◎"}</span>
+              <span>
+                <span className="sr-only">{band.label}: </span>
+                <strong>±{formatEstimate(band.tolerance, rule.unit)}</strong>
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
       <p className="sr-only">
         Scale: {formatEstimate(rule.min, rule.unit)} to{" "}
         {formatEstimate(rule.max, rule.unit)}. Accepted estimates:{" "}

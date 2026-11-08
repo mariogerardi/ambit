@@ -104,8 +104,19 @@ export type KnowledgeRule =
       unit: string;
       /** Ascending inclusive error bands; optional 3 / 2 / 1 rewards. */
       tiers?: { tolerance: number; feedback: string }[];
+      /** Hide the visual accuracy-band list while retaining scoring details in question info. */
+      showAccuracyBands?: boolean;
+      /** Name of the reference value in the submitted-estimate review. */
+      answerLabel?: string;
     }
   | { type: "region-ids"; ids: string[]; match?: "all" | "any" }
+  | {
+      type: "region-population-sum";
+      populations: Record<string, number>;
+      totalPopulation: number;
+      numerator: number;
+      denominator: number;
+    }
   | { type: "choice-ids"; ids: string[]; ordered?: boolean }
   | { type: "slot-matches"; matches: { slotId: string; choiceId: string }[] }
   | { type: "capital-name"; countryId: string }
@@ -525,7 +536,10 @@ export type QuestionContract =
       NoMapSelection)
   | ({
       mode: "geo-brush";
-      rule: Extract<ConstructionRule, { type: "raster-overlap" }>;
+      rule: Extract<
+        ConstructionRule,
+        { type: "raster-overlap" | "population-brush-target" }
+      >;
     } & Single &
       NoMapSelection)
   | ({

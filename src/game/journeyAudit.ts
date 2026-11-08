@@ -84,7 +84,19 @@ export function submitSample(
   }
   if (mechanic.response === "construction")
     response.construction = constructionAuditSample(question, correct);
-  if (mechanic.response === "selected")
+  if (
+    mechanic.response === "selected" &&
+    question.rule.type === "region-population-sum"
+  ) {
+    const populations = question.rule.populations;
+    response.selectedIds = [...eligible]
+      .sort((a, b) =>
+        correct
+          ? populations[b] - populations[a]
+          : populations[a] - populations[b],
+      )
+      .slice(0, count);
+  } else if (mechanic.response === "selected")
     response.selectedIds = correct
       ? expected.slice(0, count)
       : [

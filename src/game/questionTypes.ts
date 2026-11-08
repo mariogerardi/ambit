@@ -11,6 +11,8 @@ export const RULE_TYPES: Record<Question["rule"]["type"], string> = {
   "labeled-region-pin-set": "Independent labeled pins inside reviewed regions",
   "country-set-recall": "Progressive country recall with a mistake budget",
   "raster-overlap": "Painted overlap with a reviewed area mask",
+  "population-brush-target": "Paint toward a modeled population target",
+  "region-population-sum": "Select regions above a population threshold",
   "island-coverage-max": "Whole islands enclosed by a fixed geodesic circle",
   "point-coverage-max": "Maximum point coverage with a fixed circle",
   "line-following": "Reviewed path coverage and deviation",
