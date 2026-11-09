@@ -309,7 +309,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
     expect(
       host.querySelector(".journey-scheduler-heading h2")?.textContent,
     ).toBe("Schedule");
-    await click("Choose a Journey");
+    await click("Change Journey");
     expect(
       host.querySelector('[data-journey-id="north-america-v2"]'),
     ).not.toBeNull();

@@ -219,7 +219,9 @@ describe("Journey authoring and entry parity (DOM only)", () => {
     expect(panel).not.toBeNull();
     expect(panel?.closest(".question-card, .finish-story")).toBeNull();
     expect(panel?.textContent).toContain("Inspect");
-    expect(panel?.textContent).toContain("Journey completion · Mixed completion");
+    expect(panel?.textContent).toContain(
+      "Journey completion · Requested · Mixed completion",
+    );
   });
   it("keeps construction inputs on the same production globe adapter in draft review", async () => {
     const draft = { ...sahara, id: "unregistered-construction" };

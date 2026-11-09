@@ -74,6 +74,7 @@ export function AdminJourneyReview({
     source?.stage && source.stage !== "play" ? "requested" : "live",
   );
   const requestedState = useRef<GameState | undefined>(undefined);
+  const pendingSourceStage = useRef(source?.stage);
   const previousGame = useRef(game);
   const request = useRef(0);
   useEffect(() => {
@@ -83,6 +84,7 @@ export function AdminJourneyReview({
       source?.stage && source.stage !== "play" ? "requested" : "live",
     );
     requestedState.current = undefined;
+    pendingSourceStage.current = source?.stage;
     previousGame.current = game;
   }, [journey.id]);
   useEffect(() => {
@@ -93,7 +95,18 @@ export function AdminJourneyReview({
       return;
     }
     requestedState.current = undefined;
-    setActiveStage(liveStage(game, journey));
+    const sourceStage = pendingSourceStage.current;
+    pendingSourceStage.current = undefined;
+    const nextStage = liveStage(game, journey);
+    // The shell prepares the initial source preview asynchronously.
+    if (
+      sourceStage &&
+      sourceStage !== "play" &&
+      (sourceStage === nextStage ||
+        (sourceStage === "completion-mixed" && nextStage === "completion"))
+    )
+      return;
+    setActiveStage(nextStage);
     setStageOrigin("live");
   }, [game, journey]);
   useEffect(
@@ -104,6 +117,7 @@ export function AdminJourneyReview({
   );
   const reset = (index: number) => {
     request.current++;
+    pendingSourceStage.current = undefined;
     setBusy(false);
     setError("");
     setActiveStage("play");
@@ -115,6 +129,7 @@ export function AdminJourneyReview({
   };
   async function sample(kind: ReviewStage, index = game.roundIndex) {
     const id = ++request.current;
+    pendingSourceStage.current = undefined;
     setBusy(true);
     setError("");
     try {
@@ -330,6 +345,7 @@ export function AdminJourneyReview({
                             await file.text(),
                           );
                           if (id === request.current) {
+                            pendingSourceStage.current = undefined;
                             requestedState.current = restored;
                             onChange(restored);
                             setActiveStage(liveStage(restored, journey));
