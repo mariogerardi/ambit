@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { JourneyWorkbench } from "../review/JourneyWorkbench";
-import { AccountMenu } from "../src/app/AccountMenu";
+import { newestJourney } from "../src/game/journeyRegistry";
 import { AppMenu } from "../src/app/AppMenu";
 import { POWER_TO_THE_PEOPLE_JOURNEY as template } from "../src/game/powerToThePeopleJourney";
 const journey = { ...template, id: "workbench-test-v1" };
@@ -34,29 +34,43 @@ async function openDisclosure(text: string) {
   expect(summary).toBeDefined();
   await act(async () => summary.click());
 }
-it("keeps workbench access in the signed-in Admin menu", async () => {
-  await act(async () =>
-    root.render(
-      <AppMenu path="/" onNavigate={() => {}} onCredits={() => {}} />,
-    ),
-  );
-  await click("Open menu");
-  expect(host.querySelector('a[href="/review/journeys.html"]')).toBeNull();
-  for (const admin of [false, true]) {
+it("keeps Workbench access authorized and outside personal account navigation", async () => {
+  for (const [admin, path, visible] of [
+    [false, "/", false],
+    [true, "/", true],
+    [true, "/account?tab=profile", false],
+  ] as const) {
     await act(async () =>
       root.render(
-        <AccountMenu
-          key={String(admin)}
-          signedIn
+        <AppMenu
+          key={`${admin}${path}`}
           admin={admin}
-          path="/"
+          path={path}
           onNavigate={() => {}}
+          onCredits={() => {}}
         />,
       ),
     );
-    await click("Account");
-    expect(!!host.querySelector('a[href="/review/journeys.html"]')).toBe(admin);
+    await click("Open menu");
+    expect(!!host.querySelector('a[href="/review/journeys.html"]')).toBe(
+      visible,
+    );
   }
+});
+it("chooses the newest catalog authoring date regardless of catalog order or rotation eligibility", () => {
+  const entries = [
+    { ...newestJourney()!, id: "older", title: "A", addedAt: "2026-01-01" },
+    {
+      ...newestJourney()!,
+      id: "newest",
+      title: "Z",
+      addedAt: "2026-11-09",
+      dailyEligible: false,
+    },
+    { ...newestJourney()!, id: "middle", title: "M", addedAt: "2026-10-01" },
+  ];
+  expect(newestJourney(entries)?.id).toBe("newest");
+  expect(newestJourney(entries.reverse())?.id).toBe("newest");
 });
 it("previews an unregistered source without writing and commits only from its reviewed action", async () => {
   const preview = {

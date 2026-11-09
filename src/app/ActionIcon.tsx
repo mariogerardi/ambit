@@ -4,6 +4,7 @@ const paths = {
   friends:
     "M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2 21v-1a7 7 0 0 1 14 0v1m1-17a4 4 0 0 1 0 8m2 3a6 6 0 0 1 3 5v1",
   settings: "M4 7h16M4 17h16M8 4v6M16 14v6",
+  workbench: "M3 4h18v14H3V4Zm5 17h8m-4-3v3M7 8l-2 3 2 3m10-6 2 3-2 3m-6-7-2 8",
   admin: "m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6",
   share: "M12 16V3m-5 5 5-5 5 5M5 13v7h14v-7",
   paint:

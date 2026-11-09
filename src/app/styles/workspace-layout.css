@@ -212,61 +212,6 @@
 .experience.page-layout .study-editor-scroll {
   overflow: visible;
 }
-.admin-content {
-  width: min(100%, 1040px);
-  margin: 0 auto;
-}
-.experience .admin-content .admin-panel {
-  width: 100%;
-  padding: 0;
-}
-.admin-panel form {
-  max-width: 620px;
-}
-.admin-panel > h1 {
-  margin: 10px 0 8px;
-  font-size: clamp(32px, 3vw, 44px);
-}
-.admin-panel > .muted {
-  margin: 0 0 28px;
-}
-.admin-tab-panel[hidden] {
-  display: none;
-}
-.admin-tools {
-  color: var(--ui-muted);
-}
-.admin-reset {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 20px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.24);
-  border-radius: 12px;
-  background: rgb(var(--ui-surface-rgb) / 0.8);
-  font-size: 13px;
-  line-height: 1.6;
-}
-.admin-reset h2 {
-  margin: 0 0 4px;
-  color: var(--ui-text);
-  font-size: 19px;
-}
-.admin-reset p {
-  margin: 0;
-}
-.admin-reset > button {
-  min-height: 44px;
-  padding: 10px 14px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
-  border-radius: 9px;
-  font-size: 13px;
-}
-.admin-reset > [role="status"] {
-  flex-basis: 100%;
-}
 .account-earth {
   position: fixed;
   top: 8vh;

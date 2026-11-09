@@ -280,9 +280,7 @@ it("preserves only valid comparison parameters through authentication", () => {
 it("retains only recognized account tab destinations through sign-in", () => {
   for (const tab of ["dashboard", "profile", "friends", "appearance"])
     expect(safeReturnPath(`/account?tab=${tab}`)).toBe(`/account?tab=${tab}`);
-  expect(safeReturnPath("/account?tab=admin&section=tools")).toBe(
-    "/account?tab=admin&section=tools",
-  );
+  expect(safeReturnPath("/account?tab=admin&section=tools")).toBe("/account");
   expect(safeReturnPath("/account?tab=admin&token=secret")).toBe("/account");
   expect(safeReturnPath("/account?tab=profile&section=tools")).toBe("/account");
   expect(safeReturnPath("/account?tab=profile&tab=admin")).toBe("/account");
@@ -290,7 +288,7 @@ it("retains only recognized account tab destinations through sign-in", () => {
 
 it("retains validated Admin Journey/date context through sign-in", () => {
   const link =
-    "/account?tab=admin&section=schedule&date=2026-10-29&journey=down-the-danube-v1";
+    "/admin?section=schedule&date=2026-10-29&journey=down-the-danube-v1";
   expect(safeReturnPath(link)).toBe(link);
   expect(safeReturnPath(link.replace("2026-10-29", "2026-02-30"))).toBe(
     "/account",

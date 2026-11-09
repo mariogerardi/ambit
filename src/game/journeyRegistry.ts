@@ -19,6 +19,14 @@ export const JOURNEY_INDEX = index as (JourneySummary & {
   path: string;
   module: string;
 })[];
+export function newestJourney(catalog = JOURNEY_INDEX) {
+  return [...catalog].sort(
+    (a, b) =>
+      b.addedAt.localeCompare(a.addedAt) ||
+      a.title.localeCompare(b.title) ||
+      a.id.localeCompare(b.id),
+  )[0];
+}
 const modules = import.meta.glob<Record<string, unknown>>(["./*Journey.ts"]);
 const pending = new Map<string, Promise<Journey>>();
 

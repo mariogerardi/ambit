@@ -10,35 +10,18 @@ import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { useAccount } from "../services/accounts";
 import type { useJourneySchedule } from "../services/journeySchedule";
 import { dailyJourney, dateOrdinal } from "./dailyProgress";
+import type { DailyAttempt } from "./dailyProgress";
 import type { AdminSection } from "./accountNavigation";
 import { ARCHIVE_START_DATE } from "./archiveDates";
 import { AdminJourneys } from "./AdminJourneys";
+import type { CatalogSort, RotationFilter } from "./AdminJourneys";
 import { useToast } from "./Toast";
+import { AdminTopNavigation } from "./AdminTopNavigation";
 import { ActionIcon } from "./ActionIcon";
 import { AdminConfirmation } from "./AdminConfirmation";
 import { adminDate, journeyReviewLink } from "./accountNavigation";
 
-const ADMIN_SECTIONS = ["schedule", "journeys", "feedback"] as const;
-const DRAFT_KEY = "ambit.admin.schedule-draft";
-type ScheduleDraft = { day: string; value: string; saved: string };
-function readDraft(): ScheduleDraft | undefined {
-  try {
-    const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null");
-    if (
-      draft &&
-      typeof draft.day === "string" &&
-      Number.isFinite(dateOrdinal(draft.day)) &&
-      draft.day >= ARCHIVE_START_DATE &&
-      typeof draft.saved === "string" &&
-      draft.value !== draft.saved &&
-      (draft.value === "" ||
-        JOURNEY_INDEX.some((journey) => journey.id === draft.value))
-    )
-      return draft;
-  } catch {
-    /* An unpublished selection is optional local state. */
-  }
-}
+type ScheduleProposal = { day: string; value: string; saved: string };
 const formatDay = (date: string, long = false) =>
   new Date(`${date}T12:00:00`).toLocaleDateString(
     undefined,
@@ -71,25 +54,6 @@ function calendarDays(month: string) {
     new Date((start + index) * 86400000).toISOString().slice(0, 10),
   );
 }
-function RefreshIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20 7v5h-5M4 17v-5h5" />
-      <path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
-    </svg>
-  );
-}
-
 export function AdminPanel({
   date,
   schedule,
@@ -100,6 +64,9 @@ export function AdminPanel({
   initialJourneyId,
   initialDate,
   onNavigate,
+  attempt,
+  resetReady = false,
+  onResetAttempt,
 }: {
   date: string;
   schedule: ReturnType<typeof useJourneySchedule>;
@@ -110,6 +77,9 @@ export function AdminPanel({
   initialJourneyId?: string;
   initialDate?: string;
   onNavigate?(url: string): void;
+  attempt?: DailyAttempt;
+  resetReady?: boolean;
+  onResetAttempt?(): boolean;
 }) {
   const account = useAccount();
   const notifications = useToast();
@@ -117,28 +87,28 @@ export function AdminPanel({
   const initialDay =
     adminDate(initialDate) ??
     (date < ARCHIVE_START_DATE ? ARCHIVE_START_DATE : date);
-  const [draft, setDraft] = useState<ScheduleDraft>(
-    () =>
-      readDraft() ?? {
-        day: initialDay,
-        value:
-          records[initialDay]?.source === "assigned"
-            ? (records[initialDay].journeyId ?? "")
-            : "",
-        saved:
-          records[initialDay]?.source === "assigned"
-            ? (records[initialDay].journeyId ?? "")
-            : "",
-      },
-  );
-  const [day, setDay] = useState(draft.day);
-  const [month, setMonth] = useState(draft.day.slice(0, 7));
+  const initialAssignment =
+    records[initialDay]?.source === "assigned"
+      ? (records[initialDay].journeyId ?? "")
+      : "";
+  const [proposal, setProposal] = useState<ScheduleProposal>({
+    day: initialDay,
+    value: initialAssignment,
+    saved: initialAssignment,
+  });
+  const [day, setDay] = useState(initialDay);
+  const [month, setMonth] = useState(initialDay.slice(0, 7));
   const [localSection, setLocalSection] = useState<AdminSection>("schedule");
   const requestedSection = suppliedSection ?? localSection;
-  const section = requestedSection === "tools" ? "schedule" : requestedSection;
+  const section = requestedSection;
   const [libraryId, setLibraryId] = useState<string>();
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [librarySort, setLibrarySort] = useState<CatalogSort>("title");
+  const [libraryRotation, setLibraryRotation] = useState<RotationFilter>("all");
   const [candidateId, setCandidateId] = useState<string>();
   const [pickerSearch, setPickerSearch] = useState("");
+  const [resetConfirmation, setResetConfirmation] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
   const [confirmation, setConfirmation] = useState<{
     title: string;
     message: string;
@@ -153,7 +123,7 @@ export function AdminPanel({
       title: string,
       message: string,
       confirmLabel: string,
-      destructive = true,
+      destructive = false,
     ) =>
       new Promise<boolean>((resolve) => {
         pendingConfirmation.current?.(false);
@@ -246,11 +216,10 @@ export function AdminPanel({
   const [submitting, setSubmitting] = useState(false);
   const dayLoaded =
     !!records[day] || schedule.loadedMonths.includes(day.slice(0, 7));
-  // A server refresh is not an edit. Preserve a restored edit's original
-  // baseline until this date is loaded, including a choice to restore automatic.
+  // Server refreshes update the published baseline without losing a local proposal.
   useEffect(() => {
     if (!schedule.ready) return;
-    setDraft((current) => {
+    setProposal((current) => {
       if (
         current.day !== day ||
         current.value === current.saved ||
@@ -261,8 +230,8 @@ export function AdminPanel({
     });
   }, [day, saved, dayLoaded, schedule.ready]);
   useEffect(() => setMessage(""), [day]);
-  const edited = draft.day === day && draft.value !== draft.saved;
-  const selection = edited ? draft.value : saved;
+  const edited = proposal.day === day && proposal.value !== proposal.saved;
+  const selection = edited ? proposal.value : saved;
   const automaticChoices = { ...assignments };
   delete automaticChoices[day];
   if (records[day]?.autoJourneyId)
@@ -275,53 +244,16 @@ export function AdminPanel({
   const agendaEnd = new Date((dateOrdinal(agendaStart) + 6) * 86400000)
     .toISOString()
     .slice(0, 10);
+  const selectedDateOutsideAgenda = day < agendaStart || day > agendaEnd;
   const pickerEntries = JOURNEY_INDEX.filter((journey) =>
     journey.title.toLowerCase().includes(pickerSearch.trim().toLowerCase()),
   );
   useEffect(() => {
     if (candidateId === undefined || !dayLoaded) return;
-    let live = true;
-    async function stage() {
-      if (
-        dirty &&
-        selection !== candidateId &&
-        !(await confirmChange(
-          "Replace this draft?",
-          `The unpublished change for ${formatDay(day)} will be replaced. Nothing has been published.`,
-          "Replace draft",
-        ))
-      ) {
-        if (live) setCandidateId(undefined);
-        return;
-      }
-      if (!live) return;
-      setDraft({ day, value: candidateId!, saved });
-      setCandidateId(undefined);
-      setMessage("");
-    }
-    void stage();
-    return () => {
-      live = false;
-    };
-  }, [candidateId, dayLoaded, day, saved, dirty, selection, confirmChange]);
-
-  useEffect(() => {
-    try {
-      if (dirty) sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-      else sessionStorage.removeItem(DRAFT_KEY);
-    } catch {
-      /* Keep the in-memory selection when browser storage is unavailable. */
-    }
-  }, [dirty, draft]);
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+    setProposal({ day, value: candidateId, saved });
+    setCandidateId(undefined);
+    setMessage("");
+  }, [candidateId, dayLoaded, day, saved]);
   useEffect(() => {
     if (!pickerOpen) return;
     picker.current
@@ -335,16 +267,6 @@ export function AdminPanel({
   }, [pickerOpen]);
   async function chooseDay(next: string) {
     if (next < ARCHIVE_START_DATE) return false;
-    if (
-      next !== day &&
-      dirty &&
-      !(await confirmChange(
-        "Leave this unpublished change?",
-        `The draft for ${formatDay(day)} will be discarded. The published assignment will stay as it is.`,
-        "Discard change",
-      ))
-    )
-      return false;
     setDay(next);
     setMonth(next.slice(0, 7));
     if (next < agendaStart || dateOrdinal(next) > dateOrdinal(agendaStart) + 6)
@@ -363,27 +285,8 @@ export function AdminPanel({
     const next = adminDate(initialDate);
     if (next && next !== day) void chooseDay(next);
   }, [initialDate]);
-  function movePublishDate(next: string) {
-    if (!adminDate(next) || next === day) return;
-    if (!dirty) {
-      void chooseDay(next);
-      return;
-    }
-    const baseline =
-      records[next]?.source === "assigned"
-        ? (records[next].journeyId ?? "")
-        : "";
-    setDay(next);
-    setMonth(next.slice(0, 7));
-    setAgendaStart(next);
-    setDraft({ day: next, value: selection, saved: baseline });
-    setCandidateId(selection);
-    setPickerOpen(false);
-  }
   function changeMonth(offset: number) {
-    const next = monthStart(month, offset);
-    const target = next === date.slice(0, 7) ? date : `${next}-01`;
-    chooseDay(target < ARCHIVE_START_DATE ? ARCHIVE_START_DATE : target);
+    setMonth(monthStart(month, offset));
   }
   function changeAgendaWeek(offset: number) {
     const next = new Date((dateOrdinal(agendaStart) + offset * 7) * 86400000)
@@ -397,7 +300,7 @@ export function AdminPanel({
     );
   }
   function chooseJourney(value: string) {
-    setDraft({ day, value, saved });
+    setProposal({ day, value, saved });
     setMessage("");
     setPickerOpen(false);
     setPickerSearch("");
@@ -408,94 +311,8 @@ export function AdminPanel({
       className={`admin-panel${embedded ? " admin-embedded" : " info-view"}`}
       aria-label="Admin menu"
     >
-      {!embedded && (
-        <>
-          <span className="overline">ADMIN</span>
-          <h1 className="editorial-heading">
-            A Journey for <em>every day.</em>
-          </h1>
-          <p className="muted">
-            Choose what players discover next, and review their feedback.
-          </p>
-        </>
-      )}
+      <AdminTopNavigation active={section} onSelect={selectSection} />
       <div className="admin-workbench">
-        {!embedded && (
-          <div
-            className="admin-tabs section-navigation section-navigation--roomy"
-            role="tablist"
-            aria-label="Admin sections"
-            aria-orientation="horizontal"
-            onKeyDown={(event) => {
-              if (
-                ![
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "ArrowUp",
-                  "ArrowDown",
-                  "Home",
-                  "End",
-                ].includes(event.key)
-              )
-                return;
-              event.preventDefault();
-              const index = ADMIN_SECTIONS.indexOf(section);
-              const next =
-                ADMIN_SECTIONS[
-                  event.key === "Home"
-                    ? 0
-                    : event.key === "End"
-                      ? ADMIN_SECTIONS.length - 1
-                      : (index +
-                          (["ArrowLeft", "ArrowUp"].includes(event.key)
-                            ? -1
-                            : 1) +
-                          ADMIN_SECTIONS.length) %
-                        ADMIN_SECTIONS.length
-                ];
-              selectSection(next);
-              event.currentTarget
-                .querySelector<HTMLButtonElement>(`#admin-tab-${next}`)
-                ?.focus();
-            }}
-          >
-            {ADMIN_SECTIONS.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                id={`admin-tab-${tab}`}
-                aria-selected={section === tab}
-                aria-controls={`admin-${tab}`}
-                tabIndex={section === tab ? 0 : -1}
-                onClick={() => {
-                  selectSection(tab);
-                }}
-              >
-                <ActionIcon
-                  name={
-                    tab === "schedule"
-                      ? "archive"
-                      : tab === "journeys"
-                        ? "journey"
-                        : tab === "feedback"
-                          ? "review"
-                          : "settings"
-                  }
-                />
-                <span>
-                  {tab === "schedule"
-                    ? "Schedule"
-                    : tab === "journeys"
-                      ? "Journeys"
-                      : tab === "feedback"
-                        ? "Feedback"
-                        : "Tools"}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
         <div className="admin-workbench-main">
           <div
             id="admin-journeys"
@@ -508,10 +325,20 @@ export function AdminPanel({
               <AdminJourneys
                 selectedId={libraryId}
                 onSelect={setLibraryId}
+                onDateSelect={(next) => {
+                  void chooseDay(next);
+                  selectSection("schedule");
+                }}
                 onNavigate={onNavigate}
                 date={day}
                 today={date}
                 records={records}
+                search={librarySearch}
+                onSearchChange={setLibrarySearch}
+                sort={librarySort}
+                onSortChange={setLibrarySort}
+                rotation={libraryRotation}
+                onRotationChange={setLibraryRotation}
                 onSchedule={(id) => {
                   setCandidateId(id);
                   selectSection("schedule");
@@ -528,20 +355,35 @@ export function AdminPanel({
           >
             <header className="admin-section-heading journey-scheduler-heading">
               <div>
-                <h2>Schedule</h2>
-                <p>
-                  Choose a date to review its assignment or propose a change.
-                </p>
+                <h2 className="sr-only">Schedule</h2>
+                <div
+                  className="admin-view-switch view-switch"
+                  role="group"
+                  aria-label="Schedule view"
+                >
+                  <button
+                    type="button"
+                    aria-pressed={scheduleView === "upcoming"}
+                    onClick={() => setScheduleView("upcoming")}
+                  >
+                    Upcoming
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={scheduleView === "month"}
+                    onClick={() => setScheduleView("month")}
+                  >
+                    Month
+                  </button>
+                </div>
               </div>
               <button
                 type="button"
-                className="quiet-button scheduler-icon"
-                aria-label="Refresh schedule"
-                title="Refresh schedule"
-                onClick={() => void schedule.refresh(month)}
+                className="quiet-button tertiary-action"
                 disabled={busy}
+                onClick={() => void schedule.refresh(month)}
               >
-                <RefreshIcon />
+                Refresh schedule
               </button>
             </header>
             <section className="journey-scheduler-card">
@@ -563,26 +405,6 @@ export function AdminPanel({
               )}
               <div className="journey-scheduler">
                 <div className="admin-schedule-browser">
-                  <div
-                    className="admin-view-switch view-switch"
-                    role="group"
-                    aria-label="Schedule view"
-                  >
-                    <button
-                      type="button"
-                      aria-pressed={scheduleView === "upcoming"}
-                      onClick={() => setScheduleView("upcoming")}
-                    >
-                      Upcoming
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={scheduleView === "month"}
-                      onClick={() => setScheduleView("month")}
-                    >
-                      Month
-                    </button>
-                  </div>
                   {scheduleView === "upcoming" && (
                     <section
                       className="admin-agenda"
@@ -635,6 +457,25 @@ export function AdminPanel({
                           </button>
                         </div>
                       </header>
+                      {selectedDateOutsideAgenda && (
+                        <p
+                          className="admin-agenda-selection-note"
+                          role="status"
+                        >
+                          The selected date, {formatDay(day)}, is outside this
+                          week. Its assignment is unchanged.
+                          <button
+                            type="button"
+                            className="quiet-button tertiary-action"
+                            onClick={() => {
+                              setAgendaStart(day);
+                              setMonth(day.slice(0, 7));
+                            }}
+                          >
+                            Return to selected date
+                          </button>
+                        </p>
+                      )}
                       <ol>
                         {Array.from({ length: 7 }, (_, index) =>
                           new Date(
@@ -651,8 +492,8 @@ export function AdminPanel({
                               agendaDay.slice(0, 7),
                             );
                           const hasProposal =
-                            draft.day === agendaDay &&
-                            draft.value !== draft.saved;
+                            proposal.day === agendaDay &&
+                            proposal.value !== proposal.saved;
                           return (
                             <li key={agendaDay}>
                               <button
@@ -679,7 +520,7 @@ export function AdminPanel({
                                     (!hasProposal && agendaDay === date)) && (
                                     <span>
                                       {hasProposal
-                                        ? "Draft change"
+                                        ? "Change proposed"
                                         : source === "assigned"
                                           ? "Manual"
                                           : "Today"}
@@ -749,6 +590,21 @@ export function AdminPanel({
                         Today
                       </button>
                     </header>
+                    {month !== day.slice(0, 7) && (
+                      <p
+                        className="admin-calendar-selection-note"
+                        role="status"
+                      >
+                        Selected date: {formatDay(day)}
+                        <button
+                          type="button"
+                          className="quiet-button tertiary-action"
+                          onClick={() => setMonth(day.slice(0, 7))}
+                        >
+                          Return to selected date
+                        </button>
+                      </p>
+                    )}
                     <div
                       className="journey-calendar-weekdays"
                       aria-hidden="true"
@@ -852,6 +708,7 @@ export function AdminPanel({
                         "Rewrite this Archive day?",
                         `This changes the permanent assignment for ${formatDay(day, true)}. Players who already started keep their own Journey.`,
                         "Rewrite Archive day",
+                        true,
                       ))
                     )
                       return;
@@ -890,7 +747,7 @@ export function AdminPanel({
                         notifications.notify(confirmation);
                       } else
                         notifications.notify(
-                          "Couldn’t save the schedule. Your selection is still a draft.",
+                          "Couldn’t save the schedule. Your selection is still unpublished.",
                           { tone: "error" },
                         );
                     } catch {
@@ -909,31 +766,41 @@ export function AdminPanel({
                 >
                   <header className="schedule-assignment-heading">
                     <div>
-                      <span className="overline">Assignment for</span>
                       <h3 ref={editorHeading} tabIndex={-1}>
                         {formatDay(day, true)}
                       </h3>
+                      <div className="schedule-state-line">
+                        <span className="schedule-publication-status">
+                          {records[day]?.source === "assigned"
+                            ? "Published · Manual"
+                            : records[day]?.source === "auto"
+                              ? "Published · Automatic"
+                              : "Planned · Automatic"}
+                        </span>
+                        {day < date && <span>Archive assignment</span>}
+                      </div>
                     </div>
-                    <span
-                      className={`schedule-publication-status${dirty ? " is-draft" : ""}`}
-                    >
-                      {dirty ? "Unpublished proposal" : "Published assignment"}
-                    </span>
                   </header>
                   <div
                     className={`schedule-assignment${dirty ? " has-proposal" : ""}`}
                     aria-label="Journey assignment"
                   >
-                    <div className="schedule-current" aria-label="Currently assigned">
-                      <span className="schedule-preview-label">
-                        Currently assigned
-                      </span>
-                      <strong>{current?.title ?? "Journey unavailable"}</strong>
-                      <span>
-                        {records[day]?.source === "assigned"
-                          ? "Manual"
-                          : "Automatic"}
-                      </span>
+                    <div
+                      className="schedule-current"
+                      aria-label="Currently assigned"
+                    >
+                      {dirty && (
+                        <span className="schedule-preview-label">
+                          Currently assigned
+                        </span>
+                      )}
+                      <h4>{current?.title ?? "Journey unavailable"}</h4>
+
+                      {!dirty && current && (
+                        <p className="schedule-journey-description">
+                          {current.description}
+                        </p>
+                      )}
                       {!dirty && current && (
                         <a
                           href={journeyReviewLink(current.path, day)}
@@ -955,16 +822,23 @@ export function AdminPanel({
                         aria-label="Proposed Journey"
                       >
                         <span className="schedule-preview-label">
-                          Proposed replacement
+                          Proposed assignment · Not published
                         </span>
                         <h4>{preview?.title ?? "Journey unavailable"}</h4>
+                        {preview && (
+                          <p className="schedule-journey-description">
+                            {preview.description}
+                          </p>
+                        )}
                         {preview ? (
                           <a
                             href={journeyReviewLink(preview.path, day)}
                             onClick={(event) => {
                               if (onNavigate) {
                                 event.preventDefault();
-                                onNavigate(journeyReviewLink(preview.path, day));
+                                onNavigate(
+                                  journeyReviewLink(preview.path, day),
+                                );
                               }
                             }}
                             className="tertiary-action"
@@ -994,7 +868,7 @@ export function AdminPanel({
                       ref={pickerButton}
                       className="journey-picker-trigger"
                       type="button"
-                      aria-label="Choose a Journey"
+                      aria-label={current ? "Change Journey" : "Choose Journey"}
                       aria-expanded={pickerOpen}
                       aria-controls="admin-journey-picker"
                       aria-haspopup="dialog"
@@ -1005,7 +879,7 @@ export function AdminPanel({
                       }}
                     >
                       <span>
-                        {dirty ? "Change proposed Journey" : "Choose Journey"}
+                        {current ? "Change Journey" : "Choose Journey"}
                       </span>
                       <span aria-hidden="true">⌄</span>
                     </button>
@@ -1113,7 +987,7 @@ export function AdminPanel({
                         className="quiet-button schedule-discard"
                         disabled={busy}
                         onClick={() => {
-                          setDraft({ day, value: saved, saved });
+                          setProposal({ day, value: saved, saved });
                           setMessage("");
                         }}
                       >
@@ -1121,25 +995,6 @@ export function AdminPanel({
                       </button>
                     )}
                   </div>
-                  {dirty && (
-                    <details className="schedule-secondary-options">
-                      <summary>More options</summary>
-                      <label className="field schedule-move-proposal">
-                        <span>Move proposal to another date</span>
-                        <input
-                          type="date"
-                          min={ARCHIVE_START_DATE}
-                          required
-                          value={day}
-                          disabled={busy}
-                          onChange={(event) => {
-                            if (event.target.value)
-                              movePublishDate(event.target.value);
-                          }}
-                        />
-                      </label>
-                    </details>
-                  )}
                   {dirty && (
                     <p className="schedule-protection-note">
                       Started player attempts keep their current Journey.
@@ -1152,14 +1007,6 @@ export function AdminPanel({
                   )}
                 </form>
               </div>
-              <details className="schedule-footnote">
-                <summary>Automatic scheduling &amp; past dates</summary>
-                <p>
-                  Unassigned days use a shared automatic choice. Today and
-                  future dates are editable. Rewriting a past day requires
-                  confirmation; players who already started keep their Journey.
-                </p>
-              </details>
             </section>
           </div>
           <div
@@ -1171,6 +1018,83 @@ export function AdminPanel({
           >
             {feedback}
           </div>
+          <div
+            id="admin-utilities"
+            className="admin-tab-panel"
+            role={embedded ? "region" : "tabpanel"}
+            aria-labelledby="admin-tab-utilities"
+            hidden={section !== "utilities"}
+          >
+            <section className="admin-utilities-panel">
+              <h2 className="sr-only">Utilities</h2>
+              <section
+                className="admin-tool-group"
+                aria-labelledby="admin-personal-tools"
+              >
+                <h3 id="admin-personal-tools">Personal testing</h3>
+                <div className="admin-tool-content admin-utility">
+                  <div>
+                    <h4>Your Daily attempt</h4>
+                    <p>
+                      {attempt
+                        ? `${JOURNEY_INDEX.find((journey) => journey.id === attempt.journeyId)?.title ?? "Today’s Journey"} · ${attempt.game.answers.length} of 5 answered.`
+                        : `No Journey attempt for ${date}.`}
+                    </p>
+                    <p className="admin-utility-scope">
+                      Only your signed-in account is affected.
+                    </p>
+                    {resetMessage && <p role="status">{resetMessage}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    className="quiet-button"
+                    disabled={!attempt || !resetReady || !onResetAttempt}
+                    onClick={() => setResetConfirmation(true)}
+                  >
+                    Clear today’s attempt
+                  </button>
+                </div>
+              </section>
+              <section
+                className="admin-tool-group"
+                aria-labelledby="admin-catalog-tools"
+              >
+                <h3 id="admin-catalog-tools">Catalog &amp; release</h3>
+                <div className="admin-tool-content">
+                  <p>
+                    Rotation eligibility reflects this catalog. Deployment
+                    status isn’t available here.
+                  </p>
+                  <a
+                    className="tertiary-action"
+                    href="https://github.com/mariogerardi/ambit/blob/main/docs/HOSTING.md#journey-catalog-activation"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Catalog activation guide <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
+              </section>
+              {import.meta.env.DEV && (
+                <section
+                  className="admin-tool-group"
+                  aria-labelledby="admin-development-tools"
+                >
+                  <h3 id="admin-development-tools">Local development</h3>
+                  <div className="admin-tool-content">
+                    <p>
+                      Playtest registered Journeys and source files in an
+                      isolated session.
+                    </p>
+                    <a className="admin-tool-link" href="/review/journeys.html">
+                      <ActionIcon name="workbench" />
+                      Journey Workbench <span aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                </section>
+              )}
+            </section>
+          </div>
         </div>
       </div>
       {confirmation && (
@@ -1178,6 +1102,26 @@ export function AdminPanel({
           {...confirmation}
           onConfirm={() => finishConfirmation(true)}
           onCancel={() => finishConfirmation(false)}
+        />
+      )}
+      {resetConfirmation && (
+        <AdminConfirmation
+          title="Reset your saved Daily attempt?"
+          message="Your answers, score and help use for today will be removed from your account. Other players and isolated review sessions are unaffected."
+          confirmLabel="Reset my attempt"
+          destructive
+          onConfirm={() => {
+            const cleared = onResetAttempt?.() ?? false;
+            const status = cleared
+              ? "Attempt cleared. Start fresh from Home."
+              : "Couldn’t clear the attempt. Please try again.";
+            setResetMessage(status);
+            notifications.notify(status, {
+              tone: cleared ? "success" : "error",
+            });
+            setResetConfirmation(false);
+          }}
+          onCancel={() => setResetConfirmation(false)}
         />
       )}
     </section>

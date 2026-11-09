@@ -4,7 +4,7 @@ import { JourneyWorkbench } from "./JourneyWorkbench";
 import { PlayerWorkspace } from "../src/App";
 import { AccountProvider } from "../src/services/accounts";
 import { serviceConfig } from "../src/services/config";
-import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
+import { JOURNEY_INDEX, newestJourney } from "../src/game/journeyRegistry";
 import { validateJourneyContracts } from "../src/game/questionBuilder";
 import type { Journey } from "../src/game/questionContracts";
 import { REVIEW_STAGES, type ReviewStage } from "../src/app/journeyReview";
@@ -45,9 +45,9 @@ const modules = import.meta.glob<Record<string, unknown>>(
   "../src/game/*Journey.ts",
 );
 const params = new URLSearchParams(location.search);
-const registered = JOURNEY_INDEX.find(
-  (j) => j.path === `/journey/${params.get("journey") ?? "down-the-danube"}`,
-);
+const registered = params.has("journey")
+  ? JOURNEY_INDEX.find((j) => j.path === `/journey/${params.get("journey")}`)
+  : newestJourney();
 const recipeId = params.get("recipe") ?? undefined;
 const filename =
   params.get("module") ?? registered?.module.replace(/^\.\//, "");

@@ -80,16 +80,19 @@ The following modules own their own lifetimes and can be read independently:
   reframing retains its existing smooth scale change; reduced motion jumps directly.
 - [`HomePanel.tsx`](../src/app/HomePanel.tsx): today's Journey title, progress,
   Play/Resume/View result action and navigation; readiness is supplied by the shell.
-- [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Journeys/Feedback tabs, calendar
-  selection from the October 11 opening date, searchable Journey picker, explicit assignment, and compact reset
-  tools in Maintenance. Tabs retain the editor; unpublished selections survive navigation within
-  the browser tab through session storage. Date/month switches confirm before
-  discarding a draft. The shell supplies protected feedback and account reset;
-  choosing a Journey alone never publishes or alters a player's attempt.
+- [`AdminPanel.tsx`](../src/app/AdminPanel.tsx): Schedule/Journeys/Feedback tabs,
+  Utilities, a seven-day agenda and month calendar, searchable Journey picker,
+  and explicit assignment publishing. The selected date's unpublished proposal
+  stays in memory while switching Admin sections; it is not saved across reloads
+  and is replaced without confirmation when another date is selected. Week
+  browsing preserves the selected date and proposal. The shell supplies
+  protected feedback and account reset; choosing a Journey alone never publishes
+  or alters a player's attempt.
 - [`AdminJourneys.tsx`](../src/app/AdminJourneys.tsx) and
-  [`AdminJourneyReview.tsx`](../src/app/AdminJourneyReview.tsx): catalog browsing,
-  five-question outlines and isolated review controls. Review reuses the shell,
-  reducer and audit response samples; it never writes a Daily attempt. A reviewed
+  [`AdminJourneyReview.tsx`](../src/app/AdminJourneyReview.tsx): searchable
+  catalog with persistent selected-Journey inspector, and isolated Playtest /
+  Inspect controls. Review reuses the shell, reducer and audit response samples;
+  it never writes a Daily attempt. A reviewed
   Journey passes to a date-choice preview before explicit publication.
 - [`Toast.tsx`](../src/app/Toast.tsx): shared bounded, dismissible notifications
   above account workspaces; transient confirmations pause on focus/hover and
@@ -339,8 +342,7 @@ the canvas presentation; navigation never repeats it or changes the camera to
 produce it. Reduced motion reveals the globe immediately. Loading copy is omitted,
 but geography and WebGL errors remain visible.
 
-The header avatar opens direct navigation to Progress, Friends, Profile, Settings,
-and (for administrators) a separated Admin entry. Guests go directly to sign-in. The account menu dismisses
+The header avatar opens direct navigation to Progress, Friends, Profile and Settings. Admin is a separate operational destination in the global hamburger menu, together with the development-only Journey Workbench. Both entries are omitted on Your space. Guests go directly to sign-in. The account menu dismisses
 on outside interaction, focus leaving it, Escape, or navigation. Progress offers
 today’s Journey, Study continuation, and recent Journey/Study activity. Its Journey
 stats include current/longest day streak, finished runs, perfect point totals and
@@ -367,20 +369,10 @@ The editor checks availability and suggests alternatives, while saving remains
 protected against concurrent claims. Profile links prefill the friend finder.
 Activity pages contain at most 24 friends, with bounded server fan-out and cached
 summaries invalidated by progress sync. See [services](SERVICES.md) for API behavior.
-Progress, Friends, Profile and Settings share a persistent account shell with compact
-section headings and responsive side navigation. Admin uses the full workspace,
-without a personal greeting or the account sidebar; a back action returns to Progress. `/account?tab=dashboard`, `profile`, `friends`,
-`appearance`, or `admin` selects the content (the existing `dashboard` and `appearance`
-URL keys remain compatible with Progress and Settings); Admin uses `section=schedule`, `journeys`, `feedback`, or
-`tools` for compatibility (Tools opens Maintenance); the visible navigation is
-Schedule, Journeys and Feedback. The agenda and optional calendar share one selected
-date; Journey browsing and picking share the same list and expandable outlines. Validated Admin `date` and `journey` parameters carry
-scheduling context across review/sign-in; optional review `question` selects a known
-question in the isolated reducer state. Date-first and Journey-first selection
-converge on one editor, with explicit publishing and themed confirmations. Tab navigation updates browser history
-without remounting the account shell or replaying its entry animation. Admin mounts
-on first use and stays mounted when switching account tabs, retaining its editor.
-Legacy `/admin` links replace their URL with the matching account destination.
+Progress, Friends, Profile and Settings share a persistent account shell with compact section headings and responsive side navigation. `/account?tab=dashboard`, `profile`, `friends`, or `appearance` selects personal content. Admin is a separate `admin` application mode under `/admin?section=schedule`, `journeys`, `feedback`, or `utilities`, with no Account dashboard mounting or legacy account-Admin redirects. `AdminTopNavigation` owns the workspace identity and section navigation; `admin-workbench.css` owns Admin composition and task styling. The main application header retains global navigation.
+
+The seven-day agenda and month browser share an assignment editor. Browsing weeks/months preserves selection; selecting a day replaces an ordinary proposal without confirmation. Only the agenda or calendar changes the assignment date; each browser can return to the selected date. Date-first and Journey-first selection converge on explicit publication with historical/reset confirmations. Admin sections retain catalog filters and proposals while mounted; leaving Admin can discard those selections. Validated `date` and `journey` parameters carry context across review/sign-in; `question` selects a known question in isolated review. Utilities groups personal testing, catalog/release guidance and local development access. Workbench’s unspecified Journey comes from the latest catalog authoring date.
+
 Home places a full-width Minigames card with a NEW! badge above Explore and Study.
 Journey archive is a separate full-width card above Minigames, using the Journey
 panel's editorial colors and two empty shapes peeking out to the left. The stack

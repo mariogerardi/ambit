@@ -1,7 +1,9 @@
+import { adminLink } from "./accountNavigation";
 import { ActionIcon } from "./ActionIcon";
 import { useEffect, useRef, useState } from "react";
 
 export function AppMenu({
+  admin = false,
   onJourney,
   journeyReady = true,
   onFeedback,
@@ -9,6 +11,7 @@ export function AppMenu({
   onNavigate,
   onCredits,
 }: {
+  admin?: boolean;
   onJourney?(): void;
   journeyReady?: boolean;
   onFeedback?(): void;
@@ -150,6 +153,28 @@ export function AppMenu({
               <span>Study</span>
             </button>
           </div>
+          {admin && path.split(/[?#]/)[0] !== "/account" && (
+            <div
+              className="app-menu-secondary app-menu-admin"
+              role="group"
+              aria-label="Administration"
+            >
+              <button
+                data-dd-action-name="Menu Admin"
+                aria-current={path.startsWith("/admin") ? "page" : undefined}
+                onClick={() => navigate(adminLink())}
+              >
+                <ActionIcon name="admin" />
+                <span>Admin</span>
+              </button>
+              {import.meta.env.DEV && (
+                <a href="/review/journeys.html">
+                  <ActionIcon name="workbench" />
+                  <span>Journey Workbench</span>
+                </a>
+              )}
+            </div>
+          )}
           <div className="app-menu-secondary">
             {onFeedback && (
               <button

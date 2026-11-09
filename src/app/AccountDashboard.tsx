@@ -67,7 +67,6 @@ export function AccountDashboard({
   intent: suppliedIntent,
   defaultComparison,
   onNavigate,
-  adminContent,
   appearanceContent,
   onJourney,
   journeyReady,
@@ -84,7 +83,6 @@ export function AccountDashboard({
   onSignOut?(): void;
   busy?: boolean;
   onNavigate?(url: string): void;
-  adminContent?: ReactNode;
   appearanceContent?: ReactNode;
   onJourney?(): void;
   journeyReady?: boolean;
@@ -128,10 +126,6 @@ export function AccountDashboard({
     [loading, setLoading] = useState(!initialProfile),
     [working, setWorking] = useState(false);
   const tab = onNavigate ? (intent.tab ?? "dashboard") : localTab;
-  const [adminVisited, setAdminVisited] = useState(tab === "admin");
-  useEffect(() => {
-    if (tab === "admin") setAdminVisited(true);
-  }, [tab]);
   function selectTab(value: AccountSection) {
     if (onNavigate) onNavigate(accountTabLink(value));
     else setLocalTab(value);
@@ -288,17 +282,16 @@ export function AccountDashboard({
       data-section={tab}
     >
       <div className="account-workspace">
-        <aside className="account-sidebar" hidden={tab === "admin"}>
+        <aside className="account-sidebar">
           <span className="overline">Your space</span>
           <AccountTabs
             active={tab}
-            admin={account.admin && !!adminContent}
             newFriends={friends.some((friend) => friend.status === "incoming")}
             onSelect={selectTab}
           />
         </aside>
         <div className="account-workspace-main">
-          <header className="account-heading" hidden={tab === "admin"}>
+          <header className="account-heading">
             <div>
               <h1 className="editorial-heading">
                 {ACCOUNT_SECTIONS[tab].label}
@@ -311,13 +304,12 @@ export function AccountDashboard({
                     profile: "How you appear to other players.",
                     friends: "A shared Journey. A little friendly curiosity.",
                     appearance: "Make Ambit feel like home.",
-                    admin: "",
                   }[tab]
                 }
               </p>
             </div>
           </header>
-          <div hidden={tab === "admin"}>
+          <div>
             {loading && tab !== "friends" && (
               <p role="status">Opening your account…</p>
             )}
@@ -346,7 +338,7 @@ export function AccountDashboard({
               </p>
             )}
           </div>
-          <div hidden={tab === "admin" || tab === "appearance"}>
+          <div hidden={tab === "appearance"}>
             {!loading && available && !profile && tab !== "profile" && (
               <div className="account-callout">
                 <p>
@@ -653,22 +645,17 @@ export function AccountDashboard({
               </footer>
             </div>
           )}
-          {tab !== "admin" &&
-            sync &&
-            (sync.status === "offline" || sync.status === "error") && (
-              <div className="account-message" role="status">
-                <p>{sync.message}</p>
-                <button
-                  className="quiet-button tertiary-action"
-                  data-dd-action-name="Account Retry Sync"
-                  onClick={sync.retry}
-                >
-                  Retry sync
-                </button>
-              </div>
-            )}
-          {(tab === "admin" || adminVisited) && (
-            <div hidden={tab !== "admin"}>{adminContent}</div>
+          {sync && (sync.status === "offline" || sync.status === "error") && (
+            <div className="account-message" role="status">
+              <p>{sync.message}</p>
+              <button
+                className="quiet-button tertiary-action"
+                data-dd-action-name="Account Retry Sync"
+                onClick={sync.retry}
+              >
+                Retry sync
+              </button>
+            </div>
           )}
         </div>
       </div>

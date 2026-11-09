@@ -36,6 +36,7 @@ export function FeedbackReview({
   const [cursor, setCursor] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [updating, setUpdating] = useState<string>();
   const [loaded, setLoaded] = useState(false);
   const inFlight = useRef(false);
   const accountRef = useRef(account);
@@ -94,6 +95,7 @@ export function FeedbackReview({
     if (inFlight.current) return;
     inFlight.current = true;
     setBusy(true);
+    setUpdating(id);
     setError("");
     const request = (controller.current = new AbortController());
     try {
@@ -124,6 +126,7 @@ export function FeedbackReview({
       }
     } finally {
       inFlight.current = false;
+      setUpdating(undefined);
       if (!request.signal.aborted) setBusy(false);
     }
   }
@@ -134,10 +137,31 @@ export function FeedbackReview({
       aria-label="Feedback"
       data-dd-privacy="mask"
     >
-      <header className="feedback-review-heading">
-        <div className="admin-section-heading-copy">
-          <h2>Feedback</h2>
-          <p>Review reports and jump straight to the Journey question.</p>
+      <h2 className="sr-only">Feedback</h2>
+      <div className="admin-feedback-toolbar">
+        <div
+          className="admin-feedback-filters"
+          role="group"
+          aria-label="Filter feedback"
+        >
+          {(["all", "new", "reviewed", "resolved"] as const).map((status) => (
+            <button
+              type="button"
+              key={status}
+              className="quiet-button"
+              aria-pressed={filter === status}
+              onClick={() => setFilter(status)}
+            >
+              {status === "all"
+                ? "All"
+                : status[0].toUpperCase() + status.slice(1)}
+              <span>
+                {status === "all"
+                  ? items.length
+                  : items.filter((item) => item.status === status).length}
+              </span>
+            </button>
+          ))}
         </div>
         <button
           type="button"
@@ -147,37 +171,13 @@ export function FeedbackReview({
         >
           Refresh
         </button>
-      </header>
-      <div
-        className="admin-feedback-filters"
-        role="group"
-        aria-label="Filter feedback"
-      >
-        {(["all", "new", "reviewed", "resolved"] as const).map((status) => (
-          <button
-            type="button"
-            key={status}
-            className="quiet-button"
-            aria-pressed={filter === status}
-            onClick={() => setFilter(status)}
-          >
-            {status === "all"
-              ? "All"
-              : status[0].toUpperCase() + status.slice(1)}
-            <span>
-              {status === "all"
-                ? items.length
-                : items.filter((item) => item.status === status).length}
-            </span>
-          </button>
-        ))}
       </div>
       {cursor && items.length > 0 && (
         <p className="admin-feedback-count-note">
           Counts reflect loaded reports.
         </p>
       )}
-      {busy && <p role="status">Loading…</p>}
+      {busy && !updating && <p role="status">Loading reports…</p>}
       {error && <p role="alert">{error}</p>}
       {loaded && !items.length && (
         <div className="admin-empty">
@@ -214,7 +214,11 @@ export function FeedbackReview({
               ? timestamp
               : undefined;
             return (
-              <li key={item.id} className="admin-feedback-item">
+              <li
+                key={item.id}
+                className="admin-feedback-item"
+                aria-busy={updating === item.id}
+              >
                 <header className="admin-feedback-item-heading">
                   <div className="admin-feedback-meta">
                     <span className="admin-feedback-kind">
@@ -227,7 +231,13 @@ export function FeedbackReview({
                   </div>
                   {createdAt && (
                     <time dateTime={createdAt.toISOString()}>
-                      {createdAt.toLocaleString()}
+                      {createdAt.toLocaleString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
                     </time>
                   )}
                 </header>
@@ -267,38 +277,39 @@ export function FeedbackReview({
                     )}
                   </div>
                 )}
-                <details className="admin-feedback-context">
-                  <summary>Technical context</summary>
-                  <dl>
-                    {Object.entries(item.context).map(([key, value]) => (
-                      <div key={key}>
-                        <dt>{key}</dt>
-                        <dd>{value}</dd>
-                      </div>
+                <footer className="admin-feedback-footer">
+                  <div
+                    className="admin-feedback-actions"
+                    role="group"
+                    aria-label={`Update status for ${item.category} feedback`}
+                  >
+                    {statusActions[item.status].map((action) => (
+                      <button
+                        key={action.status}
+                        type="button"
+                        className="quiet-button"
+                        disabled={busy}
+                        onClick={() => void update(item.id, action.status)}
+                      >
+                        {action.label}
+                      </button>
                     ))}
-                  </dl>
-                </details>
-                <div
-                  className="admin-feedback-actions"
-                  role="group"
-                  aria-label={`Update status for ${item.category} feedback`}
-                >
-                  {statusActions[item.status].map((action) => (
-                    <button
-                      key={action.status}
-                      type="button"
-                      className={
-                        action.status === "resolved"
-                          ? "primary-button is-resolve"
-                          : "quiet-button"
-                      }
-                      disabled={busy}
-                      onClick={() => void update(item.id, action.status)}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
+                    {updating === item.id && (
+                      <span role="status">Updating report…</span>
+                    )}
+                  </div>
+                  <details className="admin-feedback-context">
+                    <summary>Technical context</summary>
+                    <dl>
+                      {Object.entries(item.context).map(([key, value]) => (
+                        <div key={key}>
+                          <dt>{key}</dt>
+                          <dd>{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </details>
+                </footer>
               </li>
             );
           })}

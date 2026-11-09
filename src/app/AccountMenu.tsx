@@ -9,13 +9,11 @@ import type { AccountSection } from "./accountNavigation";
 export function AccountMenu({
   signedIn,
   player,
-  admin,
   path,
   onNavigate,
 }: {
   signedIn: boolean;
   player?: PlayerProfile | null;
-  admin: boolean;
   path: string;
   onNavigate(path: string): void;
 }) {
@@ -44,7 +42,7 @@ export function AccountMenu({
     };
   }, [open]);
   const active =
-    path.split("?")[0] === "/account" || path.startsWith("/admin")
+    path.split("?")[0] === "/account"
       ? (accountIntent(path).tab ?? "dashboard")
       : undefined;
   function go(section: AccountSection) {
@@ -121,20 +119,6 @@ export function AccountMenu({
                 <span>{ACCOUNT_SECTIONS[section].label}</span>
               </button>
             ),
-          )}
-          {admin && (
-            <div className="account-menu-admin">
-              <button
-                aria-current={active === "admin" ? "page" : undefined}
-                onClick={() => go("admin")}
-              >
-                <ActionIcon name="admin" />
-                <span>Admin</span>
-              </button>
-              {import.meta.env.DEV && (
-                <a href="/review/journeys.html">Journey workbench</a>
-              )}
-            </div>
           )}
         </nav>
       )}

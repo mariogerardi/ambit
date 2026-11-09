@@ -2,31 +2,43 @@ import { useEffect, useRef, useState } from "react";
 import { JOURNEY_INDEX, loadJourney } from "../game/journeyRegistry";
 import type { Journey } from "../game/questionContracts";
 import type { DayRecord } from "../services/journeySchedule";
+import { mechanicFor } from "../game/mechanics";
 import { journeyReviewLink } from "./accountNavigation";
 
-type RotationFilter = "all" | "included" | "held";
-type CatalogSort = "title" | "newest" | "recent" | "never";
+export type RotationFilter = "all" | "included" | "held";
+export type CatalogSort = "title" | "newest" | "recent" | "never";
 
 export function AdminJourneys({
   selectedId,
   onSelect,
   onSchedule,
+  onDateSelect,
   onNavigate,
   date,
   today = date ?? "",
   records = {},
+  search,
+  onSearchChange,
+  sort,
+  onSortChange,
+  rotation,
+  onRotationChange,
 }: {
   selectedId?: string;
   onSelect(id: string): void;
   onSchedule(id: string): void;
+  onDateSelect?(date: string): void;
   onNavigate?(url: string): void;
   date?: string;
   today?: string;
   records?: Record<string, DayRecord>;
+  search: string;
+  onSearchChange(value: string): void;
+  sort: CatalogSort;
+  onSortChange(value: CatalogSort): void;
+  rotation: RotationFilter;
+  onRotationChange(value: RotationFilter): void;
 }) {
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<CatalogSort>("title");
-  const [rotation, setRotation] = useState<RotationFilter>("all");
   const [localSelectedId, setLocalSelectedId] = useState(
     selectedId ?? JOURNEY_INDEX[0]?.id,
   );
@@ -36,7 +48,6 @@ export function AdminJourneys({
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
   const inspectorHeading = useRef<HTMLHeadingElement>(null);
-  const diagnosticsDialog = useRef<HTMLDialogElement>(null);
   const activeId = selectedId ?? localSelectedId;
   const selected = JOURNEY_INDEX.find((entry) => entry.id === activeId);
   const journey = loaded?.id === activeId ? loaded : undefined;
@@ -139,62 +150,7 @@ export function AdminJourneys({
     <div
       className={`admin-journey-library${mobileDetail ? " has-mobile-detail" : ""}`}
     >
-      <header className="admin-section-heading">
-        <div>
-          <h2>Journeys</h2>
-          <p>Find a Journey, inspect its route, then review or schedule it.</p>
-        </div>
-        <button
-          type="button"
-          className="quiet-button admin-catalog-help-trigger"
-          aria-haspopup="dialog"
-          onClick={() => diagnosticsDialog.current?.showModal()}
-        >
-          Catalog status
-        </button>
-      </header>
-      <dialog
-        ref={diagnosticsDialog}
-        className="admin-info-dialog"
-        aria-labelledby="admin-catalog-info-title"
-      >
-        <header>
-          <div>
-            <p className="overline">JOURNEY CATALOG</p>
-            <h2 id="admin-catalog-info-title">Catalog status</h2>
-          </div>
-          <button
-            type="button"
-            className="quiet-button"
-            aria-label="Close catalog status"
-            onClick={() => diagnosticsDialog.current?.close()}
-          >
-            ×
-          </button>
-        </header>
-        <div className="admin-info-dialog-content">
-          <p>
-            This list reflects the frontend catalog only. Backend catalog
-            deployment is not reported here; successful schedule publication
-            confirms that the schedule service accepted the assignment.
-          </p>
-          <p>
-            Automatic rotation eligibility is catalog metadata. It does not
-            confirm backend activation for manual scheduling.
-          </p>
-          <a
-            href="https://github.com/mariogerardi/ambit/blob/main/docs/HOSTING.md#journey-catalog-activation"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Backend catalog activation steps
-          </a>
-          {import.meta.env.DEV && (
-            <a href="/review/journeys.html">Open local Journey Workbench</a>
-          )}
-        </div>
-      </dialog>
-
+      <h2 className="sr-only">Journeys</h2>
       <div className="admin-catalog-layout">
         <section
           className="admin-catalog-list-pane"
@@ -208,7 +164,7 @@ export function AdminJourneys({
                 placeholder="Find a Journey…"
                 aria-label="Search Journeys"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => onSearchChange(event.target.value)}
               />
             </label>
             <div className="admin-catalog-filters">
@@ -223,8 +179,9 @@ export function AdminJourneys({
                       value === "all" ||
                       value === "included" ||
                       value === "held"
-                    )
-                      setRotation(value);
+                    ) {
+                      onRotationChange(value);
+                    }
                   }}
                 >
                   <option value="all">Rotation: all</option>
@@ -244,8 +201,9 @@ export function AdminJourneys({
                       value === "newest" ||
                       value === "recent" ||
                       value === "never"
-                    )
-                      setSort(value);
+                    ) {
+                      onSortChange(value);
+                    }
                   }}
                 >
                   <option value="title">Title A–Z</option>
@@ -255,6 +213,11 @@ export function AdminJourneys({
                 </select>
               </label>
             </div>
+          </div>
+          <div className="admin-catalog-summary">
+            <span className="admin-result-count">
+              {matches.length} Journeys
+            </span>
           </div>
           <ul className="admin-library-list" aria-label="Journey results">
             {matches.map((entry) => {
@@ -274,7 +237,7 @@ export function AdminJourneys({
                       <span>
                         {entry.dailyEligible === false
                           ? "Held out of daily rotation"
-                          : "In daily rotation"}
+                          : dateSummary(entry.id)}
                       </span>
                     </span>
                     <span aria-hidden="true">→</span>
@@ -302,23 +265,62 @@ export function AdminJourneys({
           >
             ← Journey catalog
           </button>
+          {selected && !matches.some((entry) => entry.id === selected.id) && (
+            <p className="admin-filter-selection-note" role="status">
+              This Journey is outside the current search or rotation filter.{" "}
+              <button
+                type="button"
+                className="quiet-button tertiary-action"
+                onClick={() => {
+                  onSearchChange("");
+                  onRotationChange("all");
+                }}
+              >
+                Clear filters
+              </button>
+            </p>
+          )}
           {selected ? (
             <>
               <header className="admin-inspector-heading">
                 <div>
-                  <p className="admin-inspector-status">
-                    {selected.dailyEligible === false
-                      ? "Held out of daily rotation"
-                      : "In daily rotation"}
-                    <span aria-hidden="true"> · </span>
-                    {dateSummary(selected.id)}
-                  </p>
                   <h3 ref={inspectorHeading} tabIndex={-1}>
                     {selected.title}
                   </h3>
                   <p>{selected.description}</p>
                 </div>
               </header>
+              <dl className="admin-inspector-facts">
+                <div>
+                  <dt>Daily rotation</dt>
+                  <dd>
+                    {selected.dailyEligible === false ? "Held out" : "Included"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Scheduling</dt>
+                  <dd>{dateSummary(selected.id)}</dd>
+                </div>
+              </dl>
+              <div className="admin-scheduled-dates">
+                {dates(selected.id)
+                  .filter((scheduled) => scheduled >= today)
+                  .slice(0, 3)
+                  .map((scheduled) => (
+                    <button
+                      type="button"
+                      className="quiet-button tertiary-action"
+                      key={scheduled}
+                      onClick={() => onDateSelect?.(scheduled)}
+                    >
+                      {new Date(`${scheduled}T12:00:00`).toLocaleDateString(
+                        undefined,
+                        { month: "short", day: "numeric" },
+                      )}{" "}
+                      →
+                    </button>
+                  ))}
+              </div>
               <div className="admin-inspector-actions">
                 {review && (
                   <a
@@ -345,11 +347,6 @@ export function AdminJourneys({
               <section className="admin-inspector-outline">
                 <header>
                   <h4>Questions</h4>
-                  <span>
-                    {journey
-                      ? journey.rounds.length
-                      : "Loading"}
-                  </span>
                 </header>
                 {error ? (
                   <div role="alert">
@@ -384,15 +381,51 @@ export function AdminJourneys({
                               {question.progressLabel ?? question.label}
                             </strong>
                             <span aria-hidden="true">
-                              {expanded ? "−" : "+"}
+                              <svg
+                                viewBox="0 0 16 16"
+                                width="16"
+                                height="16"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              >
+                                <path
+                                  d={expanded ? "M3 8h10" : "M3 8h10M8 3v10"}
+                                />
+                              </svg>
                             </span>
                           </button>
                           {expanded && selectedQuestion && (
                             <div className="admin-inspector-question-detail">
+                              <span className="admin-question-mechanic">
+                                {mechanicFor(selectedQuestion).label}
+                              </span>
                               {selectedQuestion.leadIn && (
                                 <p>{selectedQuestion.leadIn}</p>
                               )}
                               <p>{selectedQuestion.prompt}</p>
+                              <a
+                                className="tertiary-action"
+                                href={journeyReviewLink(
+                                  selected.path,
+                                  date,
+                                  selectedQuestion.id,
+                                )}
+                                onClick={(event) => {
+                                  if (onNavigate) {
+                                    event.preventDefault();
+                                    onNavigate(
+                                      journeyReviewLink(
+                                        selected.path,
+                                        date,
+                                        selectedQuestion.id,
+                                      ),
+                                    );
+                                  }
+                                }}
+                              >
+                                Review this question →
+                              </a>
                             </div>
                           )}
                         </li>

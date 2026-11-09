@@ -7,6 +7,8 @@ import { reportFailure } from "./monitoring";
 import { clearProfileCache } from "./playerProfileCache";
 import {
   accountIntent,
+  adminIntent,
+  adminLink,
   accountTabLink,
   comparisonLink,
 } from "../app/accountNavigation";
@@ -23,6 +25,26 @@ export function isAdmin(user: User | null) {
   );
 }
 export function safeReturnPath(value: unknown) {
+  if (typeof value === "string" && value.startsWith("/admin?")) {
+    const parsed = new URL(value, "https://ambit.invalid");
+    const intent = adminIntent(value);
+    if (
+      !parsed.hash &&
+      [...parsed.searchParams.keys()].every(
+        (key) =>
+          ["section", "journey", "date"].includes(key) &&
+          parsed.searchParams.getAll(key).length === 1,
+      ) &&
+      (!parsed.searchParams.has("date") || intent.date) &&
+      (!parsed.searchParams.has("journey") || intent.journeyId)
+    )
+      return (
+        adminLink(intent.section, intent.date) +
+        (intent.journeyId
+          ? `&journey=${encodeURIComponent(intent.journeyId)}`
+          : "")
+      );
+  }
   if (typeof value === "string" && value.startsWith("/account?")) {
     const parsed = new URL(value, "https://ambit.invalid");
     const allowed = ["tab", "view", "date", "journey", "version"];
@@ -30,24 +52,10 @@ export function safeReturnPath(value: unknown) {
     if (
       !parsed.hash &&
       intent.tab &&
-      [...parsed.searchParams.keys()].every((key) =>
-        intent.tab === "admin"
-          ? ["tab", "section", "journey", "date"].includes(key) &&
-            parsed.searchParams.getAll(key).length === 1
-          : key === "tab",
-      ) &&
-      (!parsed.searchParams.has("journey") || !!intent.journeyId) &&
-      (!parsed.searchParams.has("date") || !!intent.date) &&
-      parsed.searchParams.getAll("tab").length === 1 &&
-      parsed.searchParams.getAll("section").length <= 1 &&
-      (intent.tab === "admin" || !parsed.searchParams.has("section"))
+      [...parsed.searchParams.keys()].every((key) => key === "tab") &&
+      parsed.searchParams.getAll("tab").length === 1
     )
-      return (
-        accountTabLink(intent.tab, intent.section, intent.date) +
-        (intent.journeyId
-          ? `&journey=${encodeURIComponent(intent.journeyId)}`
-          : "")
-      );
+      return accountTabLink(intent.tab);
     if (
       intent.comparison &&
       (parsed.hash === "" || parsed.hash === "#journey-comparison") &&

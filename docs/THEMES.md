@@ -140,8 +140,7 @@ behavior for tab panels.
 | Compact joined view switches, such as Upcoming/Month | Selected option has a neutral filled background and accent text; unselected options are muted.                                                      | Use the shared neutral hover treatment while retaining the selected appearance.                              |
 | Header menu triggers: profile and hamburger          | Use the neutral supporting-control treatment. While open, retain an accent border and accent text/icon. The profile trigger retains its pill shape. | Use a subtle neutral fill and brighter text/icon. Open triggers retain their accent treatment.               |
 
-Study links and Minigame tabs keep 13px labels and 44px minimum targets. Admin
-keeps its roomy 15px/48px variant; Account keeps 16px/44px sidebar items. On small
+Study links and Minigame tabs keep 13px labels and 44px minimum targets. Admin uses a compact operational navigation at 14px with the same selected underline; Account keeps 16px/44px sidebar items. On small
 screens, roomy/sidebar labels are 13px and their minimum targets are 44px. Short
 horizontal tab groups wrap onto another row when necessary, keeping every option
 visible. Other layout and orientation decisions remain feature-owned.

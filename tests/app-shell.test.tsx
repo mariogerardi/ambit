@@ -243,84 +243,41 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
   });
 
   it.each([true, false])(
-    "places Admin alongside account sections only for admins (admin: %s)",
+    "exposes operational navigation outside Your space only (admin: %s)",
     async (admin) => {
       authProbe.admin = admin;
       authProbe.subject = "owner";
       await mount();
-      await click("Account");
-      if (authProbe.subject) await click("Progress");
-      const adminTab = host.querySelector<HTMLButtonElement>(
-        '[data-dd-action-name="Account Open Admin"]',
+      await click("Open menu");
+      expect(!!host.querySelector('[data-dd-action-name="Menu Admin"]')).toBe(
+        admin,
       );
-      expect(!!adminTab).toBe(admin);
+      expect(!!host.querySelector('a[href="/review/journeys.html"]')).toBe(
+        admin,
+      );
+      await click("Close menu");
+      await click("Account");
+      await click("Progress");
+      expect(
+        host.querySelector('[data-dd-action-name="Account Open Admin"]'),
+      ).toBeNull();
       await click("Open menu");
       expect(
         host.querySelector('[data-dd-action-name="Menu Admin"]'),
       ).toBeNull();
-      await click("Close menu");
-      if (!adminTab) return;
-      await act(async () => adminTab.click());
-      await settleLoads();
-      expect(location.pathname + location.search).toBe("/account?tab=admin");
-      expect(
-        host.querySelector('.account-tabs [aria-current="page"]')?.textContent,
-      ).toBe("Admin");
-      expect(host.querySelector(".admin-panel")).not.toBeNull();
-      await act(async () =>
-        host
-          .querySelector<HTMLButtonElement>(
-            '[data-dd-action-name="Account Open Profile"]',
-          )!
-          .click(),
-      );
-      await settleLoads();
-      expect(location.pathname + location.search).toBe("/account?tab=profile");
-      expect(
-        host.querySelector('.account-tabs [aria-current="page"]')?.textContent,
-      ).toBe("Profile");
+      expect(host.querySelector('a[href="/review/journeys.html"]')).toBeNull();
     },
   );
 
-  it("keeps the account shell and admin draft mounted across URL-driven tabs and browser history", async () => {
+  it("keeps Admin sections mounted with history, independently of Your space", async () => {
     authProbe.subject = "owner";
-    history.replaceState(null, "", "/account?tab=dashboard");
+    history.replaceState(null, "", "/admin?section=schedule");
     await mount();
-    const layer = host.querySelector(".mode-incoming");
-    const tabs = host.querySelector(".account-tabs");
-    async function section(label: string) {
-      await act(async () =>
-        host
-          .querySelector<HTMLButtonElement>(
-            `[data-dd-action-name="Account Open ${label}"]`,
-          )!
-          .click(),
-      );
-      await settleLoads();
-      expect(host.querySelector(".mode-incoming")).toBe(layer);
-      if (label === "Admin")
-        expect(
-          host.querySelector<HTMLElement>(".account-heading")?.hidden,
-        ).toBe(true);
-      else expect(host.querySelector(".account-heading")).not.toBeNull();
-      expect(host.querySelector(".account-tabs")).toBe(tabs);
-      expect(host.querySelector(".mode-outgoing")).toBeNull();
-    }
-    await section("Profile");
-    expect(location.search).toBe("?tab=profile");
-    await section("Friends");
-    expect(location.search).toBe("?tab=friends");
-    await section("Admin");
-    expect(location.search).toBe("?tab=admin");
-    expect(host.querySelector<HTMLElement>(".account-heading")?.hidden).toBe(
-      true,
-    );
-    expect(host.querySelector(".admin-top-navigation")).not.toBeNull();
-    expect(
-      host.querySelector("#admin-tab-schedule")?.getAttribute("aria-current"),
-    ).toBe("page");
+    expect(host.querySelector(".account-dashboard")).toBeNull();
+    expect(host.querySelector(".mode-admin")).not.toBeNull();
     const editor = host.querySelector(".journey-date-editor");
-    await click("Choose a Journey");
+    expect(host.querySelectorAll("h1")).toHaveLength(1);
+    await click("Change Journey");
     await act(async () =>
       host
         .querySelector<HTMLButtonElement>(
@@ -329,32 +286,23 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
         .click(),
     );
     await click("Feedback");
-    expect(location.search).toBe("?tab=admin&section=feedback");
+    expect(location.pathname + location.search).toBe("/admin?section=feedback");
     await click("Journeys");
-    expect(location.search).toBe("?tab=admin&section=journeys");
     await act(async () => {
       history.back();
       await new Promise((resolve) => setTimeout(resolve, 25));
     });
-    expect(location.search).toBe("?tab=admin&section=feedback");
-    expect(host.querySelector("#admin-feedback")?.hasAttribute("hidden")).toBe(
-      false,
-    );
+    expect(location.search).toBe("?section=feedback");
     await act(async () => {
       history.forward();
       await new Promise((resolve) => setTimeout(resolve, 25));
     });
-    expect(location.search).toBe("?tab=admin&section=journeys");
-    expect(host.querySelector("#admin-journeys")?.hasAttribute("hidden")).toBe(
-      false,
-    );
-    await section("Dashboard");
-    expect(location.search).toBe("?tab=dashboard");
-    await section("Admin");
+    expect(location.search).toBe("?section=journeys");
+    await click("Schedule");
     expect(host.querySelector(".journey-date-editor")).toBe(editor);
-    expect(
-      host.querySelector(".schedule-proposed h4")?.textContent,
-    ).toBe("Down the Danube");
+    expect(host.querySelector(".schedule-proposed h4")?.textContent).toBe(
+      "Down the Danube",
+    );
     expect(probe.mounts).toBe(1);
   });
 
@@ -363,17 +311,17 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
     async (admin) => {
       authProbe.subject = "owner";
       authProbe.admin = admin;
-      history.replaceState(null, "", "/account?tab=admin&section=tools");
+      history.replaceState(null, "", "/admin?section=utilities");
       await mount();
       if (admin) {
         expect(
-          host.querySelector<HTMLDialogElement>(".admin-utility-dialog")?.open,
-        ).toBe(true);
-        expect(
           host
-            .querySelector("#admin-tab-schedule")
+            .querySelector("#admin-tab-utilities")
             ?.getAttribute("aria-current"),
         ).toBe("page");
+        expect(
+          host.querySelector<HTMLElement>("#admin-utilities")?.hidden,
+        ).toBe(false);
       } else {
         expect(host.textContent).toContain("Admin access required.");
         expect(host.querySelector(".admin-panel")).toBeNull();

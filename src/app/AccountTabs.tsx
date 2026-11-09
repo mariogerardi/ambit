@@ -9,18 +9,15 @@ export const ACCOUNT_SECTIONS = {
   friends: { label: "Friends", icon: "friends" },
   profile: { label: "Profile", icon: "profile" },
   appearance: { label: "Settings", icon: "settings" },
-  admin: { label: "Admin", icon: "admin" },
 } as const;
 
 export function AccountTabs({
   active,
-  admin = false,
   newFriends = false,
   guest = false,
   onSelect,
 }: {
   active: AccountSection;
-  admin?: boolean;
   newFriends?: boolean;
   guest?: boolean;
   onSelect(section: AccountSection): void;
@@ -28,7 +25,6 @@ export function AccountTabs({
   const sections: AccountSection[] = guest
     ? ["profile", "appearance"]
     : ["dashboard", "friends", "profile", "appearance"];
-  if (admin && !guest) sections.push("admin");
   return (
     <nav
       className="account-tabs section-navigation section-navigation--sidebar navigation-rows"
@@ -39,7 +35,7 @@ export function AccountTabs({
           key={section}
           type="button"
           data-dd-action-name={`Account Open ${section[0].toUpperCase() + section.slice(1)}`}
-          className={`${active === section ? "selected" : ""} ${section === "admin" ? "account-admin-link" : ""}`}
+          className={active === section ? "selected" : ""}
           aria-current={active === section ? "page" : undefined}
           onClick={() => onSelect(section)}
         >
