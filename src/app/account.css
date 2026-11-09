@@ -14,6 +14,9 @@
   gap: 22px;
   margin-bottom: 24px;
 }
+.account-heading[hidden] {
+  display: none;
+}
 .account-dashboard .account-heading h1.editorial-heading {
   margin: 6px 0 8px;
   font-size: clamp(30px, 4vw, 40px);
@@ -1133,7 +1136,7 @@
   border: 0;
 }
 
-/* Account navigation stays beside the task; Admin gets the whole workspace. */
+/* Personal account navigation stays beside the task. */
 .account-workspace {
   display: grid;
   grid-template-columns: 160px minmax(0, 1fr);
@@ -1157,22 +1160,11 @@
   padding: 0;
   margin: 0;
 }
-.account-sidebar .account-admin-link {
-  margin-top: 18px;
-  border-top-color: rgb(var(--ui-line-rgb) / 0.2);
-  border-radius: 0 0 8px 8px;
-}
 .account-section-description {
   margin: 0;
   font-size: 14px;
   line-height: 1.6;
   color: var(--ui-muted);
-}
-.account-dashboard[data-section="admin"] .account-workspace {
-  grid-template-columns: minmax(0, 1fr);
-}
-.account-dashboard[data-section="admin"] .account-sidebar {
-  display: none;
 }
 .account-dashboard .account-profile-layout {
   max-width: 760px;
@@ -1373,12 +1365,6 @@
     border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.2);
     padding-bottom: 12px;
   }
-  .account-sidebar .account-admin-link {
-    margin-top: 0;
-    margin-left: auto;
-    border: 0;
-    border-radius: 8px;
-  }
 }
 @media (max-width: 600px) {
   .account-continuations {
@@ -1418,10 +1404,6 @@
 }
 
 @media (max-width: 600px) {
-  /* Admin stays directly available in the avatar menu on narrow screens. */
-  .account-sidebar .account-tabs .account-admin-link {
-    display: none;
-  }
   .account-dashboard .friend-comparison-list .friend-comparison-row {
     flex-wrap: wrap;
     align-items: center;

@@ -419,7 +419,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     await click("Utilities");
     await vi.waitFor(() => {
       expect(
-        host.querySelector<HTMLButtonElement>(".admin-utility-dialog > button")
+        host.querySelector<HTMLButtonElement>(".admin-utility button")
           ?.disabled,
       ).toBe(false);
     });
@@ -443,7 +443,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
   it("offers retained Journeys and the new sun and river Journeys in Admin", async () => {
     await mount();
     await click("Admin");
-    await click("Choose a Journey");
+    await click("Change Journey");
     const options = [
       ...host.querySelectorAll<HTMLButtonElement>("[data-journey-id]"),
     ].map((button) => button.dataset.journeyId);
@@ -485,9 +485,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     const attempts = JSON.parse(localStorage.getItem(DAILY_KEY)!).attempts;
     await click("Admin");
     expect(host.querySelector(".mode-incoming .admin-panel")).not.toBeNull();
-    expect(location.pathname + location.search).toBe(
-      "/account?tab=admin&section=schedule",
-    );
+    expect(location.pathname).toBe("/admin");
     expect(
       host.querySelector(".page-layout .admin-content .admin-panel"),
     ).not.toBeNull();
@@ -545,7 +543,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     await act(async () => probe.props!.onSelect(member("wurl:CAN")));
     const canvas = host.querySelector("canvas");
     await click("Admin");
-    await click("Choose a Journey");
+    await click("Change Journey");
     await act(async () =>
       host
         .querySelector<HTMLButtonElement>(
@@ -621,7 +619,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     const offeredTitle = host.querySelector(".daily-menu h2")?.textContent;
     await click("Admin");
     await click("Mon, Oct 12");
-    await click("Choose a Journey");
+    await click("Change Journey");
     await act(async () =>
       host
         .querySelector<HTMLButtonElement>(
@@ -642,7 +640,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     );
     await click("Admin");
     await click("Mon, Oct 12");
-    await click("Choose a Journey");
+    await click("Change Journey");
     await click("Restore automatic rotation");
     await click("Restore automatic selection");
     expect(scheduleState.assignments).toEqual({});

@@ -76,7 +76,7 @@ The preview supports profile edits, friend acceptance and Journey comparisons. `
 Cognito branding assets; it submits no credentials. For Journey map review, open `/review/journeys.html`. It renders the real App and
 WebGL globe in isolated local review, preserving the real account session for the
 current origin. Without an account it identifies itself as a local workbench;
-it grants no server permissions. It starts Down the Danube in isolated review;
+it grants no server permissions. It starts the newest catalog Journey by `addedAt` in isolated review;
 use the always-visible **Journey** selector to choose another source. The Admin library’s
 **Review Journey** action opens registered content. Review routes use
 `/journey/<slug>?review=1` and separate in-memory state, with question selection,
@@ -86,11 +86,10 @@ blocked, and the fixture grants no server
 permissions. Review entry points stay
 outside the production bundle. See [Services](SERVICES.md) for release steps.
 
-During local development, open **Journey workbench** from the signed-in account
-menu under **Admin**, or from the Admin Journey library. For registered or unregistered Journey source, use
+During local development, administrators can open **Journey Workbench** from the global hamburger menu outside Your space, or from Admin → Utilities. For registered or unregistered Journey source, use
 the shared workbench:
 `http://127.0.0.1:5173/review/journeys.html?module=imLikeABirdJourney.ts`.
-The opaque review panel keeps Journey selection, question selection and question-state preview buttons directly accessible. Changing the Journey selector opens that source immediately; **Seed and source** contains an explicit **Apply seed** action. Expand **Catalog registration** for registration, or **Review controls** for restart and capture tools. Navigation leaves the review document, restoring the normal app and its
+The review panel keeps Journey selection visible; **Inspect** exposes question and preview-state selectors. Changing the Journey selector opens that source immediately; **Advanced development tools** contains **Apply seed**, mechanic recipes and **Catalog registration**. **Advanced review tools** contains restart and capture tools. Navigation leaves the review document, restoring the normal app and its
 account session. Use the same origin as the signed-in app (`localhost` and
 `127.0.0.1` have separate browser storage).
 Choose another `*Journey.ts` source from its selector; no registration or custom

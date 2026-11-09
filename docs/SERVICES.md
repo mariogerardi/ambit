@@ -29,72 +29,82 @@ Cognito access tokens with `openid` scope, and the Lambda checks group membershi
 Hiding a menu item is not the API authorization boundary. No password or account
 is created on the owner's behalf: use **Create account** and verify that address.
 
-The Admin account tab opens on **Schedule**, with compact navigation for
-**Journeys** and **Feedback**. The default two-week agenda shows full Journey
-titles; a month calendar remains available. The selected date initially shows its
-assignment with Review and Change actions. Date editing is disclosed on demand,
-and Publish appears only for an unpublished change. Both date-first and Journey-first scheduling use one
-assignment editor. Choose a schedule day or a Journey from the library, inspect
-its proposed assignment, and explicitly **Publish**. Changing the editor's publish
-date carries its proposed Journey; choosing a different calendar day asks before
-discarding an unpublished change. The schedule browser is secondary to the editor on
-narrow screens. Manual, published-automatic and planned-automatic assignments have
-distinct markers and plain-language labels.
+The separate **Admin** destination at `/admin` opens on **Schedule**, with compact navigation for
+**Journeys**, **Feedback**, and **Utilities**. The default agenda shows seven
+days at a time and navigates by week; a month calendar remains available. Period
+navigation does not change the selected date or its proposal. When that date is
+outside the visible week or month, the date browser offers a return action while
+the assignment editor remains on the selected date. The editor compares the current assignment with a proposal
+and keeps Publish and Discard next to an unpublished change. The Journey picker
+is searchable and compact. Choose a schedule day or a Journey from the catalog,
+inspect its proposal, and explicitly **Publish**. Only the agenda and month
+calendar select the publishing date. Selecting a different date silently replaces
+the current in-memory proposal with that date's current assignment. Proposals
+are not saved to session storage or restored after a reload. Manual, published-
+automatic and planned-automatic assignments have distinct markers and plain-
+language labels. An unpublished replacement is labeled separately from the
+current assignment’s published or planned state.
 
-These sections have URLs under `/account?tab=admin&section=...`; optional `date`
+These sections have URLs under `/admin?section=...`; optional `date`
 and `journey` parameters preserve review/scheduling context and survive sign-in
-only after validation. Legacy `/admin` links redirect there. **Review Journey**
+only after validation. Old account Admin links are not retained. **Review Journey**
 uses consistent in-app navigation from both library and schedule, carrying the
-publish date to the review's return links. Selecting a reviewed Journey stages a
-local draft in the same editor; it does not publish anything.
+publish date to the review's return links. Selecting a reviewed Journey proposes it in the same editor; it does not publish
+anything. Proposals remain in memory while switching Admin sections and are
+cleared when the editor is unmounted or the selected date changes. Loading or
+refreshing assignments does not create an unpublished edit or leave-page
+warning. Publishing waits for the selected date to load. Rewriting an Archive
+day and resetting the admin's own Daily attempt use themed in-app confirmations;
+Archive rewriting still sends the explicit rewrite flag and preserves started
+player attempts.
 
-Drafts survive leaving Admin within the same browser tab using session storage
-and are removed after publication or discard. Loading or refreshing assignments
-does not create an unpublished edit or leave-page warning. A restored deliberate
-edit keeps its baseline until that date loads, including a choice to restore
-automatic selection. Publishing waits for the selected date to load. Discarding a
-draft, rewriting an Archive day and resetting the admin's own Daily attempt use
-themed in-app confirmations; Archive rewriting still sends the explicit rewrite
-flag and preserves started player attempts.
-
-**Journeys** and the scheduling picker share the same searchable list, defaulting
-to newest first, with Review/Schedule actions, recorded last/next dates, and
-five-question outlines that expand in place. Browsing does not create a draft.
+**Journeys** presents a searchable catalog beside a persistent selected-Journey
+inspector. Search, rotation filter, sorting and selection remain when switching
+Admin sections; if filters hide the selected Journey, the inspector explains
+that it is outside the results. The inspector shows its rotation eligibility,
+scheduling history (or **Never scheduled**), and a five-question outline with
+individual question details. Rotation eligibility is catalog metadata, not
+confirmation of backend scheduling readiness. Review and Schedule are separate
+actions. Expanded questions include a response-type label and direct question review. Catalog and deployment guidance live in Utilities; development-only workbench access remains secondary. Browsing does not create a
+schedule proposal.
 **Feedback** puts New reports first and links recognized Journey/question context
-into isolated review. Filters appear when reports exist; counts are explicitly
+into isolated review. Filters select report status; counts are explicitly
 limited to loaded results when pagination remains. Technical context is in a
-disclosure. **Maintenance** contains the saved-attempt reset; legacy Tools links
-open that disclosure rather than a separate tab.
+disclosure. Each report has a bounded surface, readable message, contextual Journey link, and compact status actions. **Utilities** is a secondary destination grouping personal attempt testing, catalog/release guidance, and local development links. Reset retains its accessible confirmation.
+
+The global hamburger menu exposes **Admin** to authorized administrators and **Journey Workbench** when the Vite development entry point is available. Both entries are omitted while viewing Your space. The personal avatar menu and account sidebar contain only personal destinations. Workbench entry without an explicit Journey uses the catalog’s latest `addedAt` authoring date, with deterministic title/ID ties; explicit Journey/module links take precedence.
 
 **Review Journey** opens the protected practice route with `?review=1`, optionally
 with a validated `date` and a `question` ID to inspect. An unknown question ID is
 ignored. It reuses
 the real controls and persistent globe. Its game state is held only in memory,
 separately from normal practice, Daily/Archive attempts and account saves. Refresh
-discards it. Controls jump to or restart a question, restart the Journey, show
-hint/assist, evaluate sample correct/missed responses and preview an all-correct
-completion. Samples use the same reducer-based response generation as the
-structural audit; an unavailable sample is reported instead of fabricating a
-grade. Answer normally to inspect a particular wrong/partial response. Only
-registered Journeys are available here; this does not introduce an unlisted state
-or load arbitrary modules. Non-admin practice/review access remains blocked.
+discards it. **Playtest** presents the player experience; **Inspect** exposes
+question and preview-state selection plus secondary editorial and advanced tools.
+The active question and state label distinguish live play from a requested sample.
+Controls can restart a question or Journey, show hint/assist, evaluate sample
+correct/missed or partial responses, and preview all-correct or mixed completion.
+Samples use the same reducer-based response generation as the structural audit;
+an unavailable sample is reported instead of fabricating a grade. Answer normally
+to inspect a particular wrong/partial response. Only registered Journeys are
+available here; this does not introduce an unlisted state or load arbitrary
+modules. Non-admin practice/review access remains blocked.
 
 Scheduling starts on October 11, 2026, matching the public Archive. Earlier
 calendar cells have no Journey and cannot be selected or assigned.
 
-**Clear my Journey attempt** is a compact entry in the **Tools** tab. Clearing
-asks for confirmation and removes the signed-in
-admin's current-day attempt, including its answers, score, and help use. Other
-dates and users remain intact. Start again from Home to use the currently
-scheduled Journey. The reset saves locally and synchronizes through the existing
-account save service.
+**Clear today's attempt** is in the **Utilities** section. Its confirmation
+removes the signed-in admin's current-day attempt, including its answers, score,
+and help use. Other dates and users remain intact. Start again from Home to use
+the currently scheduled Journey. The reset saves locally and synchronizes
+through the existing account save service.
 
 Shared toast notifications confirm profile/friend actions, appearance saves,
 schedule publication, attempt reset and feedback status changes. Brief notices
 appear as compact top-centered notices, animate in/out, and expire after three
 seconds (five for failures). Dismissal pauses while hovered, focused or in a
 hidden tab. Field-specific validation and contextual errors stay inline. Notifications do not replace
-confirmation for destructive actions or publish an unsaved draft. The provider
+confirmation for destructive actions or publish an unpublished proposal. The provider
 lives above account-specific workspaces so notices survive navigation.
 
 ## Public Journey archive
@@ -126,15 +136,14 @@ frontend. No table/schema migration or rewritten historical schedule is required
 
 The Account screen shows daily Journey totals, a calendar-day Journey streak,
 Study completion totals and answer accuracy. It keeps Dashboard, Profile,
-Friends and Appearance tabs, plus a protected Admin tab for administrators. Each tab updates its
+Friends and Appearance tabs. Each tab updates its
 `/account?tab=...` URL and supports refresh and Back/Forward. The header and tab
-bar remain mounted across switches, preserving profile and schedule drafts.
+bar remain mounted across switches, preserving profile edits. Admin has its own shell and does not mount personal account content. Proposals survive switches between Admin sections only.
 Appearance owns the device-local theme preference; guests can use it without
 signing in. It does not write theme settings to the profile API.
 Journey/session history, Study setup presets, resume actions and
 Challenges are not shown on Account. Account and Admin scroll with the page.
-Account and Admin use a static globe illustration behind the content, while the hidden
-WebGL renderer is paused and kept mounted for returning to play.
+Account uses a static globe illustration; Admin uses a restrained atmospheric canvas. Both pause the hidden WebGL renderer and keep it mounted for returning to play.
 Display names, case-insensitive unique handles, preset avatars or country flags, an optional
 favorite region and a 160-character bio live in the retained, encrypted
 `ambit-production-community` table. Profile revisions prevent stale-device

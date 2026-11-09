@@ -815,33 +815,26 @@ it("consumes comparison arrival so switching account tabs does not scroll there 
   }
 });
 
-it("retains a profile draft and mounted admin content while route intent changes", async () => {
+it("retains a profile edit across personal account sections", async () => {
   const client = { request } as CommunityClient;
   const onNavigate = vi.fn();
-  const adminContent = (
-    <input aria-label="Admin draft" defaultValue="October selection" />
-  );
-  const props = { client, onNavigate, adminContent };
+  const props = { client, onNavigate };
   await mount({ ...props, intent: { tab: "profile" } });
   const heading = host.querySelector(".account-heading");
   await click("Edit profile");
   await input('input[autocomplete="nickname"]', "Alice traveling");
   await click("Progress");
   expect(onNavigate).toHaveBeenLastCalledWith("/account?tab=dashboard");
-  await mount({ ...props, intent: { tab: "admin", section: "tools" } });
-  const adminDraft = host.querySelector<HTMLInputElement>(
-    '[aria-label="Admin draft"]',
-  )!;
-  adminDraft.value = "Unpublished selection";
+  await mount({ ...props, intent: { tab: "dashboard" } });
   await mount({ ...props, intent: { tab: "profile" } });
   expect(host.querySelector(".account-heading")).toBe(heading);
   expect(
     host.querySelector<HTMLInputElement>('input[autocomplete="nickname"]')!
       .value,
   ).toBe("Alice traveling");
-  await mount({ ...props, intent: { tab: "admin", section: "schedule" } });
-  expect(host.querySelector('[aria-label="Admin draft"]')).toBe(adminDraft);
-  expect(adminDraft.value).toBe("Unpublished selection");
+  expect(
+    host.querySelector('[data-dd-action-name="Account Open Admin"]'),
+  ).toBeNull();
   expect(
     request.mock.calls.filter(
       ([path, method]) => path === "profile" && (!method || method === "GET"),

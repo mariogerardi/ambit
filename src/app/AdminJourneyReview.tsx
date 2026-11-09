@@ -31,6 +31,17 @@ function isReviewStage(value: string): value is ReviewStage {
   return REVIEW_STAGES.some((stage) => stage === value);
 }
 
+function liveStage(game: GameState, journey: Journey): ReviewStage {
+  if (game.phase === "finished") return "completion";
+  if (game.phase === "playing") {
+    const help = game.help?.[journey.rounds[game.roundIndex]?.id];
+    return help === "assisted" ? "assist" : help === "hinted" ? "hint" : "play";
+  }
+  const answer = game.answers.at(-1);
+  if (answer?.partialCredit) return "partial";
+  return answer?.correct ? "correct" : "missed";
+}
+
 export function AdminJourneyReview({
   journey,
   context,
@@ -59,11 +70,32 @@ export function AdminJourneyReview({
   const [activeStage, setActiveStage] = useState<ReviewStage>(
     source?.stage ?? "play",
   );
+  const [stageOrigin, setStageOrigin] = useState<"live" | "requested">(
+    source?.stage && source.stage !== "play" ? "requested" : "live",
+  );
+  const requestedState = useRef<GameState | undefined>(undefined);
+  const previousGame = useRef(game);
   const request = useRef(0);
   useEffect(() => {
     setInspecting(false);
     setActiveStage(source?.stage ?? "play");
+    setStageOrigin(
+      source?.stage && source.stage !== "play" ? "requested" : "live",
+    );
+    requestedState.current = undefined;
+    previousGame.current = game;
   }, [journey.id]);
+  useEffect(() => {
+    if (previousGame.current === game) return;
+    previousGame.current = game;
+    if (requestedState.current === game) {
+      requestedState.current = undefined;
+      return;
+    }
+    requestedState.current = undefined;
+    setActiveStage(liveStage(game, journey));
+    setStageOrigin("live");
+  }, [game, journey]);
   useEffect(
     () => () => {
       request.current++;
@@ -75,7 +107,10 @@ export function AdminJourneyReview({
     setBusy(false);
     setError("");
     setActiveStage("play");
-    onChange(reviewRound(journey, index, source?.seed));
+    setStageOrigin("live");
+    const next = reviewRound(journey, index, source?.seed);
+    requestedState.current = next;
+    onChange(next);
     source?.onInspect?.(index, "play");
   };
   async function sample(kind: ReviewStage, index = game.roundIndex) {
@@ -91,8 +126,10 @@ export function AdminJourneyReview({
         source?.seed,
       );
       if (id !== request.current) return;
+      requestedState.current = result;
       onChange(result);
       setActiveStage(kind);
+      setStageOrigin("requested");
       source?.onInspect?.(index, kind);
     } catch (failure) {
       if (id === request.current)
@@ -120,7 +157,9 @@ export function AdminJourneyReview({
         <div>
           <strong>{inspecting ? "Inspect" : "Playtest"}</strong>
           <span>
-            {activeQuestion} · {reviewStageLabels[activeStage]}
+            {activeQuestion} ·{" "}
+            {stageOrigin === "requested" ? "Requested" : "Live"} ·{" "}
+            {reviewStageLabels[activeStage]}
           </span>
         </div>
         <button
@@ -291,7 +330,10 @@ export function AdminJourneyReview({
                             await file.text(),
                           );
                           if (id === request.current) {
+                            requestedState.current = restored;
                             onChange(restored);
+                            setActiveStage(liveStage(restored, journey));
+                            setStageOrigin("live");
                             setError("");
                           }
                         } catch (failure) {

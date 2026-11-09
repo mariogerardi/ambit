@@ -10,7 +10,11 @@ import {
   wrapCardText,
   paintResultCard,
 } from "../src/app/journeySharing";
-import { accountIntent, comparisonLink } from "../src/app/accountNavigation";
+import {
+  accountIntent,
+  adminIntent,
+  comparisonLink,
+} from "../src/app/accountNavigation";
 import { modeForPath } from "../src/app/modes";
 import { readFriendActivity } from "../src/app/useFriendActivity";
 import type {
@@ -183,28 +187,14 @@ it("routes query links and rejects invalid comparison identities", () => {
     tab: "appearance",
   });
   expect(accountIntent("/account?tab=dashboard")).toEqual({ tab: "dashboard" });
-  expect(modeForPath("/admin")).toBe("account");
-  expect(accountIntent("/admin?section=tools")).toEqual({
-    tab: "admin",
-    section: "tools",
-  });
-  expect(accountIntent("/account?tab=admin&section=feedback")).toEqual({
-    tab: "admin",
-    section: "feedback",
-  });
+  expect(modeForPath("/admin")).toBe("admin");
+  expect(adminIntent("/admin?section=feedback").section).toBe("feedback");
   expect(
-    accountIntent(
-      "/account?tab=admin&section=journeys&journey=down-the-danube-v1",
-    ),
-  ).toEqual({
-    tab: "admin",
-    section: "journeys",
-    journeyId: "down-the-danube-v1",
-  });
-  expect(accountIntent("/account?tab=admin&section=unknown")).toEqual({
-    tab: "admin",
-    section: "schedule",
-  });
+    adminIntent("/admin?section=journeys&journey=down-the-danube-v1").journeyId,
+  ).toBe("down-the-danube-v1");
+  expect(adminIntent("/admin?section=unknown").section).toBe("schedule");
+  expect(adminIntent("/admin?date=2026-02-30").date).toBeUndefined();
+  expect(accountIntent("/account?tab=admin")).toEqual({});
 });
 it("reads all activity pages, deduplicates friends, and rejects repeating cursors", async () => {
   const calls: string[] = [];

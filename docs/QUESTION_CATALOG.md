@@ -340,7 +340,7 @@ dates; locked/assigned dates and started attempts remain fixed. See the staged
 [activation procedure](HOSTING.md#journey-catalog-activation).
 The Admin Journey library reflects the frontend catalog, identifies each
 Journey's automatic-rotation eligibility, and distinguishes selecting a date
-from publishing its schedule draft. Manual assignment requires matching
+from publishing its proposed assignment. Manual assignment requires matching
 frontend and backend catalogs; the library cannot confirm deployment state.
 Use the activation procedure to verify release readiness.
 Retained attempts remain pinned to their stored Journey. Removed editions are

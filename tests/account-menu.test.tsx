@@ -8,7 +8,6 @@ let host: HTMLDivElement, root: ReturnType<typeof createRoot>;
 const onNavigate = vi.fn();
 const props = {
   signedIn: true,
-  admin: false,
   path: "/",
   onNavigate,
 };
@@ -45,10 +44,9 @@ it("opens direct account destinations and keeps Admin restricted", async () => {
   await click("Settings");
   expect(onNavigate).toHaveBeenLastCalledWith("/account?tab=appearance");
   expect(host.querySelector("nav")).toBeNull();
-  await mount({ admin: true });
+  await mount();
   await click("Account");
-  await click("Admin");
-  expect(onNavigate).toHaveBeenLastCalledWith("/account?tab=admin");
+  expect(host.textContent).not.toContain("Admin");
 });
 it("dismisses with Escape, focus leaving, outside presses and navigation", async () => {
   await mount();
@@ -88,11 +86,9 @@ it("takes guests straight to sign-in and closes account navigation on sign-out",
   expect(host.querySelector("[aria-expanded]")).toBeNull();
 });
 
-it("marks Admin as the current account destination", async () => {
-  await mount({ admin: true, path: "/account?tab=admin&section=schedule" });
+it("keeps the personal account menu unselected while in Admin", async () => {
+  await mount({ path: "/admin?section=schedule" });
   await click("Account");
-  const current = host.querySelector(
-    '[aria-label="Your account"] [aria-current="page"]',
-  );
-  expect(current?.textContent).toBe("Admin");
+  expect(host.querySelector('[aria-current="page"]')).toBeNull();
+  expect(host.textContent).not.toContain("Admin");
 });

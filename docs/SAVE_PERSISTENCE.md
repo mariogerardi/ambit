@@ -139,7 +139,7 @@ same Journey run, answered rounds/advanced phases take precedence over stale dra
 edits. Replays receive a new run ID and monotonically increasing start time, so a
 late edit from an old run cannot replace a fresh replay. Daily and Archive results
 have no replay action, including for admins. Admins can explicitly clear today's
-attempt from the Tools tab; other players retain their completed result.
+attempt from the Utilities section of Admin; other players retain their completed result.
 
 Today's durable server schedule takes precedence over a conflicting saved
 Journey selection. Reconciliation retains the displaced run, including grades,

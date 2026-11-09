@@ -59,7 +59,15 @@ it("reviews real outcomes without changing Daily attempts or normal practice", a
     host.querySelector(".round-feedback.answer-discovered"),
   ).not.toBeNull();
   expect(host.querySelector(".admin-review-heading span")?.textContent).toBe(
-    "2 of 5 · Capital · Missed reveal",
+    "2 of 5 · Capital · Requested · Missed reveal",
+  );
+  await changeSelect("Preview state", "play");
+  expect(host.querySelector(".admin-review-heading span")?.textContent).toBe(
+    "2 of 5 · Capital · Live · Question",
+  );
+  await click("Get a hint");
+  expect(host.querySelector(".admin-review-heading span")?.textContent).toBe(
+    "2 of 5 · Capital · Live · Hint",
   );
   expect(save.load().attempts).toEqual(before);
   await act(async () => {
@@ -85,6 +93,9 @@ it("previews a complete recap and returns to scheduling without publishing", asy
   await mount();
   await click("Inspect");
   await changeSelect("Preview state", "completion");
+  expect(host.querySelector(".admin-review-heading span")?.textContent).toBe(
+    "Journey completion · Requested · Sample completion",
+  );
   expect(
     host.querySelector(".finish-story .journey-score")?.textContent,
   ).toContain("15/15");

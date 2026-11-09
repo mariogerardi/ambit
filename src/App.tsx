@@ -28,7 +28,8 @@ import { DelayedStatus } from "./app/DelayedStatus";
 import { JourneySocial } from "./app/JourneySocial";
 import {
   accountIntent,
-  accountTabLink,
+  adminIntent,
+  adminLink,
   adminDate,
 } from "./app/accountNavigation";
 import {
@@ -60,7 +61,6 @@ import {
 import { useAccount } from "./services/accounts";
 import { usePlayerProfile } from "./services/playerProfile";
 import { AccountMenu } from "./app/AccountMenu";
-import { AdminTopNavigation } from "./app/AdminTopNavigation";
 import { appRelease } from "./services/config";
 import { trackAction, trackView, reportFailure } from "./services/monitoring";
 import type { FeedbackRequest } from "./services/feedback";
@@ -216,20 +216,7 @@ export function App({
   const [path, setPath] = useState(location.pathname + location.search);
   const pathname = path.split(/[?#]/)[0];
   const accountNavigation = useMemo(() => accountIntent(path), [path]);
-  useEffect(() => {
-    if (pathname !== "/admin") return;
-    const canonical =
-      accountTabLink(
-        "admin",
-        accountNavigation.section,
-        accountNavigation.date,
-      ) +
-      (accountNavigation.journeyId
-        ? `&journey=${encodeURIComponent(accountNavigation.journeyId)}`
-        : "");
-    history.replaceState(null, "", canonical);
-    setPath(canonical);
-  }, [pathname, accountNavigation]);
+  const adminNavigation = useMemo(() => adminIntent(path), [path]);
   const requestedMode = reviewSource ? "practice" : modeForPath(path);
   const restricted =
     requestedMode === "practice" && !account.admin && !reviewSource;
@@ -311,6 +298,7 @@ export function App({
   const unrestricted =
     mode === "home" ||
     mode === "account" ||
+    mode === "admin" ||
     (mode === "study" && (studySetup || !study.session));
   const displayLayers =
     mode === "explore" || mode === "archive"
@@ -592,8 +580,9 @@ export function App({
   const [studyCustomizing, setStudyCustomizing] = useState(false);
   const panelOnly =
     mode === "account" ||
+    mode === "admin" ||
     (mobile.enabled && mode === "study" && studyCustomizing);
-  const pageLayout = mode === "account";
+  const pageLayout = mode === "account" || mode === "admin";
   const studyPreviewVisit = useMemo(() => ({}), [path]);
   const [studyPreviewState, setStudyPreviewState] = useState<{
     settings: StudySettings;
@@ -1320,6 +1309,28 @@ export function App({
         onPlay={playDaily}
         onToday={() => playDaily(today)}
       />
+    ) : mode === "admin" ? (
+      <AdminAccess onAccount={() => navigate("/account")}>
+        <div className="admin-content">
+          <Suspense fallback={<p role="status">Opening admin tools…</p>}>
+            <AdminPanel
+              section={adminNavigation.section ?? "schedule"}
+              initialJourneyId={adminNavigation.journeyId}
+              initialDate={adminNavigation.date}
+              onNavigate={navigate}
+              onSectionChange={(section) => navigate(adminLink(section))}
+              date={today}
+              schedule={schedule}
+              feedback={<FeedbackReview onNavigate={navigate} />}
+              attempt={daily.attempts[today]}
+              resetReady={
+                !!subject && dailyLoaded && cloudSave.hydrated && canSave
+              }
+              onResetAttempt={() => account.admin && resetAttempt(today)}
+            />
+          </Suspense>
+        </div>
+      </AdminAccess>
     ) : mode === "account" ? (
       <AccountPanel
         onJourney={() => playDaily(today)}
@@ -1341,27 +1352,6 @@ export function App({
           <AppearancePanel theme={theme} onTheme={changeTheme} />
         }
         onNavigate={navigate}
-        adminContent={
-          <AdminAccess onAccount={() => navigate("/account")}>
-            <div className="admin-content">
-              <Suspense fallback={<p role="status">Opening admin tools…</p>}>
-                <AdminPanel
-                  embedded
-                  section={accountNavigation.section ?? "schedule"}
-                  initialJourneyId={accountNavigation.journeyId}
-                  initialDate={accountNavigation.date}
-                  onNavigate={navigate}
-                  onSectionChange={(section) =>
-                    navigate(accountTabLink("admin", section))
-                  }
-                  date={today}
-                  schedule={schedule}
-                  feedback={<FeedbackReview onNavigate={navigate} />}
-                />
-              </Suspense>
-            </div>
-          </AdminAccess>
-        }
         defaultComparison={
           schedule.ready
             ? {
@@ -1916,9 +1906,7 @@ export function App({
         )}
       </div>
       {minigameLanding && webgl && <MinigameTourCaption tour={tour} />}
-      <header
-        className={`experience-header${mode === "account" && account.admin && accountNavigation.tab === "admin" ? " has-admin-navigation" : ""}`}
-      >
+      <header className="experience-header">
         <button
           className="experience-logo"
           data-dd-action-name="Menu Home Logo"
@@ -1927,25 +1915,6 @@ export function App({
         >
           <AmbitLogo />
         </button>
-        {mode === "account" &&
-          account.admin &&
-          accountNavigation.tab === "admin" && (
-            <AdminTopNavigation
-              active={
-                accountNavigation.section ?? "schedule"
-              }
-              date={accountNavigation.date}
-              today={today}
-              onNavigate={navigate}
-              attempt={daily.attempts[today]}
-              resetReady={
-                !!subject && dailyLoaded && cloudSave.hydrated && canSave
-              }
-              onResetAttempt={() =>
-                account.admin && resetAttempt(today)
-              }
-            />
-          )}
         <div className="experience-header-right">
           {reviewSource && !account.user ? (
             <span className="review-local-badge">Local workbench</span>
@@ -1953,12 +1922,12 @@ export function App({
             <AccountMenu
               signedIn={!!account.user}
               player={playerProfile}
-              admin={account.admin}
               path={path}
               onNavigate={navigate}
             />
           )}
           <AppMenu
+            admin={account.admin}
             onJourney={() =>
               reviewSource ? navigate("/daily") : playDaily(today)
             }
@@ -2028,13 +1997,7 @@ export function App({
         </div>
       )}
       <ModePanels
-        mode={
-          mode === "account"
-            ? "account"
-            : minigameLanding
-              ? "minigames-menu"
-              : path
-        }
+        mode={pageLayout ? mode : minigameLanding ? "minigames-menu" : path}
         page={pageLayout}
         reduced={reduced || mobile.enabled}
         persistent={mobile.enabled}
@@ -2042,13 +2005,7 @@ export function App({
         scrollKey={mobile.enabled ? mobileStep : undefined}
       >
         <PanelBoundary
-          key={
-            mode === "account"
-              ? "account"
-              : minigameLanding
-                ? "minigames-menu"
-                : path
-          }
+          key={pageLayout ? mode : minigameLanding ? "minigames-menu" : path}
         >
           <Suspense
             fallback={
