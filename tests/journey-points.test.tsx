@@ -173,6 +173,7 @@ describe("Journey point rewards", () => {
     const actions: Action[] = [
       ...help.map((type) => ({ type })),
       { type: "select", id: "wurl:CAN" },
+      { type: "submit" },
     ];
     const game = actions.reduce(
       (g, a) => gameReducer(g, a, CANADA_JOURNEY, context),

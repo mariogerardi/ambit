@@ -98,12 +98,20 @@ describe("The Reggaetón Route", () => {
     const assisted = world(help(at(0)));
     expect(assisted.states["wurl:PRI"]).toBe("selectable");
     expect(assisted.states["wurl:JAM"]).toBe("disabled");
-    const answer = reduce(at(0), { type: "select", id: "wurl:PRI" });
+    const answer = reduce(
+      at(0),
+      { type: "select", id: "wurl:PRI" },
+      { type: "submit" },
+    );
     expect(answer.phase).toBe("feedback");
     expect(answer.answers[0]).toMatchObject({ correct: true, points: 3 });
     expect(world(answer).states["wurl:PRI"]).toBe("correct");
     expect(world(answer).places.some((p) => p.name === "San Juan")).toBe(true);
-    const miss = reduce(at(0), { type: "select", id: "wurl:JAM" });
+    const miss = reduce(
+      at(0),
+      { type: "select", id: "wurl:JAM" },
+      { type: "submit" },
+    );
     expect(world(miss).states["wurl:JAM"]).toBe("incorrect");
     expect(world(miss).states["wurl:PRI"]).toBe("answer");
   });
@@ -446,6 +454,7 @@ describe("The Reggaetón Route", () => {
       game = reduce(
         game,
         { type: "select", id: correct ? "wurl:PRI" : "wurl:JAM" },
+        { type: "submit" },
         { type: "next" },
       );
       game = reduce(

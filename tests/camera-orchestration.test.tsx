@@ -676,12 +676,13 @@ it.each(["wurl:MLI", "wurl:CAN"])(
     const { gameReducer } = await import("../src/game/state");
     const { journeyWorld } = await import("../src/app/journeyWorld");
     const context = createQuestionContext(regions, [], definition);
-    const game = gameReducer(
+    const pending = gameReducer(
       { ...initialGame, phase: "playing" },
       { type: "select", id },
       definition,
       context,
     );
+    const game = gameReducer(pending, { type: "submit" }, definition, context);
     const focus = journeyWorld(regions, definition, game, context).focus;
     await render({
       mode: "practice",

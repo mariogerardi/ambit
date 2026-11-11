@@ -55,7 +55,7 @@ describe("Island Instincts Journey", () => {
     (_, i) => {
       const q = journey.rounds[i];
       expect(q.mode).toBe("map-single");
-      expect(q.commitment).toBe("immediate");
+      expect(q.commitment).toBe("submit");
       expect(q.choices).toHaveLength(6);
       expect(new Set(q.choices!.map((c) => c.id)).size).toBe(6);
       expect(solutionIds(q, context)).toEqual([owners[i]]);
@@ -115,12 +115,20 @@ describe("Island Instincts Journey", () => {
         geoContains(sphericalGeometry(norway.geometry), [point.lng, point.lat]),
       ).toBe(false);
   });
-  it("locks correct and incorrect first picks and reveals both the owner and the island", () => {
+  it("grades correct and incorrect picks only on submission and reveals both the owner and the island", () => {
     journey.rounds.forEach((q, i) => {
       for (const id of q.choices!.map((c) => c.id)) {
-        const answered = gameReducer(
+        const pending = gameReducer(
           at(i),
           { type: "select", id },
+          journey,
+          context,
+        );
+        expect(pending.phase).toBe("playing");
+        expect(pending.answers).toEqual([]);
+        const answered = gameReducer(
+          pending,
+          { type: "submit" },
           journey,
           context,
         );
@@ -150,6 +158,7 @@ describe("Island Instincts Journey", () => {
     let game = at(0);
     for (const id of owners) {
       game = gameReducer(game, { type: "select", id }, journey, context);
+      game = gameReducer(game, { type: "submit" }, journey, context);
       game = gameReducer(game, { type: "next" }, journey, context);
     }
     expect(game.phase).toBe("finished");
