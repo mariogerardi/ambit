@@ -37,6 +37,7 @@ export function JourneyWorkbench({
       <label className="field">
         <span>Journey</span>
         <select
+          aria-label="Change Journey"
           name="module"
           value={initial}
           onChange={(event) => {

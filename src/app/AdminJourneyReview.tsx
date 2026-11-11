@@ -1,7 +1,6 @@
 import { startTransition, useEffect, useRef, useState } from "react";
 import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { GameState } from "../game/state";
-import { answerPoints } from "../game/points";
 import { pinDistanceTier } from "../game/answerTargets";
 import { estimateTier } from "../game/numericEstimate";
 import { reviewedBearing } from "../game/compassBearing";
@@ -69,7 +68,6 @@ export function AdminJourneyReview({
   const [activeStage, setActiveStage] = useState<ReviewStage>(
     isReviewStage(initialStage) ? initialStage : "play",
   );
-  const [origin, setOrigin] = useState<"preview" | "player">("preview");
   const [collapsed, setCollapsed] = useState(() => window.innerWidth <= 760);
   const [busy, setBusy] = useState(false);
   const [showPending, setShowPending] = useState(false);
@@ -85,8 +83,7 @@ export function AdminJourneyReview({
   const request = useRef(0);
   const requestedState = useRef<GameState | undefined>(undefined);
   const beforeCompletion = useRef<
-    | { game: GameState; stage: ReviewStage; origin: "preview" | "player" }
-    | undefined
+    { game: GameState; stage: ReviewStage } | undefined
   >(undefined);
   const previousGame = useRef(game);
   const question = journey.rounds[selectedIndex];
@@ -116,7 +113,7 @@ export function AdminJourneyReview({
         (stage === "completion" || stage === "completion-mixed") &&
         !completion
       )
-        beforeCompletion.current = { game, stage: activeStage, origin };
+        beforeCompletion.current = { game, stage: activeStage };
       if (stage !== "completion" && stage !== "completion-mixed")
         beforeCompletion.current = undefined;
       startTransition(() => {
@@ -124,7 +121,6 @@ export function AdminJourneyReview({
         onChange(next);
         setSelectedIndex(index);
         setActiveStage(stage);
-        setOrigin("preview");
       });
       syncLocation(index, stage);
     } catch (failure) {
@@ -149,7 +145,6 @@ export function AdminJourneyReview({
     requestedState.current = saved.game;
     onChange(saved.game);
     setActiveStage(saved.stage);
-    setOrigin(saved.origin);
     setBusy(false);
     setError("");
     syncLocation(selectedIndex, saved.stage);
@@ -178,11 +173,10 @@ export function AdminJourneyReview({
     setError("");
     const stage = currentReviewStage(game, journey);
     if (game.phase === "finished" && previous.phase !== "finished")
-      beforeCompletion.current = { game: previous, stage: activeStage, origin };
+      beforeCompletion.current = { game: previous, stage: activeStage };
     const index = game.phase === "finished" ? selectedIndex : game.roundIndex;
     setSelectedIndex(index);
     setActiveStage(stage);
-    setOrigin("player");
     syncLocation(index, stage);
   }, [game, journey]);
 
@@ -194,16 +188,6 @@ export function AdminJourneyReview({
     onNavigate(`${entry.path}?${query}`);
   }
 
-  const result = game.answers.at(-1);
-  const status = completion
-    ? "Journey completion"
-    : game.phase === "feedback" || game.phase === "failed"
-      ? `${answerPoints(result, game.help?.[question.id])}/3 points`
-      : activeStage === "hint"
-        ? "Hint shown"
-        : activeStage === "assist"
-          ? "Assist shown"
-          : "Unanswered";
   return (
     <section
       className="admin-review-toolbar"
@@ -221,7 +205,29 @@ export function AdminJourneyReview({
         >
           {collapsed ? "Show tools" : "Hide tools"}
         </button>
-        <h2>{journey.title}</h2>
+        <div className="review-journey-title">
+          <h2>{journey.title}</h2>
+          <div className="review-journey-switch">
+            {source?.navigation ?? (
+              <label className="field">
+                <span>Journey</span>
+                <select
+                  aria-label="Change Journey"
+                  value={journey.id}
+                  onChange={(event) => changeJourney(event.target.value)}
+                >
+                  {[...JOURNEY_INDEX]
+                    .sort((a, b) => a.title.localeCompare(b.title))
+                    .map((entry) => (
+                      <option key={entry.id} value={entry.id}>
+                        {entry.title}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            )}
+          </div>
+        </div>
       </header>
       <div id="review-controls" className="review-controls" hidden={collapsed}>
         {loadError && (
@@ -229,27 +235,6 @@ export function AdminJourneyReview({
             {loadError}
           </p>
         )}
-        <details className="review-journey-switch">
-          <summary>Change Journey</summary>
-          {source?.navigation ?? (
-            <label className="field">
-              <span>Journey</span>
-              <select
-                value={journey.id}
-                onChange={(event) => changeJourney(event.target.value)}
-              >
-                {[...JOURNEY_INDEX]
-                  .sort((a, b) => a.title.localeCompare(b.title))
-                  .map((entry) => (
-                    <option key={entry.id} value={entry.id}>
-                      {entry.title}
-                    </option>
-                  ))}
-              </select>
-            </label>
-          )}
-        </details>
-        {source?.catalog}
         <nav aria-label="Review questions" className="review-question-list">
           {journey.rounds.map((q, index) => (
             <button
@@ -320,19 +305,22 @@ export function AdminJourneyReview({
               ))}
             </div>
           </fieldset>
-          <p className="review-preview-status" aria-live="polite">
-            {showPending
-              ? "Preparing preview…"
-              : `${origin === "preview" ? "Preview" : "Player view"} · ${status}`}
-          </p>
+          {showPending && (
+            <p className="review-pending" role="status">
+              Preparing preview…
+            </p>
+          )}
           {error && (
             <p role="alert" className="review-error">
               {error}
             </p>
           )}
         </div>
-        <details className="review-completion" open={completion || undefined}>
-          <summary>Journey completion</summary>
+        <section
+          className="review-completion"
+          aria-labelledby="review-completion-heading"
+        >
+          <h3 id="review-completion-heading">Journey completion</h3>
           <div className="review-state-buttons">
             <button
               type="button"
@@ -358,7 +346,8 @@ export function AdminJourneyReview({
           >
             Restart Journey
           </button>
-        </details>
+        </section>
+        {source?.catalog}
       </div>
       <footer className="review-navigation" hidden={collapsed}>
         <button
