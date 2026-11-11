@@ -1348,26 +1348,6 @@
   margin-top: 17px;
   padding-top: 9px;
 }
-.answer-secondary-actions .typed-country-guess {
-  grid-area: 1 / 1 / 2 / -1;
-  min-width: 0;
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-.answer-secondary-actions summary.tertiary-action {
-  width: fit-content;
-  justify-content: flex-start;
-  color: var(--ui-muted, #99b6a5);
-}
-.answer-secondary-actions:has(.answer-clear-selection) summary {
-  max-width: calc(100% - 120px);
-}
-.answer-secondary-actions summary::marker,
-.answer-secondary-actions summary::-webkit-details-marker {
-  display: none;
-  content: "";
-}
 .typing-disclosure-icon {
   text-decoration: none;
 }

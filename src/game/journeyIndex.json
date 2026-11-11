@@ -579,6 +579,42 @@
     ]
   },
   {
+    "id": "mind-the-gap-v1",
+    "dailyEligible": false,
+    "addedAt": "2026-11-11",
+    "title": "Mind the Gap",
+    "description": "A train through a building, stations buried deep, a city in the clouds, ghost platforms, and a railway between continents.",
+    "path": "/journey/mind-the-gap",
+    "module": "./mindTheGapJourney.ts",
+    "rounds": [
+      {
+        "id": "mind-the-gap-01-through-the-building",
+        "label": "A train through a building",
+        "progressLabel": "Through the building"
+      },
+      {
+        "id": "mind-the-gap-02-the-deep-end",
+        "label": "The deep end",
+        "progressLabel": "Arsenalna's country"
+      },
+      {
+        "id": "mind-the-gap-03-above-sea-level",
+        "label": "Above sea level",
+        "progressLabel": "Quito's metro"
+      },
+      {
+        "id": "mind-the-gap-04-ghost-stations",
+        "label": "Ghost stations",
+        "progressLabel": "Ghost stations"
+      },
+      {
+        "id": "mind-the-gap-05-between-continents",
+        "label": "Between continents",
+        "progressLabel": "Beneath the Bosphorus"
+      }
+    ]
+  },
+  {
     "id": "missing-borders-two-v1",
     "addedAt": "2026-10-22",
     "title": "Missing Borders II",

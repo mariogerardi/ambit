@@ -768,7 +768,6 @@ export const PRESENTATION_RECIPES: Question[] = [
       ids: ["place:2172517", "place:2147714", "place:2158177"],
     },
     commitment: "submit",
-    allowTyping: false,
     rule: { type: "place-ids", ids: ["place:2172517"] },
     guidance: {
       hint: "The capital is in southeastern Australia.",

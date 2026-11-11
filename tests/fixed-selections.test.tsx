@@ -60,7 +60,7 @@ const reduce = (state: GameState, ...actions: Action[]) =>
     state,
   );
 describe("fixed selection assists", () => {
-  it("locks Venezuela and Chile through map taps, typing, clearing and resumed help", () => {
+  it("locks Venezuela and Chile through map taps, clearing and resumed help", () => {
     const round = journey.rounds[4];
     const helped = reduce(
       at(4),
@@ -73,13 +73,6 @@ describe("fixed selection assists", () => {
     );
     for (const id of helped.selectedIds)
       expect(reduce(helped, { type: "select", id })).toBe(helped);
-    expect(
-      reduce(
-        helped,
-        { type: "text", value: "Chile" },
-        { type: "guess-country" },
-      ).selectedIds,
-    ).toEqual(helped.selectedIds);
     expect(
       reduce(helped, { type: "select", id: "wurl:BRA" }, { type: "clear" })
         .selectedIds,

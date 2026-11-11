@@ -32,6 +32,7 @@ import { POWER_TO_THE_PEOPLE_JOURNEY } from "./powerToThePeopleJourney";
 import { BARE_MINIMUM_JOURNEY } from "./bareMinimumJourney";
 import { HOW_AMERICA_ADDS_UP_JOURNEY } from "./howAmericaAddsUpJourney";
 import { WHERE_IS_IT_OFFICIAL_JOURNEY } from "./whereIsItOfficialJourney";
+import { MIND_THE_GAP_JOURNEY } from "./mindTheGapJourney";
 export const JOURNEYS = [
   IM_LIKE_A_BIRD_JOURNEY,
   BEASTS_ON_BANNERS_JOURNEY,
@@ -67,6 +68,7 @@ export const JOURNEYS = [
   BARE_MINIMUM_JOURNEY,
   HOW_AMERICA_ADDS_UP_JOURNEY,
   WHERE_IS_IT_OFFICIAL_JOURNEY,
+  MIND_THE_GAP_JOURNEY,
 ];
 export function journeyPath(id: string) {
   const paths: Record<string, string> = {
@@ -105,6 +107,7 @@ export function journeyPath(id: string) {
     [BARE_MINIMUM_JOURNEY.id]: "/journey/bare-minimum",
     [HOW_AMERICA_ADDS_UP_JOURNEY.id]: "/journey/how-america-adds-up",
     [WHERE_IS_IT_OFFICIAL_JOURNEY.id]: "/journey/where-is-it-official",
+    [MIND_THE_GAP_JOURNEY.id]: "/journey/mind-the-gap",
   };
   return paths[id] ?? "/";
 }

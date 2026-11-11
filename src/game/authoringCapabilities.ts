@@ -18,8 +18,8 @@ export function experiencePolicies(question: Question, journey: Journey) {
     playCamera:
       question.playFraming === "selection"
         ? "fit all selectable region outlines; assist fits survivors"
-        : isWholeGlobeSearch(question)
-          ? "shared random continental view, or preserve suitable rotation; stop on interaction"
+        : question.playOrbit || isWholeGlobeSearch(question)
+          ? "shared in-place world pullback, then rotation; preserve suitable rotation; stop on interaction"
           : question.introViews?.length
             ? "authored finite introduction"
             : "authored framing",

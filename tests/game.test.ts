@@ -295,7 +295,7 @@ describe("committed answers and failure policies", () => {
       ),
     ).toBe(game);
   });
-  it("ignores Chad and noneligible map units; typed guesses do not expose a named answer list", () => {
+  it("ignores ineligible map units and requires a selection rather than typed names", () => {
     const game = playing(2);
     expect(
       reduce(
@@ -304,17 +304,9 @@ describe("committed answers and failure policies", () => {
         { type: "select", id: "wurl:GUM" },
       ),
     ).toBe(game);
-    expect(
-      reduce(game, { type: "text", value: "Laos" }, { type: "guess-country" })
-        .selectedIds,
-    ).toEqual(["wurl:LAO"]);
-    const unknown = reduce(
-      game,
-      { type: "text", value: "xyz" },
-      { type: "guess-country" },
-    );
-    expect(unknown.phase).toBe("playing");
-    expect(unknown.inputError).toBeDefined();
+    const typed = reduce(game, { type: "text", value: "Laos" });
+    expect(typed.selectedIds).toEqual([]);
+    expect(canSubmit(JOURNEY.rounds[2], context, typed)).toBe(false);
   });
   it("requires complete written answers and does not treat blank input as zero", () => {
     expect(canSubmit(JOURNEY.rounds[1], context, response([], ""))).toBe(false);

@@ -56,7 +56,7 @@ regional views. Every round ends back at the actual submitted country, including
 an incorrect selection, and stays there. `scenes.reveal.returnToSelection` provides
 this reusable endpoint policy; reduced motion directly frames the chosen country.
 
-Whole-world neutral questions begin over a random continent and rotate until
+Whole-world neutral questions pull back at the current orientation to the normal globe size, then rotate until
 interaction. If the current view already has a suitable world zoom and is
 rotating normally, preserve it. Geographic clues and authored intro tours retain
 their explicit framing; reduced motion stays static.

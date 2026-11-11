@@ -243,7 +243,6 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       count: 1,
       commitment: "submit",
       selection: { type: "world" },
-      allowTyping: false,
       rule: { type: "country-ids", ids: ["wurl:CHN"] },
       correctFeedback: "Found its roots.",
       guidance: {
@@ -297,7 +296,6 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       count: 2,
       commitment: "submit",
       selection: { type: "world" },
-      allowTyping: false,
       rule: { type: "country-ids", ids: ["wurl:PER", "wurl:BOL"] },
       partialCredit: "one-of-two",
       correctFeedback: "Both shores found.",
@@ -354,7 +352,6 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       count: 1,
       commitment: "submit",
       selection: { type: "ids", ids: [jeddah.id, mocha.id, aden.id] },
-      allowTyping: false,
       rule: { type: "place-ids", ids: [mocha.id] },
       correctFeedback: "Found the port.",
       guidance: {

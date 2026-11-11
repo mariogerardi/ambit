@@ -13,6 +13,7 @@ export function playStateColor(
   palette: ThemeId = DEFAULT_THEME,
 ): string | undefined {
   const colors = playColors(palette);
+  if (state === "context") return colors["context-land"];
   return state in colors ? colors[state as keyof typeof colors] : undefined;
 }
 export function playRegionStyle(

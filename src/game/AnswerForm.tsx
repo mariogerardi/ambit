@@ -131,12 +131,6 @@ function AnswerControls({
   const single = definition.single;
   const regional = question.rule.type === "region-ids";
   const count = responseCount(question, context);
-  const canType =
-    question.mode !== "merged-region-single" &&
-    !question.disclosure.namedChoices &&
-    ((!city && question.allowTyping !== false) ||
-      question.allowTyping === true ||
-      !webgl);
   const canClear =
     question.commitment === "submit" && game.selectedIds.length > 0;
   const unordered = question.mode === "typed-regions";
@@ -249,6 +243,16 @@ function AnswerControls({
         />
       </div>
     );
+  if (
+    definition.control === "map" &&
+    !webgl &&
+    !question.disclosure.namedChoices
+  )
+    return (
+      <p className="pin-unavailable" role="status">
+        This question needs the 3D globe. Try another browser or device.
+      </p>
+    );
   if (definition.control === "map")
     return (
       <>
@@ -338,75 +342,15 @@ function AnswerControls({
             showSubmit={false}
           />
         )}
-        {(canType || canClear) && (
+        {canClear && (
           <div className="answer-secondary-actions">
-            {canType && (
-              <details
-                className="typed-country-guess"
-                open={!webgl || undefined}
-              >
-                <summary
-                  className="tertiary-action"
-                  data-dd-action-name="Answer Type Instead"
-                >
-                  <span className="typing-disclosure-icon" aria-hidden="true">
-                    ▸
-                  </span>
-                  Answer by typing
-                </summary>
-                <form
-                  autoComplete="off"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    dispatch({ type: "guess-country" });
-                  }}
-                >
-                  <label htmlFor="country-guess">
-                    {city
-                      ? `${pointNoun === "summit" ? "Summit" : "City"} name`
-                      : regional
-                        ? "Region name"
-                        : "Country name"}
-                  </label>
-                  <AnswerInput
-                    id="country-guess"
-                    autoComplete="off"
-                    spellCheck={false}
-                    enterKeyHint="go"
-                    value={game.text}
-                    onChange={(event) =>
-                      dispatch({ type: "text", value: event.target.value })
-                    }
-                    placeholder={
-                      city
-                        ? `Type a ${pointNoun}’s name`
-                        : regional
-                          ? "Type a region’s name"
-                          : "Type a country’s name"
-                    }
-                  />
-                  <button
-                    className="primary-button"
-                    data-dd-action-name="Answer Add Typed Choice"
-                    disabled={!game.text.trim()}
-                  >
-                    {question.commitment === "immediate"
-                      ? "Answer now"
-                      : `Add ${city ? pointNoun : regional ? "region" : "country"}`}{" "}
-                    <span>→</span>
-                  </button>
-                </form>
-              </details>
-            )}
-            {canClear && (
-              <button
-                className="quiet-button tertiary-action answer-clear-selection"
-                data-dd-action-name="Answer Clear Selection"
-                onClick={() => dispatch({ type: "clear" })}
-              >
-                Clear selection
-              </button>
-            )}
+            <button
+              className="quiet-button tertiary-action answer-clear-selection"
+              data-dd-action-name="Answer Clear Selection"
+              onClick={() => dispatch({ type: "clear" })}
+            >
+              Clear selection
+            </button>
           </div>
         )}
         {game.inputError && (

@@ -91,6 +91,14 @@ places/overlays. `scenes.assist.borders` (or `guidance.assist.borders`) can
 reveal political boundaries without changing eligibility or grading. Established
 reference areas retain their blue outlines even when other boundaries are hidden.
 Hint copy normally retains the play scene;
+`scenes.play.map.backgroundRegionIds` can color existing country surfaces as
+noninteractive reference geography. It uses the shared `context` fill without
+adding outlines, small-country locator rings, answer eligibility or completion
+discoveries. Explicit hint/assist regions still use their normal help emphasis;
+the background fill ends at commitment. No separate geographic overlay is needed.
+`scenes.assist.backgroundRegionIds` (compiled to
+`guidance.assist.backgroundRegionIds`) replaces those background fills during
+assist; an empty list clears them while explicit assist regions retain emphasis.
 `guidance.hintMap` can add reference region emphasis and/or a focus when authored.
 Across the Divide demonstrates this hint-stage support. There is no separate
 `scenes.hint` object.
@@ -122,6 +130,9 @@ II demonstrate it. Canonical geometry and answer rules remain unchanged.
 `scenes.play.views` and `scenes.reveal.views` optionally author a finite camera
 sequence, compiled as `introViews` / `feedbackViews`. End the sequence at the
 scene's `focus`; automatically framed play tours append the computed endpoint.
+`scenes.play.durationScale` optionally scales only that entrance's travel time
+(0.25–2, default 1); it compiles to `introDurationScale` and does not change reveal
+or completion timing.
 Reduced motion uses the effective focus directly. Playback runs once,
 does not restart on response edits, and yields to globe input. Help ends an intro
 at its effective search focus; missed pins retain the shared answer/guess review
@@ -129,6 +140,13 @@ instead of starting a reveal tour. Completion flyovers retain their looping beha
 0.1) use slow transitions to a wider view, a brief 350 ms hover, a 3.5-second dip,
 another brief hover and a 3.5-second pullback. Manual review cancels every queued
 phase. Broader tours keep their continuous course.
+
+For an authored whole-globe search entrance, `scenes.play.orbit: true` compiles
+to `playOrbit`. It pulls back at the current latitude/longitude using the shared
+world fitting, then rotates. It cannot accompany intro views or selection
+framing. Interaction or help stops rotation; an assist focus takes precedence.
+Reduced motion keeps the pulled-back view static. This changes only the camera,
+not answer eligibility or target disclosure.
 
 `scenes.play.clueLocators` accepts `{ regionId, label }` annotations for supplied
 reference/candidate areas or highlighted fragments (`clue-part:<countryId>`).
@@ -305,8 +323,8 @@ Grouped single-country scenes with an explanatory network inherit
 requested. See [shared defaults](journey-authoring/JOURNEY_DEFAULTS.md) for the
 stage-by-stage camera policy and other inherited conventions.
 Neutral full-world searches (`members` or `world`) without geographic context,
-markers, overlays or authored intro views start at a random continental overview
-and rotate until interaction. A suitable world view already rotating is preserved.
+markers, overlays or authored intro views pull back at the current orientation
+to the viewport-fitted globe size over 2.8 seconds, then rotate until interaction. A suitable world view already rotating is preserved.
 Hints stop this introductory motion; authored help framing remains in control.
 Reduced motion uses a static view. This shared policy does not override map clues.
 

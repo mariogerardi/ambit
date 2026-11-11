@@ -126,8 +126,8 @@ preserves the player's reading position.
 
 Typical modes include named single/multiple choices, map country/region selection, anonymous city markers, pin-by-distance, pin-inside-territory, typed names, numeric entry, and ordered answers. Select among them based on the cognitive target:
 
-- Use **typing sparingly**, mostly when recall or spelling of a name (often a city or capital) is the skill. A typed question shows its input immediately. Players should never have to open **“Answer by typing”** to perform a required text task.
-- If the question is **tap on the map**, make the polygons or markers genuinely selectable. A collapsed typing fallback is for accessibility or unavailable globe input—not the default workaround for a broken map.
+- Use **typing sparingly**, mostly when recall or spelling of a name (often a city or capital) is the skill. A typed question shows its input immediately. Map questions do not offer an alternate typing shortcut.
+- If the question is **tap on the map**, make the polygons or markers genuinely selectable. Do not add a typing shortcut to a map task. Globe-dependent questions show an unavailable message when WebGL cannot render the globe.
 - For **pins**, define whether the skill is estimating a point or getting inside a territory. The latter is not automatically a fair challenge with hidden boundaries: evaluate whether the player has a meaningful way to land inside without guessing against invisible grading geometry. Do **not** solve this by revealing the exact target country's outline as an assist; that simply exposes the answer surface. Redesign the task, choice of location, or clues instead.
 - For **ordering**, specify whether order is geographic, chronological, or logical, whether a card can be excluded, and whether confirmation is needed. Use the supported card-order control when rearranging cards with a distractor; provide touch and keyboard alternatives. Declare the slots, direction, candidate cards, and any locks explicitly. See [supported answer modes](QUESTION_CATALOG.md#answer-modes) for the current contract.
 
@@ -518,7 +518,7 @@ Keep eligibility, disclosure, grading, and camera framing separate. Map answerin
 is derived from the answer mode; `map.hoverFeedback` controls hover presentation
 and cannot disable answering. Muted visual states do not settle tap eligibility.
 A colored polygon is not proof that it is selectable; inspect the authored
-contract through presentation and input handling. A typing fallback must not
+contract through presentation and input handling. An alternate input must not
 conceal a broken primary control.
 
 Use [Question catalog and authoring](QUESTION_CATALOG.md) as the maintained

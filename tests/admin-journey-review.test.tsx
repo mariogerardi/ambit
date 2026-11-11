@@ -44,14 +44,17 @@ it("reviews real outcomes without changing Daily attempts or normal practice", a
   expect(
     host.querySelector(".round-feedback.answer-discovered"),
   ).not.toBeNull();
-  expect(host.querySelector(".review-preview-status")?.textContent).toBe(
-    "Preview · 0/3 points",
-  );
+  expect(
+    host.querySelector('.review-state-buttons [aria-pressed="true"]')
+      ?.textContent,
+  ).toBe("Missed");
+  expect(host.querySelector(".review-preview-status")).toBeNull();
   await state("Reset");
   await click("Get a hint");
-  expect(host.querySelector(".review-preview-status")?.textContent).toBe(
-    "Player view · Hint shown",
-  );
+  expect(
+    host.querySelector('.review-state-buttons [aria-pressed="true"]')
+      ?.textContent,
+  ).toBe("Hint");
   expect(new URLSearchParams(location.search).get("state")).toBe("hint");
   expect(save.load().attempts).toEqual(before);
   await act(async () => {
@@ -76,9 +79,12 @@ it("previews a complete recap and returns to scheduling without publishing", asy
   history.replaceState(null, "", "/journey/down-the-danube?review=1");
   await mount();
   await state("All correct");
-  expect(host.querySelector(".review-preview-status")?.textContent).toBe(
-    "Preview · Journey completion",
-  );
+  expect(
+    host.querySelector('.review-completion [aria-pressed="true"]')?.textContent,
+  ).toBe("All correct");
+  expect(
+    host.querySelector(".review-completion")?.closest("details"),
+  ).toBeNull();
   expect(
     host.querySelector(".finish-story .journey-score")?.textContent,
   ).toContain("15/15");
@@ -128,9 +134,10 @@ it("keeps the selected question when inspecting completion and synchronizes ordi
   await state("Hint");
   await state("Mixed results");
   await state("Back to question");
-  expect(host.querySelector(".review-preview-status")?.textContent).toBe(
-    "Preview · Hint shown",
-  );
+  expect(
+    host.querySelector('.review-state-buttons [aria-pressed="true"]')
+      ?.textContent,
+  ).toBe("Hint");
   expect(
     host.querySelector(".question-card")?.getAttribute("data-question-id"),
   ).toBe(DANUBE_JOURNEY.rounds[1].id);
@@ -161,6 +168,9 @@ it("reopens a registered outcome URL and switches Journeys with the scheduling d
   const select = host.querySelector<HTMLSelectElement>(
     ".review-journey-switch select",
   )!;
+  expect(select.closest(".review-heading")).not.toBeNull();
+  expect(select.closest("details")).toBeNull();
+  expect(select.getAttribute("aria-label")).toBe("Change Journey");
   const next = JOURNEY_INDEX.find((entry) => entry.id !== DANUBE_JOURNEY.id)!;
   await act(async () => {
     select.value = next.id;
@@ -205,9 +215,11 @@ it("keeps fast preview preparation quiet and announces only a sustained wait", a
   expect(host.textContent).toContain("Preparing preview");
   await act(async () => resolve(prepared));
   expect(host.textContent).not.toContain("Preparing preview");
-  expect(host.querySelector(".review-preview-status")?.textContent).toBe(
-    "Preview · 3/3 points",
-  );
+  expect(
+    host.querySelector('.review-state-buttons [aria-pressed="true"]')
+      ?.textContent,
+  ).toBe("Correct");
+  expect(host.querySelector(".review-pending")).toBeNull();
   sample.mockRestore();
   vi.useRealTimers();
 });

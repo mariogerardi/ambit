@@ -77,7 +77,7 @@ Cognito branding assets; it submits no credentials. For Journey map review, open
 WebGL globe in isolated local review, preserving the real account session for the
 current origin. Without an account it identifies itself as a local workbench;
 it grants no server permissions. It starts the newest catalog Journey by `addedAt` in isolated review;
-use **Change Journey** to choose another source. The Admin library’s
+use the Journey title selector to choose another source. The Admin library’s
 **Review Journey** action opens registered content. Review routes use
 `/journey/<slug>?review=1` and separate in-memory state, with question selection,
 help, evaluated sample reveals and completion. Normal practice omits the query
@@ -89,7 +89,7 @@ the shared workbench:
 `http://127.0.0.1:5173/review/journeys.html?module=imLikeABirdJourney.ts`.
 Review opens directly into question inspection. The control rail identifies the Journey,
 shows all question stops, and provides buttons for Question, available Hint/Assist,
-and evaluated outcomes. **Change Journey** includes unregistered local sources;
+and evaluated outcomes. The Journey title opens a single selector, including unregistered local sources;
 registered Admin Review offers the same navigation over its catalog. **Reset**
 starts the selected question fresh. **Hide tools** only changes visibility, retaining
 the displayed state and camera. The canvas spans the workspace behind both panels;
@@ -97,7 +97,7 @@ a transparent layout frame fits active geography within the clear center. Source
 switching and navigation to Admin/Schedule stay in the same app, account session
 and mounted WebGL globe. The standalone URL uses the normal app bootstrap. Use the same origin as the signed-in app (`localhost` and
 `127.0.0.1` have separate browser storage).
-The collapsed **Catalog** section previews and applies local registration edits.
+The collapsed **Catalog** section at the bottom of the tools groups registration status, route, scheduling settings and the final registration action. Adding a Journey warns that the Workbench will refresh and the current preview may reset.
 New entries stay out of automatic rotation. Removal keeps the source and is
 available only for held entries absent from both `HEAD` and `origin/main` catalogs;
 missing history blocks removal. Committed Journeys require an explicit retirement
@@ -119,11 +119,12 @@ and compass-bearing bands using actual graded inputs. Unavailable examples fail
 explicitly; drawing-specific intermediate outcomes can be checked with actual
 player inputs. Seeds remain URL-only technical controls for initial ordering.
 
-**Journey completion** is separate from question states. Its all-correct and mixed
+**Journey completion** is always visible below question controls, separate from question states. Its all-correct and mixed
 examples retain the selected question; **Back to question** restores its prior
 response/help state during the visit. Copy comparison has been removed; editorial
 lint remains in the Journey authoring audit. Fast preview operations keep their
-current content and status visible; progress appears only after 200 ms. Loading
+current content visible; there is no persistent Preview/Player view status line.
+Progress appears only after 200 ms. Loading
 illustration styles are bundled with the component as well as the critical boot shell.
 
 Both entry points update URL question/stage context after inspector and player
@@ -372,16 +373,16 @@ retains human calibration requirements.
 
 ## Common problems
 
-| Symptom                                       | Check                                                                                                                                                                                 |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vite will not start                           | Node version, `npm ci`, and whether the strict port is already occupied.                                                                                                              |
-| Missing/changed preparation input             | Cache path and committed checksum; distinguish an absent snapshot from an intentional source update.                                                                                  |
-| Subdivisions disappear after base preparation | Run `prepare:explore` to restore the extended manifest and reconciled footprints.                                                                                                     |
-| Journey metadata test fails                   | Run `prepare:journeys` after editing definitions or registration.                                                                                                                     |
-| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Hosting](HOSTING.md#hosting-behavior).                                                                                          |
-| Save warning or missing active Study attempt  | Storage availability/quota and the documented [save lifecycle](SAVE_PERSISTENCE.md). Avoid clearing storage as a first troubleshooting step.                                          |
-| Globe unavailable                             | WebGL/context availability; supported written fallbacks remain, but merged-territory questions require WebGL. Study offers Answer by name. Actual renderer recovery is separate work. |
-| Large-chunk build warning                     | Deferred globe/geometry bundles are still substantial. A successful build does not establish device performance.                                                                      |
+| Symptom                                       | Check                                                                                                                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vite will not start                           | Node version, `npm ci`, and whether the strict port is already occupied.                                                                                                                    |
+| Missing/changed preparation input             | Cache path and committed checksum; distinguish an absent snapshot from an intentional source update.                                                                                        |
+| Subdivisions disappear after base preparation | Run `prepare:explore` to restore the extended manifest and reconciled footprints.                                                                                                           |
+| Journey metadata test fails                   | Run `prepare:journeys` after editing definitions or registration.                                                                                                                           |
+| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Hosting](HOSTING.md#hosting-behavior).                                                                                                |
+| Save warning or missing active Study attempt  | Storage availability/quota and the documented [save lifecycle](SAVE_PERSISTENCE.md). Avoid clearing storage as a first troubleshooting step.                                                |
+| Globe unavailable                             | WebGL/context availability; globe-dependent questions show an unavailable message. Explicit text methods and named button choices remain usable. Actual renderer recovery is separate work. |
+| Large-chunk build warning                     | Deferred globe/geometry bundles are still substantial. A successful build does not establish device performance.                                                                            |
 
 ## Keep documentation current
 

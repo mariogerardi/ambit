@@ -1,11 +1,15 @@
 // @vitest-environment jsdom
 import { act } from "react";
+import { readFileSync } from "node:fs";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { JourneyWorkbench } from "../review/JourneyWorkbench";
 import { JourneyCatalogControls } from "../review/JourneyCatalogControls";
 import { newestJourney } from "../src/game/journeyRegistry";
 import { AppMenu } from "../src/app/AppMenu";
+import { AdminJourneyReview } from "../src/app/AdminJourneyReview";
+import { createQuestionContext } from "../src/game/questionPreparation";
+import { initialGame } from "../src/game/state";
 import { POWER_TO_THE_PEOPLE_JOURNEY as template } from "../src/game/powerToThePeopleJourney";
 const journey = { ...template, id: "workbench-test-v1" };
 let host: HTMLDivElement, root: ReturnType<typeof createRoot>;
@@ -28,6 +32,66 @@ async function click(text: string) {
   expect(button).toBeDefined();
   await act(async () => button.click());
 }
+it("offers one header selector, visible completion controls, and Catalog last", async () => {
+  const context = createQuestionContext(
+    JSON.parse(readFileSync("public/geography/world.v1.json", "utf8")),
+    [],
+    journey,
+  );
+  const navigate = vi.fn();
+  await act(async () =>
+    root.render(
+      <AdminJourneyReview
+        journey={journey}
+        context={context}
+        game={{ ...initialGame, phase: "playing" }}
+        onChange={vi.fn()}
+        onNavigate={navigate}
+        source={{
+          journey,
+          seed: 1,
+          stage: "play",
+          navigation: (
+            <JourneyWorkbench
+              journey={journey}
+              filename="powerToThePeopleJourney.ts"
+              modules={["powerToThePeopleJourney.ts", "bareMinimumJourney.ts"]}
+              seed={1}
+              onNavigate={navigate}
+            />
+          ),
+          catalog: (
+            <JourneyCatalogControls filename="powerToThePeopleJourney.ts" />
+          ),
+        }}
+      />,
+    ),
+  );
+  const selector = host.querySelector<HTMLSelectElement>(
+    '.review-heading select[aria-label="Change Journey"]',
+  )!;
+  expect(selector).not.toBeNull();
+  expect(selector.closest("details")).toBeNull();
+  const completion = host.querySelector(".review-completion")!;
+  expect(completion.closest("details")).toBeNull();
+  expect(
+    completion.querySelectorAll(".review-state-buttons button"),
+  ).toHaveLength(2);
+  expect(host.querySelector("#review-controls")?.lastElementChild).toBe(
+    host.querySelector(".workbench-catalog"),
+  );
+  expect(host.querySelector(".workbench-catalog")?.hasAttribute("open")).toBe(
+    false,
+  );
+  expect(host.textContent).not.toContain("Preview ·");
+  await act(async () => {
+    selector.value = "bareMinimumJourney.ts";
+    selector.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(navigate).toHaveBeenCalledWith(
+    expect.stringContaining("module=bareMinimumJourney.ts"),
+  );
+});
 it("previews catalog edits before an explicit write and keeps removal separate from deleting source", async () => {
   let registered = false;
   const fetch = vi.fn(async (url: string, options?: RequestInit) => {
@@ -58,6 +122,12 @@ it("previews catalog edits before an explicit write and keeps removal separate f
   });
   expect(host.textContent).toContain("Not registered");
   await click("Preview registration");
+  expect(host.textContent).toContain(
+    "Adding this Journey will refresh the Workbench. Your current preview may reset.",
+  );
+  expect(host.querySelector(".workbench-catalog-facts")?.textContent).toContain(
+    "Manual schedulingEnabledAutomatic rotationOff",
+  );
   expect(
     fetch.mock.calls.some(([, options]) => options?.method === "POST"),
   ).toBe(false);

@@ -17,6 +17,8 @@ export type VisualState =
   | "incorrect"
   | "visited"
   | "disabled"
+  /** Background geographic context, without help outlines or locator symbols. */
+  | "context"
   | "hinted"
   | "clue";
 export interface Focus {

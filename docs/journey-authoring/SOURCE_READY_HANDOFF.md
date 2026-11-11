@@ -65,7 +65,7 @@ and the selected recipe determine the exact required fields and variants.
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Journey identity                | Exported `Journey`: `id`, `title`, `description`, `rounds`; use inspected metadata conventions. New drafts use `dailyEligible: false`. Preserve existing identities/revisions when editing.          |
 | Round identity and presentation | `id`, `title`, spoiler-safe progress/resolved labels when useful, and shared `label`, `topic`, disclosure/map settings through `definePresentation`.                                                 |
-| Player action and grading       | Exact existing `mode`, `count`, `commitment`, `selection`, `allowTyping` and `rule` variant. Include all qualifying alternatives, coordinates, tolerances and inclusive bands required by that rule. |
+| Player action and grading       | Exact existing `mode`, `count`, `commitment`, `selection` and `rule` variant. Include all qualifying alternatives, coordinates, tolerances and inclusive bands required by that rule.                |
 | Final copy                      | Optional meaningful `leadIn`, `prompt`, necessary `instruction`, `explanation`, feedback overrides only when needed, and readable acceptance qualifications.                                         |
 | Help                            | `guidance.hint`, `guidance.assist.text` and the recipe's supported references, candidates or locks. Keep the canonical rule unchanged.                                                               |
 | Geography and media             | Canonical IDs/place records, existing overlays/features/media, and grouped `scenes.play`, `scenes.assist`, `scenes.reveal` as appropriate. Keep eligible inputs separate from explanatory geography. |
@@ -86,6 +86,29 @@ When an approved stop needs unsupported behavior, preserve it in the brief and
 describe the smallest proposed extension. Supply supported portions honestly as
 a partial draft if useful; label completeness accurately. Do not substitute an
 easier task, guess grading geometry or invent an API to fill that gap.
+
+## Author-side review before delivery
+
+Apply the existing [complete-puzzle review](PROJECT_INSTRUCTIONS.md) to the
+proposed play, hint, assist, correct/wrong/partial reveal and completion states.
+Keep the brief and module synchronized with approved decisions. Check that
+numeric assistance leaves a real decision against the actual acceptance bands,
+not merely several values that all qualify. Apply the [feedback-heading
+standard](../JOURNEY_CRAFTING.md#3-write-one-continuous-questionnot-a-headline-and-footnote)
+to both `correctFeedback` and accuracy-tier strings; reuse shared reactions when
+sufficient. Check intended recap roles against current extraction behavior,
+[scene inheritance](../JOURNEY_ENGINE.md#explicit-scenes) and
+[camera defaults](JOURNEY_DEFAULTS.md#camera-rules-by-stage), rather than assuming
+that a mode or `mapMode` establishes the whole experience.
+
+List dependencies in a short table in the brief: source/package path, intended
+repository destination, and bundled, external or still required status. Include
+companion data and media; verify that every file claimed as bundled is present.
+Resolve issues detectable from source inspection and label remaining uncertainty.
+Distinguish source inspection from compilation, automated audits and actual globe
+rendering; do not claim checks that did not run or require local setup for a
+read-only authoring handoff. This review is part of authoring, not a separate AI
+review round or user copywriting task.
 
 ## Codex: integrate and validate, preserving the design
 

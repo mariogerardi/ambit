@@ -97,40 +97,63 @@ export function JourneyCatalogControls({ filename }: { filename: string }) {
     >
       <summary>Catalog</summary>
       <div className="workbench-catalog-content">
-        {status && <p>{status.registered ? "Registered" : "Not registered"}</p>}
-        {status?.registered && (
+        {status && (
+          <div className="workbench-catalog-status">
+            <span>Registration</span>
+            <strong>
+              {status.registered ? "Registered" : "Not registered"}
+            </strong>
+          </div>
+        )}
+        {status?.registered && !preview && (
           <p className="workbench-catalog-route">{status.route}</p>
         )}
         {status && !status.registered && !preview && (
-          <label className="field">
-            Journey route
-            <input
-              value={route}
-              disabled={busy}
-              onChange={(event) => setRoute(event.target.value)}
-            />
-          </label>
-        )}
-        {status && (
-          <p className="workbench-catalog-note">
-            Local catalog changes require release before they reach production.
-          </p>
+          <>
+            <label className="field">
+              Journey route
+              <input
+                value={route}
+                disabled={busy}
+                onChange={(event) => setRoute(event.target.value)}
+              />
+            </label>
+            <p className="workbench-catalog-note">
+              Register to enable manual scheduling. Automatic rotation stays
+              off.
+            </p>
+          </>
         )}
         {status?.reason && (
           <p className="workbench-catalog-note">{status.reason}</p>
         )}
         {preview ? (
-          <>
-            <p>
-              {preview.action === "add" ? "Add" : "Remove"}{" "}
-              <strong>{preview.title}</strong>?
-            </p>
-            <p className="workbench-catalog-route">{preview.route}</p>
-            <p className="workbench-catalog-note">
-              {preview.action === "add"
-                ? "Enable manual scheduling; keep automatic rotation off."
-                : "Keep the Journey source available in Workbench."}
-            </p>
+          <div className="workbench-catalog-preview">
+            <h4>
+              {preview.action === "add" ? "Add" : "Remove"} {preview.title}?
+            </h4>
+            <dl className="workbench-catalog-facts">
+              <dt>Route</dt>
+              <dd className="workbench-catalog-route">{preview.route}</dd>
+              {preview.action === "add" && (
+                <>
+                  <dt>Manual scheduling</dt>
+                  <dd>Enabled</dd>
+                  <dt>Automatic rotation</dt>
+                  <dd>Off</dd>
+                </>
+              )}
+            </dl>
+            {preview.action === "add" ? (
+              <p className="workbench-catalog-refresh">
+                Adding this Journey will refresh the Workbench. Your current
+                preview may reset.
+              </p>
+            ) : (
+              <p className="workbench-catalog-note">
+                Keep the Journey source available in Workbench.
+              </p>
+            )}
             <div className="workbench-catalog-actions">
               <button disabled={busy} onClick={() => void change(true)}>
                 {preview.action === "add"
@@ -145,7 +168,7 @@ export function JourneyCatalogControls({ filename }: { filename: string }) {
                 Cancel
               </button>
             </div>
-          </>
+          </div>
         ) : (
           status &&
           (!status.registered || status.canRemove) && (
@@ -153,6 +176,11 @@ export function JourneyCatalogControls({ filename }: { filename: string }) {
               {status.registered ? "Preview removal" : "Preview registration"}
             </button>
           )
+        )}
+        {status && (
+          <p className="workbench-catalog-footer">
+            Local changes reach production after a release.
+          </p>
         )}
         {busy && <p role="status">Updating catalog…</p>}
         {error && <p role="alert">{error}</p>}

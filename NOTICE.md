@@ -509,6 +509,18 @@ The active Border Run and Pinpoint preview illustrations
 (`public/previews/border-run.svg` and `public/previews/pinpoint.svg`) use the bundled
 map geometry, with game markers and scoring rings drawn as vector artwork.
 
+## Mind the Gap photograph and geography
+
+`public/journeys/mind-the-gap/liziba.v1.jpg` is an unchanged 1280-pixel Wikimedia
+Commons thumbnail by **David290**, licensed under **CC BY-SA 4.0**. The accompanying
+`SOURCES.md` retains the original file link, license, geographic evidence and
+qualifications; `src/game/data/mind-the-gap-media.v1.json` records the download
+URL and checksum. The interface may crop the displayed frame. The photograph's
+license applies independently of application code. The original Europe reference
+is retained as public-domain Natural Earth handoff data but is not rendered.
+The Hongyancun station reference credits © OpenStreetMap contributors
+under ODbL 1.0; the Marmaray line is an original, explicitly schematic guide.
+
 ## Made in China photographs and geography
 
 The twelve documentary photographs in `public/journeys/made-in-china/` are

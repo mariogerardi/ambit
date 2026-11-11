@@ -129,7 +129,6 @@ export const SAME_HOUR_JOURNEY: Journey = {
       mode: "city-single",
       count: 1,
       commitment: "submit",
-      allowTyping: false,
       selection: { type: "ids", ids: africaCities.map((p) => p.id) },
       rule: { type: "place-ids", ids: [accra.id] },
       guidance: {
@@ -394,7 +393,6 @@ export const SAME_HOUR_JOURNEY: Journey = {
       mode: "city-single",
       count: 1,
       commitment: "submit",
-      allowTyping: false,
       selection: { type: "ids", ids: australianCities.map((p) => p.id) },
       rule: { type: "place-ids", ids: [brisbane.id] },
       guidance: {

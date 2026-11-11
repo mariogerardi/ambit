@@ -16,6 +16,8 @@ import { answerItems } from "../src/game/answerPresentation";
 import { AnswerReview } from "../src/game/AnswerReview";
 import { EARTH_KM } from "../src/game/spatial";
 import { answerPlace } from "../src/game/answerTargets";
+import { AnswerForm } from "../src/game/AnswerForm";
+import { MIND_THE_GAP_JOURNEY } from "../src/game/mindTheGapJourney";
 
 const regions = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
@@ -38,6 +40,29 @@ function round(journeyId: string, roundId: string) {
 }
 
 describe("Journey answer roles across controls", () => {
+  it.each([true, false])(
+    "keeps map answers on the globe and actual text questions typed (WebGL: %s)",
+    (webgl) => {
+      const context = createQuestionContext(regions, [], MIND_THE_GAP_JOURNEY);
+      const render = (index: number) =>
+        renderToStaticMarkup(
+          <AnswerForm
+            question={MIND_THE_GAP_JOURNEY.rounds[index]}
+            context={context}
+            game={{ ...initialGame, phase: "playing", roundIndex: index }}
+            dispatch={() => {}}
+            webgl={webgl}
+          />,
+        );
+      const map = render(1);
+      expect(map).not.toContain("Answer by typing");
+      expect(map).not.toContain("<input");
+      if (!webgl) expect(map).toContain("This question needs the 3D globe.");
+      expect(render(3)).toContain('id="written-answer"');
+      expect(render(0)).not.toContain("Answer by typing");
+      if (!webgl) expect(render(0)).toContain('aria-label="Choose an answer"');
+    },
+  );
   it("keeps merged-territory and linked-choice mistakes red while revealed solutions become purple", () => {
     const merged = round("missing-borders-v1", "missing-borders-01-iberia");
     const missed = merged.reduce(merged.start, {

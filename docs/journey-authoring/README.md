@@ -53,6 +53,7 @@ switch silently to another branch or claim local checks from repository reading.
    recipe establish implemented support. A supported control does not prove every
    proposed combination works. Inherit defaults; specify only relevant exceptions.
 5. After settling the design, follow the [implementation-ready handoff](SOURCE_READY_HANDOFF.md):
+   complete its author-side review before delivery, then
    deliver a short brief based on the [spec template](JOURNEY_SPEC_TEMPLATE.md)
    and a draft `<name>Journey.ts` module. Put final copy and concrete contracts in
    the module; keep decisions, qualifications and material gaps in the brief.

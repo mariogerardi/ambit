@@ -203,12 +203,12 @@ export const placeLabelStyle = (
         ? {
             ...base,
             font:
-              ["city", "capital", "town"].includes(place.kind) ||
+              ["city", "capital", "town", "landmark"].includes(place.kind) ||
               place.answerTarget
                 ? "500 26px Manrope, sans-serif"
                 : "500 22px Manrope, sans-serif",
             textHeight:
-              ["city", "capital", "town"].includes(place.kind) ||
+              ["city", "capital", "town", "landmark"].includes(place.kind) ||
               place.answerTarget
                 ? 24
                 : 20,

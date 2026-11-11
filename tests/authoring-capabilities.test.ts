@@ -146,7 +146,9 @@ describe("live authoring evidence", () => {
     );
     expect(entry.experience.answer).toContain("accepted alternatives");
     expect(entry.experience.disclosure).toContain("hover names false");
-    expect(entry.experience.playCamera).toContain("shared random continental");
+    expect(entry.experience.playCamera).toContain(
+      "shared in-place world pullback",
+    );
     expect(entry.experience.revealCamera).toContain("actual selection");
     expect(entry.examples[0].policyDifferences).toEqual([
       "revealCamera",

@@ -87,6 +87,18 @@ export function validateQuestionContract(q: Question): void {
   if (q.feedbackOrbit && (q.feedbackFocus?.altitude ?? 0) < 1.65)
     fail("a rotating reveal requires a whole-globe final focus");
   const definition = mechanicFor(q);
+  if (q.playOrbit && (q.playFraming || q.introViews?.length))
+    fail("a rotating entry cannot also use selection framing or intro views");
+  if (
+    q.introDurationScale !== undefined &&
+    (!q.introViews?.length ||
+      !Number.isFinite(q.introDurationScale) ||
+      q.introDurationScale < 0.25 ||
+      q.introDurationScale > 2)
+  )
+    fail(
+      "intro duration scale requires intro views and a value between 0.25 and 2",
+    );
   if (
     q.playFraming === "selection" &&
     (definition.mapSelection !== "regions" ||

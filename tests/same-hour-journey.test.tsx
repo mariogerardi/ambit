@@ -17,7 +17,7 @@ import {
 } from "../src/game/questions";
 import { gameReducer, initialGame, journeyScore } from "../src/game/state";
 import type { Action, GameState } from "../src/game/state";
-import { answerPlace, cityIdForName } from "../src/game/answerTargets";
+import { answerPlace } from "../src/game/answerTargets";
 import { journeyWorld } from "../src/app/journeyWorld";
 import { prepareGlobeRegions } from "../src/globe/geometry";
 import { AnswerForm } from "../src/game/AnswerForm";
@@ -128,8 +128,6 @@ describe("Same Hour, Different Worlds", () => {
       expect(view(help(at(index))).focus).toEqual(scene.focus);
     }
     const q5 = journey.rounds[4];
-    expect(cityIdForName(q5, "Guam")).toBeUndefined();
-    expect(cityIdForName(q5, "Hagatna")).toBeUndefined();
     expect(answerPlace(q5, "place:2073124")?.sourceId).toBe("geonames:2073124");
   });
 

@@ -186,6 +186,8 @@ export interface Question {
     hintMap?: { regionIds: readonly string[]; focus?: Focus };
     assist?: {
       text: string;
+      /** Replace background reference fills during assistance; [] clears them. */
+      backgroundRegionIds?: string[];
       images?: {
         src: string;
         alt: string;
@@ -253,8 +255,12 @@ export interface Question {
   focus: Focus;
   /** Fit the full bounded region-selection pool; resolved after geography loads. */
   playFraming?: "selection";
+  /** Whole-globe entry preserves the current orientation and starts shared rotation. */
+  playOrbit?: boolean;
   /** Finite orientation sequence; reduced motion uses focus directly. */
   introViews?: Focus[];
+  /** Optional intro-only time multiplier, between 0.25 and 2. */
+  introDurationScale?: number;
   /** Optional camera reveal for questions linking geographically distant places. */
   feedbackFocus?: Focus;
   /** Finite reveal sequence; distant missed pins retain their comparison view. */
@@ -332,6 +338,8 @@ export interface Question {
     muteOthers: boolean;
     /** Keep ordinary theme land colors when no region is an answer candidate. */
     neutralRegions?: boolean;
+    /** Noninteractive reference fills during play; no outlines or recap discoveries. */
+    backgroundRegionIds?: string[];
     revealOnCorrect?: boolean;
     revealOnAnswer?: boolean;
     candidates?: "highlighted" | "decorative" | "neutral";
@@ -360,8 +368,6 @@ export interface Question {
     /** Keep the highlighted fragment on feedback instead of restoring the owner. */
     reveal?: "part" | "part-and-owner";
   }[];
-  /** Explicit false suppresses the typing shortcut; unavailable-globe fallback remains. */
-  allowTyping?: boolean;
   places?: PlaceFeature[];
   feedbackPlaces?: PlaceFeature[];
   /** Short cartographic qualification shown beside the map. */

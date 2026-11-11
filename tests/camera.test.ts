@@ -14,9 +14,51 @@ import {
 } from "../src/globe/camera";
 import { PerspectiveCamera, Vector3 } from "three";
 import type { Focus } from "../src/geography/types";
+import { GLOBE_MOTION } from "../src/globe/motion";
 import { regionStyle, stateStyles } from "../src/globe/visualStates";
 afterEach(() => vi.unstubAllGlobals());
 describe("camera travel", () => {
+  it("pulls back moderately without changing orientation and completes before rotation resumes", () => {
+    let now = 0,
+      tick: FrameRequestCallback = () => {};
+    let position = { lat: 52.52, lng: 13.41, altitude: 0.018 };
+    const done = vi.fn();
+    vi.stubGlobal("performance", { now: () => now });
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      tick = callback;
+      return 1;
+    });
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    const travel = new CameraTravel();
+    travel.move(
+      {
+        pointOfView(target?: Focus) {
+          if (target) position = { ...position, ...target };
+          return position;
+        },
+      },
+      { ...position, altitude: 1.8 },
+      false,
+      done,
+      undefined,
+      GLOBE_MOTION.worldPullbackMs,
+    );
+    let previousAltitude = position.altitude;
+    for (now = 16; now <= 1408; now += 16) {
+      tick(now);
+      expect(position.lat).toBeCloseTo(52.52, 8);
+      expect(position.lng).toBeCloseTo(13.41, 8);
+      expect(position.altitude).toBeGreaterThanOrEqual(previousAltitude);
+      previousAltitude = position.altitude;
+    }
+    expect(travel.active).toBe(true);
+    expect(done).not.toHaveBeenCalled();
+    for (; now <= 2832 && travel.active; now += 16) tick(now);
+    expect(position.lng).toBeCloseTo(13.41, 8);
+    expect(position.lat).toBe(52.52);
+    expect(position.altitude).toBe(1.8);
+    expect(done).toHaveBeenCalledTimes(1);
+  });
   it("pulls away from Rottnest before rotating toward North America", () => {
     let now = 0,
       callback: FrameRequestCallback = () => {};

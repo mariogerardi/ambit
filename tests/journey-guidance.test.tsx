@@ -229,7 +229,7 @@ describe("authored Journey hint and assist stages", () => {
     ).toEqual(at());
   });
 
-  it("narrows markers equally, keeps them anonymous, guards map/fallback inputs and restores the reveal", () => {
+  it("narrows markers equally, keeps them anonymous, guards map inputs and restores the reveal", () => {
     const game = helped(3);
     const world = journeyWorld(regions, journey, game, context);
     expect(world.places.map((place) => place.id)).toEqual(
@@ -244,11 +244,6 @@ describe("authored Journey hint and assist stages", () => {
       ),
     ).toBe(true);
     expect(reduce(game, { type: "select", id: "place:3451190" })).toBe(game);
-    const typed = reduce(game, { type: "text", value: "Rio de Janeiro" });
-    const rejected = reduce(typed, { type: "guess-country" });
-    expect(rejected.phase).toBe("playing");
-    expect(rejected.selectedIds).toEqual([]);
-    expect(rejected.inputError).toContain("removed by the assist");
     const feedback = reduce(
       game,
       { type: "select", id: "place:3469058" },

@@ -49,6 +49,11 @@ export const stateStyles: Record<
     stroke: "rgba(150,166,169,0.23)",
     label: "Disabled",
   },
+  context: {
+    fill: "rgba(158,185,227,0.32)",
+    stroke: "rgba(191,219,211,0.34)",
+    label: "Geographic context",
+  },
   hinted: {
     fill: "rgba(243,207,115,0.32)",
     stroke: "#f3cf73",

@@ -604,6 +604,11 @@ replacement. These checks do not prove composited/translucent contrast,
 color-vision accessibility, GPU appearance, or final browser layout.
 
 City and capital map labels use a moderate shared text size in all themes. Authored city
-references retain equal typography regardless of capital status; numeric map
+and landmark references share the same readable typography, regardless of capital status; numeric map
 annotations and physical-feature labels keep their existing scale. The values
 and screen-space layout live in `src/globe/placeLabels.ts`.
+
+Background reference geography uses the `context` state and shared context-land
+fill on the existing country surfaces. It does not receive individual country
+outlines or small-country locator rings. Explicit help remains `hinted` and keeps
+its geographic outlines and locators.

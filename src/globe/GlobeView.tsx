@@ -852,6 +852,9 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               resumeRotation();
             },
             fitAltitude,
+            fitToViewport === "world"
+              ? GLOBE_MOTION.worldPullbackMs
+              : undefined,
           );
         },
         flyover(stops, loop = true, options) {

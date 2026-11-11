@@ -74,7 +74,6 @@ const base = definePresentation({
   topic: "shared place-names",
   instruction: "",
   failure: "feedback",
-  allowTyping: false,
   disclosure: {
     hoverNames: false,
     namedChoices: false,
