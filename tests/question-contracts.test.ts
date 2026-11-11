@@ -24,14 +24,36 @@ describe("safe question authoring contracts", () => {
       readFileSync("public/geography/world.v1.json", "utf8"),
     ) as RegionFeature[];
     const q = ANDES_JOURNEY.rounds[0];
+    for (const background of [
+      { map: { ...q.map!, backgroundRegionIds: ["wurl:ZZZ"] } },
+      {
+        guidance: {
+          hint: "Hint",
+          assist: { text: "Assist", backgroundRegionIds: ["wurl:ZZZ"] },
+        },
+      },
+    ])
+      expect(() =>
+        createQuestionContext(regions, [], {
+          ...ANDES_JOURNEY,
+          rounds: [{ ...q, ...background }],
+        }),
+      ).toThrow("Unknown background geography");
+  });
+  it("compiles rotating entries and rejects competing camera instructions", () => {
+    const base = ANDES_JOURNEY.rounds[0];
+    const q = compileQuestionScenes({
+      ...base,
+      scenes: { play: { focus: base.focus, orbit: true } },
+    });
+    expect(q.playOrbit).toBe(true);
+    expect(() => validateQuestionContract(q)).not.toThrow();
     expect(() =>
-      createQuestionContext(regions, [], {
-        ...ANDES_JOURNEY,
-        rounds: [
-          { ...q, map: { ...q.map!, backgroundRegionIds: ["wurl:ZZZ"] } },
-        ],
-      }),
-    ).toThrow("Unknown background geography");
+      validateQuestionContract({ ...q, introViews: [q.focus] }),
+    ).toThrow("rotating entry");
+    expect(() =>
+      validateQuestionContract({ ...q, playFraming: "selection" }),
+    ).toThrow("rotating entry");
   });
   it("compiles explicit intro pacing and rejects invalid pacing", () => {
     const base = ANDES_JOURNEY.rounds[0];

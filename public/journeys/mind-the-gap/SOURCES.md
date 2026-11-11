@@ -62,7 +62,7 @@ The handoff did not identify an exact Natural Earth release or preparation
 script. The user subsequently removed the overlay; the geometry remains in the
 source handoff record but is not rendered or used for grading. Q4 uses a clean,
 borderless regional view. European country surfaces follow the existing Study
-continent grouping and receive the shared reference fill without political
+continent grouping, explicitly include the existing Kosovo map unit omitted from the capital dataset, and receive the shared reference fill without political
 outlines or locator rings; Germany is outlined on assist and reveal.
 
 ## Marmaray

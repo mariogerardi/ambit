@@ -48,6 +48,13 @@ describe("Mind the Gap", () => {
 
   it("keeps city names visible through edits/help, then retains the actual miss", () => {
     const start = play("through-the-building");
+    const assistedFocus = view(step(start, ...help)).focus;
+    expect(view(start).focus).toMatchObject({
+      lat: 30,
+      lng: 108,
+      altitude: 0.42,
+    });
+    expect(assistedFocus).toEqual({ lat: 30.11, lng: 105.31, altitude: 0.42 });
     for (const game of [
       start,
       step(start, select("place:1815286")),
@@ -95,6 +102,7 @@ describe("Mind the Gap", () => {
       ["wurl:POL", 0],
     ] as const) {
       const result = step(play("the-deep-end"), select(id), submit);
+      expect(view(result).focus).toEqual({ lat: 49, lng: 31, altitude: 0.42 });
       expect(journeyPoints(result)).toBe(points);
       expect(view(result).states[id]).toBe(
         id === "wurl:UKR" ? "correct" : "incorrect",
@@ -164,6 +172,7 @@ describe("Mind the Gap", () => {
       "wurl:DEU": "context",
       "wurl:FRA": "context",
       "wurl:UKR": "context",
+      "wurl:NE-KOS": "context",
       "wurl:CHN": "disabled",
     });
     expect(world.places).toEqual([]);
@@ -184,6 +193,11 @@ describe("Mind the Gap", () => {
     expect(node.querySelector("#written-answer")).not.toBeNull();
     const assisted = view(step(start, ...help));
     expect(assisted.states["wurl:DEU"]).toBe("hinted");
+    expect(assisted.states["wurl:FRA"]).toBe("disabled");
+    expect(assisted.states["wurl:NE-KOS"]).toBe("disabled");
+    expect(
+      Object.values(assisted.states).filter((s) => s === "context"),
+    ).toEqual([]);
     expect(assisted.borderRegionIds).toEqual(["wurl:DEU"]);
     expect(assisted.places).toEqual([]);
     const answered = step(start, { type: "text", value: "  bErLiN! " }, submit);
@@ -207,6 +221,7 @@ describe("Mind the Gap", () => {
   it("keeps pin search global on themed land, frames Turkey on assist, and compares actual misses", () => {
     const start = play("between-continents");
     const before = view(start);
+    expect(question("between-continents").playOrbit).toBe(true);
     expect(before.focus.altitude).toBeGreaterThanOrEqual(1.65);
     expect(new Set(Object.values(before.states))).toEqual(new Set(["default"]));
     for (const game of [start, step(start, help[0])]) {
@@ -254,6 +269,12 @@ describe("Mind the Gap", () => {
       game = step(game, ...actions[suffix], submit, { type: "next" });
     }
     expect(game.phase).toBe("finished");
+    expect(journey.completion?.orbit).not.toBe(true);
+    expect(journey.completion?.views).toHaveLength(5);
+    expect(journey.completion?.views?.at(-1)).toMatchObject({
+      lat: 41.021,
+      lng: 29,
+    });
     const recap = view(game);
     expect(recap.states).toMatchObject({
       "wurl:CHN": "hinted",

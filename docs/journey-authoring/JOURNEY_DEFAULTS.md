@@ -53,6 +53,9 @@ automatically by these authoring conventions.
   clues or intro views starts at a random continental view and rotates. Preserve
   an already suitable rotating world view. Interaction stops rotation; explicit
   geographic clues retain their framing. `isWholeGlobeSearch` owns eligibility.
+  An explicit `scenes.play.orbit: true` instead pulls back from the current
+  orientation and rotates, including for a global pin search. Interaction/help
+  stops rotation; authored assist framing takes precedence.
 - **Round reveal:** ordinary authored tours are finite. In grouped scenes, a
   single-country explanatory network defaults to returning to the actual selected
   country, including a miss. `returnToSelection: false` opts out;

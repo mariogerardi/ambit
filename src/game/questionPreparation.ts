@@ -70,7 +70,10 @@ export function createQuestionContext(
     for (const id of round.candidateRegionIds ?? [])
       if (!context.targets.has(id))
         throw Error(`Unknown candidate geography (${round.id}): ${id}`);
-    for (const id of round.map?.backgroundRegionIds ?? [])
+    for (const id of [
+      ...(round.map?.backgroundRegionIds ?? []),
+      ...(round.guidance?.assist?.backgroundRegionIds ?? []),
+    ])
       if (!context.targets.has(id))
         throw Error(`Unknown background geography (${round.id}): ${id}`);
     if (round.rule.type === "merged-region") {

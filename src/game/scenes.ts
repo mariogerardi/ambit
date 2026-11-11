@@ -10,6 +10,8 @@ export interface PlayScene {
   focus?: Focus;
   /** Fit all eligible region outlines; an authored focus is optional. */
   framing?: "selection";
+  /** Pull back from the current orientation to the whole globe, then rotate. */
+  orbit?: boolean;
   /** One pass through broad orientation views, ending at the playable focus. */
   views?: Focus[];
   /** Scale this intro's travel time without changing other tours (0.25–2). */
@@ -24,6 +26,8 @@ export interface PlayScene {
   map?: Partial<NonNullable<Question["map"]>>;
 }
 export interface AssistScene {
+  /** Replace play's background fills; an empty list clears them. */
+  backgroundRegionIds?: string[];
   borders?: boolean;
   focus?: Focus;
   places?: PlaceFeature[];
@@ -72,6 +76,7 @@ export function compileQuestionScenes(
     if (value !== undefined) compiled[key] = value;
   };
   assign("playFraming", play?.framing);
+  assign("playOrbit", play?.orbit);
   assign("contextIds", play?.contextIds);
   assign("introViews", play?.views);
   assign("introDurationScale", play?.durationScale);
@@ -135,6 +140,9 @@ export function compileQuestionScenes(
       ...question.guidance,
       assist: {
         ...question.guidance.assist,
+        ...(assist.backgroundRegionIds !== undefined
+          ? { backgroundRegionIds: assist.backgroundRegionIds }
+          : {}),
         ...(assist.borders !== undefined ? { borders: assist.borders } : {}),
         ...(assist.places !== undefined ? { places: assist.places } : {}),
         ...(assist.overlays !== undefined ? { overlays: assist.overlays } : {}),

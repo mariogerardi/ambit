@@ -186,6 +186,8 @@ export interface Question {
     hintMap?: { regionIds: readonly string[]; focus?: Focus };
     assist?: {
       text: string;
+      /** Replace background reference fills during assistance; [] clears them. */
+      backgroundRegionIds?: string[];
       images?: {
         src: string;
         alt: string;
@@ -253,6 +255,8 @@ export interface Question {
   focus: Focus;
   /** Fit the full bounded region-selection pool; resolved after geography loads. */
   playFraming?: "selection";
+  /** Whole-globe entry preserves the current orientation and starts shared rotation. */
+  playOrbit?: boolean;
   /** Finite orientation sequence; reduced motion uses focus directly. */
   introViews?: Focus[];
   /** Optional intro-only time multiplier, between 0.25 and 2. */

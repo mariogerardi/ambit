@@ -127,9 +127,10 @@ const quito = city(3652462, "Quito", -0.22985, -78.52495, "ECU");
 const berlin = city(2950159, "Berlin", 52.52437, 13.41053, "DEU");
 // Match the existing Study continent grouping, using the globe's own country surfaces.
 const europeBackground = [
-  ...new Set(
-    CAPITALS.filter((p) => p.continent === "EU").map((p) => p.countryId),
-  ),
+  ...new Set([
+    ...CAPITALS.filter((p) => p.continent === "EU").map((p) => p.countryId),
+    "wurl:NE-KOS",
+  ]),
 ];
 
 // Grading is from an approximate midpoint of Marmaray's Bosphorus crossing,
@@ -229,7 +230,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
         assist: {
           text: "Two southwestern city markers remain. Use the photograph's steep hillside setting to decide.",
           candidateIds: [chengdu.id, chongqing.id],
-          focus: { lat: 30.2, lng: 105.8, altitude: 0.42 },
+          focus: { lat: 30.11, lng: 105.31, altitude: 0.42 },
         },
       },
       explanation:
@@ -246,7 +247,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       ],
       scenes: {
         play: {
-          focus: { lat: 30, lng: 108, altitude: 0.76 },
+          focus: { lat: 30, lng: 108, altitude: 0.42 },
           contextIds: ["wurl:CHN"],
           places: chinaCities,
           map: { feedbackRegions: "neutral" },
@@ -317,7 +318,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
           map: { candidates: "highlighted", muteOthers: true },
         },
         reveal: {
-          focus: europeanSearch,
+          focus: { lat: 49, lng: 31, altitude: 0.42 },
           answerIds: ["wurl:UKR"],
           places: [kyiv],
         },
@@ -426,6 +427,9 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
           contextIds: [],
           map: { borders: false },
         },
+        assist: {
+          backgroundRegionIds: [],
+        },
         reveal: {
           focus: { lat: 52.52, lng: 13.41, altitude: 0.32 },
           contextIds: ["wurl:DEU"],
@@ -484,9 +488,9 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       source: marmaraySource,
       scenes: {
         play: {
-          // Deliberately world-scale, nowhere near Istanbul. Do not opt into
-          // selection framing or use a Europe/Türkiye-centered intro view.
+          // Pull back from the current view and rotate; this is a static fallback.
           focus: { lat: 5, lng: -78, altitude: 2.2 },
+          orbit: true,
           contextIds: [],
           places: [bosphorusTarget],
           overlays: [],
@@ -507,7 +511,6 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
   completion: {
     mapMode: "cumulative",
     contextIds: ["wurl:CHN", "wurl:ECU", "wurl:DEU"],
-    orbit: true,
     focus: { lat: 30, lng: 25, altitude: 2.2 },
     views: [
       { lat: 30, lng: 107, altitude: 0.78 },
@@ -515,7 +518,6 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       { lat: -0.23, lng: -78.52, altitude: 0.82 },
       { lat: 52.52, lng: 13.41, altitude: 0.7 },
       { lat: 41.021, lng: 29.0, altitude: 0.65 },
-      { lat: 30, lng: 25, altitude: 2.2 },
     ],
     physicalFeatures: [],
     places: [quito, kyiv],

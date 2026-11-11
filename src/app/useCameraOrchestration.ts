@@ -81,7 +81,10 @@ export function useCameraOrchestration({
   } = journeyCamera;
   const round = journey.rounds[roundIndex];
   const wholeGlobeSearch =
-    isJourney && phase === "playing" && !!round && isWholeGlobeSearch(round);
+    isJourney &&
+    phase === "playing" &&
+    !!round &&
+    (!!round.playOrbit || isWholeGlobeSearch(round));
   const wholeGlobeHelp = wholeGlobeSearch ? help?.[round.id] : undefined;
   const helpFraming =
     isJourney &&
@@ -289,7 +292,12 @@ export function useCameraOrchestration({
         const worldZoom = altitude();
         if (!(motion && normalWorldView(view, worldZoom))) {
           globe.current?.cancelFocus();
-          frame(randomWorldView(worldZoom));
+          if (round.playOrbit)
+            globe.current?.focus(
+              { ...(view ?? round.focus), altitude: worldZoom },
+              "world",
+            );
+          else frame(randomWorldView(worldZoom));
         }
         setMotion(!reduced && !wholeGlobeHelp && !rotationPaused.current);
       }

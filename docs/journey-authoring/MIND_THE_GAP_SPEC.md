@@ -12,13 +12,13 @@ political division and water. These are not stops on one continuous railway.
 The supplied module is adapted rather than replaced; final ordinary copy and
 contracts live in the module.
 
-| Stop                 | Task                                                                                       | Play and help                                                                                                                                                                                                                                              | Reveal                                                                                                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Through the Building | Select Chongqing from five named Chinese city markers using the Liziba photograph.         | All city names appear from entry and remain visible through hint/assist. The southwest-China opening and river hint remain; assist leaves Chongqing/Chengdu.                                                                                               | Retain the actual wrong pick and explain the station/building's shared design.                                                                                        |
-| The Deep End         | Select Ukraine, the country containing Kyiv's Arsenalna, from six country candidates.      | Named Hongyancun entrance, then Europe/western Russia; intro duration scaled to 0.4 (about six seconds). The exact approved copy names Hongyancun's widely regarded world record and Arsenalna's former record. Assist leaves Ukraine, Belarus and Poland. | Show the Ukraine result and contextual Arsenalna marker. Russia is a distractor, never a correct answer.                                                              |
-| Above Sea Level      | Estimate the Quito Metro line's approximate elevation with a 0–5,000 m slider, 50 m steps. | The copy centers the world's highest metro line running entirely underground. Quito/Ecuador supply location context. Hint adds Andean scale; assist gives 2,000–4,000 m, including incorrect estimates.                                                    | Compare with the operator's approximate 2,850 m line elevation and explain underground versus below sea level.                                                        |
-| Ghost Stations       | Type Berlin from its metro's guarded Cold War ghost stations.                              | Immediate text input; borderless Europe view with the existing European country surfaces filled in the shared reference color; no separate overlay, label or small-country locator rings. Assist frames Germany closely without marking Berlin.            | Restore political borders and show Berlin's outcome-aware marker: correct green/check or cyan solution after a miss.                                                  |
-| Between Continents   | Pin Marmaray with Istanbul and Bosphorus named.                                            | Global search over ordinary theme country colors, initially facing the Americas. Hint retains the view. Assist highlights Türkiye and frames a broad Türkiye/Black Sea region; input remains global and the target hidden.                                 | Preserve actual pin versus approximate target, accuracy bands and schematic crossing. Accepted pins receive the Bosphorus approach; misses retain comparison framing. |
+| Stop                 | Task                                                                                       | Play and help                                                                                                                                                                                                                                                                                                    | Reveal                                                                                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Through the Building | Select Chongqing from five named Chinese city markers using the Liziba photograph.         | All city names appear from entry and remain visible through hint/assist. The southwest-China opening uses the former assist zoom (0.42); assist leaves Chongqing/Chengdu and recenters between them without changing zoom.                                                                                       | Retain the actual wrong pick and explain the station/building's shared design.                                                                                        |
+| The Deep End         | Select Ukraine, the country containing Kyiv's Arsenalna, from six country candidates.      | Named Hongyancun entrance, then Europe/western Russia; intro duration scaled to 0.4 (about six seconds). The exact approved copy names Hongyancun's widely regarded world record and Arsenalna's former record. Assist leaves Ukraine, Belarus and Poland.                                                       | Zoom to Ukraine on every submission and show the result and contextual Arsenalna marker. Russia is a distractor, never a correct answer.                              |
+| Above Sea Level      | Estimate the Quito Metro line's approximate elevation with a 0–5,000 m slider, 50 m steps. | The copy centers the world's highest metro line running entirely underground. Quito/Ecuador supply location context. Hint adds Andean scale; assist gives 2,000–4,000 m, including incorrect estimates.                                                                                                          | Compare with the operator's approximate 2,850 m line elevation and explain underground versus below sea level.                                                        |
+| Ghost Stations       | Type Berlin from its metro's guarded Cold War ghost stations.                              | Immediate text input; borderless Europe view with the existing European country surfaces filled in the shared reference color; no separate overlay, label or small-country locator rings. Kosovo is included explicitly. Assist replaces Europe with Germany alone and frames it closely without marking Berlin. | Restore political borders and show Berlin's outcome-aware marker: correct green/check or cyan solution after a miss.                                                  |
+| Between Continents   | Pin Marmaray with Istanbul and Bosphorus named.                                            | Global search over ordinary theme country colors; pull back at the current orientation, then rotate. Interaction or hint stops rotation without reframing. Assist highlights Türkiye and frames a broad Türkiye/Black Sea region; input remains global and the target hidden.                                    | Preserve actual pin versus approximate target, accuracy bands and schematic crossing. Accepted pins receive the Bosphorus approach; misses retain comparison framing. |
 
 On November 11, 2026, the user approved showing Q1 city names from entry,
 shortening Q2's entrance, refocusing Q3 on the railway, repairing Q4's reference
@@ -27,7 +27,7 @@ and shared larger landmark-reference typography. After previewing the colored
 continent footprint, the user explicitly chose to remove the Europe overlay
 entirely. The user then requested color inside the existing geographic borders,
 so the canonical European country surfaces supply the background reference fill,
-without individual small-country rings. Germany is outlined on assist. Q2 was then explicitly revised
+without individual small-country rings. Germany alone is highlighted and outlined on assist. Q2 was then explicitly revised
 to a single Ukraine answer, with this exact question:
 
 > Chongqing’s Hongyancun is widely regarded as the world’s deepest metro station. Kyiv’s Arsenalna held that record before it. Select the country home to that European station.
@@ -54,8 +54,9 @@ Berlin and the Marmaray target are resolved points; Quito and the Arsenalna
 station marker remain contextual references. China, Ecuador and Germany are
 context countries, not graded country answers; Ukraine retains its
 country-answer role; an actual Russia selection is a mistake. There is no Europe backdrop in completion and no line
-joining the five stories. One finite recap ends in shared world rotation;
-reduced motion uses the static world endpoint. The local Marmaray schematic
+joining the five stories. The recap continuously loops through the five destinations
+at normal tour speed, without a final world-scale stop or a handoff to rotation.
+Interaction stops the tour; reduced motion uses the static world overview. The local Marmaray schematic
 remains as explanatory context. Numeric and typed mistakes remain in saved
 response review without invented map locations.
 
@@ -65,7 +66,7 @@ All five controls reuse existing contracts: `city-single`/`place-ids`,
 `map-single`/`country-ids`, `slider`/`numeric-range`,
 `text`/`capital-name` for canonical Berlin aliases and outcome projection, and `pin`/`pin-distance`. City candidates reuse the shared city-selection lifecycle with names disclosed.
 Grouped scenes and the shared camera owner provide entrance/reveal tours. Small
-shared support adds intro-only pacing and noninteractive background-region fills;
+shared support adds intro-only pacing, noninteractive background-region fills with an assist replacement, and an explicit pullback-and-orbit play entrance;
 authored landmark reference typography
 now matches city references across Journeys.
 Completion is authored against `journeyDiscoveryPlaces`/`journeyWorld` semantics.
@@ -119,3 +120,18 @@ revised copy and final framing, Berlin's green correct marker, Q5's ordinary lan
 colors and regional assist movement, and the final Q4 country-surface fill without
 small-country rings. Camera pacing and reduced-motion behavior were checked in
 automated tests. No full desktop/mobile walkthrough was performed.
+
+## Camera follow-up — November 11, 2026
+
+The user approved a closer Q1 entrance at the existing assist zoom, recentering
+the two survivors on assist, a Ukraine-focused Q2 reveal, explicit Kosovo
+background coverage, Germany-only reference geography on Q4 assist, and a Q5
+entrance that pulls back in place before shared rotation. The completion recap
+now follows the five destinations continuously at normal tour speed. These
+decisions replace the previous Americas entry and finite recap-to-rotation design.
+
+All 47 focused Journey, camera-orchestration and authoring-contract tests passed,
+including the direct-module audit (zero errors/warnings), help-stage background
+replacement, entry interruption and reduced motion, submission framing and
+looping completion. TypeScript and formatting checks passed. These are automated
+and mocked camera checks; no new browser verification was performed in this round.

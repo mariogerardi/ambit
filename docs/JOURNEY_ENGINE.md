@@ -96,6 +96,9 @@ noninteractive reference geography. It uses the shared `context` fill without
 adding outlines, small-country locator rings, answer eligibility or completion
 discoveries. Explicit hint/assist regions still use their normal help emphasis;
 the background fill ends at commitment. No separate geographic overlay is needed.
+`scenes.assist.backgroundRegionIds` (compiled to
+`guidance.assist.backgroundRegionIds`) replaces those background fills during
+assist; an empty list clears them while explicit assist regions retain emphasis.
 `guidance.hintMap` can add reference region emphasis and/or a focus when authored.
 Across the Divide demonstrates this hint-stage support. There is no separate
 `scenes.hint` object.
@@ -137,6 +140,13 @@ instead of starting a reveal tour. Completion flyovers retain their looping beha
 0.1) use slow transitions to a wider view, a brief 350 ms hover, a 3.5-second dip,
 another brief hover and a 3.5-second pullback. Manual review cancels every queued
 phase. Broader tours keep their continuous course.
+
+For an authored whole-globe search entrance, `scenes.play.orbit: true` compiles
+to `playOrbit`. It pulls back at the current latitude/longitude using the shared
+world fitting, then rotates. It cannot accompany intro views or selection
+framing. Interaction or help stops rotation; an assist focus takes precedence.
+Reduced motion keeps the pulled-back view static. This changes only the camera,
+not answer eligibility or target disclosure.
 
 `scenes.play.clueLocators` accepts `{ regionId, label }` annotations for supplied
 reference/candidate areas or highlighted fragments (`clue-part:<countryId>`).

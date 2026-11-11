@@ -8,6 +8,7 @@ import { ANDES_JOURNEY } from "../src/game/andesJourney";
 import { DANUBE_JOURNEY } from "../src/game/danubeJourney";
 import { REGGAETON_JOURNEY } from "../src/game/reggaetonJourney";
 import { SMALL_WONDERS_JOURNEY } from "../src/game/smallWondersJourney";
+import { MIND_THE_GAP_JOURNEY } from "../src/game/mindTheGapJourney";
 import { createQuestionContext } from "../src/game/questions";
 import { initialGame } from "../src/game/state";
 import { reviewTourFrame, REVIEW_TOUR_ALTITUDE } from "../src/study/reviewTour";
@@ -103,6 +104,74 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount());
   vi.unstubAllGlobals();
+});
+it.each([false, true])(
+  "pulls back in place for the Marmaray search, with rotation disabled under reduced motion (%s)",
+  async (reduced) => {
+    Object.defineProperty(media, "matches", { value: reduced });
+    const definition = MIND_THE_GAP_JOURNEY;
+    const context = createQuestionContext(regions, [], definition);
+    view = { lat: 52.52, lng: 13.41, altitude: 0.32 };
+    await render({
+      mode: "practice",
+      journey: {
+        ...options.journey,
+        active: true,
+        definition,
+        context,
+        phase: "playing",
+        roundIndex: 4,
+        focus: definition.rounds[4].focus,
+      },
+    });
+    expect(port.focus).toHaveBeenCalledExactlyOnceWith(
+      { ...view, altitude: worldAltitude(width, height) },
+      "world",
+    );
+    expect(port.flyover).not.toHaveBeenCalled();
+    expect(result.motion).toBe(!reduced);
+    await act(async () => result.stop());
+    await render({ journey: { ...options.journey } });
+    expect(port.focus).toHaveBeenCalledTimes(1);
+    expect(result.motion).toBe(false);
+    const q = definition.rounds[4];
+    await render({
+      journey: { ...options.journey, help: { [q.id]: "hinted" } },
+    });
+    expect(port.focus).toHaveBeenCalledTimes(1);
+    await render({
+      journey: {
+        ...options.journey,
+        help: { [q.id]: "assisted" },
+        focus: q.guidance!.assist!.focus,
+      },
+    });
+    expect(port.focus).toHaveBeenLastCalledWith(q.guidance!.assist!.focus);
+    expect(result.motion).toBe(false);
+  },
+);
+it("keeps the Mind the Gap recap on a normal-speed continuous destination loop", async () => {
+  const definition = MIND_THE_GAP_JOURNEY;
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      context: createQuestionContext(regions, [], definition),
+      phase: "finished",
+      roundIndex: 4,
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledExactlyOnceWith(
+    definition.completion!.views,
+  );
+  expect(result.motion).toBe(false);
+  await render({
+    mode: "home",
+    journey: { ...options.journey, active: false },
+  });
+  expect(port.cancelFlyover).toHaveBeenCalled();
 });
 it("sweeps Review continuously, pauses for interaction, and holds a static view for reduced motion", async () => {
   const pending = new Map<number, FrameRequestCallback>();
