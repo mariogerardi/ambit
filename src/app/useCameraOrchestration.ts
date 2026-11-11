@@ -5,9 +5,8 @@ import type { RefObject } from "react";
 import type { Focus, PlaceFeature, RegionFeature } from "../geography/types";
 import type { GlobeHandle } from "../globe/GlobeView";
 import {
-  createDefaultViewCycle,
   normalWorldView,
-  randomWorldView,
+  worldView,
   studyCameraTarget,
 } from "../globe/defaultViews";
 import { worldAltitude } from "../globe/camera";
@@ -111,9 +110,8 @@ export function useCameraOrchestration({
   const [reduced, setReduced] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
-  const [nextDefaultView] = useState(() => createDefaultViewCycle());
   const [initialFocus] = useState(() =>
-    createDefaultViewCycle()(worldAltitude(innerWidth, innerHeight)),
+    worldView(undefined, worldAltitude(innerWidth, innerHeight)),
   );
   const previous = useRef<string | undefined>(undefined);
   const pendingExploreFocus = useRef<string | undefined>(undefined);
@@ -149,18 +147,19 @@ export function useCameraOrchestration({
         : undefined,
     [session?.settings, namedRegions, mobile],
   );
+  const studyWorldSearch =
+    studying &&
+    session?.phase === "playing" &&
+    !studyArea &&
+    !studyHighlight &&
+    !studyCapitalFocus;
   const studyDestination = (entering = false) =>
     studyCapitalFocus ??
     (studyArea && !studyHighlight
       ? entering || !normalWorldView(globe.current?.view(), studyArea.altitude!)
         ? studyArea
         : undefined
-      : studyCameraTarget(
-          globe.current?.view(),
-          altitude(),
-          nextDefaultView,
-          studyHighlight,
-        ));
+      : studyCameraTarget(globe.current?.view(), altitude(), studyHighlight));
   const builderFocus = useMemo(
     () =>
       studyPreview && !previewPlaces?.length
@@ -283,8 +282,10 @@ export function useCameraOrchestration({
       previous.current = cameraKey;
       return;
     }
-    if (wholeGlobeSearch && !helpFraming) {
-      const visit = `${cameraKey}:${journey.id}:${round.id}`;
+    if ((wholeGlobeSearch && !helpFraming) || studyWorldSearch) {
+      const visit = studyWorldSearch
+        ? `${cameraKey}:study:${session?.prompt.ordinal}`
+        : `${cameraKey}:${journey.id}:${round.id}`;
       if (worldSearchVisit.current !== visit) {
         worldSearchVisit.current = visit;
         clearHover();
@@ -292,12 +293,7 @@ export function useCameraOrchestration({
         const worldZoom = altitude();
         if (!(motion && normalWorldView(view, worldZoom))) {
           globe.current?.cancelFocus();
-          if (round.playOrbit)
-            globe.current?.focus(
-              { ...(view ?? round.focus), altitude: worldZoom },
-              "world",
-            );
-          else frame(randomWorldView(worldZoom));
+          globe.current?.focus(worldView(view, worldZoom), "world");
         }
         setMotion(!reduced && !wholeGlobeHelp && !rotationPaused.current);
       }
@@ -378,6 +374,7 @@ export function useCameraOrchestration({
     mode === "minigames" ? journeyFocus?.altitude : undefined,
     helpFraming,
     wholeGlobeSearch,
+    studyWorldSearch,
     wholeGlobeHelp,
     reduced,
     namedRegions.length,
@@ -553,11 +550,17 @@ export function useCameraOrchestration({
       frame({ ...previewViews[0], altitude: REVIEW_TOUR_ALTITUDE });
       return;
     }
-    frame(
-      journeyFocus ??
-        (studying ? studyDestination(true) : builderFocus) ??
-        nextDefaultView(altitude()),
-    );
+    const destination =
+      journeyFocus ?? (studying ? studyDestination(true) : builderFocus);
+    if (destination && !studyWorldSearch && !(wholeGlobeSearch && !helpFraming))
+      frame(destination);
+    else {
+      globe.current?.focus(
+        worldView(globe.current?.view(), altitude()),
+        "world",
+      );
+      setMotion(!reduced && !rotationPaused.current);
+    }
   };
   return {
     motion:

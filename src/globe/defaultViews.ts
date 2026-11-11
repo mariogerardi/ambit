@@ -1,23 +1,8 @@
 import type { Focus } from "../geography/types";
-export const DEFAULT_VIEWS: ReadonlyArray<Focus> = [
-  { lat: 10, lng: 24 },
-  { lat: 35, lng: 92 },
-  { lat: 15, lng: 140 },
-  { lat: 30, lng: -100 },
-  { lat: -20, lng: -60 },
-  { lat: 48, lng: 15 },
-];
-export function createDefaultViewCycle(
-  start = Math.floor(Math.random() * DEFAULT_VIEWS.length),
-) {
-  let index = start;
-  return (altitude: number): Focus => ({
-    ...DEFAULT_VIEWS[
-      ((index++ % DEFAULT_VIEWS.length) + DEFAULT_VIEWS.length) %
-        DEFAULT_VIEWS.length
-    ],
-    altitude,
-  });
+export const DEFAULT_WORLD_VIEW = { lat: 10, lng: 24 };
+/** Keep the live orientation when returning to a viewport-fitted world overview. */
+export function worldView(view: Focus | undefined, altitude: number): Focus {
+  return { ...(view ?? DEFAULT_WORLD_VIEW), altitude };
 }
 export function normalWorldView(
   view: Focus | undefined,
@@ -32,7 +17,6 @@ export function normalWorldView(
 export function studyCameraTarget(
   view: Focus | undefined,
   altitude: number,
-  nextDefault: (altitude: number) => Focus,
   highlightedCountry?: Focus,
 ): Focus | undefined {
   // Identifying a highlighted country requires that clue to be in view.
@@ -41,10 +25,7 @@ export function studyCameraTarget(
       ...highlightedCountry,
       altitude: normalWorldView(view, altitude) ? view!.altitude : altitude,
     };
-  return normalWorldView(view, altitude) ? undefined : nextDefault(altitude);
-}
-
-/** Answer-independent, fresh continental orientation for a new global search. */
-export function randomWorldView(altitude: number): Focus {
-  return createDefaultViewCycle()(altitude);
+  return normalWorldView(view, altitude)
+    ? undefined
+    : worldView(view, altitude);
 }

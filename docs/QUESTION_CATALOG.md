@@ -158,8 +158,9 @@ field enables globe input. Whole-world country selection uses the shared candida
 fill and hover emphasis; unrestricted pin placement keeps its neutral surface.
 Use disclosure settings to hide
 names, not hover settings to disable the intended control. Author typed recall as `mode: "text"` with an immediately
-visible input. `allowTyping: false` suppresses a globe-only question's typing
-shortcut while retaining the unavailable-WebGL fallback.
+visible input. Map questions have no alternate typing path. If a question requires
+the globe and WebGL is unavailable, show a globe-required message. Explicit named
+button choices remain usable without WebGL.
 
 `merged-region-single` asks for one apparent territory with hidden internal
 country boundaries. A `merged-region` rule declares a Journey-scoped synthetic

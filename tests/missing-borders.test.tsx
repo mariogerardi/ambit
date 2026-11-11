@@ -146,8 +146,6 @@ describe("Missing Borders composite mechanic", () => {
           selectedIds: [question.rule.memberIds[0]],
         }),
       ).toBe(false);
-      const typed = { ...game, text: question.resolvedLabel! };
-      expect(reduce(typed, { type: "guess-country" })).toBe(typed);
       const miss = reduce(game, { type: "select", id: wrong });
       expect(miss.answers.at(-1)?.correct).toBe(false);
       expect(miss.phase).toBe("feedback");

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, useState } from "react";
+import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -27,6 +27,56 @@ const settings: StudySettings = {
   autoAdvance: false,
 };
 describe("Study completion, replay, and alternate answers", () => {
+  it.each(["countries", "capitals", "flags"] as const)(
+    "requires globe picks for %s map prompts while preserving typed recall",
+    (topic) => {
+      const map = startStudy(
+        {
+          ...settings,
+          topics: [topic],
+          styles: { ...settings.styles, [topic]: "map" },
+        },
+        42,
+      );
+      expect(map.prompt.style).toBe("map");
+      expect(
+        studyReducer(map, {
+          type: "text",
+          value: countryName(map.prompt.targetId),
+        }),
+      ).toBe(map);
+      expect(
+        studyReducer(
+          { ...map, text: countryName(map.prompt.targetId) },
+          { type: "submit" },
+        ).phase,
+      ).toBe("playing");
+      const html = renderToStaticMarkup(
+        <StudyPanel
+          save={{ ...emptyStudy, session: map }}
+          setup={false}
+          active
+          webgl
+          onSettings={vi.fn()}
+          onStart={vi.fn()}
+          onSetup={vi.fn()}
+          onAction={vi.fn()}
+        />,
+      );
+      expect(html).not.toContain("Answer by name");
+      const typed = startStudy(
+        {
+          ...settings,
+          topics: [topic],
+          styles: { ...settings.styles, [topic]: "typing" },
+        },
+        42,
+      );
+      expect(studyReducer(typed, { type: "text", value: "Ottawa" }).text).toBe(
+        "Ottawa",
+      );
+    },
+  );
   it("does not label the final unanswered question completed, including after finishing", () => {
     let session = startStudy(settings, 42);
     session = studyReducer(session, {
@@ -125,67 +175,6 @@ describe("Study completion, replay, and alternate answers", () => {
       vi.unstubAllGlobals();
     }
   });
-  it("offers keyboard answers on map prompts when WebGL is available", async () => {
-    const webgl = true;
-    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-    const host = document.createElement("div"),
-      root = createRoot(host);
-    const initial = startStudy(
-      {
-        ...settings,
-        topics: ["capitals"],
-        styles: { ...settings.styles, capitals: "map" },
-      },
-      42,
-    );
-    function Harness() {
-      const [session, setSession] = useState(initial);
-      return (
-        <StudyPanel
-          save={{ ...emptyStudy, settings: initial.settings, session }}
-          setup={false}
-          active
-          webgl={webgl}
-          onSettings={() => {}}
-          onStart={() => {}}
-          onSetup={() => {}}
-          onAction={(action) =>
-            setSession((current) => studyReducer(current, action))
-          }
-        />
-      );
-    }
-    try {
-      await act(async () => root.render(<Harness />));
-      const details = host.querySelector("details")!;
-      expect(details.open).toBe(!webgl);
-      if (webgl)
-        await act(async () => {
-          details.open = true;
-        });
-      const input = host.querySelector("input")!;
-      await act(async () => {
-        Object.getOwnPropertyDescriptor(
-          HTMLInputElement.prototype,
-          "value",
-        )!.set!.call(input, countryName(initial.prompt.targetId));
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-      });
-      await act(async () =>
-        host
-          .querySelector("form")!
-          .dispatchEvent(
-            new Event("submit", { bubbles: true, cancelable: true }),
-          ),
-      );
-      expect(host.textContent).toContain("Well spotted.");
-      expect(host.textContent).toContain(countryName(initial.prompt.targetId));
-      expect(host.querySelector(".round-feedback")).not.toBeNull();
-    } finally {
-      await act(async () => root.unmount());
-      vi.unstubAllGlobals();
-    }
-  });
 });
 
 it.each([false, true])(
@@ -271,7 +260,9 @@ it.each([true, false])(
     expect(html).not.toContain("Answer by name");
     expect(html).not.toContain("<input");
     if (!webgl)
-      expect(html).toContain("Choose typing or multiple choice in Practice.");
+      expect(html).toContain(
+        "This question needs the 3D globe. Try another browser or device.",
+      );
   },
 );
 it("gives mobile correct-answer feedback time to read before automatic advance", async () => {

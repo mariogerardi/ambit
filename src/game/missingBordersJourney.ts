@@ -21,7 +21,6 @@ const base = definePresentation({
     committedNames: false,
     previousVisits: false,
   },
-  allowTyping: false,
   map: {
     borders: true,
     hoverFeedback: false,

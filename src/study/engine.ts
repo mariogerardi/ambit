@@ -38,12 +38,7 @@ import {
   STUDY_PLACES,
   studyPlace,
 } from "./placeTopics";
-import {
-  gradeStudyPin,
-  isStudyPinPrompt,
-  studyPinTarget,
-  validStudyPin,
-} from "./pins";
+import { gradeStudyPin, studyPinTarget, validStudyPin } from "./pins";
 export const COUNTRIES = roster.members;
 export const FLAGS = new Map(
   flagCatalog.flags.map((f) => [f.countryId, f.src]),
@@ -706,14 +701,10 @@ export function studyReducer(
       ? { ...session, pin: { lat: action.lat, lng: action.lng } }
       : session;
   if (action.type === "text")
-    return canTypeStudyAnswer(session.prompt)
+    return session.prompt.style === "typing"
       ? { ...session, text: action.value }
       : session;
-  if (
-    action.type === "submit" &&
-    !canTypeStudyAnswer(session.prompt) &&
-    session.prompt.style === "map"
-  )
+  if (action.type === "submit" && session.prompt.style === "map")
     return session;
   if (action.type === "choice")
     return session.prompt.choices.includes(action.id)
@@ -745,7 +736,7 @@ export function studyReducer(
   } else {
     response = session.text.trim();
     if (!response) return session;
-    if (style === "map" || (!isPlaceTopic(topic) && topic !== "capitals"))
+    if (!isPlaceTopic(topic) && topic !== "capitals")
       selectedId =
         countryIdForName(
           {
@@ -808,12 +799,6 @@ export function answerLabel(prompt: StudyPrompt, id = prompt.targetId): string {
     ? (capitalChoiceName(id) ?? id)
     : countryName(id);
 }
-export const canTypeStudyAnswer = (prompt: StudyPrompt) =>
-  !isStudyPinPrompt(prompt) &&
-  !(
-    (prompt.topic === "countries" || prompt.topic === "places") &&
-    prompt.style === "map"
-  );
 export function studyPrompt(prompt: StudyPrompt): string {
   if (isPlaceTopic(prompt.topic) && prompt.place)
     return prompt.style === "map"

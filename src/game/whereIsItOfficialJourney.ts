@@ -114,7 +114,6 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       count: 1,
       commitment: "submit",
       selection: { type: "world" },
-      allowTyping: false,
       rule: {
         type: "country-ids",
         ids: OFFICIAL_LANGUAGE_NETWORKS.Arabic,
@@ -177,7 +176,6 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       count: 1,
       commitment: "submit",
       selection: { type: "world" },
-      allowTyping: false,
       rule: {
         type: "country-ids",
         ids: OFFICIAL_LANGUAGE_NETWORKS.Portuguese,
@@ -235,7 +233,6 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       count: 1,
       commitment: "submit",
       selection: { type: "world" },
-      allowTyping: false,
       rule: {
         type: "country-ids",
         ids: OFFICIAL_LANGUAGE_NETWORKS.Russian,
@@ -297,7 +294,6 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       count: 1,
       commitment: "submit",
       selection: { type: "world" },
-      allowTyping: false,
       rule: {
         type: "country-ids",
         ids: OFFICIAL_LANGUAGE_NETWORKS.Malay,
@@ -364,7 +360,6 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       count: 1,
       commitment: "submit",
       selection: { type: "world" },
-      allowTyping: false,
       rule: {
         type: "country-ids",
         ids: OFFICIAL_LANGUAGE_NETWORKS["Guaraní"],

@@ -368,8 +368,6 @@ export interface Question {
     /** Keep the highlighted fragment on feedback instead of restoring the owner. */
     reveal?: "part" | "part-and-owner";
   }[];
-  /** Explicit false suppresses the typing shortcut; unavailable-globe fallback remains. */
-  allowTyping?: boolean;
   places?: PlaceFeature[];
   feedbackPlaces?: PlaceFeature[];
   /** Short cartographic qualification shown beside the map. */

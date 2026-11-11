@@ -9,7 +9,6 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   FLAGS,
   answerLabel,
-  canTypeStudyAnswer,
   countryName,
   defaultSettings,
   studyPrompt,
@@ -460,9 +459,7 @@ export function StudyPanel({
                     : "Select your answer on the globe."
                   : isStudyPinPrompt(prompt)
                     ? "The globe isn’t available. Try another browser or device."
-                    : canTypeStudyAnswer(prompt)
-                      ? "The globe isn’t available. Answer by country name below."
-                      : "The globe isn’t available. Choose typing or multiple choice in Practice."}
+                    : "This question needs the 3D globe. Try another browser or device."}
               </p>
               {isStudyPinPrompt(prompt) ? (
                 <QuestionActions
@@ -472,41 +469,6 @@ export function StudyPanel({
                 />
               ) : (
                 <QuestionActions showSubmit={false} />
-              )}
-              {canTypeStudyAnswer(prompt) && (
-                <details
-                  className="typed-country-guess"
-                  open={!webgl || undefined}
-                >
-                  <summary data-dd-action-name="Study Answer By Name">
-                    Answer by name
-                  </summary>
-                  <form
-                    autoComplete="off"
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      onAction({ type: "submit" });
-                    }}
-                  >
-                    <label className="field">
-                      Country name
-                      <AnswerInput
-                        autoComplete="off"
-                        spellCheck={false}
-                        enterKeyHint="done"
-                        value={session.text}
-                        placeholder="Your answer…"
-                        onChange={(event) =>
-                          onAction({ type: "text", value: event.target.value })
-                        }
-                      />
-                    </label>
-                    <QuestionActions
-                      submitType="submit"
-                      disabled={!session.text.trim()}
-                    />
-                  </form>
-                </details>
               )}
             </div>
           ) : (

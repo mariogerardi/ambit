@@ -897,13 +897,14 @@ it("preserves a suitable world view already rotating when a global question load
   expect(result.motion).toBe(false);
   expect(port.focus).not.toHaveBeenCalled();
 });
-it("starts an unrotating global question on an answer-independent random continent and restarts only on a new question", async () => {
-  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
-    "../src/game/whereIsItOfficialJourney"
-  );
-  const { DEFAULT_VIEWS } = await import("../src/globe/defaultViews");
-  const random = vi.spyOn(Math, "random").mockReturnValue(0);
-  try {
+it.each([false, true])(
+  "pulls global searches back at their current orientation and stops on help (reduced: %s)",
+  async (reduced) => {
+    Object.defineProperty(media, "matches", { value: reduced });
+    const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+      "../src/game/whereIsItOfficialJourney"
+    );
+    view = { lat: 36, lng: 140, altitude: 0.2 };
     await render({
       mode: "practice",
       journey: {
@@ -912,25 +913,33 @@ it("starts an unrotating global question on an answer-independent random contine
         definition,
         phase: "playing",
         roundIndex: 0,
+        focus: definition.rounds[0].focus,
       },
     });
-    expect(port.focus).toHaveBeenLastCalledWith({
-      ...DEFAULT_VIEWS[0],
-      altitude: worldAltitude(width, height),
-    });
-    expect(result.motion).toBe(true);
+    expect(port.focus).toHaveBeenLastCalledWith(
+      { ...view, altitude: worldAltitude(width, height) },
+      "world",
+    );
+    expect(result.motion).toBe(!reduced);
     await act(async () => result.stop());
-    random.mockReturnValue(0.99);
+    await render({ journey: { ...options.journey } });
+    expect(port.focus).toHaveBeenCalledTimes(1);
+    await act(async () => result.recenter());
+    expect(port.focus).toHaveBeenLastCalledWith(
+      { ...view, altitude: worldAltitude(width, height) },
+      "world",
+    );
+    expect(result.motion).toBe(!reduced);
     await render({ journey: { ...options.journey, phase: "feedback" } });
-    vi.mocked(port.focus).mockClear();
+    view = { lat: -20, lng: -65, altitude: 0.3 };
     await render({
       journey: { ...options.journey, phase: "playing", roundIndex: 1 },
     });
-    expect(port.focus).toHaveBeenLastCalledWith({
-      ...DEFAULT_VIEWS.at(-1),
-      altitude: worldAltitude(width, height),
-    });
-    expect(result.motion).toBe(true);
+    expect(port.focus).toHaveBeenLastCalledWith(
+      { ...view, altitude: worldAltitude(width, height) },
+      "world",
+    );
+    expect(result.motion).toBe(!reduced);
     await render({
       journey: {
         ...options.journey,
@@ -938,7 +947,41 @@ it("starts an unrotating global question on an answer-independent random contine
       },
     });
     expect(result.motion).toBe(false);
-  } finally {
-    random.mockRestore();
-  }
+  },
+);
+it.each(["home", "minigames", "explore", "archive"] as const)(
+  "returns to %s by pulling back in place and rotating",
+  async (mode) => {
+    view = { lat: -30, lng: 115, altitude: 0.05 };
+    await render({
+      mode: "practice",
+      transitionKey: "/journey/test",
+      journey: { ...options.journey, active: true, focus: view },
+    });
+    vi.mocked(port.focus).mockClear();
+    await render({
+      mode,
+      transitionKey: `/${mode}`,
+      journey: { ...options.journey, active: false, focus: undefined },
+    });
+    expect(port.focus).toHaveBeenCalledExactlyOnceWith(
+      { ...view, altitude: worldAltitude(width, height) },
+      "world",
+    );
+    expect(result.motion).toBe(true);
+  },
+);
+it("pulls an unrestricted Study question back without a new continental destination", async () => {
+  const session = startStudy({ ...defaultStudySettings, scope: "all" }, 42);
+  view = { lat: -23, lng: -44, altitude: 0.2 };
+  await render({
+    mode: "study",
+    transitionKey: "/study?view=session",
+    study: { active: true, session, editorOpen: false },
+  });
+  expect(port.focus).toHaveBeenLastCalledWith(
+    { ...view, altitude: worldAltitude(width, height) },
+    "world",
+  );
+  expect(result.motion).toBe(true);
 });

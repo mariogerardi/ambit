@@ -5,15 +5,14 @@ import {
   validConstruction,
 } from "./construction";
 import type { Construction } from "./constructionTypes";
-import { countryIdForName } from "./answerNames";
-import { mechanicFor, usesChoiceCards } from "./mechanics";
+import { mechanicFor } from "./mechanics";
 import {
   orderedCards,
   swapOrderCard,
   isSlotAnswer,
   initialOrderCards,
 } from "./ordering";
-import { pointAnswerNoun, validPin } from "./answerTargets";
+import { validPin } from "./answerTargets";
 import {
   candidateAvailable,
   lockedOrderSlots,
@@ -29,7 +28,6 @@ import type {
   Response,
 } from "./questionContracts";
 import { canSubmit, isCorrect } from "./questionEvaluation";
-import { cityIdForName } from "./answerTargets";
 import { submittedPoints, POINTS_VERSION } from "./points";
 import type { BearingResult } from "./compassBearing";
 import { enterRecall, assistRecall } from "./countryRecall";
@@ -72,7 +70,6 @@ export type Action =
   | { type: "drop-labeled-pin"; lat: number; lng: number }
   | { type: "remove-labeled-pin"; id: string }
   | { type: "recall-country" }
-  | { type: "guess-country" }
   | { type: "text"; value: string }
   | { type: "ordered"; index: number; value: string }
   | { type: "order-card"; index: number; id: string }
@@ -387,44 +384,12 @@ export function gameReducer(
                 )
               : [],
         });
-  if (action.type === "select" || action.type === "guess-country") {
+  if (action.type === "select") {
     const mechanic = mechanicFor(round);
     if (mechanic.response !== "selected") return state;
-    if (
-      action.type === "guess-country" &&
-      (usesChoiceCards(round) || round.mode === "merged-region-single")
-    )
+    const id = action.id;
+    if (!canSelect(round, context, id) || !candidateAvailable(round, state, id))
       return state;
-    const id =
-      action.type === "select"
-        ? action.id
-        : mechanic.mapSelection === "places"
-          ? cityIdForName(round, state.text)
-          : countryIdForName(context, state.text);
-    if (!id || !canSelect(round, context, id))
-      return action.type === "guess-country"
-        ? {
-            ...state,
-            inputError:
-              (mechanic.mapSelection === "places"
-                ? `Choose a marked ${pointAnswerNoun(round)} or type its name. If names are ambiguous, choose the marker on the globe.`
-                : round.rule.type === "region-ids"
-                  ? "Choose a region allowed by this question. Check the name and spelling."
-                  : "Choose a country allowed by this question. Check the name and spelling.") +
-              (round.selection.type === "members" &&
-              round.selection.excludeIds?.includes("wurl:TCD")
-                ? " Chad is already given."
-                : ""),
-          }
-        : state;
-    if (!candidateAvailable(round, state, id))
-      return action.type === "guess-country"
-        ? {
-            ...state,
-            inputError:
-              "That option was removed by the assist. Choose one of the remaining candidates.",
-          }
-        : state;
     // A saved draft may predate the move to immediate single-country answers.
     // Tapping it again commits it; it was never graded merely by restoring it.
     if (

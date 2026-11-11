@@ -266,9 +266,9 @@ mobile preferences panel temporarily hides it. Scoped sessions
 frame their eligible area; country-identification and typed/choice
 capital questions can frame their visible clue. Capital map questions keep the
 answer country undisclosed. Capital feedback reveals the target capital's marker
-and name even when those hints were disabled. Named-country map prompts require
-an actual globe selection; typing remains available when the answer name is not
-in the prompt. Capital multiple choice separates the studied countries from its
+and name even when those hints were disabled. Map prompts require actual globe selection; there is no alternate country-name
+input. Without WebGL, globe-dependent questions show an unavailable message.
+Questions authored with the typing method retain their text input. Capital multiple choice separates the studied countries from its
 distractor pool: selected-country capitals, same-continent capitals, cities in the
 target country, worldwide cities, or worldwide capitals. City options use their
 own place IDs and the bundled major-city catalog; countries without another city

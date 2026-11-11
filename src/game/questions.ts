@@ -22,7 +22,6 @@ export {
   matchingCapitals,
 } from "./questionPreparation";
 export { canSubmit, isCorrect } from "./questionEvaluation";
-export { cityIdForName } from "./answerTargets";
 
 export {
   questionPrompt,

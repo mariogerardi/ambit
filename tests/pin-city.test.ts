@@ -4,7 +4,6 @@ import { EIGHTH_JOURNEY as journey } from "./fixtures/engine/eighthJourney";
 import {
   ANSWER_PLACES,
   answerPlace,
-  cityIdForName,
   pinDistance,
 } from "../src/game/answerTargets";
 import {
@@ -115,14 +114,13 @@ describe("pins and cities remain playable without the authoring tool", () => {
       false,
     );
   });
-  it("accepts city markers and normalized names but never treats a country as the city's answer", () => {
+  it("accepts city markers but never treats a country as the city's answer", () => {
     expect(
       isCorrect(city, context, { ...response, selectedIds: ["place:2988507"] }),
     ).toBe(true);
     expect(
       isCorrect(city, context, { ...response, selectedIds: ["wurl:FRA"] }),
     ).toBe(false);
-    expect(cityIdForName(city, "PARIS")).toBe("place:2988507");
     expect(ANSWER_PLACES.get("place:2988507")?.name).toBe("Paris");
     expect(
       journeyWorld(regions, journey, at(1), context).places.every(

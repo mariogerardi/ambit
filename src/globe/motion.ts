@@ -30,6 +30,7 @@ export function tourDuration(distance: number, entry = true) {
 }
 /** Shared render-clock timings; authored teaching sequences remain explicit. */
 export const GLOBE_MOTION = {
+  worldPullbackMs: 2800,
   stateFadeMs: 160,
   pinDropMs: 340,
   overlayFadeMs: 240,

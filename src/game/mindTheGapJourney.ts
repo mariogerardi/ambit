@@ -223,7 +223,6 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       selection: { type: "ids", ids: chinaCities.map((p) => p.id) },
       rule: { type: "place-ids", ids: [chongqing.id] },
       commitment: "submit",
-      allowTyping: false,
       disclosure: { ...base.disclosure, namedChoices: true },
       guidance: {
         hint: "The city stands where the Jialing River meets the Yangtze, with neighborhoods climbing the surrounding hills.",
@@ -283,7 +282,6 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       },
       rule: { type: "country-ids", ids: ["wurl:UKR"] },
       commitment: "submit",
-      allowTyping: false,
       map: {
         ...base.map!,
         candidates: "highlighted",

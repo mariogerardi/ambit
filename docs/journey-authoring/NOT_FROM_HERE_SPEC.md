@@ -28,7 +28,7 @@ The TypeScript module supplies the actual prompts, descriptions, qualifications,
 
 ## Grading and acceptance decisions
 
-- **Q1:** Exact canonical country `wurl:CHN`; an immediate tap commits. Open world selection rather than a narrowed candidate field. `allowTyping:false` keeps the globe as the primary input.
+- **Q1:** Exact canonical country `wurl:CHN`; an immediate tap commits. Open world selection rather than a narrowed candidate field. The globe is the answer input; no typing shortcut is available.
 - **Q2:** Exact unordered pair `wurl:PER` + `wurl:BOL`; submit together. `partialCredit:"one-of-two"` earns **one point** for exactly one independently correct selection, following the current engine's convention. Do not accept other Andean countries simply because wild potato species grow there: the prompt concerns **countries sharing Lake Titicaca**.
 - **Q3:** `place:78751` **Mocha** accepted; distractors `place:105343` **Jeddah**, `place:415189` **Aden**. IDs and coordinates verified against GeoNames records. Disable typing. No aliases besides the single target place identity are needed: the challenge is selecting the correct fixed marker, not recalling its spelling.
 - **Q4:** GeoNames Réunion center (-21.1, 55.6), authored `not-from-here:reunion-center` identity. Three **inclusive** distance bands: **25 km → 3**, **50 km → 2**, **90 km → 1**; outside 90 km misses. This is a **near-island distance task**, not strict island polygon containment; within-range sea pins can qualify. No new geography or bespoke grading is assumed.

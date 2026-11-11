@@ -122,6 +122,12 @@ it("previews catalog edits before an explicit write and keeps removal separate f
   });
   expect(host.textContent).toContain("Not registered");
   await click("Preview registration");
+  expect(host.textContent).toContain(
+    "Adding this Journey will refresh the Workbench. Your current preview may reset.",
+  );
+  expect(host.querySelector(".workbench-catalog-facts")?.textContent).toContain(
+    "Manual schedulingEnabledAutomatic rotationOff",
+  );
   expect(
     fetch.mock.calls.some(([, options]) => options?.method === "POST"),
   ).toBe(false);

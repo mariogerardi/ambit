@@ -121,19 +121,3 @@ export function pinInside(
     );
   });
 }
-/** Resolve typing against the candidate pool, never silently pick an ambiguous name. */
-export function cityIdForName(question: Question, value: string) {
-  const normalized = normalizeAnswer(value);
-  const ids = question.selection.type === "ids" ? question.selection.ids : [];
-  const matches = ids.filter((id) => {
-    const place = answerPlace(question, id);
-    const capital = CAPITALS.find((p) => p.id === id);
-    return (
-      !!place &&
-      [place.name, ...(place.aliases ?? []), ...(capital?.aliases ?? [])].some(
-        (name) => normalizeAnswer(name) === normalized,
-      )
-    );
-  });
-  return matches.length === 1 ? matches[0] : undefined;
-}

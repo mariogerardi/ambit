@@ -44,7 +44,6 @@ describe("not the obvious city", () => {
     ]);
     expect(journey.rounds[2].choices).toHaveLength(4);
     for (const q of journey.rounds.filter((q) => q.mode.startsWith("city-"))) {
-      expect(q.allowTyping).not.toBe(true);
       expect(q.selection.type === "ids" && q.selection.ids.length).toBe(
         q.mode === "city-multiple" ? 5 : 6,
       );

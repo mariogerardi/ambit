@@ -97,7 +97,7 @@ a transparent layout frame fits active geography within the clear center. Source
 switching and navigation to Admin/Schedule stay in the same app, account session
 and mounted WebGL globe. The standalone URL uses the normal app bootstrap. Use the same origin as the signed-in app (`localhost` and
 `127.0.0.1` have separate browser storage).
-The collapsed **Catalog** section at the bottom of the tools previews and applies local registration edits.
+The collapsed **Catalog** section at the bottom of the tools groups registration status, route, scheduling settings and the final registration action. Adding a Journey warns that the Workbench will refresh and the current preview may reset.
 New entries stay out of automatic rotation. Removal keeps the source and is
 available only for held entries absent from both `HEAD` and `origin/main` catalogs;
 missing history blocks removal. Committed Journeys require an explicit retirement
@@ -373,16 +373,16 @@ retains human calibration requirements.
 
 ## Common problems
 
-| Symptom                                       | Check                                                                                                                                                                                 |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vite will not start                           | Node version, `npm ci`, and whether the strict port is already occupied.                                                                                                              |
-| Missing/changed preparation input             | Cache path and committed checksum; distinguish an absent snapshot from an intentional source update.                                                                                  |
-| Subdivisions disappear after base preparation | Run `prepare:explore` to restore the extended manifest and reconciled footprints.                                                                                                     |
-| Journey metadata test fails                   | Run `prepare:journeys` after editing definitions or registration.                                                                                                                     |
-| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Hosting](HOSTING.md#hosting-behavior).                                                                                          |
-| Save warning or missing active Study attempt  | Storage availability/quota and the documented [save lifecycle](SAVE_PERSISTENCE.md). Avoid clearing storage as a first troubleshooting step.                                          |
-| Globe unavailable                             | WebGL/context availability; supported written fallbacks remain, but merged-territory questions require WebGL. Study offers Answer by name. Actual renderer recovery is separate work. |
-| Large-chunk build warning                     | Deferred globe/geometry bundles are still substantial. A successful build does not establish device performance.                                                                      |
+| Symptom                                       | Check                                                                                                                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vite will not start                           | Node version, `npm ci`, and whether the strict port is already occupied.                                                                                                                    |
+| Missing/changed preparation input             | Cache path and committed checksum; distinguish an absent snapshot from an intentional source update.                                                                                        |
+| Subdivisions disappear after base preparation | Run `prepare:explore` to restore the extended manifest and reconciled footprints.                                                                                                           |
+| Journey metadata test fails                   | Run `prepare:journeys` after editing definitions or registration.                                                                                                                           |
+| Deep link fails only after deployment         | Host SPA fallback and root-relative asset paths; see [Hosting](HOSTING.md#hosting-behavior).                                                                                                |
+| Save warning or missing active Study attempt  | Storage availability/quota and the documented [save lifecycle](SAVE_PERSISTENCE.md). Avoid clearing storage as a first troubleshooting step.                                                |
+| Globe unavailable                             | WebGL/context availability; globe-dependent questions show an unavailable message. Explicit text methods and named button choices remain usable. Actual renderer recovery is separate work. |
+| Large-chunk build warning                     | Deferred globe/geometry bundles are still substantial. A successful build does not establish device performance.                                                                            |
 
 ## Keep documentation current
 

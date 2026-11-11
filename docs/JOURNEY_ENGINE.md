@@ -323,8 +323,8 @@ Grouped single-country scenes with an explanatory network inherit
 requested. See [shared defaults](journey-authoring/JOURNEY_DEFAULTS.md) for the
 stage-by-stage camera policy and other inherited conventions.
 Neutral full-world searches (`members` or `world`) without geographic context,
-markers, overlays or authored intro views start at a random continental overview
-and rotate until interaction. A suitable world view already rotating is preserved.
+markers, overlays or authored intro views pull back at the current orientation
+to the viewport-fitted globe size over 2.8 seconds, then rotate until interaction. A suitable world view already rotating is preserved.
 Hints stop this introductory motion; authored help framing remains in control.
 Reduced motion uses a static view. This shared policy does not override map clues.
 

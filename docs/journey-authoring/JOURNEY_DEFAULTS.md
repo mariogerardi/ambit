@@ -50,11 +50,13 @@ automatically by these authoring conventions.
   framing for a deliberate reference/clue composition. Existing questions adopt
   the policy explicitly rather than having authored views silently replaced.
 - **Question entry:** a neutral whole-world country search without authored map
-  clues or intro views starts at a random continental view and rotates. Preserve
-  an already suitable rotating world view. Interaction stops rotation; explicit
-  geographic clues retain their framing. `isWholeGlobeSearch` owns eligibility.
-  An explicit `scenes.play.orbit: true` instead pulls back from the current
-  orientation and rotates, including for a global pin search. Interaction/help
+  clues or intro views pulls back at its current latitude/longitude over 2.8
+  seconds to the normal viewport-fitted globe size, then rotates. Preserve an
+  already suitable rotating world view. Generic Home/Explore/Archive/Minigames
+  overviews and unrestricted Study entry use the same policy. Explicit geographic
+  clues retain their framing. `isWholeGlobeSearch` owns Journey eligibility.
+  `scenes.play.orbit: true` explicitly requests this entrance for other questions,
+  including a global pin search. Interaction/help
   stops rotation; authored assist framing takes precedence.
 - **Round reveal:** ordinary authored tours are finite. In grouped scenes, a
   single-country explanatory network defaults to returning to the actual selected
