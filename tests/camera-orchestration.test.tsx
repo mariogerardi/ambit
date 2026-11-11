@@ -897,6 +897,28 @@ it("preserves a suitable world view already rotating when a global question load
   expect(result.motion).toBe(false);
   expect(port.focus).not.toHaveBeenCalled();
 });
+it("resumes a suitable stopped world overview without refocusing it", async () => {
+  const { WHERE_IS_IT_OFFICIAL_JOURNEY: definition } = await import(
+    "../src/game/whereIsItOfficialJourney"
+  );
+  view = { lat: -15, lng: 133, altitude: worldAltitude(width, height) };
+  await render({
+    mode: "practice",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      phase: "playing",
+      roundIndex: 0,
+    },
+  });
+  expect(port.focus).not.toHaveBeenCalled();
+  expect(result.motion).toBe(true);
+  await act(async () => result.stop());
+  await render({ journey: { ...options.journey, roundIndex: 1 } });
+  expect(port.focus).not.toHaveBeenCalled();
+  expect(result.motion).toBe(true);
+});
 it.each([false, true])(
   "pulls global searches back at their current orientation and stops on help (reduced: %s)",
   async (reduced) => {

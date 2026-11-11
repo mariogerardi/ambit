@@ -7,7 +7,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnswerForm } from "../src/game/AnswerForm";
 import { JOURNEY, COUNTRY_FACTS } from "./fixtures/engine/journey";
 import { FIFTEENTH_JOURNEY } from "../src/game/fifteenthJourney";
-import { SUN_FLAGS_JOURNEY } from "../src/game/sunFlagsJourney";
 import { createQuestionContext } from "../src/game/questions";
 import type { Journey } from "../src/game/questions";
 import { gameReducer, initialGame } from "../src/game/state";
@@ -86,28 +85,27 @@ const submit = () =>
   host.querySelector<HTMLButtonElement>("button.answer-submit-button")!;
 
 describe("Journey answer controls", () => {
-  it("keeps typing and clear in a shared footer while typing is expanded", async () => {
+  it("clears a map selection without offering the removed typing shortcut", async () => {
+    const journey: Journey = {
+      ...JOURNEY,
+      rounds: [
+        { ...JOURNEY.rounds[2], commitment: "submit", failure: "feedback" },
+      ],
+    };
     await act(async () =>
-      root.render(
-        <Harness journey={SUN_FLAGS_JOURNEY} selectedIds={["wurl:URY"]} />,
-      ),
+      root.render(<Harness journey={journey} selectedIds={["wurl:LAO"]} />),
     );
     const footer = host.querySelector(".answer-secondary-actions")!;
-    const details = footer.querySelector("details")!;
-    const summary = details.querySelector("summary")!;
+    expect(footer).not.toBeNull();
+    expect(host.textContent).not.toContain("Answer by typing");
+    expect(host.querySelector("details, #country-guess")).toBeNull();
     const clear = footer.querySelector<HTMLButtonElement>(
       ".answer-clear-selection",
     )!;
-    expect(summary.classList.contains("tertiary-action")).toBe(true);
     expect(clear.classList.contains("tertiary-action")).toBe(true);
-    expect(clear.parentElement).toBe(footer);
-    await act(async () => summary.click());
-    expect(details.open).toBe(true);
-    expect(details.querySelector("#country-guess")).not.toBeNull();
     await act(async () => clear.click());
     expect(current.selectedIds).toEqual([]);
-    expect(details.open).toBe(true);
-    expect(host.querySelector(".answer-clear-selection")).toBeNull();
+    expect(host.querySelector(".answer-secondary-actions")).toBeNull();
   });
 
   it("starts unanswered, steps explicitly down to zero, and submits the player's chosen number", async () => {

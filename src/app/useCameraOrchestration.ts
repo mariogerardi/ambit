@@ -291,7 +291,7 @@ export function useCameraOrchestration({
         clearHover();
         const view = globe.current?.view();
         const worldZoom = altitude();
-        if (!(motion && normalWorldView(view, worldZoom))) {
+        if (!normalWorldView(view, worldZoom)) {
           globe.current?.cancelFocus();
           globe.current?.focus(worldView(view, worldZoom), "world");
         }
