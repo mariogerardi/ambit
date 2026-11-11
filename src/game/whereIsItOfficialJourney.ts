@@ -55,7 +55,7 @@ export const OFFICIAL_LANGUAGE_NETWORKS = {
 const base = definePresentation({
   label: "Official languages",
   topic: "Language and geography",
-  instruction: "National official status counts.",
+  instruction: "",
   failure: "feedback",
   disclosure: {
     hoverNames: false,
@@ -112,7 +112,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       resolvedLabel: "Arabic · across regions",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: { type: "world" },
       allowTyping: false,
       rule: {
@@ -130,10 +130,11 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
         },
       },
       leadIn:
-        "One expression can belong to a language used far beyond one country’s borders.",
-      prompt: "Find a country where this language is official:",
+        "A language can be official in countries with very different histories.",
+      prompt:
+        "Find a country where this language has national official status.",
       explanation:
-        "Arabic connects North Africa and Southwest Asia with countries farther south, including Chad, Djibouti, Comoros and Somalia. Mali’s official languages include Hassaniya Arabic, a different variety from the Standard Arabic used in this proverb.",
+        "Arabic has official status across much of North Africa and Southwest Asia, as well as in Chad, Djibouti, Comoros and Somalia. Mali also qualifies through Hassaniya Arabic, a different variety from the Standard Arabic used in this proverb.",
       guidance: {
         hint: "This script is read from right to left. Look across North Africa and Southwest Asia.",
         assist: {
@@ -174,7 +175,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       resolvedLabel: "Portuguese · across oceans",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: { type: "world" },
       allowTyping: false,
       rule: {
@@ -190,10 +191,12 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
           translation: "Sometimes a small change makes all the difference.",
         },
       },
-      leadIn: "This language has official status on four continents.",
-      prompt: "Find a country where this language is official:",
+      leadIn:
+        "The next language spread across oceans through trade and colonization.",
+      prompt:
+        "Find a country where this language has national official status.",
       explanation:
-        "Portuguese has official status in nine countries across four continents: Portugal, Brazil, six African countries and Timor-Leste. Maritime empire and colonization carried the language across oceans; independent states later made their own choices about its place in national life.",
+        "Portuguese has official status in nine countries across four continents: Portugal, Brazil, six African countries and Timor-Leste. Colonization carried it overseas; independent countries later made their own choices about its place in national life.",
       guidance: {
         hint: "This is a Romance language whose official reach expanded far beyond Europe by sea.",
         assist: {
@@ -230,7 +233,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       resolvedLabel: "Russian · across borders",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: { type: "world" },
       allowTyping: false,
       rule: {
@@ -246,11 +249,11 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
           translation: "Not everything works on the first try.",
         },
       },
-      leadIn:
-        "This sentence uses Cyrillic, an alphabet shared by several languages.",
-      prompt: "Find a country where this language is official:",
+      leadIn: "Several languages use this alphabet. The words are the clue.",
+      prompt:
+        "Find a country where this language has national official status.",
       explanation:
-        "Russian has national legal standing beyond Russia. Belarus recognizes it alongside Belarusian, and Kyrgyzstan gives it official-language status. Kazakhstan names Kazakh as its official language and expressly provides for Russian’s official use in state and local institutions.",
+        "Russian’s official use extends beyond Russia. Belarus recognizes it alongside Belarusian, and Kyrgyzstan gives it official-language status. Kazakhstan provides for its official use in state and local institutions while naming Kazakh as its official language.",
       guidance: {
         hint: "Cyrillic is used by several languages. This Slavic language has national legal standing beyond its largest-speaking country.",
         assist: {
@@ -286,12 +289,13 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
     defineQuestion({
       ...base,
       id: "official-04-malay",
+      instruction: "Related national standards count.",
       title: "Familiar Letters, Unfamiliar Words",
       progressLabel: "Familiar Letters",
       resolvedLabel: "Malay · related national standards",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: { type: "world" },
       allowTyping: false,
       rule: {
@@ -309,10 +313,11 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
         },
       },
       leadIn:
-        "Closely related forms of this language have different national names.",
-      prompt: "Find a country where this language is official:",
+        "The next language has close relatives with different national names.",
+      prompt:
+        "Find a country where this language has national official status.",
       explanation:
-        "Malay links Malaysia, Brunei and Singapore across the South China Sea. Indonesia is also part of this network: its official language, Bahasa Indonesia, developed from Malay as a distinct national standard. Singapore recognizes Malay alongside English, Mandarin and Tamil: one small country belongs to several official-language networks.",
+        "Malay is official in Malaysia, Brunei and Singapore. Indonesia’s Bahasa Indonesia developed from Malay as a distinct national standard and is accepted here too. Singapore also recognizes English, Mandarin and Tamil, so one country can belong to several official-language networks.",
       guidance: {
         hint: "Think of maritime Southeast Asia and closely related languages with different national names.",
         assist: {
@@ -357,7 +362,7 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       resolvedLabel: "Guaraní · living recognition",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: { type: "world" },
       allowTyping: false,
       rule: {
@@ -374,10 +379,11 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
         },
       },
       leadIn:
-        "This final expression belongs to a language whose story long predates today’s borders.",
-      prompt: "Find a country where this language is official:",
+        "Our final stop looks at how countries recognize Indigenous languages.",
+      prompt:
+        "Find a country where this language has national official status.",
       explanation:
-        "Guaraní joins two neighboring countries through different national arrangements. Paraguay recognizes it alongside Spanish; Bolivia includes it among its constitutionally official Indigenous languages. An enduring spoken tradition is reflected in both a bilingual national framework and a much larger multilingual one.",
+        "Paraguay recognizes Guaraní alongside Spanish; Bolivia includes it among its constitutionally official Indigenous languages. The same language is part of a bilingual national framework in one country and a much larger multilingual one in its neighbor.",
       guidance: {
         hint: "This is an Indigenous language of South America, used in everyday life and recognized by national law.",
         assist: {
@@ -426,6 +432,6 @@ export const WHERE_IS_IT_OFFICIAL_JOURNEY: Journey = {
       url: assets + "SOURCES.md",
     },
     caption:
-      "Five expressions connect places through regional ties, ocean crossings, neighboring states and living Indigenous traditions. Each chosen country is one doorway into a wider linguistic geography.",
+      "These five languages cross borders in different ways: regional ties, colonization, neighboring states, related national standards and Indigenous traditions. Official status reflects a country’s history and institutions. It does not mean everyone speaks the same language, or that a language stops at a border.",
   },
 };

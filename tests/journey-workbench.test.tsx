@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { JourneyWorkbench } from "../review/JourneyWorkbench";
+import { JourneyCatalogControls } from "../review/JourneyCatalogControls";
 import { newestJourney } from "../src/game/journeyRegistry";
 import { AppMenu } from "../src/app/AppMenu";
 import { POWER_TO_THE_PEOPLE_JOURNEY as template } from "../src/game/powerToThePeopleJourney";
@@ -27,18 +28,81 @@ async function click(text: string) {
   expect(button).toBeDefined();
   await act(async () => button.click());
 }
-async function openDisclosure(text: string) {
-  const summary = [...host.querySelectorAll("summary")].find(
-    (item) => item.textContent?.trim() === text,
-  )!;
-  expect(summary).toBeDefined();
-  await act(async () => summary.click());
-}
-it("keeps Workbench access authorized and outside personal account navigation", async () => {
+it("previews catalog edits before an explicit write and keeps removal separate from deleting source", async () => {
+  let registered = false;
+  const fetch = vi.fn(async (url: string, options?: RequestInit) => {
+    const query = options?.body
+      ? JSON.parse(options.body as string)
+      : Object.fromEntries(new URL(url, "http://localhost").searchParams);
+    if (query.action === "status")
+      return Response.json({ registered, canRemove: registered });
+    if (options?.method === "POST") registered = query.action === "add";
+    return Response.json({
+      action: query.action,
+      module: "testJourney.ts",
+      route: "/journey/test",
+      title: "Test Journey",
+      id: "test-v1",
+      revision: "revision",
+      files: [],
+    });
+  });
+  vi.stubGlobal("fetch", fetch);
+  await act(async () =>
+    root.render(<JourneyCatalogControls filename="testJourney.ts" />),
+  );
+  const details = host.querySelector("details")!;
+  await act(async () => {
+    details.open = true;
+    details.dispatchEvent(new Event("toggle"));
+  });
+  expect(host.textContent).toContain("Not registered");
+  await click("Preview registration");
+  expect(
+    fetch.mock.calls.some(([, options]) => options?.method === "POST"),
+  ).toBe(false);
+  await click("Cancel");
+  expect(registered).toBe(false);
+  await click("Preview registration");
+  await click("Add to catalog");
+  expect(host.textContent).toContain("Automatic rotation is off");
+  await click("Preview removal");
+  expect(registered).toBe(true);
+  await click("Remove from catalog");
+  expect(registered).toBe(false);
+  expect(host.textContent).toContain("Source kept for review");
+});
+it("shows committed catalog entries without offering unsafe removal", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      Response.json({
+        registered: true,
+        canRemove: false,
+        route: "/journey/test",
+        reason: "Existing assignments and saves must be retained.",
+      }),
+    ),
+  );
+  await act(async () =>
+    root.render(<JourneyCatalogControls filename="testJourney.ts" />),
+  );
+  await act(async () => {
+    const details = host.querySelector("details")!;
+    details.open = true;
+    details.dispatchEvent(new Event("toggle"));
+  });
+  expect(host.textContent).toContain("Registered");
+  expect(host.textContent).toContain("Existing assignments and saves");
+  expect(host.textContent).not.toContain("Preview removal");
+});
+it("keeps administration access authorized throughout the app, including Your Space", async () => {
   for (const [admin, path, visible] of [
     [false, "/", false],
+    [false, "/account?tab=profile", false],
     [true, "/", true],
-    [true, "/account?tab=profile", false],
+    [true, "/account", true],
+    [true, "/account?tab=profile", true],
   ] as const) {
     await act(async () =>
       root.render(
@@ -52,6 +116,9 @@ it("keeps Workbench access authorized and outside personal account navigation", 
       ),
     );
     await click("Open menu");
+    expect(!!host.querySelector('[data-dd-action-name="Menu Admin"]')).toBe(
+      visible,
+    );
     expect(!!host.querySelector('a[href="/review/journeys.html"]')).toBe(
       visible,
     );
@@ -72,116 +139,35 @@ it("chooses the newest catalog authoring date regardless of catalog order or rot
   expect(newestJourney(entries)?.id).toBe("newest");
   expect(newestJourney(entries.reverse())?.id).toBe("newest");
 });
-it("previews an unregistered source without writing and commits only from its reviewed action", async () => {
-  const preview = {
-    title: journey.title,
-    id: journey.id,
-    module: "powerToThePeopleJourney.ts",
-    route: "/journey/workbench-test",
-    revision: "reviewed",
-    files: ["src/game/journeys.ts"],
-  };
-  const request = vi
-    .fn<typeof fetch>()
-    .mockResolvedValue(new Response(JSON.stringify(preview), { status: 200 }));
-  await act(async () =>
-    root.render(
-      <JourneyWorkbench
-        journey={journey}
-        filename={preview.module}
-        modules={[preview.module]}
-        seed={1}
-        request={request}
-      />,
-    ),
-  );
-  expect(request).not.toHaveBeenCalled();
-  expect(host.textContent).toContain("held out of automatic Daily selection");
-  await openDisclosure("Advanced development tools");
-  await openDisclosure("Catalog registration");
-  await click("Preview registration");
-  expect(request).toHaveBeenCalledWith(
-    expect.stringContaining("?module=powerToThePeopleJourney.ts"),
-    undefined,
-  );
-  expect(host.textContent).toContain("src/game/journeys.ts");
-  expect(request).toHaveBeenCalledTimes(1);
-  request.mockResolvedValue(
-    new Response(JSON.stringify(preview), { status: 200 }),
-  );
-  await click("Register in local catalog");
-  expect(request.mock.calls[1][1]).toMatchObject({
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-  expect(JSON.parse(request.mock.calls[1][1]!.body as string)).toMatchObject({
-    revision: "reviewed",
-    route: preview.route,
-  });
-  expect(host.textContent).toContain("Registered in the local catalog");
-});
-it("shows audit errors and never offers a commit after a failed preview", async () => {
-  const request = vi.fn<typeof fetch>().mockResolvedValue(
-    new Response(
-      JSON.stringify({
-        error: "Fix the Journey audit before registering: missing target",
-      }),
-      { status: 400 },
-    ),
+it("switches Journey through app navigation while keeping technical URL context", async () => {
+  const navigate = vi.fn();
+  history.replaceState(
+    null,
+    "",
+    "/review/journeys.html?module=powerToThePeopleJourney.ts&question=old&state=missed&theme=dusk",
   );
   await act(async () =>
     root.render(
       <JourneyWorkbench
         journey={journey}
         filename="powerToThePeopleJourney.ts"
-        modules={[]}
-        seed={1}
-        request={request}
+        modules={["powerToThePeopleJourney.ts", "bareMinimumJourney.ts"]}
+        seed={17}
+        onNavigate={navigate}
       />,
     ),
   );
-  await openDisclosure("Advanced development tools");
-  await openDisclosure("Catalog registration");
-  await click("Preview registration");
-  expect(host.querySelector('[role="alert"]')?.textContent).toContain(
-    "missing target",
+  const select = host.querySelector<HTMLSelectElement>(
+    'select[name="module"]',
+  )!;
+  await act(async () => {
+    select.value = "bareMinimumJourney.ts";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(navigate).toHaveBeenCalledWith(
+    "/review/journeys.html?module=bareMinimumJourney.ts&theme=dusk&seed=17",
   );
-  expect(host.textContent).not.toContain("Register in local catalog");
-  expect(request).toHaveBeenCalledTimes(1);
-});
-
-it("switches Journey immediately from the visible selector and submits the current seed", async () => {
-  const submit = vi
-    .spyOn(HTMLFormElement.prototype, "requestSubmit")
-    .mockImplementation(() => {});
-  try {
-    await act(async () =>
-      root.render(
-        <JourneyWorkbench
-          journey={journey}
-          filename="powerToThePeopleJourney.ts"
-          modules={["powerToThePeopleJourney.ts", "bareMinimumJourney.ts"]}
-          seed={17}
-          request={vi.fn()}
-        />,
-      ),
-    );
-    const select = host.querySelector<HTMLSelectElement>(
-      'select[name="module"]',
-    )!;
-    expect(select.closest("details")).toBeNull();
-    await act(async () => {
-      select.value = "bareMinimumJourney.ts";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    expect(submit).toHaveBeenCalledOnce();
-    expect([...new FormData(select.form!).entries()]).toEqual([
-      ["module", "bareMinimumJourney.ts"],
-      ["seed", "17"],
-    ]);
-  } finally {
-    submit.mockRestore();
-  }
+  expect(host.querySelector("form")).toBeNull();
 });
 
 it("sorts Journey sources by their displayed titles", async () => {
@@ -198,7 +184,7 @@ it("sorts Journey sources by their displayed titles", async () => {
           "bareMinimumJourney.ts",
         ]}
         seed={1}
-        request={vi.fn()}
+        onNavigate={vi.fn()}
       />,
     ),
   );
@@ -206,6 +192,7 @@ it("sorts Journey sources by their displayed titles", async () => {
     ...host.querySelectorAll<HTMLSelectElement>('select[name="module"] option'),
   ];
   expect(options.map((option) => option.textContent)).toEqual([
+    "Choose a Journey",
     "A Continent in Pieces",
     "Bare Minimum",
     "How America Adds Up",
@@ -214,47 +201,27 @@ it("sorts Journey sources by their displayed titles", async () => {
   ]);
 });
 
-it("opens a recipe sandbox without offering catalog registration", async () => {
-  const submit = vi
-    .spyOn(HTMLFormElement.prototype, "requestSubmit")
-    .mockImplementation(() => {});
-  try {
-    await act(async () =>
-      root.render(
-        <JourneyWorkbench
-          journey={{ ...journey, title: "Capital pin" }}
-          filename="powerToThePeopleJourney.ts"
-          modules={["powerToThePeopleJourney.ts"]}
-          recipes={[
-            { id: "recipe:pin", title: "Capital pin" },
-            { id: "recipe:map-multiple", title: "Country pair" },
-          ]}
-          recipeId="pin"
-          seed={17}
-          request={vi.fn()}
-        />,
-      ),
-    );
-    expect(host.textContent).not.toContain("Catalog registration");
-    expect(
-      host.querySelector('option[value="powerToThePeopleJourney.ts"]')
-        ?.textContent,
-    ).toBe("Power to the People");
-    await openDisclosure("Advanced development tools");
-    const select = host.querySelector<HTMLSelectElement>(
-      'select[name="recipe"]',
-    )!;
-    expect(select.value).toBe("pin");
-    await act(async () => {
-      select.value = "map-multiple";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    expect(submit).toHaveBeenCalledOnce();
-    expect([...new FormData(select.form!).entries()]).toEqual([
-      ["recipe", "map-multiple"],
-      ["seed", "17"],
-    ]);
-  } finally {
-    submit.mockRestore();
-  }
+it("keeps recipe previews available by URL without exposing development or catalog controls", async () => {
+  await act(async () =>
+    root.render(
+      <JourneyWorkbench
+        journey={{ ...journey, title: "Capital pin" }}
+        filename="powerToThePeopleJourney.ts"
+        modules={["powerToThePeopleJourney.ts"]}
+        recipeId="pin"
+        seed={17}
+        onNavigate={vi.fn()}
+      />,
+    ),
+  );
+  expect(
+    host.querySelector('select[name="module"]')?.getAttribute("value"),
+  ).toBeNull();
+  expect(
+    host.querySelector('select[name="module"] option:checked')?.textContent,
+  ).toBe("Choose a Journey");
+  expect(
+    host.querySelectorAll("button, details, input:not([type=hidden])"),
+  ).toHaveLength(0);
+  expect(host.textContent).not.toContain("Catalog registration");
 });

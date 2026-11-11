@@ -92,6 +92,7 @@ describe("Pacific Journey", () => {
     let state = reduce(
       at(0),
       { type: "select", id: "wurl:JPN" },
+      { type: "submit" },
       { type: "next" },
     );
     state = reduce(

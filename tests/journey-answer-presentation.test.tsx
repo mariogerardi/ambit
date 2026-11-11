@@ -232,10 +232,14 @@ describe("Journey answer roles across controls", () => {
 
   it("does not select Spain with Portugal or grade Canada for an ocean answer", () => {
     const europe = round("same-hour-different-worlds", "same-hour-q2");
-    const selected = europe.reduce(europe.start, {
-      type: "select",
-      id: "wurl:PRT",
-    });
+    const selected = europe.reduce(
+      europe.start,
+      {
+        type: "select",
+        id: "wurl:PRT",
+      },
+      { type: "submit" },
+    );
     expect(europe.view(selected).states["clue-part:wurl:ESP"]).toBe("hinted");
     expect(selected.phase).toBe("feedback");
     expect(europe.view(selected).states["wurl:PRT"]).toBe("incorrect");

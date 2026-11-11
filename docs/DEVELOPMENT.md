@@ -77,41 +77,63 @@ Cognito branding assets; it submits no credentials. For Journey map review, open
 WebGL globe in isolated local review, preserving the real account session for the
 current origin. Without an account it identifies itself as a local workbench;
 it grants no server permissions. It starts the newest catalog Journey by `addedAt` in isolated review;
-use the always-visible **Journey** selector to choose another source. The Admin library’s
+use **Change Journey** to choose another source. The Admin library’s
 **Review Journey** action opens registered content. Review routes use
 `/journey/<slug>?review=1` and separate in-memory state, with question selection,
 help, evaluated sample reveals and completion. Normal practice omits the query
-flag; both are separate from saved Daily attempts. Non-read API requests are
-blocked, and the fixture grants no server
-permissions. Review entry points stay
-outside the production bundle. See [Services](SERVICES.md) for release steps.
+flag; both are separate from saved Daily attempts. Local Review grants no server
+permissions; its source discovery stays outside the production bundle. See [Services](SERVICES.md) for release steps.
 
-During local development, administrators can open **Journey Workbench** from the global hamburger menu outside Your space, or from Admin → Utilities. For registered or unregistered Journey source, use
+During local development, administrators can open **Journey Workbench** from the global hamburger menu, including Your Space, or from Admin → Utilities. For registered or unregistered Journey source, use
 the shared workbench:
 `http://127.0.0.1:5173/review/journeys.html?module=imLikeABirdJourney.ts`.
-The review panel keeps Journey selection visible; **Inspect** exposes question and preview-state selectors. Changing the Journey selector opens that source immediately; **Advanced development tools** contains **Apply seed**, mechanic recipes and **Catalog registration**. **Advanced review tools** contains restart and capture tools. Navigation leaves the review document, restoring the normal app and its
-account session. Use the same origin as the signed-in app (`localhost` and
+Review opens directly into question inspection. The control rail identifies the Journey,
+shows all question stops, and provides buttons for Question, available Hint/Assist,
+and evaluated outcomes. **Change Journey** includes unregistered local sources;
+registered Admin Review offers the same navigation over its catalog. **Reset**
+starts the selected question fresh. **Hide tools** only changes visibility, retaining
+the displayed state and camera. The canvas spans the workspace behind both panels;
+a transparent layout frame fits active geography within the clear center. Source
+switching and navigation to Admin/Schedule stay in the same app, account session
+and mounted WebGL globe. The standalone URL uses the normal app bootstrap. Use the same origin as the signed-in app (`localhost` and
 `127.0.0.1` have separate browser storage).
+The collapsed **Catalog** section previews and applies local registration edits.
+New entries stay out of automatic rotation. Removal keeps the source and is
+available only for held entries absent from both `HEAD` and `origin/main` catalogs;
+missing history blocks removal. Committed Journeys require an explicit retirement
+change that handles assignments and save recovery. Catalog edits do not publish
+assignments or deploy; production scheduling requires matching released catalogs.
 Choose another `*Journey.ts` source from its selector; no registration or custom
 React fixture is required. It runs the production App, globe adapter and camera
 orchestration with review state in memory. Player progress storage, account sync,
-legacy packs and schedule requests are disabled; non-read application API requests are blocked; account token renewal remains available.
+legacy packs and schedule requests are disabled while local Review is active.
+Persistence and account sync resume on leaving Review; no document-wide fetch
+guard remains. Account token renewal stays available.
 Old Bird, Made in China and Beasts on Banners review links redirect here.
 
-Use `question=<question-id>&state=<stage>&seed=17&theme=ocean` to reproduce a state.
+Review URLs accept `question=<question-id>&state=<stage>&seed=17&theme=ocean`.
 Stages are `play`, `hint`, `assist`, `correct`, `missed`, `completion`, and
-`completion-mixed`, plus `partial` for two-country partial credit and lower distance-pin tiers. The review buttons update the URL. The seed fixes shuffled
-inputs; samples use real reducer submissions and fail explicitly if unavailable.
-Capture current state downloads the actual response/receipts as JSON; restore
-accepts only the matching Journey ID, answer-contract revision and valid state.
-Captures never enter player saves.
+`completion-mixed`; `partial` prepares one-of-two partial credit or the original
+lower pin tier. `tier-1`, `tier-2`, etc. prepare specific lower pin, numeric-estimate
+and compass-bearing bands using actual graded inputs. Unavailable examples fail
+explicitly; drawing-specific intermediate outcomes can be checked with actual
+player inputs. Seeds remain URL-only technical controls for initial ordering.
 
-The **Mechanic recipe** selector opens a one-question sandbox through the same
-App/globe adapter, with normal help, evaluated reveals and completion. Recipe
-sandboxes cannot be registered in the catalog. **Clue and reveal** compares the
-player’s starting information with the answer and explanation. Its editorial
-notes flag answer-only feedback, near-duplicate clues/reveals, long headings and
-ambiguous capital-pin wording; they are suggestions, not grading failures.
+**Journey completion** is separate from question states. Its all-correct and mixed
+examples retain the selected question; **Back to question** restores its prior
+response/help state during the visit. Copy comparison has been removed; editorial
+lint remains in the Journey authoring audit. Fast preview operations keep their
+current content and status visible; progress appears only after 200 ms. Loading
+illustration styles are bundled with the component as well as the critical boot shell.
+
+Both entry points update URL question/stage context after inspector and player
+actions. These URLs reopen an equivalent preview stage, not the exact coordinates,
+drawing or answer history of a manual response. The technical `captureReview` and
+`restoreReview` helpers retain actual response/receipts and validate Journey ID,
+answer-contract revision and state; they have no regular Review controls and never
+write player saves. Recipe sandboxes remain available through `?recipe=<id>` URLs
+from the capability report, without a recipe selector in the review interface.
+The local Workbench omits report submission to keep review activity isolated.
 
 Run `npm run check:journey -- --capabilities` (add `--json` for structured output)
 for current reuse evidence, required data, limitations, matching examples, recipe
@@ -120,16 +142,15 @@ paired copy and demonstrated lifecycle states. Internal modes remain explicitly
 identified as requiring a product decision. Scene/reducer evidence does not
 certify facts, camera fit, typography or GPU rendering.
 
-For an unregistered source, expand **Catalog registration**, choose its route and
-select **Preview registration**. The workbench audits the Journey and lists the
-local source, route catalog, generated metadata and catalog documentation edits.
-**Register in local catalog** applies those edits with `dailyEligible: false`.
-A stale preview is rejected; preview again after editing the source. Registration
-does not assign a date, commit, merge or deploy. Follow the staged catalog/backend
-release procedure in [Hosting](HOSTING.md#journey-catalog-activation) before
-activating it. These controls and their same-origin loopback write endpoint exist
-only on the Vite development server, not in the hosted production app. Player
-progress, account sync and schedule writes remain disabled in review.
+Catalog registration is repository maintenance, outside the Review interface.
+The local-only `/__journey-workbench/register` endpoint remains available to
+implementation tooling: GET with `module` and `route` previews audited edits;
+POST with `module`, `route` and the returned `revision` applies that exact preview.
+It updates the source, route catalog, generated metadata and catalog documentation
+with `dailyEligible: false`; stale previews are rejected. Registration does not
+assign a date, commit, merge or deploy. Follow [Hosting](HOSTING.md#journey-catalog-activation)
+before activation. This same-origin loopback endpoint exists only on the Vite
+development server. Player progress, account sync and schedule writes remain disabled.
 
 Reload a state URL for each viewport or theme;
 use reduced-motion emulation for animated compositions. These tools prepare

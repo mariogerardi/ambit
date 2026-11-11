@@ -14,6 +14,7 @@ import {
   captureReview,
   restoreReview,
   reviewState,
+  reviewOutcomes,
 } from "../src/app/journeyReview";
 import { journeyPoints } from "../src/game/points";
 import { compileQuestionScenes } from "../src/game/scenes";
@@ -198,6 +199,15 @@ describe("live authoring evidence", () => {
         "completion",
         "completion-mixed",
       ] as const) {
+        if (
+          stage === "missed" &&
+          !reviewOutcomes(question).some((outcome) => outcome.stage === stage)
+        ) {
+          await expect(
+            reviewState(journey, context, 0, stage, 17),
+          ).rejects.toThrow(/fully missed example is unavailable/);
+          continue;
+        }
         const game = await reviewState(journey, context, 0, stage, 17);
         expect(restoreReview(journey, captureReview(journey, game))).toEqual(
           game,
@@ -215,7 +225,7 @@ describe("live authoring evidence", () => {
       } else
         await expect(
           reviewState(journey, context, 0, "partial"),
-        ).rejects.toThrow(/No partial/);
+        ).rejects.toThrow(/outcome is unavailable/);
     },
   );
   it("flags answer-only headings/reveals and repeated clues without turning editorial advice into an audit failure", () => {

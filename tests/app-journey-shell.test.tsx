@@ -477,7 +477,7 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
     expect(host.textContent).toContain("Well spotted.");
   });
 
-  it("lets Island Instincts use either country taps or six immediate choices without making the clue answerable", async () => {
+  it("lets Island Instincts confirm country taps or named choices without making the clue answerable", async () => {
     history.replaceState(null, "", "/journey/island-instincts");
     await mount();
     const canvas = host.querySelector("canvas");
@@ -500,6 +500,8 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
         probe.props!.regions.find((r) => r.id === "wurl:IND")!,
       ),
     );
+    expect(host.querySelector(".mode-incoming .round-feedback")).toBeNull();
+    await click("Submit answer");
     expect(
       host.querySelector(".mode-incoming .round-feedback")!.textContent,
     ).toContain("Correct answer: India");
@@ -520,6 +522,8 @@ describe("app journey shell (DOM only; no browser or WebGL)", () => {
       ),
     ].find((b) => b.textContent?.includes("Equatorial Guinea"))!;
     await act(async () => answer.click());
+    expect(host.querySelector(".mode-incoming .round-feedback")).toBeNull();
+    await click("Submit answer");
     expect(
       host.querySelector(".mode-incoming .round-feedback")!.textContent,
     ).toContain("Correct answer: Equatorial Guinea");

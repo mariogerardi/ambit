@@ -138,6 +138,10 @@ interface Props {
   theme?: GlobeTheme;
   palette?: ThemeId;
   compact?: boolean;
+  /** Keep authored framing fitted when Review's reserved viewport changes size. */
+  fitToContainer?: boolean;
+  /** Transparent layout frame used for fitting while the canvas stays full width. */
+  frameSelector?: string;
   expanded?: boolean;
   visualScale?: number;
   onInteraction?(): void;
@@ -233,20 +237,30 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       height: window.innerHeight,
       frameHeight: window.innerHeight,
       frameTop: 0,
+      frameWidth: window.innerWidth,
+      frameLeft: 0,
     });
     const readViewport = useCallback(() => {
       const canvas = host.current?.getBoundingClientRect();
       if (!canvas?.width || !canvas.height) return;
-      const frame = props.compact
+      const currentProps = current.current;
+      const frame = currentProps.compact
         ? host.current?.closest(".game-scene")?.getBoundingClientRect()
-        : undefined;
+        : currentProps.frameSelector
+          ? host.current
+              ?.closest(".experience")
+              ?.querySelector(currentProps.frameSelector)
+              ?.getBoundingClientRect()
+          : undefined;
       return {
         width: canvas.width,
         height: canvas.height,
         frameHeight: frame?.height ?? canvas.height,
         frameTop: frame ? frame.top - canvas.top : 0,
+        frameWidth: frame?.width ?? canvas.width,
+        frameLeft: frame ? frame.left - canvas.left : 0,
       };
-    }, [props.compact]);
+    }, []);
     const [sceneId] = useState(() => crypto.randomUUID());
     const [ready, setReady] = useState(false),
       [texture, setTexture] = useState<string>();
@@ -514,6 +528,14 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       });
       if (host.current) {
         observer.observe(host.current);
+        const frame = props.frameSelector
+          ? host.current
+              .closest(".experience")
+              ?.querySelector(props.frameSelector)
+          : undefined;
+        if (frame) observer.observe(frame);
+        const viewport = readViewport();
+        if (viewport) setSize(viewport);
         if (props.compact && host.current.parentElement)
           observer.observe(host.current.parentElement);
       }
@@ -522,7 +544,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
         image.onload = null;
         image.onerror = null;
       };
-    }, [props.theme, props.compact, readViewport]);
+    }, [props.theme, props.compact, props.frameSelector, readViewport]);
     useEffect(() => {
       if (!globe.current) return;
       const g = globe.current,
@@ -590,7 +612,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       keyLight.position.copy(g.camera().position);
       g.lights([new AmbientLight(0xffffff, 1.6), keyLight]);
       previousViewport.current = {
-        width: viewport.width,
+        width: viewport.frameWidth,
         height: viewport.frameHeight,
       };
       const initial = current.current.initialFocus;
@@ -600,10 +622,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           altitude:
             current.current.compact &&
             normalWorldView(initial, worldAltitude(innerWidth, innerHeight))
-              ? worldAltitude(viewport.width, viewport.frameHeight, true)
+              ? worldAltitude(viewport.frameWidth, viewport.frameHeight, true)
               : (initial?.altitude ??
                 worldAltitude(
-                  viewport.width,
+                  viewport.frameWidth,
                   viewport.frameHeight,
                   current.current.compact,
                 )),
@@ -706,25 +728,33 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
       ).fov;
       camera.updateProjectionMatrix();
       if (
-        props.compact &&
-        (previous.width !== viewport.width ||
+        (props.compact || props.fitToContainer) &&
+        (previous.width !== viewport.frameWidth ||
           previous.height !== viewport.frameHeight)
       ) {
         resizing.current.adapt(
           globe.current,
           previous,
-          { width: viewport.width, height: viewport.frameHeight },
+          { width: viewport.frameWidth, height: viewport.frameHeight },
           travel.current.active ||
             flyover.current.active ||
             fidget.current.active,
         );
       }
       previousViewport.current = {
-        width: viewport.width,
+        width: viewport.frameWidth,
         height: viewport.frameHeight,
       };
       refreshLabels();
-    }, [size, ready, props.compact, props.active, readViewport, refreshLabels]);
+    }, [
+      size,
+      ready,
+      props.compact,
+      props.fitToContainer,
+      props.active,
+      readViewport,
+      refreshLabels,
+    ]);
     useEffect(() => {
       if (!ready || !globe.current) return;
       const syncRendering = () => {
@@ -763,7 +793,7 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           const viewport = readViewport() ?? size;
           const scale =
             worldAltitude(
-              viewport.width,
+              viewport.frameWidth,
               viewport.frameHeight,
               !!current.current.compact,
             ) / 1.65;
@@ -795,7 +825,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
           const fitAltitude = () =>
             focusAltitude(
               altitude,
-              readViewport() ?? size,
+              {
+                width: (readViewport() ?? size).frameWidth,
+                frameHeight: (readViewport() ?? size).frameHeight,
+              },
               !!current.current.compact,
               fitToViewport,
             );
@@ -837,7 +870,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               ...stop,
               altitude: focusAltitude(
                 stop.altitude ?? 0.65,
-                viewport,
+                {
+                  width: viewport.frameWidth,
+                  frameHeight: viewport.frameHeight,
+                },
                 !!current.current.compact,
               ),
             })),
@@ -1377,8 +1413,10 @@ export const GlobeView = forwardRef<GlobeHandle, Props>(
               viewportProjection(size.height, size.frameHeight, size.frameTop)
                 .offsetY,
             ]
-          : [size.width > 900 ? 155 : 0, size.width < 700 ? -55 : 0],
-      [size, props.compact],
+          : props.frameSelector
+            ? [size.frameLeft + (size.frameWidth - size.width) / 2, 0]
+            : [size.width > 900 ? 155 : 0, size.width < 700 ? -55 : 0],
+      [size, props.compact, props.frameSelector],
     );
     const constructionPointer = (
       event: React.PointerEvent<HTMLDivElement>,

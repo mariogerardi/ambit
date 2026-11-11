@@ -173,7 +173,7 @@ export const HOW_AMERICA_ADDS_UP_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "ids", ids: states.filter((s) => s !== "wurl:USA-HI") },
-      commitment: "immediate",
+      commitment: "submit",
       importedRegions: US_STATES,
       rule: { type: "region-ids", ids: ["wurl:USA-NY"], match: "any" },
       guidance: {
@@ -217,7 +217,7 @@ export const HOW_AMERICA_ADDS_UP_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "ids", ids: states },
-      commitment: "immediate",
+      commitment: "submit",
       importedRegions: US_STATES,
       map: {
         ...base.map,

@@ -22,6 +22,12 @@ describe("safe question authoring contracts", () => {
     for (const journey of JOURNEYS)
       expect(() => validateJourneyContracts(journey)).not.toThrow();
   });
+  it("keeps all published single-country picks editable until submission", () => {
+    for (const journey of JOURNEYS)
+      for (const question of journey.rounds)
+        if (question.mode === "map-single")
+          expect(question.commitment, question.id).toBe("submit");
+  });
   it("rejects invalid in-place revisions and unrelated legacy receipt labels", () => {
     expect(() =>
       validateJourneyContracts({ ...ANDES_JOURNEY, saveRevision: 0 }),

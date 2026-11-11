@@ -188,13 +188,16 @@ export function correctAnswerSummary(
     "land-path",
   ].includes(question.mode);
   return {
-    label: alternatives
-      ? values.length > 1
-        ? "One correct set"
-        : "One correct answer"
-      : values.length > 1
-        ? "Correct answers"
-        : "Correct answer",
+    label:
+      question.textClue && game.answers.at(-1)?.correct
+        ? "Your answer"
+        : alternatives
+          ? values.length > 1
+            ? "One correct set"
+            : "One correct answer"
+          : values.length > 1
+            ? "Correct answers"
+            : "Correct answer",
     value: values.join(ordered ? " → " : ", "),
   };
 }

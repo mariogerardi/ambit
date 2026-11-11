@@ -42,11 +42,11 @@ describe("Journey visual grammar", () => {
     for (const id of ["wurl:CHL", "wurl:PER", "wurl:BOL", "wurl:BRA"])
       expect(regionBorderVisible(context.targets.get(id)!, view)).toBe(true);
   });
-  it("uses the same open search surface for both flag recall questions", () => {
+  it("uses the same selectable country field for both flag recall questions", () => {
     for (const id of ["canada-maple-flag-v1", "pacific-rising-sun"]) {
       const { scene } = question(id);
-      expect(scene().states["wurl:JPN"]).toBe("surface");
-      expect(scene().states["wurl:CAN"]).toBe("surface");
+      expect(scene().states["wurl:JPN"]).toBe("selectable");
+      expect(scene().states["wurl:CAN"]).toBe("selectable");
     }
   });
   it("keeps a reference inspectable but ineligible, including old pending selections", () => {
@@ -205,7 +205,9 @@ describe("Journey visual grammar", () => {
   });
   it("shares one status symbol across a clue fragment and its owner", () => {
     const { reduce, scene } = question("island-owner-bioko");
-    const result = scene(reduce({ type: "select", id: "wurl:GNQ" }));
+    const result = scene(
+      reduce({ type: "select", id: "wurl:GNQ" }, { type: "submit" }),
+    );
     expect(result.states["clue-part:wurl:GNQ"]).toBe("correct");
     expect(result.states["wurl:GNQ"]).toBe("correct");
     expect(

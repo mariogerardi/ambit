@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import type { RegionFeature } from "../geography/types";
 import { COUNTRY_FACTS } from "../game/countryFacts";
 import { loadJourney } from "../game/journeyRegistry";
@@ -47,6 +47,7 @@ export function useJourneyContent({
   published,
   retry,
   reviewJourney,
+  retainWhileLoading = false,
 }: {
   mode: AppMode;
   journeyId?: string;
@@ -56,6 +57,7 @@ export function useJourneyContent({
   published: PublishedPuzzle[];
   retry: number;
   reviewJourney?: Journey;
+  retainWhileLoading?: boolean;
 }) {
   const [loaded, setLoaded] = useState<{
     journey: Journey;
@@ -64,7 +66,13 @@ export function useJourneyContent({
   const [journeyError, setJourneyError] = useState("");
   const wantsJourney = mode === "daily" || mode === "practice";
   const journey =
-    loaded && loaded.journey.id === journeyId ? loaded.journey : emptyJourney;
+    reviewJourney && reviewJourney.id === journeyId && loaded?.runtime
+      ? reviewJourney
+      : loaded &&
+          (loaded.journey.id === journeyId ||
+            (retainWhileLoading && wantsJourney))
+        ? loaded.journey
+        : emptyJourney;
   const isJourney = wantsJourney && journey !== emptyJourney;
   useEffect(() => {
     if (!wantsJourney || !journeyId) return;
@@ -79,7 +87,7 @@ export function useJourneyContent({
           : loadJourney(journeyId);
     void Promise.all([content, import("../game/runtime")])
       .then(([journey, runtime]) => {
-        if (live) setLoaded({ journey, runtime });
+        if (live) startTransition(() => setLoaded({ journey, runtime }));
       })
       .catch(() => {
         if (live)
@@ -142,16 +150,16 @@ export function useJourneyContent({
   }, [mode, ready, regions, contexts, warmJourneyId, published]);
   const warmRegions = useMemo(
     () =>
-      loaded
+      journey !== emptyJourney || loaded
         ? [
             ...new Map(
-              loaded.journey.rounds
+              (journey !== emptyJourney ? journey : loaded!.journey).rounds
                 .flatMap((question) => question.importedRegions ?? [])
                 .map((region) => [region.id, region]),
             ).values(),
           ]
         : undefined,
-    [loaded?.journey],
+    [loaded?.journey, journey],
   );
   return {
     loaded,

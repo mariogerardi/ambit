@@ -39,7 +39,7 @@ export function usePlayerProgress({
       ? readSave(progressKey(DAILY_KEY, subject), emptyDaily, validDaily)
       : { value: emptyDaily, available: true },
   );
-  const [studyStore] = useState(() =>
+  const [studyStore, setStudyStore] = useState(() =>
     enabled ? createStudySave(subject) : undefined,
   );
   const [storedDaily, setDaily] = useState(dailyRead.value);
@@ -58,11 +58,19 @@ export function usePlayerProgress({
   );
   const cloudSave = useProgressSync(
     subject,
-    dailyLoaded ? dailyStore.current : undefined,
-    studyStore,
+    enabled && dailyLoaded ? dailyStore.current : undefined,
+    enabled ? studyStore : undefined,
     accessToken,
   );
   const canSave = dailySaveOk && studySaveOk;
+  useEffect(() => {
+    if (!enabled || studyStore) return;
+    const store = createStudySave(subject);
+    setStudy(store.load());
+    setStudySaveOk(store.writable);
+    if (store.recovered) setSaveRecovered(true);
+    setStudyStore(store);
+  }, [enabled, studyStore, subject]);
   useEffect(() => {
     if (!canSave) reportFailure("local save");
   }, [canSave]);
@@ -76,18 +84,18 @@ export function usePlayerProgress({
     setDailyLoaded(true);
   }, [enabled, catalogReady, dailyLoaded, catalog, subject]);
   useEffect(() => {
-    if (!dailyLoaded || !dailyStore.current) return;
+    if (!enabled || !dailyLoaded || !dailyStore.current) return;
     const saved = dailyStore.current.save(daily);
     setDailySaveOk(saved.ok);
     if (!dailyStore.current.equivalent(saved.value, storedDaily))
       setDaily(saved.value);
-  }, [daily, storedDaily, dailyLoaded]);
+  }, [enabled, daily, storedDaily, dailyLoaded]);
   useEffect(() => {
-    if (!studyStore) return;
+    if (!enabled || !studyStore) return;
     const saved = studyStore.save(study);
     setStudySaveOk(saved.ok);
     if (!studyStore.equivalent(saved.value, study)) setStudy(saved.value);
-  }, [study, studyStore]);
+  }, [enabled, study, studyStore]);
   useEffect(() => {
     if (!enabled || !studyStore) return;
     const change = (event: Event) => {
@@ -128,14 +136,21 @@ export function usePlayerProgress({
     };
   }, [enabled, studyStore]);
   const retrySaving = useCallback(() => {
+    if (!enabled) return;
     if (studyStore) setStudySaveOk(studyStore.save(study).ok);
     if (dailyStore.current) setDailySaveOk(dailyStore.current.save(daily).ok);
     cloudSave.retry();
-  }, [studyStore, study, daily, cloudSave.retry]);
+  }, [enabled, studyStore, study, daily, cloudSave.retry]);
   const resetAttempt = useCallback(
     (date: string) => {
       const store = dailyStore.current;
-      if (!subject || !store || !cloudSave.hydrated || date !== localDateKey())
+      if (
+        !enabled ||
+        !subject ||
+        !store ||
+        !cloudSave.hydrated ||
+        date !== localDateKey()
+      )
         return false;
       try {
         const current = store.load();
@@ -151,7 +166,7 @@ export function usePlayerProgress({
         return false;
       }
     },
-    [subject, cloudSave.hydrated, cloudSave.retry],
+    [enabled, subject, cloudSave.hydrated, cloudSave.retry],
   );
   return {
     daily,

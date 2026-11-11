@@ -144,7 +144,7 @@ describe("catalog help and reference geography", () => {
       { ...playing, help: { [q.id]: "assisted" } },
       context,
     );
-    expect(view.states["wurl:USA"]).toBe("surface");
+    expect(view.states["wurl:USA"]).toBe("selectable");
   });
 });
 

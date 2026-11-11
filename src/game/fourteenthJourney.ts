@@ -210,7 +210,7 @@ export const FOURTEENTH_JOURNEY: Journey = {
         committedNames: true,
         previousVisits: false,
       },
-      commitment: "immediate",
+      commitment: "submit",
       failure: "feedback",
       highlightParts: [
         {

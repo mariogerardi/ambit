@@ -9,12 +9,12 @@ import {
 } from "../src/game/questionPreparation";
 import { initialGame, gameReducer, type GameState } from "../src/game/state";
 import { journeyWorld } from "../src/app/journeyWorld";
+import { questionMapPresentation } from "../src/game/presentation";
 import { journeyPoints } from "../src/game/points";
 import { validateQuestionContract } from "../src/game/questionBuilder";
 import { PRESENTATION_RECIPES } from "../src/game/recipes";
 import { GameShell } from "../src/game/GameShell";
 import { auditJourney } from "../src/game/journeyAudit";
-import { JOURNEY_INDEX } from "../src/game/journeyRegistry";
 import { captureReview, restoreReview } from "../src/app/journeyReview";
 import type { RegionFeature } from "../src/geography/types";
 const regions = JSON.parse(
@@ -35,7 +35,7 @@ const reduce = (
     game,
   );
 const choose = (index: number, id: string) =>
-  reduce(start(index), { type: "select", id });
+  reduce(start(index), { type: "select", id }, { type: "submit" });
 const view = (game: GameState) => journeyWorld(regions, journey, game, context);
 const shell = (game: GameState) => {
   const node = document.createElement("div");
@@ -54,12 +54,11 @@ const shell = (game: GameState) => {
   return node;
 };
 describe("Where Is It Official?", () => {
-  it("audits as a workbench-only draft with five complete accepted sets", () => {
+  it("audits five complete accepted sets", () => {
     expect(
       auditJourney(journey, regions, (asset) => existsSync(`public${asset}`))
         .errors,
     ).toEqual([]);
-    expect(JOURNEY_INDEX.some((entry) => entry.id === journey.id)).toBe(false);
     expect(
       journey.rounds.map((q) =>
         q.rule.type === "country-ids" ? q.rule.ids.length : 0,
@@ -117,7 +116,7 @@ describe("Where Is It Official?", () => {
         expect(
           q.rule.ids
             .filter((other) => other !== id)
-            .every((other) => map.states[other] === "hinted"),
+            .every((other) => map.states[other] === "answer"),
         ).toBe(true);
         expect(
           Object.values(map.states).filter((state) => state === "correct"),
@@ -128,12 +127,57 @@ describe("Where Is It Official?", () => {
       }
     }
   });
-  it("shows a neutral whole-world search and withholds names, translations and source clues before submission", () => {
+  it("allows single-country picks to be replaced, removed and cleared before explicit submission", () => {
+    for (const [index, q] of journey.rounds.entries()) {
+      if (q.rule.type !== "country-ids") throw Error("Expected country set");
+      expect(q.commitment).toBe("submit");
+      const submitButton = (game: GameState) =>
+        shell(game).querySelector<HTMLButtonElement>(
+          '[data-dd-action-name="Answer Submit"]',
+        )!;
+      expect(submitButton(start(index)).disabled).toBe(true);
+      const wrong = reduce(start(index), { type: "select", id: "wurl:CAN" });
+      expect(wrong.phase).toBe("playing");
+      expect(wrong.answers).toEqual([]);
+      expect(submitButton(wrong).disabled).toBe(false);
+      expect(shell(wrong).textContent).not.toContain(
+        "Your first answer is final.",
+      );
+      expect(
+        shell(wrong).querySelector(".journey-text-clue figcaption"),
+      ).toBeNull();
+      const valid = q.rule.ids[0];
+      const revised = reduce(wrong, { type: "select", id: valid });
+      expect(revised.selectedIds).toEqual([valid]);
+      expect(revised.phase).toBe("playing");
+      expect(revised.answers).toEqual([]);
+      const removed = reduce(revised, { type: "select", id: valid });
+      expect(removed.selectedIds).toEqual([]);
+      expect(submitButton(removed).disabled).toBe(true);
+      expect(reduce(revised, { type: "clear" }).selectedIds).toEqual([]);
+      const submitted = reduce(revised, { type: "submit" });
+      expect(submitted.phase).toBe("feedback");
+      expect(submitted.answers[0]).toMatchObject({ correct: true, points: 3 });
+      expect(
+        shell(submitted).querySelector(".journey-correct-answer")?.textContent,
+      ).toContain("Your answer:");
+      expect(
+        reduce(
+          submitted,
+          { type: "select", id: "wurl:CAN" },
+          { type: "submit" },
+        ),
+      ).toBe(submitted);
+      const missed = reduce(wrong, { type: "submit" });
+      expect(missed.answers[0]).toMatchObject({ correct: false, points: 0 });
+    }
+  });
+  it("shows selectable whole-world countries and withholds names, translations and source clues before submission", () => {
     for (const [index, q] of journey.rounds.entries()) {
       const map = view(start(index));
-      expect(map.states["wurl:PSE"]).toBe("surface");
-      expect(map.states["wurl:EGY"]).toBe("surface");
-      expect(Object.values(map.states)).not.toContain("selectable");
+      expect(map.states["wurl:PSE"]).toBe("selectable");
+      expect(map.states["wurl:EGY"]).toBe("selectable");
+      expect(questionMapPresentation(q, "playing").hover).toBe(true);
       expect(Object.values(map.states)).not.toContain("hinted");
       const node = shell(start(index));
       expect(
@@ -145,7 +189,9 @@ describe("Where Is It Official?", () => {
           ?.getAttribute("lang"),
       ).toBe(q.textClue!.lang);
       expect(node.querySelector(".journey-text-clue figcaption")).toBeNull();
-      expect(q.prompt).toBe("Find a country where this language is official:");
+      expect(q.prompt).toBe(
+        "Find a country where this language has national official status.",
+      );
       expect(q.textClue!.reveal.translation).not.toContain("—a saying");
       expect(node.textContent).not.toContain(q.textClue!.reveal.language);
       expect(node.textContent).not.toContain(q.textClue!.reveal.translation);
@@ -171,11 +217,15 @@ describe("Where Is It Official?", () => {
       const map = view(assisted);
       expect(map.selectableRegionIds?.sort()).toEqual([...candidates].sort());
       const valid = candidates.find((id) => original.includes(id))!;
-      expect(journeyPoints(reduce(hinted, { type: "select", id: valid }))).toBe(
-        2,
-      );
       expect(
-        journeyPoints(reduce(assisted, { type: "select", id: valid })),
+        journeyPoints(
+          reduce(hinted, { type: "select", id: valid }, { type: "submit" }),
+        ),
+      ).toBe(2);
+      expect(
+        journeyPoints(
+          reduce(assisted, { type: "select", id: valid }, { type: "submit" }),
+        ),
       ).toBe(1);
       const excluded = selectableIds(q, context).find(
         (id) => !candidates.includes(id),
@@ -204,14 +254,15 @@ describe("Where Is It Official?", () => {
       expect(map.focus).toMatchObject(
         regions.find((region) => region.id === "wurl:CAN")!.focus,
       );
-      expect(q.rule.ids.every((id) => map.states[id] === "hinted")).toBe(true);
+      expect(q.rule.ids.every((id) => map.states[id] === "answer")).toBe(true);
       const node = shell(game);
       expect(node.querySelector("figcaption em")?.textContent).toContain(
         q.textClue!.reveal.translation,
       );
       expect(node.querySelector(".feedback-map-key")?.textContent).toContain(
-        "Official-language network",
+        "Other valid answers",
       );
+      expect(node.querySelectorAll(".key-answer circle")).toHaveLength(2);
       expect(
         node.querySelector(".journey-correct-answer")?.textContent,
       ).toContain(context.names.get(q.rule.ids[0]));

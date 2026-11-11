@@ -270,7 +270,7 @@ export const SHARED_NAMES_JOURNEY: Journey = {
       prompt: "Find the country on the globe.",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: {
         type: "ids",
         ids: ["wurl:GEO", "wurl:ARM", "wurl:AZE", "wurl:TUR"],

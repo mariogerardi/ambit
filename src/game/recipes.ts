@@ -264,7 +264,7 @@ export const MECHANIC_RECIPES: Question[] = [
       type: "ids",
       ids: ["wurl:CAN", "wurl:USA", "wurl:MEX"],
     },
-    commitment: "immediate",
+    commitment: "submit",
     rule: {
       type: "country-ids",
       ids: ["wurl:CAN"],
@@ -803,7 +803,7 @@ export const PRESENTATION_RECIPES: Question[] = [
     mode: "map-single",
     count: 1,
     selection: { type: "world" },
-    commitment: "immediate",
+    commitment: "submit",
     rule: { type: "country-ids", ids: ["wurl:FRA", "wurl:CAN"], match: "any" },
     prompt: "Select France or Canada for this scoped demonstration.",
     explanation:

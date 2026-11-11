@@ -542,6 +542,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     await click("Play");
     await act(async () => probe.props!.onSelect(member("wurl:CAN")));
     const canvas = host.querySelector("canvas");
+    await click("Submit answer");
     await click("Admin");
     await click("Change Journey");
     await act(async () =>
@@ -593,6 +594,7 @@ describe("app daily shell (DOM only; no browser or WebGL)", () => {
     await mount();
     await click("Play");
     await act(async () => probe.props!.onSelect(member("wurl:CAN")));
+    await click("Submit answer");
     expect(host.textContent).toContain("Well spotted.");
     await act(async () => vi.advanceTimersByTime(1026));
     await settleLoads();

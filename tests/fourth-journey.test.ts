@@ -99,7 +99,11 @@ describe("Mediterranean facelift", () => {
         playColors().selectable,
       );
     }
-    const selected = reduce(at(0), { type: "select", id: "wurl:MAR" });
+    const selected = reduce(
+      at(0),
+      { type: "select", id: "wurl:MAR" },
+      { type: "submit" },
+    );
     choices.innerHTML = shell(selected);
     expect(selected.phase).toBe("feedback");
     expect(choices.textContent).toContain("Morocco");

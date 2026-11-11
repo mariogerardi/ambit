@@ -26,6 +26,8 @@ export const SHARED_VISUAL_RULES = {
     "Supplied reference points cannot themselves earn a correct pin.",
   "point-answer-role":
     "Explanatory points cannot be graded by an unrelated abstract choice.",
+  "answer-role":
+    "Reveal networks cannot replace the graded roles of selected or valid unselected countries.",
   "review-retention":
     "Required revealed solutions and actual mistakes survive completion.",
 } as const;
@@ -68,6 +70,18 @@ export function auditVisualScene(
 ) {
   const errors: string[] = [];
   const live = game.phase === "playing";
+  if (
+    game.phase === "feedback" &&
+    q.feedbackNetwork &&
+    ["map-single", "map-multiple"].includes(q.mode)
+  )
+    for (const item of answerItems(q, context, game))
+      if (["correct", "answer", "incorrect"].includes(item.state))
+        for (const id of item.geographyIds)
+          if (context.targets.has(id) && world.states[id] !== item.state)
+            errors.push(
+              `[answer-role] Reveal changed ${item.state} to ${world.states[id]}: ${q.id} / ${id}`,
+            );
   if (live && q.rule.type === "bearing-angle") {
     const { origin, destination } = q.rule;
     if (

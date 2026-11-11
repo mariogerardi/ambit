@@ -1086,7 +1086,22 @@ export function AdminPanel({
                       Playtest registered Journeys and source files in an
                       isolated session.
                     </p>
-                    <a className="admin-tool-link" href="/review/journeys.html">
+                    <a
+                      className="admin-tool-link"
+                      href="/review/journeys.html"
+                      onClick={(event) => {
+                        if (
+                          onNavigate &&
+                          !event.metaKey &&
+                          !event.ctrlKey &&
+                          !event.shiftKey &&
+                          !event.altKey
+                        ) {
+                          event.preventDefault();
+                          onNavigate("/review/journeys.html");
+                        }
+                      }}
+                    >
                       <ActionIcon name="workbench" />
                       Journey Workbench <span aria-hidden="true">→</span>
                     </a>

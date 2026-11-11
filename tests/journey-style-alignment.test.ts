@@ -25,7 +25,38 @@ describe("shared Journey style contracts", () => {
         it(`${question.id} confirms its complete multi-country selection`, () => {
           expect(question.commitment).toBe("submit");
         });
-      if (["map-single", "merged-region-single"].includes(question.mode))
+      if (question.mode === "map-single")
+        it(`${question.id} keeps a country pick editable and resumes a pending selection without grading it`, () => {
+          expect(question.commitment).toBe("submit");
+          const id = solutionIds(question, context)[0];
+          const pending = gameReducer(
+            start,
+            { type: "select", id },
+            journey,
+            context,
+          );
+          expect(pending.phase).toBe("playing");
+          expect(pending.answers).toEqual([]);
+          expect(view(pending).states[id]).toBe("selected");
+          const removed = gameReducer(
+            pending,
+            { type: "select", id },
+            journey,
+            context,
+          );
+          expect(removed.selectedIds).toEqual([]);
+          const resumed = { ...start, selectedIds: [id] };
+          expect(resumed.answers).toEqual([]);
+          const committed = gameReducer(
+            resumed,
+            { type: "submit" },
+            journey,
+            context,
+          );
+          expect(committed.phase).toBe("feedback");
+          expect(committed.answers.at(-1)?.correct).toBe(true);
+        });
+      if (question.mode === "merged-region-single")
         it(`${question.id} commits one country tap and safely resumes old drafts`, () => {
           expect(question.commitment).toBe("immediate");
           const id = solutionIds(question, context)[0];

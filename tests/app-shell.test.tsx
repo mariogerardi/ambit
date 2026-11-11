@@ -243,7 +243,7 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
   });
 
   it.each([true, false])(
-    "exposes operational navigation outside Your space only (admin: %s)",
+    "exposes authorized operational navigation including Your Space (admin: %s)",
     async (admin) => {
       authProbe.admin = admin;
       authProbe.subject = "owner";
@@ -262,10 +262,12 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
         host.querySelector('[data-dd-action-name="Account Open Admin"]'),
       ).toBeNull();
       await click("Open menu");
-      expect(
-        host.querySelector('[data-dd-action-name="Menu Admin"]'),
-      ).toBeNull();
-      expect(host.querySelector('a[href="/review/journeys.html"]')).toBeNull();
+      expect(!!host.querySelector('[data-dd-action-name="Menu Admin"]')).toBe(
+        admin,
+      );
+      expect(!!host.querySelector('a[href="/review/journeys.html"]')).toBe(
+        admin,
+      );
     },
   );
 

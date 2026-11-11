@@ -1,42 +1,39 @@
-import {
-  reviewQuestionCopy,
-  supportsPartialPreview,
-} from "../game/authoringReview";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { GameState } from "../game/state";
+import { answerPoints } from "../game/points";
+import { pinDistanceTier } from "../game/answerTargets";
+import { estimateTier } from "../game/numericEstimate";
+import { reviewedBearing } from "../game/compassBearing";
+import { JOURNEY_INDEX } from "../game/journeyRegistry";
 import { adminJourneyLink } from "./accountNavigation";
-import {
-  captureReview,
-  REVIEW_STAGES,
-  restoreReview,
-  reviewRound,
-  reviewState,
-} from "./journeyReview";
+import { isReviewStage, reviewOutcomes, reviewState } from "./journeyReview";
 import type { JourneyReviewSource, ReviewStage } from "./journeyReview";
 export { reviewRound } from "./journeyReview";
 
-const reviewStageLabels: Record<ReviewStage, string> = {
-  play: "Question",
-  hint: "Hint",
-  assist: "Assist",
-  correct: "Correct reveal",
-  missed: "Missed reveal",
-  partial: "Partial outcome",
-  completion: "Sample completion",
-  "completion-mixed": "Mixed completion",
-};
-
-function isReviewStage(value: string): value is ReviewStage {
-  return REVIEW_STAGES.some((stage) => stage === value);
-}
-
-function liveStage(game: GameState, journey: Journey): ReviewStage {
-  if (game.phase === "finished") return "completion";
+export function currentReviewStage(
+  game: GameState,
+  journey: Journey,
+): ReviewStage {
+  if (game.phase === "finished")
+    return game.answers.every((answer) => answer.correct)
+      ? "completion"
+      : "completion-mixed";
+  const question = journey.rounds[game.roundIndex];
   if (game.phase === "playing") {
-    const help = game.help?.[journey.rounds[game.roundIndex]?.id];
+    const help = game.help?.[question.id];
     return help === "assisted" ? "assist" : help === "hinted" ? "hint" : "play";
   }
+  const rule = question.rule;
+  const tier =
+    rule.type === "pin-distance"
+      ? rule.tiers?.indexOf(pinDistanceTier(question, game)!)
+      : rule.type === "numeric-range"
+        ? rule.tiers?.indexOf(estimateTier(question, game)!)
+        : rule.type === "bearing-angle"
+          ? reviewedBearing(question, game)?.tier
+          : undefined;
+  if (tier !== undefined && tier !== null && tier > 0) return `tier-${tier}`;
   const answer = game.answers.at(-1);
   if (answer?.partialCredit) return "partial";
   return answer?.correct ? "correct" : "missed";
@@ -50,6 +47,7 @@ export function AdminJourneyReview({
   onNavigate,
   date,
   source,
+  loadError,
 }: {
   journey: Journey;
   context: QuestionContext;
@@ -58,321 +56,332 @@ export function AdminJourneyReview({
   onNavigate(url: string): void;
   date?: string;
   source?: JourneyReviewSource;
+  loadError?: string;
 }) {
-  const question = journey.rounds[game.roundIndex];
-  const editorial = useMemo(
-    () => reviewQuestionCopy(question, context),
-    [question, context],
+  const params = new URLSearchParams(location.search);
+  const initialQuestion = source?.questionId ?? params.get("question");
+  const initialIndex = Math.max(
+    0,
+    journey.rounds.findIndex((q) => q.id === initialQuestion),
   );
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [inspecting, setInspecting] = useState(false);
+  const initialStage = source?.stage ?? params.get("state") ?? "play";
+  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
   const [activeStage, setActiveStage] = useState<ReviewStage>(
-    source?.stage ?? "play",
+    isReviewStage(initialStage) ? initialStage : "play",
   );
-  const [stageOrigin, setStageOrigin] = useState<"live" | "requested">(
-    source?.stage && source.stage !== "play" ? "requested" : "live",
-  );
-  const requestedState = useRef<GameState | undefined>(undefined);
-  const pendingSourceStage = useRef(source?.stage);
-  const previousGame = useRef(game);
-  const request = useRef(0);
+  const [origin, setOrigin] = useState<"preview" | "player">("preview");
+  const [collapsed, setCollapsed] = useState(() => window.innerWidth <= 760);
+  const [busy, setBusy] = useState(false);
+  const [showPending, setShowPending] = useState(false);
   useEffect(() => {
-    setInspecting(false);
-    setActiveStage(source?.stage ?? "play");
-    setStageOrigin(
-      source?.stage && source.stage !== "play" ? "requested" : "live",
-    );
-    requestedState.current = undefined;
-    pendingSourceStage.current = source?.stage;
-    previousGame.current = game;
-  }, [journey.id]);
-  useEffect(() => {
-    if (previousGame.current === game) return;
-    previousGame.current = game;
-    if (requestedState.current === game) {
-      requestedState.current = undefined;
+    if (!busy) {
+      setShowPending(false);
       return;
     }
-    requestedState.current = undefined;
-    const sourceStage = pendingSourceStage.current;
-    pendingSourceStage.current = undefined;
-    const nextStage = liveStage(game, journey);
-    // The shell prepares the initial source preview asynchronously.
-    if (
-      sourceStage &&
-      sourceStage !== "play" &&
-      (sourceStage === nextStage ||
-        (sourceStage === "completion-mixed" && nextStage === "completion"))
-    )
-      return;
-    setActiveStage(nextStage);
-    setStageOrigin("live");
-  }, [game, journey]);
-  useEffect(
-    () => () => {
-      request.current++;
-    },
-    [journey.id],
-  );
-  const reset = (index: number) => {
-    request.current++;
-    pendingSourceStage.current = undefined;
-    setBusy(false);
-    setError("");
-    setActiveStage("play");
-    setStageOrigin("live");
-    const next = reviewRound(journey, index, source?.seed);
-    requestedState.current = next;
-    onChange(next);
-    source?.onInspect?.(index, "play");
-  };
-  async function sample(kind: ReviewStage, index = game.roundIndex) {
+    const timer = window.setTimeout(() => setShowPending(true), 200);
+    return () => clearTimeout(timer);
+  }, [busy]);
+  const [error, setError] = useState("");
+  const request = useRef(0);
+  const requestedState = useRef<GameState | undefined>(undefined);
+  const beforeCompletion = useRef<
+    | { game: GameState; stage: ReviewStage; origin: "preview" | "player" }
+    | undefined
+  >(undefined);
+  const previousGame = useRef(game);
+  const question = journey.rounds[selectedIndex];
+  const outcomes = reviewOutcomes(question);
+  const completion =
+    activeStage === "completion" || activeStage === "completion-mixed";
+  const seed = source?.seed ?? 1;
+
+  function syncLocation(index: number, stage: ReviewStage) {
+    if (source?.onInspect) source.onInspect(index, stage);
+    else {
+      const url = new URL(location.href);
+      url.searchParams.set("question", journey.rounds[index].id);
+      url.searchParams.set("state", stage);
+      if (url.href !== location.href) history.replaceState(null, "", url);
+    }
+  }
+
+  async function open(index: number, stage: ReviewStage) {
     const id = ++request.current;
-    pendingSourceStage.current = undefined;
     setBusy(true);
     setError("");
     try {
-      const result = await reviewState(
-        journey,
-        context,
-        index,
-        kind,
-        source?.seed,
-      );
+      const next = await reviewState(journey, context, index, stage, seed);
       if (id !== request.current) return;
-      requestedState.current = result;
-      onChange(result);
-      setActiveStage(kind);
-      setStageOrigin("requested");
-      source?.onInspect?.(index, kind);
+      if (
+        (stage === "completion" || stage === "completion-mixed") &&
+        !completion
+      )
+        beforeCompletion.current = { game, stage: activeStage, origin };
+      if (stage !== "completion" && stage !== "completion-mixed")
+        beforeCompletion.current = undefined;
+      startTransition(() => {
+        requestedState.current = next;
+        onChange(next);
+        setSelectedIndex(index);
+        setActiveStage(stage);
+        setOrigin("preview");
+      });
+      syncLocation(index, stage);
     } catch (failure) {
       if (id === request.current)
         setError(
           failure instanceof Error
             ? failure.message
-            : "Couldn’t open this review state.",
+            : "Couldn’t open this preview.",
         );
     } finally {
       if (id === request.current) setBusy(false);
     }
   }
-  const isCompletion =
-    activeStage === "completion" || activeStage === "completion-mixed";
-  const activeQuestion = isCompletion
+
+  function returnToQuestion() {
+    const saved = beforeCompletion.current;
+    if (!saved || saved.game.roundIndex !== selectedIndex) {
+      void open(selectedIndex, "play");
+      return;
+    }
+    request.current++;
+    requestedState.current = saved.game;
+    onChange(saved.game);
+    setActiveStage(saved.stage);
+    setOrigin(saved.origin);
+    setBusy(false);
+    setError("");
+    syncLocation(selectedIndex, saved.stage);
+  }
+
+  useEffect(() => {
+    void open(
+      initialIndex,
+      isReviewStage(initialStage) ? initialStage : "play",
+    );
+    return () => {
+      request.current++;
+    };
+  }, [journey.id]);
+
+  useEffect(() => {
+    if (previousGame.current === game) return;
+    const previous = previousGame.current;
+    previousGame.current = game;
+    if (requestedState.current === game) {
+      requestedState.current = undefined;
+      return;
+    }
+    request.current++;
+    setBusy(false);
+    setError("");
+    const stage = currentReviewStage(game, journey);
+    if (game.phase === "finished" && previous.phase !== "finished")
+      beforeCompletion.current = { game: previous, stage: activeStage, origin };
+    const index = game.phase === "finished" ? selectedIndex : game.roundIndex;
+    setSelectedIndex(index);
+    setActiveStage(stage);
+    setOrigin("player");
+    syncLocation(index, stage);
+  }, [game, journey]);
+
+  function changeJourney(id: string) {
+    const entry = JOURNEY_INDEX.find((entry) => entry.id === id);
+    if (!entry || entry.id === journey.id) return;
+    const query = new URLSearchParams({ review: "1" });
+    if (date) query.set("date", date);
+    onNavigate(`${entry.path}?${query}`);
+  }
+
+  const result = game.answers.at(-1);
+  const status = completion
     ? "Journey completion"
-    : `${game.roundIndex + 1} of ${journey.rounds.length} · ${question.progressLabel ?? question.label}`;
+    : game.phase === "feedback" || game.phase === "failed"
+      ? `${answerPoints(result, game.help?.[question.id])}/3 points`
+      : activeStage === "hint"
+        ? "Hint shown"
+        : activeStage === "assist"
+          ? "Assist shown"
+          : "Unanswered";
   return (
     <section
       className="admin-review-toolbar"
       aria-label="Journey review"
-      data-mode={inspecting ? "inspect" : "playtest"}
+      data-collapsed={collapsed || undefined}
     >
-      <div className="admin-review-heading">
-        <div>
-          <strong>{inspecting ? "Inspect" : "Playtest"}</strong>
-          <span>
-            {activeQuestion} ·{" "}
-            {stageOrigin === "requested" ? "Requested" : "Live"} ·{" "}
-            {reviewStageLabels[activeStage]}
-          </span>
-        </div>
+      <header className="review-heading">
+        <span className="review-eyebrow">Review</span>
         <button
           type="button"
-          className="quiet-button admin-review-mode-toggle"
-          aria-expanded={inspecting}
-          onClick={() => setInspecting((value) => !value)}
+          className="review-visibility"
+          aria-expanded={!collapsed}
+          aria-controls="review-controls"
+          onClick={() => setCollapsed(!collapsed)}
         >
-          {inspecting ? "Return to playtest" : "Inspect"}
+          {collapsed ? "Show tools" : "Hide tools"}
         </button>
-      </div>
-      {source?.navigation}
-      {inspecting && (
-        <>
-          <div className="admin-review-selectors">
+        <h2>{journey.title}</h2>
+      </header>
+      <div id="review-controls" className="review-controls" hidden={collapsed}>
+        {loadError && (
+          <p role="alert" className="review-error">
+            {loadError}
+          </p>
+        )}
+        <details className="review-journey-switch">
+          <summary>Change Journey</summary>
+          {source?.navigation ?? (
             <label className="field">
-              <span>Question</span>
+              <span>Journey</span>
               <select
-                value={game.roundIndex}
-                onChange={(event) => reset(Number(event.target.value))}
+                value={journey.id}
+                onChange={(event) => changeJourney(event.target.value)}
               >
-                {journey.rounds.map((question, index) => (
-                  <option key={question.id} value={index}>
-                    {index + 1}. {question.progressLabel ?? question.label}
-                  </option>
-                ))}
+                {[...JOURNEY_INDEX]
+                  .sort((a, b) => a.title.localeCompare(b.title))
+                  .map((entry) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.title}
+                    </option>
+                  ))}
               </select>
             </label>
-            <label className="field">
-              <span>Preview state</span>
-              <select
-                value={activeStage}
-                disabled={busy}
-                onChange={(event) => {
-                  const stage = event.target.value;
-                  if (!isReviewStage(stage)) return;
-                  if (stage === "play") reset(game.roundIndex);
-                  else void sample(stage);
-                }}
-              >
-                <option value="play">Question</option>
-                {question.guidance && <option value="hint">Hint</option>}
-                {question.guidance?.assist && (
-                  <option value="assist">Assist</option>
-                )}
-                <option value="correct">Correct reveal</option>
-                <option value="missed">Missed reveal</option>
-                {supportsPartialPreview(question) && (
-                  <option value="partial">Partial / lower tier</option>
-                )}
-                <option value="completion">Sample completion</option>
-                <option value="completion-mixed">Mixed completion</option>
-              </select>
-            </label>
+          )}
+        </details>
+        {source?.catalog}
+        <nav aria-label="Review questions" className="review-question-list">
+          {journey.rounds.map((q, index) => (
+            <button
+              key={q.id}
+              type="button"
+              aria-current={
+                !completion && selectedIndex === index ? "step" : undefined
+              }
+              onClick={() => void open(index, "play")}
+            >
+              <span className="review-question-number">{index + 1}</span>
+              <span>{q.progressLabel ?? q.label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="review-question-controls">
+          <div className="review-section-heading">
+            <h3>Question {selectedIndex + 1}</h3>
+            <button
+              type="button"
+              className="review-text-action"
+              onClick={() =>
+                completion
+                  ? returnToQuestion()
+                  : void open(selectedIndex, "play")
+              }
+            >
+              {completion ? "Back to question" : "Reset"}
+            </button>
           </div>
-          <details className="admin-review-editorial">
-            <summary>Question copy and notes</summary>
-            <p>What does the player learn after identifying the answer?</p>
-            <div className="admin-review-copy-pair">
-              <section aria-label="Before answering">
-                <strong>Before answering</strong>
-                {editorial.before.expression && (
-                  <p>{editorial.before.expression}</p>
-                )}
-                {editorial.before.leadIn && <p>{editorial.before.leadIn}</p>}
-                <p>{editorial.before.prompt}</p>
-                {editorial.before.instruction && (
-                  <p>{editorial.before.instruction}</p>
-                )}
-              </section>
-              <section aria-label="After answering">
-                <strong>After answering</strong>
-                <p>
-                  {editorial.after.heading} · {editorial.after.answer}
-                </p>
-                <p>{editorial.after.explanation}</p>
-              </section>
-            </div>
-            {editorial.warnings.length > 0 && (
-              <ul aria-label="Editorial notes">
-                {editorial.warnings.map((warning) => (
-                  <li key={warning}>{warning}</li>
-                ))}
-              </ul>
-            )}
-          </details>
-          <details className="admin-review-tools">
-            <summary>Advanced review tools</summary>
-            <div className="admin-review-control-panel">
-              <div className="admin-library-actions">
-                {!source && (
-                  <>
-                    <button
-                      type="button"
-                      className="quiet-button"
-                      onClick={() =>
-                        onNavigate(
-                          adminJourneyLink(journey.id, "journeys", date),
-                        )
-                      }
-                    >
-                      ← Journey library
-                    </button>
-                    <button
-                      type="button"
-                      className="quiet-button"
-                      onClick={() =>
-                        onNavigate(
-                          adminJourneyLink(journey.id, "schedule", date),
-                        )
-                      }
-                    >
-                      Schedule this Journey
-                    </button>
-                  </>
-                )}
-              </div>
-              <div className="admin-library-actions">
+          <fieldset disabled={showPending} className="review-state-group">
+            <legend>Before answering</legend>
+            <div className="review-state-buttons">
+              {(
+                [
+                  { stage: "play", label: "Question" },
+                  ...(question.guidance
+                    ? [{ stage: "hint", label: "Hint" }]
+                    : []),
+                  ...(question.guidance?.assist
+                    ? [{ stage: "assist", label: "Assist" }]
+                    : []),
+                ] as { stage: ReviewStage; label: string }[]
+              ).map(({ stage, label }) => (
                 <button
+                  key={stage}
                   type="button"
-                  className="quiet-button"
-                  onClick={() => reset(game.roundIndex)}
+                  aria-pressed={activeStage === stage}
+                  onClick={() => void open(selectedIndex, stage)}
                 >
-                  Restart question
+                  {label}
                 </button>
-                <button
-                  type="button"
-                  className="quiet-button"
-                  onClick={() => reset(0)}
-                >
-                  Restart Journey
-                </button>
-              </div>
-              <details className="admin-review-captures">
-                <summary>Capture and restore</summary>
-                <div className="admin-review-states">
-                  <button
-                    type="button"
-                    className="quiet-button"
-                    onClick={() => {
-                      const url = URL.createObjectURL(
-                        new Blob([captureReview(journey, game)], {
-                          type: "application/json",
-                        }),
-                      );
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = `${journey.id}-review.json`;
-                      link.click();
-                      setTimeout(() => URL.revokeObjectURL(url), 1000);
-                    }}
-                  >
-                    Capture current state
-                  </button>
-                  <label className="field">
-                    Restore captured state
-                    <input
-                      type="file"
-                      accept="application/json,.json"
-                      onChange={async (event) => {
-                        const file = event.target.files?.[0];
-                        if (!file) return;
-                        const id = ++request.current;
-                        setBusy(true);
-                        try {
-                          const restored = restoreReview(
-                            journey,
-                            await file.text(),
-                          );
-                          if (id === request.current) {
-                            pendingSourceStage.current = undefined;
-                            requestedState.current = restored;
-                            onChange(restored);
-                            setActiveStage(liveStage(restored, journey));
-                            setStageOrigin("live");
-                            setError("");
-                          }
-                        } catch (failure) {
-                          if (id === request.current)
-                            setError(
-                              failure instanceof Error
-                                ? failure.message
-                                : "Couldn’t restore this capture.",
-                            );
-                        } finally {
-                          if (id === request.current) setBusy(false);
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-              </details>
+              ))}
             </div>
-          </details>
-        </>
-      )}
-      {busy && <p role="status">Preparing example answers…</p>}
-      {error && <p role="alert">{error}</p>}
+          </fieldset>
+          <fieldset disabled={showPending} className="review-state-group">
+            <legend>After answering</legend>
+            <div className="review-state-buttons review-outcome-buttons">
+              {outcomes.map(({ stage, label }) => (
+                <button
+                  key={stage}
+                  type="button"
+                  aria-pressed={activeStage === stage}
+                  onClick={() => void open(selectedIndex, stage)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <p className="review-preview-status" aria-live="polite">
+            {showPending
+              ? "Preparing preview…"
+              : `${origin === "preview" ? "Preview" : "Player view"} · ${status}`}
+          </p>
+          {error && (
+            <p role="alert" className="review-error">
+              {error}
+            </p>
+          )}
+        </div>
+        <details className="review-completion" open={completion || undefined}>
+          <summary>Journey completion</summary>
+          <div className="review-state-buttons">
+            <button
+              type="button"
+              disabled={showPending}
+              aria-pressed={activeStage === "completion"}
+              onClick={() => void open(selectedIndex, "completion")}
+            >
+              All correct
+            </button>
+            <button
+              type="button"
+              disabled={showPending}
+              aria-pressed={activeStage === "completion-mixed"}
+              onClick={() => void open(selectedIndex, "completion-mixed")}
+            >
+              Mixed results
+            </button>
+          </div>
+          <button
+            type="button"
+            className="review-text-action"
+            onClick={() => void open(0, "play")}
+          >
+            Restart Journey
+          </button>
+        </details>
+      </div>
+      <footer className="review-navigation" hidden={collapsed}>
+        <button
+          type="button"
+          className="review-text-action"
+          onClick={() =>
+            onNavigate(adminJourneyLink(journey.id, "journeys", date))
+          }
+        >
+          ← Journeys
+        </button>
+        {JOURNEY_INDEX.some((entry) => entry.id === journey.id) && (
+          <button
+            type="button"
+            className="review-text-action"
+            onClick={() =>
+              onNavigate(adminJourneyLink(journey.id, "schedule", date))
+            }
+          >
+            Schedule Journey →
+          </button>
+        )}
+      </footer>
     </section>
   );
 }
