@@ -12,6 +12,8 @@ export interface PlayScene {
   framing?: "selection";
   /** One pass through broad orientation views, ending at the playable focus. */
   views?: Focus[];
+  /** Scale this intro's travel time without changing other tours (0.25–2). */
+  durationScale?: number;
   contextIds?: string[];
   candidateRegionIds?: string[];
   /** Labels for already supplied area clues; never infer a withheld name. */
@@ -72,6 +74,7 @@ export function compileQuestionScenes(
   assign("playFraming", play?.framing);
   assign("contextIds", play?.contextIds);
   assign("introViews", play?.views);
+  assign("introDurationScale", play?.durationScale);
   assign("candidateRegionIds", play?.candidateRegionIds);
   assign("clueLocators", play?.clueLocators);
   assign("places", play?.places);

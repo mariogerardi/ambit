@@ -516,9 +516,9 @@ Commons thumbnail by **David290**, licensed under **CC BY-SA 4.0**. The accompan
 `SOURCES.md` retains the original file link, license, geographic evidence and
 qualifications; `src/game/data/mind-the-gap-media.v1.json` records the download
 URL and checksum. The interface may crop the displayed frame. The photograph's
-license applies independently of application code. The Europe reference is
-simplified public-domain Natural Earth geometry supplied with the authoring
-handoff. The Hongyancun station reference credits © OpenStreetMap contributors
+license applies independently of application code. The original Europe reference
+is retained as public-domain Natural Earth handoff data but is not rendered.
+The Hongyancun station reference credits © OpenStreetMap contributors
 under ODbL 1.0; the Marmaray line is an original, explicitly schematic guide.
 
 ## Made in China photographs and geography

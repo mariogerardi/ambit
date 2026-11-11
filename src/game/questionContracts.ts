@@ -255,6 +255,8 @@ export interface Question {
   playFraming?: "selection";
   /** Finite orientation sequence; reduced motion uses focus directly. */
   introViews?: Focus[];
+  /** Optional intro-only time multiplier, between 0.25 and 2. */
+  introDurationScale?: number;
   /** Optional camera reveal for questions linking geographically distant places. */
   feedbackFocus?: Focus;
   /** Finite reveal sequence; distant missed pins retain their comparison view. */
@@ -332,6 +334,8 @@ export interface Question {
     muteOthers: boolean;
     /** Keep ordinary theme land colors when no region is an answer candidate. */
     neutralRegions?: boolean;
+    /** Noninteractive reference fills during play; no outlines or recap discoveries. */
+    backgroundRegionIds?: string[];
     revealOnCorrect?: boolean;
     revealOnAnswer?: boolean;
     candidates?: "highlighted" | "decorative" | "neutral";

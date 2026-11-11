@@ -24,40 +24,46 @@ station's floors differently; the Journey says “middle floors.”
 
 - [Independent Kyiv Metro guide: Arsenalna](https://kyivmetro.org/en/m1-line/arsenalna/)
   reports the 105.5 m platform depth. This site is not the metro operator.
-- [Admiralteyskaya's designers](https://www.lmgt.ru/en/projects/metro-in-st.-petersburg/admiralteiskayathe-metro-station-admiralteyskaya)
-  report 86 m. The page's introductory address/date fields are inconsistent with
-  its station description; the Journey uses only its depth information.
 - [Metroteca's depth comparison](https://metroteca.com/en/depth/) discusses
-  measurement conventions. No precise global ranking is asserted.
+  measurement conventions and identifies Hongyancun as the deepest station,
+  followed by the former record holder Arsenalna. The question uses “widely
+  regarded” because comparison conventions and published station data differ.
+  The per-city list is not a ranking of individual stations: Admiralteyskaya is
+  not presented as the world's third-deepest station and is not part of this round.
 - [Hongyancun's constructor, CSCEC](https://en.cscec.com/CompanyNews/CorporateNews/202510/3911551.html)
   describes the station's hillside engineering and 141 m elevation difference
   between entrances. This is not equated with platform depth.
 - [OpenStreetMap node 9436112299, version 12](https://www.openstreetmap.org/node/9436112299/history)
   supplies the Hongyancun reference point (29.5525861° N, 106.4893638° E) and a
-  recorded depth of 116 m. The question uses the less specific “more than 100 m.”
+  recorded depth of 116 m, used approximately in the reveal.
   © OpenStreetMap contributors, [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
 
-Kyiv and Saint Petersburg markers are explanatory station references, not extra
-graded locations. Their city/country relationships are the two-country task.
+Kyiv's Arsenalna marker is an explanatory station reference, not an extra
+graded location. Ukraine is the sole country answer; Russia remains a distractor.
 Other city points use the credited GeoNames identities in the Journey module.
 
 ## Quito and Berlin
 
-[Quito Turismo's visitor map](https://visitquito.ec/wp-content/uploads/2025/07/MAPA_2023_DIGITAL.pdf)
-lists an urban-zone average altitude of 2,850 m. This is an approximate city
-elevation, not a common height assigned to all metro platforms.
+[Transdev's commissioning announcement](https://www.transdev.com/en/news/south-america/press-release/commissioning-of-quitos-first-metro-line-jointly-operated-by-transdev)
+describes the metro line itself at 2,850 m and identifies it as the world's highest
+metro line, built in a 22.6 km tunnel. Q3 asks for that approximate railway
+elevation, rather than Quito's city average or a precise height for each platform.
 
 [Berlin's ghost-station exhibition](https://www.berlin.de/en/tickets/exhibitions/border-and-ghost-stations-in-divided-berlin-b20043c9-a84f-4435-a240-4b2b51a41410/)
 describes the West Berlin U-Bahn and S-Bahn services through sealed eastern
 stations and Friedrichstraße's controlled interchange exception. No historical
 route geometry is reconstructed.
 
-The Europe reference in `src/game/data/mind-the-gap-europe.v1.json` is supplied
+The original Europe reference in `src/game/data/mind-the-gap-europe.v1.json` is supplied
 handoff geometry described as united, simplified Natural Earth 1:110m country
 polygons, with an approximate eastern boundary. It is display-only. The source
 data are [public domain](https://www.naturalearthdata.com/about/terms-of-use/).
 The handoff did not identify an exact Natural Earth release or preparation
-script; it is not used for political boundaries or grading.
+script. The user subsequently removed the overlay; the geometry remains in the
+source handoff record but is not rendered or used for grading. Q4 uses a clean,
+borderless regional view. European country surfaces follow the existing Study
+continent grouping and receive the shared reference fill without political
+outlines or locator rings; Germany is outlined on assist and reveal.
 
 ## Marmaray
 

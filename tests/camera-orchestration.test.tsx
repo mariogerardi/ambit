@@ -307,6 +307,39 @@ it("plays authored intros once, leaves answer edits alone, and ends the intro on
   expect(port.cancelFlyover).toHaveBeenCalledTimes(3);
 });
 
+it("scales only an authored intro and preserves its endpoint on help and reduced motion", async () => {
+  const base = REGGAETON_JOURNEY.rounds[4];
+  const round = { ...base, introDurationScale: 0.4 };
+  const definition = { ...REGGAETON_JOURNEY, rounds: [round] };
+  await render({
+    mode: "practice",
+    transitionKey: "/journey/paced-intro",
+    journey: {
+      ...options.journey,
+      active: true,
+      definition,
+      focus: round.focus,
+    },
+  });
+  expect(port.flyover).toHaveBeenCalledExactlyOnceWith(
+    round.introViews,
+    false,
+    { durationScale: 0.4 },
+  );
+  await render({ journey: { ...options.journey, focus: { ...round.focus } } });
+  expect(port.flyover).toHaveBeenCalledTimes(1);
+  await render({
+    journey: { ...options.journey, help: { [round.id]: "hinted" } },
+  });
+  expect(port.focus).toHaveBeenLastCalledWith(round.focus);
+  await act(async () => {
+    Object.defineProperty(media, "matches", { value: true });
+    mediaChange!();
+  });
+  expect(port.focus).toHaveBeenLastCalledWith(round.focus);
+  expect(port.flyover).toHaveBeenCalledTimes(1);
+});
+
 it("preserves Not From Here’s continental opening and frames both country assists", async () => {
   const { NOT_FROM_HERE_JOURNEY: definition } = await import(
     "../src/game/notFromHereJourney"

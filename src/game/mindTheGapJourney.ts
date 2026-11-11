@@ -1,14 +1,9 @@
 import { definePresentation, defineQuestion } from "./questionBuilder";
 import { cityReference } from "./authoredPlaces";
 import { GLOBE_SYMBOLS } from "../globe/symbols";
+import { CAPITALS } from "./quizData";
 import type { FactSource, Journey } from "./questionContracts";
-import type {
-  MapOverlay,
-  PhysicalFeature,
-  PlaceFeature,
-  RegionFeature,
-} from "../geography/types";
-import europeReference from "./data/mind-the-gap-europe.v1.json";
+import type { MapOverlay, PlaceFeature } from "../geography/types";
 
 const source = (name: string, url: string): FactSource => ({
   name,
@@ -29,17 +24,13 @@ const depthSources = [
     "https://kyivmetro.org/en/m1-line/arsenalna/",
   ),
   source(
-    "Lenmetrogiprotrans · Admiralteyskaya station",
-    "https://www.lmgt.ru/en/projects/metro-in-st.-petersburg/admiralteiskayathe-metro-station-admiralteyskaya",
-  ),
-  source(
     "Station depth comparison, including measurement conventions",
     "https://metroteca.com/en/depth/",
   ),
 ];
 const quitoSource = source(
-  "Visit Quito · city altitude (urban average 2,850 m)",
-  "https://visitquito.ec/wp-content/uploads/2025/07/MAPA_2023_DIGITAL.pdf",
+  "Transdev · Quito's underground metro line at 2,850 m",
+  "https://www.transdev.com/en/news/south-america/press-release/commissioning-of-quitos-first-metro-line-jointly-operated-by-transdev",
 );
 const berlinSource = source(
   "Berlin government · Border and ghost stations in divided Berlin",
@@ -103,17 +94,10 @@ const chinaCities: PlaceFeature[] = [
 ].map((place) => ({
   ...place,
   markerSize: GLOBE_SYMBOLS.candidate,
-  labelHidden: true,
-  hoverName: "",
   markerBadge: undefined,
 }));
-const namedChinaCities = chinaCities.map((p) => ({
-  ...p,
-  labelHidden: false,
-  hoverName: p.name,
-}));
 
-// These points appear only in the Q2 reveal; the countries are the answers.
+// The station appears only in the Q2 reveal; Ukraine is the answer.
 const kyiv: PlaceFeature = {
   id: "mind-the-gap:kyiv-arsenalna",
   name: "Kyiv · Arsenalna (105.5 m)",
@@ -121,18 +105,6 @@ const kyiv: PlaceFeature = {
   lat: 50.4415,
   lng: 30.5455,
   parentId: "wurl:UKR",
-  sourceId: "mind-the-gap:station-reference",
-  displayRole: "reference",
-  visualState: "hinted",
-  labelFlexible: true,
-};
-const stPetersburg: PlaceFeature = {
-  id: "mind-the-gap:saint-petersburg-admiralteyskaya",
-  name: "Saint Petersburg · Admiralteyskaya (86 m)",
-  kind: "landmark",
-  lat: 59.9358,
-  lng: 30.3151,
-  parentId: "wurl:RUS",
   sourceId: "mind-the-gap:station-reference",
   displayRole: "reference",
   visualState: "hinted",
@@ -153,6 +125,12 @@ const hongyancun: PlaceFeature = {
 const europeanSearch = { lat: 53.8, lng: 29.2, altitude: 0.88 };
 const quito = city(3652462, "Quito", -0.22985, -78.52495, "ECU");
 const berlin = city(2950159, "Berlin", 52.52437, 13.41053, "DEU");
+// Match the existing Study continent grouping, using the globe's own country surfaces.
+const europeBackground = [
+  ...new Set(
+    CAPITALS.filter((p) => p.continent === "EU").map((p) => p.countryId),
+  ),
+];
 
 // Grading is from an approximate midpoint of Marmaray's Bosphorus crossing,
 // *not* a claimed survey coordinate of the precise tunnel alignment.
@@ -174,19 +152,6 @@ const bosphorusRevealed: PlaceFeature = {
   labelHidden: false,
   visualState: "answer",
   answerTarget: true,
-};
-
-const europeShape: PhysicalFeature = {
-  id: "mind-the-gap:europe-reference",
-  name: "Europe",
-  kind: "landform",
-  lat: 52,
-  lng: 14,
-  rank: 8,
-  geometry: europeReference.geometry as RegionFeature["geometry"],
-  fillOpacity: 0.2,
-  // Natural Earth public-domain footprint, merged/simplified. This reference
-  // doesn't grade the city; its approximate eastern extent is intentional.
 };
 
 const crossingSketch: MapOverlay = {
@@ -258,6 +223,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       rule: { type: "place-ids", ids: [chongqing.id] },
       commitment: "submit",
       allowTyping: false,
+      disclosure: { ...base.disclosure, namedChoices: true },
       guidance: {
         hint: "The city stands where the Jialing River meets the Yangtze, with neighborhoods climbing the surrounding hills.",
         assist: {
@@ -287,7 +253,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
         },
         reveal: {
           focus: { lat: 29.56, lng: 106.54, altitude: 0.23 },
-          places: namedChinaCities,
+          places: chinaCities,
         },
       },
     }),
@@ -296,13 +262,13 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       id: "mind-the-gap-02-the-deep-end",
       title: "The Deep End",
       label: "The deep end",
-      progressLabel: "Europe's deep stations",
-      resolvedLabel: "Arsenalna · Kyiv; Admiralteyskaya · Saint Petersburg",
+      progressLabel: "Arsenalna's country",
+      resolvedLabel: "Arsenalna · Kyiv, Ukraine",
       leadIn:
-        "Chongqing's Hongyancun station descends more than 100 meters underground. In Europe, Arsenalna in Kyiv and Admiralteyskaya in Saint Petersburg also take passengers far below ground.",
-      prompt: "Select the two countries that contain those European stations.",
-      mode: "map-multiple",
-      count: 2,
+        "Chongqing’s Hongyancun is widely regarded as the world’s deepest metro station. Kyiv’s Arsenalna held that record before it.",
+      prompt: "Select the country home to that European station.",
+      mode: "map-single",
+      count: 1,
       selection: {
         type: "ids",
         ids: [
@@ -314,8 +280,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
           "wurl:EST",
         ],
       },
-      rule: { type: "country-ids", ids: ["wurl:UKR", "wurl:RUS"] },
-      partialCredit: "one-of-two",
+      rule: { type: "country-ids", ids: ["wurl:UKR"] },
       commitment: "submit",
       allowTyping: false,
       map: {
@@ -324,24 +289,19 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
         muteOthers: true,
       },
       guidance: {
-        hint: "Kyiv lies south of Belarus; Saint Petersburg is near the eastern end of the Gulf of Finland.",
+        hint: "Kyiv stands on the Dnipro River, south of Belarus.",
         assist: {
-          text: "The choice is now between Ukraine, Russia, Belarus and Finland. Select the two containing the named cities.",
-          candidateIds: ["wurl:UKR", "wurl:RUS", "wurl:BLR", "wurl:FIN"],
-          focus: europeanSearch,
+          text: "Ukraine, Belarus and Poland remain. Select the country whose capital is Kyiv.",
+          candidateIds: ["wurl:UKR", "wurl:BLR", "wurl:POL"],
+          focus: { lat: 52, lng: 26, altitude: 0.7 },
         },
       },
       explanation:
-        "Arsenalna in Kyiv lies about 105.5 meters below ground. Admiralteyskaya in Saint Petersburg is about 86 meters deep. Back in Chongqing, Hongyancun also descends more than 100 meters. Hills, dense cities and engineering constraints make these stations extraordinary vertical journeys.",
+        "Arsenalna is in Kyiv, Ukraine. Its platforms lie about 105.5 meters below ground beneath the city's high riverbank. Chongqing's Hongyancun is commonly quoted at about 116 meters: in both cities, steep terrain can turn reaching a train into a remarkable vertical journey.",
       qualification:
         "Station depths are approximate. Measurements may refer to a platform, track or entrance, so figures quoted for different stations are not always directly comparable.",
       source: depthSources[0],
-      sources: [
-        depthSources[1],
-        depthSources[2],
-        hongyancunSource,
-        stationMapSource,
-      ],
+      sources: [depthSources[1], hongyancunSource, stationMapSource],
       scenes: {
         play: {
           // Deliberately regional. Auto-fit would include all of Russia and zoom out too far.
@@ -351,14 +311,15 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
             { lat: 43, lng: 80, altitude: 1.7 },
             europeanSearch,
           ],
+          durationScale: 0.4,
           contextIds: [],
           places: [hongyancun],
           map: { candidates: "highlighted", muteOthers: true },
         },
         reveal: {
           focus: europeanSearch,
-          answerIds: ["wurl:UKR", "wurl:RUS"],
-          places: [kyiv, stPetersburg],
+          answerIds: ["wurl:UKR"],
+          places: [kyiv],
         },
       },
     }),
@@ -367,16 +328,16 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       id: "mind-the-gap-03-above-sea-level",
       title: "Above Sea Level",
       label: "Above sea level",
-      progressLabel: "Quito's altitude",
-      resolvedLabel: "Quito · approximately 2,850 m",
+      progressLabel: "Quito's metro",
+      resolvedLabel: "Quito Metro · approximately 2,850 m",
       leadIn:
-        "Now go from deep below a city to a metro beneath a city high in the Andes.",
-      prompt: "About how many meters above sea level is Quito?",
+        "Quito’s metro runs entirely underground, yet it is the world’s highest metro line.",
+      prompt: "Roughly how many meters above sea level do its trains run?",
       mode: "slider",
       count: 1,
       selection: { type: "none" },
       commitment: "submit",
-      inputLabel: "Elevation above sea level",
+      inputLabel: "Metro elevation above sea level",
       rule: {
         type: "numeric-range",
         min: 0,
@@ -385,7 +346,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
         value: 2850,
         unit: "m",
         tolerance: 900,
-        answerLabel: "Quito urban-area average",
+        answerLabel: "Quito Metro · approximate elevation",
         tiers: [
           { tolerance: 200, feedback: "Well estimated." },
           { tolerance: 500, feedback: "A close estimate." },
@@ -393,15 +354,15 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
         ],
       },
       guidance: {
-        hint: "Quito sits well above 2,000 meters, in a high Andean basin.",
+        hint: "The railway runs high in the Andes, well above 2,000 meters.",
         assist: {
           text: "It's between 2,000 and 4,000 meters above sea level. Make your best estimate.",
         },
       },
       explanation:
-        "Quito's urban area averages about 2,850 meters above sea level, even though its metro runs underground. After Chongqing's and Kyiv's dramatic descents, Quito flips the perspective: the entire city is already high above the ocean.",
+        "Quito's metro runs at roughly 2,850 meters above sea level through a 22.6-kilometer tunnel. After the deep descents in Chongqing and Kyiv, it flips the perspective: underground means below the local surface, which can still be high above the sea.",
       qualification:
-        "2,850 m is the approximate average elevation of urban Quito, not a survey of every metro platform; individual stations and neighborhoods vary.",
+        "2,850 m is the operator's approximate elevation for the line, rather than an exact surveyed height shared by every platform.",
       source: quitoSource,
       sources: [placesSource],
       scenes: {
@@ -426,30 +387,31 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       progressLabel: "Ghost stations",
       resolvedLabel: "Berlin · the ghost stations",
       leadIn:
-        "During the Cold War, trains passed through sealed underground stations in the eastern half of a divided European city. Guards watched, but the trains could not stop.",
-      prompt: "Name the city.",
+        "During the Cold War, trains serving the west passed through sealed stations in the east without stopping.",
+      prompt: "Which city’s metro had these guarded “ghost stations”?",
       mode: "text",
       count: 1,
       commitment: "submit",
       selection: { type: "none" },
       inputLabel: "City",
-      rule: { type: "manual-text", answers: ["Berlin"] },
+      rule: { type: "capital-name", countryId: "wurl:DEU" },
       map: {
         ...base.map!,
         borders: false,
         hoverFeedback: false,
         feedbackRegions: "neutral",
+        backgroundRegionIds: europeBackground,
       },
       visualExceptions: {
         "hidden-boundaries":
-          "Europe is one noninteractive continental reference for a historical city-name question. Germany is supplied only by assistance or reveal.",
+          "A borderless European view supplies orientation for a historical metro question. Germany is supplied only by assistance or reveal.",
       },
       guidance: {
         hint: "Its postwar division became one of the defining symbols of the Cold War.",
         assist: {
           text: "The city is in Germany. Its famous wall began separating East and West in 1961.",
           regionIds: ["wurl:DEU"],
-          focus: { lat: 51, lng: 13, altitude: 1.08 },
+          focus: { lat: 51, lng: 10, altitude: 0.5 },
         },
       },
       explanation:
@@ -457,17 +419,11 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       qualification:
         "The history concerns U-Bahn and S-Bahn lines. Friedrichstraße was an exception: passengers could use its controlled interchange and border checkpoint.",
       source: berlinSource,
-      sources: [
-        source(
-          "Natural Earth · public-domain source geometry",
-          europeReference.sourceUrl,
-        ),
-      ],
+      sources: [placesSource],
       scenes: {
         play: {
           focus: { lat: 52, lng: 13, altitude: 1.18 },
           contextIds: [],
-          physicalFeatures: [europeShape],
           map: { borders: false },
         },
         reveal: {
@@ -506,22 +462,19 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       },
       map: {
         ...base.map!,
-        background: "open-search",
         neutralRegions: true,
         feedbackRegions: "neutral",
       },
       visualExceptions: {
         "natural-background":
           "The world remains ordinary reference geography for a free coordinate search; no country is an answer surface.",
-        "open-search-background":
-          "The finale is deliberately a worldwide, freely navigable pin search. Istanbul and the Bosphorus are explicitly named; no target marker or regional framing is disclosed before submission.",
       },
       guidance: {
         hint: "Find northwestern Türkiye, where the Black Sea leads into the Sea of Marmara.",
         assist: {
           text: "Türkiye is highlighted for reference. Look at its northwestern edge: the Bosphorus separates Istanbul's European and Asian shores.",
           regionIds: ["wurl:TUR"],
-          // Intentionally no focus: assistance must not forcibly zoom the globe.
+          focus: { lat: 40, lng: 34, altitude: 0.9 },
         },
       },
       explanation:
@@ -537,7 +490,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
           contextIds: [],
           places: [bosphorusTarget],
           overlays: [],
-          map: { background: "open-search", neutralRegions: true },
+          map: { neutralRegions: true },
         },
         reveal: {
           focus: { lat: 41.021, lng: 29, altitude: 0.18 },
@@ -565,7 +518,7 @@ export const MIND_THE_GAP_JOURNEY: Journey = {
       { lat: 30, lng: 25, altitude: 2.2 },
     ],
     physicalFeatures: [],
-    places: [quito, kyiv, stPetersburg],
+    places: [quito, kyiv],
     overlays: [crossingSketch],
     caption:
       "Above cities, far beneath them, through divided history, and under the water between continents: city railways reveal just how unusual the world's geography can be.",

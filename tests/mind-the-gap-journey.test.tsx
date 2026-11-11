@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { existsSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { geoContains } from "d3-geo";
 import { describe, expect, it } from "vitest";
 import { MIND_THE_GAP_JOURNEY as journey } from "../src/game/mindTheGapJourney";
 import { createQuestionContext } from "../src/game/questionPreparation";
@@ -47,7 +46,7 @@ describe("Mind the Gap", () => {
     expect(report.warnings).toEqual([]);
   });
 
-  it("keeps city markers equal and anonymous through edits/help, then retains the actual miss", () => {
+  it("keeps city names visible through edits/help, then retains the actual miss", () => {
     const start = play("through-the-building");
     for (const game of [
       start,
@@ -58,7 +57,11 @@ describe("Mind the Gap", () => {
       expect(places).toHaveLength(game.help ? 2 : 5);
       expect(
         places.every(
-          (p) => !p.name && !p.hoverName && p.labelHidden && !p.markerBadge,
+          (p) =>
+            !!p.name &&
+            p.hoverName === p.name &&
+            !p.labelHidden &&
+            !p.markerBadge,
         ),
       ).toBe(true);
       expect(new Set(places.map((p) => p.markerSize)).size).toBe(1);
@@ -85,30 +88,28 @@ describe("Mind the Gap", () => {
     expect(view(play("the-deep-end")).places.map((p) => p.name)).toEqual([
       "Hongyancun · Chongqing",
     ]);
-    for (const [ids, points] of [
-      [["wurl:UKR", "wurl:RUS"], 3],
-      [["wurl:RUS", "wurl:UKR"], 3],
-      [["wurl:UKR", "wurl:POL"], 1],
-      [["wurl:POL", "wurl:FIN"], 0],
+    expect(q.introDurationScale).toBe(0.4);
+    for (const [id, points] of [
+      ["wurl:UKR", 3],
+      ["wurl:RUS", 0],
+      ["wurl:POL", 0],
     ] as const) {
-      const result = step(play("the-deep-end"), ...ids.map(select), submit);
+      const result = step(play("the-deep-end"), select(id), submit);
       expect(journeyPoints(result)).toBe(points);
-      for (const id of ids)
-        expect(view(result).states[id]).toBe(
-          ["wurl:UKR", "wurl:RUS"].includes(id) ? "correct" : "incorrect",
-        );
+      expect(view(result).states[id]).toBe(
+        id === "wurl:UKR" ? "correct" : "incorrect",
+      );
+      expect(
+        view(result).places.some((p) => p.name.includes("Admiralteyskaya")),
+      ).toBe(false);
       expect(
         view(result).places.some((p) => p.name.includes("Arsenalna")),
       ).toBe(true);
     }
     const assisted = step(play("the-deep-end"), ...help);
-    expect(view(assisted).focus).toEqual(q.focus);
-    expect(view(assisted).states["wurl:POL"]).toBe("disabled");
-    expect(
-      journeyPoints(
-        step(assisted, select("wurl:UKR"), select("wurl:RUS"), submit),
-      ),
-    ).toBe(1);
+    expect(view(assisted).focus).toEqual(q.guidance?.assist?.focus);
+    expect(view(assisted).states["wurl:RUS"]).toBe("disabled");
+    expect(journeyPoints(step(assisted, select("wurl:UKR"), submit))).toBe(1);
   });
 
   it("grades inclusive elevation bands and leaves an incorrect assisted estimate possible", () => {
@@ -159,12 +160,14 @@ describe("Mind the Gap", () => {
     const world = view(start);
     expect(world.showBorders).toBe(false);
     expect(world.borderRegionIds).toEqual([]);
-    expect(new Set(Object.values(world.states))).toEqual(new Set(["disabled"]));
+    expect(world.states).toMatchObject({
+      "wurl:DEU": "context",
+      "wurl:FRA": "context",
+      "wurl:UKR": "context",
+      "wurl:CHN": "disabled",
+    });
     expect(world.places).toEqual([]);
-    expect(world.physicalFeatures).toHaveLength(1);
-    const geometry = world.physicalFeatures[0].geometry!;
-    expect(geoContains(geometry, [13.41, 52.52])).toBe(true);
-    expect(geoContains(geometry, [-78.52, -0.23])).toBe(false);
+    expect(world.physicalFeatures).toEqual([]);
     const node = document.createElement("div");
     node.innerHTML = renderToStaticMarkup(
       <GameShell
@@ -181,25 +184,43 @@ describe("Mind the Gap", () => {
     expect(node.querySelector("#written-answer")).not.toBeNull();
     const assisted = view(step(start, ...help));
     expect(assisted.states["wurl:DEU"]).toBe("hinted");
+    expect(assisted.borderRegionIds).toEqual(["wurl:DEU"]);
     expect(assisted.places).toEqual([]);
     const answered = step(start, { type: "text", value: "  bErLiN! " }, submit);
     expect(answered.answers.at(-1)?.correct).toBe(true);
     expect(view(answered).showBorders).toBe(true);
     expect(
       view(answered).places.find((p) => p.name === "Berlin"),
-    ).toMatchObject({ visualState: "answer" });
-    expect(view(answered).physicalFeatures).toEqual(world.physicalFeatures);
+    ).toMatchObject({ visualState: "correct" });
+    expect(view(answered).physicalFeatures).toEqual([]);
+    expect(view(answered).states["wurl:FRA"]).toBe("disabled");
+    const missed = view(step(start, { type: "text", value: "Paris" }, submit));
+    expect(missed.places.find((p) => p.name === "Berlin")).toMatchObject({
+      visualState: "answer",
+    });
+    expect(missed.places.find((p) => p.name === "Paris")).toMatchObject({
+      visualState: "incorrect",
+    });
+    expect(missed.physicalFeatures).toEqual([]);
   });
 
-  it("keeps pin search global and help framing unchanged, and compares actual misses", () => {
+  it("keeps pin search global on themed land, frames Turkey on assist, and compares actual misses", () => {
     const start = play("between-continents");
     const before = view(start);
     expect(before.focus.altitude).toBeGreaterThanOrEqual(1.65);
-    for (const game of [start, step(start, help[0]), step(start, ...help)]) {
+    expect(new Set(Object.values(before.states))).toEqual(new Set(["default"]));
+    for (const game of [start, step(start, help[0])]) {
       expect(view(game).focus).toEqual(before.focus);
       expect(view(game).places).toEqual([]);
       expect(view(game).overlays).toEqual([]);
     }
+    const assisted = view(step(start, ...help));
+    expect(assisted.focus).toEqual(
+      question("between-continents").guidance?.assist?.focus,
+    );
+    expect(assisted.focus.altitude).toBeLessThan(before.focus.altitude!);
+    expect(assisted.places).toEqual([]);
+    expect(assisted.overlays).toEqual([]);
     const missed = step(
       start,
       { type: "drop-pin", lat: -33, lng: 151 },
@@ -220,7 +241,7 @@ describe("Mind the Gap", () => {
   it("retains point discoveries, contextual stations and actual mistakes in the mixed recap", () => {
     const actions: Record<string, Action[]> = {
       "through-the-building": [select("place:1815286")],
-      "the-deep-end": [select("wurl:UKR"), select("wurl:POL")],
+      "the-deep-end": [select("wurl:POL")],
       "above-sea-level": [{ type: "text", value: "2850" }],
       "ghost-stations": [{ type: "text", value: "Berlin" }],
       "between-continents": [{ type: "drop-pin", lat: -33, lng: 151 }],
@@ -240,7 +261,6 @@ describe("Mind the Gap", () => {
       "wurl:DEU": "hinted",
       "wurl:POL": "incorrect",
       "wurl:UKR": "visited",
-      "wurl:RUS": "visited",
     });
     expect(recap.places.find((p) => p.name === "Quito")).toMatchObject({
       displayRole: "reference",
@@ -259,5 +279,6 @@ describe("Mind the Gap", () => {
       visualState: "incorrect",
     });
     expect(recap.physicalFeatures).toEqual([]);
+    expect(recap.states["wurl:FRA"]).toBe("disabled");
   });
 });

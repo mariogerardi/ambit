@@ -434,6 +434,10 @@ export function useCameraOrchestration({
       return;
     stop();
     if (reduced || sceneHelp) frame(journeyFocus ?? sceneViews.at(-1)!);
+    else if (phase === "playing" && round?.introDurationScale !== undefined)
+      globe.current?.flyover(sceneViews, false, {
+        durationScale: round.introDurationScale,
+      });
     else if (phase === "feedback" && round?.feedbackOrbit)
       tourThenOrbit(sceneViews);
     else if (round?.feedbackReturnToSelection)
@@ -452,6 +456,7 @@ export function useCameraOrchestration({
     cameraKey,
     sceneViews,
     sceneHelp,
+    round?.introDurationScale,
     reduced,
     mode,
     dailyReady,

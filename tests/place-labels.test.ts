@@ -80,6 +80,16 @@ const camera = () => {
   return c;
 };
 afterEach(() => vi.unstubAllGlobals());
+it("gives authored landmark references the same readable typography as city references", () => {
+  const city = cityReference(places[0]);
+  const landmark = { ...city, kind: "landmark" as const };
+  for (const palette of ["ocean", "paper", "dusk", "survey"] as const) {
+    expect(placeLabelStyle(landmark, palette)).toEqual(
+      placeLabelStyle(city, palette),
+    );
+  }
+});
+
 describe("cached readable place labels", () => {
   it("draws numeric area annotations as plain numbers rather than target symbols", () => {
     const fillText = vi.fn();

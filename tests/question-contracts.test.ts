@@ -15,9 +15,42 @@ import { createQuestionContext } from "../src/game/questionPreparation";
 import { journeyWorld } from "../src/app/journeyWorld";
 import { initialGame } from "../src/game/state";
 import { ANDES_JOURNEY } from "../src/game/andesJourney";
+import { compileQuestionScenes } from "../src/game/scenes";
 import type { RegionFeature } from "../src/geography/types";
 
 describe("safe question authoring contracts", () => {
+  it("rejects unknown background geography before a round can be played", () => {
+    const regions = JSON.parse(
+      readFileSync("public/geography/world.v1.json", "utf8"),
+    ) as RegionFeature[];
+    const q = ANDES_JOURNEY.rounds[0];
+    expect(() =>
+      createQuestionContext(regions, [], {
+        ...ANDES_JOURNEY,
+        rounds: [
+          { ...q, map: { ...q.map!, backgroundRegionIds: ["wurl:ZZZ"] } },
+        ],
+      }),
+    ).toThrow("Unknown background geography");
+  });
+  it("compiles explicit intro pacing and rejects invalid pacing", () => {
+    const base = ANDES_JOURNEY.rounds[0];
+    const q = compileQuestionScenes({
+      ...base,
+      scenes: {
+        play: { focus: base.focus, views: [base.focus], durationScale: 0.4 },
+      },
+    });
+    expect(q.introDurationScale).toBe(0.4);
+    expect(() => validateQuestionContract(q)).not.toThrow();
+    for (const value of [NaN, 0, 0.2, 2.1])
+      expect(() =>
+        validateQuestionContract({ ...q, introDurationScale: value }),
+      ).toThrow("intro duration scale");
+    expect(() => validateQuestionContract({ ...q, introViews: [] })).toThrow(
+      "intro duration scale",
+    );
+  });
   it("validates every current Journey", () => {
     for (const journey of JOURNEYS)
       expect(() => validateJourneyContracts(journey)).not.toThrow();

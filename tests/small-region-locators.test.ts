@@ -9,6 +9,7 @@ import {
   projectSmallRegion,
 } from "../src/globe/smallRegionLocators";
 import { playColors } from "../src/theme/playColors";
+import { playStateColor } from "../src/globe/themes";
 
 const world = validateRegions(
   JSON.parse(readFileSync("public/geography/world.v1.json", "utf8")),
@@ -24,6 +25,26 @@ const camera = (distance = 300, reversed = false, region = maldives) => {
   return c;
 };
 describe("small-country location and selection", () => {
+  it("omits rings for noninteractive background context but keeps explicit help locators", () => {
+    for (const palette of ["ocean", "paper", "dusk", "survey"] as const)
+      expect(playStateColor("context", palette)).toBe(
+        playColors(palette)["context-land"],
+      );
+    const layer = new SmallRegionLocators();
+    layer.update([maldives], {
+      states: { [maldives.id]: "context" },
+      regionInteraction: false,
+    });
+    layer.view(camera(), 800, 600, 100);
+    expect(layer.element.querySelector("g")).toBeNull();
+    layer.update([maldives], {
+      states: { [maldives.id]: "hinted" },
+      regionInteraction: false,
+    });
+    layer.view(camera(), 800, 600, 100);
+    expect(layer.element.querySelector("g")).not.toBeNull();
+    layer.dispose();
+  });
   it("uses small, subdued rings at world zoom while retaining generous touch targets and emphasizing feedback", () => {
     const layer = new SmallRegionLocators();
     layer.update([maldives], { states: {} });

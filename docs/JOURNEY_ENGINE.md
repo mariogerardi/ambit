@@ -91,6 +91,11 @@ places/overlays. `scenes.assist.borders` (or `guidance.assist.borders`) can
 reveal political boundaries without changing eligibility or grading. Established
 reference areas retain their blue outlines even when other boundaries are hidden.
 Hint copy normally retains the play scene;
+`scenes.play.map.backgroundRegionIds` can color existing country surfaces as
+noninteractive reference geography. It uses the shared `context` fill without
+adding outlines, small-country locator rings, answer eligibility or completion
+discoveries. Explicit hint/assist regions still use their normal help emphasis;
+the background fill ends at commitment. No separate geographic overlay is needed.
 `guidance.hintMap` can add reference region emphasis and/or a focus when authored.
 Across the Divide demonstrates this hint-stage support. There is no separate
 `scenes.hint` object.
@@ -122,6 +127,9 @@ II demonstrate it. Canonical geometry and answer rules remain unchanged.
 `scenes.play.views` and `scenes.reveal.views` optionally author a finite camera
 sequence, compiled as `introViews` / `feedbackViews`. End the sequence at the
 scene's `focus`; automatically framed play tours append the computed endpoint.
+`scenes.play.durationScale` optionally scales only that entrance's travel time
+(0.25–2, default 1); it compiles to `introDurationScale` and does not change reveal
+or completion timing.
 Reduced motion uses the effective focus directly. Playback runs once,
 does not restart on response edits, and yields to globe input. Help ends an intro
 at its effective search focus; missed pins retain the shared answer/guess review

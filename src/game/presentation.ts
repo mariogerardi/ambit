@@ -613,6 +613,9 @@ export function questionVisualStates(
     ]),
   );
   if (game.phase === "home") return {};
+  if (game.phase === "playing")
+    for (const id of question.map?.backgroundRegionIds ?? [])
+      if (context.targets.has(id)) states[id] = "context";
   if (question.rule.type === "country-set-recall") {
     for (const id of question.contextIds ?? []) states[id] = "hinted";
     for (const id of recalledIds(game.recall))
