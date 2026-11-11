@@ -51,6 +51,7 @@ For an approved specification, start with
 | Bare Minimum                       | `/journey/bare-minimum`                       | [bareMinimumJourney.ts](../src/game/bareMinimumJourney.ts)                     |
 | How America Adds Up                | `/journey/how-america-adds-up`                | [howAmericaAddsUpJourney.ts](../src/game/howAmericaAddsUpJourney.ts)           |
 | Where Is It Official?              | `/journey/where-is-it-official`               | [whereIsItOfficialJourney.ts](../src/game/whereIsItOfficialJourney.ts)         |
+| Mind the Gap                       | `/journey/mind-the-gap`                       | [mindTheGapJourney.ts](../src/game/mindTheGapJourney.ts)                       |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.

@@ -1,9 +1,9 @@
 # Mind the Gap — implementation spec
 
-**Status:** approved experience, implemented as an unregistered workbench draft.  
+**Status:** approved experience, registered for manual scheduling with automatic rotation held off.  
 **Journey:** `mind-the-gap-v1`, `src/game/mindTheGapJourney.ts`.  
 **Basis:** original handoff ZIP authored against `9062d0445c60bd7ec504c3bae0d2698c568ae44a`; integrated on `feat/mind-the-gap` after `7a4c854`, November 11, 2026.  
-**Registration:** deferred; `dailyEligible: false`. No catalog activation, push, merge, Daily assignment or deployment is authorized.
+**Registration:** registered; `dailyEligible: false`. On November 11, 2026, the user authorized committing registration, pushing all changes and deploying. Automatic Daily eligibility remains off; no date assignment is requested.
 
 ## Approved sequence and decisions
 
