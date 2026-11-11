@@ -87,6 +87,29 @@ describe the smallest proposed extension. Supply supported portions honestly as
 a partial draft if useful; label completeness accurately. Do not substitute an
 easier task, guess grading geometry or invent an API to fill that gap.
 
+## Author-side review before delivery
+
+Apply the existing [complete-puzzle review](PROJECT_INSTRUCTIONS.md) to the
+proposed play, hint, assist, correct/wrong/partial reveal and completion states.
+Keep the brief and module synchronized with approved decisions. Check that
+numeric assistance leaves a real decision against the actual acceptance bands,
+not merely several values that all qualify. Apply the [feedback-heading
+standard](../JOURNEY_CRAFTING.md#3-write-one-continuous-questionnot-a-headline-and-footnote)
+to both `correctFeedback` and accuracy-tier strings; reuse shared reactions when
+sufficient. Check intended recap roles against current extraction behavior,
+[scene inheritance](../JOURNEY_ENGINE.md#explicit-scenes) and
+[camera defaults](JOURNEY_DEFAULTS.md#camera-rules-by-stage), rather than assuming
+that a mode or `mapMode` establishes the whole experience.
+
+List dependencies in a short table in the brief: source/package path, intended
+repository destination, and bundled, external or still required status. Include
+companion data and media; verify that every file claimed as bundled is present.
+Resolve issues detectable from source inspection and label remaining uncertainty.
+Distinguish source inspection from compilation, automated audits and actual globe
+rendering; do not claim checks that did not run or require local setup for a
+read-only authoring handoff. This review is part of authoring, not a separate AI
+review round or user copywriting task.
+
 ## Codex: integrate and validate, preserving the design
 
 - Read the brief and supplied module together. Approved creative decisions govern;
