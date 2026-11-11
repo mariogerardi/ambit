@@ -23,4 +23,7 @@ supported; update the corresponding catalog image path. Restart the development
 server after adding files; production builds enable only assets that exist.
 Missing slots stay disabled and never request a missing image. Country flags
 remain selectable. Previously saved emoji avatars remain supported but are no
-longer offered in the picker.
+longer offered in the picker. Vite builds the available-image list at startup;
+after adding or regenerating avatar files, restart the development server. An
+already-running server keeps its old list and will show the globe fallback for
+presets it did not detect.

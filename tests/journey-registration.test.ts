@@ -1,6 +1,8 @@
 import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createServer } from "vite";
 import ts from "typescript";
@@ -11,6 +13,9 @@ import {
 } from "../review/registrationServer";
 import { POWER_TO_THE_PEOPLE_JOURNEY as template } from "../src/game/powerToThePeopleJourney";
 import { auditJourney } from "../src/game/journeyAudit";
+import { catalogStatus, removalPlan } from "../review/catalogRemoval";
+
+const run = promisify(execFile);
 
 const journey = { ...template, id: "registration-test-v1" };
 const module = "registrationTestJourney.ts";
@@ -50,6 +55,25 @@ async function fixture() {
     );
   }
   // Fixture validation uses real geography/contracts; asset existence is covered by the Journey tests.
+  await run("git", ["init", "--quiet"], { cwd: root });
+  await run("git", ["add", "src/game/journeyIndex.json"], { cwd: root });
+  await run(
+    "git",
+    [
+      "-c",
+      "user.name=Test",
+      "-c",
+      "user.email=test@example.test",
+      "commit",
+      "--quiet",
+      "-m",
+      "Catalog baseline",
+    ],
+    { cwd: root },
+  );
+  await run("git", ["update-ref", "refs/remotes/origin/main", "HEAD"], {
+    cwd: root,
+  });
   const load = async (file: string): Promise<Record<string, unknown>> =>
     file.includes("journeyAudit")
       ? {
@@ -62,6 +86,72 @@ async function fixture() {
   return { root, load, snapshot };
 }
 describe("local Journey registration", () => {
+  it("removes only local uncommitted additions, retaining their source and detecting stale previews", async () => {
+    const f = await fixture();
+    expect(await catalogStatus(f.root, module)).toMatchObject({
+      registered: false,
+    });
+    const add = await registrationPlan(f.root, module, route, f.load);
+    await applyRegistration(f.root, add, add.preview.revision);
+    const source = await readFile(path.join(f.root, files[0]), "utf8");
+    expect(await catalogStatus(f.root, module)).toMatchObject({
+      registered: true,
+      canRemove: true,
+    });
+    const remove = await removalPlan(f.root, module, route);
+    await writeFile(
+      path.join(f.root, files[1]),
+      remove.before[0] + "\n// User edit\n",
+    );
+    await expect(
+      applyRegistration(f.root, remove, remove.preview.revision),
+    ).rejects.toThrow("Preview registration again");
+    const fresh = await removalPlan(f.root, module, route);
+    await applyRegistration(f.root, fresh, fresh.preview.revision);
+    const [afterSource, catalog, index, docs] = await f.snapshot();
+    expect(afterSource).toBe(source);
+    expect(catalog).not.toContain("REGISTRATION_TEST_JOURNEY");
+    expect(catalog).toContain("// User edit");
+    expect(
+      JSON.parse(index).some((item: { id: string }) => item.id === journey.id),
+    ).toBe(false);
+    expect(docs).not.toContain(`[${module}](../src/game/${module})`);
+    expect(await catalogStatus(f.root, module)).toMatchObject({
+      registered: false,
+    });
+  });
+  it("blocks removal once committed and when catalog history cannot be verified", async () => {
+    const f = await fixture();
+    const add = await registrationPlan(f.root, module, route, f.load);
+    await applyRegistration(f.root, add, add.preview.revision);
+    await run("git", ["update-ref", "-d", "refs/remotes/origin/main"], {
+      cwd: f.root,
+    });
+    expect(await catalogStatus(f.root, module)).toMatchObject({
+      canRemove: false,
+    });
+    await expect(removalPlan(f.root, module, route)).rejects.toThrow(
+      "Cannot verify",
+    );
+    await run("git", ["add", "src/game/journeyIndex.json"], { cwd: f.root });
+    await run(
+      "git",
+      [
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.test",
+        "commit",
+        "--quiet",
+        "-m",
+        "Register Journey",
+      ],
+      { cwd: f.root },
+    );
+    await expect(removalPlan(f.root, module, route)).rejects.toThrow(
+      "already committed",
+    );
+  });
   it("previews exact edits without writing, then adds a held entry with matching source, route and metadata", async () => {
     const f = await fixture(),
       before = await f.snapshot();
@@ -184,6 +274,28 @@ describe("local Journey registration", () => {
           (j: { id: string }) => j.id === journey.id,
         ).dailyEligible,
       ).toBe(false);
+      const status = await fetch(
+        `${url}?${new URLSearchParams({ module, action: "status" })}`,
+      );
+      expect(await status.json()).toMatchObject({
+        registered: true,
+        canRemove: true,
+      });
+      const removal = await fetch(
+        `${url}?${new URLSearchParams({ module, route, action: "remove" })}`,
+      );
+      const removePreview = await removal.json();
+      const removed = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Origin: origin },
+        body: JSON.stringify({
+          module,
+          route,
+          action: "remove",
+          revision: removePreview.revision,
+        }),
+      });
+      expect(removed.status).toBe(200);
     } finally {
       await server.close();
     }

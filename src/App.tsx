@@ -1,3 +1,4 @@
+import { useLocalJourneyReview } from "./app/useLocalJourneyReview";
 import { useGlobeRecovery } from "./app/useGlobeRecovery";
 import { useJourneyContent } from "./app/useJourneyContent";
 import { useWorldGeography } from "./app/useWorldGeography";
@@ -34,6 +35,7 @@ import {
 } from "./app/accountNavigation";
 import {
   Suspense,
+  startTransition,
   lazy,
   useCallback,
   useEffect,
@@ -166,7 +168,7 @@ export function PlayerWorkspace({
         <LoadingScreen />
       ) : (
         <App
-          key={reviewSource?.journey.id ?? account.user?.profile.sub ?? "guest"}
+          key={account.user?.profile.sub ?? "guest"}
           reviewSource={reviewSource}
         />
       )}
@@ -174,22 +176,31 @@ export function PlayerWorkspace({
   );
 }
 export function App({
-  reviewSource,
+  reviewSource: providedReviewSource,
 }: { reviewSource?: JourneyReviewSource } = {}) {
   const account = useAccount();
   const { notify } = useToast();
   const subject = account.user?.profile.sub;
-  const schedule = useJourneySchedule(!reviewSource);
+  const [path, setPath] = useState(location.pathname + location.search);
+  const localReview = useLocalJourneyReview(
+    providedReviewSource ? "" : path,
+    navigate,
+  );
+  const reviewSource = providedReviewSource ?? localReview.source;
+  const sourceReview = !!providedReviewSource || localReview.active;
+  const schedule = useJourneySchedule(!sourceReview);
   const playerProfile = usePlayerProfile(subject, account.accessToken);
   const [feedback, setFeedback] = useState<FeedbackRequest>();
   const closeFeedback = useCallback(() => setFeedback(undefined), []);
   const [creditsOpen, setCreditsOpen] = useState(false);
+  const [reviewNotesTarget, setReviewNotesTarget] =
+    useState<HTMLDivElement | null>(null);
   const closeCredits = useCallback(() => setCreditsOpen(false), []);
   const mobile = useMobileLayout();
   const [globeExpanded, setGlobeExpanded] = useState(false);
   const [exploreContentHeight, setExploreContentHeight] = useState(220);
   const expanded = mobile.enabled && globeExpanded && !mobile.keyboard;
-  const published = usePublishedPuzzles(!reviewSource);
+  const published = usePublishedPuzzles(!sourceReview);
   const allJourneys = useMemo(
     () => [...JOURNEY_INDEX, ...published.items.map((p) => p.journey)],
     [published.items],
@@ -211,19 +222,18 @@ export function App({
     catalog: allJourneys,
     catalogReady: published.ready,
     assignments: schedule.schedule?.assignments,
-    enabled: !reviewSource,
+    enabled: !sourceReview,
   });
-  const [path, setPath] = useState(location.pathname + location.search);
   const pathname = path.split(/[?#]/)[0];
   const accountNavigation = useMemo(() => accountIntent(path), [path]);
   const adminNavigation = useMemo(() => adminIntent(path), [path]);
-  const requestedMode = reviewSource ? "practice" : modeForPath(path);
+  const requestedMode = sourceReview ? "practice" : modeForPath(path);
   const restricted =
-    requestedMode === "practice" && !account.admin && !reviewSource;
+    requestedMode === "practice" && !account.admin && !sourceReview;
   const mode = restricted ? "home" : requestedMode;
   const reviewing =
     mode === "practice" &&
-    (!!reviewSource ||
+    (sourceReview ||
       new URLSearchParams(path.split("?")[1] ?? "").get("review") === "1");
   useEffect(() => {
     if (restricted && !account.loading) {
@@ -237,16 +247,20 @@ export function App({
   const [theme, setTheme] = useState(() => reviewSource?.theme ?? readTheme());
   useEffect(() => applyTheme(theme), [theme]);
   useEffect(() => {
-    if (reviewSource) return;
+    if (reviewSource?.theme) setTheme(reviewSource.theme);
+    else if (!sourceReview) setTheme(readTheme());
+  }, [sourceReview, reviewSource?.theme]);
+  useEffect(() => {
+    if (sourceReview) return;
     const update = (event: StorageEvent) => {
       if (event.key === THEME_KEY || event.key === null) setTheme(readTheme());
     };
     addEventListener("storage", update);
     return () => removeEventListener("storage", update);
-  }, [reviewSource]);
+  }, [sourceReview]);
   const changeTheme = (value: ThemeId) => {
     setTheme(value);
-    if (reviewSource) return;
+    if (sourceReview) return;
     if (saveTheme(value)) notify("Appearance saved on this device.");
     else
       notify("Appearance changed, but couldn’t be saved on this device.", {
@@ -430,6 +444,7 @@ export function App({
     published: published.items,
     retry,
     reviewJourney: reviewSource?.journey,
+    retainWhileLoading: reviewing,
   });
   const freshGame = useMemo(
     () =>
@@ -442,59 +457,6 @@ export function App({
     mode === "daily"
       ? (activeAttempt?.game ?? { ...initialGame, phase: "playing" as const })
       : ((reviewing ? reviews : practice)[journey.id] ?? freshGame);
-  const reviewQuestionId =
-    reviewSource?.questionId ??
-    new URLSearchParams(path.split("?")[1]).get("question");
-  useEffect(() => {
-    if (
-      !reviewing ||
-      !context ||
-      !isJourney ||
-      (!reviewSource && !reviewQuestionId)
-    )
-      return;
-    const index = reviewQuestionId
-      ? journey.rounds.findIndex((q) => q.id === reviewQuestionId)
-      : 0;
-    if (index < 0) return;
-    let live = true;
-    void import("./app/journeyReview")
-      .then(({ reviewState }) =>
-        reviewState(
-          journey,
-          context,
-          index,
-          reviewSource?.stage ?? "play",
-          reviewSource?.seed,
-        ),
-      )
-      .then((next) => {
-        if (live) {
-          setReviews((previous) => ({ ...previous, [journey.id]: next }));
-          reviewSource?.onInspect?.(index, reviewSource.stage);
-        }
-      })
-      .catch((error) => {
-        if (live)
-          notify(
-            error instanceof Error
-              ? error.message
-              : "Couldn’t open this review state.",
-            { tone: "error" },
-          );
-      });
-    return () => {
-      live = false;
-    };
-  }, [
-    reviewing,
-    context,
-    isJourney,
-    journey,
-    reviewQuestionId,
-    reviewSource,
-    notify,
-  ]);
   const [constructionReviewIndex, setConstructionReviewIndex] = useState<
     number | undefined
   >(undefined);
@@ -938,16 +900,15 @@ export function App({
     setStudyReview(undefined);
   }, [mode]);
   function navigate(url: string) {
-    if (reviewSource) {
-      if (reviewSource.onExit) reviewSource.onExit(url);
-      else location.assign(url);
+    if (providedReviewSource?.onExit) {
+      providedReviewSource.onExit(url);
       return;
     }
     if (url === path) return;
     setExploreSearch("");
     prepareNavigation(url);
     history.pushState(null, "", url);
-    setPath(url);
+    startTransition(() => setPath(url));
   }
   useEffect(() => {
     const change = () => setPath(location.pathname + location.search);
@@ -1531,6 +1492,9 @@ export function App({
       </section>
     ) : context ? (
       <GameShell
+        mapNotesTarget={
+          reviewing && !mobile.enabled ? reviewNotesTarget : undefined
+        }
         reviewing={reviewing}
         constructionReviewIndex={constructionReviewIndex}
         canReplay={mode === "practice"}
@@ -1550,19 +1514,22 @@ export function App({
         onReplay={() => {
           if (mode === "practice") dispatch({ type: "start" });
         }}
-        onReport={(questionId) =>
-          setFeedback({
-            kind: "question",
-            context: {
-              view: "journey",
-              journeyId: journey.id,
-              questionId,
-              contentVersion:
-                published.items
-                  .find((item) => item.id === journey.id)
-                  ?.revision.toString() ?? appRelease,
-            },
-          })
+        onReport={
+          sourceReview
+            ? undefined
+            : (questionId) =>
+                setFeedback({
+                  kind: "question",
+                  context: {
+                    view: "journey",
+                    journeyId: journey.id,
+                    questionId,
+                    contentVersion:
+                      published.items
+                        .find((item) => item.id === journey.id)
+                        ?.revision.toString() ?? appRelease,
+                  },
+                })
         }
         compact={mobile.enabled}
         journey={journey}
@@ -1590,9 +1557,20 @@ export function App({
         onHome={() => navigate("/")}
         onStudy={() => navigate("/study")}
       />
+    ) : localReview.error ? (
+      <section className="info-view">
+        <h1>Couldn’t open this review.</h1>
+        <p role="alert">{localReview.error}</p>
+        <button onClick={() => navigate("/review/journeys.html")}>
+          Open the latest Journey
+        </button>
+        <button onClick={() => navigate("/admin?section=journeys")}>
+          ← Journeys
+        </button>
+      </section>
     ) : wantsJourney ? (
       <section className="info-view" role="status">
-        <p>{journeyError || "Loading your Journey…"}</p>
+        <p>{journeyError || <DelayedStatus>Opening Journey…</DelayedStatus>}</p>
         {journeyError && (
           <button onClick={() => setRetry((v) => v + 1)}>Try again ↻</button>
         )}
@@ -1652,6 +1630,9 @@ export function App({
       data-keyboard-open={mobile.keyboard || undefined}
       data-panel-only={panelOnly || undefined}
     >
+      {reviewing && !mobile.enabled && (
+        <div className="review-map-frame" aria-hidden="true" />
+      )}
       {(!webgl || mode === "account") && (
         <div className="account-earth" aria-hidden="true" />
       )}
@@ -1674,6 +1655,10 @@ export function App({
             <Suspense fallback={<LoadingScreen />}>
               <GlobeView
                 active={!panelOnly}
+                fitToContainer={reviewing}
+                frameSelector={
+                  reviewing && !mobile.enabled ? ".review-map-frame" : undefined
+                }
                 ref={globe}
                 initialFocus={recovery.focus ?? initialFocus}
                 theme="play"
@@ -1916,7 +1901,7 @@ export function App({
           <AmbitLogo />
         </button>
         <div className="experience-header-right">
-          {reviewSource && !account.user ? (
+          {sourceReview && !account.user ? (
             <span className="review-local-badge">Local workbench</span>
           ) : (
             <AccountMenu
@@ -1929,17 +1914,17 @@ export function App({
           <AppMenu
             admin={account.admin}
             onJourney={() =>
-              reviewSource ? navigate("/daily") : playDaily(today)
+              sourceReview ? navigate("/daily") : playDaily(today)
             }
             journeyReady={
-              !!reviewSource ||
+              sourceReview ||
               (!!regions.length &&
                 dailyLoaded &&
                 cloudSave.ready &&
                 schedule.ready)
             }
             onFeedback={
-              reviewSource
+              sourceReview
                 ? undefined
                 : () =>
                     setFeedback({ kind: "experience", context: { view: mode } })
@@ -2005,7 +1990,15 @@ export function App({
         scrollKey={mobile.enabled ? mobileStep : undefined}
       >
         <PanelBoundary
-          key={pageLayout ? mode : minigameLanding ? "minigames-menu" : path}
+          key={
+            reviewing
+              ? "journey-review"
+              : pageLayout
+                ? mode
+                : minigameLanding
+                  ? "minigames-menu"
+                  : path
+          }
         >
           <Suspense
             fallback={
@@ -2023,20 +2016,24 @@ export function App({
           className="journey-review-panel"
           aria-label="Journey review workbench"
         >
-          <Suspense fallback={<p role="status">Opening review controls…</p>}>
+          <Suspense fallback={null}>
             <AdminJourneyReview
+              key={`${journey.id}:${reviewSource?.requestKey ?? path}`}
               journey={journey}
               date={adminDate(
                 new URLSearchParams(path.split("?")[1]).get("date"),
               )}
               source={reviewSource}
+              loadError={localReview.error}
               context={context}
               game={game}
               onChange={(next) =>
-                setReviews((previous) => ({
-                  ...previous,
-                  [journey.id]: next,
-                }))
+                startTransition(() =>
+                  setReviews((previous) => ({
+                    ...previous,
+                    [journey.id]: next,
+                  })),
+                )
               }
               onNavigate={navigate}
             />
@@ -2053,6 +2050,7 @@ export function App({
               aria-label="Globe controls"
             >
               <GlobeRecenter ready={ready && webgl} onRecenter={recenterView} />
+              {reviewing && <div ref={setReviewNotesTarget} />}
             </div>
           )))}
       {mobile.enabled && (

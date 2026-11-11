@@ -1,0 +1,52 @@
+/* Matches the critical pre-JavaScript loading styles in index.html. */
+.ambit-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 100dvh;
+  background: var(--ui-bg, #101010);
+  color: var(--ui-text, #eff1df);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 450ms ease-out;
+}
+.ambit-loading-screen.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+.ambit-loading-globe {
+  width: min(38vw, 170px);
+  height: auto;
+}
+.ambit-loading-title {
+  display: block;
+  width: clamp(160px, 40vw, 220px);
+  height: auto;
+}
+.ambit-loading-copy {
+  color: var(--ui-muted, #b6c9bf);
+  font-size: 13px;
+  letter-spacing: 0.045em;
+}
+.ambit-loading-dots {
+  animation: ambit-loading-fade 1.7s ease-in-out infinite;
+}
+@keyframes ambit-loading-fade {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambit-loading-screen {
+    transition-duration: 150ms;
+  }
+  .ambit-loading-dots {
+    animation-duration: 4s;
+  }
+}

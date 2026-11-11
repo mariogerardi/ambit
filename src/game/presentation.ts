@@ -386,7 +386,12 @@ export function questionMapPresentation(
         : phase === "feedback" && question.map?.feedbackBorders !== undefined
           ? question.map.feedbackBorders
           : recap || !!reveal || question.map?.borders !== false,
-    hover: recap || !!reveal || question.map?.hoverFeedback !== false,
+    hover:
+      recap ||
+      !!reveal ||
+      (mechanicFor(question).mapSelection === "regions" &&
+        ["members", "world"].includes(question.selection.type)) ||
+      question.map?.hoverFeedback !== false,
     muteOthers:
       !recap &&
       !reveal &&
@@ -569,7 +574,7 @@ export function questionRegions(
   return result;
 }
 
-/** Neutral full-world searches can begin in motion; authored geographic clues keep their framing. */
+/** Full-world searches can begin in motion; authored geographic clues keep their framing. */
 export function isWholeGlobeSearch(question: Question) {
   return (
     mechanicFor(question).mapSelection === "regions" &&
@@ -600,11 +605,7 @@ export function questionVisualStates(
   const states: Record<string, VisualState> = Object.fromEntries(
     [...context.regions, ...(question.importedRegions ?? [])].map((r) => [
       r.id,
-      game.phase === "playing" &&
-      (question.map?.background === "open-search" ||
-        (wholeWorld &&
-          question.map?.candidates === "neutral" &&
-          (question.selection.type === "world" || context.members.has(r.id))))
+      game.phase === "playing" && question.map?.background === "open-search"
         ? "surface"
         : question.map?.neutralRegions
           ? "default"
@@ -647,19 +648,20 @@ export function questionVisualStates(
     // Muting unrelated land must not disable explicitly highlighted candidates.
     if (
       question.selection.type !== "none" &&
-      (!question.map?.muteOthers || question.map.candidates === "highlighted")
+      (wholeWorld ||
+        !question.map?.muteOthers ||
+        question.map.candidates === "highlighted")
     )
       for (const id of selectableIds(question, context))
         if (context.targets.has(id))
           states[id] =
+            wholeWorld ||
             question.selection.type === "neighbors" ||
             question.map?.candidates === "highlighted"
               ? "selectable"
-              : wholeWorld && question.map?.candidates === "neutral"
+              : question.map?.candidates === "decorative"
                 ? "surface"
-                : question.map?.candidates === "decorative"
-                  ? "surface"
-                  : "disabled";
+                : "disabled";
     for (const id of question.candidateRegionIds ?? [])
       if (context.targets.has(id))
         states[id] =
@@ -803,9 +805,13 @@ export function questionVisualStates(
           (item.state !== "disabled" || states[id] !== "hinted")
         )
           states[id] = item.state;
-  // A network explains the distribution without claiming every member was selected.
+  // Supporting network geography stays blue; valid answers keep their solution role.
   for (const id of question.feedbackNetwork?.regionIds ?? [])
-    if (context.targets.has(id) && !game.selectedIds.includes(id))
+    if (
+      context.targets.has(id) &&
+      !expected.includes(id) &&
+      !game.selectedIds.includes(id)
+    )
       states[id] = "hinted";
   // An authored sequence reveal explains the solution; assignment errors remain
   // in the response review, while an actually chosen spare retains its wrong color.
@@ -861,9 +867,6 @@ export function journeyVisitedStates(
               : solutionIds(question, context).slice(0, question.count),
           )
         : undefined;
-    if (example && !answer.correct && question.feedbackNetwork)
-      for (const id of example)
-        if (context.targets.has(id)) states[id] = "visited";
     for (const [id, state] of Object.entries(
       questionVisualStates(question, context, review),
     ))

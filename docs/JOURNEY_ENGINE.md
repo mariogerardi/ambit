@@ -276,16 +276,20 @@ language name and translation nodes appear only after commitment. Use a valid
 language tag and RTL where appropriate, without translating the clue early.
 
 `selection: {type: "world"}` includes all supported ADM0 map units, whereas
-`members` retains the existing UN-member roster. Combine world selection with
-neutral candidates for an untinted global search. For `match: "any"`, an assist
+`members` retains the existing UN-member roster. Both display eligible countries
+with the shared selectable fill and hover emphasis, even with the legacy
+`map.candidates: "neutral"` setting; disclosure still governs names. For `match: "any"`, an assist
 may narrow the displayed valid alternatives while retaining enough qualifying
 answers and a plausible invalid option; it never changes the canonical solution.
 
 `scenes.reveal.network: {regionIds, label}` is explanatory geography. All listed
-countries appear in context color at once; a chosen valid/invalid country keeps
-its real grade. Alternative-answer recaps retain the submitted valid choice, or
+countries appear together. Valid unchosen answers retain the solution color and
+concentric-circle symbol; supporting countries outside the answer set use context
+color. A chosen valid/invalid country keeps its real grade. Alternative-answer recaps retain the submitted valid choice, or
 one illustrative solution after a miss, rather than promote the whole network.
 The network's IDs and legend are checked independently of answer eligibility.
+The shared `answer-role` visual audit also checks that a reveal network has not
+repainted correct, incorrect or valid unchosen countries as supporting context.
 
 `scenes.reveal.orbit: true` finishes the finite reveal at its authored whole-globe
 focus, appending that focus to the views if needed, then resumes the shared

@@ -5,7 +5,11 @@ import ts from "typescript";
 import { format } from "prettier";
 import type { Plugin, ViteDevServer } from "vite";
 import type { Journey } from "../src/game/questionContracts";
-import type { RegistrationPreview } from "./registrationTypes";
+import type {
+  RegistrationPlan,
+  RegistrationPreview,
+} from "./registrationTypes";
+import { catalogStatus, removalPlan } from "./catalogRemoval";
 
 const endpoint = "/__journey-workbench/register";
 const catalogPath = "src/game/journeys.ts";
@@ -33,7 +37,7 @@ export async function registrationPlan(
   module: string,
   route: string,
   load: (file: string) => Promise<Record<string, unknown>>,
-) {
+): Promise<RegistrationPlan> {
   if (!/^[A-Za-z][A-Za-z0-9]*Journey\.ts$/.test(module))
     throw Error("Choose a Journey source file.");
   if (!/^\/journey\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(route))
@@ -235,6 +239,7 @@ export async function registrationPlan(
     docs.slice(tableEnd);
   const revision = hash(JSON.stringify({ before, module, route, journey }));
   const preview: RegistrationPreview = {
+    action: "add",
     title: journey.title,
     id: journey.id,
     module,
@@ -257,7 +262,7 @@ export async function registrationPlan(
 
 export async function applyRegistration(
   root: string,
-  plan: Awaited<ReturnType<typeof registrationPlan>>,
+  plan: RegistrationPlan,
   revision: string,
 ) {
   if (plan.preview.revision !== revision)
@@ -320,7 +325,12 @@ export function journeyWorkbenchPlugin(): Plugin {
             );
             return;
           }
-          let input: { module?: string; route?: string; revision?: string };
+          let input: {
+            module?: string;
+            route?: string;
+            revision?: string;
+            action?: string;
+          };
           if (req.method === "GET")
             input = Object.fromEntries(new URL(req.url!, host).searchParams);
           else {
@@ -332,20 +342,28 @@ export function journeyWorkbenchPlugin(): Plugin {
             }
             input = JSON.parse(body);
           }
-          if (
-            typeof input.module !== "string" ||
-            typeof input.route !== "string"
-          )
+          if (typeof input.module !== "string")
             throw Error("Choose a Journey and route.");
           const root = server.config.root;
+          if (input.action === "status" && req.method === "GET") {
+            res.end(JSON.stringify(await catalogStatus(root, input.module)));
+            return;
+          }
+          if (typeof input.route !== "string")
+            throw Error("Choose a Journey and route.");
+          if (input.action && !["add", "remove"].includes(input.action))
+            throw Error("Unknown catalog action.");
           registering = true;
           try {
-            const plan = await registrationPlan(
-              root,
-              input.module,
-              input.route,
-              (file) => server.ssrLoadModule(file),
-            );
+            const plan =
+              input.action === "remove"
+                ? await removalPlan(root, input.module, input.route)
+                : await registrationPlan(
+                    root,
+                    input.module,
+                    input.route,
+                    (file) => server.ssrLoadModule(file),
+                  );
             if (req.method === "POST") {
               if (typeof input.revision !== "string")
                 throw Error("Preview registration first.");

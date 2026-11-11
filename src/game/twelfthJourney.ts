@@ -116,7 +116,7 @@ export const TWELFTH_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "members" },
-      commitment: "immediate",
+      commitment: "submit",
 
       ...base,
       id: "exceptions-double-landlocked",
@@ -241,7 +241,7 @@ export const TWELFTH_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "members" },
-      commitment: "immediate",
+      commitment: "submit",
 
       ...base,
       id: "exceptions-bolivia-coast",
@@ -307,7 +307,7 @@ export const TWELFTH_JOURNEY: Journey = {
       mode: "map-single",
       count: 1,
       selection: { type: "members" },
-      commitment: "immediate",
+      commitment: "submit",
 
       ...base,
       id: "exceptions-baku",

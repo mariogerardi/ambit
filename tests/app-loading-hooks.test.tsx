@@ -200,3 +200,26 @@ it("ignores a disabled physical-layer request and caches the subsequent valid sn
   expect(physicalSignals).toHaveLength(2);
   expect(geographyResult.physicalFeatures?.[0]).toBe(feature);
 });
+
+it("keeps the previous Review Journey visible until replacement content is ready", async () => {
+  const next = deferred<typeof ANDES_JOURNEY>();
+  vi.spyOn(registry, "loadJourney")
+    .mockResolvedValueOnce(CANADA_JOURNEY)
+    .mockReturnValueOnce(next.promise);
+  const props = {
+    mode: "practice" as const,
+    journeyId: CANADA_JOURNEY.id,
+    warmJourneyId: CANADA_JOURNEY.id,
+    ready: true,
+    regions,
+    published,
+    retry: 0,
+    retainWhileLoading: true,
+  };
+  await renderJourney(props);
+  await renderJourney({ ...props, journeyId: ANDES_JOURNEY.id });
+  expect(journeyResult.journey).toBe(CANADA_JOURNEY);
+  expect(journeyResult.isJourney).toBe(true);
+  await act(async () => next.resolve(ANDES_JOURNEY));
+  expect(journeyResult.journey).toBe(ANDES_JOURNEY);
+});

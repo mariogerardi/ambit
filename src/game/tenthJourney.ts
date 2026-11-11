@@ -59,7 +59,7 @@ export const TENTH_JOURNEY: Journey = {
       mode: "map-single",
       rule: { type: "flag-country", countryId: "wurl:JPN" },
       selection: { type: "members" },
-      commitment: "immediate",
+      commitment: "submit",
       image: {
         src: flagCatalog.flags.find((f) => f.countryId === "wurl:JPN")!.src,
         alt: "Flag clue: a red circle centered on a white field.",

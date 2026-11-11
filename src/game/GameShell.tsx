@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { TextClue } from "./TextClue";
 import { ConstructionReview, IslandScoring } from "./ConstructionAnswer";
 import { constructionRule, reviewedConstruction } from "./construction";
@@ -44,6 +45,19 @@ import {
   resolvedRoundIdentity,
   journeyResultCopy,
 } from "./copy";
+function MapNotesPlacement({
+  target,
+  children,
+}: {
+  target?: HTMLElement | null;
+  children: ReactNode;
+}) {
+  return target === null
+    ? null
+    : target
+      ? createPortal(children, target)
+      : children;
+}
 function FlagComparison({
   flags,
   label = "Flag comparison",
@@ -93,7 +107,7 @@ function MapKey({ entries }: { entries: ReturnType<typeof feedbackLegend> }) {
                 background: `var(--play-${colorRole ?? (key === "hint" ? "hinted" : key === "neutral" ? "disabled" : key)})`,
               }}
             >
-              {["correct", "selected", "incorrect"].includes(key) && (
+              {["correct", "selected", "incorrect", "answer"].includes(key) && (
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -102,13 +116,20 @@ function MapKey({ entries }: { entries: ReturnType<typeof feedbackLegend> }) {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path
-                    d={
-                      key === "incorrect"
-                        ? "M7 7l10 10M17 7L7 17"
-                        : "M5 12l5 5L20 7"
-                    }
-                  />
+                  {key === "answer" ? (
+                    <>
+                      <circle cx="12" cy="12" r="8" />
+                      <circle cx="12" cy="12" r="4" />
+                    </>
+                  ) : (
+                    <path
+                      d={
+                        key === "incorrect"
+                          ? "M7 7l10 10M17 7L7 17"
+                          : "M5 12l5 5L20 7"
+                      }
+                    />
+                  )}
                 </svg>
               )}
             </i>
@@ -137,10 +158,12 @@ export function GameShell({
   contextNavigation,
   reviewing = false,
   constructionReviewIndex,
+  mapNotesTarget,
 }: {
   reduced?: boolean;
   reviewing?: boolean;
   constructionReviewIndex?: number;
+  mapNotesTarget?: HTMLElement | null;
   social?: ReactNode;
   contextNavigation?: ReactNode;
   onReport?(questionId: string): void;
@@ -776,19 +799,21 @@ export function GameShell({
         </section>
       )}
       {(mapAttribution || mapCaption) && (
-        <aside className="journey-map-notes" aria-label="Map notes">
-          {mapCaption && <span>{mapCaption}</span>}
-          {mapAttribution && (
-            <a
-              data-dd-action-name="Journey Map Source"
-              href={mapAttribution.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {mapAttribution.label}
-            </a>
-          )}
-        </aside>
+        <MapNotesPlacement target={mapNotesTarget}>
+          <aside className="journey-map-notes" aria-label="Map notes">
+            {mapCaption && <span>{mapCaption}</span>}
+            {mapAttribution && (
+              <a
+                data-dd-action-name="Journey Map Source"
+                href={mapAttribution.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {mapAttribution.label}
+              </a>
+            )}
+          </aside>
+        </MapNotesPlacement>
       )}
       <div className="board-tools">
         {inGame && game.phase === "playing" && (

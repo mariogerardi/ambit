@@ -50,6 +50,7 @@ For an approved specification, start with
 | Power to the People                | `/journey/power-to-the-people`                | [powerToThePeopleJourney.ts](../src/game/powerToThePeopleJourney.ts)           |
 | Bare Minimum                       | `/journey/bare-minimum`                       | [bareMinimumJourney.ts](../src/game/bareMinimumJourney.ts)                     |
 | How America Adds Up                | `/journey/how-america-adds-up`                | [howAmericaAddsUpJourney.ts](../src/game/howAmericaAddsUpJourney.ts)           |
+| Where Is It Official?              | `/journey/where-is-it-official`               | [whereIsItOfficialJourney.ts](../src/game/whereIsItOfficialJourney.ts)         |
 
 Home displays TODAY'S JOURNEY, its title/description, progress, and the appropriate
 Play/Resume/View result action. Daily dates change at midnight in New York.
@@ -153,8 +154,9 @@ Map picking is derived from the answer mode and canonical candidate pool.
 excluded from region-answer eligibility. Use `scenes.play.candidateRegionIds` for
 an openly shown geographic pool independent of the input method, and use
 `choices[].geographyIds` to link button identities to reviewed depictions. Neither
-field enables globe input. Whole-world recall and pin placement use the neutral
-search surface, not the finite-candidate gold. Use disclosure settings to hide
+field enables globe input. Whole-world country selection uses the shared candidate
+fill and hover emphasis; unrestricted pin placement keeps its neutral surface.
+Use disclosure settings to hide
 names, not hover settings to disable the intended control. Author typed recall as `mode: "text"` with an immediately
 visible input. `allowTyping: false` suppresses a globe-only question's typing
 shortcut while retaining the unavailable-WebGL fallback.
@@ -206,8 +208,8 @@ all choices into the occupied slots and spare when starting or advancing; the
 chosen arrangement is stored in the response and stays stable through edits/help.
 `assist.fixedSelections` can lock correct unordered picks, preserve existing picks,
 and keep the anchors selected after clearing. Focused tests retain coverage of
-this supported behavior. The current authoring standard commits single-country and merged-territory
-answers immediately; pins and multi-answer selections retain confirmation.
+this supported behavior. Single-country picks, pins and multi-answer selections
+remain editable until explicit submission. Merged-territory answers commit immediately.
 The engine supports additional commitment configurations for compatibility and
 reviewed extensions. Do not copy those configurations into new content merely
 because validation permits them. See [the shared input rules](JOURNEY_CRAFTING.md#5-give-the-globe-purposeful-question-state-information).

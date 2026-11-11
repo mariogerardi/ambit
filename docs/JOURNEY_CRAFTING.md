@@ -273,12 +273,14 @@ comparisons can use connecting lines.
   hover names, or camera movement until submission. This is a task-specific
   disclosure rule, not the default for questions where that identity is already given.
 - **Open search surface (light neutral land):** Undisclosed land available for
-  whole-world recall or a deliberately unrestricted pin search. Pin input alone
+  a deliberately unrestricted pin search. Pin input alone
   does not imply an open search field: city pins with given reference countries
   use the same muted background as other questions. Declare
   `map.background: "open-search"` and its authored reason when the withheld
   footprint is itself part of a broad pin search. Whole-world country selection
-  uses `map.candidates: "neutral"`. Gray muted geography represents
+  uses the same selectable fill and hover emphasis as a bounded candidate pool,
+  including sources that retain `map.candidates: "neutral"`. Concealed names stay
+  controlled independently by disclosure settings. Gray muted geography represents
   background outside the current search field. Do not color only the correct
   candidate or expose a withheld pin target's outline.
   Keep this broad surface lower in visual emphasis than the blue references;
@@ -345,9 +347,11 @@ memory is part of the task, and explain that omission before submission. Write p
 around geographic names or “the highlighted island,” rather than palette values
 such as “darker yellow”; meaning must survive theme changes.
 
-**Keep input consistent.** Single-country and merged-territory taps submit
-immediately, including named button alternatives. Pins and multi-answer selections
-retain confirmation. Pins use a crosshair on land and water. Reference areas do
+**Keep input consistent.** Single-country picks remain editable until the player
+selects **Submit answer**, including named button and typing alternatives. Tapping
+another country replaces the selection; tapping it again or clearing removes it.
+Pins and multi-answer selections also retain confirmation. Merged-territory taps
+submit immediately. Pins use a crosshair on land and water. Reference areas do
 not gain answer cursors or hover emphasis. Colors alone never grant eligibility,
 change grading, expose names, or frame the camera.
 The shared answer control owns commitment notices such as “Your first answer is

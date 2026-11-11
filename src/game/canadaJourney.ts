@@ -37,7 +37,7 @@ export const CANADA_JOURNEY: Journey = {
       rule: { type: "flag-country", countryId: "wurl:CAN" },
       count: 1,
       selection: { type: "members" },
-      commitment: "immediate",
+      commitment: "submit",
 
       title: "A flag, a place.",
       label: "Flag",

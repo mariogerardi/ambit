@@ -1153,6 +1153,48 @@
     ]
   },
   {
+    "id": "where-is-it-official-v1",
+    "dailyEligible": false,
+    "addedAt": "2026-11-03",
+    "title": "Where Is It Official?",
+    "saveRevision": 1,
+    "description": "Five expressions, five languages, and a world of possible answers. Find one country; discover the wider connections.",
+    "path": "/journey/where-is-it-official",
+    "module": "./whereIsItOfficialJourney.ts",
+    "rounds": [
+      {
+        "id": "official-01-arabic",
+        "label": "Official languages",
+        "progressLabel": "A Familiar Script",
+        "resolvedLabel": "Arabic · across regions"
+      },
+      {
+        "id": "official-02-portuguese",
+        "label": "Official languages",
+        "progressLabel": "Across Oceans",
+        "resolvedLabel": "Portuguese · across oceans"
+      },
+      {
+        "id": "official-03-russian",
+        "label": "Official languages",
+        "progressLabel": "Beyond the Alphabet",
+        "resolvedLabel": "Russian · across borders"
+      },
+      {
+        "id": "official-04-malay",
+        "label": "Official languages",
+        "progressLabel": "Familiar Letters",
+        "resolvedLabel": "Malay · related national standards"
+      },
+      {
+        "id": "official-05-guarani",
+        "label": "Official languages",
+        "progressLabel": "Words That Remain",
+        "resolvedLabel": "Guaraní · living recognition"
+      }
+    ]
+  },
+  {
     "id": "where-the-silk-roads-met-v1",
     "addedAt": "2026-10-20",
     "title": "Where the Silk Roads Met",

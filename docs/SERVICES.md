@@ -72,7 +72,7 @@ into isolated review. Filters select report status; counts are explicitly
 limited to loaded results when pagination remains. Technical context is in a
 disclosure. Each report has a bounded surface, readable message, contextual Journey link, and compact status actions. **Utilities** is a secondary destination grouping personal attempt testing, catalog/release guidance, and local development links. Reset retains its accessible confirmation.
 
-The global hamburger menu exposes **Admin** to authorized administrators and **Journey Workbench** when the Vite development entry point is available. Both entries are omitted while viewing Your space. The personal avatar menu and account sidebar contain only personal destinations. Workbench entry without an explicit Journey uses the catalog’s latest `addedAt` authoring date, with deterministic title/ID ties; explicit Journey/module links take precedence.
+The global hamburger menu exposes **Admin** to authorized administrators and **Journey Workbench** when the Vite development entry point is available. Both remain available while viewing Your Space. The personal avatar menu and account sidebar contain only personal destinations. Workbench entry without an explicit Journey uses the catalog’s latest `addedAt` authoring date, with deterministic title/ID ties; explicit Journey/module links take precedence.
 
 **Review Journey** opens the protected practice route with `?review=1`, optionally
 with a validated `date` and a `question` ID to inspect. An unknown question ID is

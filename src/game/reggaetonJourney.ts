@@ -211,7 +211,7 @@ export const REGGAETON_JOURNEY: Journey = {
         type: "ids",
         ids: ["wurl:CUB", "wurl:HTI", "wurl:JAM", "wurl:DOM", "wurl:PRI"],
       },
-      commitment: "immediate",
+      commitment: "submit",
       rule: { type: "country-ids", ids: ["wurl:PRI"] },
       guidance: {
         hint: "Look in the Greater Antilles. Puerto Rico is smaller than Cuba and Hispaniola, and lies farther east.",

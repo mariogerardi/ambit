@@ -80,19 +80,15 @@ describe("shared question support", () => {
     }
   });
 
-  it("keeps the selection cue and final-answer notice in inline spans of one paragraph", () => {
+  it("keeps the selection cue without a final-answer notice for editable country picks", () => {
     const { question } = find("reggaeton-01-jamaica");
     const host = markup(
       renderToStaticMarkup(<QuestionSupport question={question} />),
     );
     expect(host.querySelectorAll("p")).toHaveLength(1);
-    expect(host.textContent).toBe(
-      "Select the island. Your first answer is final.",
-    );
+    expect(host.textContent).toBe("Select the island.");
     expect(host.querySelector("p")?.children[0].tagName).toBe("SPAN");
-    expect(host.querySelector("p")?.children[1].className).toBe(
-      "question-support-commitment",
-    );
+    expect(host.querySelector(".question-support-commitment")).toBeNull();
   });
 
   it("omits the duplicate selection sentence when the prompt already supplies the task", () => {
@@ -158,7 +154,13 @@ describe("shared question support", () => {
     expect(
       markup(
         renderToStaticMarkup(
-          <QuestionSupport question={{ ...country, failure: "end-game" }} />,
+          <QuestionSupport
+            question={{
+              ...country,
+              commitment: "immediate",
+              failure: "end-game",
+            }}
+          />,
         ),
       ).textContent,
     ).toContain("one wrong answer ends this Journey");

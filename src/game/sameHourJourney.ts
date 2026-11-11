@@ -180,7 +180,7 @@ export const SAME_HOUR_JOURNEY: Journey = {
       instruction: "Select a country.",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: {
         type: "ids",
         ids: ["wurl:PRT", "wurl:POL", "wurl:GBR", "wurl:GRC"],

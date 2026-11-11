@@ -153,7 +153,7 @@ export function AppMenu({
               <span>Study</span>
             </button>
           </div>
-          {admin && path.split(/[?#]/)[0] !== "/account" && (
+          {admin && (
             <div
               className="app-menu-secondary app-menu-admin"
               role="group"
@@ -168,7 +168,20 @@ export function AppMenu({
                 <span>Admin</span>
               </button>
               {import.meta.env.DEV && (
-                <a href="/review/journeys.html">
+                <a
+                  href="/review/journeys.html"
+                  onClick={(event) => {
+                    if (
+                      !event.metaKey &&
+                      !event.ctrlKey &&
+                      !event.shiftKey &&
+                      !event.altKey
+                    ) {
+                      event.preventDefault();
+                      navigate("/review/journeys.html");
+                    }
+                  }}
+                >
                   <ActionIcon name="workbench" />
                   <span>Journey Workbench</span>
                 </a>

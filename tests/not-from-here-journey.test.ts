@@ -56,7 +56,7 @@ describe("Not From Here handoff integration", () => {
       ])
         expect(view(game).physicalFeatures).toEqual([]);
     }
-    const missed = step(play("kiwifruit"), select("wurl:JPN"));
+    const missed = step(play("kiwifruit"), select("wurl:JPN"), submit);
     expect(view(missed).states).toMatchObject({
       "wurl:CHN": "answer",
       "wurl:NZL": "hinted",
@@ -80,7 +80,7 @@ describe("Not From Here handoff integration", () => {
       const world = view(play(subject));
       expect(world.places).toEqual([]);
       expect(new Set(Object.values(world.states))).toEqual(
-        new Set(["surface"]),
+        new Set(["selectable"]),
       );
       expect(world.overlays).toEqual([]);
     }
@@ -268,7 +268,7 @@ describe("Not From Here handoff integration", () => {
       expect(world.overlays).toEqual([]);
     }
     const answers = [
-      step(play("kiwifruit"), select("wurl:JPN")),
+      step(play("kiwifruit"), select("wurl:JPN"), submit),
       step(play("potatoes"), select("wurl:CHL"), select("wurl:PER"), submit),
       step(play("coffee"), select("place:415189"), submit),
       step(play("vanilla"), { type: "drop-pin", lat: 0, lng: 0 }, submit),
@@ -307,7 +307,7 @@ describe("Not From Here handoff integration", () => {
 
   it("consolidates canonical discoveries, keeps France muted and gives every recap subject a visible stop", () => {
     const answers = [
-      step(play("kiwifruit"), select("wurl:CHN")),
+      step(play("kiwifruit"), select("wurl:CHN"), submit),
       step(play("potatoes"), select("wurl:PER"), select("wurl:BOL"), submit),
       step(play("coffee"), select("place:78751"), submit),
       step(

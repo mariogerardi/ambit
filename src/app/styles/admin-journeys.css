@@ -1,298 +1,330 @@
-.admin-review-toolbar .field {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-  color: var(--ui-muted);
-  font-size: 13px;
+/* Panels overlay one continuous globe; the transparent frame owns camera fit. */
+.experience.journey-reviewing {
+  --review-width: 304px;
+  --review-player-width: 400px;
+  --review-gap: 24px;
 }
-.admin-review-toolbar select {
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 44px;
-  padding: 10px 12px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
-  border-radius: 8px;
-  background: rgb(var(--ui-surface-rgb) / 0.9);
+.journey-review-panel {
+  position: absolute;
+  z-index: 8;
+  top: var(--page-content-top);
+  right: 24px;
+  bottom: 24px;
+  width: var(--review-width);
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.16);
+  border-radius: 12px;
+  background: rgb(var(--ui-surface-rgb));
+  overflow: hidden;
+}
+.admin-review-toolbar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   color: var(--ui-text);
-  font: 14px var(--font-ui);
+  font: 13px/1.45 var(--font-ui);
 }
-.admin-review-toolbar select:focus-visible {
+.admin-review-toolbar :is(button, select, input) {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid rgb(var(--ui-line-rgb) / 0.22);
+  border-radius: 6px;
+  padding: 7px 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.admin-review-toolbar :is(button, select, input):focus-visible,
+.admin-review-toolbar summary:focus-visible {
   outline: 2px solid var(--ui-focus);
   outline-offset: 2px;
 }
-.admin-library-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
+.admin-review-toolbar button:hover:not(:disabled) {
+  background: var(--control-hover-background);
+  border-color: rgb(var(--ui-accent-rgb) / 0.5);
 }
-.admin-library-actions > a,
-.admin-library-actions > button {
-  min-height: 44px;
-  box-sizing: border-box;
+.admin-review-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: wait;
 }
-.admin-library-actions > a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-.admin-review-toolbar {
-  padding: 16px;
-  margin: 0 0 24px;
+.review-heading {
+  flex: 0 0 auto;
   display: grid;
-  gap: 14px;
-  border: 1px solid rgb(var(--ui-accent-rgb) / 0.4);
-  border-radius: 12px;
-  background: rgb(var(--ui-surface-rgb));
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.14);
 }
-.admin-review-heading {
-  display: grid;
-  gap: 4px;
-}
-.admin-review-heading span,
-.admin-review-toolbar p {
-  font-size: 13px;
+.review-eyebrow {
   color: var(--ui-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+}
+.review-heading h2 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font: 400 27px/1.12 var(--font-editorial);
+  color: var(--ui-editorial);
+  overflow-wrap: anywhere;
+}
+.admin-review-toolbar :is(.review-visibility, .review-text-action) {
+  min-height: 30px;
+  padding: 4px 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--ui-accent);
+  font-size: 12px;
+  text-align: left;
+}
+.admin-review-toolbar :is(.review-visibility, .review-text-action):hover {
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.review-controls {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 18px 12px;
+  scrollbar-width: thin;
+}
+.review-controls[hidden] {
+  display: none;
+}
+.admin-review-toolbar details {
+  padding: 8px 0;
 }
 .admin-review-toolbar summary {
   cursor: pointer;
-  min-height: 32px;
-}
-.admin-review-states {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-/* Review tools are secondary to the actual question being inspected. */
-.admin-review-toolbar {
-  gap: 10px;
-  padding: 12px;
-  margin: 0;
-}
-.admin-review-toolbar[data-mode="playtest"] {
-  gap: 8px;
-  padding: 10px;
-}
-.admin-review-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.admin-review-heading > div {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-.admin-review-heading strong {
-  font-size: 13px;
-}
-.admin-review-heading span {
-  overflow: hidden;
-  font-size: 12px;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-}
-.admin-review-toolbar .admin-review-mode-toggle {
-  flex: 0 0 auto;
-  width: auto;
-  min-height: 36px;
-  padding: 7px 10px;
-  color: var(--ui-accent);
-  white-space: nowrap;
-}
-.admin-review-toolbar[data-mode="playtest"] .workbench-advanced {
-  display: none;
-}
-.admin-review-selectors {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
-}
-.admin-review-toolbar .field {
-  gap: 6px;
-  margin: 0;
-}
-.admin-review-control-panel {
-  display: grid;
-  gap: 14px;
-  padding-top: 12px;
-}
-.admin-review-control-panel > .admin-library-actions {
-  margin: 0;
-}
-.admin-review-toolbar .admin-library-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-.admin-review-toolbar .admin-library-actions:has(.journey-workbench) {
-  grid-template-columns: minmax(0, 1fr);
-}
-.admin-review-toolbar :is(button, input, select) {
-  box-sizing: border-box;
-  min-height: 44px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.3);
-  border-radius: 8px;
-  background: rgb(var(--ui-surface-rgb));
-  color: var(--ui-text);
-  padding: 9px 11px;
-  font: 13px var(--font-ui);
-}
-.admin-review-toolbar button {
-  width: 100%;
-  white-space: normal;
-  line-height: 1.35;
-}
-.admin-review-toolbar button:hover {
-  border-color: var(--ui-accent);
-  background: var(--control-hover-background);
-}
-.admin-review-toolbar button:focus-visible {
-  outline: 2px solid var(--ui-focus);
-  outline-offset: 2px;
-}
-.admin-review-toolbar details > summary {
-  display: list-item;
   padding: 6px 0;
-  min-height: 32px;
-  color: var(--ui-accent);
-  font-size: 13px;
-}
-.admin-review-group {
-  min-width: 0;
-  padding: 12px;
-  margin: 0;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.22);
-  border-radius: 8px;
-}
-.admin-review-group legend {
-  padding: 0 5px;
   color: var(--ui-muted);
   font-size: 12px;
 }
-.admin-review-captures input {
-  width: 100%;
+.admin-review-toolbar details[open] > summary {
+  color: var(--ui-accent);
+  margin-bottom: 8px;
+}
+.admin-review-toolbar .field {
+  display: grid;
+  gap: 6px;
   min-width: 0;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.admin-review-toolbar select {
+  width: 100%;
+  background: rgb(var(--ui-surface-rgb));
+  color: var(--ui-text);
+}
+.workbench-catalog-content {
+  display: grid;
+  gap: 10px;
+}
+.workbench-catalog-content p {
+  margin: 0;
+}
+.workbench-catalog-content input {
+  width: 100%;
+}
+.workbench-catalog-note {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.workbench-catalog-route {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.workbench-catalog-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.review-question-list {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+}
+.review-question-list button {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  border-color: transparent;
+  padding: 6px 8px;
+}
+.review-question-number {
+  color: var(--ui-muted);
+  font-size: 11px;
+}
+.review-question-list button[aria-current] {
+  background: rgb(var(--ui-accent-rgb) / 0.09);
+  color: var(--ui-accent);
+}
+.review-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+}
+.review-section-heading h3 {
+  margin: 0;
+  font: 500 12px/1.4 var(--font-ui);
+}
+.review-state-group {
+  border: 0;
+  padding: 0;
+  margin: 10px 0 0;
+  min-width: 0;
+}
+.review-state-group legend {
+  font-size: 11px;
+  color: var(--ui-muted);
+  padding: 0 0 6px;
+}
+.review-state-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.review-state-buttons button {
+  flex: 1 0 auto;
+  font-size: 12px;
+}
+.review-outcome-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.review-state-buttons button[aria-pressed="true"] {
+  border-color: rgb(var(--ui-accent-rgb) / 0.65);
+  background: rgb(var(--ui-accent-rgb) / 0.1);
+  color: var(--ui-accent);
+}
+.review-preview-status {
+  margin: 12px 0;
+  color: var(--ui-muted);
+  font-size: 11px;
+}
+.review-error {
+  color: var(--ui-text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.review-completion {
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+}
+.review-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 14px;
+  padding: 10px 18px;
+  flex: 0 0 auto;
+  border-top: 1px solid rgb(var(--ui-line-rgb) / 0.14);
+}
+.review-navigation[hidden] {
+  display: none;
+}
+.journey-review-panel:has([data-collapsed]) {
+  bottom: auto;
+}
+.admin-review-toolbar[data-collapsed] .review-heading {
+  border: 0;
 }
 .review-local-badge {
   font: 12px var(--font-ui);
   color: var(--ui-muted);
 }
-
-.journey-review-panel {
-  position: absolute;
-  right: 24px;
-  bottom: 96px;
-  z-index: 8;
-  width: min(380px, calc(100vw - 48px));
-  max-height: calc(100dvh - 150px);
-  overflow: auto;
-  pointer-events: auto;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px #0004;
-  background: rgb(var(--ui-surface-rgb));
-}
-.journey-review-panel:has(.admin-review-toolbar[data-mode="playtest"]) {
-  width: min(310px, calc(100vw - 32px));
-  max-height: none;
-  overflow: visible;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.journey-review-panel .admin-review-toolbar {
-  margin: 0;
-  background: rgb(var(--ui-surface-rgb));
-}
-.experience.journey-reviewing:has(
-    .admin-review-toolbar[data-mode="inspect"]
-  )
-  .game-scene {
-  right: min(390px, 32vw);
-  transition: right 180ms ease;
-}
-.journey-reviewing:has(.admin-review-toolbar[data-mode="inspect"])
-  .journey-review-panel {
-  top: 160px;
-  right: 0;
-  bottom: 0;
-  width: min(390px, 32vw);
-  max-height: none;
-  overflow: auto;
-  overscroll-behavior: contain;
-  border-left: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-  border-radius: 12px 0 0;
-  box-shadow: -12px 0 36px rgb(var(--ui-shadow-rgb) / 0.22);
-}
-.journey-reviewing:has(.admin-review-toolbar[data-mode="inspect"])
-  .journey-review-panel
-  .admin-review-toolbar {
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-@media (max-width: 700px) {
-  .journey-review-panel {
-    right: 12px;
-    bottom: 12px;
-    width: min(360px, calc(100vw - 24px));
-    max-height: 58dvh;
-  }
-  .journey-review-panel:has(.admin-review-toolbar[data-mode="playtest"]) {
-    width: min(300px, calc(100vw - 24px));
-  }
-  .experience.journey-reviewing:has(
-      .admin-review-toolbar[data-mode="inspect"]
-    )
-    .game-scene {
-    inset: 0 0 52dvh;
-    transition: bottom 180ms ease;
-  }
-  .journey-reviewing:has(.admin-review-toolbar[data-mode="inspect"])
-    .journey-review-panel {
-    top: auto;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 52dvh;
-    max-height: 52dvh;
-    border-top: 1px solid rgb(var(--ui-line-rgb) / 0.2);
-    border-left: 0;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0 -12px 36px rgb(var(--ui-shadow-rgb) / 0.25);
-  }
-  .admin-review-selectors {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.journey-reviewing .globe-controls {
-  bottom: 48px;
-}
-
-/* Keep account and navigation menus above the independent review panel on all viewports. */
 .experience.journey-reviewing .experience-header {
   z-index: 9;
 }
 
-.admin-review-copy-pair {
-  display: grid;
-  gap: 12px;
+@media (min-width: 761px) {
+  .experience.journey-reviewing .experience-header {
+    padding: 32px 24px;
+  }
+  .review-map-frame {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--review-player-width) + var(--review-gap));
+    right: calc(var(--review-width) + var(--review-gap));
+    pointer-events: none;
+  }
+  .experience.journey-reviewing :is(.question-card, .finish-story) {
+    left: 24px;
+    width: calc(var(--review-player-width) - 24px);
+    max-width: none;
+    box-sizing: border-box;
+  }
+  .experience.journey-reviewing .experience-footer {
+    left: 24px;
+    right: auto;
+    max-width: calc(var(--review-player-width) - 24px);
+  }
+  .experience.journey-reviewing .journey-progress {
+    left: 24px;
+    max-width: calc(var(--review-player-width) - 24px);
+  }
+  .experience.journey-reviewing .globe-controls {
+    right: calc(var(--review-width) + 40px);
+    bottom: 18px;
+    max-width: calc(
+      100vw - var(--review-player-width) - var(--review-width) -
+        var(--review-gap) * 2 - 32px
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  .experience.journey-reviewing .journey-map-notes {
+    position: static;
+    padding: 0;
+    background: transparent;
+    text-align: right;
+    font-size: 10px;
+  }
 }
-.admin-review-copy-pair section {
-  padding: 10px;
-  border: 1px solid rgb(var(--ui-line-rgb) / 0.25);
-  border-radius: 8px;
+@media (min-width: 761px) and (max-width: 1200px) {
+  .experience.journey-reviewing {
+    --review-width: 280px;
+    --review-player-width: 360px;
+    --review-gap: 16px;
+  }
+  .journey-review-panel {
+    right: 16px;
+  }
+  .experience.journey-reviewing :is(.question-card, .finish-story) {
+    left: 16px;
+  }
 }
-.admin-review-copy-pair p {
-  margin: 8px 0 0;
-  line-height: 1.5;
-}
-.admin-review-editorial li {
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 8px;
+@media (max-width: 760px) {
+  .journey-review-panel {
+    position: fixed;
+    top: 84px;
+    right: 12px;
+    bottom: auto;
+    width: min(304px, calc(100vw - 24px));
+    max-height: calc(100dvh - 108px);
+  }
+  .admin-review-toolbar {
+    max-height: calc(100dvh - 108px);
+  }
+  .journey-review-panel:has([data-collapsed]) {
+    width: 172px;
+  }
+  .admin-review-toolbar[data-collapsed] h2 {
+    display: none;
+  }
+  .review-heading {
+    padding: 10px 14px;
+  }
 }

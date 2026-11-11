@@ -241,7 +241,7 @@ export const NOT_FROM_HERE_JOURNEY: Journey = {
       prompt: "Select the country those seeds came from.",
       mode: "map-single",
       count: 1,
-      commitment: "immediate",
+      commitment: "submit",
       selection: { type: "world" },
       allowTyping: false,
       rule: { type: "country-ids", ids: ["wurl:CHN"] },
