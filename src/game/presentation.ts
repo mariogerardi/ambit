@@ -214,6 +214,8 @@ function resolveQuestionPlaces(
           {
             ...place,
             answerTarget: true,
+            lat: feedback?.lat ?? place.lat,
+            lng: feedback?.lng ?? place.lng,
             assisted: items.some((item) => item.id === id && item.supplied),
             // Explicit undefined clears a clue badge so the renderer shows the result glyph.
             // Without an override, retain the author's existing badge behavior.

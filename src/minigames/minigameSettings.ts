@@ -80,7 +80,7 @@ export function sameMinigameSettings(
   b: MinigameSettings,
   kind?: BorderMinigame,
 ) {
-  if (kind === "say-where") return true;
+  if (kind === "say-where" || kind === "out-of-place") return true;
   if (kind === "border-run")
     return (
       (a.showBorders ?? false) === (b.showBorders ?? false) &&

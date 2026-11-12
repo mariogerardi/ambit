@@ -65,6 +65,18 @@ export const games = [
       "Cities and landmarks earn 1–1,000 points by distance. Large countries can stand alone; smaller countries and states get a surrounding search region with roughly six to eight plausible city locations. Scoring distances scale to the whole search region. Countries and U.S. states earn 1,000 points for a pin anywhere inside. Older world-search games keep their original scoring.",
   },
   {
+    slug: "out-of-place",
+    title: "Out of Place",
+    description: "Six places. One mistake. Can you spot it?",
+    image: "/previews/out-of-place.svg",
+    imageAlt: "Six map markers with one label out of place.",
+    controls: "Tap a marker",
+    instruction:
+      "Six cities and filled countries share one region. One name or location is wrong. Tap a city marker or country to reveal its correction. Your first tap is final; three misses end the game.",
+    rules:
+      "Find one incorrect city or country among six places. Cities are capitals or have at least one million recorded residents. Countries are filled; cities have dot markers. Each correction appears immediately after your tap.",
+  },
+  {
     slug: "say-where",
     title: "Say Where?",
     description: "One expression. Where is its language used officially?",
@@ -93,6 +105,7 @@ export function MinigamesPanel({
   borderRun,
   pinpoint,
   sayWhere,
+  outOfPlace,
   webgl,
   tour,
   customizing,
@@ -105,6 +118,7 @@ export function MinigamesPanel({
   borderRun: ReturnType<typeof useBorderMinigame>;
   pinpoint: ReturnType<typeof useBorderMinigame>;
   sayWhere: ReturnType<typeof useBorderMinigame>;
+  outOfPlace: ReturnType<typeof useBorderMinigame>;
   webgl: boolean;
   tour: ReturnType<typeof useMinigameTour>;
   customizing: boolean;
@@ -114,15 +128,17 @@ export function MinigamesPanel({
   const index = games.findIndex((game) => game.slug === kind);
   const selected = games[index];
   const game =
-    kind === "say-where"
-      ? sayWhere
-      : kind === "missing-borders"
-        ? missing
-        : kind === "border-run"
-          ? borderRun
-          : kind === "pinpoint"
-            ? pinpoint
-            : shared;
+    kind === "out-of-place"
+      ? outOfPlace
+      : kind === "say-where"
+        ? sayWhere
+        : kind === "missing-borders"
+          ? missing
+          : kind === "border-run"
+            ? borderRun
+            : kind === "pinpoint"
+              ? pinpoint
+              : shared;
   const [confirming, setConfirming] = useState(false);
   const startButton = useRef<HTMLButtonElement>(null);
   const gameNames = useRef<HTMLDivElement>(null);
@@ -362,7 +378,7 @@ export function MinigamesPanel({
             </button>
           </div>
         </div>
-        {kind !== "say-where" && (
+        {!["say-where", "out-of-place"].includes(kind) && (
           <button
             className="minigame-customize-toggle"
             type="button"
@@ -373,7 +389,7 @@ export function MinigamesPanel({
             {customizing ? "Close customization" : "Customize"}
           </button>
         )}
-        {customizing && kind !== "say-where" && (
+        {customizing && !["say-where", "out-of-place"].includes(kind) && (
           <div id="minigame-customization">
             <MinigameSettingsEditor
               kind={game.kind}

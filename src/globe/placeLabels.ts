@@ -1,3 +1,5 @@
+import { placeLabelPlacement, type LabelBox } from "./placeLabelLayout";
+export { placeLabelPlacement, type LabelBox } from "./placeLabelLayout";
 import { DEFAULT_THEME } from "../theme/themes";
 import {
   CanvasTexture,
@@ -176,12 +178,6 @@ export function placeDetailVisible(place: PlaceFeature, altitude: number) {
         : 500_000;
   return (place.population ?? 0) >= minimum;
 }
-export interface LabelBox {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-}
 /** Answer cities share one style so a capital's typography cannot disclose it. */
 export const placeLabelStyle = (
   place: PlaceFeature,
@@ -237,53 +233,6 @@ export function placeLabelPriority(place: PlaceFeature) {
   return place.displayRole ? 2 : 0;
 }
 
-/** Try nearby screen anchors before dropping an authored city's name. */
-export function placeLabelPlacement(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  width: number,
-  height: number,
-  occupied: readonly LabelBox[],
-  answerTarget = false,
-  surfaceAligned = false,
-) {
-  const centers = surfaceAligned
-    ? [[0.5, 0.5]]
-    : answerTarget
-      ? [
-          [0.5, -0.5],
-          [0.5, 1.5],
-          [-14 / w, 0.5],
-          [1 + 14 / w, 0.5],
-          [-14 / w, -0.5],
-          [1 + 14 / w, -0.5],
-        ]
-      : [[0.5, -0.32]];
-  for (const [cx, cy] of centers) {
-    const box = {
-      left: x - cx * w,
-      right: x + (1 - cx) * w,
-      top: y - (1 - cy) * h,
-      bottom: y + cy * h,
-    };
-    if (
-      box.left >= 0 &&
-      box.right <= width &&
-      box.top >= 0 &&
-      box.bottom <= height &&
-      !occupied.some(
-        (p) =>
-          box.left < p.right + 5 &&
-          box.right > p.left - 5 &&
-          box.top < p.bottom + 3 &&
-          box.bottom > p.top - 3,
-      )
-    )
-      return { box, cx, cy };
-  }
-}
 function markerColor(place: PlaceFeature, palette: ThemeId) {
   return place.accuracyBand
     ? pinBandColor(place.accuracyBand.index, place.accuracyBand.count, palette)
@@ -373,6 +322,7 @@ export class PlaceLabels {
     return this.drawnBoxes;
   }
   private targets: { place: PlaceFeature; x: number; y: number }[] = [];
+  private labelTargets: { place: PlaceFeature; box: LabelBox }[] = [];
   private label(place: PlaceFeature) {
     const labelKind = place.answerTarget ? "city" : place.kind;
     const style = placeLabelStyle(place, this.palette);
@@ -699,6 +649,7 @@ export class PlaceLabels {
     this.group.visible = layer.visible || markers;
     if (!this.group.visible) {
       this.targets = [];
+      this.labelTargets = [];
       return;
     }
     if (
@@ -784,6 +735,7 @@ export class PlaceLabels {
     reserved: readonly LabelBox[] = [],
   ) {
     this.targets = [];
+    this.labelTargets = [];
     this.drawnBoxes = [];
     this.pendingLabels = false;
     let newLabelBudget = 4;
@@ -1055,12 +1007,18 @@ export class PlaceLabels {
       if (this.density === "physical") shown.push({ x, y });
       occupied.push(box);
       this.drawnBoxes.push(box);
+      if (place.answerTarget) this.labelTargets.push({ place, box });
       named.add(nameKey);
       nameCounts.set(place.kind, (nameCounts.get(place.kind) ?? 0) + 1);
     }
   }
   pick(x: number, y: number, touchRadius?: number): PlaceFeature | undefined {
-    return this.targets
+    const label = this.labelTargets.find(
+      ({ box }) =>
+        x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
+    )?.place;
+    if (label) return label;
+    const marker = this.targets
       .map((target) => ({
         ...target,
         distance: Math.hypot(x - target.x, y - target.y),
@@ -1069,6 +1027,7 @@ export class PlaceLabels {
         (t) => t.distance <= (touchRadius ?? (t.place.answerTarget ? 15 : 9)),
       )
       .sort((a, b) => a.distance - b.distance)[0]?.place;
+    return marker;
   }
   dispose() {
     for (const sprite of this.sprites.values()) {
@@ -1086,6 +1045,7 @@ export class PlaceLabels {
     this.markerMaterials.clear();
     this.active = [];
     this.targets = [];
+    this.labelTargets = [];
     this.group.clear();
     this.data = undefined;
   }

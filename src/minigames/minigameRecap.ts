@@ -28,16 +28,19 @@ export function minigameCompletion(
     ...missed,
   ].map((point) => ({ ...point, altitude: 1.7 }));
   const places = visits.flatMap((v, i) => [
-    ...(v.points !== undefined
+    ...(v.points !== undefined || run.kind === "out-of-place"
       ? [
           {
             id: `recap:target:${i}`,
-            name: "Answer",
+            name:
+              run.kind === "out-of-place"
+                ? (v.target?.name ?? "Corrected marker")
+                : "Answer",
             kind: "pin" as const,
             ...v.point,
             sourceId: "minigame-history",
             visualState: "answer" as const,
-            labelHidden: true,
+            labelHidden: run.kind !== "out-of-place",
           },
         ]
       : []),
@@ -61,9 +64,10 @@ export function minigameCompletion(
     focus: views[0] ?? { lat: 20, lng: 0, altitude: 2.5 },
     views: views.length ? views : undefined,
     mapMode: "authored",
-    regionIds: [
-      ...new Set(visits.filter((v) => v.correct).flatMap((v) => v.ids)),
-    ],
+    regionIds:
+      run.kind === "out-of-place"
+        ? []
+        : [...new Set(visits.filter((v) => v.correct).flatMap((v) => v.ids))],
     places,
     overlays:
       run.kind === "pinpoint"

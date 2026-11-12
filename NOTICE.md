@@ -605,3 +605,12 @@ individually. Follow-up evidence and remaining uncertainties are documented in
 runtime acceptance decisions are separate from the unmodified research files.
 No source audio or images are copied. The Say Where? sharing illustration is
 original code-authored SVG, adapted to the four shared theme palettes.
+
+## Out of Place
+
+Out of Place reuses the bundled GeoNames city/capital records (CC BY 4.0) and
+Natural Earth country geometry (public domain), documented above. Deliberately
+incorrect labels and coordinates are generated presentation states; corrections
+retain the canonical source records. No new geographic source is imported. Its
+preview and sharing illustration is original code-authored SVG with four theme
+variants.

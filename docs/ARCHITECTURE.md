@@ -524,6 +524,17 @@ research records and their flags separately. See the
 [Say Where? spec](minigames/SAY_WHERE_SPEC.md) for approved status/variety rules,
 evidence and explicit holds. Border-game customization does not apply.
 
+Out of Place (`/minigames/out-of-place/play`) dynamically samples six regional
+items from bundled capitals, million-plus cities and country footprints. Countries
+are fills and cities are dots; one name or city position is incorrect. The shared
+point contract grades a single immediate tap, while the adapter also accepts only
+the original filled country shapes. Canonical data supplies corrections; city
+reveals never add a home-country reference fill. Seeded generation enforces
+ownership and conservative screen-space label/tap separation. See the
+[Out of Place spec](minigames/OUT_OF_PLACE_SPEC.md) and the focused
+`out-of-place` data/shell tests. Saves, scores, replay and sharing reuse the shared
+minigame lifecycle; no new backend or Journey registration is required.
+
 Pinpoint (`/minigames/pinpoint/play`) reuses `pin-distance` and `pin-inside` for ten
 rounds. The pool includes primary capitals, bundled cities with a source population
 of at least one million, 60 curated Wikidata landmarks across 60 countries, eligible

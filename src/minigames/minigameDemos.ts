@@ -1,3 +1,8 @@
+import {
+  outOfPlacePairs,
+  outOfPlaceJourney,
+  type OutOfPlacePair,
+} from "./outOfPlace";
 import { sayWherePairs, sayWhereJourney } from "./sayWhere";
 import { geoArea, geoDistance } from "d3-geo";
 import type { Focus, RegionFeature } from "../geography/types";
@@ -89,6 +94,7 @@ export function minigameExamples(
     "border-run": existing?.["border-run"] ?? [],
     pinpoint: existing?.pinpoint ?? [],
     "say-where": existing?.["say-where"] ?? [],
+    "out-of-place": existing?.["out-of-place"] ?? [],
   };
   const needed = (game: BorderMinigame) =>
     (!kind || kind === game) && !library[game].length;
@@ -108,7 +114,9 @@ export function minigameExamples(
       kind === "shared-neighbors"
         ? question.focus
         : (question.feedbackFocus ?? question.focus);
-    if (kind === "say-where") {
+    if (kind === "out-of-place") {
+      focus = question.focus;
+    } else if (kind === "say-where") {
       dispatch({ type: "select", id: pair.answer });
       // Menu demonstrations show a representative region, never an unrelated hemisphere.
       // Live play still starts with the neutral whole-globe search.
@@ -148,10 +156,10 @@ export function minigameExamples(
       });
       focus = routeFocus(points);
     }
-    if (kind !== "pinpoint" && kind !== "say-where")
+    if (kind !== "pinpoint" && kind !== "say-where" && kind !== "out-of-place")
       focus = { ...focus, altitude: (focus.altitude ?? 0.7) * 0.9 };
     const pending = action;
-    if (kind === "missing-borders")
+    if (kind === "missing-borders" || kind === "out-of-place")
       dispatch({ type: "select", id: pair.answer });
     else dispatch({ type: "submit" });
     if (action.phase !== "feedback" || !action.answers[0]?.correct)
@@ -165,11 +173,13 @@ export function minigameExamples(
       focus,
       searchIds,
       title:
-        kind === "say-where"
-          ? "Read the expression"
-          : kind === "pinpoint"
-            ? (pair as PinpointPair).name
-            : pair.countries.map((key) => base.names.get(key)).join(" → "),
+        kind === "out-of-place"
+          ? (pair as OutOfPlacePair).area.name
+          : kind === "say-where"
+            ? "Read the expression"
+            : kind === "pinpoint"
+              ? (pair as PinpointPair).name
+              : pair.countries.map((key) => base.names.get(key)).join(" → "),
       action: pending,
       reveal: action,
       steps:
@@ -183,6 +193,13 @@ export function minigameExamples(
     if (!found) throw Error(`Missing demo geography: ${codes.join("/")}`);
     return found;
   };
+  if (needed("out-of-place")) {
+    const pairs = outOfPlacePairs(regions);
+    for (const pair of pairs
+      .filter((_, i) => i % Math.max(1, Math.floor(pairs.length / 4)) === 0)
+      .slice(0, 4))
+      add("out-of-place", pair, outOfPlaceJourney(pair, base));
+  }
   if (needed("say-where")) {
     const pairs = sayWherePairs();
     for (const languageId of ["pt", "ru", "ta", "mi"]) {
@@ -551,7 +568,9 @@ export function tourFrame(
         remaining < DEMO_QUESTION_MS
           ? "question"
           : remaining < DEMO_REVEAL_MS
-            ? current.kind === "missing-borders" || current.kind === "say-where"
+            ? ["missing-borders", "say-where", "out-of-place"].includes(
+                current.kind,
+              )
               ? "question"
               : "action"
             : "reveal";

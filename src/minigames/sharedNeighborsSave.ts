@@ -38,6 +38,7 @@ export function validNeighborRun(value: unknown): value is NeighborRun {
         "border-run",
         "pinpoint",
         "say-where",
+        "out-of-place",
       ].includes(String(value.kind))) &&
     (value.pinpointRules === undefined || value.pinpointRules === "regional") &&
     typeof value.id === "string" &&

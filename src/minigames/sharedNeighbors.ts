@@ -17,13 +17,15 @@ export type BorderMinigame =
   | "missing-borders"
   | "border-run"
   | "pinpoint"
-  | "say-where";
+  | "say-where"
+  | "out-of-place";
 export const MINIGAME_TITLES: Record<BorderMinigame, string> = {
   "shared-neighbors": "Shared Neighbors",
   "missing-borders": "Missing Borders",
   "border-run": "Border Run",
   pinpoint: "Pinpoint",
   "say-where": "Say Where?",
+  "out-of-place": "Out of Place",
 };
 export interface MinigameVisit {
   selectedId?: string;
@@ -286,7 +288,9 @@ export function neighborReducer(
       : run;
   if (action.type === "select")
     return run.result === undefined &&
-      journey.rounds[0].mode === "merged-region-single" &&
+      (journey.rounds[0].mode === "merged-region-single" ||
+        (journey.rounds[0].mode === "city-single" &&
+          journey.rounds[0].commitment === "immediate")) &&
       canSelect(journey.rounds[0], context, action.id)
       ? grade({ ...run, selectedId: action.id })
       : run;

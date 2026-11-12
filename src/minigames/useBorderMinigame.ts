@@ -1,4 +1,10 @@
 import {
+  outOfPlacePairs,
+  outOfPlaceDeck,
+  outOfPlaceJourney,
+  type OutOfPlacePair,
+} from "./outOfPlace";
+import {
   sayWherePairs,
   sayWhereDeck,
   sayWhereJourney,
@@ -86,8 +92,8 @@ export function useBorderMinigame(
   const [scoresStore] = useState(() => createMinigameScores(subject, kind));
   const [scores, setScores] = useState(() => scoresStore.load());
   const scoreKey =
-    kind === "say-where"
-      ? "best:say-where:v1"
+    kind === "say-where" || kind === "out-of-place"
+      ? `best:${kind}:v1`
       : `best:${kind === "pinpoint" && (!run || run.pinpointRules === "regional") ? "v3:" : kind === "border-run" || kind === "pinpoint" ? "v2:" : ""}${kind === "pinpoint" ? [...(runSettings.categories ?? defaultMinigameSettings.categories!)].sort().join("|") : JSON.stringify(kind === "missing-borders" ? [runSettings.region, runSettings.framing, runSettings.excludeSmallCountries ?? true, [...runSettings.excludedCountries].sort()] : kind === "border-run" ? [runSettings.showBorders ?? false, [...runSettings.excludedCountries].sort()] : [runSettings.includeTerritories, runSettings.excludeAdjacentClues, [...runSettings.excludedCountries].sort()])}`;
   const ranked = usesDefaultMinigameRules(runSettings, kind);
   const base = useMemo(
@@ -106,15 +112,17 @@ export function useBorderMinigame(
   const allPairs = useMemo(
     () =>
       base
-        ? kind === "say-where"
-          ? sayWherePairs()
-          : kind === "missing-borders"
-            ? missingBorderPairs(regions)
-            : kind === "border-run"
-              ? borderRunPairs(topology!, runSettings.excludedCountries)
-              : kind === "pinpoint"
-                ? pinpointPairs(regions, runSettings)
-                : sharedNeighborPairs(base.graph)
+        ? kind === "out-of-place"
+          ? outOfPlacePairs(regions)
+          : kind === "say-where"
+            ? sayWherePairs()
+            : kind === "missing-borders"
+              ? missingBorderPairs(regions)
+              : kind === "border-run"
+                ? borderRunPairs(topology!, runSettings.excludedCountries)
+                : kind === "pinpoint"
+                  ? pinpointPairs(regions, runSettings)
+                  : sharedNeighborPairs(base.graph)
         : [],
     [
       base,
@@ -143,7 +151,7 @@ export function useBorderMinigame(
   const pairs = useMemo(
     () =>
       base
-        ? kind === "pinpoint" || kind === "say-where"
+        ? kind === "pinpoint" || kind === "say-where" || kind === "out-of-place"
           ? allPairs
           : filterMinigamePairs(
               runSettings.includeTerritories ? allPairs : mainlandPairs,
@@ -158,7 +166,7 @@ export function useBorderMinigame(
   const choices = useMemo(
     () =>
       base
-        ? kind === "say-where"
+        ? kind === "say-where" || kind === "out-of-place"
           ? allPairs
           : kind === "border-run"
             ? borderRunPairs(topology!, settings.excludedCountries)
@@ -195,41 +203,54 @@ export function useBorderMinigame(
   const deck = useMemo(
     () =>
       current
-        ? kind === "say-where"
-          ? sayWhereDeck(pairs as SayWherePair[], current.seed, current.cycle)
-          : kind === "pinpoint"
-            ? pinpointDeck(pairs as PinpointPair[], current.seed, current.cycle)
-            : neighborDeck(pairs, current.seed, current.cycle)
+        ? kind === "out-of-place"
+          ? outOfPlaceDeck(
+              pairs as OutOfPlacePair[],
+              regions,
+              current.seed,
+              current.cycle,
+            )
+          : kind === "say-where"
+            ? sayWhereDeck(pairs as SayWherePair[], current.seed, current.cycle)
+            : kind === "pinpoint"
+              ? pinpointDeck(
+                  pairs as PinpointPair[],
+                  current.seed,
+                  current.cycle,
+                )
+              : neighborDeck(pairs, current.seed, current.cycle)
         : [],
-    [pairs, current?.seed, current?.cycle, kind],
+    [pairs, regions, current?.seed, current?.cycle, kind],
   );
   const pair = current ? deck[current.index] : undefined;
   const questionJourney = useMemo(
     () =>
       pair && base
-        ? kind === "say-where"
-          ? sayWhereJourney(pair as SayWherePair, base)
-          : kind === "missing-borders"
-            ? missingBorderJourney(
-                pair as MissingBorderPair,
-                base,
-                regions,
-                (current!.seed + Math.imul(current!.cycle, 0x9e3779b9)) >>> 0,
-                runSettings.framing === "wide",
-              )
-            : kind === "border-run"
-              ? borderRunJourney(
-                  pair as RoutePair,
+        ? kind === "out-of-place"
+          ? outOfPlaceJourney(pair as OutOfPlacePair, base)
+          : kind === "say-where"
+            ? sayWhereJourney(pair as SayWherePair, base)
+            : kind === "missing-borders"
+              ? missingBorderJourney(
+                  pair as MissingBorderPair,
                   base,
-                  runSettings.showBorders ?? false,
+                  regions,
+                  (current!.seed + Math.imul(current!.cycle, 0x9e3779b9)) >>> 0,
+                  runSettings.framing === "wide",
                 )
-              : kind === "pinpoint"
-                ? pinpointJourney(
-                    pair as PinpointPair,
-                    entryFocus,
-                    current?.pinpointRules === "regional",
+              : kind === "border-run"
+                ? borderRunJourney(
+                    pair as RoutePair,
+                    base,
+                    runSettings.showBorders ?? false,
                   )
-                : neighborJourney(pair, base)
+                : kind === "pinpoint"
+                  ? pinpointJourney(
+                      pair as PinpointPair,
+                      entryFocus,
+                      current?.pinpointRules === "regional",
+                    )
+                  : neighborJourney(pair, base)
         : undefined,
     [
       pair,
@@ -292,7 +313,7 @@ export function useBorderMinigame(
         ? `${current.id}:${current.cycle}:${current.index}`
         : undefined,
     });
-    if (overview) {
+    if (overview && kind !== "out-of-place") {
       view.regionInteraction = false;
       for (const visit of current?.history ?? []) {
         for (const id of visit.ids)
@@ -453,16 +474,21 @@ export function useBorderMinigame(
                             context.targets.has(id),
                           );
                 const target =
-                  kind === "say-where"
-                    ? context.targets.get(
-                        next.result ? next.selectedId! : pair!.answer,
-                      )!.focus
-                    : kind === "pinpoint"
-                      ? ((pair as PinpointPair).region?.focus ??
-                        (pair as PinpointPair).place!)
-                      : kind === "missing-borders" || kind === "border-run"
-                        ? (q.feedbackFocus ?? q.focus)
-                        : (context.targets.get(ids.at(-1)!)?.focus ?? q.focus);
+                  kind === "out-of-place"
+                    ? (pair as OutOfPlacePair).items.find(
+                        (i) => i.id === pair!.answer,
+                      )!
+                    : kind === "say-where"
+                      ? context.targets.get(
+                          next.result ? next.selectedId! : pair!.answer,
+                        )!.focus
+                      : kind === "pinpoint"
+                        ? ((pair as PinpointPair).region?.focus ??
+                          (pair as PinpointPair).place!)
+                        : kind === "missing-borders" || kind === "border-run"
+                          ? (q.feedbackFocus ?? q.focus)
+                          : (context.targets.get(ids.at(-1)!)?.focus ??
+                            q.focus);
                 const distanceKm =
                   kind === "pinpoint" &&
                   (pair as PinpointPair).place &&
@@ -488,16 +514,40 @@ export function useBorderMinigame(
                 const result = points === undefined ? next.result! : points > 0;
                 const pinpointTarget =
                   kind === "pinpoint" ? (pair as PinpointPair) : undefined;
+                const chosenPlace =
+                  kind === "out-of-place"
+                    ? (pair as OutOfPlacePair).displayed.find(
+                        (i) => i.id === next.selectedId,
+                      )
+                    : undefined;
                 const visit = {
-                  ...(kind === "say-where"
+                  ...(kind === "say-where" || kind === "out-of-place"
                     ? { selectedId: next.selectedId }
                     : {}),
                   ids,
                   correct: result,
                   point: { lat: target.lat, lng: target.lng },
-                  pin: next.pin,
+                  pin:
+                    kind === "out-of-place" && !next.result
+                      ? chosenPlace && {
+                          lat: chosenPlace.lat,
+                          lng: chosenPlace.lng,
+                        }
+                      : next.pin,
                   points,
                   distanceKm,
+                  ...(kind === "out-of-place"
+                    ? {
+                        target: {
+                          id: pair!.answer,
+                          name: (pair as OutOfPlacePair).items.find(
+                            (i) => i.id === pair!.answer,
+                          )!.name,
+                          lat: target.lat,
+                          lng: target.lng,
+                        },
+                      }
+                    : {}),
                   ...(pinpointTarget
                     ? {
                         target: {

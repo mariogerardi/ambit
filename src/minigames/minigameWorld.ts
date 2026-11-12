@@ -1,3 +1,4 @@
+import type { OutOfPlacePair } from "./outOfPlace";
 import { submittedMinigameRegion } from "./minigameAnswer";
 import { regionalPinpointBands } from "./pinpointSearch";
 import { interiorAnchor } from "../geography/interiorAnchor";
@@ -48,6 +49,30 @@ export function minigameWorld({
   regionalPinpoint?: boolean;
 }): MinigameWorld {
   const view: MinigameWorld = journeyWorld(regions, journey, game, context);
+  if (kind === "out-of-place" && !overview) {
+    const scene = pair as OutOfPlacePair;
+    const countryIds = scene.items
+      .filter((i) => i.type === "country")
+      .map((i) => i.parentId);
+    const playing = game.phase === "playing";
+    // A corrected city never promotes its home country into a seventh clue.
+    // Only the original filled-country choices receive country emphasis.
+    for (const region of regions) view.states[region.id] = "surface";
+    view.regionInteraction = playing;
+    view.selectableRegionIds = playing ? countryIds : [];
+    view.selectDisabled = true;
+    for (const id of countryIds)
+      view.states[id] = playing
+        ? "selectable"
+        : id === scene.answer
+          ? game.answers[0]?.correct
+            ? "correct"
+            : "answer"
+          : game.selectedIds.includes(id)
+            ? "incorrect"
+            : "selectable";
+    view.clueLocators = [];
+  }
   if (kind === "missing-borders")
     view.regionTransitionKey = revealKey ?? journey.rounds[0].id;
   if (kind === "border-run" && game.phase === "playing" && !showBorders)

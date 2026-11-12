@@ -9,6 +9,7 @@ export const ARTWORK_PATHS = [
   "/previews/border-run.svg",
   "/previews/pinpoint.svg",
   "/previews/say-where.svg",
+  "/previews/out-of-place.svg",
   "/previews/discover-asia.svg",
   "/previews/african-capitals.svg",
   "/previews/world-flags.svg",
