@@ -1,5 +1,7 @@
 import languages from "../../sources/say-where/say-where-languages.json";
 import expressions from "../../sources/say-where/say-where-expressions.json";
+import { comparisonFocus } from "../globe/camera";
+import type { Focus } from "../geography/types";
 import { defineQuestion } from "../game/questionBuilder";
 import type {
   FactSource,
@@ -10,6 +12,8 @@ import type { NeighborPair } from "./sharedNeighbors";
 import { neighborDeck } from "./sharedNeighbors";
 
 export const SAY_WHERE_RESEARCH = { languages, expressions };
+export const SAY_WHERE_POLICY =
+  "National official or co-official status, or legally prescribed national government use, qualifies. Widespread spoken use alone does not.";
 export const SAY_WHERE_HELD: Record<string, string> = {
   "sw-ms-01": "Cross-language applicability to Indonesian remains unresolved.",
   "sw-id-01": "Cross-language applicability to Malay remains unresolved.",
@@ -147,7 +151,7 @@ export function sayWherePairs(): SayWherePair[] {
                     ? "Belgium's co-official languages have territorially regulated use. Regional-only recognition in otherwise nonqualifying countries does not count."
                     : language.id === "it"
                       ? "Vatican City qualifies through Italian's official working use; this is distinct from Latin in the Holy See."
-                      : "National official or co-official status, or legally prescribed national government use, qualifies. Widespread spoken use alone does not.",
+                      : SAY_WHERE_POLICY,
       };
     });
 }
@@ -169,13 +173,61 @@ export function sayWhereDeck(
 export const sayWhereRoundCount = (pairs: NeighborPair[]) =>
   new Set((pairs as SayWherePair[]).map((p) => p.languageId)).size;
 
+/** Regional stops describe the revealed network, independently of the player's guess. */
+function sayWhereViews(pair: SayWherePair, context: QuestionContext): Focus[] {
+  switch (pair.languageId) {
+    case "pt":
+      return [
+        { lat: 5, lng: -20, altitude: 2 },
+        { lat: -4, lng: 20, altitude: 1.5 },
+        { lat: -9, lng: 125, altitude: 0.8 },
+      ];
+    case "ru":
+      return [{ lat: 50, lng: 65, altitude: 1.6 }];
+    case "nl":
+      return [
+        { lat: 51, lng: 5, altitude: 0.8 },
+        { lat: 5, lng: -55, altitude: 0.8 },
+      ];
+    case "hi":
+      return [
+        { lat: 22, lng: 79, altitude: 1 },
+        { lat: -18, lng: 178, altitude: 0.8 },
+      ];
+    default: {
+      const focus = comparisonFocus(
+        pair.answerIds.map((id) => context.targets.get(id)!.focus),
+      );
+      return [{ ...focus, altitude: Math.max(0.8, focus.altitude ?? 0.8) }];
+    }
+  }
+}
+
 export function sayWhereJourney(
   pair: SayWherePair,
   context: QuestionContext,
 ): Journey {
-  const countries = pair.answerIds
-    .map((id) => context.names.get(id)!)
-    .join(", ");
+  const countries = new Intl.ListFormat("en", {
+    style: "long",
+    type: "conjunction",
+  }).format(
+    pair.answerIds.map((id) =>
+      id === "wurl:VAT"
+        ? "Vatican City"
+        : id === "wurl:NLD"
+          ? "the Netherlands"
+          : context.names.get(id)!,
+    ),
+  );
+  const language =
+    pair.languageId === "fa"
+      ? "Persian"
+      : pair.languageId === "sw"
+        ? "Swahili"
+        : pair.languageId === "el"
+          ? "Modern Greek"
+          : pair.language.replace(" / ", " or ");
+  const views = sayWhereViews(pair, context);
   return {
     id: "minigame-say-where",
     title: "Say Where?",
@@ -211,7 +263,7 @@ export function sayWhereJourney(
             translation: pair.expression.english_translation,
           },
         },
-        explanation: `${pair.language} qualifies in ${countries}.`,
+        explanation: `${language} is used officially in ${countries}.`,
         qualification: pair.qualification,
         source: pair.sources[0],
         sources: pair.sources.slice(1),
@@ -229,12 +281,13 @@ export function sayWhereJourney(
             overlays: [],
           },
           reveal: {
-            focus: context.targets.get(pair.answer)!.focus,
+            focus: views[0],
+            views,
+            returnToSelection: false,
             network: {
               regionIds: pair.answerIds,
               label: "Qualifying countries",
             },
-            returnToSelection: true,
           },
         },
       }),

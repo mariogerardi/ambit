@@ -15,6 +15,8 @@ import { minigameShareCard } from "./minigameSharing";
 import { JourneyShareDialog } from "../app/JourneyShareDialog";
 import { ActionIcon } from "../app/ActionIcon";
 import { SettingsIcon } from "../app/SettingsIcon";
+import { InfoTooltip } from "../app/InfoTooltip";
+import { SAY_WHERE_POLICY } from "./sayWhere";
 import { PanelActive } from "../app/ModePanels";
 import type { useBorderMinigame } from "./useBorderMinigame";
 import { AnswerCounter } from "../game/AnswerCounter";
@@ -147,46 +149,84 @@ export function BorderMinigamePanel({
     strikes = run.answered - run.correct;
   return (
     <section
-      className={`info-view shared-neighbors-game ${missing ? "missing-borders-game" : ""} ${overview ? "minigame-overview" : ""}`}
+      className={`info-view shared-neighbors-game ${sayWhere ? "say-where-game" : ""} ${missing ? "missing-borders-game" : ""} ${overview ? "minigame-overview" : ""}`}
       aria-label={`${shared.title} game`}
     >
       <div className="shared-neighbors-heading">
         <h2 className="minigame-title">{shared.title}</h2>
         {!overview && (
-          <details
-            className="minigame-menu"
-            ref={menu}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                closeMenu();
-                event.currentTarget.querySelector("summary")?.focus();
-              }
-            }}
-          >
-            <summary aria-label="Game menu">
-              <SettingsIcon />
-            </summary>
-            <div className="minigame-menu-options">
-              <button
-                onClick={() => {
-                  closeMenu();
-                  onBack();
-                }}
+          <div className="minigame-heading-tools">
+            {sayWhere && (
+              <InfoTooltip
+                key={`${question?.id}:${feedback}`}
+                label="About Say Where?"
+                className="minigame-info-button"
+                icon={<span aria-hidden="true">ⓘ</span>}
               >
-                All games
-              </button>
-              {!ended && (
+                <p>{SAY_WHERE_POLICY}</p>
+                {feedback && question ? (
+                  <>
+                    {question.qualification !== SAY_WHERE_POLICY && (
+                      <p>{question.qualification}</p>
+                    )}
+                    <details className="say-where-sources" open>
+                      <summary>Sources</summary>
+                      <ul>
+                        {[question.source, ...(question.sources ?? [])].map(
+                          (s) => (
+                            <li key={s.url}>
+                              <a href={s.url} target="_blank" rel="noreferrer">
+                                {s.name}
+                              </a>
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </details>
+                  </>
+                ) : (
+                  <p>
+                    Sources and language notes appear here after you check your
+                    answer.
+                  </p>
+                )}
+              </InfoTooltip>
+            )}
+            <details
+              className="minigame-menu"
+              ref={menu}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  closeMenu();
+                  event.currentTarget.querySelector("summary")?.focus();
+                }
+              }}
+            >
+              <summary aria-label="Game menu">
+                <SettingsIcon />
+              </summary>
+              <div className="minigame-menu-options">
                 <button
                   onClick={() => {
                     closeMenu();
-                    shared.action({ type: "finish" });
+                    onBack();
                   }}
                 >
-                  Finish game
+                  All games
                 </button>
-              )}
-            </div>
-          </details>
+                {!ended && (
+                  <button
+                    onClick={() => {
+                      closeMenu();
+                      shared.action({ type: "finish" });
+                    }}
+                  >
+                    Finish game
+                  </button>
+                )}
+              </div>
+            </details>
+          </div>
         )}
       </div>
       <h1 className="editorial-heading" ref={heading} tabIndex={-1}>
@@ -409,25 +449,6 @@ export function BorderMinigamePanel({
                 </>
               ) : null}
               {!pinpoint && !missing && <p>{question!.explanation}</p>}
-              {sayWhere && (
-                <>
-                  <p className="muted">{question!.qualification}</p>
-                  <details className="say-where-sources">
-                    <summary>Sources</summary>
-                    <ul>
-                      {[question!.source, ...(question!.sources ?? [])].map(
-                        (s) => (
-                          <li key={s.url}>
-                            <a href={s.url} target="_blank" rel="noreferrer">
-                              {s.name}
-                            </a>
-                          </li>
-                        ),
-                      )}
-                    </ul>
-                  </details>
-                </>
-              )}
               {ended && (
                 <p className="minigame-ended-notice">
                   {run.ended === "strikes"

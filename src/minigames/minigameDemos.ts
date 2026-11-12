@@ -110,12 +110,9 @@ export function minigameExamples(
         : (question.feedbackFocus ?? question.focus);
     if (kind === "say-where") {
       dispatch({ type: "select", id: pair.answer });
-      // Demo orientation is independent of the correct country.
-      focus = {
-        lat: 12,
-        lng: [0, 90, 180, -90][library[kind].length],
-        altitude: 2.2,
-      };
+      // Menu demonstrations show a representative region, never an unrelated hemisphere.
+      // Live play still starts with the neutral whole-globe search.
+      focus = question.feedbackFocus!;
     } else if (kind === "pinpoint") {
       const point = (pair as PinpointPair).place!;
       dispatch({ type: "drop-pin", lat: point.lat, lng: point.lng });
@@ -508,6 +505,28 @@ export function tourDuration(examples: MinigameExample[]) {
     (sum, _, index) => sum + DEMO_HOLD_MS + leg(examples, index).duration,
     0,
   );
+}
+/** Rejoin the nearest regional example after the player has explored manually. */
+export function nearestTourTime(examples: MinigameExample[], view: Focus) {
+  let nearest = 0;
+  for (let i = 1; i < examples.length; i++)
+    if (
+      geoDistance(
+        [view.lng, view.lat],
+        [examples[i].focus.lng, examples[i].focus.lat],
+      ) <
+      geoDistance(
+        [view.lng, view.lat],
+        [examples[nearest].focus.lng, examples[nearest].focus.lat],
+      )
+    )
+      nearest = i;
+  return examples
+    .slice(0, nearest)
+    .reduce(
+      (sum, _, index) => sum + DEMO_HOLD_MS + leg(examples, index).duration,
+      0,
+    );
 }
 /** A full westward revolution, with matching position and speed at every join. */
 export function tourFrame(

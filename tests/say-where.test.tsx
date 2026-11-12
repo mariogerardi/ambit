@@ -174,10 +174,61 @@ describe("Say Where?", () => {
     );
     expect(reveal.states["wurl:AFG"]).toBe("correct");
     expect(reveal.states["wurl:TJK"]).toBe("answer");
-    expect(reveal.focus).toMatchObject(base.targets.get("wurl:AFG")!.focus);
+    expect(reveal.focus).toEqual(q.feedbackFocus);
+    expect(q.feedbackReturnToSelection).not.toBe(true);
     expect(
       renderToStaticMarkup(<TextClue clue={q.textClue!} revealed />),
     ).toContain(pair.expression.english_translation);
+  });
+  it("generates natural feedback for single, multiple and shared languages", () => {
+    const explanation = (language: string) =>
+      prepared(pairs.find((p) => p.languageId === language)!).journey.rounds[0]
+        .explanation;
+    expect(explanation("it")).toBe(
+      "Italian is used officially in Italy, Switzerland, San Marino, and Vatican City.",
+    );
+    expect(explanation("mi")).toBe("Māori is used officially in New Zealand.");
+    expect(explanation("hi")).toBe(
+      "Hindi is used officially in India and Fiji.",
+    );
+    expect(explanation("nl")).toBe(
+      "Dutch is used officially in the Netherlands, Belgium, and Suriname.",
+    );
+    const shared = pairs.find((p) => p.expression.id === "sw-id-02")!;
+    expect(prepared(shared).journey.rounds[0].explanation).toBe(
+      "Malay or Indonesian is used officially in Malaysia, Brunei, Singapore, and Indonesia.",
+    );
+  });
+  it("tours the accepted geography after a miss instead of the submitted country", () => {
+    for (const pair of pairs) {
+      const { journey, context } = prepared(pair);
+      const q = journey.rounds[0];
+      const run = { ...startNeighborRun(pairs), kind: "say-where" as const };
+      const selected = neighborReducer(
+        run,
+        { type: "select", id: "wurl:CHN" },
+        journey,
+        context,
+        17,
+      );
+      const result = neighborReducer(
+        selected,
+        { type: "submit" },
+        journey,
+        context,
+        17,
+      );
+      const reveal = journeyWorld(
+        regions,
+        journey,
+        neighborGame(result, journey),
+        context,
+      );
+      expect(reveal.states["wurl:CHN"]).toBe("incorrect");
+      expect(reveal.focus).toEqual(q.feedbackFocus);
+      expect(q.feedbackViews?.length).toBeGreaterThan(0);
+      expect(q.feedbackReturnToSelection).not.toBe(true);
+    }
   });
   it("preserves editable selections and feedback in an account-scoped save; three misses end the run", () => {
     const { journey, context } = prepared();

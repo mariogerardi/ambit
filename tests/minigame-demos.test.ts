@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { geoDistance } from "d3-geo";
 import { Color } from "three";
 import { expect, it, vi } from "vitest";
 import { BorderFades } from "../src/globe/borderFades";
@@ -359,10 +360,27 @@ it("gives each question time before answering and frames the actual examples at 
         (example.revealFocus ?? example.focus).altitude!,
       );
       if (example.kind === "say-where") {
-        expect(example.focus.altitude).toBeGreaterThanOrEqual(1.65);
-        expect(example.focus).not.toMatchObject(
-          example.context.targets.get(example.pair.answer)!.focus,
-        );
+        // Every visible phase must frame accepted geography, including Māori/NZ.
+        const ids = example.journey.rounds[0].rule;
+        if (ids.type !== "country-ids") throw Error("Expected country answers");
+        for (const time of [
+          0,
+          DEMO_QUESTION_MS,
+          DEMO_REVEAL_MS,
+          DEMO_HOLD_MS - 1,
+        ]) {
+          const focus = tourFrame([example], time).focus;
+          const nearest = Math.min(
+            ...ids.ids.map((id) => {
+              const region = example.context.targets.get(id)!;
+              return geoDistance(
+                [focus.lng, focus.lat],
+                [region.focus.lng, region.focus.lat],
+              );
+            }),
+          );
+          expect(nearest).toBeLessThan(Math.PI / 3);
+        }
       } else expect(example.focus.altitude).toBeLessThan(1.2);
     }
   }

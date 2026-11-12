@@ -7,8 +7,10 @@ Status: local implementation on `feat/say-where`; not pushed or deployed.
 Read a short expression in its original script. Select any one qualifying
 sovereign country on the globe, then Check answer. Selection remains editable
 until submission. Language names, English translations, accepted-country lists
-and source labels appear only on reveal. Right-to-left scripts retain their
-language/direction metadata through the shared `TextClue` component.
+and source labels appear only on reveal. The information icon beside the game
+menu holds the general qualification rule throughout play; after submission it
+also holds the current expression’s language notes and all sources. Right-to-left
+scripts retain their language/direction metadata through the shared `TextClue` component.
 
 Each correct round earns one correct answer. Three misses end the run after its
 last reveal; Finish game ends early. Resume, replay, independent account-scoped
@@ -19,9 +21,10 @@ Language mistakes do not create misleading country-location Study exercises.
 The deck visits every language once per seeded cycle and rotates through that
 language's expressions on later cycles. The current entry orientation is retained
 and pulled back to the normal globe view before rotation. Picking pauses motion;
-reveal frames the actual submitted country, including a miss. The full qualifying
-network is visible after submission; an actual correct selection receives its
-correct color. Completion retains actual selections/misses and one illustrative
+reveal tours the accepted countries in regional groups, including after a miss.
+The submitted country remains marked without controlling the reveal camera.
+The full qualifying network is visible after submission; an actual correct
+selection receives its correct color. Completion retains actual selections/misses and one illustrative
 solution after a miss, not every explanatory country as a discovery. Reduced
 motion uses the shared static framing and manual demo controls.
 
@@ -75,8 +78,14 @@ text fingerprint and full accepted network. Country IDs are checked through the
 canonical question context. Country display geometry never changes grading.
 
 The fifth menu card and four evaluated demo examples use the shared tour. Demo
-question framing is independent of the answer. A new SVG result illustration is
-rendered through all four existing theme palettes. The new score/save namespace
+framing briefly focuses a representative region containing accepted countries;
+this is demonstration-only, and live play keeps its neutral whole-globe entry.
+The expression appears above the instruction; the reveal replaces the instruction
+with its language and translation. Resuming a paused tour rejoins the example
+nearest the current globe orientation. The game roster scrolls horizontally inside
+the panel width. Expressions use unboxed typography with room to wrap. Country
+feedback is generated dynamically with natural list punctuation. A new SVG result
+illustration is rendered through all four existing theme palettes. The new score/save namespace
 is `say-where`, with scoring policy version `v1`. No backend, Journey catalog or
 Daily assignment changes are required.
 

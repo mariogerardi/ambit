@@ -21,6 +21,7 @@ import {
   minigameExamples,
   tourFrame,
   smoothJoin,
+  nearestTourTime,
 } from "./minigameDemos";
 import type { TourFrame } from "./minigameDemos";
 
@@ -44,6 +45,7 @@ export function useMinigameTour({
   const [manualIndex, setManualIndex] = useState(0);
   const [answer, setAnswer] = useState(false);
   const [frame, setFrame] = useState<TourFrame>();
+  const resumeFromNearest = useRef(false);
   const motion = useRef<
     { focus: Focus; velocity: Required<Focus> } | undefined
   >(undefined);
@@ -129,6 +131,10 @@ export function useMinigameTour({
       const currentPlan = plan.current;
       if (!currentPlan.examples.length) return;
       if (currentPlan.needsJoin) {
+        const liveView = globe.current?.orbitView() ?? globe.current?.view();
+        if (resumeFromNearest.current && liveView)
+          currentPlan.elapsed = nearestTourTime(currentPlan.examples, liveView);
+        resumeFromNearest.current = false;
         const target = tourFrame(
           currentPlan.examples,
           currentPlan.elapsed,
@@ -137,8 +143,7 @@ export function useMinigameTour({
           currentPlan.examples,
           currentPlan.elapsed + 1,
         ).focus;
-        const origin =
-          motion.current?.focus ?? globe.current?.orbitView() ?? target;
+        const origin = motion.current?.focus ?? liveView ?? target;
         const velocity = motion.current?.velocity ?? {
           lat: 0,
           lng: 0,
@@ -300,7 +305,10 @@ export function useMinigameTour({
     paused,
     reduced,
     pause,
-    toggle: () => setPaused((value) => !value),
+    toggle: () => {
+      if (paused) resumeFromNearest.current = true;
+      setPaused(!paused);
+    },
     answer,
     reveal: () => setAnswer((value) => !value),
     next: () => {

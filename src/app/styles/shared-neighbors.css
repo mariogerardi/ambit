@@ -12,6 +12,43 @@
 .shared-neighbors-heading {
   margin-bottom: 12px;
 }
+.minigame-heading-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.experience .minigame-info-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-editorial);
+  font-size: 22px;
+  text-decoration: none;
+}
+.experience .minigame-info-button:is(:hover, [aria-expanded="true"]) {
+  background: rgb(var(--ui-editorial-rgb) / 0.1);
+}
+.say-where-sources ul {
+  padding-left: 20px;
+}
+.say-where-sources li + li {
+  margin-top: 8px;
+}
+.say-where-game .journey-text-clue {
+  margin-block: 28px;
+  max-width: 34ch;
+}
+.say-where-game .journey-text-clue blockquote {
+  font-size: clamp(26px, 2.6vw, 36px);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
 .experience .minigame-games-button {
   min-height: 44px;
   padding: 10px 14px;

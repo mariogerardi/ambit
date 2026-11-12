@@ -33,6 +33,15 @@ it("plays any qualifying country, reveals translation/sources, and resumes after
   );
   expect(host.querySelector(".journey-text-clue figcaption")).toBeNull();
   expect(host.querySelector(".say-where-sources")).toBeNull();
+  await click("About Say Where?");
+  expect(document.querySelector(".info-note-tooltip")?.textContent).toContain(
+    "Widespread spoken use alone does not.",
+  );
+  expect(document.querySelector(".say-where-sources")).toBeNull();
+  expect(
+    document.querySelector(".info-note-tooltip")?.textContent,
+  ).not.toContain(pair.language);
+  await click("About Say Where?");
   const alternative = pair.answerIds[1];
   await act(async () =>
     probe.props!.onSelect(world.find((r) => r.id === alternative)!),
@@ -44,7 +53,11 @@ it("plays any qualifying country, reveals translation/sources, and resumes after
   expect(
     host.querySelector(".journey-text-clue figcaption")?.textContent,
   ).toContain(pair.expression.english_translation);
-  expect(host.querySelector(".say-where-sources a")).not.toBeNull();
+  expect(host.querySelector(".say-where-sources a")).toBeNull();
+  await click("About Say Where?");
+  expect(document.querySelectorAll(".say-where-sources a")).toHaveLength(
+    pair.sources.length,
+  );
   await act(async () => root.unmount());
   resetRoot();
   await mount();
@@ -53,6 +66,7 @@ it("plays any qualifying country, reveals translation/sources, and resumes after
   ).toContain(pair.language);
   await click("Next expression");
   expect(host.querySelector(".journey-text-clue figcaption")).toBeNull();
+  expect(document.querySelector(".say-where-sources")).toBeNull();
   expect(store.load().run?.answered).toBe(1);
   await act(async () =>
     host
@@ -80,6 +94,10 @@ it("integrates the fifth menu card, its preview, three strikes and final results
       probe.props!.onSelect(world.find((r) => r.id === "wurl:CHN")!),
     );
     await click("Check answer");
+    expect(probe.tours.at(-1)?.length).toBeGreaterThan(0);
+    expect(probe.tours.at(-1)).not.toContainEqual(
+      world.find((r) => r.id === "wurl:CHN")!.focus,
+    );
     if (i < 2) await click("Next expression");
   }
   expect(host.textContent).toContain("That was your third strike.");

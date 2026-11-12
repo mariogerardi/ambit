@@ -119,6 +119,17 @@ export function MinigamesPanel({
             : shared;
   const [confirming, setConfirming] = useState(false);
   const startButton = useRef<HTMLButtonElement>(null);
+  const gameNames = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = gameNames.current;
+    const selected = row?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!row || !selected) return;
+    // Scroll this row only; selecting a game must not move the page or panel.
+    const left = selected.offsetLeft - row.offsetLeft;
+    if (left < row.scrollLeft) row.scrollLeft = left;
+    else if (left + selected.offsetWidth > row.scrollLeft + row.clientWidth)
+      row.scrollLeft = left + selected.offsetWidth - row.clientWidth;
+  }, [kind]);
   const cancelDiscard = useCallback(() => setConfirming(false), []);
   useEffect(() => setConfirming(false), [path, game.run?.id]);
   const startNew = () => {
@@ -151,6 +162,7 @@ export function MinigamesPanel({
     <section className="info-view minigames-carousel" aria-label="Minigames">
       <div
         className="minigame-game-names section-navigation"
+        ref={gameNames}
         role="tablist"
         aria-label="Choose a minigame"
         onKeyDown={(event) => {
@@ -342,6 +354,8 @@ export function MinigameTourCaption({
 }: {
   tour: ReturnType<typeof useMinigameTour>;
 }) {
+  const sayWhere = tour.example?.kind === "say-where";
+  const revealed = tour.phase === "reveal" || (tour.reduced && tour.answer);
   const prompt = !tour.example
     ? "Preparing the globe tour…"
     : tour.phase === "travel"
@@ -353,21 +367,19 @@ export function MinigameTourCaption({
         : tour.example.journey.rounds[0].prompt;
   return (
     <section
-      className={`minigame-globe-caption${tour.reduced ? " reduced" : ""}`}
+      className={`minigame-globe-caption${sayWhere ? " say-where-caption" : ""}${tour.reduced ? " reduced" : ""}`}
       aria-label="Globe demonstration"
     >
       <div className="minigame-globe-prompt">
-        {tour.example?.kind === "say-where" &&
+        {sayWhere &&
           tour.phase !== "travel" &&
-          tour.example.journey.rounds[0].textClue && (
+          tour.example?.journey.rounds[0].textClue && (
             <TextClue
               clue={tour.example.journey.rounds[0].textClue!}
-              revealed={
-                tour.phase === "reveal" || (tour.reduced && tour.answer)
-              }
+              revealed={!!revealed}
             />
           )}
-        <p>{prompt}</p>
+        {(!sayWhere || !revealed || tour.phase === "travel") && <p>{prompt}</p>}
         {tour.reduced ? (
           <>
             <button className="quiet-button" onClick={tour.reveal}>
