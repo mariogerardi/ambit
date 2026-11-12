@@ -375,6 +375,9 @@ export function demoWorld(
   view.regionTransitionKey = `preview:${example.kind}`;
   // Continuous previews fade back into travel rather than starting a new attempt.
   view.regionPhase = undefined;
+  if (example.kind === "out-of-place")
+    for (const id of Object.keys(view.states))
+      if (view.states[id] === "surface") view.states[id] = "disabled";
   if (phase === "question" || phase === "action") {
     for (const id of Object.keys(view.states)) {
       if (example.kind === "border-run" && view.states[id] === "disabled")

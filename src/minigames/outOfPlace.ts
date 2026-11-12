@@ -414,7 +414,7 @@ export function outOfPlaceJourney(
   const country = context.names.get(actual.parentId)!;
   const explanation =
     pair.mistake === "name"
-      ? `The ${actual.type === "country" ? "country" : "marker"} labelled ${shown.name} is ${actual.name}${actual.type === "city" ? `, ${country}` : ""}. Its name has been corrected.`
+      ? `The ${actual.type === "country" ? "country" : "marker"} labelled ${shown.name} was actually ${actual.name}${actual.type === "city" ? `, ${country}` : ""}. Its name has been corrected.`
       : `${actual.name} was shown about ${(Math.round((distance(actual, shown) * 6371.0088) / 10) * 10).toLocaleString("en-US")} km from its true location in ${country}. The dotted line connects its original position to the corrected marker.`;
   const marker = (i: OutOfPlaceItem): PlaceFeature => ({
     ...i,

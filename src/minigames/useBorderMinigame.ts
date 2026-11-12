@@ -273,9 +273,9 @@ export function useBorderMinigame(
     () =>
       questionJourney &&
       (overview
-        ? { ...questionJourney, completion: minigameCompletion(current!) }
+        ? { ...questionJourney, completion: minigameCompletion(current!, base) }
         : questionJourney),
-    [questionJourney, overview, current?.history],
+    [questionJourney, overview, current?.history, base],
   );
   const context = useMemo(
     () =>

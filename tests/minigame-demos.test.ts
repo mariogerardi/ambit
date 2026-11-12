@@ -24,6 +24,22 @@ const regions = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
 const library = minigameExamples(regions);
+it("dims irrelevant Out of Place demo countries while retaining candidate fills", () => {
+  for (const example of library["out-of-place"]) {
+    for (const phase of ["question", "reveal"] as const) {
+      const view = demoWorld(regions, example, phase, 1, false, 0);
+      const countries = view.places
+        .filter((p) => p.markerHidden)
+        .map((p) => p.id);
+      expect(countries.length).toBeGreaterThan(0);
+      for (const region of regions) {
+        if (countries.includes(region.id))
+          expect(view.states[region.id]).not.toBe("disabled");
+        else expect(view.states[region.id]).toBe("disabled");
+      }
+    }
+  }
+});
 it("prepares only the requested game's previews and preserves already prepared examples", () => {
   const world = [...regions];
   const shared = minigameExamples(world, "shared-neighbors");

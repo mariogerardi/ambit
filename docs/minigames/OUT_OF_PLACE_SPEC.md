@@ -20,6 +20,12 @@ home country: only the original country choices retain country fills. Supporting
 countries retain their candidate color. No Study exercise is inferred from a
 failure to identify an intentionally misleading map.
 
+Completion keeps countries as colored fills with labels and cities as dots. Each
+place appears once, without generic response pins. Correct identifications take
+precedence when a place occurs in multiple rounds. Missed mistakes use the answer
+color; wrongly selected places use the incorrect color. Name corrections say the
+labelled place “was actually” the corrected name.
+
 ## Dynamic content and fairness
 
 Cities come from the bundled primary capitals and GeoNames places with at least
@@ -55,6 +61,7 @@ city labels and country labels use the point picker. Reveal coordinates now hono
 authored feedback-place positions, alongside existing name corrections.
 
 Menu examples use the existing continuous regional tour and skip a pending-answer
-phase. The preview/share SVG has all four theme variants. Focused tests cover
+phase. Irrelevant demo countries use the theme's dimmed disabled fill. The
+preview/share SVG has all four theme variants. Focused tests cover
 eligibility, one-error scenes, spacing/ownership, fills and background rejection,
 first-tap grading, correction, saves, reload/replay, strikes, scores and sharing.

@@ -22,6 +22,7 @@ import {
 import { journeyWorld } from "../src/app/journeyWorld";
 import { minigameWorld } from "../src/minigames/minigameWorld";
 import { createNeighborSave } from "../src/minigames/sharedNeighborsSave";
+import { minigameCompletion } from "../src/minigames/minigameRecap";
 import {
   minigameResultText,
   minigameResult,
@@ -140,7 +141,7 @@ describe("Out of Place", () => {
         expect(journey.rounds[0].explanation).toContain(
           "km from its true location",
         );
-      }
+      } else expect(journey.rounds[0].explanation).toContain(" was actually ");
       for (const actual of pair.items) {
         const revealed = world.places.find((p) => p.id === actual.id)!;
         expect(revealed).toMatchObject({
@@ -153,6 +154,80 @@ describe("Out of Place", () => {
         "correct",
       );
     }
+  });
+  it("recaps countries as fills and cities as dots without duplicate wrong-answer pins", () => {
+    const items = outOfPlaceItems(regions);
+    const cities = items.filter((p) => p.type === "city").slice(0, 3);
+    const countries = items
+      .filter(
+        (p) =>
+          p.type === "country" &&
+          !cities.some((city) => city.parentId === p.id),
+      )
+      .slice(0, 3);
+    const visit = (
+      target: (typeof items)[number],
+      correct: boolean,
+      selected = target,
+    ) => ({
+      target: {
+        id: target.id,
+        name: target.name,
+        lat: target.lat,
+        lng: target.lng,
+      },
+      ids: target.type === "country" ? [target.id] : [],
+      correct,
+      point: { lat: target.lat, lng: target.lng },
+      selectedId: selected.id,
+      ...(!correct ? { pin: { lat: selected.lat, lng: selected.lng } } : {}),
+    });
+    const run = {
+      ...startNeighborRun(pairs),
+      kind: "out-of-place" as const,
+      overview: true,
+      result: false,
+      selectedId: cities[0].id,
+      pin: { lat: cities[0].lat, lng: cities[0].lng },
+      history: [
+        visit(cities[0], true),
+        visit(countries[0], true),
+        visit(cities[1], false, countries[1]),
+        visit(countries[2], false, cities[2]),
+        visit(cities[1], false, cities[0]),
+      ],
+    };
+    const completion = minigameCompletion(run, base);
+    const journey = { ...outOfPlaceJourney(pairs[0], base), completion };
+    const view = minigameWorld({
+      regions,
+      journey,
+      context: createQuestionContext(regions, [], journey, base),
+      game: neighborGame(run, journey),
+      kind: "out-of-place",
+      pair: pairs[0],
+      overview: true,
+    });
+    expect(view.places).toHaveLength(6);
+    expect(new Set(view.places.map((p) => p.id)).size).toBe(6);
+    expect(view.places.some((p) => p.kind === "pin")).toBe(false);
+    const states = ["correct", "answer", "incorrect"];
+    countries.forEach((country, index) => {
+      expect(view.states[country.id]).toBe(states[[0, 2, 1][index]]);
+      expect(view.places.find((p) => p.id === country.id)).toMatchObject({
+        markerHidden: true,
+      });
+    });
+    cities.forEach((city, index) => {
+      expect(view.places.find((p) => p.id === city.id)).toMatchObject({
+        kind: "city",
+        markerHidden: false,
+        visualState: states[index],
+      });
+      expect(view.states[city.parentId]).toBe("disabled");
+    });
+    expect(view.regionInteraction).toBe(false);
+    expect(view.clueLocators).toEqual([]);
   });
   it("persists a first-tap result in its own save and shares its own game URL", () => {
     const pair = pairs[0],

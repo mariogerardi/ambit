@@ -119,6 +119,16 @@ it("handles three wrong taps, corrected-marker recap, high scores and replay", a
   expect(
     probe.props!.places.some((p) => p.name !== "" && p.name !== "Missed pin"),
   ).toBe(true);
+  expect(probe.props!.places.some((p) => p.kind === "pin")).toBe(false);
+  expect(new Set(probe.props!.places.map((p) => p.id)).size).toBe(
+    probe.props!.places.length,
+  );
+  for (const place of probe.props!.places.filter((p) =>
+    p.id.startsWith("wurl:"),
+  )) {
+    expect(place.markerHidden).toBe(true);
+    expect(probe.props!.states[place.id]).toBe(place.visualState);
+  }
   await click("Play again");
   expect(store.load().run?.answered).toBe(0);
   expect(probe.props!.places).toHaveLength(6);

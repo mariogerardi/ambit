@@ -7,6 +7,7 @@ import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { GameState } from "../game/state";
 import type { RegionReveal } from "../globe/regionFades";
 import { journeyWorld } from "../app/journeyWorld";
+import { presentJourneyPlace } from "../game/authoredPlaces";
 import { pointAlongBearing } from "../game/geodesic";
 import { borderRunCrossings } from "./borderRunPath";
 import { PINPOINT_BANDS } from "./extraGames";
@@ -49,6 +50,18 @@ export function minigameWorld({
   regionalPinpoint?: boolean;
 }): MinigameWorld {
   const view: MinigameWorld = journeyWorld(regions, journey, game, context);
+  if (kind === "out-of-place" && overview) {
+    // History already contains the corrected item and the selected mistake.
+    // Do not mix in generic last-question response pins or duplicate discoveries.
+    view.places = (journey.completion?.places ?? []).map(presentJourneyPlace);
+    view.regionInteraction = false;
+    view.selectableRegionIds = [];
+    view.clueLocators = [];
+    for (const region of regions) view.states[region.id] = "disabled";
+    for (const place of journey.completion?.places ?? [])
+      if (context.targets.has(place.id))
+        view.states[place.id] = place.visualState ?? "answer";
+  }
   if (kind === "out-of-place" && !overview) {
     const scene = pair as OutOfPlacePair;
     const countryIds = scene.items
