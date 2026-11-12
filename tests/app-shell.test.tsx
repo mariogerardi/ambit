@@ -64,6 +64,8 @@ describe("app shell (DOM only; no browser or WebGL)", () => {
       "Missing Borders",
       "Border Run",
       "Pinpoint",
+      "Out of Place",
+      "Say Where?",
     ]);
     for (const [slug, title] of [
       ["shared-neighbors", "Shared Neighbors"],

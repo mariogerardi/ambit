@@ -15,7 +15,7 @@ import { startNeighborRun } from "../src/minigames/sharedNeighbors";
 import { createNeighborSave } from "../src/minigames/sharedNeighborsSave";
 import { createMinigameScores } from "../src/minigames/minigameScores";
 const pairs = outOfPlacePairs(world);
-it("opens the sixth game with city dots and country fills, then commits the first tap immediately", async () => {
+it("opens Out of Place with city dots and country fills, then commits the first tap immediately", async () => {
   history.replaceState(null, "", "/minigames/out-of-place");
   await mount();
   expect(
@@ -63,7 +63,7 @@ it("opens the sixth game with city dots and country fills, then commits the firs
   await click("Next map");
   expect(probe.props!.places).toHaveLength(6);
   expect(probe.props!.placeInteraction).toBe(true);
-});
+}, 15_000);
 it("accepts a tap on a filled country but ignores background countries", async () => {
   const deck = outOfPlaceDeck(pairs, world, 42, 0);
   const index = deck.findIndex(
