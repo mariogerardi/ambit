@@ -246,8 +246,10 @@ Study sync. Viewer completion is read fresh for score disclosure without reading
 or rewriting the summary cache. Profiles, caches and relationships are read in strongly
 consistent batches, with a second relationship check before returning scores.
 Server fan-out is bounded to four concurrent reads; historical comparisons expose at most 30
-results. Projection reads are bounded to 1,000 save registers and fail explicitly
-rather than show incomplete totals when that bound is exceeded.
+results. Projection reads follow all save pages, evaluating up to 1,000 registers
+per query and respecting DynamoDB's byte limit. They return only Journey and
+archived Study registers for aggregation, omitting active Study sessions and drafts.
+Accounts with longer histories retain complete totals without a fixed register cutoff.
 
 Friendship records, versioned Journey results and challenge records stay separate.
 Future minigames can add game-specific result projections without changing friend

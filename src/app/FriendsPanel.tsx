@@ -402,8 +402,8 @@ export function FriendsPanel({
   const notices = (
     <>
       {(error || failure) && (
-        <p className="account-message" role="alert">
-          {error || failure}
+        <p className="account-message friends-error" role="alert">
+          <span>{error || failure}</span>
           {failure && !error && (
             <button
               className="quiet-button tertiary-action"

@@ -16,6 +16,7 @@ SETTINGS = {"topics": ["capitals"], "scope": "all", "continent": "AF", "countryI
 class Database:
     def __init__(self):
         self.items, self.saves = {}, []
+        self.save_page_size = 1000
 
     def get_item(self, Key, **kwargs):
         item = self.items.get((Key["pk"], Key["sk"]))
@@ -27,7 +28,17 @@ class Database:
     def query(self, **kwargs):
         values = kwargs["ExpressionAttributeValues"]
         if kwargs.get("ProjectionExpression"):
-            return {"Items": [s for s in self.saves if s["pk"] == values[":owner"]]}
+            saves = [s for s in self.saves if s["pk"] == values[":owner"]]
+            start = int(kwargs.get("ExclusiveStartKey", {}).get("sk", 0))
+            end = start + min(kwargs["Limit"], self.save_page_size)
+            items = saves[start:end]
+            if kwargs.get("FilterExpression"):
+                items = [s for s in items if s["namespace"] == values[":daily"] or
+                         (s["namespace"] == values[":study"] and s["field"].startswith(values[":history"]))]
+            result = {"Items": copy.deepcopy(items)}
+            if end < len(saves):
+                result["LastEvaluatedKey"] = {"pk": values[":owner"], "sk": str(end)}
+            return result
         return {"Items": [copy.deepcopy(v) for (pk, sk), v in sorted(self.items.items(), reverse=True) if pk == values[":owner"] and sk.startswith(values[":prefix"])][:kwargs["Limit"]]}
 
     def batch_get_item(self, RequestItems):
@@ -242,6 +253,45 @@ class CommunityTests(unittest.TestCase):
         score = next(s for s in result["journeys"] if s["date"] == "2026-10-17")
         self.assertEqual(score["points"], 9)
         self.assertNotIn("private", str(result))
+
+    def test_activity_reads_more_than_1000_registers_for_viewer_and_friend(self):
+        self.friends()
+        study = {"session": {"phase": "summary", "settings": SETTINGS,
+                             "history": [{"correct": True, "response": "private answer"} for _ in range(10)]}}
+        for subject in ("a", "b"):
+            with self.subTest(subject=subject):
+                self.db.items.pop(("user#b", "activity-v1"), None)
+                self.db.saves = [
+                    {"pk": "user#" + subject, "namespace": "study", "field": "history." + str(i),
+                     "writer": "browser", "clock": 1, "valueJson": json.dumps(study)}
+                    for i in range(1001)
+                ] + [self.daily_record("a"), self.daily_record("b")]
+                status, page = self.call("GET /account/friends/activity", query={"date": "2026-10-10"})
+                self.assertEqual(status, 200, page)
+                activity = page["you"] if subject == "a" else page["friends"][0]
+                self.assertEqual(activity["stats"]["studySessions"], 1001)
+                self.assertEqual(activity["stats"]["studyQuestions"], 10010)
+                self.assertEqual(activity["stats"]["journeysCompleted"], 1)
+                self.assertEqual(page["friends"][0]["today"]["score"]["correct"], 3)
+                self.assertNotIn("private answer", json.dumps(page))
+
+    def test_activity_follows_empty_filtered_and_byte_limited_pages_past_ten_queries(self):
+        self.friends()
+        self.db.save_page_size = 100  # DynamoDB can stop before Limit at its byte boundary.
+        self.db.saves = [self.daily_record("a"), self.daily_record("b")] + [
+            {"pk": "user#a", "namespace": "study", "field": "draft." + str(i),
+             "writer": "browser", "clock": 1, "valueJson": json.dumps("private draft")}
+            for i in range(1100)
+        ] + [self.daily_record("a", day="2026-10-09"),
+             {"pk": "user#a", "namespace": "daily", "field": "reset.2026-10-10/test",
+              "writer": "admin", "clock": 2, "valueJson": "2"}]
+        status, page = self.call("GET /account/friends/activity", query={"date": "2026-10-10"})
+        self.assertEqual(status, 200, page)
+        self.assertEqual(page["you"]["stats"]["journeysCompleted"], 1)
+        self.assertEqual(page["you"]["today"]["status"], "not_started")
+        self.assertTrue(page["friends"][0]["today"]["scoreLocked"])
+        self.assertNotIn("score", page["friends"][0]["today"])
+        self.assertNotIn("private", json.dumps(page))
 
     def test_journey_reset_removes_old_scores_and_allows_a_fresh_run(self):
         self.db.saves = [self.daily_record("a"), self.daily_record("a", writer="stale"), self.daily_record("a", day="2026-10-09")]
