@@ -118,7 +118,12 @@
       "Equatorial Guinea: official status does not imply common everyday usage."
     ],
     "pending_decisions": [],
-    "review_status": "source_checked"
+    "review_status": "source_checked",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "ru",
@@ -186,7 +191,12 @@
     "pending_decisions": [
       "KAZ: confirm whether nationally authorized administrative co-use meets the game policy."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "sw",
@@ -254,7 +264,12 @@
     "pending_decisions": [
       "Consider whether Rwanda and Uganda have sufficient practical usage for the teaching objective, despite formal status."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "nl",
@@ -312,7 +327,12 @@
       "BEL: decide whether nationally recognized regional co-officiality counts.",
       "Constituent Kingdom countries versus sovereign states: choose a uniform geographic roster policy."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "it",
@@ -380,7 +400,12 @@
     "pending_decisions": [
       "VAT: verify country ID availability in game data, and apply the Vatican City State/Holy See distinction."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "el",
@@ -423,7 +448,12 @@
       "Greek in Greece is well evidenced as official by European Commission country compendium."
     ],
     "pending_decisions": [],
-    "review_status": "source_checked"
+    "review_status": "source_checked",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "tr",
@@ -466,7 +496,12 @@
       "Do not model Northern Cyprus as a separate ISO 3166-1 sovereign-state answer."
     ],
     "pending_decisions": [],
-    "review_status": "source_checked"
+    "review_status": "source_checked",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "ro",
@@ -508,7 +543,12 @@
       "The Moldovan constitution explicitly names Romanian following a 2023 legislative amendment; do not separate “Moldovan” as a different answer language here."
     ],
     "pending_decisions": [],
-    "review_status": "source_checked"
+    "review_status": "source_checked",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "ms",
@@ -565,7 +605,12 @@
     "pending_decisions": [
       "Editorial review needed for false-recognition risk with Indonesian, especially short, shared phrases."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "ta",
@@ -610,7 +655,12 @@
     "pending_decisions": [
       "Native speaker review needed for register and variant acceptability across Singapore and Sri Lanka."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "id",
@@ -644,7 +694,12 @@
     "pending_decisions": [
       "Shared wording with Malay needs a deliberate multi-language ambiguity policy."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "ga",
@@ -676,7 +731,12 @@
       "Irish greeting and farewell formulations can be dialect-specific; do not overstate geographical exclusivity of a phrase."
     ],
     "pending_decisions": [],
-    "review_status": "source_checked"
+    "review_status": "source_checked",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "mi",
@@ -708,7 +768,12 @@
       "Do not strip macrons in the answer display."
     ],
     "pending_decisions": [],
-    "review_status": "source_checked"
+    "review_status": "source_checked",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "ka",
@@ -739,7 +804,12 @@
       "Constitution also recognizes Abkhazian regionally in Abkhazia; this does not limit Georgian’s national official status."
     ],
     "pending_decisions": [],
-    "review_status": "source_checked"
+    "review_status": "source_checked",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "hi",
@@ -773,7 +843,12 @@
     "pending_decisions": [
       "Decide whether Fijian Hindi, standard Hindi and Fiji constitutional language provisions qualify Fiji. Current candidate list excludes Fiji."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "vi",
@@ -807,7 +882,12 @@
     "pending_decisions": [
       "VNM: explicit policy decision required whether constitutional national-language status suffices as official."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
   },
   {
     "id": "fa",
@@ -841,6 +921,891 @@
     "pending_decisions": [
       "Should a future broader Persian macro-language entry accept Afghanistan (Dari) and Tajikistan (Tajik), or retain separate standardized languages? Current pilot intentionally retains only Iran."
     ],
-    "review_status": "editorial_review_required"
+    "review_status": "editorial_review_required",
+    "research_revision": "say-where-idioms-v2",
+    "editorial_notes_v2": [
+      "Status evidence carried forward from v1; no automatic expansion of qualifying countries.",
+      "Some idioms have multiple accepted varieties; check expression-specific notes."
+    ]
+  },
+  {
+    "id": "fr",
+    "language_name": "French",
+    "iso_639_1": "fr",
+    "iso_639_3": "fra",
+    "sample_language_tag": "fr-FR",
+    "sample_variety_or_standard": "Metropolitan French sample; expressions often circulate across the Francophonie",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "FRA",
+      "BEL",
+      "CHE",
+      "LUX",
+      "MCO",
+      "CAN",
+      "HTI",
+      "SEN",
+      "CIV",
+      "BEN",
+      "TGO",
+      "GAB",
+      "CMR",
+      "COD",
+      "COG",
+      "TCD",
+      "CAF",
+      "DJI",
+      "COM",
+      "MDG",
+      "BDI",
+      "RWA",
+      "GIN",
+      "GNQ",
+      "SYC",
+      "VUT"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "FRA",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "BEL",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "CHE",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "LUX",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "MCO",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "CAN",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "HTI",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "SEN",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "CIV",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "BEN",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "TGO",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "GAB",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "CMR",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "COD",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "COG",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "TCD",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "CAF",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "DJI",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "COM",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "MDG",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "BDI",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "RWA",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "GIN",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "GNQ",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "SYC",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "VUT",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for French. French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking.",
+        "source": {
+          "title": "French statutory status overview (2026)",
+          "url": "https://countries.world/french-speaking-countries/"
+        },
+        "needs_editorial_decision": true
+      }
+    ],
+    "notes": [
+      "French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking."
+    ],
+    "pending_decisions": [
+      "French has 26 official/co-official national jurisdictions in the referenced updated 2026 comparison; Mali, Burkina Faso and Niger were downgraded to working-language status. Legal bases and variants in each country require country-specific checking."
+    ],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "es",
+    "language_name": "Spanish",
+    "iso_639_1": "es",
+    "iso_639_3": "spa",
+    "sample_language_tag": "es",
+    "sample_variety_or_standard": "Neutral written Spanish, not a specific American or Peninsular dialect",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "ESP",
+      "MEX",
+      "GTM",
+      "HND",
+      "SLV",
+      "NIC",
+      "CRI",
+      "PAN",
+      "CUB",
+      "DOM",
+      "COL",
+      "VEN",
+      "ECU",
+      "PER",
+      "BOL",
+      "PRY",
+      "CHL",
+      "ARG",
+      "URY",
+      "GNQ"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "ESP",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "MEX",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Spanish. Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "GTM",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "HND",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "SLV",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "NIC",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "CRI",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "PAN",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "CUB",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "DOM",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "COL",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "VEN",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "ECU",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "PER",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "BOL",
+        "legal_category": "state_official",
+        "evidence": "Spanish national language evidenced by linked source.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "PRY",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Spanish. Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "CHL",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Spanish. Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "ARG",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Spanish. Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "URY",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Spanish. Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "GNQ",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Spanish. Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication.",
+        "source": {
+          "title": "Instituto Cervantes — official status by Hispanic state, Anuario 2024",
+          "url": "https://cvc.cervantes.es/Lengua/anuario/anuario_24/moreno-alvarez/cuadros.htm"
+        },
+        "needs_editorial_decision": true
+      }
+    ],
+    "notes": [
+      "Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication."
+    ],
+    "pending_decisions": [
+      "Twenty-sovereign-state Spanish geographic convention; some constitutions (Argentina, Chile, Mexico, Uruguay) lack explicit official-language wording. National predominant/de-facto role MUST be ruled on before publication."
+    ],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "de",
+    "language_name": "German",
+    "iso_639_1": "de",
+    "iso_639_3": "deu",
+    "sample_language_tag": "de-DE",
+    "sample_variety_or_standard": "Standard German, Germany example; Swiss/Austrian variants possible",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "DEU",
+      "AUT",
+      "CHE",
+      "LIE",
+      "LUX",
+      "BEL"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "DEU",
+        "legal_category": "state_official",
+        "evidence": "German national language evidenced by linked source.",
+        "source": {
+          "title": "University College London — German language official status",
+          "url": "https://web.clie.ucl.ac.uk/home/sac/german/background"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "AUT",
+        "legal_category": "state_official",
+        "evidence": "German national language evidenced by linked source.",
+        "source": {
+          "title": "University College London — German language official status",
+          "url": "https://web.clie.ucl.ac.uk/home/sac/german/background"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "CHE",
+        "legal_category": "state_official",
+        "evidence": "German national language evidenced by linked source.",
+        "source": {
+          "title": "University College London — German language official status",
+          "url": "https://web.clie.ucl.ac.uk/home/sac/german/background"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "LIE",
+        "legal_category": "state_official",
+        "evidence": "German national language evidenced by linked source.",
+        "source": {
+          "title": "University College London — German language official status",
+          "url": "https://web.clie.ucl.ac.uk/home/sac/german/background"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "LUX",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for German. National legal/institutional German in six states; Belgian official use is organized regionally. South Tyrol in Italy is regional only; excluded.",
+        "source": {
+          "title": "University College London — German language official status",
+          "url": "https://web.clie.ucl.ac.uk/home/sac/german/background"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "BEL",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for German. National legal/institutional German in six states; Belgian official use is organized regionally. South Tyrol in Italy is regional only; excluded.",
+        "source": {
+          "title": "University College London — German language official status",
+          "url": "https://web.clie.ucl.ac.uk/home/sac/german/background"
+        },
+        "needs_editorial_decision": true
+      }
+    ],
+    "notes": [
+      "National legal/institutional German in six states; Belgian official use is organized regionally. South Tyrol in Italy is regional only; excluded."
+    ],
+    "pending_decisions": [
+      "National legal/institutional German in six states; Belgian official use is organized regionally. South Tyrol in Italy is regional only; excluded."
+    ],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "fi",
+    "language_name": "Finnish",
+    "iso_639_1": "fi",
+    "iso_639_3": "fin",
+    "sample_language_tag": "fi-FI",
+    "sample_variety_or_standard": "Standard Finnish",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "FIN"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "FIN",
+        "legal_category": "state_official",
+        "evidence": "Finnish national language evidenced by linked source.",
+        "source": {
+          "title": "Finnish Ministry for Foreign Affairs — About Finland",
+          "url": "https://um.fi/atcm45/about-finland"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Finnish and Swedish are Finland’s national/official languages."
+    ],
+    "pending_decisions": [],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "et",
+    "language_name": "Estonian",
+    "iso_639_1": "et",
+    "iso_639_3": "est",
+    "sample_language_tag": "et-EE",
+    "sample_variety_or_standard": "Standard Estonian",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "EST"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "EST",
+        "legal_category": "state_official",
+        "evidence": "Estonian national language evidenced by linked source.",
+        "source": {
+          "title": "European Commission — state languages of EU countries",
+          "url": "https://translation.ec.europa.eu/languages-eu-why-multilingualism-matters/linguistic-diversity-eu_en"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Estonian is the state language of Estonia."
+    ],
+    "pending_decisions": [],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "pl",
+    "language_name": "Polish",
+    "iso_639_1": "pl",
+    "iso_639_3": "pol",
+    "sample_language_tag": "pl-PL",
+    "sample_variety_or_standard": "Standard Polish",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "POL"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "POL",
+        "legal_category": "state_official",
+        "evidence": "Polish national language evidenced by linked source.",
+        "source": {
+          "title": "European Commission — state languages of EU countries",
+          "url": "https://translation.ec.europa.eu/languages-eu-why-multilingualism-matters/linguistic-diversity-eu_en"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Polish is the state language of Poland."
+    ],
+    "pending_decisions": [],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "uk",
+    "language_name": "Ukrainian",
+    "iso_639_1": "uk",
+    "iso_639_3": "ukr",
+    "sample_language_tag": "uk-UA",
+    "sample_variety_or_standard": "Standard Ukrainian",
+    "script": "Cyrillic",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "UKR"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "UKR",
+        "legal_category": "state_official",
+        "evidence": "Ukrainian national language evidenced by linked source.",
+        "source": {
+          "title": "President of Ukraine — Constitution Article 10",
+          "url": "https://president.gov.ua/documents/constitution/konstituciya-ukrayini-rozdil-i"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Article 10 of Ukraine’s constitution names Ukrainian the state language."
+    ],
+    "pending_decisions": [],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "sv",
+    "language_name": "Swedish",
+    "iso_639_1": "sv",
+    "iso_639_3": "swe",
+    "sample_language_tag": "sv-SE",
+    "sample_variety_or_standard": "Sweden Swedish",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "SWE",
+      "FIN"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "SWE",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Swedish. Sweden’s 2009 Language Act establishes Swedish as principal public language, a different wording from “official”; Finland explicitly co-official Swedish.",
+        "source": {
+          "title": "Swedish Parliament — Language Act 2009:600",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/spraklag-2009600_sfs-2009-600/"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "FIN",
+        "legal_category": "state_official",
+        "evidence": "Swedish national language evidenced by linked source.",
+        "source": {
+          "title": "Swedish Parliament — Language Act 2009:600",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/spraklag-2009600_sfs-2009-600/"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Sweden’s 2009 Language Act establishes Swedish as principal public language, a different wording from “official”; Finland explicitly co-official Swedish."
+    ],
+    "pending_decisions": [
+      "Sweden’s 2009 Language Act establishes Swedish as principal public language, a different wording from “official”; Finland explicitly co-official Swedish."
+    ],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "cs",
+    "language_name": "Czech",
+    "iso_639_1": "cs",
+    "iso_639_3": "ces",
+    "sample_language_tag": "cs-CZ",
+    "sample_variety_or_standard": "Standard Czech",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "CZE"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "CZE",
+        "legal_category": "state_official_or_equivalent_review",
+        "evidence": "Candidate country in cited source for Czech. Czech is the Czech state’s main public administration language; statutory usage rather than constitutionally explicit “official” declaration should be checked.",
+        "source": {
+          "title": "European Commission — state languages of EU countries",
+          "url": "https://translation.ec.europa.eu/languages-eu-why-multilingualism-matters/linguistic-diversity-eu_en"
+        },
+        "needs_editorial_decision": true
+      }
+    ],
+    "notes": [
+      "Czech is the Czech state’s main public administration language; statutory usage rather than constitutionally explicit “official” declaration should be checked."
+    ],
+    "pending_decisions": [
+      "Czech is the Czech state’s main public administration language; statutory usage rather than constitutionally explicit “official” declaration should be checked."
+    ],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
+  },
+  {
+    "id": "he",
+    "language_name": "Hebrew",
+    "iso_639_1": "he",
+    "iso_639_3": "heb",
+    "sample_language_tag": "he-IL",
+    "sample_variety_or_standard": "Modern Israeli Hebrew",
+    "script": "Hebrew",
+    "direction": "rtl",
+    "qualifying_country_codes": [
+      "ISR"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "ISR",
+        "legal_category": "state_official",
+        "evidence": "Hebrew national language evidenced by linked source.",
+        "source": {
+          "title": "Knesset — Basic Law: Israel — Nation-State of the Jewish People, Article 4",
+          "url": "https://main.knesset.gov.il/EN/activity/documents/BasicLawsPDF/BasicLawNationState.pdf"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Israel Basic Law (2018) Article 4 declares Hebrew the language of the state. Arabic’s protected special status is not silently equated with this category."
+    ],
+    "pending_decisions": [],
+    "review_status": "research_candidate",
+    "research_revision": "say-where-idioms-v2"
   }
 ]

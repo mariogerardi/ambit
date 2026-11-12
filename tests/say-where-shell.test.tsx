@@ -9,6 +9,7 @@ import {
   world,
   resetRoot,
   root,
+  settleLoads,
 } from "./helpers/appShell";
 import { sayWherePairs, sayWhereDeck } from "../src/minigames/sayWhere";
 import { startNeighborRun } from "../src/minigames/sharedNeighbors";
@@ -52,7 +53,10 @@ it("plays any qualifying country, reveals translation/sources, and resumes after
   expect(probe.props!.states[alternative]).toBe("correct");
   expect(
     host.querySelector(".journey-text-clue figcaption")?.textContent,
-  ).toContain(pair.expression.english_translation);
+  ).toContain(pair.expression.literal_english);
+  expect(host.querySelector(".say-where-meaning")?.textContent).toBe(
+    pair.expression.english_translation,
+  );
   expect(host.querySelector(".say-where-sources a")).toBeNull();
   await click("About Say Where?");
   expect(document.querySelectorAll(".say-where-sources a")).toHaveLength(
@@ -88,7 +92,28 @@ it("integrates the fifth menu card, its preview, three strikes and final results
       ?.getAttribute("aria-selected"),
   ).toBe("true");
   expect(host.querySelector(".minigame-customize-toggle")).toBeNull();
-  await click("Start new game");
+  const menu = host.querySelector(".minigames-carousel")!;
+  const flashes: string[] = [];
+  const observer = new MutationObserver(() =>
+    flashes.push(menu.textContent ?? ""),
+  );
+  observer.observe(menu, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+  await act(async () =>
+    host
+      .querySelector<HTMLButtonElement>('[aria-label="Start new game"]')!
+      .click(),
+  );
+  // Inspect the outgoing panel before the helper finishes its exit animation.
+  expect(
+    host.querySelector(".mode-outgoing .minigames-carousel")?.textContent,
+  ).not.toContain("Resume game");
+  await settleLoads();
+  observer.disconnect();
+  expect(flashes.some((text) => text.includes("Resume game"))).toBe(false);
   for (let i = 0; i < 3; i++) {
     await act(async () =>
       probe.props!.onSelect(world.find((r) => r.id === "wurl:CHN")!),

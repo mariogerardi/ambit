@@ -115,7 +115,9 @@ it("keeps moving west through every example and rejoins each full rotation witho
       8,
     );
     for (let i = 0; i < examples.length; i++)
-      for (const phase of source[0].kind === "missing-borders"
+      for (const phase of ["missing-borders", "say-where"].includes(
+        source[0].kind,
+      )
         ? ["question", "reveal", "travel"]
         : ["question", "action", "reveal", "travel"])
         expect(stages.has(`${i}:${phase}`)).toBe(true);
@@ -351,7 +353,9 @@ it("gives each question time before answering and frames the actual examples at 
   for (const examples of Object.values(library)) {
     expect(tourFrame(examples, 4200).phase).toBe("question");
     expect(tourFrame(examples, DEMO_QUESTION_MS).phase).toBe(
-      examples[0].kind === "missing-borders" ? "question" : "action",
+      ["missing-borders", "say-where"].includes(examples[0].kind)
+        ? "question"
+        : "action",
     );
     expect(tourFrame(examples, DEMO_REVEAL_MS).phase).toBe("reveal");
     for (const example of examples) {

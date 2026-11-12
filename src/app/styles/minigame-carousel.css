@@ -21,7 +21,25 @@
   min-width: 0;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  --fade-start: 0px;
+  --fade-end: 0px;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent
+  );
+}
+.minigame-game-names::-webkit-scrollbar {
+  display: none;
+}
+.minigame-game-names[data-overflow-start="true"] {
+  --fade-start: 20px;
+}
+.minigame-game-names[data-overflow-end="true"] {
+  --fade-end: 20px;
 }
 .minigame-game-names button {
   flex: 0 0 auto;
@@ -136,8 +154,15 @@
   text-wrap: pretty;
 }
 .say-where-caption .journey-text-clue figcaption {
-  margin-top: 10px;
-  gap: 3px;
+  margin: 0 0 4px;
+}
+.say-where-caption .journey-text-clue figcaption em {
+  font-size: 14px;
+}
+.say-where-caption .journey-text-clue-language {
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 600;
 }
 .experience .minigame-globe-prompt > button {
   flex: 0 0 auto;
@@ -164,7 +189,7 @@
     font-size: 11px;
   }
   .experience.minigame-touring:has(.say-where-caption) {
-    --map-tools-height: 170px;
+    --map-tools-height: max(170px, var(--say-where-caption-height, 170px));
   }
   .say-where-caption .journey-text-clue blockquote {
     font-size: 22px;
@@ -210,7 +235,7 @@
     --map-tools-height: 96px;
   }
   .experience.minigame-touring:has(.say-where-caption.reduced) {
-    --map-tools-height: 190px;
+    --map-tools-height: max(190px, var(--say-where-caption-height, 190px));
   }
 }
 

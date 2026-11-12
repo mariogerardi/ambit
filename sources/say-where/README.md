@@ -1,45 +1,40 @@
-# Say Where? — research handoff (2026-11-11)
+# Say Where? — expanded idioms/proverbs research handoff
 
-Two **linked research datasets** for the proposed **Say Where?** Ambit minigame. This is **research input, not a game-ready answer key**. Codex should preserve the source fields and unresolved decisions, not silently treat flagged claims as resolved.
+**Edition:** 2026-11-11, v2. **Title:** Say Where?
 
-- `say-where-languages.json`: **17 languages**, their standard codes and sample varieties, plus **42 country-by-country status claims** with legal/official sources and notes.
-- `say-where-expressions.json`: **51 expressions**, three per language, linked by `language_id`. Each has the exact source-attested native text, English gloss, language tag, direction, source, type, ambiguity notes and review status.
+This replaces the previous 51 phrasebook-like expressions with **108 attested idioms, sayings, proverbs and whakataukī across 27 languages (four per language)**. Ten language records have been added, bringing the language coverage from 17 to 27. The 17 preexisting language/legal-status records are retained, not silently rewritten. **All items are editorial research candidates; none is approved for unattended production.**
 
-## Proposed gameplay
+## Files
 
-The player sees **only the native-language expression** and selects **any one country** where that language qualifies under the game's official-language rule. Don't show language names, the translations, country lists, country names or source labels until after submission. A correct response is **any one qualifying country**, not only a designated example. The reveal can show all other qualifying countries, expression meaning, and why specific legal statuses count.
+- `say-where-languages.json` — 27 language records with codes, selected variety, candidate ISO alpha-3 answer countries, per-country legal evidence and issues needing review. Ten records are newly researched.
+- `say-where-expressions.json` — 108 new researched expression records; every record has native-script text, precise source, a literal English gloss **and** natural meaning, type, language link, direction, varieties, caveats and publication status.
+- `EDITORIAL_PREVIEW.md` — 16 colorful examples to help choose an editorial tone.
 
-## Suggested status rule — requires editorial sign-off
+## Intended gameplay
 
-Working list uses sovereign ISO 3166-1 alpha-3 states (including Vatican City State) where the language has **nationwide official, state, federal/union-official, or constitutionally designated official administrative status**. Country-level co-officiality with territorially regulated use (Belgium), officially permitted institutional use (Kazakhstan), and constitutionally declared national language without explicit official-language wording (Vietnam) are included as **candidates requiring an explicit ruling**. The phrase “qualifying_country_codes” currently means *research candidates under this working rule*, **not** a locked production answer key.
+Player sees **only the native expression**; not the language, literal meaning, English sense, author/source label or country list. Player selects *any* country in which the language qualifies under a previously approved national official-status policy. Reveal can show the language, literal image, actual meaning, and all valid countries. The player's task is to identify the language's geography, not translate the saying.
 
-Regional-only official languages in otherwise nonqualifying countries do not count. Widespread spoken use alone does not count. Constituent territories like Aruba, Curaçao, Sint Maarten and Macau require a separate country-model policy; they are excluded from this sovereign-state pilot.
+## Changes in selection policy
 
-**Important modern change:** Kazakhstan adopted a **new constitution effective July 1, 2026**. The relevant Russian-language provision is **Article 9(2)**, not Article 7(2) of the superseded constitution. That 2026 source is used in the Russian record. Source: https://www.gov.kz/article/232335?lang=en
+1. **No generic greetings or ordinary sentences.** All 108 candidates have a named expression type (idiom, saying, proverb, historical saying or Māori whakataukī). Do not call newly written text a traditional proverb.
+2. **Memorable, authentic expressions.** Favorite material uses vivid imagery (an owl and the moon, moon in a lap, elephants, monkeys, mouse-deer and shrimp sandwiches, etc.). Each item links to a source documenting its wording. Expression source is separate from language official-status evidence.
+3. **Two reveal fields.** `literal_english` = word/image gloss; `english_translation` = communicative meaning. Both are reveal-only. Translations here are research glosses, not certified translations.
+4. **Variety and fairness.** Source attestation does *not* prove exclusivity to a single national standard. Malay/Indonesian, Russian/related Slavic languages, Farsi/Dari/Tajik, cognate Germanic and cross-cultural common proverbs require review. Favor specific but not stereotyped material. Do not infer a country just from a motif; many proverbs travel.
+5. **Legal status.** The original 17 legal datasets carry forward. New multi-state records (particularly French, Spanish and German) are **candidate pools**, not adjudicated full answer keys. French changes in Mali, Burkina Faso and Niger are reflected (working rather than official language). Spanish is especially sensitive: Argentina, Chile, Mexico and Uruguay lack explicit official-language statements in their constitutions in the cited overview. Swedish is a public *principal language* under its 2009 law. Distinguish co-official, administrative, national/principal, de facto and regional-only status. Verify each country independently with current primary law **before** production. Never silently penalize a valid alternative.
+6. **Editorial checks.** Native/fluent review is still needed for wording, region, register, diacritics, and meanings. The older Romanian typo was replaced with an attested proverb. The Czech country-name leak was removed. Any record with `publication_status` starting `blocked_` is prohibited from use until revised and re-sourced. Other `research_candidate`s are also **not** production-authorized.
+7. **Review artwork/cultural context.** Māori whakataukī deserve contextual presentation; do not imply they're casual jokes merely to satisfy 'quirky.' Some snippets have gendered or old-fashioned grammar and sources are not always governmental.
 
-## Specific decisions before implementation
+## Known structural decisions for Codex
 
-1. **Country membership:** Does Kazakhstan’s nationwide official administrative use of Russian count? Does Dutch in Belgian language regions qualify as national co-officiality? Does Vietnamese constitutionally specified *national language* qualify? Does Vatican City State usefully map to an in-game selectable country? These are flagged at record level.
-2. **Varieties:** Iranian Farsi versus Afghan Dari/Tajik; Hindi versus Fiji Hindi; Malay versus standardized Indonesian; European Portuguese versus other national varieties. Do not automatically merge distinct varieties or expand country codes.
-3. **Shared expressions:** Especially Malay/Indonesian, also related Slavic/Romance and other language pairs. If a displayed expression is authentic in more than one sampled language, **either** explicitly allow the union of independently supported valid countries **or** replace the expression. Don't make linguistically valid guesses wrong just because of internal `language_id`.
-4. **Expression quality:** Expressions come from Omniglot's curated, contributed **phrase collections**. These are evidence of attested usage, **not independent folkloric/proverb authentication**, and the data deliberately marks no item as a proverb. The starter set uses greetings, wishes, idioms and ordinary sentences. Before shipping, have a native/fluent reader check text, punctuation, register, variety and naturalness; replace generic or ambiguous items with source-attested, more distinctive expressions where practical.
-5. **Fairness:** No expression contains an explicit country name/demonym. Yet some terms, scripts and formulaic phrases are instantly identifiable or ambiguous; calibrate difficulty and don't assume script alone establishes one country's language.
-6. **Globe UX:** Verify the game's selectable country IDs match these ISO 3166-1 alpha-3 codes. Microstates and very small countries may require special selection/accessibility handling. Treat feedback/reveal as content separate from grading.
+- Match `language_id` to language `id` and ISO `qualifying_country_codes` to Ambit's real country IDs. Do not infer `wurl:` prefix without inspection.
+- Preserve one-source-per-expression links and separate country-specific legal sources. Some languages have source collections with multiple examples; always verify the exact native wording against the linked page before shipping.
+- The current country arrays are **candidate lists**. Do not ship automatic grading for a newly added language until official-status coverage is exhaustive under the selected policy, including alternative correct answers.
+- When an expression is also natural in another language (especially Malay/Indonesian), either independently document the additional valid countries and accept them, or replace that expression. `language_id` on its own is insufficient to rule out alternatives.
+- Do not add extra UI controls: one globe selection per prompt, immediate reveal after commitment; no in-play translation or language-name label.
+- The Malay bamboo saying already used in the prior five-stop Journey is intentionally not repeated here.
 
-## Technical structure
+## Hand-off request
 
-Language record: `id`, `language_name`, `iso_639_1`, `iso_639_3`, `sample_language_tag`, `sample_variety_or_standard`, `script`, `direction`, `qualifying_country_codes`, `status_checked_on`, `country_evidence[]`, `notes[]`, `pending_decisions[]`, `review_status`.
+> Here is an expanded research collection for **Say Where?**. Read this README and the two linked JSON files. Reuse the existing country-selection engine. The new expression set **replaces** the former 51 phrasebook-style entries; it has 108 source-linked sayings across 27 languages. Use the literal gloss and natural meaning only in answer feedback. Before changing gameplay, identify country-status decisions, cross-language ambiguity, source typos and language-variety pitfalls; don't invent expressions or assume country pools are approved. Do focused checks only, and ask for decisions you cannot justify from primary evidence.
 
-Each `country_evidence` contains `country_code`, `legal_category`, `evidence`, `source{title,url}`, and `needs_editorial_decision`.
-
-Expression record: `id`, `language_id`, `native_text`, `english_translation`, `language_tag`, `direction`, `expression_type` (`common_saying` or `ordinary_sentence`; none are asserted as traditional proverbs), `authenticity_source{title,url}`, `source_checked_on`, `source_type`, `notes_or_ambiguity`, `contains_explicit_country_or_demonym`, `native_speaker_reviewed`, `publication_status`.
-
-All native strings are UTF-8 and NFC-normalized. Preserve Unicode characters, including right-to-left presentation for Persian, Georgian/Tamil scripts, and Māori macrons.
-
-## Handing off to Codex
-
-**Suggested request:**
-
-> These are research datasets for the *Say Where?* minigame. Read the README and both JSON files. Treat them as candidates, not production approval. First identify the minimal integration path with Ambit's existing globe selection and scoring; report decision points involving official-status boundaries, language varieties, shared expressions, country IDs and UX. Do not invent additional expressions, treat phrases as proverbs, silently change source text, or resolve flagged status questions without asking. Use the title **Say Where?**.
-
-Research URLs and classification details are embedded **in each record**, so Codex need not infer evidence from this README. Source checks occurred on November 11, 2026. This is a sourced starter, not legal advice or a linguistic certification.
+Sources are recorded inline in each dataset record. The editorial preview is for review and should not be bundled into the production app. 

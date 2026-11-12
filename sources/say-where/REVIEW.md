@@ -1,45 +1,87 @@
 # Say Where? research integration review
 
-Imported from the user-supplied `say-where-research-handoff.zip` on November 11,
-2026 against repository revision `202732c`. The original README and both JSON
-files remain unchanged. Their instructions are reference material; implementation
-and the acceptance policy follow the user's requests and subsequent decisions.
+Reviewed November 11, 2026 on `feat/say-where`, following `58e8107`. The user
+requested all **27 languages and 108 expressions**, with supplied country lists
+as starting answer sets and targeted verification of genuine status uncertainty.
+Attached authoring instructions are reference material; the user's requests govern.
 
-The import audit found 17 unique language IDs, 51 unique expression IDs, valid
-language references, NFC-native text, and a canonical globe unit for every
-country in the original candidate sets. All 51 expressions remain marked
-`research_candidate` and `native_speaker_reviewed: false` in the original data.
-The runtime adapter makes approval/holds explicit instead of overwriting those
-provenance fields. It does not claim independent verification of every original
-country source or native-speaker certification.
+The four expanded ZIP files are preserved byte-for-byte. `metadata.json` records
+hashes and the earlier archive/repository revision. All expressions retain their
+original research and native-review flags. The import confirms unique IDs, valid
+language links, NFC-native text and canonical globe IDs. All 108 are included;
+this does not certify native review or independently verify every attribution.
+Literal gloss and intended meaning remain distinct in the UI.
 
-## Follow-up evidence checked November 11, 2026
+## Settled eligibility decisions
 
-| Decision                            | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Result                                                                                                                                                                                             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vietnamese national government use  | [Vietnam Government: Law 64/2025/QH15, Article 7(1)](https://xaydungchinhsach.chinhphu.vn/toan-van-luat-so-64-2025-qh15-ban-hanh-van-ban-quy-pham-phap-luat-119250311155839688.htm)                                                                                                                                                                                                                                                                                                                                | Requires Vietnamese in legal normative documents; include Vietnam under the user's combined constitutional/legislative rule.                                                                       |
-| Russian official administrative use | [Kazakhstan Government: 2026 Constitution](https://www.gov.kz/article/232335?lang=en)                                                                                                                                                                                                                                                                                                                                                                                                                              | The current government publication supports the new constitution; use Article 9(2), not the superseded Article 7(2). Include Kazakhstan under the approved rule.                                   |
-| Belgian Dutch                       | [Belgian Constitutional Court: Constitution, Article 4](https://nl.const-court.be/court/basic-text/constitution)                                                                                                                                                                                                                                                                                                                                                                                                   | National co-officiality has territorially regulated use; include Belgium as explicitly approved by the user.                                                                                       |
-| Hindi in Fiji                       | [Fiji Government: President's World Hindi Conference address](https://www.fiji.gov.fj/he-president-ratu-wiliame-katonivere-at-the-opening-of-the-12th-world-hindi-conference/)                                                                                                                                                                                                                                                                                                                                     | Government explicitly identifies Hindi as official. Include Fiji (`FJI`); distinguish standard Hindi samples from everyday Fiji Hindi.                                                             |
-| Persian varieties                   | [University of Chicago Persian language program](https://mes.uchicago.edu/languages/persian-language-program)                                                                                                                                                                                                                                                                                                                                                                                                      | Describes Iranian, Afghan and Tajik national varieties of Persian. Adopt and disclose a broad Persian-varieties acceptance policy, rather than claiming all samples are locally identical.         |
-| Dari government status              | [Afghanistan Ministry of Foreign Affairs](https://mfa.gov.af/en/background/)                                                                                                                                                                                                                                                                                                                                                                                                                                       | Identifies Dari and Pashto as official. Include Afghanistan for the broad Persian policy.                                                                                                          |
-| Tajik government status             | [Tajikistan Ministry of Foreign Affairs: Constitution, Article 2](https://www.mid.tj/index.php/en/main/tajikistan/constitution)                                                                                                                                                                                                                                                                                                                                                                                    | Establishes Tajik as the state language. Include Tajikistan for the disclosed Persian-varieties policy.                                                                                            |
-| Shared Malay/Indonesian wording     | [Malaysian Federal Territories Mufti: Malay prose containing “lama tidak bertemu”](https://www.muftiwp.gov.my/ar/artikel/al-kafi-li-al-fatawi/5951-al-kafi-1990-benarkah-terdapat-larangan-memeluk-sahabatnya-apabila-bertemu) and [Malaysian publisher Little Heritage House: “Selamat Makan”](https://littleheritagehouse.com.my/wp-content/uploads/2020/10/CMCO-Tiffin-Carrier-Set_Complete-2.pdf), alongside supplied [Indonesian phrase collection](https://www.omniglot.com/language/phrases/indonesian.php) | The same wording is attested in both language contexts. Accept the union of independently sourced Malay/Indonesian country sets for `sw-id-02` and `sw-id-03`, and label both languages on reveal. |
+National official/co-official status or explicitly authorized national government
+use qualifies. National recognition alone needs legislation establishing government
+use; widespread speech alone does not count. Preserve Vietnamese through Vietnam's
+legal-document mandate, Russian in Kazakhstan under its 2026 Constitution,
+territorially regulated Belgian national co-officiality, Hindi in India and Fiji,
+and the disclosed broad Persian/Farsi/Dari/Tajik set of Iran, Afghanistan and
+Tajikistan. Vatican City remains eligible for Italian working use. Sources for
+these settled cases remain attached in `src/minigames/sayWhere.ts`.
 
-Primary educational/official publications and original publisher usage support
-the additions above. The complete original country-by-country source set remains
-in `say-where-languages.json`; the expression sources remain in the linked file.
-The Indonesian phrase page was indexed with relevant content but direct retrieval
-returned HTTP 403. Do not imply a successful direct fetch or new native review.
+V1 holds concerned different phrasebook text under reused IDs and do not block
+new sayings. Old “Lama tidak bertemu” and “Selamat makan” source links are not
+reused as evidence of different v2 wording.
 
-## Explicit holds
+## Expanded status resolutions
 
-- `sw-ms-01`: applicability beyond Malay remains unresolved; do not make an
-  Indonesian guess wrong without resolving it.
-- `sw-id-01`: applicability beyond Indonesian remains unresolved.
-- `sw-hi-01`: this Sanskrit-derived formula needs a Nepali-language overlap review.
+[eligibility-review.json](eligibility-review.json) records exact additions,
+player-facing qualifications and authoritative sources, separately from raw data.
 
-These expressions remain in the research archive and out of the live deck. They
-are not silently replaced. No general license is inferred for third-party source
-pages; the handoff's short common expressions and factual evidence retain source
-attribution, and no third-party page layout, audio or imagery is copied.
+- **French:** retain the 26 supplied countries. Add Mali (Constitution Article 31),
+  Burkina Faso (revised Constitution Article 35) and Niger (2025 Charter Article 12)
+  through legally designated working-language use. This satisfies the existing
+  government-use rule without relabelling French as officially national there.
+  Add Mauritius through [Constitution Section 49](https://mauritiusassembly.govmu.org/mauritiusassembly/wp-content/uploads/2024/11/The-Constitution-Long-Upload-on-website-modify-on-28.01.22-06.04.22-.pdf),
+  expressly authorizing French in the National Assembly. Result: 30 countries.
+  Luxembourg's statutory administrative/judicial use also qualifies. Neither OIF
+  membership nor widespread use automatically adds a country.
+- **Spanish:** retain Argentina, Chile, Mexico and Uruguay. Argentina's procedure
+  code Article 115 prescribes the national language; read together with the
+  Presidency's identification of Spanish, it supports government use. This does
+  not claim Article 115 explicitly names Spanish. Chile's official ORD. 881 (2024)
+  explains Spanish requirements for public documents. Mexico's Linguistic Rights
+  Act Articles 4 and 7 combine national recognition with public-procedure validity.
+  Uruguay's General Procedure Code Article 65 prescribes Castilian in proceedings.
+  Flagged Paraguay and Equatorial Guinea explicitly recognize Spanish in their
+  constitutional Articles 140 and 4. No de-facto-only exception is introduced.
+- **German:** Luxembourg's government confirms statutory administrative and court
+  use. Belgium's government confirms three official languages; territorial
+  regulation is consistent with the settled Dutch decision. Regional-only German
+  in Italy is not included.
+- **Swedish:** Section 10 of the Language Act prescribes Swedish for courts,
+  administrative authorities and other public bodies, beyond Section 4's
+  principal-language designation. Sweden qualifies; Finland remains included.
+- **Czech:** the Czech Financial Analytical Office quotes Administrative Procedure
+  Code Section 16, prescribing Czech communication/documents. Explicit
+  constitutional official-language wording is unnecessary under our policy.
+
+The French overview was inspected as the starting roster, not used as a
+constitution. Cervantes redirected to maintenance; the national authorities in
+the JSON resolve the flagged Spanish cases instead. Direct retrieval of Burkina
+Faso's consolidated government PDF timed out; its indexed official text and the
+[Presidency's constitutional-revision account](https://www.presidencedufaso.bf/wp-content/uploads/2024/01/CONSEIL-DES-MINISTRES-N%C2%B0038-DU-06-DECEMBRE-2023.pdf)
+support working-language status. No independent audit of every unchanged supplied
+country source is claimed. No checked national-status case remains on hold.
+
+## Shared sayings and remaining uncertainty
+
+Five new expressions accept Malaysia, Brunei, Singapore and Indonesia, based on
+new evidence of related forms, not old phrasebook-ID exceptions:
+
+- `sw-id-01`: [DBP pungguk entry](https://prpm.dbp.gov.my/Cari1?d=175768&keyword=pungguk+I).
+- `sw-id-02`: [DBP kuman/gajah entry](https://prpm.dbp.gov.my/Cari1?d=82736&keyword=seberang).
+- `sw-id-03`: [DBP rotan/akar explanation](https://prpm.dbp.gov.my/Cari1?d=175768&keyword=berguna).
+- `sw-id-04`: [National Library of Malaysia's Malay usage](https://www.pnm.gov.my/pnm/resources/pdf%20file/SP32021.pdf).
+- `sw-ms-02`: [Indonesian linguistic research on gajah/pelanduk](https://download.garuda.kemdikbud.go.id/article.php?article=2578000&title=Leksikon+Nama+Binatang+Dalam+Peribahasa+Indonesia+dan+Relevansinya+Bagi+Pengetahuan+Kosakata+Pemelajar+BIPA+A1&val=24174).
+
+Unresolved: Indonesian applicability of the exact Malay forms in `sw-ms-01`,
+`sw-ms-03` and `sw-ms-04`. They retain the supplied Malay answer set rather than
+an unsupported expansion. Georgian figurative glosses and other supplied native,
+variety and orthographic caveats remain unverified. All entries are included as
+requested; attribution or related-language intelligibility does not resolve those
+linguistic questions. Source audio, imagery and page layouts are not copied.

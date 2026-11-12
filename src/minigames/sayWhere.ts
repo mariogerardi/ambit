@@ -1,5 +1,6 @@
 import languages from "../../sources/say-where/say-where-languages.json";
 import expressions from "../../sources/say-where/say-where-expressions.json";
+import eligibilityReview from "../../sources/say-where/eligibility-review.json";
 import { comparisonFocus } from "../globe/camera";
 import type { Focus } from "../geography/types";
 import { defineQuestion } from "../game/questionBuilder";
@@ -14,12 +15,8 @@ import { neighborDeck } from "./sharedNeighbors";
 export const SAY_WHERE_RESEARCH = { languages, expressions };
 export const SAY_WHERE_POLICY =
   "National official or co-official status, or legally prescribed national government use, qualifies. Widespread spoken use alone does not.";
-export const SAY_WHERE_HELD: Record<string, string> = {
-  "sw-ms-01": "Cross-language applicability to Indonesian remains unresolved.",
-  "sw-id-01": "Cross-language applicability to Malay remains unresolved.",
-  "sw-hi-01":
-    "The Sanskrit-derived wording also needs a Nepali-language acceptance review.",
-};
+// The v1 holds concerned different wording under reused IDs. All v2 items are included.
+export const SAY_WHERE_HELD: Record<string, string> = {};
 const extraSources: Record<string, FactSource[]> = {
   vi: [
     {
@@ -53,18 +50,33 @@ const extraSources: Record<string, FactSource[]> = {
     },
   ],
 };
-const sharedSources: FactSource[] = [
-  {
+const sharedSources: Record<string, FactSource> = {
+  "sw-id-01": {
     reviewedOn: "2026-11-11",
-    name: "Malaysian Federal Territories Mufti · Malay use of lama tidak bertemu",
-    url: "https://www.muftiwp.gov.my/ar/artikel/al-kafi-li-al-fatawi/5951-al-kafi-1990-benarkah-terdapat-larangan-memeluk-sahabatnya-apabila-bertemu",
+    name: "Dewan Bahasa dan Pustaka · pungguk proverb in Malay",
+    url: "https://prpm.dbp.gov.my/Cari1?d=175768&keyword=pungguk+I",
   },
-  {
+  "sw-id-02": {
     reviewedOn: "2026-11-11",
-    name: "Little Heritage House, Malaysia · Selamat Makan menu",
-    url: "https://littleheritagehouse.com.my/wp-content/uploads/2020/10/CMCO-Tiffin-Carrier-Set_Complete-2.pdf",
+    name: "Dewan Bahasa dan Pustaka · kuman/gajah proverb in Malay",
+    url: "https://prpm.dbp.gov.my/Cari1?d=82736&keyword=seberang",
   },
-];
+  "sw-id-03": {
+    reviewedOn: "2026-11-11",
+    name: "Dewan Bahasa dan Pustaka · rotan/akar proverb in Malay",
+    url: "https://prpm.dbp.gov.my/Cari1?d=175768&keyword=berguna",
+  },
+  "sw-id-04": {
+    reviewedOn: "2026-11-11",
+    name: "National Library of Malaysia · Malay use of mulutmu harimaumu",
+    url: "https://www.pnm.gov.my/pnm/resources/pdf%20file/SP32021.pdf",
+  },
+  "sw-ms-02": {
+    reviewedOn: "2026-11-11",
+    name: "Indonesian linguistic research · gajah/pelanduk proverb",
+    url: "https://download.garuda.kemdikbud.go.id/article.php?article=2578000&title=Leksikon+Nama+Binatang+Dalam+Peribahasa+Indonesia+dan+Relevansinya+Bagi+Pengetahuan+Kosakata+Pemelajar+BIPA+A1&val=24174",
+  },
+};
 const broadened: Record<string, string[]> = {
   hi: ["IND", "FJI"],
   fa: ["IRN", "AFG", "TJK"],
@@ -81,7 +93,11 @@ export interface SayWherePair extends NeighborPair {
   qualification: string;
 }
 const acceptedCountries = (id: string) =>
-  broadened[id] ?? languages.find((l) => l.id === id)!.qualifying_country_codes;
+  broadened[id] ?? [
+    ...languages.find((l) => l.id === id)!.qualifying_country_codes,
+    ...(eligibilityReview.find((r) => r.language_id === id)
+      ?.added_country_codes ?? []),
+  ];
 
 const clueFingerprint = (text: string) => {
   let hash = 2166136261;
@@ -93,16 +109,22 @@ const clueFingerprint = (text: string) => {
 /** Research is preserved verbatim; reviewed acceptance changes live separately here. */
 export function sayWherePairs(): SayWherePair[] {
   return expressions
-    .filter((e) => !SAY_WHERE_HELD[e.id])
+    .filter(
+      (e) =>
+        !SAY_WHERE_HELD[e.id] && !e.publication_status.startsWith("blocked_"),
+    )
     .map((expression) => {
       const language = languages.find((l) => l.id === expression.language_id)!;
-      const shared = ["sw-id-02", "sw-id-03"].includes(expression.id);
+      const shared = !!sharedSources[expression.id];
+      const review = eligibilityReview.find(
+        (r) => r.language_id === language.id,
+      );
       const codes = shared
         ? [...new Set([...acceptedCountries("ms"), ...acceptedCountries("id")])]
         : acceptedCountries(language.id);
       const answerIds = codes.map((code) => `wurl:${code}`);
       return {
-        id: `say-where-v1:${expression.id}:${codes.join("+")}:${clueFingerprint(expression.native_text)}`,
+        id: `say-where-v2:${expression.id}:${codes.join("+")}:${clueFingerprint(expression.native_text)}`,
         // Compatibility with the shared round/deck envelope; these are not play clues.
         countries: [answerIds[0], answerIds[0]],
         answer: answerIds[0],
@@ -124,10 +146,11 @@ export function sayWherePairs(): SayWherePair[] {
             url: e.source.url,
           })),
           ...(extraSources[language.id] ?? []),
-          ...(shared ? sharedSources : []),
+          ...(review?.sources ?? []),
+          ...(shared ? [sharedSources[expression.id]] : []),
           ...(shared
             ? languages
-                .find((l) => l.id === "ms")!
+                .find((l) => l.id === (language.id === "ms" ? "id" : "ms"))!
                 .country_evidence.map((e) => ({
                   reviewedOn: language.status_checked_on,
                   name: e.source.title,
@@ -137,21 +160,23 @@ export function sayWherePairs(): SayWherePair[] {
         ].filter(
           (s, i, all) => all.findIndex((other) => other.url === s.url) === i,
         ),
-        qualification: shared
-          ? "This wording is attested in Malay and Indonesian. Countries qualifying through either language are accepted."
-          : language.id === "fa"
-            ? "The sample is Iranian Persian. The accepted Persian network includes the related national varieties Dari in Afghanistan and Tajik Persian in Tajikistan; their everyday wording and writing systems differ."
-            : language.id === "hi"
-              ? "The sample is standard Hindi. Fiji also qualifies through officially recognized Hindi; the everyday Fiji Hindi variety differs."
-              : language.id === "vi"
-                ? "Vietnamese is constitutionally the national language, and Article 7(1) of Law 64/2025/QH15 requires its use in legal normative documents."
-                : language.id === "ru"
-                  ? "Kazakhstan qualifies through officially authorized government use under Article 9(2) of its 2026 constitution."
-                  : language.id === "nl"
-                    ? "Belgium's co-official languages have territorially regulated use. Regional-only recognition in otherwise nonqualifying countries does not count."
-                    : language.id === "it"
-                      ? "Vatican City qualifies through Italian's official working use; this is distinct from Latin in the Holy See."
-                      : SAY_WHERE_POLICY,
+        qualification:
+          review?.qualification ??
+          (shared
+            ? "Related forms of this proverb are attested in Malay and Indonesian. Countries qualifying through either language are accepted."
+            : language.id === "fa"
+              ? "The sample is Iranian Persian. The accepted Persian network includes the related national varieties Dari in Afghanistan and Tajik Persian in Tajikistan; their everyday wording and writing systems differ."
+              : language.id === "hi"
+                ? "The sample is standard Hindi. Fiji also qualifies through officially recognized Hindi; the everyday Fiji Hindi variety differs."
+                : language.id === "vi"
+                  ? "Vietnamese is constitutionally the national language, and Article 7(1) of Law 64/2025/QH15 requires its use in legal normative documents."
+                  : language.id === "ru"
+                    ? "Kazakhstan qualifies through officially authorized government use under Article 9(2) of its 2026 constitution."
+                    : language.id === "nl"
+                      ? "Belgium's co-official languages have territorially regulated use. Regional-only recognition in otherwise nonqualifying countries does not count."
+                      : language.id === "it"
+                        ? "Vatican City qualifies through Italian's official working use; this is distinct from Latin in the Holy See."
+                        : SAY_WHERE_POLICY),
       };
     });
 }
@@ -176,6 +201,18 @@ export const sayWhereRoundCount = (pairs: NeighborPair[]) =>
 /** Regional stops describe the revealed network, independently of the player's guess. */
 function sayWhereViews(pair: SayWherePair, context: QuestionContext): Focus[] {
   switch (pair.languageId) {
+    case "fr":
+      return [
+        { lat: 14, lng: 12, altitude: 2 },
+        { lat: 36, lng: -75, altitude: 1.8 },
+        { lat: -18, lng: 167, altitude: 0.8 },
+      ];
+    case "es":
+      return [
+        { lat: 12, lng: -85, altitude: 1.7 },
+        { lat: -20, lng: -65, altitude: 1.7 },
+        { lat: 22, lng: 0, altitude: 1.5 },
+      ];
     case "pt":
       return [
         { lat: 5, lng: -20, altitude: 2 },
@@ -260,7 +297,7 @@ export function sayWhereJourney(
           dir: pair.expression.direction as "ltr" | "rtl",
           reveal: {
             language: pair.language,
-            translation: pair.expression.english_translation,
+            translation: pair.expression.literal_english,
           },
         },
         explanation: `${language} is used officially in ${countries}.`,

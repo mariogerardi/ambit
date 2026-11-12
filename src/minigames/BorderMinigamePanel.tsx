@@ -16,7 +16,7 @@ import { JourneyShareDialog } from "../app/JourneyShareDialog";
 import { ActionIcon } from "../app/ActionIcon";
 import { SettingsIcon } from "../app/SettingsIcon";
 import { InfoTooltip } from "../app/InfoTooltip";
-import { SAY_WHERE_POLICY } from "./sayWhere";
+import { SAY_WHERE_POLICY, type SayWherePair } from "./sayWhere";
 import { PanelActive } from "../app/ModePanels";
 import type { useBorderMinigame } from "./useBorderMinigame";
 import { AnswerCounter } from "../game/AnswerCounter";
@@ -448,6 +448,11 @@ export function BorderMinigamePanel({
                   )}
                 </>
               ) : null}
+              {sayWhere && (
+                <p className="say-where-meaning">
+                  {(shared.pair as SayWherePair).expression.english_translation}
+                </p>
+              )}
               {!pinpoint && !missing && <p>{question!.explanation}</p>}
               {ended && (
                 <p className="minigame-ended-notice">

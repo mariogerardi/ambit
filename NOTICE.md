@@ -596,11 +596,12 @@ Historical evidence, asset checksums and reproduction notes are recorded in
 ## Say Where? language research
 
 The Say Where? minigame starts from the user-supplied November 11, 2026 research
-handoff. Original language evidence, short source-attested expressions, English
-glosses, attribution links and review flags are preserved in `sources/say-where/`.
-The research records credit Omniglot's contributed phrase collections and the
-country-level official/constitutional sources individually. Follow-up evidence
-and explicit publication holds are documented in `sources/say-where/REVIEW.md`;
+handoffs, including the expanded idioms edition. Original language evidence,
+expressions, literal English glosses, intended meanings, attribution links and
+review flags are preserved in `sources/say-where/`. The research records credit
+the expression collections and country-level official/constitutional sources
+individually. Follow-up evidence and remaining uncertainties are documented in
+`sources/say-where/REVIEW.md`;
 runtime acceptance decisions are separate from the unmodified research files.
 No source audio or images are copied. The Say Where? sharing illustration is
 original code-authored SVG, adapted to the four shared theme palettes.

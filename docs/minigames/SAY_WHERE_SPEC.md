@@ -1,16 +1,19 @@
-# Say Where? — initial minigame
+# Say Where? — minigame
 
 Status: local implementation on `feat/say-where`; not pushed or deployed.
 
 ## Player experience
 
-Read a short expression in its original script. Select any one qualifying
+Read an idiom or saying in its original script. Select any one qualifying
 sovereign country on the globe, then Check answer. Selection remains editable
 until submission. Language names, English translations, accepted-country lists
-and source labels appear only on reveal. The information icon beside the game
-menu holds the general qualification rule throughout play; after submission it
+and source labels appear only on reveal. The demo reveal stacks a small italic
+literal English gloss above the large native expression, with the language below.
+Actual game feedback also explains the intended meaning. The information icon
+beside the game menu holds the general qualification rule throughout play; after submission it
 also holds the current expression’s language notes and all sources. Right-to-left
-scripts retain their language/direction metadata through the shared `TextClue` component.
+scripts retain their language/direction metadata through the shared `TextClue`
+component.
 
 Each correct round earns one correct answer. Three misses end the run after its
 last reveal; Finish game ends early. Resume, replay, independent account-scoped
@@ -24,17 +27,21 @@ and pulled back to the normal globe view before rotation. Picking pauses motion;
 reveal tours the accepted countries in regional groups, including after a miss.
 The submitted country remains marked without controlling the reveal camera.
 The full qualifying network is visible after submission; an actual correct
-selection receives its correct color. Completion retains actual selections/misses and one illustrative
+selection receives its correct color. Completion retains actual selections/misses
+and one illustrative
 solution after a miss, not every explanatory country as a discovery. Reduced
 motion uses the shared static framing and manual demo controls.
 
 ## Content and approved acceptance policy
 
-The supplied ZIP contains 17 languages, 51 expressions and country-level evidence.
-Its three files are preserved byte-for-byte in `sources/say-where/`, including
-all original uncertainty flags. They are research records, not an automatically
-approved answer key. `src/minigames/sayWhere.ts` supplies reviewed acceptance
-changes and explicit holds separately.
+The expanded supplied ZIP contains 27 languages, 108 expressions and country-level
+evidence. Its four files are preserved byte-for-byte in `sources/say-where/`,
+including all original uncertainty flags. The original phrasebook edition is
+recoverable at the revision recorded in `metadata.json`; v1 holds applied to
+different wording and do not carry over merely because an ID was reused. The user
+approved integrating the full expanded collection with targeted status checks.
+`src/minigames/sayWhere.ts` and `eligibility-review.json` keep acceptance decisions
+separate from the original research flags.
 
 On November 11, 2026 the user approved national official/co-official status or
 explicitly authorized national government use, including constitutionally
@@ -54,18 +61,24 @@ including disputed varieties/shared expressions.
   broad Persian-varieties policy. University of Chicago describes Iranian, Afghan
   and Tajik national varieties; national official-status evidence is retained.
   An Iranian colloquial sample is not claimed to be the usual wording everywhere.
-- `sw-id-02` and `sw-id-03` accept the union of Malay and Indonesian countries:
-  Malaysia, Brunei, Singapore and Indonesia. Malaysian primary usage attests the
-  shared strings alongside their supplied Indonesian phrase source.
+- Five reviewed Malay/Indonesian shared proverbs (`sw-id-01` through `sw-id-04`
+  and `sw-ms-02`) accept Malaysia, Brunei, Singapore and Indonesia. New
+  dictionary, library and linguistic-research evidence supports the related
+  forms; old phrasebook-specific source links are not reused.
 - Italian includes Vatican City (`wurl:VAT`), with working-language status
   distinguished from Latin in the Holy See. Existing small-country picking applies.
 - The handoff's sovereign-country pilot excludes constituent/dependent territories
   and regional-only recognition. No automatic UN-roster filtering replaces it.
 
-The initial live pool contains **48 expressions across all 17 languages**. Three
-original candidates remain on hold: `sw-ms-01`, `sw-id-01` (unresolved cross-language
-applicability), and `sw-hi-01` (Sanskrit-derived wording also requiring Nepali
-acceptance research). Nothing is invented or silently rewritten to fill these gaps.
+The current live pool contains **all 108 expressions across all 27 languages**,
+as requested. Supplied country lists are starting answer sets, with reviewed
+adjustments recorded separately in `eligibility-review.json`. French additionally
+accepts Mali, Burkina Faso and Niger through designated working-language status,
+and Mauritius through constitutionally authorized parliamentary use. Flagged
+Spanish, German, Swedish and Czech status cases remain eligible under the
+existing government-use rule, supported by the linked national authorities.
+Other wording/meaning and cross-language uncertainties are recorded, not treated
+as resolved by importing the dataset.
 Full follow-up evidence is in [the research review](../../sources/say-where/REVIEW.md).
 Native/fluent-speaker review is not claimed; original review flags remain intact.
 
@@ -80,16 +93,23 @@ canonical question context. Country display geometry never changes grading.
 The fifth menu card and four evaluated demo examples use the shared tour. Demo
 framing briefly focuses a representative region containing accepted countries;
 this is demonstration-only, and live play keeps its neutral whole-globe entry.
-The expression appears above the instruction; the reveal replaces the instruction
-with its language and translation. Resuming a paused tour rejoins the example
+The demo moves directly from question to full answer, skipping the intermediate
+selection phase. The expression appears above the instruction; the reveal
+replaces the instruction with its literal translation and language. Resuming a
+paused tour rejoins the example
 nearest the current globe orientation. The game roster scrolls horizontally inside
-the panel width. Expressions use unboxed typography with room to wrap. Country
+the panel width, with smooth navigation, a hidden native scrollbar and edge fades
+only where more tabs are offscreen. Reduced motion uses immediate scrolling.
+Starting a game commits its run and navigation in the same React transition so
+the departing menu does not flash Resume game. Expressions use unboxed typography
+with room to wrap; mobile caption space follows longer content. Country
 feedback is generated dynamically with natural list punctuation. A new SVG result
-illustration is rendered through all four existing theme palettes. The new score/save namespace
+illustration is rendered through all four existing theme palettes. The score/save
+namespace
 is `say-where`, with scoring policy version `v1`. No backend, Journey catalog or
 Daily assignment changes are required.
 
-Focused verification covers linked research, holds, all accepted countries,
+Focused verification covers linked research, all accepted countries,
 shared-language unions, deterministic balanced decks, disclosure, RTL metadata,
 editable submission, three strikes, save isolation, reload/resume, replay, actual
 misses in completion and shared-game compatibility. Verification results and any

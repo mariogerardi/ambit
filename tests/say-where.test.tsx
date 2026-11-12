@@ -36,6 +36,7 @@ const regions = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
 const pairs = sayWherePairs();
+const roundCount = SAY_WHERE_RESEARCH.languages.length;
 const base = createQuestionContext(regions, [], {
   id: "test",
   title: "Test",
@@ -66,6 +67,9 @@ describe("Say Where?", () => {
   });
   it("preserves linked research and keeps unresolved expressions out of live grading", () => {
     const { languages, expressions } = SAY_WHERE_RESEARCH;
+    expect(languages).toHaveLength(27);
+    expect(expressions).toHaveLength(108);
+    expect(pairs).toHaveLength(expressions.length);
     expect(new Set(languages.map((l) => l.id)).size).toBe(languages.length);
     expect(new Set(expressions.map((e) => e.id)).size).toBe(expressions.length);
     for (const e of expressions) {
@@ -127,7 +131,31 @@ describe("Say Where?", () => {
     expect(pairs.find((p) => p.languageId === "it")!.answerIds).toContain(
       "wurl:VAT",
     );
-    for (const id of ["sw-id-02", "sw-id-03"])
+    const french = pairs.find((p) => p.languageId === "fr")!;
+    expect(french.answerIds).toEqual(
+      expect.arrayContaining(["wurl:MLI", "wurl:BFA", "wurl:NER", "wurl:MUS"]),
+    );
+    expect(french.sources.some((s) => s.url.includes("ner242401"))).toBe(true);
+    expect(pairs.find((p) => p.languageId === "es")!.answerIds).toEqual(
+      expect.arrayContaining(["wurl:MEX", "wurl:ARG", "wurl:CHL", "wurl:URY"]),
+    );
+    expect(pairs.find((p) => p.languageId === "sv")!.qualification).toContain(
+      "Section 10",
+    );
+    expect(pairs.find((p) => p.languageId === "cs")!.qualification).toContain(
+      "Section 16",
+    );
+    // Each new overlap is supported by its own v2 wording evidence.
+    expect(
+      pairs.find((p) => p.expression.id === "sw-ms-01")!.answerIds,
+    ).toEqual(["wurl:MYS", "wurl:BRN", "wurl:SGP"]);
+    for (const id of [
+      "sw-id-01",
+      "sw-id-02",
+      "sw-id-03",
+      "sw-id-04",
+      "sw-ms-02",
+    ])
       expect(pairs.find((p) => p.expression.id === id)!.answerIds).toEqual([
         "wurl:MYS",
         "wurl:BRN",
@@ -146,7 +174,7 @@ describe("Say Where?", () => {
       <TextClue clue={q.textClue!} revealed={false} />,
     );
     expect(markup).toContain('dir="rtl"');
-    expect(markup).not.toContain(pair.expression.english_translation);
+    expect(markup).not.toContain(pair.expression.literal_english);
     expect(markup).not.toContain(pair.language);
     expect(world.places).toEqual([]);
     expect(world.states["wurl:AFG"]).toBe("selectable");
@@ -156,7 +184,7 @@ describe("Say Where?", () => {
       { type: "select", id: "wurl:AFG" },
       journey,
       context,
-      17,
+      roundCount,
     );
     expect(selected.answered).toBe(0);
     const result = neighborReducer(
@@ -164,7 +192,7 @@ describe("Say Where?", () => {
       { type: "submit" },
       journey,
       context,
-      17,
+      roundCount,
     );
     const reveal = journeyWorld(
       regions,
@@ -178,7 +206,7 @@ describe("Say Where?", () => {
     expect(q.feedbackReturnToSelection).not.toBe(true);
     expect(
       renderToStaticMarkup(<TextClue clue={q.textClue!} revealed />),
-    ).toContain(pair.expression.english_translation);
+    ).toContain(pair.expression.literal_english);
   });
   it("generates natural feedback for single, multiple and shared languages", () => {
     const explanation = (language: string) =>
@@ -194,7 +222,7 @@ describe("Say Where?", () => {
     expect(explanation("nl")).toBe(
       "Dutch is used officially in the Netherlands, Belgium, and Suriname.",
     );
-    const shared = pairs.find((p) => p.expression.id === "sw-id-02")!;
+    const shared = pairs.find((p) => p.expression.id === "sw-id-01")!;
     expect(prepared(shared).journey.rounds[0].explanation).toBe(
       "Malay or Indonesian is used officially in Malaysia, Brunei, Singapore, and Indonesia.",
     );
@@ -209,14 +237,14 @@ describe("Say Where?", () => {
         { type: "select", id: "wurl:CHN" },
         journey,
         context,
-        17,
+        roundCount,
       );
       const result = neighborReducer(
         selected,
         { type: "submit" },
         journey,
         context,
-        17,
+        roundCount,
       );
       const reveal = journeyWorld(
         regions,
@@ -234,7 +262,7 @@ describe("Say Where?", () => {
     const { journey, context } = prepared();
     let run: NeighborRun = { ...startNeighborRun(pairs), kind: "say-where" };
     const act = (action: Parameters<typeof neighborReducer>[1]) =>
-      (run = neighborReducer(run, action, journey, context, 17));
+      (run = neighborReducer(run, action, journey, context, roundCount));
     act({ type: "submit" });
     expect(run.answered).toBe(0);
     act({ type: "select", id: pairs[0].answer });

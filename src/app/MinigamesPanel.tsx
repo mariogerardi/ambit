@@ -1,6 +1,12 @@
 import { TextClue } from "../game/TextClue";
 import type { useMinigameTour } from "../minigames/useMinigameTour";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { DiscardMinigameDialog } from "./DiscardMinigameDialog";
 import type { BorderMinigame } from "../minigames/sharedNeighbors";
 import { MinigameSettingsEditor } from "../minigames/MinigameSettingsEditor";
@@ -120,23 +126,67 @@ export function MinigamesPanel({
   const [confirming, setConfirming] = useState(false);
   const startButton = useRef<HTMLButtonElement>(null);
   const gameNames = useRef<HTMLDivElement>(null);
+  const [scrollEdges, setScrollEdges] = useState({ start: false, end: false });
+  useEffect(() => {
+    const row = gameNames.current;
+    if (!row) return;
+    const update = () => {
+      const start = row.scrollLeft > 1;
+      const end = row.scrollLeft + row.clientWidth < row.scrollWidth - 1;
+      setScrollEdges((previous) =>
+        previous.start === start && previous.end === end
+          ? previous
+          : { start, end },
+      );
+    };
+    update();
+    row.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? undefined
+        : new ResizeObserver(update);
+    observer?.observe(row);
+    for (const child of row.children) observer?.observe(child);
+    return () => {
+      row.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      observer?.disconnect();
+    };
+  }, []);
   useEffect(() => {
     const row = gameNames.current;
     const selected = row?.querySelector<HTMLElement>('[aria-selected="true"]');
     if (!row || !selected) return;
     // Scroll this row only; selecting a game must not move the page or panel.
     const left = selected.offsetLeft - row.offsetLeft;
-    if (left < row.scrollLeft) row.scrollLeft = left;
-    else if (left + selected.offsetWidth > row.scrollLeft + row.clientWidth)
-      row.scrollLeft = left + selected.offsetWidth - row.clientWidth;
+    let destination = row.scrollLeft;
+    if (left < row.scrollLeft + 16) destination = Math.max(0, left - 16);
+    else if (
+      left + selected.offsetWidth >
+      row.scrollLeft + row.clientWidth - 16
+    )
+      destination = left + selected.offsetWidth - row.clientWidth + 16;
+    if (row.scrollTo)
+      row.scrollTo({
+        left: destination,
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
+    else row.scrollLeft = destination;
   }, [kind]);
   const cancelDiscard = useCallback(() => setConfirming(false), []);
   useEffect(() => setConfirming(false), [path, game.run?.id]);
   const startNew = () => {
     setConfirming(false);
     onCustomize(false);
-    game.start(true);
-    onNavigate(`/minigames/${kind}/play`);
+    // Commit the new save and destination together, so the departing menu keeps
+    // its pre-start appearance rather than briefly displaying Resume game.
+    startTransition(() => {
+      game.start(true);
+      onNavigate(`/minigames/${kind}/play`);
+    });
   };
   const select = (next: number) => {
     onCustomize(false);
@@ -163,6 +213,8 @@ export function MinigamesPanel({
       <div
         className="minigame-game-names section-navigation"
         ref={gameNames}
+        data-overflow-start={scrollEdges.start}
+        data-overflow-end={scrollEdges.end}
         role="tablist"
         aria-label="Choose a minigame"
         onKeyDown={(event) => {
@@ -183,7 +235,7 @@ export function MinigamesPanel({
             .querySelector<HTMLButtonElement>(
               `[data-game="${games[next].slug}"]`,
             )
-            ?.focus();
+            ?.focus({ preventScroll: true });
         }}
       >
         {games.map((item, i) => (
@@ -355,6 +407,29 @@ export function MinigameTourCaption({
   tour: ReturnType<typeof useMinigameTour>;
 }) {
   const sayWhere = tour.example?.kind === "say-where";
+  const caption = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!sayWhere) return;
+    const element = caption.current;
+    const content = element?.firstElementChild;
+    const experience = element?.closest<HTMLElement>(".experience");
+    if (!content || !experience) return;
+    const measure = () =>
+      experience.style.setProperty(
+        "--say-where-caption-height",
+        `${Math.ceil(content.getBoundingClientRect().height) + 24}px`,
+      );
+    measure();
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? undefined
+        : new ResizeObserver(measure);
+    observer?.observe(content);
+    return () => {
+      observer?.disconnect();
+      experience.style.removeProperty("--say-where-caption-height");
+    };
+  }, [sayWhere]);
   const revealed = tour.phase === "reveal" || (tour.reduced && tour.answer);
   const prompt = !tour.example
     ? "Preparing the globe tour…"
@@ -367,6 +442,7 @@ export function MinigameTourCaption({
         : tour.example.journey.rounds[0].prompt;
   return (
     <section
+      ref={caption}
       className={`minigame-globe-caption${sayWhere ? " say-where-caption" : ""}${tour.reduced ? " reduced" : ""}`}
       aria-label="Globe demonstration"
     >
@@ -377,6 +453,7 @@ export function MinigameTourCaption({
             <TextClue
               clue={tour.example.journey.rounds[0].textClue!}
               revealed={!!revealed}
+              translationFirst
             />
           )}
         {(!sayWhere || !revealed || tour.phase === "travel") && <p>{prompt}</p>}

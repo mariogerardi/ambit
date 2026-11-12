@@ -149,6 +149,12 @@ it("shows the expression above its instruction and replaces the instruction on r
   expect(host.querySelector("figcaption")?.textContent).toContain(
     tour.example!.journey.rounds[0].textClue!.reveal.translation,
   );
+  const figure = host.querySelector("figure")!;
+  expect(figure.children[0].tagName).toBe("FIGCAPTION");
+  expect(figure.children[1].tagName).toBe("BLOCKQUOTE");
+  expect(figure.children[2].textContent).toBe(
+    tour.example!.journey.rounds[0].textClue!.reveal.language,
+  );
 });
 
 it("keeps the animation loop and current velocity when switching games and clears the old scene", async () => {

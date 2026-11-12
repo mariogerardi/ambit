@@ -551,7 +551,7 @@ export function tourFrame(
         remaining < DEMO_QUESTION_MS
           ? "question"
           : remaining < DEMO_REVEAL_MS
-            ? current.kind === "missing-borders"
+            ? current.kind === "missing-borders" || current.kind === "say-where"
               ? "question"
               : "action"
             : "reveal";
