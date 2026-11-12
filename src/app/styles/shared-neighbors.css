@@ -45,9 +45,23 @@
   max-width: 34ch;
 }
 .say-where-game .journey-text-clue blockquote {
-  font-size: clamp(26px, 2.6vw, 36px);
+  font-size: clamp(24px, 2.35vw, 32px);
   line-height: 1.5;
   text-wrap: pretty;
+}
+.say-where-game .journey-text-clue-translations {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.say-where-game .journey-text-clue-translations dt {
+  color: var(--ui-muted);
+  font-size: 11px;
+}
+.say-where-game .journey-text-clue-translations dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
 }
 .experience .minigame-games-button {
   min-height: 44px;

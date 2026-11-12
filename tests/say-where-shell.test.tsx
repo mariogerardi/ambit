@@ -33,6 +33,8 @@ it("plays any qualifying country, reveals translation/sources, and resumes after
     pair.expression.native_text,
   );
   expect(host.querySelector(".journey-text-clue figcaption")).toBeNull();
+  expect(host.querySelector(".journey-text-clue-translations")).toBeNull();
+  expect(host.textContent).not.toContain(pair.expression.english_translation);
   expect(host.querySelector(".say-where-sources")).toBeNull();
   await click("About Say Where?");
   expect(document.querySelector(".info-note-tooltip")?.textContent).toContain(
@@ -54,7 +56,20 @@ it("plays any qualifying country, reveals translation/sources, and resumes after
   expect(
     host.querySelector(".journey-text-clue figcaption")?.textContent,
   ).toContain(pair.expression.literal_english);
-  expect(host.querySelector(".say-where-meaning")?.textContent).toBe(
+  expect(
+    [...host.querySelectorAll(".journey-text-clue-translations dt")].map(
+      (e) => e.textContent,
+    ),
+  ).toEqual(["Literal translation", "Meaning"]);
+  expect(
+    [...host.querySelectorAll(".journey-text-clue-translations dd")].map(
+      (e) => e.textContent,
+    ),
+  ).toEqual([
+    pair.expression.literal_english,
+    pair.expression.english_translation,
+  ]);
+  expect(host.querySelector(".round-feedback")?.textContent).not.toContain(
     pair.expression.english_translation,
   );
   expect(host.querySelector(".say-where-sources a")).toBeNull();

@@ -147,13 +147,13 @@ it("shows the expression above its instruction and replaces the instruction on r
   await act(async () => tour.reveal());
   expect(host.textContent).not.toContain(prompt);
   expect(host.querySelector("figcaption")?.textContent).toContain(
-    tour.example!.journey.rounds[0].textClue!.reveal.translation,
+    tour.example!.journey.rounds[0].textClue!.reveal.language,
   );
   const figure = host.querySelector("figure")!;
   expect(figure.children[0].tagName).toBe("FIGCAPTION");
   expect(figure.children[1].tagName).toBe("BLOCKQUOTE");
   expect(figure.children[2].textContent).toBe(
-    tour.example!.journey.rounds[0].textClue!.reveal.language,
+    tour.example!.journey.rounds[0].textClue!.reveal.translation,
   );
 });
 

@@ -154,15 +154,15 @@
   text-wrap: pretty;
 }
 .say-where-caption .journey-text-clue figcaption {
-  margin: 0 0 4px;
+  margin: 0 0 2px;
 }
-.say-where-caption .journey-text-clue figcaption em {
+.say-where-caption .journey-text-clue-translation {
+  margin-top: 2px;
+}
+.say-where-caption .journey-text-clue-translation em {
+  font-family: var(--font-editorial);
   font-size: 14px;
-}
-.say-where-caption .journey-text-clue-language {
-  margin-top: 8px;
-  font-size: 18px;
-  font-weight: 600;
+  line-height: 1.5;
 }
 .experience .minigame-globe-prompt > button {
   flex: 0 0 auto;

@@ -453,7 +453,7 @@ export function MinigameTourCaption({
             <TextClue
               clue={tour.example.journey.rounds[0].textClue!}
               revealed={!!revealed}
-              translationFirst
+              languageFirst
             />
           )}
         {(!sayWhere || !revealed || tour.phase === "travel") && <p>{prompt}</p>}

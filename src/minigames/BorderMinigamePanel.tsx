@@ -372,7 +372,13 @@ export function BorderMinigamePanel({
       ) : (
         <>
           {sayWhere && question?.textClue && (
-            <TextClue clue={question.textClue} revealed={feedback} />
+            <TextClue
+              clue={question.textClue}
+              revealed={feedback}
+              meaning={
+                (shared.pair as SayWherePair).expression.english_translation
+              }
+            />
           )}
           {!sayWhere && !pinpoint && !missing && (
             <MinigameCountries names={names} route={route} />
@@ -448,11 +454,6 @@ export function BorderMinigamePanel({
                   )}
                 </>
               ) : null}
-              {sayWhere && (
-                <p className="say-where-meaning">
-                  {(shared.pair as SayWherePair).expression.english_translation}
-                </p>
-              )}
               {!pinpoint && !missing && <p>{question!.explanation}</p>}
               {ended && (
                 <p className="minigame-ended-notice">

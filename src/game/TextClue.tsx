@@ -4,33 +4,48 @@ import type { Question } from "./questionContracts";
 export function TextClue({
   clue,
   revealed,
-  translationFirst = false,
+  languageFirst = false,
+  meaning,
 }: {
   clue: NonNullable<Question["textClue"]>;
   revealed: boolean;
-  translationFirst?: boolean;
+  languageFirst?: boolean;
+  meaning?: string;
 }) {
   return (
-    <figure
-      className={`journey-text-clue${translationFirst ? " journey-text-clue-translation-first" : ""}`}
-    >
-      {revealed && translationFirst && (
+    <figure className="journey-text-clue">
+      {revealed && languageFirst && (
         <figcaption lang="en" dir="ltr">
-          <em>{clue.reveal.translation}</em>
+          <strong>{clue.reveal.language}</strong>
         </figcaption>
       )}
       <blockquote lang={clue.lang} dir={clue.dir ?? "auto"}>
         {clue.text}
       </blockquote>
       {revealed &&
-        (translationFirst ? (
-          <p className="journey-text-clue-language" lang="en" dir="ltr">
-            {clue.reveal.language}
+        (languageFirst ? (
+          <p className="journey-text-clue-translation" lang="en" dir="ltr">
+            <em>{clue.reveal.translation}</em>
           </p>
         ) : (
           <figcaption lang="en" dir="ltr">
             <strong>{clue.reveal.language}</strong>
-            <em>{clue.reveal.translation}</em>
+            {meaning ? (
+              <dl className="journey-text-clue-translations">
+                <div>
+                  <dt>Literal translation</dt>
+                  <dd>
+                    <em>{clue.reveal.translation}</em>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Meaning</dt>
+                  <dd>{meaning}</dd>
+                </div>
+              </dl>
+            ) : (
+              <em>{clue.reveal.translation}</em>
+            )}
           </figcaption>
         ))}
     </figure>

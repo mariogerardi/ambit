@@ -7,9 +7,10 @@ Status: local implementation on `feat/say-where`; not pushed or deployed.
 Read an idiom or saying in its original script. Select any one qualifying
 sovereign country on the globe, then Check answer. Selection remains editable
 until submission. Language names, English translations, accepted-country lists
-and source labels appear only on reveal. The demo reveal stacks a small italic
-literal English gloss above the large native expression, with the language below.
-Actual game feedback also explains the intended meaning. The information icon
+and source labels appear only on reveal. The demo reveal places the language just
+above the native expression and a small italic literal gloss just below it.
+In-game reveals group “Literal translation” and “Meaning” beneath the expression;
+the meaning is not a separate sentence in answer feedback. The information icon
 beside the game menu holds the general qualification rule throughout play; after submission it
 also holds the current expression’s language notes and all sources. Right-to-left
 scripts retain their language/direction metadata through the shared `TextClue`
