@@ -317,11 +317,12 @@ def friend_action(subject, other, action):
 
 
 def saved_records(subject):
+    """Read all Journey and archived Study registers, including byte-limited pages."""
     db = dynamodb.Table(os.environ["SAVES_TABLE"])
     values, cursor = {}, None
     # Match private save register semantics; never expose registers or answers.
-    for _ in range(10):
-        options = {"KeyConditionExpression": "pk = :owner", "ExpressionAttributeValues": {":owner": "user#" + subject}, "ProjectionExpression": "#ns, #field, writer, #clock, valueJson", "ExpressionAttributeNames": {"#ns": "namespace", "#field": "field", "#clock": "clock"}, "ConsistentRead": True, "Limit": 100}
+    while True:
+        options = {"KeyConditionExpression": "pk = :owner", "FilterExpression": "#ns = :daily OR (#ns = :study AND begins_with(#field, :history))", "ExpressionAttributeValues": {":owner": "user#" + subject, ":daily": "daily", ":study": "study", ":history": "history."}, "ProjectionExpression": "#ns, #field, writer, #clock, valueJson", "ExpressionAttributeNames": {"#ns": "namespace", "#field": "field", "#clock": "clock"}, "ConsistentRead": True, "Limit": 1000}
         if cursor:
             options["ExclusiveStartKey"] = cursor
         page = db.query(**options)
@@ -331,10 +332,7 @@ def saved_records(subject):
                 values[address] = item
         cursor = page.get("LastEvaluatedKey")
         if not cursor:
-            break
-    if cursor:
-        raise Problem(503, "There’s a lot of progress to catch up on. Please try again later.")
-    return list(values.values())
+            return list(values.values())
 
 
 def saved_values(subject, namespace, field=None):

@@ -114,6 +114,19 @@ async function click(label: string) {
   expect(button).toBeDefined();
   await act(async () => button!.click());
 }
+it("retries failed activity and replaces the error with friend results", async () => {
+  request.mockRejectedValueOnce(new Error("Couldn’t load friend activity."));
+  await mount();
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain(
+    "Couldn’t load friend activity.",
+  );
+  await click("Refresh friends");
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  expect(host.querySelector(".friend-card")?.textContent).toContain("@bob");
+  expect(
+    request.mock.calls.filter(([path]) => path.startsWith("friends/activity?")),
+  ).toHaveLength(2);
+});
 it("shows completion without leaking a locked daily score and opens a friend’s stats", async () => {
   await mount();
   expect(host.querySelector(".friend-card")?.textContent).toContain("@bob");
