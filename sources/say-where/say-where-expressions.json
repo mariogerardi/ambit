@@ -1,0 +1,971 @@
+[
+  {
+    "id": "sw-pt-01",
+    "language_id": "pt",
+    "native_text": "Boa viagem!",
+    "english_translation": "Have a good journey!",
+    "language_tag": "pt-PT",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful European Portuguese phrases",
+      "url": "https://www.omniglot.com/language/phrases/portuguese.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "European Portuguese; shared with other Lusophone varieties, and transparent to Romance-language speakers.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-pt-02",
+    "language_id": "pt",
+    "native_text": "Tenho saudades tuas",
+    "english_translation": "I miss you.",
+    "language_tag": "pt-PT",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful European Portuguese phrases",
+      "url": "https://www.omniglot.com/language/phrases/portuguese.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "European Portuguese familiar register; wording is not necessarily natural in all Portuguese-speaking countries.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-pt-03",
+    "language_id": "pt",
+    "native_text": "Fale mais devagar",
+    "english_translation": "Please speak more slowly.",
+    "language_tag": "pt-PT",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful European Portuguese phrases",
+      "url": "https://www.omniglot.com/language/phrases/portuguese.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Polite imperative; source is an expression list, not a proverb collection.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ru-01",
+    "language_id": "ru",
+    "native_text": "Сколько лет, сколько зим!",
+    "english_translation": "Long time no see!",
+    "language_tag": "ru",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Russian phrases",
+      "url": "https://www.omniglot.com/language/phrases/russian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Idiomatic greeting, literally referring to many years and winters; not a historical proverb.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ru-02",
+    "language_id": "ru",
+    "native_text": "Счастливого пути!",
+    "english_translation": "Have a safe journey!",
+    "language_tag": "ru",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Russian phrases",
+      "url": "https://www.omniglot.com/language/phrases/russian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Fixed travel wish; also similar in nearby Slavic languages.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ru-03",
+    "language_id": "ru",
+    "native_text": "Я не понимаю",
+    "english_translation": "I do not understand.",
+    "language_tag": "ru",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Russian phrases",
+      "url": "https://www.omniglot.com/language/phrases/russian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Ordinary conversational sentence.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-sw-01",
+    "language_id": "sw",
+    "native_text": "Safari njema!",
+    "english_translation": "Have a good journey!",
+    "language_tag": "sw",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Swahili phrases",
+      "url": "https://www.omniglot.com/language/phrases/swahili.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Common farewell or travel wish, not a proverb.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-sw-02",
+    "language_id": "sw",
+    "native_text": "Kila la kheri!",
+    "english_translation": "All the best!",
+    "language_tag": "sw",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Swahili phrases",
+      "url": "https://www.omniglot.com/language/phrases/swahili.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Fixed well-wishing formula; often rendered “Good luck.”",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-sw-03",
+    "language_id": "sw",
+    "native_text": "Lala salama",
+    "english_translation": "Sleep well.",
+    "language_tag": "sw",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Swahili phrases",
+      "url": "https://www.omniglot.com/language/phrases/swahili.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional bedtime wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-nl-01",
+    "language_id": "nl",
+    "native_text": "Lang niet gezien",
+    "english_translation": "Long time no see.",
+    "language_tag": "nl",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Dutch phrases",
+      "url": "https://www.omniglot.com/language/phrases/dutch.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Familiar greeting formula.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-nl-02",
+    "language_id": "nl",
+    "native_text": "Smakelijk eten!",
+    "english_translation": "Enjoy your meal!",
+    "language_tag": "nl",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Dutch phrases",
+      "url": "https://www.omniglot.com/language/phrases/dutch.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional mealtime wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-nl-03",
+    "language_id": "nl",
+    "native_text": "Ik weet het niet",
+    "english_translation": "I do not know.",
+    "language_tag": "nl",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Dutch phrases",
+      "url": "https://www.omniglot.com/language/phrases/dutch.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Plain statement; no idiom/proverb claim.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-it-01",
+    "language_id": "it",
+    "native_text": "In bocca al lupo!",
+    "english_translation": "Good luck!",
+    "language_tag": "it",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Italian phrases",
+      "url": "https://www.omniglot.com/language/phrases/italian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Idiomatic well-wishing expression; literally “into the wolf’s mouth,” not a literal instruction.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-it-02",
+    "language_id": "it",
+    "native_text": "Mi manchi",
+    "english_translation": "I miss you.",
+    "language_tag": "it",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Italian phrases",
+      "url": "https://www.omniglot.com/language/phrases/italian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Ordinary personal sentence.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-it-03",
+    "language_id": "it",
+    "native_text": "Non lo so",
+    "english_translation": "I do not know.",
+    "language_tag": "it",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Italian phrases",
+      "url": "https://www.omniglot.com/language/phrases/italian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Ordinary conversational sentence.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-el-01",
+    "language_id": "el",
+    "native_text": "Καλή όρεξη!",
+    "english_translation": "Enjoy your meal!",
+    "language_tag": "el",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Greek phrases",
+      "url": "https://www.omniglot.com/language/phrases/greek.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional mealtime wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-el-02",
+    "language_id": "el",
+    "native_text": "Καλό ταξίδι!",
+    "english_translation": "Have a good journey!",
+    "language_tag": "el",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Greek phrases",
+      "url": "https://www.omniglot.com/language/phrases/greek.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Common travel wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-el-03",
+    "language_id": "el",
+    "native_text": "Δεν καταλαβαίνω",
+    "english_translation": "I do not understand.",
+    "language_tag": "el",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Greek phrases",
+      "url": "https://www.omniglot.com/language/phrases/greek.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Modern Greek spelling/phrasing; not Ancient Greek.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-tr-01",
+    "language_id": "tr",
+    "native_text": "Afiyet olsun!",
+    "english_translation": "Enjoy your meal!",
+    "language_tag": "tr",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Turkish phrases",
+      "url": "https://www.omniglot.com/language/phrases/turkish.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Fixed phrase in eating contexts; not a proverb.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-tr-02",
+    "language_id": "tr",
+    "native_text": "Geçmiş olsun",
+    "english_translation": "Get well soon.",
+    "language_tag": "tr",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Turkish phrases",
+      "url": "https://www.omniglot.com/language/phrases/turkish.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Often said after illness or misfortune; English translation is contextual.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-tr-03",
+    "language_id": "tr",
+    "native_text": "Bilmiyorum",
+    "english_translation": "I do not know.",
+    "language_tag": "tr",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Turkish phrases",
+      "url": "https://www.omniglot.com/language/phrases/turkish.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Short inflected verb; may be harder to identify than a multiword expression.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ro-01",
+    "language_id": "ro",
+    "native_text": "Poftă bună!",
+    "english_translation": "Enjoy your meal!",
+    "language_tag": "ro",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Romanian phrases",
+      "url": "https://www.omniglot.com/language/phrases/romanian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional mealtime wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ro-02",
+    "language_id": "ro",
+    "native_text": "Mi-e dor de tine",
+    "english_translation": "I miss you.",
+    "language_tag": "ro",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Romanian phrases",
+      "url": "https://www.omniglot.com/language/phrases/romanian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Widely used emotional expression; ordinary sentence, not a traditional proverb.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ro-03",
+    "language_id": "ro",
+    "native_text": "Drum bun!",
+    "english_translation": "Safe travels!",
+    "language_tag": "ro",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Romanian phrases",
+      "url": "https://www.omniglot.com/language/phrases/romanian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Fixed travel wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ms-01",
+    "language_id": "ms",
+    "native_text": "Selamat maju jaya!",
+    "english_translation": "Good luck!",
+    "language_tag": "ms-MY",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Malay phrases",
+      "url": "https://www.omniglot.com/language/phrases/malay.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "May be intelligible in closely related Indonesian; needs cross-language ambiguity assessment.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ms-02",
+    "language_id": "ms",
+    "native_text": "Jemput makan!",
+    "english_translation": "Please, eat!",
+    "language_tag": "ms-MY",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Malay phrases",
+      "url": "https://www.omniglot.com/language/phrases/malay.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional invitation to begin eating; Malay register.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ms-03",
+    "language_id": "ms",
+    "native_text": "Saya tidak faham",
+    "english_translation": "I do not understand.",
+    "language_tag": "ms-MY",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Malay phrases",
+      "url": "https://www.omniglot.com/language/phrases/malay.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Similar to Indonesian “saya tidak paham”; standard spellings differ.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ta-01",
+    "language_id": "ta",
+    "native_text": "நல்வாழ்த்துக்கள்",
+    "english_translation": "Best wishes!",
+    "language_tag": "ta",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful formal Tamil phrases",
+      "url": "https://www.omniglot.com/language/phrases/tamil.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Formal written Tamil; a formula, not a traditional saying.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ta-02",
+    "language_id": "ta",
+    "native_text": "காலை வணக்கம்",
+    "english_translation": "Good morning.",
+    "language_tag": "ta",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful formal Tamil phrases",
+      "url": "https://www.omniglot.com/language/phrases/tamil.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Formal/written-register greeting.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ta-03",
+    "language_id": "ta",
+    "native_text": "உங்கள் பெயர் என்ன?",
+    "english_translation": "What is your name?",
+    "language_tag": "ta",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful formal Tamil phrases",
+      "url": "https://www.omniglot.com/language/phrases/tamil.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Polite formal Tamil; native-speaker review advisable for idiomaticity across Sri Lanka and Singapore.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-id-01",
+    "language_id": "id",
+    "native_text": "Semoga beruntung!",
+    "english_translation": "Good luck!",
+    "language_tag": "id",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Indonesian phrases",
+      "url": "https://www.omniglot.com/language/phrases/indonesian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional wish; intelligible in Malay-speaking settings.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-id-02",
+    "language_id": "id",
+    "native_text": "Lama tidak bertemu",
+    "english_translation": "Long time no see.",
+    "language_tag": "id",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Indonesian phrases",
+      "url": "https://www.omniglot.com/language/phrases/indonesian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Also understandable in Malay; shared expression risk.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-id-03",
+    "language_id": "id",
+    "native_text": "Selamat makan",
+    "english_translation": "Enjoy your meal.",
+    "language_tag": "id",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Indonesian phrases",
+      "url": "https://www.omniglot.com/language/phrases/indonesian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "May also be recognized as Malay; high cross-language ambiguity risk.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ga-01",
+    "language_id": "ga",
+    "native_text": "Céad míle fáilte",
+    "english_translation": "A hundred thousand welcomes.",
+    "language_tag": "ga",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Irish phrases",
+      "url": "https://www.omniglot.com/language/phrases/irish.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Established welcome formula; not automatically a proverb.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ga-02",
+    "language_id": "ga",
+    "native_text": "Go n-éirí an bóthar leat!",
+    "english_translation": "May the road go well for you!",
+    "language_tag": "ga",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Irish phrases",
+      "url": "https://www.omniglot.com/language/phrases/irish.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Idiomatic Irish good-luck wish; precise literal rendering varies.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ga-03",
+    "language_id": "ga",
+    "native_text": "Níl a fhios agam",
+    "english_translation": "I do not know.",
+    "language_tag": "ga",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Irish phrases",
+      "url": "https://www.omniglot.com/language/phrases/irish.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Ordinary sentence; common variant omits “a” in some contexts.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-mi-01",
+    "language_id": "mi",
+    "native_text": "Kia waimarie",
+    "english_translation": "Good luck.",
+    "language_tag": "mi",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Māori phrases",
+      "url": "https://www.omniglot.com/language/phrases/maori.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional well-wishing expression.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-mi-02",
+    "language_id": "mi",
+    "native_text": "Kia pai te haere",
+    "english_translation": "Have a good journey.",
+    "language_tag": "mi",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Māori phrases",
+      "url": "https://www.omniglot.com/language/phrases/maori.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Travel wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-mi-03",
+    "language_id": "mi",
+    "native_text": "Pō mārie",
+    "english_translation": "Good night.",
+    "language_tag": "mi",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Māori phrases",
+      "url": "https://www.omniglot.com/language/phrases/maori.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Bedtime greeting; macron matters.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ka-01",
+    "language_id": "ka",
+    "native_text": "დილა მშვიდობისა",
+    "english_translation": "Good morning.",
+    "language_tag": "ka",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Georgian phrases",
+      "url": "https://www.omniglot.com/language/phrases/georgian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Standard greeting, not proverb.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ka-02",
+    "language_id": "ka",
+    "native_text": "წარმატებებს გისურვებ",
+    "english_translation": "I wish you success.",
+    "language_tag": "ka",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Georgian phrases",
+      "url": "https://www.omniglot.com/language/phrases/georgian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Informal singular well-wishing phrase.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-ka-03",
+    "language_id": "ka",
+    "native_text": "არ ვიცი",
+    "english_translation": "I do not know.",
+    "language_tag": "ka",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Georgian phrases",
+      "url": "https://www.omniglot.com/language/phrases/georgian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Short ordinary sentence; very little identifying content.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-hi-01",
+    "language_id": "hi",
+    "native_text": "शुभ यात्रा",
+    "english_translation": "Have a good journey.",
+    "language_tag": "hi-IN",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Hindi phrases",
+      "url": "https://www.omniglot.com/language/phrases/hindi.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Sanskrit-derived/formal travel wish; not exclusive to Hindi across South Asia.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-hi-02",
+    "language_id": "hi",
+    "native_text": "मुझे नहीं पता",
+    "english_translation": "I do not know.",
+    "language_tag": "hi-IN",
+    "direction": "ltr",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Hindi phrases",
+      "url": "https://www.omniglot.com/language/phrases/hindi.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Everyday expression in standard Hindi.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-hi-03",
+    "language_id": "hi",
+    "native_text": "फिर मिलेंगे",
+    "english_translation": "See you again.",
+    "language_tag": "hi-IN",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Hindi phrases",
+      "url": "https://www.omniglot.com/language/phrases/hindi.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional parting expression; close forms can occur in Urdu.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-vi-01",
+    "language_id": "vi",
+    "native_text": "Lâu quá không gặp",
+    "english_translation": "Long time no see.",
+    "language_tag": "vi",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Vietnamese phrases",
+      "url": "https://www.omniglot.com/language/phrases/vietnamese.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Colloquial greeting; Latin quốc ngữ with diacritics.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-vi-02",
+    "language_id": "vi",
+    "native_text": "Chúc ngủ ngon",
+    "english_translation": "Sleep well.",
+    "language_tag": "vi",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Vietnamese phrases",
+      "url": "https://www.omniglot.com/language/phrases/vietnamese.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Bedtime wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-vi-03",
+    "language_id": "vi",
+    "native_text": "Ăn ngon nhé",
+    "english_translation": "Enjoy your meal.",
+    "language_tag": "vi",
+    "direction": "ltr",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Vietnamese phrases",
+      "url": "https://www.omniglot.com/language/phrases/vietnamese.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conversational mealtime wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-fa-01",
+    "language_id": "fa",
+    "native_text": "نوش جان",
+    "english_translation": "Enjoy your meal.",
+    "language_tag": "fa-IR",
+    "direction": "rtl",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Persian (Farsi) phrases",
+      "url": "https://www.omniglot.com/language/phrases/persian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Conventional meal-time wish; shared with some nearby languages and similar scripts.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-fa-02",
+    "language_id": "fa",
+    "native_text": "دلم برات تنگ شده",
+    "english_translation": "I miss you.",
+    "language_tag": "fa-IR",
+    "direction": "rtl",
+    "expression_type": "ordinary_sentence",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Persian (Farsi) phrases",
+      "url": "https://www.omniglot.com/language/phrases/persian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Informal Iranian Persian phrase; the exact wording is regional/register-specific.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  },
+  {
+    "id": "sw-fa-03",
+    "language_id": "fa",
+    "native_text": "شب خوش",
+    "english_translation": "Good night.",
+    "language_tag": "fa-IR",
+    "direction": "rtl",
+    "expression_type": "common_saying",
+    "authenticity_source": {
+      "title": "Omniglot: Useful Persian (Farsi) phrases",
+      "url": "https://www.omniglot.com/language/phrases/persian.php"
+    },
+    "source_checked_on": "2026-11-11",
+    "source_type": "curated_phrase_collection",
+    "notes_or_ambiguity": "Short informal bedtime or parting wish.",
+    "contains_explicit_country_or_demonym": false,
+    "native_speaker_reviewed": false,
+    "publication_status": "research_candidate"
+  }
+]

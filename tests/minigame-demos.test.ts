@@ -358,7 +358,12 @@ it("gives each question time before answering and frames the actual examples at 
       expect(view.altitude).toBeCloseTo(
         (example.revealFocus ?? example.focus).altitude!,
       );
-      expect(example.focus.altitude).toBeLessThan(1.2);
+      if (example.kind === "say-where") {
+        expect(example.focus.altitude).toBeGreaterThanOrEqual(1.65);
+        expect(example.focus).not.toMatchObject(
+          example.context.targets.get(example.pair.answer)!.focus,
+        );
+      } else expect(example.focus.altitude).toBeLessThan(1.2);
     }
   }
   for (const example of library.pinpoint) {

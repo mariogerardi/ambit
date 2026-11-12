@@ -1,0 +1,21 @@
+{
+  "archive": "say-where-research-handoff.zip",
+  "archiveSha256": "2860f7f1e3f20ff5b8ef30d3e8b2f690bedb5640feb9606a3235252c07f8f09b",
+  "importedOn": "2026-11-11",
+  "languageCount": 17,
+  "expressionCount": 51,
+  "files": {
+    "README.md": {
+      "sha256": "0ec8f3935580bf8ba3587ca2b3d6f62625465c3c4fd45961f2707f49e22550b1",
+      "bytes": 6390
+    },
+    "say-where-languages.json": {
+      "sha256": "77cfbe97c025320436504a090784d44381634d2e764fa50ce047e3d5bce2abb9",
+      "bytes": 33836
+    },
+    "say-where-expressions.json": {
+      "sha256": "c521d1e6d3e2764dd5d0dc7a5ab31d15692cf1e82484d8c8549d39b3cd6cca34",
+      "bytes": 35812
+    }
+  }
+}

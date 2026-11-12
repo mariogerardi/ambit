@@ -1,3 +1,4 @@
+import { TextClue } from "../game/TextClue";
 import type { useMinigameTour } from "../minigames/useMinigameTour";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DiscardMinigameDialog } from "./DiscardMinigameDialog";
@@ -57,6 +58,18 @@ export const games = [
     rules:
       "Cities and landmarks earn 1–1,000 points by distance. Large countries can stand alone; smaller countries and states get a surrounding search region with roughly six to eight plausible city locations. Scoring distances scale to the whole search region. Countries and U.S. states earn 1,000 points for a pin anywhere inside. Older world-search games keep their original scoring.",
   },
+  {
+    slug: "say-where",
+    title: "Say Where?",
+    description: "One expression. Where is its language used officially?",
+    image: "/previews/say-where.svg",
+    imageAlt: "An expression above a globe with several qualifying countries.",
+    controls: "Select a country",
+    instruction:
+      "Read an expression in its original script. Select any country where its language has national official status or legally prescribed government use, then check your answer. Three wrong answers end the run, or finish whenever you like.",
+    rules:
+      "Any qualifying country counts. The reveal explains the language, translation and full accepted network. Languages are shuffled evenly; expressions vary on later visits. Three wrong answers end the game.",
+  },
 ];
 
 export function selectedMinigame(path: string): BorderMinigame {
@@ -73,6 +86,7 @@ export function MinigamesPanel({
   missing,
   borderRun,
   pinpoint,
+  sayWhere,
   webgl,
   tour,
   customizing,
@@ -84,6 +98,7 @@ export function MinigamesPanel({
   missing: ReturnType<typeof useBorderMinigame>;
   borderRun: ReturnType<typeof useBorderMinigame>;
   pinpoint: ReturnType<typeof useBorderMinigame>;
+  sayWhere: ReturnType<typeof useBorderMinigame>;
   webgl: boolean;
   tour: ReturnType<typeof useMinigameTour>;
   customizing: boolean;
@@ -93,13 +108,15 @@ export function MinigamesPanel({
   const index = games.findIndex((game) => game.slug === kind);
   const selected = games[index];
   const game =
-    kind === "missing-borders"
-      ? missing
-      : kind === "border-run"
-        ? borderRun
-        : kind === "pinpoint"
-          ? pinpoint
-          : shared;
+    kind === "say-where"
+      ? sayWhere
+      : kind === "missing-borders"
+        ? missing
+        : kind === "border-run"
+          ? borderRun
+          : kind === "pinpoint"
+            ? pinpoint
+            : shared;
   const [confirming, setConfirming] = useState(false);
   const startButton = useRef<HTMLButtonElement>(null);
   const cancelDiscard = useCallback(() => setConfirming(false), []);
@@ -281,16 +298,18 @@ export function MinigamesPanel({
             </button>
           </div>
         </div>
-        <button
-          className="minigame-customize-toggle"
-          type="button"
-          aria-expanded={customizing}
-          aria-controls="minigame-customization"
-          onClick={() => onCustomize(!customizing)}
-        >
-          {customizing ? "Close customization" : "Customize"}
-        </button>
-        {customizing && (
+        {kind !== "say-where" && (
+          <button
+            className="minigame-customize-toggle"
+            type="button"
+            aria-expanded={customizing}
+            aria-controls="minigame-customization"
+            onClick={() => onCustomize(!customizing)}
+          >
+            {customizing ? "Close customization" : "Customize"}
+          </button>
+        )}
+        {customizing && kind !== "say-where" && (
           <div id="minigame-customization">
             <MinigameSettingsEditor
               kind={game.kind}
@@ -338,6 +357,16 @@ export function MinigameTourCaption({
       aria-label="Globe demonstration"
     >
       <div className="minigame-globe-prompt">
+        {tour.example?.kind === "say-where" &&
+          tour.phase !== "travel" &&
+          tour.example.journey.rounds[0].textClue && (
+            <TextClue
+              clue={tour.example.journey.rounds[0].textClue!}
+              revealed={
+                tour.phase === "reveal" || (tour.reduced && tour.answer)
+              }
+            />
+          )}
         <p>{prompt}</p>
         {tour.reduced ? (
           <>

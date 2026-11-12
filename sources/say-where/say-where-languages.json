@@ -1,0 +1,846 @@
+[
+  {
+    "id": "pt",
+    "language_name": "Portuguese",
+    "iso_639_1": "pt",
+    "iso_639_3": "por",
+    "sample_language_tag": "pt-PT",
+    "sample_variety_or_standard": "European Portuguese (expression sample); nationally recognized Portuguese across Lusophone states",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "PRT",
+      "BRA",
+      "AGO",
+      "MOZ",
+      "CPV",
+      "GNB",
+      "STP",
+      "GNQ",
+      "TLS"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "PRT",
+        "legal_category": "state_official",
+        "evidence": "The CPLP language institute identifies each of the nine member states as a country with Portuguese as an official language.",
+        "source": {
+          "title": "International Institute of the Portuguese Language (CPLP): principal institutions and official-language member states",
+          "url": "https://iilp.cplp.org/2020/07/13/principais-instituicoes-de-lingua-portuguesa/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "BRA",
+        "legal_category": "state_official",
+        "evidence": "Same CPLP official-language membership evidence.",
+        "source": {
+          "title": "International Institute of the Portuguese Language (CPLP): principal institutions and official-language member states",
+          "url": "https://iilp.cplp.org/2020/07/13/principais-instituicoes-de-lingua-portuguesa/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "AGO",
+        "legal_category": "state_official",
+        "evidence": "Same CPLP official-language membership evidence.",
+        "source": {
+          "title": "International Institute of the Portuguese Language (CPLP): principal institutions and official-language member states",
+          "url": "https://iilp.cplp.org/2020/07/13/principais-instituicoes-de-lingua-portuguesa/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "MOZ",
+        "legal_category": "state_official",
+        "evidence": "Same CPLP official-language membership evidence.",
+        "source": {
+          "title": "International Institute of the Portuguese Language (CPLP): principal institutions and official-language member states",
+          "url": "https://iilp.cplp.org/2020/07/13/principais-instituicoes-de-lingua-portuguesa/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "CPV",
+        "legal_category": "state_official",
+        "evidence": "Same CPLP official-language membership evidence.",
+        "source": {
+          "title": "International Institute of the Portuguese Language (CPLP): principal institutions and official-language member states",
+          "url": "https://iilp.cplp.org/2020/07/13/principais-instituicoes-de-lingua-portuguesa/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "GNB",
+        "legal_category": "state_official",
+        "evidence": "CPLP country profile explicitly states Portuguese is the official language.",
+        "source": {
+          "title": "CPLP: Guinea-Bissau country profile",
+          "url": "https://www.cplp.org/estados-membros/guine-bissau/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "STP",
+        "legal_category": "state_official",
+        "evidence": "Same CPLP official-language membership evidence.",
+        "source": {
+          "title": "International Institute of the Portuguese Language (CPLP): principal institutions and official-language member states",
+          "url": "https://iilp.cplp.org/2020/07/13/principais-instituicoes-de-lingua-portuguesa/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "GNQ",
+        "legal_category": "state_official",
+        "evidence": "CPLP country profile lists Portuguese with Spanish and French as languages; legal official status does not imply widespread daily use.",
+        "source": {
+          "title": "CPLP: Equatorial Guinea country profile",
+          "url": "https://www.cplp.org/estados-membros/guine-equatorial/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "TLS",
+        "legal_category": "state_official",
+        "evidence": "CPLP country profile explicitly calls Portuguese and Tetum official languages.",
+        "source": {
+          "title": "CPLP: Timor-Leste country profile",
+          "url": "https://www.cplp.org/estados-membros/timor-leste/"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Samples are European Portuguese; never imply every phrase is used identically in all nine countries.",
+      "Macau has official Portuguese regionally in the PRC but is not a sovereign country.",
+      "Equatorial Guinea: official status does not imply common everyday usage."
+    ],
+    "pending_decisions": [],
+    "review_status": "source_checked"
+  },
+  {
+    "id": "ru",
+    "language_name": "Russian",
+    "iso_639_1": "ru",
+    "iso_639_3": "rus",
+    "sample_language_tag": "ru",
+    "sample_variety_or_standard": "Standard Russian in Cyrillic",
+    "script": "Cyrillic",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "RUS",
+      "BLR",
+      "KAZ",
+      "KGZ"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "RUS",
+        "legal_category": "state_official",
+        "evidence": "Russian is the state language throughout the federation under Constitution Article 68.",
+        "source": {
+          "title": "Constitutional Court of Russia: Constitution, Chapter 3, Article 68",
+          "url": "https://www.ksrf.ru/about/legalbases/ConstitutionRF/Chapter3.php"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "BLR",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 17 establishes Belarusian and Russian as state languages.",
+        "source": {
+          "title": "Constitution of Belarus: Article 17",
+          "url": "https://constitution.by/1994/5/"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "KAZ",
+        "legal_category": "official_state_institutions",
+        "evidence": "2026 Constitution Article 9(2) continues Russian’s official use alongside Kazakh in state organizations and local self-government; Kazakh alone is the state language.",
+        "source": {
+          "title": "Government of Kazakhstan: 2026 Constitution, Article 9",
+          "url": "https://www.gov.kz/article/232335?lang=en"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "KGZ",
+        "legal_category": "official_language",
+        "evidence": "Constitution Article 13 names Kyrgyz the state language and Russian the official language.",
+        "source": {
+          "title": "Government of Kyrgyzstan: Constitution, Article 13",
+          "url": "https://www.gov.kg/ru/p/constitution"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Kazakhstan officially uses Russian alongside Kazakh in state institutions, but only Kazakh is the state language.",
+      "Kyrgyzstan explicitly has Russian as an official language alongside state-language Kyrgyz.",
+      "Do not include Ukraine, Tajikistan, or Uzbekistan based on widespread use alone."
+    ],
+    "pending_decisions": [
+      "KAZ: confirm whether nationally authorized administrative co-use meets the game policy."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "sw",
+    "language_name": "Swahili (Kiswahili)",
+    "iso_639_1": "sw",
+    "iso_639_3": "swa",
+    "sample_language_tag": "sw",
+    "sample_variety_or_standard": "Standard Kiswahili; words and spelling vary by region",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "KEN",
+      "TZA",
+      "UGA",
+      "RWA"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "KEN",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 7(2): Kiswahili and English are official languages; Kiswahili also national language.",
+        "source": {
+          "title": "Kenya Law Reform Commission: Constitution Article 7",
+          "url": "https://klrc.go.ke/index.php/constitution-of-kenya/108-chapter-two-the-republic/173-7-national-official-and-other-languages"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "TZA",
+        "legal_category": "state_official",
+        "evidence": "East African Community state profile describes Kiswahili and English as official languages.",
+        "source": {
+          "title": "East African Community: Tanzania key facts",
+          "url": "https://www.eac.int/eac-partner-states/tanzania"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "UGA",
+        "legal_category": "official_language",
+        "evidence": "Constitution Article 6(2): Swahili is the second official language, with use prescribed by Parliament.",
+        "source": {
+          "title": "Constitution of Uganda (consolidated 2023), Article 6",
+          "url": "https://ulii.org/en/akn/ug/act/statute/1995/constitution/eng%402023-12-31"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "RWA",
+        "legal_category": "official_language",
+        "evidence": "Organic Law 02/2017/OL Article 1 establishes Kiswahili as an official language; a presidential order regulates use.",
+        "source": {
+          "title": "RwandaLII: Organic Law 2 of 2017",
+          "url": "https://rwandalii.org/akn/rw/act/ol/2017/2/eng%402017-05-01"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Tanzania is described as official by EAC; Kenya explicitly official by Constitution.",
+      "In Uganda the second official language has use conditioned by legislation; Rwanda’s official use is governed by presidential order.",
+      "Not automatically official in Burundi or the DRC; distinguish national language from official language."
+    ],
+    "pending_decisions": [
+      "Consider whether Rwanda and Uganda have sufficient practical usage for the teaching objective, despite formal status."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "nl",
+    "language_name": "Dutch",
+    "iso_639_1": "nl",
+    "iso_639_3": "nld",
+    "sample_language_tag": "nl",
+    "sample_variety_or_standard": "Standard Dutch (Netherlands-oriented expressions)",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "NLD",
+      "BEL",
+      "SUR"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "NLD",
+        "legal_category": "state_official",
+        "evidence": "Government of the Netherlands explicitly identifies Dutch as the official language of the Netherlands.",
+        "source": {
+          "title": "Government of the Netherlands: Recognized languages",
+          "url": "https://www.rijksoverheid.nl/themas/overheid-en-democratie/erkende-talen/erkende-talen-in-nl"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "BEL",
+        "legal_category": "co_official_territorial",
+        "evidence": "Constitution Article 4 recognizes Dutch, French, and German language regions; Dutch is officially used in its designated regions, not across every municipality.",
+        "source": {
+          "title": "Belgian Constitutional Court: Constitution, Article 4",
+          "url": "https://nl.const-court.be/court/basic-text/constitution"
+        },
+        "needs_editorial_decision": true
+      },
+      {
+        "country_code": "SUR",
+        "legal_category": "state_official",
+        "evidence": "Government of Suriname identifies Dutch as its only official language.",
+        "source": {
+          "title": "Government of Suriname: Country information",
+          "url": "https://gov.sr/suriname/"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Belgium regulates official-language use territorially, even though Dutch is recognized at the country level.",
+      "Dutch also has official status in Aruba, Curaçao and Sint Maarten, which are constituent countries of the Kingdom of the Netherlands but not sovereign states; these are intentionally excluded.",
+      "Frisian has separate regional status within the Netherlands."
+    ],
+    "pending_decisions": [
+      "BEL: decide whether nationally recognized regional co-officiality counts.",
+      "Constituent Kingdom countries versus sovereign states: choose a uniform geographic roster policy."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "it",
+    "language_name": "Italian",
+    "iso_639_1": "it",
+    "iso_639_3": "ita",
+    "sample_language_tag": "it",
+    "sample_variety_or_standard": "Standard Italian",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "ITA",
+      "CHE",
+      "SMR",
+      "VAT"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "ITA",
+        "legal_category": "state_official",
+        "evidence": "Law 482/1999, Article 1(1), expressly establishes Italian as the official language.",
+        "source": {
+          "title": "Normattiva: Italian Law 482/1999, Art. 1",
+          "url": "https://www.normattiva.it/atto/caricaDettaglioAtto?atto.codiceRedazionale=099G0557&atto.dataPubblicazioneGazzetta=1999-12-20"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "CHE",
+        "legal_category": "confederation_official",
+        "evidence": "Federal Constitution Article 70: Italian is among three official languages of the Swiss Confederation.",
+        "source": {
+          "title": "Swiss Federal Constitution, Article 70 (bilingual legal display)",
+          "url": "https://www.droit-bilingue.ch/en-it/1/10/101-70-82.html"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "SMR",
+        "legal_category": "state_official",
+        "evidence": "UK government toponymic factfile identifies Italian as the only official language.",
+        "source": {
+          "title": "UK Government: European Microstates Toponymic Factfile (2026)",
+          "url": "https://assets.publishing.service.gov.uk/media/6968cbde6958e5645144b08d/European_Microstates_Toponymic_Factfile.pdf"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "VAT",
+        "legal_category": "official_state_working",
+        "evidence": "UK government factfile identifies Italian as the official working language of Vatican City State; distinguish from the Holy See (Latin).",
+        "source": {
+          "title": "UK Government: European Microstates Toponymic Factfile (2026)",
+          "url": "https://assets.publishing.service.gov.uk/media/6968cbde6958e5645144b08d/European_Microstates_Toponymic_Factfile.pdf"
+        },
+        "needs_editorial_decision": true
+      }
+    ],
+    "notes": [
+      "Italian is co-official federally in Switzerland; regional official use in Slovenia and Croatia does not qualify those entire countries.",
+      "Vatican City State uses Italian officially; separate this from the Holy See, where Latin has special official standing.",
+      "Microstate shapes and pins may be hard to select on Ambit globe."
+    ],
+    "pending_decisions": [
+      "VAT: verify country ID availability in game data, and apply the Vatican City State/Holy See distinction."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "el",
+    "language_name": "Greek (Modern)",
+    "iso_639_1": "el",
+    "iso_639_3": "ell",
+    "sample_language_tag": "el",
+    "sample_variety_or_standard": "Standard Modern Greek, not Ancient Greek",
+    "script": "Greek",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "GRC",
+      "CYP"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "GRC",
+        "legal_category": "state_official",
+        "evidence": "European Commission country compendium lists Greek as the official language of Greece.",
+        "source": {
+          "title": "European Commission: Country Compendium, Greece",
+          "url": "https://commission.europa.eu/system/files/2023-11/styleguide_english_dgt_country_compendium_en.pdf"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "CYP",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 3: Greek and Turkish are official languages of the Republic.",
+        "source": {
+          "title": "Cyprus legal repository: Constitution Article 3",
+          "url": "https://www.cylaw.org/nomoi/enop/ind/syntagma/section-sc939e9174-42d9-9075-3b89-3b5042c139bb.html"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Greek and Turkish are constitutionally official in Cyprus; official EU-language status differs from national legal status.",
+      "Greek in Greece is well evidenced as official by European Commission country compendium."
+    ],
+    "pending_decisions": [],
+    "review_status": "source_checked"
+  },
+  {
+    "id": "tr",
+    "language_name": "Turkish",
+    "iso_639_1": "tr",
+    "iso_639_3": "tur",
+    "sample_language_tag": "tr",
+    "sample_variety_or_standard": "Standard modern Turkish (Türkiye-oriented)",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "TUR",
+      "CYP"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "TUR",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 3 provides that the language of the state is Turkish.",
+        "source": {
+          "title": "Constitutional Court of Türkiye: Constitution, Article 3",
+          "url": "https://www.anayasa.gov.tr/media/7258/anayasa_eng.pdf"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "CYP",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 3: Turkish and Greek are official languages of the Republic; territorial administration is divided in practice.",
+        "source": {
+          "title": "Cyprus legal repository: Constitution Article 3",
+          "url": "https://www.cylaw.org/nomoi/enop/ind/syntagma/section-sc939e9174-42d9-9075-3b89-3b5042c139bb.html"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "The Republic of Cyprus constitution names Turkish official, although actual state administration is divided.",
+      "Do not model Northern Cyprus as a separate ISO 3166-1 sovereign-state answer."
+    ],
+    "pending_decisions": [],
+    "review_status": "source_checked"
+  },
+  {
+    "id": "ro",
+    "language_name": "Romanian",
+    "iso_639_1": "ro",
+    "iso_639_3": "ron",
+    "sample_language_tag": "ro",
+    "sample_variety_or_standard": "Standard modern Romanian",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "ROU",
+      "MDA"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "ROU",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 13 states Romanian is the official language.",
+        "source": {
+          "title": "Romanian Government: Constitution, Article 13",
+          "url": "https://legislatie.just.ro/Public/FormaPrintabila/00000G0CLS5H2O3H8WS2Q0KMRGZN20AC"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "MDA",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 13 as amended 2023 establishes Romanian as the state language.",
+        "source": {
+          "title": "Moldovan Constitutional Court: Constitution, 2023 English",
+          "url": "https://new.constcourt.md/public/files/file/Baza%20legala/Constitutia_RM_EN_2023.pdf"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "The Moldovan constitution explicitly names Romanian following a 2023 legislative amendment; do not separate “Moldovan” as a different answer language here."
+    ],
+    "pending_decisions": [],
+    "review_status": "source_checked"
+  },
+  {
+    "id": "ms",
+    "language_name": "Malay",
+    "iso_639_1": "ms",
+    "iso_639_3": "msa",
+    "sample_language_tag": "ms-MY",
+    "sample_variety_or_standard": "Standard Malay (Malaysia-oriented Rumi orthography)",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "MYS",
+      "BRN",
+      "SGP"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "MYS",
+        "legal_category": "national_and_official",
+        "evidence": "Constitution Article 152 and National Language Act 1967 make Malay the national and official language.",
+        "source": {
+          "title": "Government of Malaysia: Official language",
+          "url": "https://www.malaysia.gov.my/en/government/kenali-malaysia/official-language"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "BRN",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 82(1): the official language is Malay.",
+        "source": {
+          "title": "Attorney General of Brunei: Constitution, Article 82",
+          "url": "https://www.agc.gov.bn/AGC%20Images/LAWS/ACT_PDF/C/CONST.%20I%201984.pdf"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "SGP",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 153A: Malay, Mandarin, Tamil and English are four official languages; Malay is also national.",
+        "source": {
+          "title": "Singapore Statutes Online: Constitution, Article 153A",
+          "url": "https://sso.agc.gov.sg/act/cons1963?ProvIds=pr153A-"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Singapore: official Malay and national language; Brunei: official Malay, with local forms and Jawi usage.",
+      "Malay and Indonesian are closely related but separate standardized official-language categories in this game.",
+      "A Malay phrase may be intelligible in Indonesian or vice versa; do not silently add Indonesia to Malay’s qualifying list."
+    ],
+    "pending_decisions": [
+      "Editorial review needed for false-recognition risk with Indonesian, especially short, shared phrases."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "ta",
+    "language_name": "Tamil",
+    "iso_639_1": "ta",
+    "iso_639_3": "tam",
+    "sample_language_tag": "ta",
+    "sample_variety_or_standard": "Formal literary/written Tamil (செந்தமிழ்) used for sample",
+    "script": "Tamil",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "LKA",
+      "SGP"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "LKA",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 18(2): Tamil is also an official language; Article 19: Tamil a national language.",
+        "source": {
+          "title": "Sri Lanka Official Languages Commission: Constitution, Chapter IV",
+          "url": "https://olc.gov.lk/en/media/documents/Chapter-IV-English.pdf"
+        },
+        "needs_editorial_decision": false
+      },
+      {
+        "country_code": "SGP",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 153A explicitly lists Tamil among the four official languages.",
+        "source": {
+          "title": "Singapore Statutes Online: Constitution, Article 153A",
+          "url": "https://sso.agc.gov.sg/act/cons1963?ProvIds=pr153A-"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Tamil is official nationally in Sri Lanka and Singapore; in India it is official in Tamil Nadu and other administrative contexts, but not an official language of the Union.",
+      "Formal and colloquial Sri Lankan, Singaporean and Indian Tamil varieties may differ."
+    ],
+    "pending_decisions": [
+      "Native speaker review needed for register and variant acceptability across Singapore and Sri Lanka."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "id",
+    "language_name": "Indonesian",
+    "iso_639_1": "id",
+    "iso_639_3": "ind",
+    "sample_language_tag": "id",
+    "sample_variety_or_standard": "Standard Bahasa Indonesia",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "IDN"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "IDN",
+        "legal_category": "state_language",
+        "evidence": "Constitution Article 36 designates Bahasa Indonesia as the language of the state.",
+        "source": {
+          "title": "People’s Representative Council (DPR): Constitution, Article 36",
+          "url": "https://www.dpr.go.id/dokumen/jdih/undang-undang-dasar"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Indonesian is legally the state language of Indonesia and linguistically closely related to Malay.",
+      "Do not automatically accept Malaysia, Singapore or Brunei for an Indonesian-standard expression."
+    ],
+    "pending_decisions": [
+      "Shared wording with Malay needs a deliberate multi-language ambiguity policy."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "ga",
+    "language_name": "Irish",
+    "iso_639_1": "ga",
+    "iso_639_3": "gle",
+    "sample_language_tag": "ga",
+    "sample_variety_or_standard": "Standard Irish or widely attested regional forms (record phrases individually)",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "IRL"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "IRL",
+        "legal_category": "first_official",
+        "evidence": "Constitution Article 8: Irish is the first official language of the state.",
+        "source": {
+          "title": "Irish Statute Book: Constitution, Article 8",
+          "url": "https://www.irishstatutebook.ie/eli/cons/en/html"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Irish has first-official-language status nationwide, despite English dominating everyday use.",
+      "Irish greeting and farewell formulations can be dialect-specific; do not overstate geographical exclusivity of a phrase."
+    ],
+    "pending_decisions": [],
+    "review_status": "source_checked"
+  },
+  {
+    "id": "mi",
+    "language_name": "Māori",
+    "iso_639_1": "mi",
+    "iso_639_3": "mri",
+    "sample_language_tag": "mi",
+    "sample_variety_or_standard": "Te reo Māori, standard orthography with macrons",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "NZL"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "NZL",
+        "legal_category": "state_official",
+        "evidence": "Te Ture mō Te Reo Māori 2016, section 5, states Māori is an official language of New Zealand.",
+        "source": {
+          "title": "New Zealand Legislation: Te Ture mō Te Reo Māori 2016, Section 5",
+          "url": "https://www.legislation.govt.nz/act/public/2016/17/en/latest/"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Official nationwide under section 5 of the 2016 Act.",
+      "Do not strip macrons in the answer display."
+    ],
+    "pending_decisions": [],
+    "review_status": "source_checked"
+  },
+  {
+    "id": "ka",
+    "language_name": "Georgian",
+    "iso_639_1": "ka",
+    "iso_639_3": "kat",
+    "sample_language_tag": "ka",
+    "sample_variety_or_standard": "Standard Georgian, Mkhedruli script",
+    "script": "Georgian",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "GEO"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "GEO",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 2(3): Georgian is the official language; Abkhaz also official in the Autonomous Republic of Abkhazia.",
+        "source": {
+          "title": "Constitutional Court of Georgia: Constitution, Article 2(3)",
+          "url": "https://www.constcourt.ge/en/court/legislation/constitution-text"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Constitution also recognizes Abkhazian regionally in Abkhazia; this does not limit Georgian’s national official status."
+    ],
+    "pending_decisions": [],
+    "review_status": "source_checked"
+  },
+  {
+    "id": "hi",
+    "language_name": "Hindi",
+    "iso_639_1": "hi",
+    "iso_639_3": "hin",
+    "sample_language_tag": "hi-IN",
+    "sample_variety_or_standard": "Standard Modern Hindi in Devanagari, not Fiji Hindi",
+    "script": "Devanagari",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "IND"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "IND",
+        "legal_category": "union_official",
+        "evidence": "Constitution Article 343: Hindi in Devanagari script is the official language of the Union; India has no single national language.",
+        "source": {
+          "title": "Government of India, Department of Official Language: Official language policy",
+          "url": "https://rajbhasha.gov.in/en/bharat-samhita-code-of-india-"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Hindi is an official language of the Union of India, not the single national language of India.",
+      "Fiji Hindi (hif) differs from Standard Hindi; Fiji’s use of the name Hindi needs editorial/legal-variety review before accepting FJI."
+    ],
+    "pending_decisions": [
+      "Decide whether Fijian Hindi, standard Hindi and Fiji constitutional language provisions qualify Fiji. Current candidate list excludes Fiji."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "vi",
+    "language_name": "Vietnamese",
+    "iso_639_1": "vi",
+    "iso_639_3": "vie",
+    "sample_language_tag": "vi",
+    "sample_variety_or_standard": "Standard modern Vietnamese in quốc ngữ Latin orthography",
+    "script": "Latin",
+    "direction": "ltr",
+    "qualifying_country_codes": [
+      "VNM"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "VNM",
+        "legal_category": "national_language_constitutional",
+        "evidence": "Constitution Article 5(3) declares Vietnamese the national language; confirm whether this meets the game’s precise official-language standard.",
+        "source": {
+          "title": "Government of Vietnam: Constitution, Article 5",
+          "url": "https://xaydungchinhsach.chinhphu.vn/toan-van-hien-phap-nuoc-cong-hoa-xa-hoi-chu-nghia-viet-nam-119231225213002261.htm"
+        },
+        "needs_editorial_decision": true
+      }
+    ],
+    "notes": [
+      "Constitution explicitly calls Vietnamese the national language, not using the word “official” in the cited clause.",
+      "Modern Latin-script writing is the normal standard; historical chữ Nôm is not presented as contemporary sample text."
+    ],
+    "pending_decisions": [
+      "VNM: explicit policy decision required whether constitutional national-language status suffices as official."
+    ],
+    "review_status": "editorial_review_required"
+  },
+  {
+    "id": "fa",
+    "language_name": "Persian (Iranian Farsi)",
+    "iso_639_1": "fa",
+    "iso_639_3": "fas",
+    "sample_language_tag": "fa-IR",
+    "sample_variety_or_standard": "Iranian Persian in Perso-Arabic script (Dari and Tajik standards separate for this pilot)",
+    "script": "Perso-Arabic",
+    "direction": "rtl",
+    "qualifying_country_codes": [
+      "IRN"
+    ],
+    "status_checked_on": "2026-11-11",
+    "country_evidence": [
+      {
+        "country_code": "IRN",
+        "legal_category": "state_official",
+        "evidence": "Constitution Article 15 expressly declares Persian the official language and script of state documents, correspondence, texts and textbooks.",
+        "source": {
+          "title": "Iran Constitution, Article 15 (Refworld legal copy)",
+          "url": "https://www.refworld.org/legal/legislation/natlegbod/1979/en/72964"
+        },
+        "needs_editorial_decision": false
+      }
+    ],
+    "notes": [
+      "Iranian Persian is nationally official in Iran. Afghanistan designates Dari and Pashto official, and Tajikistan designates Tajik; those related language standards need a product-level identity decision.",
+      "The source phrases are Iranian Farsi, not automatically idiomatic in all Persian varieties."
+    ],
+    "pending_decisions": [
+      "Should a future broader Persian macro-language entry accept Afghanistan (Dari) and Tajikistan (Tajik), or retain separate standardized languages? Current pilot intentionally retains only Iran."
+    ],
+    "review_status": "editorial_review_required"
+  }
+]

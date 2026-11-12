@@ -35,6 +35,7 @@ for (const kind of kinds) {
     `${kind} records a completed game only with default rules (default: %s)`,
     async (defaults) => {
       const changes: Record<BorderMinigame, Partial<MinigameSettings>> = {
+        "say-where": {},
         "shared-neighbors": { excludeAdjacentClues: true },
         "missing-borders": { excludeSmallCountries: false },
         "border-run": { showBorders: true },

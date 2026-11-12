@@ -511,6 +511,19 @@ rather than a connecting line. Entry framing uses the actual endpoint components
 reveal framing fits the full route. These are schematic land corridors derived
 from canonical boundaries, not transport-network data.
 
+Say Where? (`/minigames/say-where/play`) adds a language/expression provider to
+that same controller. It uses editable country selection, accepts any reviewed
+country, and reveals native text, translation, the qualifying network and sources
+through the existing text-clue/scene contracts. Each seeded cycle visits every
+language once and rotates its expressions. Three misses end a run; selection,
+feedback, replay, high scores and result sharing use the existing account-scoped
+local save infrastructure. Actual selected countries/misses survive completion;
+a language mistake does not create a country-location Study exercise. The initial
+reviewed pool has 48 expressions across 17 languages, preserving all 51 supplied
+research records and their flags separately. See the
+[Say Where? spec](minigames/SAY_WHERE_SPEC.md) for approved status/variety rules,
+evidence and explicit holds. Border-game customization does not apply.
+
 Pinpoint (`/minigames/pinpoint/play`) reuses `pin-distance` and `pin-inside` for ten
 rounds. The pool includes primary capitals, bundled cities with a source population
 of at least one million, 60 curated Wikidata landmarks across 60 countries, eligible

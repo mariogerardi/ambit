@@ -1,3 +1,4 @@
+import { sayWherePairs, sayWhereJourney } from "./sayWhere";
 import { geoArea, geoDistance } from "d3-geo";
 import type { Focus, RegionFeature } from "../geography/types";
 import type { Journey, QuestionContext } from "../game/questionContracts";
@@ -87,6 +88,7 @@ export function minigameExamples(
     "missing-borders": existing?.["missing-borders"] ?? [],
     "border-run": existing?.["border-run"] ?? [],
     pinpoint: existing?.pinpoint ?? [],
+    "say-where": existing?.["say-where"] ?? [],
   };
   const needed = (game: BorderMinigame) =>
     (!kind || kind === game) && !library[game].length;
@@ -106,7 +108,15 @@ export function minigameExamples(
       kind === "shared-neighbors"
         ? question.focus
         : (question.feedbackFocus ?? question.focus);
-    if (kind === "pinpoint") {
+    if (kind === "say-where") {
+      dispatch({ type: "select", id: pair.answer });
+      // Demo orientation is independent of the correct country.
+      focus = {
+        lat: 12,
+        lng: [0, 90, 180, -90][library[kind].length],
+        altitude: 2.2,
+      };
+    } else if (kind === "pinpoint") {
       const point = (pair as PinpointPair).place!;
       dispatch({ type: "drop-pin", lat: point.lat, lng: point.lng });
       focus = pinpointSearchFrame([
@@ -141,7 +151,7 @@ export function minigameExamples(
       });
       focus = routeFocus(points);
     }
-    if (kind !== "pinpoint")
+    if (kind !== "pinpoint" && kind !== "say-where")
       focus = { ...focus, altitude: (focus.altitude ?? 0.7) * 0.9 };
     const pending = action;
     if (kind === "missing-borders")
@@ -158,9 +168,11 @@ export function minigameExamples(
       focus,
       searchIds,
       title:
-        kind === "pinpoint"
-          ? (pair as PinpointPair).name
-          : pair.countries.map((key) => base.names.get(key)).join(" → "),
+        kind === "say-where"
+          ? "Read the expression"
+          : kind === "pinpoint"
+            ? (pair as PinpointPair).name
+            : pair.countries.map((key) => base.names.get(key)).join(" → "),
       action: pending,
       reveal: action,
       steps:
@@ -174,6 +186,13 @@ export function minigameExamples(
     if (!found) throw Error(`Missing demo geography: ${codes.join("/")}`);
     return found;
   };
+  if (needed("say-where")) {
+    const pairs = sayWherePairs();
+    for (const languageId of ["pt", "ru", "ta", "mi"]) {
+      const pair = pairs.find((p) => p.languageId === languageId)!;
+      add("say-where", pair, sayWhereJourney(pair, base));
+    }
+  }
   if (needed("shared-neighbors")) {
     library["shared-neighbors"] = [];
     const shared = sharedNeighborPairs(base.graph);
