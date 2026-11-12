@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { geoDistance } from "d3-geo";
 import { Color } from "three";
 import { expect, it, vi } from "vitest";
 import { BorderFades } from "../src/globe/borderFades";
@@ -23,6 +24,22 @@ const regions = JSON.parse(
   readFileSync("public/geography/world.v1.json", "utf8"),
 ) as RegionFeature[];
 const library = minigameExamples(regions);
+it("dims irrelevant Out of Place demo countries while retaining candidate fills", () => {
+  for (const example of library["out-of-place"]) {
+    for (const phase of ["question", "reveal"] as const) {
+      const view = demoWorld(regions, example, phase, 1, false, 0);
+      const countries = view.places
+        .filter((p) => p.markerHidden)
+        .map((p) => p.id);
+      expect(countries.length).toBeGreaterThan(0);
+      for (const region of regions) {
+        if (countries.includes(region.id))
+          expect(view.states[region.id]).not.toBe("disabled");
+        else expect(view.states[region.id]).toBe("disabled");
+      }
+    }
+  }
+});
 it("prepares only the requested game's previews and preserves already prepared examples", () => {
   const world = [...regions];
   const shared = minigameExamples(world, "shared-neighbors");
@@ -114,7 +131,11 @@ it("keeps moving west through every example and rejoins each full rotation witho
       8,
     );
     for (let i = 0; i < examples.length; i++)
-      for (const phase of source[0].kind === "missing-borders"
+      for (const phase of [
+        "missing-borders",
+        "say-where",
+        "out-of-place",
+      ].includes(source[0].kind)
         ? ["question", "reveal", "travel"]
         : ["question", "action", "reveal", "travel"])
         expect(stages.has(`${i}:${phase}`)).toBe(true);
@@ -350,7 +371,11 @@ it("gives each question time before answering and frames the actual examples at 
   for (const examples of Object.values(library)) {
     expect(tourFrame(examples, 4200).phase).toBe("question");
     expect(tourFrame(examples, DEMO_QUESTION_MS).phase).toBe(
-      examples[0].kind === "missing-borders" ? "question" : "action",
+      ["missing-borders", "say-where", "out-of-place"].includes(
+        examples[0].kind,
+      )
+        ? "question"
+        : "action",
     );
     expect(tourFrame(examples, DEMO_REVEAL_MS).phase).toBe("reveal");
     for (const example of examples) {
@@ -358,7 +383,32 @@ it("gives each question time before answering and frames the actual examples at 
       expect(view.altitude).toBeCloseTo(
         (example.revealFocus ?? example.focus).altitude!,
       );
-      expect(example.focus.altitude).toBeLessThan(1.2);
+      if (example.kind === "say-where") {
+        // Every visible phase must frame accepted geography, including Māori/NZ.
+        const ids = example.journey.rounds[0].rule;
+        if (ids.type !== "country-ids") throw Error("Expected country answers");
+        for (const time of [
+          0,
+          DEMO_QUESTION_MS,
+          DEMO_REVEAL_MS,
+          DEMO_HOLD_MS - 1,
+        ]) {
+          const focus = tourFrame([example], time).focus;
+          const nearest = Math.min(
+            ...ids.ids.map((id) => {
+              const region = example.context.targets.get(id)!;
+              return geoDistance(
+                [focus.lng, focus.lat],
+                [region.focus.lng, region.focus.lat],
+              );
+            }),
+          );
+          expect(nearest).toBeLessThan(Math.PI / 3);
+        }
+      } else
+        expect(example.focus.altitude).toBeLessThan(
+          example.kind === "out-of-place" ? 2 : 1.2,
+        );
     }
   }
   for (const example of library.pinpoint) {

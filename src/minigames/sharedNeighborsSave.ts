@@ -9,6 +9,7 @@ import { validStudyPlace } from "../study/placeReview";
 
 const validVisit = (v: unknown) =>
   isRecord(v) &&
+  (v.selectedId === undefined || typeof v.selectedId === "string") &&
   Array.isArray(v.ids) &&
   v.ids.every((id) => typeof id === "string") &&
   typeof v.correct === "boolean" &&
@@ -36,6 +37,8 @@ export function validNeighborRun(value: unknown): value is NeighborRun {
         "missing-borders",
         "border-run",
         "pinpoint",
+        "say-where",
+        "out-of-place",
       ].includes(String(value.kind))) &&
     (value.pinpointRules === undefined || value.pinpointRules === "regional") &&
     typeof value.id === "string" &&

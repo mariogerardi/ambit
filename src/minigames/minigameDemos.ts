@@ -1,3 +1,9 @@
+import {
+  outOfPlacePairs,
+  outOfPlaceJourney,
+  type OutOfPlacePair,
+} from "./outOfPlace";
+import { sayWherePairs, sayWhereJourney } from "./sayWhere";
 import { geoArea, geoDistance } from "d3-geo";
 import type { Focus, RegionFeature } from "../geography/types";
 import type { Journey, QuestionContext } from "../game/questionContracts";
@@ -87,6 +93,8 @@ export function minigameExamples(
     "missing-borders": existing?.["missing-borders"] ?? [],
     "border-run": existing?.["border-run"] ?? [],
     pinpoint: existing?.pinpoint ?? [],
+    "say-where": existing?.["say-where"] ?? [],
+    "out-of-place": existing?.["out-of-place"] ?? [],
   };
   const needed = (game: BorderMinigame) =>
     (!kind || kind === game) && !library[game].length;
@@ -106,7 +114,14 @@ export function minigameExamples(
       kind === "shared-neighbors"
         ? question.focus
         : (question.feedbackFocus ?? question.focus);
-    if (kind === "pinpoint") {
+    if (kind === "out-of-place") {
+      focus = question.focus;
+    } else if (kind === "say-where") {
+      dispatch({ type: "select", id: pair.answer });
+      // Menu demonstrations show a representative region, never an unrelated hemisphere.
+      // Live play still starts with the neutral whole-globe search.
+      focus = question.feedbackFocus!;
+    } else if (kind === "pinpoint") {
       const point = (pair as PinpointPair).place!;
       dispatch({ type: "drop-pin", lat: point.lat, lng: point.lng });
       focus = pinpointSearchFrame([
@@ -141,10 +156,10 @@ export function minigameExamples(
       });
       focus = routeFocus(points);
     }
-    if (kind !== "pinpoint")
+    if (kind !== "pinpoint" && kind !== "say-where" && kind !== "out-of-place")
       focus = { ...focus, altitude: (focus.altitude ?? 0.7) * 0.9 };
     const pending = action;
-    if (kind === "missing-borders")
+    if (kind === "missing-borders" || kind === "out-of-place")
       dispatch({ type: "select", id: pair.answer });
     else dispatch({ type: "submit" });
     if (action.phase !== "feedback" || !action.answers[0]?.correct)
@@ -158,9 +173,13 @@ export function minigameExamples(
       focus,
       searchIds,
       title:
-        kind === "pinpoint"
-          ? (pair as PinpointPair).name
-          : pair.countries.map((key) => base.names.get(key)).join(" → "),
+        kind === "out-of-place"
+          ? (pair as OutOfPlacePair).area.name
+          : kind === "say-where"
+            ? "Read the expression"
+            : kind === "pinpoint"
+              ? (pair as PinpointPair).name
+              : pair.countries.map((key) => base.names.get(key)).join(" → "),
       action: pending,
       reveal: action,
       steps:
@@ -174,6 +193,20 @@ export function minigameExamples(
     if (!found) throw Error(`Missing demo geography: ${codes.join("/")}`);
     return found;
   };
+  if (needed("out-of-place")) {
+    const pairs = outOfPlacePairs(regions);
+    for (const pair of pairs
+      .filter((_, i) => i % Math.max(1, Math.floor(pairs.length / 4)) === 0)
+      .slice(0, 4))
+      add("out-of-place", pair, outOfPlaceJourney(pair, base));
+  }
+  if (needed("say-where")) {
+    const pairs = sayWherePairs();
+    for (const languageId of ["pt", "ru", "ta", "mi"]) {
+      const pair = pairs.find((p) => p.languageId === languageId)!;
+      add("say-where", pair, sayWhereJourney(pair, base));
+    }
+  }
   if (needed("shared-neighbors")) {
     library["shared-neighbors"] = [];
     const shared = sharedNeighborPairs(base.graph);
@@ -342,6 +375,9 @@ export function demoWorld(
   view.regionTransitionKey = `preview:${example.kind}`;
   // Continuous previews fade back into travel rather than starting a new attempt.
   view.regionPhase = undefined;
+  if (example.kind === "out-of-place")
+    for (const id of Object.keys(view.states))
+      if (view.states[id] === "surface") view.states[id] = "disabled";
   if (phase === "question" || phase === "action") {
     for (const id of Object.keys(view.states)) {
       if (example.kind === "border-run" && view.states[id] === "disabled")
@@ -490,6 +526,28 @@ export function tourDuration(examples: MinigameExample[]) {
     0,
   );
 }
+/** Rejoin the nearest regional example after the player has explored manually. */
+export function nearestTourTime(examples: MinigameExample[], view: Focus) {
+  let nearest = 0;
+  for (let i = 1; i < examples.length; i++)
+    if (
+      geoDistance(
+        [view.lng, view.lat],
+        [examples[i].focus.lng, examples[i].focus.lat],
+      ) <
+      geoDistance(
+        [view.lng, view.lat],
+        [examples[nearest].focus.lng, examples[nearest].focus.lat],
+      )
+    )
+      nearest = i;
+  return examples
+    .slice(0, nearest)
+    .reduce(
+      (sum, _, index) => sum + DEMO_HOLD_MS + leg(examples, index).duration,
+      0,
+    );
+}
 /** A full westward revolution, with matching position and speed at every join. */
 export function tourFrame(
   examples: MinigameExample[],
@@ -513,7 +571,9 @@ export function tourFrame(
         remaining < DEMO_QUESTION_MS
           ? "question"
           : remaining < DEMO_REVEAL_MS
-            ? current.kind === "missing-borders"
+            ? ["missing-borders", "say-where", "out-of-place"].includes(
+                current.kind,
+              )
               ? "question"
               : "action"
             : "reveal";

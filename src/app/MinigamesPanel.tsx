@@ -1,5 +1,12 @@
+import { TextClue } from "../game/TextClue";
 import type { useMinigameTour } from "../minigames/useMinigameTour";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { DiscardMinigameDialog } from "./DiscardMinigameDialog";
 import type { BorderMinigame } from "../minigames/sharedNeighbors";
 import { MinigameSettingsEditor } from "../minigames/MinigameSettingsEditor";
@@ -57,6 +64,30 @@ export const games = [
     rules:
       "Cities and landmarks earn 1–1,000 points by distance. Large countries can stand alone; smaller countries and states get a surrounding search region with roughly six to eight plausible city locations. Scoring distances scale to the whole search region. Countries and U.S. states earn 1,000 points for a pin anywhere inside. Older world-search games keep their original scoring.",
   },
+  {
+    slug: "out-of-place",
+    title: "Out of Place",
+    description: "Six places. One mistake. Can you spot it?",
+    image: "/previews/out-of-place.svg",
+    imageAlt: "Six map markers with one label out of place.",
+    controls: "Tap a marker",
+    instruction:
+      "Six cities and filled countries share one region. One name or location is wrong. Tap a city marker or country to reveal its correction. Your first tap is final; three misses end the game.",
+    rules:
+      "Find one incorrect city or country among six places. Cities are capitals or have at least one million recorded residents. Countries are filled; cities have dot markers. Each correction appears immediately after your tap.",
+  },
+  {
+    slug: "say-where",
+    title: "Say Where?",
+    description: "One expression. Where is its language used officially?",
+    image: "/previews/say-where.svg",
+    imageAlt: "An expression above a globe with several qualifying countries.",
+    controls: "Select a country",
+    instruction:
+      "Read an expression in its original script. Select any country where its language has national official status or legally prescribed government use, then check your answer. Three wrong answers end the run, or finish whenever you like.",
+    rules:
+      "Any qualifying country counts. The reveal explains the language, translation and full accepted network. Languages are shuffled evenly; expressions vary on later visits. Three wrong answers end the game.",
+  },
 ];
 
 export function selectedMinigame(path: string): BorderMinigame {
@@ -73,6 +104,8 @@ export function MinigamesPanel({
   missing,
   borderRun,
   pinpoint,
+  sayWhere,
+  outOfPlace,
   webgl,
   tour,
   customizing,
@@ -84,6 +117,8 @@ export function MinigamesPanel({
   missing: ReturnType<typeof useBorderMinigame>;
   borderRun: ReturnType<typeof useBorderMinigame>;
   pinpoint: ReturnType<typeof useBorderMinigame>;
+  sayWhere: ReturnType<typeof useBorderMinigame>;
+  outOfPlace: ReturnType<typeof useBorderMinigame>;
   webgl: boolean;
   tour: ReturnType<typeof useMinigameTour>;
   customizing: boolean;
@@ -93,22 +128,81 @@ export function MinigamesPanel({
   const index = games.findIndex((game) => game.slug === kind);
   const selected = games[index];
   const game =
-    kind === "missing-borders"
-      ? missing
-      : kind === "border-run"
-        ? borderRun
-        : kind === "pinpoint"
-          ? pinpoint
-          : shared;
+    kind === "out-of-place"
+      ? outOfPlace
+      : kind === "say-where"
+        ? sayWhere
+        : kind === "missing-borders"
+          ? missing
+          : kind === "border-run"
+            ? borderRun
+            : kind === "pinpoint"
+              ? pinpoint
+              : shared;
   const [confirming, setConfirming] = useState(false);
   const startButton = useRef<HTMLButtonElement>(null);
+  const gameNames = useRef<HTMLDivElement>(null);
+  const [scrollEdges, setScrollEdges] = useState({ start: false, end: false });
+  useEffect(() => {
+    const row = gameNames.current;
+    if (!row) return;
+    const update = () => {
+      const start = row.scrollLeft > 1;
+      const end = row.scrollLeft + row.clientWidth < row.scrollWidth - 1;
+      setScrollEdges((previous) =>
+        previous.start === start && previous.end === end
+          ? previous
+          : { start, end },
+      );
+    };
+    update();
+    row.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? undefined
+        : new ResizeObserver(update);
+    observer?.observe(row);
+    for (const child of row.children) observer?.observe(child);
+    return () => {
+      row.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      observer?.disconnect();
+    };
+  }, []);
+  useEffect(() => {
+    const row = gameNames.current;
+    const selected = row?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!row || !selected) return;
+    // Scroll this row only; selecting a game must not move the page or panel.
+    const left = selected.offsetLeft - row.offsetLeft;
+    let destination = row.scrollLeft;
+    if (left < row.scrollLeft + 16) destination = Math.max(0, left - 16);
+    else if (
+      left + selected.offsetWidth >
+      row.scrollLeft + row.clientWidth - 16
+    )
+      destination = left + selected.offsetWidth - row.clientWidth + 16;
+    if (row.scrollTo)
+      row.scrollTo({
+        left: destination,
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
+    else row.scrollLeft = destination;
+  }, [kind]);
   const cancelDiscard = useCallback(() => setConfirming(false), []);
   useEffect(() => setConfirming(false), [path, game.run?.id]);
   const startNew = () => {
     setConfirming(false);
     onCustomize(false);
-    game.start(true);
-    onNavigate(`/minigames/${kind}/play`);
+    // Commit the new save and destination together, so the departing menu keeps
+    // its pre-start appearance rather than briefly displaying Resume game.
+    startTransition(() => {
+      game.start(true);
+      onNavigate(`/minigames/${kind}/play`);
+    });
   };
   const select = (next: number) => {
     onCustomize(false);
@@ -134,6 +228,9 @@ export function MinigamesPanel({
     <section className="info-view minigames-carousel" aria-label="Minigames">
       <div
         className="minigame-game-names section-navigation"
+        ref={gameNames}
+        data-overflow-start={scrollEdges.start}
+        data-overflow-end={scrollEdges.end}
         role="tablist"
         aria-label="Choose a minigame"
         onKeyDown={(event) => {
@@ -154,7 +251,7 @@ export function MinigamesPanel({
             .querySelector<HTMLButtonElement>(
               `[data-game="${games[next].slug}"]`,
             )
-            ?.focus();
+            ?.focus({ preventScroll: true });
         }}
       >
         {games.map((item, i) => (
@@ -281,16 +378,18 @@ export function MinigamesPanel({
             </button>
           </div>
         </div>
-        <button
-          className="minigame-customize-toggle"
-          type="button"
-          aria-expanded={customizing}
-          aria-controls="minigame-customization"
-          onClick={() => onCustomize(!customizing)}
-        >
-          {customizing ? "Close customization" : "Customize"}
-        </button>
-        {customizing && (
+        {!["say-where", "out-of-place"].includes(kind) && (
+          <button
+            className="minigame-customize-toggle"
+            type="button"
+            aria-expanded={customizing}
+            aria-controls="minigame-customization"
+            onClick={() => onCustomize(!customizing)}
+          >
+            {customizing ? "Close customization" : "Customize"}
+          </button>
+        )}
+        {customizing && !["say-where", "out-of-place"].includes(kind) && (
           <div id="minigame-customization">
             <MinigameSettingsEditor
               kind={game.kind}
@@ -323,6 +422,31 @@ export function MinigameTourCaption({
 }: {
   tour: ReturnType<typeof useMinigameTour>;
 }) {
+  const sayWhere = tour.example?.kind === "say-where";
+  const caption = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!sayWhere) return;
+    const element = caption.current;
+    const content = element?.firstElementChild;
+    const experience = element?.closest<HTMLElement>(".experience");
+    if (!content || !experience) return;
+    const measure = () =>
+      experience.style.setProperty(
+        "--say-where-caption-height",
+        `${Math.ceil(content.getBoundingClientRect().height) + 24}px`,
+      );
+    measure();
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? undefined
+        : new ResizeObserver(measure);
+    observer?.observe(content);
+    return () => {
+      observer?.disconnect();
+      experience.style.removeProperty("--say-where-caption-height");
+    };
+  }, [sayWhere]);
+  const revealed = tour.phase === "reveal" || (tour.reduced && tour.answer);
   const prompt = !tour.example
     ? "Preparing the globe tour…"
     : tour.phase === "travel"
@@ -334,11 +458,21 @@ export function MinigameTourCaption({
         : tour.example.journey.rounds[0].prompt;
   return (
     <section
-      className={`minigame-globe-caption${tour.reduced ? " reduced" : ""}`}
+      ref={caption}
+      className={`minigame-globe-caption${sayWhere ? " say-where-caption" : ""}${tour.reduced ? " reduced" : ""}`}
       aria-label="Globe demonstration"
     >
       <div className="minigame-globe-prompt">
-        <p>{prompt}</p>
+        {sayWhere &&
+          tour.phase !== "travel" &&
+          tour.example?.journey.rounds[0].textClue && (
+            <TextClue
+              clue={tour.example.journey.rounds[0].textClue!}
+              revealed={!!revealed}
+              languageFirst
+            />
+          )}
+        {(!sayWhere || !revealed || tour.phase === "travel") && <p>{prompt}</p>}
         {tour.reduced ? (
           <>
             <button className="quiet-button" onClick={tour.reveal}>

@@ -1,0 +1,122 @@
+[
+  {
+    "language_id": "fr",
+    "added_country_codes": ["MLI", "BFA", "NER", "MUS"],
+    "qualification": "Mali, Burkina Faso and Niger qualify through constitutionally designated working-language use of French, even though their current constitutions distinguish it from official national languages. Luxembourg also qualifies through statutory legislative and administrative use. Mauritius qualifies through constitutionally authorized French in the National Assembly (Section 49).",
+    "sources": [
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Mali Constitution (2023) · Article 31",
+        "url": "https://www.constituteproject.org/constitution/Mali_2023"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Burkina Faso · consolidated Constitution, Article 35",
+        "url": "https://dgre.gov.bf/documents/77/constitution_consolid%C3%A9e_apres_la_relecture_du_29_octobre_2024VF.pdf"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Niger Official Journal · 2025 Refoundation Charter, Article 12",
+        "url": "https://faolex.fao.org/docs/pdf/ner242401.pdf"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Luxembourg Government · statutory court and administrative languages",
+        "url": "https://guichet.public.lu/en/citoyens/justice/voies-recours-reglement-litiges/frais-avocat-justice/langues-tribunaux.html"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Belgium Government · three official languages",
+        "url": "https://www.belgium.be/en/about_belgium/government/federale_staat"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Mauritius National Assembly · Constitution, Section 49",
+        "url": "https://mauritiusassembly.govmu.org/mauritiusassembly/wp-content/uploads/2024/11/The-Constitution-Long-Upload-on-website-modify-on-28.01.22-06.04.22-.pdf"
+      }
+    ]
+  },
+  {
+    "language_id": "es",
+    "added_country_codes": [],
+    "qualification": "Constitutional official-language wording is not required. Argentina, Chile, Mexico and Uruguay qualify through national statutory or legally prescribed public use of Spanish. Paraguay and Equatorial Guinea also explicitly recognize Spanish as official.",
+    "sources": [
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Argentina · National Civil and Commercial Procedure Code, Article 115",
+        "url": "https://www.argentina.gob.ar/normativa/nacional/ley-17454-16547/actualizacion"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Argentine Presidency · Spanish language identification",
+        "url": "https://www.casarosada.gob.ar/nuestro-pais/acerca-de-argentina"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Chile Directorate of Labour · ORD. 881 (2024), Spanish in official documents",
+        "url": "https://www.dt.gob.cl/legislacion/1624/w3-article-127223.html"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Mexico · Linguistic Rights Act, Articles 4 and 7",
+        "url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LGDLPI.pdf"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Uruguay · General Procedure Code, Article 65",
+        "url": "https://www.impo.com.uy/bases/codigo-general-proceso/15982-1988"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Paraguay Chamber of Deputies · Constitution, Article 140",
+        "url": "https://www.diputados.gov.py/pdf/ConstitucionNacional_2024.pdf"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Equatorial Guinea Constitution · Article 4",
+        "url": "https://www.guineaecuatorialpress.com/pdf/Ley_Fundamental_Guinea_Ecuatorial.pdf"
+      }
+    ]
+  },
+  {
+    "language_id": "de",
+    "added_country_codes": [],
+    "qualification": "Luxembourg qualifies through legally authorized national administrative and judicial use of German. Belgium has three official languages with territorially regulated use; regional-only German in Italy does not qualify.",
+    "sources": [
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Luxembourg Government · statutory court and administrative languages",
+        "url": "https://guichet.public.lu/en/citoyens/justice/voies-recours-reglement-litiges/frais-avocat-justice/langues-tribunaux.html"
+      },
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Belgium Government · three official languages",
+        "url": "https://www.belgium.be/en/about_belgium/government/federale_staat"
+      }
+    ]
+  },
+  {
+    "language_id": "sv",
+    "added_country_codes": [],
+    "qualification": "Sweden calls Swedish its principal language. Section 10 of the Language Act also prescribes Swedish for courts, administrative authorities and other public bodies, so Sweden qualifies through government use. Swedish is also a national official language in Finland.",
+    "sources": [
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Swedish Parliament · Language Act 2009:600, Sections 4 and 10",
+        "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/spraklag-2009600_sfs-2009-600/"
+      }
+    ]
+  },
+  {
+    "language_id": "cs",
+    "added_country_codes": [],
+    "qualification": "Czech qualifies through Section 16 of Act 500/2004, which prescribes Czech for administrative proceedings and documents. An explicit constitutional official-language clause is not required.",
+    "sources": [
+      {
+        "reviewedOn": "2026-11-11",
+        "name": "Czech Financial Analytical Office · Administrative Procedure Code, Section 16",
+        "url": "https://fau.gov.cz/en/site-map/information-for-obliged-entities/information-for-vasps-304"
+      }
+    ]
+  }
+]

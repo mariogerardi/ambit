@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useMinigameTour } from "../src/minigames/useMinigameTour";
 import { minigameExamples } from "../src/minigames/minigameDemos";
+import { MinigameTourCaption } from "../src/app/MinigamesPanel";
 import type { RegionFeature } from "../src/geography/types";
 import type { GlobeHandle } from "../src/globe/GlobeView";
 
@@ -19,7 +20,7 @@ let options: Options, now: number, serial: number, hidden: boolean;
 let frames: Map<number, FrameRequestCallback>;
 function Probe() {
   tour = useMinigameTour(options);
-  return null;
+  return <MinigameTourCaption tour={tour} />;
 }
 async function render(update: Partial<Options> = {}) {
   options = { ...options, ...update };
@@ -114,6 +115,46 @@ it("offers manual examples and reveals without animation for reduced motion", as
   expect(tour.example?.id).not.toBe(first);
   expect(tour.phase).toBe("question");
   expect(frames.size).toBe(0);
+});
+
+it("resumes at the nearest example after the globe has been moved manually", async () => {
+  let live = { lat: 30, lng: 140, altitude: 1.65 };
+  options.globe.current!.orbitView = vi.fn((focus) => {
+    if (focus) live = focus as typeof live;
+    return live;
+  });
+  await render({ kind: "say-where" });
+  await advance(8500);
+  const previous = tour.example!.id;
+  await act(async () => tour.pause());
+  const nearest = minigameExamples(regions)["say-where"].find(
+    (e) => e.id !== previous,
+  )!;
+  live = { ...nearest.focus } as typeof live;
+  await act(async () => tour.toggle());
+  await advance(5000);
+  expect(tour.example?.id).toBe(nearest.id);
+  expect(tour.phase).toBe("question");
+});
+
+it("shows the expression above its instruction and replaces the instruction on reveal", async () => {
+  await render({ kind: "say-where", reduced: true });
+  const prompt = tour.example!.journey.rounds[0].prompt;
+  expect(host.textContent).toContain(prompt);
+  const clue = host.querySelector(".journey-text-clue")!;
+  expect(clue.nextElementSibling?.textContent).toBe(prompt);
+  expect(host.querySelector("figcaption")).toBeNull();
+  await act(async () => tour.reveal());
+  expect(host.textContent).not.toContain(prompt);
+  expect(host.querySelector("figcaption")?.textContent).toContain(
+    tour.example!.journey.rounds[0].textClue!.reveal.language,
+  );
+  const figure = host.querySelector("figure")!;
+  expect(figure.children[0].tagName).toBe("FIGCAPTION");
+  expect(figure.children[1].tagName).toBe("BLOCKQUOTE");
+  expect(figure.children[2].textContent).toBe(
+    tour.example!.journey.rounds[0].textClue!.reveal.translation,
+  );
 });
 
 it("keeps the animation loop and current velocity when switching games and clears the old scene", async () => {

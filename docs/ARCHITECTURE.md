@@ -511,6 +511,30 @@ rather than a connecting line. Entry framing uses the actual endpoint components
 reveal framing fits the full route. These are schematic land corridors derived
 from canonical boundaries, not transport-network data.
 
+Say Where? (`/minigames/say-where/play`) adds a language/expression provider to
+that same controller. It uses editable country selection, accepts any reviewed
+country, and reveals native text, translation, the qualifying network and sources
+through the existing text-clue/scene contracts. Each seeded cycle visits every
+language once and rotates its expressions. Three misses end a run; selection,
+feedback, replay, high scores and result sharing use the existing account-scoped
+local save infrastructure. Actual selected countries/misses survive completion;
+a language mistake does not create a country-location Study exercise. The initial
+reviewed pool has 48 expressions across 17 languages, preserving all 51 supplied
+research records and their flags separately. See the
+[Say Where? spec](minigames/SAY_WHERE_SPEC.md) for approved status/variety rules,
+evidence and explicit holds. Border-game customization does not apply.
+
+Out of Place (`/minigames/out-of-place/play`) dynamically samples six regional
+items from bundled capitals, million-plus cities and country footprints. Countries
+are fills and cities are dots; one name or city position is incorrect. The shared
+point contract grades a single immediate tap, while the adapter also accepts only
+the original filled country shapes. Canonical data supplies corrections; city
+reveals never add a home-country reference fill. Seeded generation enforces
+ownership and conservative screen-space label/tap separation. See the
+[Out of Place spec](minigames/OUT_OF_PLACE_SPEC.md) and the focused
+`out-of-place` data/shell tests. Saves, scores, replay and sharing reuse the shared
+minigame lifecycle; no new backend or Journey registration is required.
+
 Pinpoint (`/minigames/pinpoint/play`) reuses `pin-distance` and `pin-inside` for ten
 rounds. The pool includes primary capitals, bundled cities with a source population
 of at least one million, 60 curated Wikidata landmarks across 60 countries, eligible

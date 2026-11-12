@@ -16,14 +16,19 @@ export type BorderMinigame =
   | "shared-neighbors"
   | "missing-borders"
   | "border-run"
-  | "pinpoint";
+  | "pinpoint"
+  | "say-where"
+  | "out-of-place";
 export const MINIGAME_TITLES: Record<BorderMinigame, string> = {
   "shared-neighbors": "Shared Neighbors",
   "missing-borders": "Missing Borders",
   "border-run": "Border Run",
   pinpoint: "Pinpoint",
+  "say-where": "Say Where?",
+  "out-of-place": "Out of Place",
 };
 export interface MinigameVisit {
+  selectedId?: string;
   target?: import("../study/placeReview").StudyPlaceTarget;
   ids: string[];
   correct: boolean;
@@ -276,9 +281,16 @@ export function neighborReducer(
             : undefined,
     };
   };
+  if (action.type === "select" && journey.rounds[0].mode === "map-single")
+    return run.result === undefined &&
+      canSelect(journey.rounds[0], context, action.id)
+      ? { ...run, selectedId: action.id }
+      : run;
   if (action.type === "select")
     return run.result === undefined &&
-      journey.rounds[0].mode === "merged-region-single" &&
+      (journey.rounds[0].mode === "merged-region-single" ||
+        (journey.rounds[0].mode === "city-single" &&
+          journey.rounds[0].commitment === "immediate")) &&
       canSelect(journey.rounds[0], context, action.id)
       ? grade({ ...run, selectedId: action.id })
       : run;
@@ -299,7 +311,11 @@ export function neighborReducer(
       run.result !== undefined ||
       (journey.rounds[0].mode === "pin"
         ? !validPin(run.pin)
-        : journey.rounds[0].mode !== "number" || !/^\d+$/.test(run.text ?? ""))
+        : journey.rounds[0].mode === "map-single"
+          ? !run.selectedId ||
+            !canSelect(journey.rounds[0], context, run.selectedId)
+          : journey.rounds[0].mode !== "number" ||
+            !/^\d+$/.test(run.text ?? ""))
     )
       return run;
     return grade(run);

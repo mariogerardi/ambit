@@ -7,6 +7,8 @@ export function minigameReviewTargets(
   run: NeighborRun,
   regions: RegionFeature[],
 ): StudyPlaceTarget[] {
+  // A language error is not evidence that the player cannot locate a country.
+  if (kind === "say-where" || kind === "out-of-place") return [];
   const visits = (run.review ?? run.history ?? []).filter((v) =>
     kind === "pinpoint"
       ? (v.points ?? (v.correct ? 1000 : 0)) < 500

@@ -1,3 +1,5 @@
+import type { OutOfPlacePair } from "./outOfPlace";
+import { TextClue } from "../game/TextClue";
 import { submittedMinigameRegion } from "./minigameAnswer";
 import {
   useCallback,
@@ -14,6 +16,8 @@ import { minigameShareCard } from "./minigameSharing";
 import { JourneyShareDialog } from "../app/JourneyShareDialog";
 import { ActionIcon } from "../app/ActionIcon";
 import { SettingsIcon } from "../app/SettingsIcon";
+import { InfoTooltip } from "../app/InfoTooltip";
+import { SAY_WHERE_POLICY, type SayWherePair } from "./sayWhere";
 import { PanelActive } from "../app/ModePanels";
 import type { useBorderMinigame } from "./useBorderMinigame";
 import { AnswerCounter } from "../game/AnswerCounter";
@@ -34,6 +38,9 @@ export function BorderMinigamePanel({
   onStudy(targets: StudyPlaceTarget[]): void;
   regions: RegionFeature[];
 }) {
+  const outOfPlace = shared.kind === "out-of-place";
+  const sayWhere = shared.kind === "say-where";
+  const question = shared.journey?.rounds[0];
   const missing = shared.kind === "missing-borders",
     pinpoint = shared.kind === "pinpoint",
     route = shared.kind === "border-run";
@@ -124,14 +131,21 @@ export function BorderMinigamePanel({
     (id) => shared.context!.names.get(id) ?? id,
   );
   const target = pinpoint ? (shared.pair as PinpointPair) : undefined;
-  const answer = pinpoint
-    ? target!.name
-    : route
-      ? `${shared.pair.answer} border crossings`
-      : missing
-        ? names.join(" + ")
-        : shared.context.names.get(shared.pair.answer)!;
-  const hasAnswerAction = feedback || !missing;
+  const mapScene = outOfPlace ? (shared.pair as OutOfPlacePair) : undefined;
+  const answer = outOfPlace
+    ? mapScene!.displayed.find((i) => i.id === mapScene!.answer)!.name
+    : sayWhere
+      ? shared.context.names.get(
+          run.result ? run.selectedId! : shared.pair.answer,
+        )!
+      : pinpoint
+        ? target!.name
+        : route
+          ? `${shared.pair.answer} border crossings`
+          : missing
+            ? names.join(" + ")
+            : shared.context.names.get(shared.pair.answer)!;
+  const hasAnswerAction = feedback || (!missing && !outOfPlace);
   const closeMenu = () => {
     if (menu.current) menu.current.open = false;
   };
@@ -140,52 +154,98 @@ export function BorderMinigamePanel({
     strikes = run.answered - run.correct;
   return (
     <section
-      className={`info-view shared-neighbors-game ${missing ? "missing-borders-game" : ""} ${overview ? "minigame-overview" : ""}`}
+      className={`info-view shared-neighbors-game ${sayWhere ? "say-where-game" : ""} ${missing ? "missing-borders-game" : ""} ${overview ? "minigame-overview" : ""}`}
       aria-label={`${shared.title} game`}
     >
       <div className="shared-neighbors-heading">
         <h2 className="minigame-title">{shared.title}</h2>
         {!overview && (
-          <details
-            className="minigame-menu"
-            ref={menu}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                closeMenu();
-                event.currentTarget.querySelector("summary")?.focus();
-              }
-            }}
-          >
-            <summary aria-label="Game menu">
-              <SettingsIcon />
-            </summary>
-            <div className="minigame-menu-options">
-              <button
-                onClick={() => {
-                  closeMenu();
-                  onBack();
-                }}
+          <div className="minigame-heading-tools">
+            {sayWhere && (
+              <InfoTooltip
+                key={`${question?.id}:${feedback}`}
+                label="About Say Where?"
+                className="minigame-info-button"
+                icon={<span aria-hidden="true">ⓘ</span>}
               >
-                All games
-              </button>
-              {!ended && (
+                <p>{SAY_WHERE_POLICY}</p>
+                {feedback && question ? (
+                  <>
+                    {question.qualification !== SAY_WHERE_POLICY && (
+                      <p>{question.qualification}</p>
+                    )}
+                    <details className="say-where-sources" open>
+                      <summary>Sources</summary>
+                      <ul>
+                        {[question.source, ...(question.sources ?? [])].map(
+                          (s) => (
+                            <li key={s.url}>
+                              <a href={s.url} target="_blank" rel="noreferrer">
+                                {s.name}
+                              </a>
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </details>
+                  </>
+                ) : (
+                  <p>
+                    Sources and language notes appear here after you check your
+                    answer.
+                  </p>
+                )}
+              </InfoTooltip>
+            )}
+            <details
+              className="minigame-menu"
+              ref={menu}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  closeMenu();
+                  event.currentTarget.querySelector("summary")?.focus();
+                }
+              }}
+            >
+              <summary aria-label="Game menu">
+                <SettingsIcon />
+              </summary>
+              <div className="minigame-menu-options">
                 <button
                   onClick={() => {
                     closeMenu();
-                    shared.action({ type: "finish" });
+                    onBack();
                   }}
                 >
-                  Finish game
+                  All games
                 </button>
-              )}
-            </div>
-          </details>
+                {!ended && (
+                  <button
+                    onClick={() => {
+                      closeMenu();
+                      shared.action({ type: "finish" });
+                    }}
+                  >
+                    Finish game
+                  </button>
+                )}
+              </div>
+            </details>
+          </div>
         )}
       </div>
       <h1 className="editorial-heading" ref={heading} tabIndex={-1}>
         {overview ? (
           <>
-            {pinpoint ? (
+            {outOfPlace ? (
+              <>
+                Your map, <em>corrected.</em>
+              </>
+            ) : sayWhere ? (
+              <>
+                Your words, <em>placed.</em>
+              </>
+            ) : pinpoint ? (
               <>
                 Your aim, <em>mapped.</em>
               </>
@@ -202,6 +262,14 @@ export function BorderMinigamePanel({
                 Your neighbors, <em>found.</em>
               </>
             )}
+          </>
+        ) : outOfPlace ? (
+          <>
+            What’s <em>out of place?</em>
+          </>
+        ) : sayWhere ? (
+          <>
+            Where is it <em>official?</em>
           </>
         ) : pinpoint ? (
           <>
@@ -230,13 +298,17 @@ export function BorderMinigamePanel({
           >
             <div>
               <dt>
-                {pinpoint
-                  ? "Points / 10,000"
-                  : route
-                    ? "Routes solved"
-                    : missing
-                      ? "Borders found"
-                      : "Neighbors found"}
+                {outOfPlace
+                  ? "Mistakes spotted"
+                  : sayWhere
+                    ? "Expressions placed"
+                    : pinpoint
+                      ? "Points / 10,000"
+                      : route
+                        ? "Routes solved"
+                        : missing
+                          ? "Borders found"
+                          : "Neighbors found"}
               </dt>
               <dd>{pinpoint ? points.toLocaleString() : run.correct}</dd>
             </div>
@@ -314,7 +386,16 @@ export function BorderMinigamePanel({
         </>
       ) : (
         <>
-          {!pinpoint && !missing && (
+          {sayWhere && question?.textClue && (
+            <TextClue
+              clue={question.textClue}
+              revealed={feedback}
+              meaning={
+                (shared.pair as SayWherePair).expression.english_translation
+              }
+            />
+          )}
+          {!outOfPlace && !sayWhere && !pinpoint && !missing && (
             <MinigameCountries names={names} route={route} />
           )}
           {target?.photo && (
@@ -346,7 +427,7 @@ export function BorderMinigamePanel({
                 {run.result
                   ? route
                     ? "Well done."
-                    : missing
+                    : missing || outOfPlace
                       ? "Well spotted."
                       : pinpoint && target?.place
                         ? (last?.points ?? 0) >= 900
@@ -372,25 +453,34 @@ export function BorderMinigamePanel({
               ) : !pinpoint ? (
                 <>
                   <p className="study-response study-correction journey-correct-answer">
-                    <span>{run.result ? "Answer" : "Correct answer"}: </span>
+                    <span>
+                      {outOfPlace
+                        ? "Mistake"
+                        : run.result
+                          ? "Answer"
+                          : "Correct answer"}
+                      :{" "}
+                    </span>
                     <strong>{answer}</strong>
                   </p>
                   {!run.result && (
                     <p className="submitted-answer minigame-incorrect-answer">
                       Your answer:{" "}
                       <strong>
-                        {(shared.game &&
-                          submittedMinigameRegion(shared.game, shared.context)
-                            ?.name) ||
+                        {(outOfPlace
+                          ? mapScene!.displayed.find(
+                              (i) => i.id === run.selectedId,
+                            )?.name
+                          : shared.game &&
+                            submittedMinigameRegion(shared.game, shared.context)
+                              ?.name) ||
                           (missing ? "Selected territory" : "Open water")}
                       </strong>
                     </p>
                   )}
                 </>
               ) : null}
-              {!pinpoint && !missing && (
-                <p>{shared.journey!.rounds[0].explanation}</p>
-              )}
+              {!pinpoint && !missing && <p>{question!.explanation}</p>}
               {ended && (
                 <p className="minigame-ended-notice">
                   {run.ended === "strikes"
@@ -402,7 +492,15 @@ export function BorderMinigamePanel({
             </div>
           ) : (
             <div className="minigame-answer-area">
-              {!route && !missing && run.pin ? (
+              {outOfPlace ? (
+                <p className="muted">{question!.instruction}</p>
+              ) : sayWhere ? (
+                <p className="muted">
+                  {run.selectedId
+                    ? "Country selected. Choose another or check your answer."
+                    : question!.prompt}
+                </p>
+              ) : !route && !missing && run.pin ? (
                 <p className="shared-neighbors-pin" role="status">
                   Pin placed. Move it or check your answer.
                 </p>
@@ -447,18 +545,28 @@ export function BorderMinigamePanel({
                 >
                   {ended
                     ? "See results →"
-                    : missing
+                    : outOfPlace
                       ? "Next map →"
-                      : pinpoint
-                        ? "Next place →"
-                        : route
-                          ? "Next route →"
-                          : "Next pair →"}
+                      : sayWhere
+                        ? "Next expression →"
+                        : missing
+                          ? "Next map →"
+                          : pinpoint
+                            ? "Next place →"
+                            : route
+                              ? "Next route →"
+                              : "Next pair →"}
                 </button>
               ) : !missing ? (
                 <button
                   className="primary-button"
-                  disabled={route ? !/^\d+$/.test(run.text ?? "") : !run.pin}
+                  disabled={
+                    sayWhere
+                      ? !run.selectedId
+                      : route
+                        ? !/^\d+$/.test(run.text ?? "")
+                        : !run.pin
+                  }
                   onClick={() => shared.action({ type: "submit" })}
                 >
                   Check answer

@@ -1,0 +1,47 @@
+{
+  "archive": "say-where-idioms-expanded.zip",
+  "archiveSha256": "28bf1747ffdafd83ac0a9f9df681b676e17e5eb3cdb3776d217923a4cb693272",
+  "importedOn": "2026-11-11",
+  "languageCount": 27,
+  "expressionCount": 108,
+  "files": {
+    "README.md": {
+      "sha256": "660a24f0fa25b27f4088e6c49a47baf79536cda8b42abee779061689c20d909c",
+      "bytes": 5993
+    },
+    "say-where-languages.json": {
+      "sha256": "e573f686c4fcfd2bbcae1ee716a4cd3419b096184a36d9b0e889cbac8c6f89d2",
+      "bytes": 79783
+    },
+    "say-where-expressions.json": {
+      "sha256": "876e2b6d44f01f6d2ad404c0b76d51632bce156db5ce21f429e59a6a23559a07",
+      "bytes": 108703
+    },
+    "EDITORIAL_PREVIEW.md": {
+      "sha256": "b20864ef801915f570dece2358913dfd6e612d9e48d64577cc8a566bf18a0ebc",
+      "bytes": 3912
+    }
+  },
+  "supersedes": {
+    "repositoryRevision": "58e8107",
+    "archive": "say-where-research-handoff.zip",
+    "archiveSha256": "2860f7f1e3f20ff5b8ef30d3e8b2f690bedb5640feb9606a3235252c07f8f09b",
+    "importedOn": "2026-11-11",
+    "languageCount": 17,
+    "expressionCount": 51,
+    "files": {
+      "README.md": {
+        "sha256": "0ec8f3935580bf8ba3587ca2b3d6f62625465c3c4fd45961f2707f49e22550b1",
+        "bytes": 6390
+      },
+      "say-where-languages.json": {
+        "sha256": "77cfbe97c025320436504a090784d44381634d2e764fa50ce047e3d5bce2abb9",
+        "bytes": 33836
+      },
+      "say-where-expressions.json": {
+        "sha256": "c521d1e6d3e2764dd5d0dc7a5ab31d15692cf1e82484d8c8549d39b3cd6cca34",
+        "bytes": 35812
+      }
+    }
+  }
+}

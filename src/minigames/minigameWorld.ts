@@ -1,3 +1,4 @@
+import type { OutOfPlacePair } from "./outOfPlace";
 import { submittedMinigameRegion } from "./minigameAnswer";
 import { regionalPinpointBands } from "./pinpointSearch";
 import { interiorAnchor } from "../geography/interiorAnchor";
@@ -6,6 +7,7 @@ import type { Journey, QuestionContext } from "../game/questionContracts";
 import type { GameState } from "../game/state";
 import type { RegionReveal } from "../globe/regionFades";
 import { journeyWorld } from "../app/journeyWorld";
+import { presentJourneyPlace } from "../game/authoredPlaces";
 import { pointAlongBearing } from "../game/geodesic";
 import { borderRunCrossings } from "./borderRunPath";
 import { PINPOINT_BANDS } from "./extraGames";
@@ -48,6 +50,42 @@ export function minigameWorld({
   regionalPinpoint?: boolean;
 }): MinigameWorld {
   const view: MinigameWorld = journeyWorld(regions, journey, game, context);
+  if (kind === "out-of-place" && overview) {
+    // History already contains the corrected item and the selected mistake.
+    // Do not mix in generic last-question response pins or duplicate discoveries.
+    view.places = (journey.completion?.places ?? []).map(presentJourneyPlace);
+    view.regionInteraction = false;
+    view.selectableRegionIds = [];
+    view.clueLocators = [];
+    for (const region of regions) view.states[region.id] = "disabled";
+    for (const place of journey.completion?.places ?? [])
+      if (context.targets.has(place.id))
+        view.states[place.id] = place.visualState ?? "answer";
+  }
+  if (kind === "out-of-place" && !overview) {
+    const scene = pair as OutOfPlacePair;
+    const countryIds = scene.items
+      .filter((i) => i.type === "country")
+      .map((i) => i.parentId);
+    const playing = game.phase === "playing";
+    // A corrected city never promotes its home country into a seventh clue.
+    // Only the original filled-country choices receive country emphasis.
+    for (const region of regions) view.states[region.id] = "surface";
+    view.regionInteraction = playing;
+    view.selectableRegionIds = playing ? countryIds : [];
+    view.selectDisabled = true;
+    for (const id of countryIds)
+      view.states[id] = playing
+        ? "selectable"
+        : id === scene.answer
+          ? game.answers[0]?.correct
+            ? "correct"
+            : "answer"
+          : game.selectedIds.includes(id)
+            ? "incorrect"
+            : "selectable";
+    view.clueLocators = [];
+  }
   if (kind === "missing-borders")
     view.regionTransitionKey = revealKey ?? journey.rounds[0].id;
   if (kind === "border-run" && game.phase === "playing" && !showBorders)

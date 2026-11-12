@@ -592,3 +592,25 @@ The Journey-local Borneo perimeter derives from the bundled Natural Earth 5.1.2
 country polygons (public domain); city locations reuse GeoNames (CC BY 4.0).
 Historical evidence, asset checksums and reproduction notes are recorded in
 `public/journeys/bare-minimum/SOURCES.md` and `asset-audit.json`.
+
+## Say Where? language research
+
+The Say Where? minigame starts from the user-supplied November 11, 2026 research
+handoffs, including the expanded idioms edition. Original language evidence,
+expressions, literal English glosses, intended meanings, attribution links and
+review flags are preserved in `sources/say-where/`. The research records credit
+the expression collections and country-level official/constitutional sources
+individually. Follow-up evidence and remaining uncertainties are documented in
+`sources/say-where/REVIEW.md`;
+runtime acceptance decisions are separate from the unmodified research files.
+No source audio or images are copied. The Say Where? sharing illustration is
+original code-authored SVG, adapted to the four shared theme palettes.
+
+## Out of Place
+
+Out of Place reuses the bundled GeoNames city/capital records (CC BY 4.0) and
+Natural Earth country geometry (public domain), documented above. Deliberately
+incorrect labels and coordinates are generated presentation states; corrections
+retain the canonical source records. No new geographic source is imported. Its
+preview and sharing illustration is original code-authored SVG with four theme
+variants.

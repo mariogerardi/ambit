@@ -305,8 +305,17 @@ export function App({
     mode === "minigames" && pathname === "/minigames/border-run/play";
   const pinpointPlaying =
     mode === "minigames" && pathname === "/minigames/pinpoint/play";
+  const sayWherePlaying =
+    mode === "minigames" && pathname === "/minigames/say-where/play";
+  const outOfPlacePlaying =
+    mode === "minigames" && pathname === "/minigames/out-of-place/play";
   const minigamePlaying =
-    sharedPlaying || missingPlaying || borderRunPlaying || pinpointPlaying;
+    sharedPlaying ||
+    missingPlaying ||
+    borderRunPlaying ||
+    pinpointPlaying ||
+    sayWherePlaying ||
+    outOfPlacePlaying;
   const minigameLanding = mode === "minigames" && !minigamePlaying;
   const demoKind = selectedMinigame(pathname);
   const unrestricted =
@@ -498,13 +507,31 @@ export function App({
     "pinpoint",
     () => globe.current?.view(),
   );
-  const activeMinigame = missingPlaying
-    ? missingBorders
-    : borderRunPlaying
-      ? borderRun
-      : pinpointPlaying
-        ? pinpoint
-        : sharedNeighbors;
+  const sayWhere = useBorderMinigame(
+    sayWherePlaying || (minigameLanding && demoKind === "say-where")
+      ? namedRegions
+      : emptyRegions,
+    subject,
+    "say-where",
+  );
+  const outOfPlace = useBorderMinigame(
+    outOfPlacePlaying || (minigameLanding && demoKind === "out-of-place")
+      ? namedRegions
+      : emptyRegions,
+    subject,
+    "out-of-place",
+  );
+  const activeMinigame = outOfPlacePlaying
+    ? outOfPlace
+    : sayWherePlaying
+      ? sayWhere
+      : missingPlaying
+        ? missingBorders
+        : borderRunPlaying
+          ? borderRun
+          : pinpointPlaying
+            ? pinpoint
+            : sharedNeighbors;
   useEffect(() => {
     if (minigamePlaying && webgl && activeMinigame.count && !activeMinigame.run)
       activeMinigame.start();
@@ -693,13 +720,17 @@ export function App({
     },
   });
   const demoController =
-    demoKind === "missing-borders"
-      ? missingBorders
-      : demoKind === "border-run"
-        ? borderRun
-        : demoKind === "pinpoint"
-          ? pinpoint
-          : sharedNeighbors;
+    demoKind === "out-of-place"
+      ? outOfPlace
+      : demoKind === "say-where"
+        ? sayWhere
+        : demoKind === "missing-borders"
+          ? missingBorders
+          : demoKind === "border-run"
+            ? borderRun
+            : demoKind === "pinpoint"
+              ? pinpoint
+              : sharedNeighbors;
   const tour = useMinigameTour({
     active: minigameLanding && ready && webgl,
     kind: demoKind,
@@ -1073,7 +1104,7 @@ export function App({
   const choose = useCallback(
     (region: RegionFeature, point?: Focus) => {
       stop();
-      if (missingPlaying) {
+      if (missingPlaying || sayWherePlaying || outOfPlacePlaying) {
         if (point && !activeMinigame.canSelectPoint(point)) return;
         if (!activeMinigame.ended && activeMinigame.run?.result === undefined)
           activeMinigame.action({ type: "select", id: region.id });
@@ -1113,6 +1144,8 @@ export function App({
       namedRegions,
       selectExplore,
       missingPlaying,
+      sayWherePlaying,
+      outOfPlacePlaying,
       activeMinigame.action,
       activeMinigame.canSelectPoint,
       activeMinigame.ended,
@@ -1244,6 +1277,8 @@ export function App({
         missing={missingBorders}
         borderRun={borderRun}
         pinpoint={pinpoint}
+        sayWhere={sayWhere}
+        outOfPlace={outOfPlace}
         webgl={webgl}
         tour={tour}
         customizing={demoCustomizing}
@@ -1748,23 +1783,29 @@ export function App({
                 interactionLabel={
                   minigamePlaying && activeMinigame.game?.phase !== "playing"
                     ? "Interactive Earth. Drag to rotate, scroll or pinch to zoom."
-                    : missingPlaying
-                      ? "Interactive Earth. Tap the territory hiding two countries; drag to rotate, scroll or pinch to zoom."
-                      : sharedPlaying || pinpointPlaying
-                        ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
-                        : isJourney &&
-                            ["pin", "geo-multipin"].includes(
-                              journey.rounds[game.roundIndex].mode,
-                            )
-                          ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
-                          : isJourney &&
-                              journey.rounds[game.roundIndex].mode.startsWith(
-                                "city-",
-                              )
-                            ? "Interactive Earth. Select a city marker to answer; drag to rotate, scroll or pinch to zoom."
-                            : undefined
+                    : outOfPlacePlaying
+                      ? "Interactive Earth. Tap the incorrect city marker or filled country; drag to rotate, scroll or pinch to zoom."
+                      : sayWherePlaying
+                        ? "Interactive Earth. Select a qualifying country; drag to rotate, scroll or pinch to zoom."
+                        : missingPlaying
+                          ? "Interactive Earth. Tap the territory hiding two countries; drag to rotate, scroll or pinch to zoom."
+                          : sharedPlaying || pinpointPlaying
+                            ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
+                            : isJourney &&
+                                ["pin", "geo-multipin"].includes(
+                                  journey.rounds[game.roundIndex].mode,
+                                )
+                              ? "Interactive Earth. Tap land or water to place a pin; drag to rotate, scroll or pinch to zoom."
+                              : isJourney &&
+                                  journey.rounds[
+                                    game.roundIndex
+                                  ].mode.startsWith("city-")
+                                ? "Interactive Earth. Select a city marker to answer; drag to rotate, scroll or pinch to zoom."
+                                : undefined
                 }
                 placeInteraction={
+                  (outOfPlacePlaying &&
+                    activeMinigame.game?.phase === "playing") ||
                   mode === "explore" ||
                   (isJourney &&
                     (journey.rounds[game.roundIndex].mode.startsWith("city-") ||
@@ -1828,6 +1869,11 @@ export function App({
                         : undefined
                 }
                 onPlace={(place) => {
+                  if (outOfPlacePlaying) {
+                    stop();
+                    activeMinigame.action({ type: "select", id: place.id });
+                    return;
+                  }
                   if (
                     isJourney &&
                     game.phase === "playing" &&

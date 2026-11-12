@@ -1,5 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import {
+  outOfPlacePairs,
+  outOfPlaceJourney,
+} from "../src/minigames/outOfPlace";
+import { minigameBase } from "../src/minigames/minigameContext";
+import type { RegionFeature } from "../src/geography/types";
 import {
   PerspectiveCamera,
   SRGBColorSpace,
@@ -91,6 +98,76 @@ it("gives authored landmark references the same readable typography as city refe
 });
 
 describe("cached readable place labels", () => {
+  it("fits all six Out of Place labels in a narrow regional frame", () => {
+    canvasFactory();
+    const regions = JSON.parse(
+      readFileSync("public/geography/world.v1.json", "utf8"),
+    ) as RegionFeature[];
+    for (const pair of outOfPlacePairs(regions)) {
+      const labels = new PlaceLabels();
+      const places = outOfPlaceJourney(
+        pair,
+        minigameBase(regions),
+      ).rounds[0].places!.map((p) => ({
+        ...p,
+        answerTarget: true,
+        visualState: "selectable" as const,
+      }));
+      labels.update(
+        {
+          id: "out-of-place",
+          kind: "place-labels",
+          places,
+          visible: true,
+          markers: true,
+        },
+        100,
+      );
+      const c = new PerspectiveCamera(50, 320 / 200, 0.1, 1000),
+        lat = (pair.focus.lat * Math.PI) / 180,
+        lng = (pair.focus.lng * Math.PI) / 180;
+      const radius = 100 * (1 + pair.focus.altitude!);
+      c.position.set(
+        radius * Math.cos(lat) * Math.sin(lng),
+        radius * Math.sin(lat),
+        radius * Math.cos(lat) * Math.cos(lng),
+      );
+      c.lookAt(0, 0, 0);
+      c.updateMatrixWorld();
+      for (let frame = 0; frame < 3; frame++) labels.view(c, 320, 200);
+      expect(labels.labelBoxes(), pair.area.name).toHaveLength(6);
+      labels.dispose();
+    }
+  });
+  it("accepts a visible answer label as well as its marker without making context labels answers", () => {
+    canvasFactory();
+    const labels = new PlaceLabels();
+    const place = {
+      ...places[0],
+      name: "An answer marker",
+      answerTarget: true,
+      labelFlexible: true,
+    };
+    labels.update(
+      { id: "answers", kind: "place-labels", places: [place], visible: true },
+      100,
+    );
+    labels.view(camera(), 800, 800);
+    const box = labels.labelBoxes()[0];
+    expect(box).toBeDefined();
+    expect(
+      labels.pick((box.left + box.right) / 2, (box.top + box.bottom) / 2),
+    ).toBe(place);
+    labels.update(
+      { id: "answers", kind: "place-labels", places: [], visible: true },
+      100,
+    );
+    labels.view(camera(), 800, 800);
+    expect(
+      labels.pick((box.left + box.right) / 2, (box.top + box.bottom) / 2),
+    ).toBeUndefined();
+    labels.dispose();
+  });
   it("draws numeric area annotations as plain numbers rather than target symbols", () => {
     const fillText = vi.fn();
     canvasFactory(fillText);

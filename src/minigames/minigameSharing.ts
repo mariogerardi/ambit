@@ -10,6 +10,8 @@ const labels: Record<BorderMinigame, string> = {
   "missing-borders": "borders found",
   "border-run": "routes solved",
   pinpoint: "points / 10,000",
+  "say-where": "expressions placed",
+  "out-of-place": "mistakes spotted",
 };
 export interface MinigameResult {
   kind: BorderMinigame;
